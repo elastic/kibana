@@ -222,6 +222,10 @@ export const updateAttackDiscoveryStatusToRunning = async (
     currentAd,
   };
 };
+const getDataFromJSON = (adStringified: string) => {
+  const { alertsContextCount, attackDiscoveries } = JSON.parse(adStringified);
+  return { alertsContextCount, attackDiscoveries };
+};
 
 export const updateAttackDiscoveries = ({
   apiConfig,
@@ -241,29 +245,30 @@ export const updateAttackDiscoveries = ({
   currentAd: AttackDiscoveryResponse;
   dataClient: AttackDiscoveryDataClient;
   latestReplacements: Replacements;
-  rawAttackDiscoveries: string;
+  rawAttackDiscoveries: string | null;
   size: number;
   startTime: Moment;
   telemetry: AnalyticsServiceSetup;
 }) => {
-  const getDataFromJSON = () => {
-    const { alertsContextCount, attackDiscoveries } = JSON.parse(rawAttackDiscoveries);
-    return { alertsContextCount, attackDiscoveries };
-  };
-
   const endTime = moment();
   const durationMs = endTime.diff(startTime);
 
   if (rawAttackDiscoveries == null) {
     throw new Error('tool returned no attack discoveries');
   }
+  const { alertsContextCount, attackDiscoveries } = getDataFromJSON(rawAttackDiscoveries);
   const updateProps = {
-    ...getDataFromJSON(),
+    alertsContextCount,
+    attackDiscoveries,
     status: attackDiscoveryStatus.succeeded,
-    generationIntervals: addGenerationInterval(currentAd.generationIntervals, {
-      durationMs,
-      date: new Date().toISOString(),
-    }),
+    ...(alertsContextCount === 0 || attackDiscoveries === 0
+      ? {}
+      : {
+          generationIntervals: addGenerationInterval(currentAd.generationIntervals, {
+            durationMs,
+            date: new Date().toISOString(),
+          }),
+        }),
     id: attackDiscoveryId,
     replacements: latestReplacements,
     backingIndex: currentAd.backingIndex,

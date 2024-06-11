@@ -114,7 +114,7 @@ export const useAttackDiscovery = ({
 
   useEffect(() => {
     if (pollData !== null && pollData.connectorId === connectorId) {
-      if (pollData.alertsContextCount) setAlertsContextCount(null);
+      if (pollData.alertsContextCount != null) setAlertsContextCount(pollData.alertsContextCount);
       if (pollData.updatedAt) setLastUpdated(new Date(pollData.updatedAt));
       if (pollData.replacements) setReplacements(pollData.replacements);
       setAttackDiscoveries(pollData.attackDiscoveries);
