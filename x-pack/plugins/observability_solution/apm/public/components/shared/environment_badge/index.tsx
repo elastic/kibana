@@ -9,27 +9,33 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ItemsBadge } from '../item_badge';
 import { PopoverBadge } from '../popover_badge';
-import { EuiLink } from '@elastic/eui';
+import { EuiCode, EuiLink } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 
 interface Props {
   environments?: string[];
 }
-
+``;
 export function EnvironmentBadge({ environments = [] }: Props) {
-  console.log('environments', environments);
   if (isEmpty(environments)) {
     return (
       <PopoverBadge
         title={i18n.translate('xpack.apm.servicesTable.notAvailable.title', {
           defaultMessage: 'No environment detected.',
         })}
-        content={i18n.translate('xpack.apm.servicesTable.notAvailable.content', {
-          defaultMessage: 'Declare your service environment by adding service.name to your logs.',
-        })}
+        content={
+          <FormattedMessage
+            id="xpack.apm.servicesTable.notAvailable.content"
+            defaultMessage="Declare your service environment by adding {field} to your logs."
+            values={{
+              field: <EuiCode>service.environment</EuiCode>,
+            }}
+          />
+        }
         footer={
           <EuiLink
-            href="https://www.elastic.co/guide/en/kibana/current/agent-configuration.html"
+            href="https://demo.elastic.co/app/observabilityOnboarding/customLogs/?category=logs"
             external
           >
             {i18n.translate('xpack.apm.servicesTable.notAvailable.footer', {

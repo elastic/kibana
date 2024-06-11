@@ -41,7 +41,7 @@ export function calculateAverageMetrics(entities) {
       }
     });
 
-    console.log('object', obj);
+    // console.log('object', obj);
 
     return {
       ...obj,

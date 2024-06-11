@@ -53,7 +53,7 @@ export async function getServiceAssets({
 }) {
   return withApmSpan('get_service_assets', async () => {
     try {
-      const response = await getEntities({
+      const entities = await getEntities({
         assetsESClient,
         start,
         end,
@@ -62,20 +62,21 @@ export async function getServiceAssets({
         size: MAX_NUMBER_OF_SERVICES,
       });
 
-      console.log(response.hits.hits);
-      const serviceEntities = response.hits.hits.map((hit) => {
-        return {
-          name: hit._source.entity.id.split(':')[0],
-          environments: hit._source.entity.id.split(':')[1] ?? null,
-          ...(hit._source as ServiceAssetDocument),
-        };
-      });
+      console.log('entities', JSON.stringify(entities));
 
-      const mergeEntitiesRe = mergeEntities({ entities: serviceEntities });
-      console.log('mergeEntities', mergeEntitiesRe);
-      const entitiesAverages = calculateAverageMetrics(mergeEntitiesRe);
-      console.log('calculateAverageMetrics', entitiesAverages);
-      return entitiesAverages;
+      // const serviceEntities = response.hits.hits.map((hit) => {
+      //   return {
+      //     name: hit._source.entity.id.split(':')[0],
+      //     environments: hit._source.entity.id.split(':')[1] ?? null,
+      //     ...(hit._source as ServiceAssetDocument),
+      //   };
+      // });
+
+      // const mergeEntitiesRe = mergeEntities({ entities: serviceEntities });
+      // console.log('mergeEntities', mergeEntitiesRe);
+      // const entitiesAverages = calculateAverageMetrics(mergeEntitiesRe);
+      // console.log('calculateAverageMetrics', entitiesAverages);
+      // return entitiesAverages;
     } catch (error) {
       // If the index does not exist, handle it gracefully
       if (
@@ -85,7 +86,7 @@ export async function getServiceAssets({
         const type = error.originalError.body.error.type;
 
         if (type === 'index_not_found_exception') {
-          logger.error(`Asset index does not exist. Unable to fetch services.`);
+          logger.error(`Entities index does not exist. Unable to fetch services.`);
           return [];
         }
       }

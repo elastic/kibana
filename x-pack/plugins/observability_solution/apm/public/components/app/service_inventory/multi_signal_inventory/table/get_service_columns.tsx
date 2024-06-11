@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
@@ -144,7 +137,7 @@ export function getServiceColumns({
     {
       field: ServiceInventoryFieldName.LogRatePerMinute,
       name: i18n.translate('xpack.apm.multiSignal.servicesTable.logRatePerMinute', {
-        defaultMessage: 'Log rate (per minute)',
+        defaultMessage: 'Log rate (per min.)',
       }),
       sortable: true,
       dataType: 'number',

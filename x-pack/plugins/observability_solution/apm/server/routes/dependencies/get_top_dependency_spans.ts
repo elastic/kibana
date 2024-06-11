@@ -139,7 +139,7 @@ export async function getTopDependencySpans({
 
   const transactionsById = keyBy(transactions, (transaction) => transaction.transaction.id);
 
-  return spans.map((span): DependencySpan => {
+  return spans.map((span) => {
     const transaction = maybe(transactionsById[span.transaction!.id]);
 
     return {

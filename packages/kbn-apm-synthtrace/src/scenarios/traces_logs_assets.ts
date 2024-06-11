@@ -21,7 +21,7 @@ import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 
-const ENVIRONMENT = 'synthtrace-env';
+const ENVIRONMENT = 'synthtrace-env-2';
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;

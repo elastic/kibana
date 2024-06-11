@@ -10,7 +10,45 @@ import { ENTITY_ENVIRONMENT, FIRST_SEEN, LAST_SEEN } from '../../../common/es_fi
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 
-export function assetsRangeQuery(start: number, end: number): QueryDslQueryContainer[] {
+export interface ServiceEntities {
+  serviceName: string;
+  agentName?: string;
+  dataStreams: string[];
+  entity: Entity;
+}
+
+interface Entity {
+  id: string;
+  latestTimestamp: string;
+  identity: {
+    service: {
+      name: string;
+      environment?: string;
+    };
+  };
+  metrics: {
+    latency: number;
+    failedTransactionRate: number;
+    throughput: number;
+    logErrorRate: number;
+    logRatePerMinute: number;
+  };
+}
+
+interface EntitiesRaw {
+  agent: {
+    name: string[];
+  };
+  data_stream: {
+    type: string[];
+  };
+  entity: Entity;
+}
+export interface SourceDoc {
+  [key: string]: string | string[] | SourceDoc;
+}
+
+export function entitiesRangeQuery(start: number, end: number): QueryDslQueryContainer[] {
   return [
     {
       range: {
@@ -44,23 +82,50 @@ export async function getEntities({
   kuery: string;
   size: number;
 }) {
-  const response = await assetsESClient.search(`get_entities`, {
-    body: {
-      size,
-      track_total_hits: false,
-      _source: ['agent.name', 'entity', 'data_stream'],
-      query: {
-        bool: {
-          filter: [
-            ...kqlQuery(kuery),
-            ...environmentQuery(environment, ENTITY_ENVIRONMENT),
-            // Not supported for now
-            //...assetsRangeQuery(start, end),
-          ],
+  const entities = (
+    await assetsESClient.search(`get_entities`, {
+      body: {
+        size,
+        track_total_hits: false,
+        _source: ['agent.name', 'entity', 'data_stream'],
+        query: {
+          bool: {
+            filter: [
+              ...kqlQuery(kuery),
+              ...environmentQuery(environment, ENTITY_ENVIRONMENT),
+              // Not supported for now
+              //...entitiesRangeQuery(start, end),
+            ],
+          },
         },
       },
-    },
-  });
+    })
+  ).hits.hits.map((hit) => hit._source as EntitiesRaw);
 
-  return response;
+  return entities.map((entity): ServiceEntities => {
+    return {
+      serviceName: entity.entity.identity.service.name,
+      agentName: entity.agent.name[0],
+      dataStreams: entity.data_stream.type,
+      entity: entity.entity,
+    };
+  });
 }
+
+// enti {
+//   agent: { name: [ 'nodejs' ] },
+//   data_stream: { type: [ 'metrics', 'logs' ] },
+//   entity: {
+//     indexPatterns: [ 'logs-*', 'metrics-*' ],
+//     latestTimestamp: '2024-06-05T10:34:40.810Z',
+//     metric: {
+//       logRatePerMinute: 0,
+//       logErrorRate: null,
+//       throughput: 0,
+//       failedTransactionRate: 0.3333333333333333
+//     },
+//     identity: { service: [Object] },
+//     id: 'multi-signal-service:synthtrace-env-2',
+//     definitionId: 'apm-services'
+//   }
+// }

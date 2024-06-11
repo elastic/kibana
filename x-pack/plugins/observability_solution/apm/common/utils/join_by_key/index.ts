@@ -68,9 +68,8 @@ export function joinByKey(
       // delete and set the key to put it last
       map.delete(stableKey);
       map.set(stableKey, mergeFn(item, current));
-      console.log(map);
     } else {
-      map.set(stableKey, mergeFn({}, current));
+      map.set(stableKey, { ...current });
     }
   });
   return [...map.values()];

@@ -8,59 +8,39 @@
 import { compact, isEmpty, uniq } from 'lodash';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { ServiceEntities } from '../get_entities';
 
-export function mergeEntities({ entities }) {
-  return joinByKey(entities, 'name', function merge(item, current) {
-    const environments = item?.environments ?? [];
-    const currentEnvironments = current.environments ?? [];
-
-    const itemsDataStream = item?.data_stream?.type ?? [];
-    const currentDataStream = current.data_stream.type ?? [];
-
-    const itemsMetric = item?.entity?.metric ?? [];
-    const currentMetric = current.entity.metric ?? [];
-
-    console.log('currentEnvironment', current);
-    if (isEmpty(item)) {
-      return {
-        name: current.name,
-        data_stream: { type: currentDataStream },
-        agent: {
-          name: current.agent.name,
-        },
-        environments: currentEnvironments ? [currentEnvironments] : [],
-        entity: {
-          // TODO rename to metrics
-          metric: {
-            logRatePerMinute: [currentMetric.logRatePerMinute],
-            logErrorRate: [currentMetric.logErrorRate],
-            failedTransactionRate: [currentMetric.failedTransactionRate],
-            latency: [currentMetric.latency],
-            throughput: [currentMetric.throughput],
-          },
-        },
-      };
-    }
-    return {
-      name: current.name,
-      data_stream: { type: uniq([...itemsDataStream, ...currentDataStream]) },
-      agent: {
-        name: current.agent.name,
-      },
-      environments: uniq(compact([].concat(...environments, currentEnvironments))),
-      entity: {
-        // TODO rename to metrics
-        metric: {
-          logRatePerMinute: [].concat(itemsMetric.logRatePerMinute, currentMetric.logRatePerMinute),
-          logErrorRate: [].concat(itemsMetric.logErrorRate, currentMetric.logErrorRate),
-          failedTransactionRate: [].concat(
-            itemsMetric.failedTransactionRate,
-            currentMetric.failedTransactionRate
+function mergeFunc(acc: ServiceEntities[], entity: ServiceEntities) {
+  return {
+    serviceName: entity.serviceName,
+    agentName: entity.agentName,
+    dataStreams: uniq(compact([...acc.dataStreams, ...entity.dataStreams])),
+    entity: {
+      metrics: { ...acc.entity.metric, ...entity.entity.metrics },
+      identity: {
+        service: {
+          name: entity.entity.identity.service.name,
+          environments: uniq(
+            compact([
+              acc.entity.identity.service.environment,
+              entity.entity.identity.service.environment,
+            ])
           ),
-          latency: [].concat(itemsMetric.latency, currentMetric.latency),
-          throughput: [].concat(itemsMetric.throughput, currentMetric.throughput),
         },
       },
-    };
-  });
+    },
+  };
+}
+export function mergeEntities({ entities }: { entities: ServiceEntities[] }) {
+  const map = new Map();
+  return entities.reduce((acc, entity) => {
+    console.log('test');
+    const existingObject = map.get(entity.serviceName);
+    if (existingObject) {
+      map.set(entity.serviceName, mergeFunc(acc, entity));
+    } else {
+      map.set(entity.serviceName, { ...entity });
+    }
+    return [...map.values()];
+  }, new Map());
 }
