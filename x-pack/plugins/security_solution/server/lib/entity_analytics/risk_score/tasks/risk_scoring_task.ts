@@ -212,7 +212,7 @@ export const runTask = async ({
       lastExecutionTimestamp: taskStartTime,
       namespace: state.namespace,
       runs: state.runs + 1,
-      scoresWritten,
+      scoresWritten: 0,
     };
 
     if (taskId !== getTaskId(state.namespace)) {
@@ -277,7 +277,7 @@ export const runTask = async ({
     );
     console.log('taskDurationInMs ', taskDurationInMilliseconds);
     const telemetryEvent = {
-      scoresWritten,
+      scoresWritten: result.scores_written,
       taskDurationInSeconds,
       interval: taskInstance?.schedule?.interval,
       alertSampleSizePerShard: 0,
@@ -289,7 +289,7 @@ export const runTask = async ({
       telemetry.reportEvent(RISK_SCORE_EXECUTION_CANCELLATION_EVENT.eventType, telemetryEvent);
     }
 
-    if (scoresWritten > 0) {
+    if (result.scores_written > 0) {
       log('refreshing risk score index and scheduling transform');
       await riskScoreService.refreshRiskScoreIndex();
       await riskScoreService.scheduleLatestTransformNow();
