@@ -28,10 +28,16 @@ export interface RoleKibanaPrivilege {
   _reserved?: string[];
 }
 
+export interface RoleRemoteClusterPrivilege {
+  clusters: string[];
+  privileges: string[];
+}
+
 export interface Role {
   name: string;
   elasticsearch: {
     cluster: string[];
+    remote_cluster?: RoleRemoteClusterPrivilege[];
     indices: RoleIndexPrivilege[];
     remote_indices?: RoleRemoteIndexPrivilege[];
     run_as: string[];

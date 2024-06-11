@@ -1,23 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it renders without crashing 1`] = `
-<IndexPrivileges
-  availableIndexPrivileges={
+<RemoteClusterPrivileges
+  availableRemoteClusterPrivileges={
     Array [
-      "all",
-      "read",
-      "write",
-      "index",
+      "monitor_enrich",
     ]
   }
   editable={true}
-  indexPatterns={Array []}
-  indexType="indices"
-  indicesAPIClient={
-    Object {
-      "getFields": [MockFunction],
-    }
-  }
   license={
     Object {
       "features$": Observable {
@@ -36,7 +26,17 @@ exports[`it renders without crashing 1`] = `
       "elasticsearch": Object {
         "cluster": Array [],
         "indices": Array [],
-        "remote_cluster": Array [],
+        "remote_cluster": Array [
+          Object {
+            "clusters": Array [
+              "cluster1",
+              "cluster2",
+            ],
+            "privileges": Array [
+              "monitor_enrich",
+            ],
+          },
+        ],
         "run_as": Array [],
       },
       "kibana": Array [],

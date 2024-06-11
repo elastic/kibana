@@ -22,6 +22,7 @@ export type ElasticsearchRole = Pick<Role, 'name' | 'metadata' | 'transient_meta
     resources: string[];
   }>;
   cluster: Role['elasticsearch']['cluster'];
+  remote_cluster: Role['elasticsearch']['remote_cluster'];
   indices: Role['elasticsearch']['indices'];
   remote_indices?: Role['elasticsearch']['remote_indices'];
   run_as: Role['elasticsearch']['run_as'];
@@ -46,6 +47,7 @@ export function transformElasticsearchRoleToRole(
     transient_metadata: elasticsearchRole.transient_metadata,
     elasticsearch: {
       cluster: elasticsearchRole.cluster,
+      remote_cluster: elasticsearchRole.remote_cluster,
       indices: elasticsearchRole.indices,
       remote_indices: elasticsearchRole.remote_indices,
       run_as: elasticsearchRole.run_as,

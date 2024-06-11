@@ -19,6 +19,7 @@ export const transformPutPayloadToElasticsearchRole = (
 ) => {
   const {
     elasticsearch = {
+      remote_cluster: undefined,
       cluster: undefined,
       indices: undefined,
       remote_indices: undefined,
@@ -33,6 +34,7 @@ export const transformPutPayloadToElasticsearchRole = (
   return {
     metadata: rolePayload.metadata,
     cluster: elasticsearch.cluster || [],
+    remote_cluster: elasticsearch.remote_cluster,
     indices: elasticsearch.indices || [],
     remote_indices: elasticsearch.remote_indices,
     run_as: elasticsearch.run_as || [],

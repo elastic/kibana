@@ -98,6 +98,7 @@ describe('GET role mappings feature check', () => {
         canUseStoredScripts: true,
         hasCompatibleRealms: true,
         canUseRemoteIndices: true,
+        canUseRemoteClusters: true,
       },
     },
   });
@@ -122,6 +123,7 @@ describe('GET role mappings feature check', () => {
         canUseStoredScripts: true,
         hasCompatibleRealms: true,
         canUseRemoteIndices: true,
+        canUseRemoteClusters: true,
       },
     },
   });
@@ -141,6 +143,7 @@ describe('GET role mappings feature check', () => {
           canUseStoredScripts: true,
           hasCompatibleRealms: true,
           canUseRemoteIndices: false,
+          canUseRemoteClusters: false,
         },
       },
     }
@@ -166,6 +169,7 @@ describe('GET role mappings feature check', () => {
         canUseStoredScripts: false,
         hasCompatibleRealms: true,
         canUseRemoteIndices: true,
+        canUseRemoteClusters: true,
       },
     },
   });
@@ -190,6 +194,7 @@ describe('GET role mappings feature check', () => {
         canUseStoredScripts: true,
         hasCompatibleRealms: true,
         canUseRemoteIndices: true,
+        canUseRemoteClusters: true,
       },
     },
   });
@@ -218,6 +223,7 @@ describe('GET role mappings feature check', () => {
         canUseStoredScripts: true,
         hasCompatibleRealms: false,
         canUseRemoteIndices: true,
+        canUseRemoteClusters: true,
       },
     },
   });
@@ -249,6 +255,7 @@ describe('GET role mappings feature check', () => {
           canUseStoredScripts: true,
           hasCompatibleRealms: false,
           canUseRemoteIndices: false,
+          canUseRemoteClusters: false,
         },
       },
     }
