@@ -172,7 +172,7 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
                   content={
                     <FormattedMessage
                       id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyDisabledAPMLogstashOuputText"
-                      defaultMessage="Logstash output for agent integration is not supported with APM"
+                      defaultMessage="Logstash output for integrations is not supported with APM"
                     />
                   }
                 >
