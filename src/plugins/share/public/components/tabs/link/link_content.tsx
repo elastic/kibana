@@ -50,7 +50,7 @@ export const LinkContent = ({
   delegatedShareUrlHandler,
 }: LinkProps) => {
   const [url, setUrl] = useState<string>('');
-  const [longUrl, setLongUrl] = useState<string>('');
+  const [testUrl, setTestUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [isTextCopied, setTextCopied] = useState(false);
   const [, setShortUrlCache] = useState<string | undefined>(undefined);
@@ -73,7 +73,7 @@ export const LinkContent = ({
 
       // persist updated url to state
       setUrl(urlWithUpdatedParams);
-      setLongUrl(urlWithUpdatedParams);
+      setTestUrl(urlWithUpdatedParams);
 
       return urlWithUpdatedParams;
     },
@@ -90,15 +90,29 @@ export const LinkContent = ({
       const shortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
       const urlWithLoc = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
       setShortUrlCache(urlWithLoc);
+      // discover has specific tests that test short url for specific permissions
+      if (objectType === 'search') {
+        setTestUrl(urlWithLoc);
+      }
       return urlWithLoc;
     } else {
       const snapshotUrl = getSnapshotUrl();
-      setLongUrl(snapshotUrl);
+      // dashboard has specific tests that test long urls only
+      if (objectType === 'dashboard') {
+        setTestUrl(snapshotUrl);
+      }
       const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
       setShortUrlCache(shortUrl.url);
+      setTestUrl(shortUrl.url);
       return shortUrl.url;
     }
-  }, [shareableUrlLocatorParams, urlService.shortUrls, getSnapshotUrl, setShortUrlCache]);
+  }, [
+    shareableUrlLocatorParams,
+    objectType,
+    urlService.shortUrls,
+    getSnapshotUrl,
+    setShortUrlCache,
+  ]);
 
   const copyUrlHelper = useCallback(async () => {
     let urlToCopy = url;
@@ -157,7 +171,7 @@ export const LinkContent = ({
             <EuiButton
               fill
               data-test-subj="copyShareUrlButton"
-              data-share-url={longUrl === '' ? getSnapshotUrl() : longUrl}
+              data-share-url={testUrl === '' ? copyUrlHelper() : testUrl}
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
               onClick={copyUrlHelper}
               color={objectType === 'lens' && isDirty ? 'warning' : 'primary'}

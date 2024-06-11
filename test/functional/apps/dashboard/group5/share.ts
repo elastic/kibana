@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.share.clickShareTopNavButton();
       return await PageObjects.share.isShareMenuOpen();
     });
-    return PageObjects.share.getSharedUrl();
+    return await PageObjects.share.getSharedUrl();
   };
 
   describe('share dashboard', () => {
