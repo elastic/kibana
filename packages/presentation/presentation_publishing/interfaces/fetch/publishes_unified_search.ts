@@ -40,11 +40,11 @@ export type PublishesWritableUnifiedSearch = PublishesUnifiedSearch &
     setQuery: (query: Query | undefined) => void;
   };
 
-  export const apiPublishesTimeslice = (
-    unknownApi: null | unknown
-  ): unknownApi is PublishesTimeslice => {
-    return Boolean(unknownApi && (unknownApi as PublishesTimeslice)?.timeslice$ !== undefined);
-  };
+export const apiPublishesTimeslice = (
+  unknownApi: null | unknown
+): unknownApi is PublishesTimeslice => {
+  return Boolean(unknownApi && (unknownApi as PublishesTimeslice)?.timeslice$ !== undefined);
+};
 
 export const apiPublishesTimeRange = (
   unknownApi: null | unknown
@@ -72,7 +72,7 @@ export const apiPublishesPartialUnifiedSearch = (
 ): unknownApi is Partial<PublishesUnifiedSearch> => {
   return Boolean(
     apiPublishesTimeRange(unknownApi) ||
-    apiPublishesFilters(unknownApi) ||
+      apiPublishesFilters(unknownApi) ||
       (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
   );
 };
