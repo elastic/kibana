@@ -74,6 +74,7 @@ export function usePackagePolicyWithRelatedData(
     description: '',
     namespace: '',
     policy_id: '',
+    policy_ids: [''],
     enabled: true,
     inputs: [],
     version: '',
@@ -171,7 +172,7 @@ export function usePackagePolicyWithRelatedData(
         }
 
         const { data: agentPolicyData, error: agentPolicyError } = await sendGetOneAgentPolicy(
-          packagePolicyData!.item.policy_id
+          packagePolicyData!.item.policy_ids[0] // TODO multiple
         );
 
         if (agentPolicyError) {

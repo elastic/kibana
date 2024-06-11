@@ -1,19 +1,30 @@
-GREATEST
+## GREATEST
 
-Syntax
-Parameters
-first
-First of the columns to evaluate.
-rest
-The rest of the columns to evaluate.
-DescriptionReturns the maximum value from multiple columns. This is similar to MV_MAX
-except it is intended to run on multiple columns at once.
-When run on keyword or text fields, this returns the last string
-      in alphabetical order. When run on boolean columns this will return
-      true if any values are true.
-Supported types
-Example
+The `GREATEST` function in ES|QL returns the maximum value from multiple columns. This function is similar to `MV_MAX` but is intended to run on multiple columns at once. When run on keyword or text fields, this function returns the last string in alphabetical order. When run on boolean columns, this function will return true if any values are true.
+
+### Syntax
+
+`GREATEST(first, rest)`
+
+#### Parameters
+
+- `first`: First of the columns to evaluate.
+- `rest`: The rest of the columns to evaluate.
+
+### Examples
+
+Here are a couple of examples of how to use the `GREATEST` function in ES|QL:
+
 ```esql
 ROW a = 10, b = 20
 | EVAL g = GREATEST(a, b)
 ```
+
+In this example, the `GREATEST` function is used to find the maximum value between the columns `a` and `b`.
+
+```esql
+ROW a = 10, b = 20, c = 30, d = 40
+| EVAL g = GREATEST(a, b, c, d)
+```
+
+In this example, the `GREATEST` function is used to find the maximum value among the columns `a`, `b`, `c`, and `d`.
