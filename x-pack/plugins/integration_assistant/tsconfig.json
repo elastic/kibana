@@ -7,7 +7,7 @@
     "index.ts",
     "server/**/*.ts",
     "common/**/*.ts",
-    "public/**/*.ts",
+    "public/**/*",
     "__jest__/**/*",
     "../../typings/**/*"
   ],

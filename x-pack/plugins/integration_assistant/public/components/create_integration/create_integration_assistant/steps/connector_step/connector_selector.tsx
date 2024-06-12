@@ -42,7 +42,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
     return (
       <>
         {connectors.map((connector) => (
-          <EuiFlexItem>
+          <EuiFlexItem key={connector.id}>
             <EuiPanel
               key={connector.id}
               hasShadow={false}
