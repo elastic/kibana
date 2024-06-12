@@ -291,7 +291,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     },
 
     getModelsDownloadStatus() {
-      return httpService.http<Record<string, ModelDownloadState> | undefined>({
+      return httpService.http<Record<string, ModelDownloadState>>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_status`,
         method: 'GET',
         version: '1',

@@ -6,6 +6,7 @@
  */
 
 import type { FC } from 'react';
+import { useRef } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
 import {
@@ -24,7 +25,7 @@ import {
   EuiToolTip,
   EuiProgress,
 } from '@elastic/eui';
-import { groupBy } from 'lodash';
+import { groupBy, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -48,6 +49,7 @@ import {
 import { isDefined } from '@kbn/ml-is-defined';
 import { useStorage } from '@kbn/ml-local-storage';
 import { dynamic } from '@kbn/shared-ux-utility';
+import useMountedState from 'react-use/lib/useMountedState';
 import { getModelStateColor } from './get_model_state_color';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
@@ -130,12 +132,14 @@ interface Props {
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
 
-const DOWNLOAD_POLL_INTERVAL = 2000;
+const DOWNLOAD_POLL_INTERVAL = 3000;
 
 export const ModelsList: FC<Props> = ({
   pageState: pageStateExternal,
   updatePageState: updatePageStateExternal,
 }) => {
+  const isMounted = useMountedState();
+
   const {
     services: {
       application: { capabilities },
@@ -408,41 +412,80 @@ export const ModelsList: FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const downLoadStatusFetchInProgress = useRef(false);
   /**
    * Updates model list with download status
    */
   const fetchDownloadStatus = useCallback(
-    async (fetchInProgress = new Set<string>()) => {
+    /**
+     * @param downloadInProgress Set of model ids that reports download in progress
+     */
+    async (downloadInProgress: Set<string> = new Set<string>()) => {
+      // Allows only single fetch to be in progress
+      if (downLoadStatusFetchInProgress.current && downloadInProgress.size === 0) return;
+
       try {
+        downLoadStatusFetchInProgress.current = true;
+
         const downloadStatus = await trainedModelsApiService.getModelsDownloadStatus();
 
-        setItems((prevItems) => {
-          return prevItems.map((item) => {
-            const newItem = { ...item };
-            if (downloadStatus?.[item.model_id]) {
-              fetchInProgress.add(item.model_id);
-              newItem.downloadState = downloadStatus?.[item.model_id];
-            } else {
-              if (fetchInProgress.has(item.model_id)) {
-                // Change downloading state to downloaded
-                delete newItem.downloadState;
-                newItem.state = MODEL_STATE.DOWNLOADED;
-                fetchInProgress.delete(item.model_id);
+        if (isMounted()) {
+          setItems((prevItems) => {
+            return prevItems.map((item) => {
+              const newItem = { ...item };
+              if (downloadStatus[item.model_id]) {
+                newItem.downloadState = downloadStatus[item.model_id];
+              } else {
+                if (downloadInProgress.has(item.model_id)) {
+                  // Change downloading state to downloaded
+                  delete newItem.downloadState;
+                  newItem.state = MODEL_STATE.DOWNLOADED;
+                }
               }
-            }
-            return newItem;
+              return newItem;
+            });
           });
+        }
+
+        const downloadedModelIds = Array.from<string>(downloadInProgress).filter(
+          (v) => !downloadStatus[v]
+        );
+
+        if (downloadedModelIds.length > 0) {
+          // Show success toast
+          displaySuccessToast(
+            i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
+              defaultMessage:
+                '"{modelIds}" {modelIdsLength, plural, one {has} other {have}} been downloaded successfully.',
+              values: {
+                modelIds: downloadedModelIds.join(', '),
+                modelIdsLength: downloadedModelIds.length,
+              },
+            })
+          );
+        }
+
+        Object.keys(downloadStatus).forEach((modelId) => {
+          if (downloadStatus[modelId]) {
+            downloadInProgress.add(modelId);
+          }
+        });
+        downloadedModelIds.forEach((v) => {
+          downloadInProgress.delete(v);
         });
 
-        if (!downloadStatus) return;
+        if (isEmpty(downloadStatus)) {
+          downLoadStatusFetchInProgress.current = false;
+          return;
+        }
 
         await new Promise((resolve) => setTimeout(resolve, DOWNLOAD_POLL_INTERVAL));
-        await fetchDownloadStatus(fetchInProgress);
+        await fetchDownloadStatus(downloadInProgress);
       } catch (e) {
-        // Fail silently
+        downLoadStatusFetchInProgress.current = false;
       }
     },
-    [setItems, trainedModelsApiService]
+    [trainedModelsApiService, displaySuccessToast, isMounted]
   );
 
   /**
