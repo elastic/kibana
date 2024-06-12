@@ -767,6 +767,33 @@ describe('Detections Rules API', () => {
       );
     });
 
+    test('passes backfill payload', async () => {
+      const startDate = new Date().toISOString();
+      const endDate = new Date().toISOString();
+      await performBulkAction({
+        bulkAction: {
+          type: BulkActionTypeEnum.backfill,
+          ids: ['ruleId1'],
+          backfillPayload: { start_date: startDate, end_date: endDate },
+        },
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_bulk_action',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'backfill',
+            ids: ['ruleId1'],
+            backfill: { start_date: startDate, end_date: endDate },
+          }),
+          query: {
+            dry_run: false,
+          },
+        })
+      );
+    });
+
     test('executes dry run', async () => {
       await performBulkAction({
         bulkAction: { type: BulkActionTypeEnum.disable, query: 'some query' },

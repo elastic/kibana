@@ -115,3 +115,9 @@ export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
 
 // EXPORT
 export const BULK_EXPORT_ACTION_BTN = '[data-test-subj="exportRuleBulk"]';
+
+// SCHEDULE BACKFILL
+export const SCHEDULE_BACKFILL_RULE_BULK_BTN = '[data-test-subj="scheduleRuleRunBulk"]';
+
+export const SCHEDULE_BACKFILL_RULE_BULK_WARNING_MODAL =
+  '[data-test-subj="bulkActionConfirmationModal"]';

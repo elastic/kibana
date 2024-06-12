@@ -13,7 +13,10 @@ import type { BulkActionTypeEnum } from '../../../../../../common/api/detection_
  * * export
  * * edit
  */
-export type BulkActionForConfirmation = BulkActionTypeEnum['export'] | BulkActionTypeEnum['edit'];
+export type BulkActionForConfirmation =
+  | BulkActionTypeEnum['export']
+  | BulkActionTypeEnum['backfill']
+  | BulkActionTypeEnum['edit'];
 
 /**
  * transformed results of dry run

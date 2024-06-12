@@ -10,10 +10,12 @@ import { recurse } from 'cypress-recurse';
 import {
   CONFIRM_DELETE_RULE_BTN,
   CONFIRM_DUPLICATE_RULE,
+  CONFIRM_SCHEDULE_BACKFILL_RULE_WARNING_BTN,
   DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION,
   MODAL_CONFIRMATION_BODY,
+  MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_TITLE,
   RULES_TAGS_FILTER_BTN,
   TOASTER_BODY,
@@ -49,6 +51,8 @@ import {
   RULES_BULK_EDIT_SCHEDULES_WARNING,
   RULES_BULK_EDIT_TAGS,
   RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR,
+  SCHEDULE_BACKFILL_RULE_BULK_BTN,
+  SCHEDULE_BACKFILL_RULE_BULK_WARNING_MODAL,
   TAGS_RULE_BULK_MENU_ITEM,
   UPDATE_SCHEDULE_INTERVAL_INPUT,
   UPDATE_SCHEDULE_LOOKBACK_INPUT,
@@ -428,4 +432,19 @@ export const waitForMixedRulesBulkEditModal = (customRulesCount: number) => {
     'have.text',
     `This action can only be applied to ${customRulesCount} custom rules`
   );
+};
+
+// SCHEDULE BACKFILL
+export const scheduleBackfillForSelectedRules = (enabledCount: number, disabledCount: number) => {
+  cy.log('Bulk schedule backfill for selected rules');
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(SCHEDULE_BACKFILL_RULE_BULK_BTN).click();
+  if (disabledCount > 0) {
+    cy.get(SCHEDULE_BACKFILL_RULE_BULK_WARNING_MODAL).should(
+      'have.text',
+      `This action can only be applied to ${enabledCount} custom rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule backfill for disabled rules)CancelSchedule ${enabledCount} custom rules`
+    );
+    cy.get(CONFIRM_SCHEDULE_BACKFILL_RULE_WARNING_BTN).click();
+  }
+  cy.get(MODAL_CONFIRMATION_BTN).click();
 };

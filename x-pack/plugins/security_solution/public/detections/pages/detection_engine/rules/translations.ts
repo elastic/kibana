@@ -103,6 +103,13 @@ export const BULK_ACTION_EXPORT = i18n.translate(
   }
 );
 
+export const BULK_ACTION_SCHEDULE_BACKFILL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.scheduleBackfillTitle',
+  {
+    defaultMessage: 'Manual run',
+  }
+);
+
 export const BULK_ACTION_DUPLICATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicateTitle',
   {
@@ -240,6 +247,15 @@ export const BULK_EXPORT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
     }
   );
 
+export const BULK_SCHEDULE_BACKFILL_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkScheduleBackfillConfirmationDeniedTitle',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be scheduled',
+    }
+  );
+
 export const BULK_EDIT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationDeniedTitle',
@@ -291,6 +307,40 @@ export const BULK_EXPORT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
         'Export {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
     }
   );
+
+export const BULK_SCHEDULE_BACKFILL_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkScheduleBackfillConfirmation.confirmButtonLabel',
+    {
+      values: { customRulesCount },
+      defaultMessage:
+        'Schedule {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+    }
+  );
+
+export const BULK_SCHEDULE_BACKFILL_LIMIT_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkScheduleBackfillLimitErrorMessage',
+  {
+    defaultMessage: 'This action can only be applied',
+  }
+);
+
+export const BULK_SCHEDULE_BACKFILL_LIMIT_ERROR_MESSAGE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkScheduleBackfillLimitErrorTitle',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        'Backfill cannot be scheduled for more than {rulesCount, plural, =1 {# rule} other {# rules}}',
+    }
+  );
+
+export const BULK_SCHEDULE_BACKFILL_LIMIT_ERROR_CLOSE_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkScheduleLimitErrorCloseButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
 
 export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.saveButtonLabel',
@@ -1191,6 +1241,44 @@ export const RULES_BULK_DISABLE_FAILURE_DESCRIPTION = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} failed to disable.',
+    }
+  );
+
+/**
+ * Bulk Schedule
+ */
+
+export const RULES_BULK_SCHEDULE_BACKFILL_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.backfill.successToastTitle',
+  {
+    defaultMessage: 'Rules scheduled',
+  }
+);
+
+export const RULES_BULK_SCHEDULE_BACKFILL_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.backfill.errorToastTitle',
+  {
+    defaultMessage: 'Error scheduling backfill',
+  }
+);
+
+export const RULES_BULK_SCHEDULE_BACKFILL_SUCCESS_DESCRIPTION = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.backfill.successToastDescription',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully scheduled backfill for {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+    }
+  );
+
+export const RULES_BULK_SCHEDULE_BACKFILL_FAILURE_DESCRIPTION = (failedRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.backfill.errorToastDescription',
+    {
+      values: { failedRulesCount },
+      defaultMessage:
+        '{failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}} failed to schedule backfill.',
     }
   );
 

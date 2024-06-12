@@ -54,6 +54,11 @@ export const BulkActionsDryRunErrCode = z.enum([
   'MACHINE_LEARNING_INDEX_PATTERN',
   'ESQL_INDEX_PATTERN',
   'INVESTIGATION_FIELDS_FEATURE',
+  'MANUAL_RULE_RUN_FEATURE',
+  'BACKFILL_DISABLED_RULE',
+  'BACKFILL_IN_THE_FUTURE',
+  'BACKFILL_START_FAR_IN_THE_PAST',
+  'BACKFILL_START_GREATER_THAN_END',
 ]);
 export type BulkActionsDryRunErrCodeEnum = typeof BulkActionsDryRunErrCode.enum;
 export const BulkActionsDryRunErrCodeEnum = BulkActionsDryRunErrCode.enum;
@@ -71,6 +76,7 @@ export const BulkEditActionResults = z.object({
   updated: z.array(RuleResponse),
   created: z.array(RuleResponse),
   deleted: z.array(RuleResponse),
+  backfilled: z.array(RuleResponse),
   skipped: z.array(BulkActionSkipResult),
 });
 
@@ -157,6 +163,23 @@ export const BulkDuplicateRules = BulkActionBase.merge(
   })
 );
 
+export type BulkScheduleBackfill = z.infer<typeof BulkScheduleBackfill>;
+export const BulkScheduleBackfill = BulkActionBase.merge(
+  z.object({
+    action: z.literal('backfill'),
+    backfill: z.object({
+      /**
+       * Start date of the backfill
+       */
+      start_date: z.string(),
+      /**
+       * End date of the backfill
+       */
+      end_date: z.string().optional(),
+    }),
+  })
+);
+
 /**
  * The condition for throttling the notification: 'rule', 'no_actions', or time duration
  */
@@ -172,6 +195,7 @@ export const BulkActionType = z.enum([
   'export',
   'delete',
   'duplicate',
+  'backfill',
   'edit',
 ]);
 export type BulkActionTypeEnum = typeof BulkActionType.enum;
@@ -302,6 +326,7 @@ export const PerformBulkActionRequestBody = z.union([
   BulkEnableRules,
   BulkExportRules,
   BulkDuplicateRules,
+  BulkScheduleBackfill,
   BulkEditRules,
 ]);
 export type PerformBulkActionRequestBodyInput = z.input<typeof PerformBulkActionRequestBody>;

@@ -136,6 +136,7 @@ export type LoadingRuleAction =
   | 'duplicate'
   | 'enable'
   | 'export'
+  | 'backfill'
   | 'load'
   | 'edit'
   | null;

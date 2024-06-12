@@ -6,14 +6,19 @@
  */
 
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
+import moment from 'moment';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
-import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
+import {
+  BulkActionsDryRunErrCode,
+  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS,
+} from '../../../../../../common/constants';
 import type {
   BulkActionEditPayload,
   BulkActionEditType,
+  BulkScheduleBackfill,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
@@ -38,6 +43,11 @@ interface DryRunBulkEditBulkActionsValidationArgs {
   rule: RuleAlertType;
   mlAuthz: MlAuthz;
   edit: BulkActionEditPayload[];
+  experimentalFeatures: ExperimentalFeatures;
+}
+
+interface DryRunScheduleBackfillBulkActionsValidationArgs extends BulkActionsValidationArgs {
+  backfillPayload: BulkScheduleBackfill['backfill'];
   experimentalFeatures: ExperimentalFeatures;
 }
 
@@ -74,6 +84,68 @@ export const validateBulkDisableRule = async ({ rule, mlAuthz }: BulkActionsVali
  */
 export const validateBulkDuplicateRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
   await throwMlAuthError(mlAuthz, rule.params.type);
+};
+
+/**
+ * runs validation for bulk schedule backfill for a single rule
+ * @param params - {@link DryRunScheduleBackfillBulkActionsValidationArgs}
+ */
+export const validateBulkScheduleBackfill = async ({
+  rule,
+  backfillPayload,
+  experimentalFeatures,
+}: DryRunScheduleBackfillBulkActionsValidationArgs) => {
+  const now = moment();
+  const startDate = moment(backfillPayload.start_date);
+
+  // check that start date is not in the future
+  await throwDryRunError(
+    () => invariant(now.isSameOrAfter(startDate), 'Backfill cannot be scheduled for the future'),
+    BulkActionsDryRunErrCode.BACKFILL_IN_THE_FUTURE
+  );
+
+  // check that start date is not more than 90 days in the past
+  const isStartDateOutOfRange = now
+    .clone()
+    .subtract(MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS, 'd')
+    .isAfter(startDate);
+  await throwDryRunError(
+    () =>
+      invariant(
+        !isStartDateOutOfRange,
+        `Backfill cannot look back more than ${MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS} days`
+      ),
+    BulkActionsDryRunErrCode.BACKFILL_START_FAR_IN_THE_PAST
+  );
+
+  if (backfillPayload.end_date) {
+    const endDate = moment(backfillPayload.end_date);
+
+    // check that end date is greater than start date
+    await throwDryRunError(
+      () =>
+        invariant(endDate.isAfter(startDate), 'Backfill end must be greater than backfill start'),
+      BulkActionsDryRunErrCode.BACKFILL_START_GREATER_THAN_END
+    );
+
+    // check that start date is not in the future
+    await throwDryRunError(
+      () => invariant(now.isSameOrAfter(endDate), 'Backfill cannot be scheduled for the future'),
+      BulkActionsDryRunErrCode.BACKFILL_IN_THE_FUTURE
+    );
+  }
+
+  // check whether "manual rule run" feature is enabled
+  await throwDryRunError(
+    () =>
+      invariant(experimentalFeatures?.manualRuleRunEnabled, 'Manual rule run feature is disabled.'),
+    BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE
+  );
+
+  await throwDryRunError(
+    () => invariant(rule.enabled, 'Cannot schedule backfill for a disabled rule'),
+    BulkActionsDryRunErrCode.BACKFILL_DISABLED_RULE
+  );
 };
 
 /**

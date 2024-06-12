@@ -28,6 +28,7 @@ paths:
                 - $ref: '#/components/schemas/BulkEnableRules'
                 - $ref: '#/components/schemas/BulkExportRules'
                 - $ref: '#/components/schemas/BulkDuplicateRules'
+                - $ref: '#/components/schemas/BulkScheduleBackfill'
                 - $ref: '#/components/schemas/BulkEditRules'
       responses:
         200:
@@ -77,6 +78,11 @@ components:
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
         - INVESTIGATION_FIELDS_FEATURE
+        - MANUAL_RULE_RUN_FEATURE
+        - BACKFILL_DISABLED_RULE
+        - BACKFILL_IN_THE_FUTURE
+        - BACKFILL_START_FAR_IN_THE_PAST
+        - BACKFILL_START_GREATER_THAN_END
 
     NormalizedRuleError:
       type: object
@@ -111,6 +117,10 @@ components:
           type: array
           items:
             $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+        backfilled:
+          type: array
+          items:
+            $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
         skipped:
           type: array
           items:
@@ -120,6 +130,7 @@ components:
         - created
         - deleted
         - skipped
+        - backfilled
 
     BulkEditActionSummary:
       type: object
@@ -250,6 +261,29 @@ components:
           required:
             - action
 
+    BulkScheduleBackfill:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              enum: [backfill]
+            backfill:
+              type: object
+              properties:
+                start_date:
+                  type: string
+                  description: Start date of the backfill
+                end_date:
+                  type: string
+                  description: End date of the backfill
+              required:
+                - start_date
+          required:
+            - action
+            - backfill
+
     ThrottleForBulkActions:
       type: string
       description: "The condition for throttling the notification: 'rule', 'no_actions', or time duration"
@@ -267,6 +301,7 @@ components:
         - export
         - delete
         - duplicate
+        - backfill
         - edit
 
     BulkActionEditType:

@@ -41,6 +41,7 @@ import type { BulkActionError } from './bulk_actions_response';
 import { buildBulkResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
+import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 
 export const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ROUTE_CONCURRENCY = 5;
@@ -148,7 +149,7 @@ export const performBulkActionRoute = (
               experimentalFeatures: config.experimentalFeatures,
             });
 
-            return buildBulkResponse(response, {
+            return buildBulkResponse(response, body.action, {
               updated: rules,
               skipped,
               errors,
@@ -167,6 +168,7 @@ export const performBulkActionRoute = (
           let updated: RuleAlertType[] = [];
           let created: RuleAlertType[] = [];
           let deleted: RuleAlertType[] = [];
+          let backfilled: RuleAlertType[] = [];
 
           switch (body.action) {
             case BulkActionTypeEnum.enable: {
@@ -322,16 +324,30 @@ export const performBulkActionRoute = (
                 .filter((rule): rule is RuleAlertType => rule !== null);
               break;
             }
+
+            case BulkActionTypeEnum.backfill: {
+              const { scheduled, errors: bulkActionErrors } = await bulkScheduleBackfill({
+                rules,
+                isDryRun,
+                rulesClient,
+                mlAuthz,
+                backfillPayload: body.backfill,
+                experimentalFeatures: config.experimentalFeatures,
+              });
+              errors.push(...bulkActionErrors);
+              backfilled = scheduled;
+            }
           }
 
           if (abortController.signal.aborted === true) {
             throw new AbortError('Bulk action was aborted');
           }
 
-          return buildBulkResponse(response, {
+          return buildBulkResponse(response, body.action, {
             updated,
             deleted,
             created,
+            backfilled,
             errors,
             isDryRun,
           });

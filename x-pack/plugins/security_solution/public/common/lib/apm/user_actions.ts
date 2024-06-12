@@ -23,6 +23,7 @@ export const BULK_RULE_ACTIONS = {
   DISABLE: `${APP_UI_ID} bulkRuleActions disable`,
   DUPLICATE: `${APP_UI_ID} bulkRuleActions duplicate`,
   EXPORT: `${APP_UI_ID} bulkRuleActions export`,
+  SCHEDULE_BACKFILL: `${APP_UI_ID} bulkRuleActions schedule backfill`,
   DELETE: `${APP_UI_ID} bulkRuleActions delete`,
   EDIT: `${APP_UI_ID} bulkRuleActions edit`,
 };

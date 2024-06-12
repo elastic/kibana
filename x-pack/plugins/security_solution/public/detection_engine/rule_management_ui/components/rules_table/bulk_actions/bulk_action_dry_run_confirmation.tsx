@@ -24,6 +24,8 @@ const getActionRejectedTitle = (
       return i18n.BULK_EDIT_CONFIRMATION_REJECTED_TITLE(failedRulesCount);
     case BulkActionTypeEnum.export:
       return i18n.BULK_EXPORT_CONFIRMATION_REJECTED_TITLE(failedRulesCount);
+    case BulkActionTypeEnum.backfill:
+      return i18n.BULK_SCHEDULE_BACKFILL_CONFIRMATION_REJECTED_TITLE(failedRulesCount);
     default:
       assertUnreachable(bulkAction);
   }
@@ -38,6 +40,8 @@ const getActionConfirmLabel = (
       return i18n.BULK_EDIT_CONFIRMATION_CONFIRM(succeededRulesCount);
     case BulkActionTypeEnum.export:
       return i18n.BULK_EXPORT_CONFIRMATION_CONFIRM(succeededRulesCount);
+    case BulkActionTypeEnum.backfill:
+      return i18n.BULK_SCHEDULE_BACKFILL_CONFIRMATION_CONFIRM(succeededRulesCount);
     default:
       assertUnreachable(bulkAction);
   }

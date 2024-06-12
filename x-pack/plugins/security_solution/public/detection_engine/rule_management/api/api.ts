@@ -30,6 +30,7 @@ import type {
   BulkDuplicateRules,
   BulkActionEditPayload,
   BulkActionType,
+  BulkScheduleBackfill,
   CoverageOverviewResponse,
   GetRuleManagementFiltersResponse,
 } from '../../../../common/api/detection_engine/rule_management';
@@ -299,6 +300,7 @@ export interface BulkActionResult {
   created: RuleResponse[];
   deleted: RuleResponse[];
   skipped: RuleResponse[];
+  backfilled: RuleResponse[];
 }
 
 export interface BulkActionAggregatedError {
@@ -330,7 +332,10 @@ export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefine
 type PlainBulkAction = {
   type: Exclude<
     BulkActionType,
-    BulkActionTypeEnum['edit'] | BulkActionTypeEnum['export'] | BulkActionTypeEnum['duplicate']
+    | BulkActionTypeEnum['edit']
+    | BulkActionTypeEnum['export']
+    | BulkActionTypeEnum['duplicate']
+    | BulkActionTypeEnum['backfill']
   >;
 } & QueryOrIds;
 
@@ -344,7 +349,16 @@ type DuplicateBulkAction = {
   duplicatePayload?: BulkDuplicateRules['duplicate'];
 } & QueryOrIds;
 
-export type BulkAction = PlainBulkAction | EditBulkAction | DuplicateBulkAction;
+type ScheduleBackfillBulkAction = {
+  type: BulkActionTypeEnum['backfill'];
+  backfillPayload: BulkScheduleBackfill['backfill'];
+} & QueryOrIds;
+
+export type BulkAction =
+  | PlainBulkAction
+  | EditBulkAction
+  | DuplicateBulkAction
+  | ScheduleBackfillBulkAction;
 
 export interface PerformBulkActionProps {
   bulkAction: BulkAction;
@@ -370,6 +384,8 @@ export async function performBulkAction({
     edit: bulkAction.type === BulkActionTypeEnum.edit ? bulkAction.editPayload : undefined,
     duplicate:
       bulkAction.type === BulkActionTypeEnum.duplicate ? bulkAction.duplicatePayload : undefined,
+    backfill:
+      bulkAction.type === BulkActionTypeEnum.backfill ? bulkAction.backfillPayload : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {

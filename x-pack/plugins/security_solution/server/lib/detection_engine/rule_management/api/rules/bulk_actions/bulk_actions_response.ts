@@ -16,7 +16,11 @@ import type {
   NormalizedRuleError,
   RuleDetailsInError,
 } from '../../../../../../../common/api/detection_engine';
-import type { BulkEditActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+import type {
+  BulkActionType,
+  BulkEditActionResponse,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
@@ -32,6 +36,7 @@ export type BulkActionError =
 
 export const buildBulkResponse = (
   response: KibanaResponseFactory,
+  action: Exclude<BulkActionType, BulkActionTypeEnum['export']>,
   {
     isDryRun = false,
     errors = [],
@@ -39,16 +44,18 @@ export const buildBulkResponse = (
     created = [],
     deleted = [],
     skipped = [],
+    backfilled = [],
   }: {
     isDryRun?: boolean;
     errors?: BulkActionError[];
     updated?: RuleAlertType[];
     created?: RuleAlertType[];
     deleted?: RuleAlertType[];
+    backfilled?: RuleAlertType[];
     skipped?: BulkActionSkipResult[];
   }
 ): IKibanaResponse<BulkEditActionResponse> => {
-  const numSucceeded = updated.length + created.length + deleted.length;
+  const numSucceeded = updated.length + created.length + deleted.length + backfilled.length;
   const numSkipped = skipped.length;
   const numFailed = errors.length;
 
@@ -67,19 +74,30 @@ export const buildBulkResponse = (
         created: [],
         deleted: [],
         skipped: [],
+        backfilled: [],
       }
     : {
         updated: updated.map((rule) => internalRuleToAPIResponse(rule)),
         created: created.map((rule) => internalRuleToAPIResponse(rule)),
         deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
+        backfilled: backfilled.map((rule) => internalRuleToAPIResponse(rule)),
         skipped,
       };
 
   if (numFailed > 0) {
+    let message = '';
+    if (action === BulkActionTypeEnum.backfill) {
+      message =
+        summary.succeeded > 0
+          ? 'Bulk schedule backfill partially failed'
+          : 'Bulk schedule backfill failed';
+    } else {
+      message = summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed';
+    }
     return response.custom<BulkEditActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
-        message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
+        message,
         status_code: 500,
         attributes: {
           errors: normalizeErrorResponse(errors),

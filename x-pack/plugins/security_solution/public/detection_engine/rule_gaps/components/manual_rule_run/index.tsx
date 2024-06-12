@@ -19,11 +19,10 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
+import { MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
 
 import * as i18n from './translations';
-
-export const MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS = 90;
 
 interface ManualRuleRunModalProps {
   onCancel: () => void;

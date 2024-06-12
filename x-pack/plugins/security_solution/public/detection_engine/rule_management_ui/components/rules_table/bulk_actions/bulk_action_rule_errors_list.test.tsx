@@ -11,7 +11,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
-import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
+import {
+  BulkActionsDryRunErrCode,
+  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS,
+} from '../../../../../../common/constants';
 import type { DryRunResult } from './types';
 import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
@@ -85,6 +88,45 @@ describe('Component BulkEditRuleErrorsList', () => {
     ];
     render(
       <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.edit} ruleErrors={ruleErrors} />,
+      {
+        wrapper: Wrapper,
+      }
+    );
+
+    expect(screen.getByText(value)).toBeInTheDocument();
+  });
+
+  test.each([
+    [
+      BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE,
+      '2 rules (Manual rule run feature is disabled)',
+    ],
+    [
+      BulkActionsDryRunErrCode.BACKFILL_DISABLED_RULE,
+      '2 rules (Cannot schedule backfill for disabled rules)',
+    ],
+    [
+      BulkActionsDryRunErrCode.BACKFILL_IN_THE_FUTURE,
+      '2 rules (Backfill cannot be scheduled for the future)',
+    ],
+    [
+      BulkActionsDryRunErrCode.BACKFILL_START_FAR_IN_THE_PAST,
+      `2 rules (Backfill cannot look back more than ${MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS} days)`,
+    ],
+    [
+      BulkActionsDryRunErrCode.BACKFILL_START_GREATER_THAN_END,
+      '2 rules (Backfill end must be greater than backfill start)',
+    ],
+  ])('should render correct message for "%s" errorCode', (errorCode, value) => {
+    const ruleErrors: DryRunResult['ruleErrors'] = [
+      {
+        message: 'test failure',
+        errorCode,
+        ruleIds: ['rule:1', 'rule:2'],
+      },
+    ];
+    render(
+      <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.backfill} ruleErrors={ruleErrors} />,
       {
         wrapper: Wrapper,
       }
