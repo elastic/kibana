@@ -11,10 +11,10 @@ import type {
   RulePatchProps,
   RuleObjectId,
   RuleToImport,
+  RuleResponse,
 } from '../../../../../../common/api/detection_engine';
 import type { RuleAlertType } from '../../../rule_schema';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 export interface IDetectionRulesClient {
   createCustomRule: (args: CreateCustomRuleArgs) => Promise<RuleResponse>;
