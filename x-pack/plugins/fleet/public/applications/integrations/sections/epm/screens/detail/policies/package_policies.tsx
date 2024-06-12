@@ -352,7 +352,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     <AgentPolicyRefreshContext.Provider value={{ refresh: refreshPolicies }}>
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={1} />
-        <EuiFlexItem grow={6}>
+        <EuiFlexItem grow={7}>
           <EuiBasicTable
             items={packageAndAgentPolicies || []}
             columns={columns}
