@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+VALIDATION_PACKAGE_DIR="$KIBANA_DIR/packages/kbn-esql-validation-autocomplete"
+EDITOR_PACKAGE_DIR="$KIBANA_DIR/packages/kbn-text-based-editor"
+
 report_main_step () {
   echo "--- $1"
 }
@@ -19,7 +22,7 @@ main () {
 
   .buildkite/scripts/bootstrap.sh
 
-  cd "$KIBANA_DIR/packages/kbn-esql-validation-autocomplete"
+  cd "$VALIDATION_PACKAGE_DIR"
 
   report_main_step "Generate function definitions"
 
@@ -31,7 +34,7 @@ main () {
 
   report_main_step "Generate inline function docs"
 
-  cd "$KIBANA_DIR/packages/kbn-text-based-editor"
+  cd "$EDITOR_PACKAGE_DIR"
 
   yarn make:docs $PARENT_DIR/elasticsearch
 
@@ -70,12 +73,12 @@ main () {
   echo "No existing PR found. Committing changes."
 
   # Make a commit
-  BRANCH_NAME="esql_generate_function_definitions_$(date +%s)"
+  BRANCH_NAME="esql_generate_function_metadata_$(date +%s)"
 
   git checkout -b "$BRANCH_NAME"
 
-  git add ./**/*
-  git commit -m "Update function definitions"
+  git add "$EDITOR_PACKAGE_DIR/**/*" "$VALIDATION_PACKAGE_DIR/**/*"
+  git commit -m "Update function metadata"
 
   report_main_step "Changes committed. Creating pull request."
 
