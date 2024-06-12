@@ -18,5 +18,7 @@
   "kbn_references": [
     "@kbn/user-profile-components",
     "@kbn/core-user-profile-browser",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
   ]
 }
