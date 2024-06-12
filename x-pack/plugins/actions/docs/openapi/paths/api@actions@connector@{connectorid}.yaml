@@ -51,8 +51,7 @@ post:
       required: true
       schema:
         type: string
-        examples:
-          - ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   requestBody:
     required: true
     content:
