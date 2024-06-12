@@ -23,7 +23,7 @@ describe('Data table record utils', () => {
   describe('buildDataTableRecordList', () => {
     test('should return a list of DataTableRecord', () => {
       const result = buildDataTableRecordList({
-        docs: esHitsMock,
+        records: esHitsMock,
         dataView: dataViewMock,
       });
       result.forEach((doc) => {
@@ -36,7 +36,7 @@ describe('Data table record utils', () => {
 
     test('should support processing each record', () => {
       const result = buildDataTableRecordList({
-        docs: esHitsMock,
+        records: esHitsMock,
         dataView: dataViewMock,
         processRecord: (record) => ({ ...record, id: 'custom-id' }),
       });

@@ -105,7 +105,7 @@ describe('context successors', function () {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(rows).toEqual(
             buildDataTableRecordList({
-              docs: mockSearchSource._stubHits.slice(-3),
+              records: mockSearchSource._stubHits.slice(-3),
               dataView,
             })
           );
@@ -140,7 +140,7 @@ describe('context successors', function () {
           expect(intervals.length).toBeGreaterThan(1);
           expect(rows).toEqual(
             buildDataTableRecordList({
-              docs: mockSearchSource._stubHits.slice(-3),
+              records: mockSearchSource._stubHits.slice(-3),
               dataView,
             })
           );
@@ -173,7 +173,7 @@ describe('context successors', function () {
           expect(intervals.length).toBeGreaterThan(1);
           expect(rows).toEqual(
             buildDataTableRecordList({
-              docs: mockSearchSource._stubHits.slice(0, 4),
+              records: mockSearchSource._stubHits.slice(0, 4),
               dataView,
             })
           );
@@ -262,7 +262,7 @@ describe('context successors', function () {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(rows).toEqual(
             buildDataTableRecordList({
-              docs: mockSearchSource._stubHits.slice(-3),
+              records: mockSearchSource._stubHits.slice(-3),
               dataView,
             })
           );
@@ -337,7 +337,7 @@ describe('context successors', function () {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(rows).toEqual(
             buildDataTableRecordList({
-              docs: mockSearchSource._stubHits.slice(-3),
+              records: mockSearchSource._stubHits.slice(-3),
               dataView,
             })
           );

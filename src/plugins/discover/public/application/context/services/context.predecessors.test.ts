@@ -104,7 +104,7 @@ describe('context predecessors', function () {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(rows).toEqual(
             buildDataTableRecordList({
-              docs: mockSearchSource._stubHits.slice(0, 3),
+              records: mockSearchSource._stubHits.slice(0, 3),
               dataView,
             })
           );
@@ -139,7 +139,7 @@ describe('context predecessors', function () {
           expect(intervals.length).toBeGreaterThan(1);
           expect(rows).toEqual(
             buildDataTableRecordList({
-              docs: mockSearchSource._stubHits.slice(0, 3),
+              records: mockSearchSource._stubHits.slice(0, 3),
               dataView,
             })
           );
@@ -178,7 +178,7 @@ describe('context predecessors', function () {
 
           expect(rows).toEqual(
             buildDataTableRecordList({
-              docs: mockSearchSource._stubHits.slice(-3),
+              records: mockSearchSource._stubHits.slice(-3),
               dataView,
             })
           );
@@ -271,7 +271,7 @@ describe('context predecessors', function () {
           expect(setFieldsSpy.calledOnce).toBe(true);
           expect(rows).toEqual(
             buildDataTableRecordList({
-              docs: mockSearchSource._stubHits.slice(0, 3),
+              records: mockSearchSource._stubHits.slice(0, 3),
               dataView,
             })
           );

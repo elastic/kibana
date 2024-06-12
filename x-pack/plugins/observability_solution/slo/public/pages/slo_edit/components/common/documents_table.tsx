@@ -98,7 +98,7 @@ export function DocumentsTable({
                 {loading && <EuiProgress size="xs" color="accent" />}
                 <UnifiedDataTable
                   rows={buildDataTableRecordList({
-                    docs: (data?.hits?.hits ?? []) as any,
+                    records: (data?.hits?.hits ?? []) as any,
                     dataView,
                   })}
                   showColumnTokens
