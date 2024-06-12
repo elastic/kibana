@@ -15,6 +15,7 @@ import ServiceNowSIRParamsFields from './servicenow_sir_params';
 import { Choice } from '../lib/servicenow/types';
 import { merge } from 'lodash';
 import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('../lib/servicenow/use_get_choices');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -346,7 +347,9 @@ describe('ServiceNowSIRParamsFields renders', () => {
 
     it('updates additional fields', async () => {
       const newValue = JSON.stringify({ bar: 'test' });
-      render(<ServiceNowSIRParamsFields {...defaultProps} />);
+      render(<ServiceNowSIRParamsFields {...defaultProps} />, {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      });
 
       userEvent.paste(await screen.findByTestId('additional_fieldsJsonEditor'), newValue);
 

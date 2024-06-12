@@ -16,6 +16,7 @@ import ServiceNowITSMParamsFields from './servicenow_itsm_params';
 import { Choice } from '../lib/servicenow/types';
 import { ACTION_GROUP_RECOVERED } from '../lib/servicenow/helpers';
 import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('../lib/servicenow/use_get_choices');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -371,7 +372,9 @@ describe('ServiceNowITSMParamsFields renders', () => {
 
     it('updates additional fields', async () => {
       const newValue = JSON.stringify({ bar: 'test' });
-      render(<ServiceNowITSMParamsFields {...defaultProps} />);
+      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      });
 
       userEvent.paste(await screen.findByTestId('additional_fieldsJsonEditor'), newValue);
 
