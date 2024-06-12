@@ -115,7 +115,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await deleteButton.click();
 
-        await testSubjects.existOrFail('confirm-delete-custom-field-modal');
+        await testSubjects.existOrFail('confirm-delete-modal');
 
         await testSubjects.click('confirmModalConfirmButton');
 
@@ -151,6 +151,52 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         expect(await testSubjects.getVisibleText('templates-list')).to.be('Template name\ntag-t1');
+      });
+
+      it('updates a template', async () => {
+        await testSubjects.existOrFail('templates-form-group');
+        const editButton = await find.byCssSelector('[data-test-subj*="-template-edit"]');
+
+        await editButton.click();
+
+        await testSubjects.setValue('template-name-input', 'Updated template name!');
+        await comboBox.setCustom('template-tags', 'tag-t1');
+        await testSubjects.setValue('template-description-input', 'Template description updated');
+
+        const caseTitle = await find.byCssSelector(
+          `[data-test-subj="input"][aria-describedby="caseTitle"]`
+        );
+        await caseTitle.focus();
+        await caseTitle.type('!!');
+
+        await cases.create.setDescription('test description!!');
+
+        await cases.create.setTags('case-tag');
+        await cases.create.setCategory('new!');
+
+        await testSubjects.click('common-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await retry.waitFor('templates-list', async () => {
+          return await testSubjects.exists('templates-list');
+        });
+
+        expect(await testSubjects.getVisibleText('templates-list')).to.be(
+          'Updated template name!\ntag-t1'
+        );
+      });
+
+      it('deletes a template', async () => {
+        await testSubjects.existOrFail('templates-form-group');
+        const deleteButton = await find.byCssSelector('[data-test-subj*="-template-delete"]');
+
+        await deleteButton.click();
+
+        await testSubjects.existOrFail('confirm-delete-modal');
+
+        await testSubjects.click('confirmModalConfirmButton');
+
+        await testSubjects.missingOrFail('template-list');
       });
     });
   });

@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Tags } from './tags';
-import type { FormProps } from './schema';
-import { schema } from './schema';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { MAX_LENGTH_PER_TAG } from '../../../common/constants';
+import { FormTestComponent } from '../../common/test_utils';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');
@@ -26,25 +22,8 @@ jest.mock('../../containers/use_get_tags');
 const useGetTagsMock = useGetTags as jest.Mock;
 
 describe('Tags', () => {
-  let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
-
-  const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
-    const { form } = useForm<FormProps>({
-      defaultValue: { tags: [] },
-      schema: {
-        tags: schema.tags,
-      },
-    });
-
-    globalForm = form;
-
-    return (
-      <TestProviders>
-        <Form form={form}>{children}</Form>
-      </TestProviders>
-    );
-  };
+  const onSubmit = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -54,59 +33,88 @@ describe('Tags', () => {
 
   it('it renders', async () => {
     appMockRender.render(
-      <MockHookWrapperComponent>
+      <FormTestComponent>
         <Tags isLoading={false} />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('caseTags')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('caseTags')).toBeInTheDocument();
+  });
+
+  it('it renders existing tags when provided', async () => {
+    appMockRender.render(
+      <FormTestComponent>
+        <Tags isLoading={false} currentTags={['foo', 'bar']} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('caseTags')).toBeInTheDocument();
+    expect(await screen.findByText('foo')).toBeInTheDocument();
+    expect(await screen.findByText('bar')).toBeInTheDocument();
   });
 
   it('it changes the tags', async () => {
     appMockRender.render(
-      <MockHookWrapperComponent>
+      <FormTestComponent onSubmit={onSubmit}>
         <Tags isLoading={false} />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), 'test{enter}');
-    userEvent.type(screen.getByRole('combobox'), 'case{enter}');
+    userEvent.type(await screen.findByRole('combobox'), 'test{enter}');
+    userEvent.type(await screen.findByRole('combobox'), 'case{enter}');
 
-    expect(globalForm.getFormData()).toEqual({ tags: ['test', 'case'] });
+    userEvent.click(await screen.findByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({ tags: ['test', 'case'] }, true);
+    });
+  });
+
+  it('it adds the tags to existing array', async () => {
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Tags isLoading={false} currentTags={['foo', 'bar']} />
+      </FormTestComponent>
+    );
+
+    userEvent.paste(await screen.findByRole('combobox'), 'dude');
+    userEvent.keyboard('{enter}');
+
+    userEvent.click(await screen.findByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({ tags: ['foo', 'bar', 'dude'] }, true);
+    });
   });
 
   it('it shows error when tag is empty', async () => {
     appMockRender.render(
-      <MockHookWrapperComponent>
+      <FormTestComponent>
         <Tags isLoading={false} />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
 
     userEvent.type(screen.getByRole('combobox'), ' {enter}');
 
-    await waitFor(() => {
-      expect(screen.getByText('A tag must contain at least one non-space character.'));
-    });
+    expect(await screen.findByText('A tag must contain at least one non-space character.'));
   });
 
   it('it shows error when tag is too long', async () => {
     const longTag = 'z'.repeat(MAX_LENGTH_PER_TAG + 1);
 
     appMockRender.render(
-      <MockHookWrapperComponent>
+      <FormTestComponent>
         <Tags isLoading={false} />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
 
     userEvent.paste(screen.getByRole('combobox'), `${longTag}`);
     userEvent.keyboard('{enter}');
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('The length of the tag is too long. The maximum length is 256 characters.')
-      );
-    });
+    expect(
+      await screen.findByText(
+        'The length of the tag is too long. The maximum length is 256 characters.'
+      )
+    );
   });
 });
