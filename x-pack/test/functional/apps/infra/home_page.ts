@@ -292,10 +292,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           [
-            { metric: 'cpuUsage', value: '2,500.0%' },
-            { metric: 'memoryUsage', value: '2,000.0%' },
+            { metric: 'cpuUsage', value: '25.0%' },
+            { metric: 'memoryUsage', value: '20.0%' },
           ].forEach(({ metric, value }) => {
-            it.skip(`${metric} tile should show ${value}`, async () => {
+            it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
                 const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
                   metric
