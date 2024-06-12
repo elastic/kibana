@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { BedrockChat } from '@kbn/langchain/server/language_models';
+import type {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { CATEGORIZATION_REVIEW_PROMPT } from './prompts';
 
@@ -13,7 +16,10 @@ import type { CategorizationState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { ECS_EVENT_TYPES_PER_CATEGORY } from './constants';
 
-export async function handleReview(state: CategorizationState, model: BedrockChat) {
+export async function handleReview(
+  state: CategorizationState,
+  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
+) {
   const categorizationReviewPrompt = CATEGORIZATION_REVIEW_PROMPT;
   const outputParser = new JsonOutputParser();
   const categorizationReview = categorizationReviewPrompt.pipe(model).pipe(outputParser);

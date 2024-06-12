@@ -6968,6 +6968,28 @@
     node-loader "^2.0.0"
     tiktoken "^1.0.13"
 
+"@launchdarkly/js-sdk-common@2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.5.0.tgz#d1dc595034bf6ee09b0313add5b8901fe9b82f26"
+  integrity sha512-sVwwUpXwAZsQowdbNN4ckprzR9DMEkurYWFuLjpyaaHtUmB6g7WnIz3lGGIXz/nE3QoUlwtC+eR8Nqb+XdonKw==
+
+"@launchdarkly/js-server-sdk-common@2.4.3":
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.4.3.tgz#4d2a1bb71982dadecbadb0411d1068fb7945f54a"
+  integrity sha512-1YQ6fMpO0gcWt2Pme5XyUdokQxU5fMcoWAUpHJwxiHAt1+ygDqRD3wuUPCnbJ8KzJprcj51fpCG/9h3KSW9mHA==
+  dependencies:
+    "@launchdarkly/js-sdk-common" "2.5.0"
+    semver "7.5.4"
+
+"@launchdarkly/node-server-sdk@^9.4.5":
+  version "9.4.5"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.4.5.tgz#4a64319de7917fc149e51a9e22c1a5243d76d849"
+  integrity sha512-GXYhvfFG7wGgeFoyWUa7Srso4CwMHo+c/WLQzoB1A5EPQ76oVkvYJbrgCym1ZLdIpm06bNRQ75NOn2hRn1SjfQ==
+  dependencies:
+    "@launchdarkly/js-server-sdk-common" "2.4.3"
+    https-proxy-agent "^5.0.1"
+    launchdarkly-eventsource "2.0.3"
+
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
@@ -13474,6 +13496,11 @@ cache-base@^1.0.1:
     to-object-path "^0.3.0"
     union-value "^1.0.0"
     unset-value "^1.0.0"
+
+cacheable-lookup@6:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/cacheable-lookup/-/cacheable-lookup-6.1.0.tgz#0330a543471c61faa4e9035db583aad753b36385"
+  integrity sha512-KJ/Dmo1lDDhmW2XDPMo+9oiy/CeqosPguPCrgcVzKyZrL6pM1gU2GmPY/xo6OQPTUaA/c0kwHuywB4E6nmT9ww==
 
 cacheable-lookup@^5.0.3:
   version "5.0.3"
@@ -21672,18 +21699,23 @@ launchdarkly-eventsource@1.4.4:
   resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-1.4.4.tgz#fa595af8602e487c61520787170376c6a1104459"
   integrity sha512-GL+r2Y3WccJlhFyL2buNKel+9VaMnYpbE/FfCkOST5jSNSFodahlxtGyrE8o7R+Qhobyq0Ree4a7iafJDQi9VQ==
 
-launchdarkly-js-client-sdk@^3.1.4:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.1.4.tgz#e613cb53412533c07ccf140ae570fc994c59758d"
-  integrity sha512-yq0FeklpVuHMSRz7jfUAfyM7I/659RvGztqJ0Y9G5eN/ZrG1o2W61ZU0Nrv/gqZCtLXjarh/u1otxSFFBjTpHw==
+launchdarkly-eventsource@2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.0.3.tgz#8a7b8da5538153f438f7d452b1c87643d900f984"
+  integrity sha512-VhFjppK7jXlcEKaS7bxdoibB5j01NKyeDR7a8XfssdDGNWCTsbF0/5IExSmPi44eDncPhkoPNxlSZhEZvrbD5w==
+
+launchdarkly-js-client-sdk@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.3.0.tgz#33573b884438b63f1501039c4bf0b174694a06d0"
+  integrity sha512-Hb+EF/5m43jsKrkXLPrdklX5g+XUJiwJQlVfa4y+ZPEqSnP4w4GrFp+Iv5ftWCcRhhpQuw/rygoNZlL1e1vmgg==
   dependencies:
     escape-string-regexp "^4.0.0"
-    launchdarkly-js-sdk-common "5.0.3"
+    launchdarkly-js-sdk-common "5.2.0"
 
-launchdarkly-js-sdk-common@5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-5.0.3.tgz#345f899f5779be8b03d6599978c855eb838d8b7f"
-  integrity sha512-wKG8UsVbPVq8+7eavgAm5CVmulQWN6Ddod2ZoA3euZ1zPvJPwIQ2GrOYaCJr3cFrrMIX+nQyBJHBHYxUAPcM+Q==
+launchdarkly-js-sdk-common@5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-5.2.0.tgz#be9fadc59786c060087a3b818d15af700faf0fd2"
+  integrity sha512-aLv2ZrUv229RIwLtFhdILu2aJS/fqGSJzTk4L/bCDZA8RuIh7PutI3ui/AJeNnzPzjKzdEQZw6wVhkVc84baog==
   dependencies:
     base64-js "^1.3.0"
     fast-deep-equal "^2.0.1"

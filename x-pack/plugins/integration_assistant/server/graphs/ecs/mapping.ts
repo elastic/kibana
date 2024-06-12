@@ -4,12 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { BedrockChat } from '@kbn/langchain/server/language_models';
-import { ECS_MAIN_PROMPT } from './prompts';
 import type { EcsMappingState } from '../../types';
+import { ECS_MAIN_PROMPT } from './prompts';
 
-export async function handleEcsMapping(state: EcsMappingState, model: BedrockChat) {
+export async function handleEcsMapping(
+  state: EcsMappingState,
+  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
+) {
   const ecsMainPrompt = ECS_MAIN_PROMPT;
   const outputParser = new JsonOutputParser();
   const ecsMainGraph = ecsMainPrompt.pipe(model).pipe(outputParser);

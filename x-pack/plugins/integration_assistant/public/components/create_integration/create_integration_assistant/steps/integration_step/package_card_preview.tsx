@@ -52,7 +52,7 @@ export const PackageCardPreview = React.memo<PackageCardPreviewProps>(({ integra
           type={
             integrationSettings?.logo
               ? `data:image/svg+xml;base64,${integrationSettings.logo}`
-              : 'brokenLink'
+              : '--no-image--'
           }
         />
       }
