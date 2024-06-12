@@ -66,6 +66,7 @@ describe('context predecessors', function () {
       fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
         const anchor = buildDataTableRecord(
           {
+            _id: 'test',
             _source: {
               [dataView.timeFieldName!]: timeValIso,
             },
@@ -220,6 +221,7 @@ describe('context predecessors', function () {
       fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
         const anchor = buildDataTableRecord(
           {
+            _id: 'test',
             _source: {
               [dataView.timeFieldName!]: timeValIso,
             },

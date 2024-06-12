@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('shows dataset from integration', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
 
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
 
@@ -132,7 +132,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     it('goes to log explorer page when opened', async () => {
       const rowIndexToOpen = 1;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       const actionsCol = cols.Actions;
 
       const datasetName = (await datasetNameCol.getCellTexts())[rowIndexToOpen];
