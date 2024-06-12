@@ -28,7 +28,7 @@ export const useResolveRule = (props: UseResolveProps) => {
   const { data, isSuccess, isFetching, isLoading, isInitialLoading, isError, error } = useQuery({
     queryKey: ['useResolveRule', id],
     queryFn,
-    enabled: typeof id !== 'undefined',
+    enabled: !!id,
     select: (rule): RuleFormData | null => {
       if (!rule) {
         return null;
