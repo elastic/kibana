@@ -224,25 +224,6 @@ if (doc['task.runAt'].size()!=0) {
     `);
   });
 
-  test('generates OneOfTaskTypes clause as expected', () => {
-    expect(OneOfTaskTypes('field-name', ['type-a', 'type-b'])).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "must": Array [
-            Object {
-              "terms": Object {
-                "field-name": Array [
-                  "type-a",
-                  "type-b",
-                ],
-              },
-            },
-          ],
-        },
-      }
-    `);
-  });
-
   describe(`script`, () => {
     test('it marks the update as a noop if the type is skipped', async () => {
       const taskManagerId = '3478fg6-82374f6-83467gf5-384g6f';
@@ -265,5 +246,24 @@ if (doc['task.runAt'].size()!=0) {
         }).source
       ).toMatch(/ctx.op = "noop"/);
     });
+  });
+
+  test('generates OneOfTaskTypes clause as expected', () => {
+    expect(OneOfTaskTypes('field-name', ['type-a', 'type-b'])).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "must": Array [
+            Object {
+              "terms": Object {
+                "field-name": Array [
+                  "type-a",
+                  "type-b",
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
   });
 });

@@ -113,20 +113,6 @@ export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition = {
   },
 };
 
-export const OneOfTaskTypes = (field: string, types: string[]): MustCondition => {
-  return {
-    bool: {
-      must: [
-        {
-          terms: {
-            [field]: types,
-          },
-        },
-      ],
-    },
-  };
-};
-
 const SortByRunAtAndRetryAtScript: ScriptBasedSortClause = {
   _script: {
     type: 'number',
@@ -230,6 +216,20 @@ export const updateFieldsAndMarkAsFailed = ({
       skippedTaskTypes,
       unusedTaskTypes,
       taskMaxAttempts,
+    },
+  };
+};
+
+export const OneOfTaskTypes = (field: string, types: string[]): MustCondition => {
+  return {
+    bool: {
+      must: [
+        {
+          terms: {
+            [field]: types,
+          },
+        },
+      ],
     },
   };
 };
