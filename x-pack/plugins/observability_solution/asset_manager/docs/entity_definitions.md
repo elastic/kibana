@@ -1,4 +1,4 @@
-### Entity Definitinos
+### Entity Definitions
 
 Entity definitions are a core concept of the entity model. They define the way to locate, aggregate and extract a specific type of entity documents from source indices. Definitions are stored as Kibana saved objects and serve as the input to build ingested pipelines and transforms that will actually collect and store the data.
 
