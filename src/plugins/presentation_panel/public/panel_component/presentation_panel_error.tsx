@@ -17,6 +17,7 @@ import { Subscription } from 'rxjs';
 import { editPanelAction } from '../panel_actions/panel_actions';
 import { getErrorCallToAction } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi } from './types';
+import { i18n } from '@kbn/i18n';
 
 export const PresentationPanelError = ({
   api,
@@ -82,7 +83,9 @@ export const PresentationPanelError = ({
         searchErrorDisplay?.body ?? (
           <EuiText size="s">
             <Markdown data-test-subj="errorMessageMarkdown" readOnly>
-              {error.message}
+              {error.message.length ? error.message : i18n.translate('presentationPanelError.emptyErrorMessage', {
+                defaultMessage: "Error",
+              })}
             </Markdown>
           </EuiText>
         )
