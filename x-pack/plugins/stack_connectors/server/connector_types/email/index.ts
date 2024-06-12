@@ -28,6 +28,7 @@ import {
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
 import { portSchema } from '../lib/schemas';
@@ -310,6 +311,7 @@ async function executor(
     transport.clientSecret = secrets.clientSecret;
   }
 
+  const isCloud = config.service === AdditionalEmailServices.ELASTIC_CLOUD;
   if (config.service === AdditionalEmailServices.EXCHANGE) {
     transport.clientId = config.clientId!;
     transport.tenantId = config.tenantId!;
@@ -323,7 +325,7 @@ async function executor(
     transport.host = config.host!;
     transport.port = config.port!;
     transport.secure = getSecureValue(config.secure, config.port);
-  } else if (config.service === AdditionalEmailServices.ELASTIC_CLOUD) {
+  } else if (isCloud) {
     // use custom elastic cloud settings
     transport.host = ELASTIC_CLOUD_SERVICE.host!;
     transport.port = ELASTIC_CLOUD_SERVICE.port!;
@@ -370,12 +372,26 @@ async function executor(
     const message = i18n.translate('xpack.stackConnectors.email.errorSendingErrorMessage', {
       defaultMessage: 'error sending email',
     });
-    return {
+    const errorResult: ConnectorTypeExecutorResult<unknown> = {
       status: 'error',
       actionId,
       message,
       serviceMessage: err.message,
     };
+
+    logger.info(`Error with email connector ${err}`);
+
+    // Mark cloud errors for rate limiting (SMTP 450) and
+    // recipient address being rejected (SMTP 554) as user errors
+    const statusCode = err?.response?.status;
+    if ((isCloud && statusCode === 450) || statusCode === 554) {
+      return {
+        ...errorResult,
+        errorSource: TaskErrorSource.USER,
+      };
+    }
+
+    return errorResult;
   }
 
   return { status: 'ok', data: result, actionId };
