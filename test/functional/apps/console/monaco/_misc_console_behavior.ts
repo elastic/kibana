@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should go to line number when Ctrl+L is pressed', async () => {
         await PageObjects.console.monaco.enterText(
-          '\nGET _search/foo\n{\n  "query": {\n    "match_all": {}'
+          '\nGET _search/foo\n{\n  "query": {\n    "match_all": {} \n} \n}'
         );
         await PageObjects.console.monaco.pressCtrlL();
         // Sleep to allow the line number input to be focused
