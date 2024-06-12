@@ -13,7 +13,7 @@ import { useTableData } from '../../hooks/use_table_data';
 
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
 import { EndpointsTable } from './endpoints_table';
-import { TABLE_COLUMNS } from './table_columns';
+import { useTableColumns } from './table_columns';
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -26,6 +26,8 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     inferenceEndpoints,
     queryParams
   );
+
+  const tableColumns = useTableColumns();
 
   const handleTableChange = useCallback(
     ({ page, sort }) => {
@@ -47,7 +49,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
 
   return (
     <EndpointsTable
-      columns={TABLE_COLUMNS}
+      columns={tableColumns}
       data={paginatedSortedTableData}
       onChange={handleTableChange}
       pagination={pagination}
