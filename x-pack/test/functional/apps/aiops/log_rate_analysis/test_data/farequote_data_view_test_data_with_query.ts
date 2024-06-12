@@ -19,6 +19,7 @@ export const farequoteDataViewTestDataWithQuery: TestData = {
   brushDeviationTargetTimestamp: 1455033600000,
   brushIntervalFactor: 1,
   chartClickCoordinates: [0, 0],
+  columnSelectorSearch: 'p-value',
   fieldSelectorSearch: 'airline',
   fieldSelectorApplyAvailable: false,
   query: 'NOT airline:("SWR" OR "ACA" OR "AWE" OR "BAW" OR "JAL" OR "JBU" OR "JZA" OR "KLM")',
@@ -43,6 +44,7 @@ export const farequoteDataViewTestDataWithQuery: TestData = {
         impact: 'High',
       },
     ],
+    columnSelectorPopover: ['Log rate', 'Doc count', 'p-value', 'Impact', 'Actions'],
     fieldSelectorPopover: ['airline', 'custom_field.keyword'],
     globalState: {
       refreshInterval: { pause: true, value: 60000 },
