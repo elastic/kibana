@@ -20,14 +20,12 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiButtonEmpty,
-  EuiButton,
   EuiToolTip,
   EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
-import { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
 import { AlertsSettings } from '../alerts/settings/alerts_settings';
 import { useAssistantContext } from '../assistant_context';
 import type { KnowledgeBaseConfig } from '../assistant/types';
@@ -35,8 +33,6 @@ import * as i18n from './translations';
 import { useDeleteKnowledgeBase } from '../assistant/api/knowledge_base/use_delete_knowledge_base';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
-import { useCreateKnowledgeBaseEntry } from '../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
-import { useDeleteKnowledgeBaseEntries } from '../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries';
 
 const ESQL_RESOURCE = 'esql';
 const KNOWLEDGE_BASE_INDEX_PATTERN_OLD = '.kibana-elastic-ai-assistant-kb';
@@ -63,22 +59,6 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
     const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http });
     const { mutate: deleteKB, isLoading: isDeletingUpKB } = useDeleteKnowledgeBase({ http });
-
-    // TODO: Remove before merging after testing is complete
-    const entry: KnowledgeBaseEntryCreateProps = {
-      metadata: {
-        kbResource: 'user',
-        required: true,
-        source: 'user',
-      },
-      text: 'Useful information about the user',
-    };
-    const { mutate: createEntry, isLoading: isCreatingEntry } = useCreateKnowledgeBaseEntry({
-      http,
-    });
-    const { mutate: deleteEntries, isLoading: isDeletingEntries } = useDeleteKnowledgeBaseEntries({
-      http,
-    });
 
     // Resource enabled state
     const isElserEnabled = kbStatus?.elser_exists ?? false;
@@ -336,31 +316,6 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
                 {esqlDescription}
               </EuiText>
             </span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="s" />
-
-        {/* TODO: Remove before merging after testing is complete */}
-
-        <EuiFlexGroup key={'blarg'} gutterSize="s" alignItems="center" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color={'primary'}
-              isLoading={isCreatingEntry}
-              onClick={() => createEntry(entry)}
-            >
-              {'Create Entry'}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color={'danger'}
-              isLoading={isDeletingEntries}
-              onClick={() => deleteEntries({ ids: ['YOE_CZABSQy1BdxtAGbs'] })}
-            >
-              {'Delete Entry'}
-            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
 
