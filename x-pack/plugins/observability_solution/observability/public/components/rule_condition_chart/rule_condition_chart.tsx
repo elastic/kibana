@@ -63,6 +63,8 @@ interface RuleConditionChartProps {
     metrics: GenericMetric[];
     threshold: number[];
     comparator: COMPARATORS | LEGACY_COMPARATORS;
+    warningThreshold?: number[];
+    warningComparator?: COMPARATORS | LEGACY_COMPARATORS;
     timeSize?: number;
     timeUnit?: TimeUnitChar;
     equation?: string;
@@ -97,11 +99,22 @@ export function RuleConditionChart({
     services: { lens },
   } = useKibana();
   const { euiTheme } = useEuiTheme();
-  const { metrics, timeSize, timeUnit, threshold, comparator, equation } = metricExpression;
+  const {
+    metrics,
+    timeSize,
+    timeUnit,
+    threshold,
+    comparator,
+    equation,
+    warningComparator,
+    warningThreshold,
+  } = metricExpression;
   const [attributes, setAttributes] = useState<LensAttributes>();
   const [aggMap, setAggMap] = useState<AggMap>();
   const [formula, setFormula] = useState<string>('');
   const [thresholdReferenceLine, setThresholdReferenceLine] = useState<XYReferenceLinesLayer[]>();
+  const [warningThresholdReferenceLine, setWarningThresholdReferenceLine] =
+    useState<XYReferenceLinesLayer[]>();
   const [alertAnnotation, setAlertAnnotation] = useState<XYByValueAnnotationsLayer>();
   const [chartLoading, setChartLoading] = useState<boolean>(false);
   const filters = [...(searchConfiguration.filter || []), ...additionalFilters];
@@ -133,6 +146,66 @@ export function RuleConditionChart({
       }
     });
   }, [chartLoading, attributes]);
+
+  // Build the warning threshold reference line
+  useEffect(() => {
+    if (!warningThreshold) return;
+    const refLayers = [];
+    if (
+      warningComparator === COMPARATORS.NOT_BETWEEN ||
+      (warningComparator === COMPARATORS.BETWEEN && warningThreshold.length === 2)
+    ) {
+      const refLineStart = new XYReferenceLinesLayer({
+        data: [
+          {
+            value: (warningThreshold[0] || 0).toString(),
+            color: euiTheme.colors.warning,
+            fill: warningComparator === COMPARATORS.NOT_BETWEEN ? 'below' : 'none',
+          },
+        ],
+      });
+      const refLineEnd = new XYReferenceLinesLayer({
+        data: [
+          {
+            value: (warningThreshold[1] || 0).toString(),
+            color: euiTheme.colors.warning,
+            fill: warningComparator === COMPARATORS.NOT_BETWEEN ? 'above' : 'none',
+          },
+        ],
+      });
+
+      refLayers.push(refLineStart, refLineEnd);
+    } else {
+      let fill: FillStyle = 'above';
+      if (
+        warningComparator === COMPARATORS.LESS_THAN ||
+        warningComparator === COMPARATORS.LESS_THAN_OR_EQUALS
+      ) {
+        fill = 'below';
+      }
+      const warningThresholdRefLine = new XYReferenceLinesLayer({
+        data: [
+          {
+            value: (warningThreshold[0] || 0).toString(),
+            color: euiTheme.colors.warning,
+            fill,
+          },
+        ],
+      });
+      // A transparent line to add extra buffer at the top of threshold
+      const bufferRefLine = new XYReferenceLinesLayer({
+        data: [
+          {
+            value: getBufferThreshold(warningThreshold[0]),
+            color: 'transparent',
+            fill,
+          },
+        ],
+      });
+      refLayers.push(warningThresholdRefLine, bufferRefLine);
+    }
+    setWarningThresholdReferenceLine(refLayers);
+  }, [warningThreshold, warningComparator, euiTheme.colors.warning, metrics]);
 
   // Build the threshold reference line
   useEffect(() => {
@@ -293,6 +366,9 @@ export function RuleConditionChart({
     const layers: Array<XYDataLayer | XYReferenceLinesLayer | XYByValueAnnotationsLayer> = [
       xyDataLayer,
     ];
+    if (warningThresholdReferenceLine) {
+      layers.push(...warningThresholdReferenceLine);
+    }
     if (thresholdReferenceLine) {
       layers.push(...thresholdReferenceLine);
     }
@@ -332,6 +408,7 @@ export function RuleConditionChart({
     timeSize,
     timeUnit,
     seriesType,
+    warningThresholdReferenceLine,
   ]);
 
   if (

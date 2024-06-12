@@ -339,6 +339,8 @@ export const Expressions: React.FC<Props> = (props) => {
                   comparator: e.comparator,
                   timeSize,
                   timeUnit,
+                  warningComparator: e.warningComparator,
+                  warningThreshold: e.warningThreshold,
                 }}
                 searchConfiguration={{
                   index: metricsView.dataViewReference.id,
