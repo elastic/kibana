@@ -109,11 +109,16 @@ export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperCom
         models = await ml?.mlApi?.trainedModels?.getTrainedModels();
       } catch (error) {
         const errorObj = extractErrorProperties(error);
-        setInferenceAddError(errorObj.message);
+        if (errorObj.statusCode === 403) {
+          setInferenceAddError('Forbidden to access trained models');
+        } else {
+          setInferenceAddError(errorObj.message);
+        }
       } finally {
         setAvailableTrainedModels(models || []);
       }
     };
+
     fetchAvailableTrainedModels();
   }, [ml]);
 
