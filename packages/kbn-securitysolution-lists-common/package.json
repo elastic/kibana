@@ -1,5 +1,5 @@
 {
-  "description": "OpenAPI common schemas for Kibana",
+  "description": "Security Solution Lists common package",
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "name": "@kbn/securitysolution-lists-common",
   "private": true,
