@@ -7,7 +7,7 @@
 
 import { RunnableConfig } from '@langchain/core/runnables';
 import { StructuredTool } from '@langchain/core/tools';
-import { ToolExecutor } from '@langchain/langgraph/prebuilt';
+import { ToolExecutor } from '@langchain/langgraph';
 import { AgentState, NodeParamsBase } from '../types';
 
 export interface ExecuteToolsParams extends NodeParamsBase {

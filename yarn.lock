@@ -21650,10 +21650,10 @@ langchainhub@~0.0.8:
   resolved "https://registry.yarnpkg.com/langchainhub/-/langchainhub-0.0.8.tgz#fd4b96dc795e22e36c1a20bad31b61b0c33d3110"
   integrity sha512-Woyb8YDHgqqTOZvWIbm2CaFDGfZ4NTSyXV687AG4vXEfoNo7cGQp7nhl7wL3ehenKWmNEmcxCLgOZzW8jE6lOQ==
 
-langsmith@^0.1.30, langsmith@~0.1.1, langsmith@~0.1.7:
-  version "0.1.30"
-  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.1.30.tgz#3000e441605b26e15a87fb991a3929c944edbc0a"
-  integrity sha512-g8f10H1iiRjCweXJjgM3Y9xl6ApCa1OThDvc0BlSDLVrGVPy1on9wT39vAzYkeadC7oG48p7gfpGlYH3kLkJ9Q==
+langsmith@^0.1.31, langsmith@~0.1.1, langsmith@~0.1.7:
+  version "0.1.31"
+  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.1.31.tgz#a3518ea340e85191c0252d47a347d7295fd9b511"
+  integrity sha512-G9zi+84RvUZ7UP/ZC0dx/9SYHk8Bhe9GywUeVBzEyt8M4QeU6FPWT7TEjDSqp/XuPJf5o59Z2QlmNJgMnpUd8Q==
   dependencies:
     "@types/uuid" "^9.0.1"
     commander "^10.0.1"
