@@ -15,7 +15,7 @@ import {
 } from '@kbn/langchain/server/language_models';
 
 const mockLlm = new FakeLLM({
-  response: "I'll callback later.",
+  response: '{ "message": "ll callback later."}',
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
 const testState: EcsMappingState = ecsTestState;
