@@ -36,11 +36,11 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
     cy.task('esArchiverLoad', { archiveName: 'exceptions' });
 
     login();
-    postDataView('exceptions-*');
+    postDataView('auditbeat-exceptions-*');
     createRule(
       getNewRule({
         query: 'agent.name:*',
-        data_view_id: 'exceptions-*',
+        data_view_id: 'auditbeat-exceptions-*',
         interval: '1m',
         rule_id: 'rule_testing',
       })

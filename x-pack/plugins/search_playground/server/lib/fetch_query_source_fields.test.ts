@@ -19,6 +19,8 @@ import {
   SPARSE_INPUT_OUTPUT_ONE_INDEX,
   SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS,
   SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS_MODEL_ID_KEYWORD,
+  DENSE_SPARSE_SAME_FIELD_NAME_CAPS,
+  DENSE_SPARSE_SAME_FIELD_NAME_DOCS,
 } from '../../__mocks__/fetch_query_source_fields.mock';
 import {
   fetchFields,
@@ -253,6 +255,50 @@ describe('fetch_query_source_fields', () => {
           dense_vector_query_fields: [],
           source_fields: ['text'],
           skipped_fields: 2,
+        },
+      });
+    });
+
+    it('should return the correct field types for sparse vector and dense vector when using the same field name', () => {
+      expect(
+        parseFieldsCapabilities(DENSE_SPARSE_SAME_FIELD_NAME_CAPS, [
+          {
+            index: 'cohere-embeddings',
+            doc: DENSE_SPARSE_SAME_FIELD_NAME_DOCS[0],
+          },
+          {
+            index: 'elser_index',
+            doc: DENSE_SPARSE_SAME_FIELD_NAME_DOCS[1],
+          },
+        ])
+      ).toEqual({
+        'cohere-embeddings': {
+          bm25_query_fields: ['text'],
+          dense_vector_query_fields: [
+            {
+              field: 'text_embedding',
+              indices: ['cohere-embeddings'],
+              model_id: 'cohere_embeddings',
+              nested: false,
+            },
+          ],
+          elser_query_fields: [],
+          skipped_fields: 2,
+          source_fields: ['text'],
+        },
+        elser_index: {
+          bm25_query_fields: ['text'],
+          dense_vector_query_fields: [],
+          elser_query_fields: [
+            {
+              field: 'text_embedding',
+              indices: ['elser_index'],
+              model_id: 'my-elser-model',
+              nested: false,
+            },
+          ],
+          skipped_fields: 2,
+          source_fields: ['text'],
         },
       });
     });

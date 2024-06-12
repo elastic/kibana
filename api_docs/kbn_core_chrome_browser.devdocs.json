@@ -4044,6 +4044,21 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.RenderAs",
+        "type": "Type",
+        "tags": [],
+        "label": "RenderAs",
+        "description": [],
+        "signature": [
+          "\"block\" | \"item\" | \"accordion\" | \"panelOpener\""
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
         "id": "def-common.RootNavigationItemDefinition",
         "type": "Type",
         "tags": [],

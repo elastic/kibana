@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const usageAPI = getService('usageAPI');
 
   describe('Verify disabledFeatures telemetry payloads', async () => {
-    beforeEach(async () => {
+    before(async () => {
       await spacesService.create({
         id: 'space-1',
         name: 'space-1',
@@ -28,13 +28,24 @@ export default function ({ getService }: FtrProviderContext) {
         name: 'space-2',
         description: 'This is your space-2!',
         color: '#00bfb3',
+        solution: 'security',
         disabledFeatures: ['savedObjectsManagement', 'canvas', 'maps'],
+      });
+
+      await spacesService.create({
+        id: 'space-3',
+        name: 'space-3',
+        description: 'This is your space-3!',
+        color: '#00bfb3',
+        disabledFeatures: [],
+        solution: 'search',
       });
     });
 
-    afterEach(async () => {
+    after(async () => {
       await spacesService.delete('space-1');
       await spacesService.delete('space-2');
+      await spacesService.delete('space-3');
     });
 
     it('includes only disabledFeatures findings', async () => {
@@ -81,6 +92,21 @@ export default function ({ getService }: FtrProviderContext) {
         filesSharedImage: 0,
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
+      });
+    });
+
+    it('includes only solution findings', async () => {
+      const [{ stats }] = await usageAPI.getTelemetryStats({
+        unencrypted: true,
+        refreshCache: true,
+      });
+
+      expect(stats.stack_stats.kibana.plugins.spaces.solutions).to.eql({
+        security: 1,
+        search: 1,
+        observability: 0,
+        classic: 0,
+        unset: 2,
       });
     });
   });
