@@ -11,8 +11,7 @@ import { readEntityDiscoveryAPIKey, checkIfEntityDiscoveryAPIKeyIsValid } from '
 import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 import { ERROR_API_KEY_NOT_FOUND, ERROR_API_KEY_NOT_VALID } from '../../../common/errors';
-import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
-import { uninstallEntityDefinition } from '../../lib/entities/uninstall_entity_definition';
+import { uninstallBuiltInEntityDefinitions } from '../../lib/entities/uninstall_entity_definition';
 
 export function uninstallBuiltinEntityDefinitionsRoute<T extends RequestHandlerContext>({
   router,
@@ -44,17 +43,7 @@ export function uninstallBuiltinEntityDefinitionsRoute<T extends RequestHandlerC
         const soClient = server.core.savedObjects.getScopedClient(fakeRequest);
         const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
 
-        const definitions = await findEntityDefinitions({
-          soClient,
-          esClient,
-          builtIn: true,
-        });
-
-        await Promise.all(
-          definitions.map(async (definition) => {
-            await uninstallEntityDefinition({ definition, esClient, soClient, logger });
-          })
-        );
+        await uninstallBuiltInEntityDefinitions({ soClient, esClient, logger });
 
         return res.ok({ body: { success: true } });
       } catch (e) {

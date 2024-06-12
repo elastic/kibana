@@ -11,6 +11,7 @@ import { EntityDefinition } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
 import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
+import { findEntityDefinitions } from './find_entity_definition';
 import {
   stopAndDeleteHistoryTransform,
   stopAndDeleteLatestTransform,
@@ -32,4 +33,26 @@ export async function uninstallEntityDefinition({
   await deleteHistoryIngestPipeline(esClient, definition, logger);
   await deleteLatestIngestPipeline(esClient, definition, logger);
   await deleteEntityDefinition(soClient, definition, logger);
+}
+
+export async function uninstallBuiltInEntityDefinitions({
+  esClient,
+  soClient,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  logger: Logger;
+}) {
+  const definitions = await findEntityDefinitions({
+    soClient,
+    esClient,
+    builtIn: true,
+  });
+
+  await Promise.all(
+    definitions.map(async (definition) => {
+      await uninstallEntityDefinition({ definition, esClient, soClient, logger });
+    })
+  );
 }
