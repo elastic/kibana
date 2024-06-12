@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import React, { MouseEventHandler, ReactElement, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -16,209 +16,43 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiContextMenuPanelDescriptor,
-  EuiIcon,
-  EuiIconTip,
-  EuiNotificationBadge,
   EuiPopover,
-  EuiSkeletonRectangle,
   EuiSkeletonText,
-  EuiToolTip,
-  IconType,
 } from '@elastic/eui';
 import { Action, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
 import {
   getViewModeSubject,
   useBatchedOptionalPublishingSubjects,
-  ViewMode,
 } from '@kbn/presentation-publishing';
-import { Subscription } from 'rxjs';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { uiActions } from '../../kibana_services';
-import {
-  contextMenuTrigger,
-  CONTEXT_MENU_TRIGGER,
-  panelNotificationTrigger,
-  PANEL_NOTIFICATION_TRIGGER,
-} from '../../panel_actions';
+import { contextMenuTrigger } from '../../panel_actions';
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-
-const QUICK_ACTION_IDS = {
-  edit: [
-    'editPanel',
-    'ACTION_CONFIGURE_IN_LENS',
-    'ACTION_CUSTOMIZE_PANEL',
-    'editAnomalyChartsPanelAction',
-    'ACTION_OPEN_IN_DISCOVER',
-  ],
-  view: ['ACTION_OPEN_IN_DISCOVER', 'openInspector', 'togglePanel'],
-};
-
-const allowedNotificationActions = ['ACTION_FILTERS_NOTIFICATION'];
+import { DefaultPresentationPanelApi } from '../types';
 
 export const PresentationPanelContextMenu = ({
   api,
   index,
-  getActions,
-  actionPredicate,
-  children,
-  className,
-  viewMode,
-  showNotifications = true,
+  contextMenuActions,
 }: {
   index?: number;
   api: DefaultPresentationPanelApi | null;
-  getActions: PresentationPanelInternalProps['getActions'];
-  actionPredicate?: (actionId: string) => boolean;
-  children: ReactElement;
-  className?: string;
-  viewMode?: ViewMode;
-  showNotifications?: boolean;
+  contextMenuActions: Array<Action<object>>;
 }) => {
-  const [menuPanelsLoading, setMenuPanelsLoading] = useState(false);
-  const [contextMenuActions, setContextMenuActions] = useState<Array<Action<object>>>([]);
-  const [quickActions, setQuickActions] = useState<Array<Action<object>>>([]);
+  const [menuPanelsLoading, setMenuPanelsLoading] = useState<boolean>(true);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
-  const [hoverActionPanels, setHoverActionPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
-  const [notifications, setNotifications] = useState<Array<Action<object>>>([]);
 
-  const [title, description, hidePanelTitle, parentHideTitle, parentViewMode] =
-    useBatchedOptionalPublishingSubjects(
-      api?.panelTitle,
-      api?.panelDescription,
-      api?.hidePanelTitle,
-      api?.parentApi?.hidePanelTitle,
+  const [title] = useBatchedOptionalPublishingSubjects(
+    api?.panelTitle,
 
-      /**
-       * View mode changes often have the biggest influence over which actions will be compatible,
-       * so we build and update all actions when the view mode changes. This is temporary, as these
-       * actions should eventually all be Frequent Compatibility Change Actions which can track their
-       * own dependencies.
-       */
-      getViewModeSubject(api ?? undefined)
-    );
-
-  const hideTitle = hidePanelTitle || parentHideTitle;
-
-  const showDescription = description && (!title || hideTitle);
-
-  const quickActionIds = useMemo(
-    () => QUICK_ACTION_IDS[parentViewMode === 'edit' ? 'edit' : 'view'],
-    [parentViewMode]
+    /**
+     * View mode changes often have the biggest influence over which actions will be compatible,
+     * so we build and update all actions when the view mode changes. This is temporary, as these
+     * actions should eventually all be Frequent Compatibility Change Actions which can track their
+     * own dependencies.
+     */
+    getViewModeSubject(api ?? undefined)
   );
-
-  useEffect(() => {
-    if (!api) return;
-    let cancelled = false;
-    const apiContext = { embeddable: api };
-    const subscriptions = new Subscription();
-    const handleActionCompatibilityChange = (
-      type: 'quickActions' | 'notifications',
-      isCompatible: boolean,
-      action: Action<object>
-    ) => {
-      if (cancelled) return;
-      (type === 'quickActions' ? setQuickActions : setNotifications)((currentActions) => {
-        const newActions = currentActions?.filter((current) => current.id !== action.id);
-        if (isCompatible) return [...newActions, action];
-        return newActions;
-      });
-    };
-
-    (async () => {
-      // subscribe to any frequently changing context menu actions
-      const frequentlyChangingActions = uiActions.getFrequentlyChangingActionsForTrigger(
-        CONTEXT_MENU_TRIGGER,
-        apiContext
-      );
-
-      for (const frequentlyChangingAction of frequentlyChangingActions) {
-        if (quickActionIds.includes(frequentlyChangingAction.id)) {
-          subscriptions.add(
-            frequentlyChangingAction.subscribeToCompatibilityChanges(
-              apiContext,
-              (isCompatible, action) =>
-                handleActionCompatibilityChange(
-                  'quickActions',
-                  isCompatible,
-                  action as Action<object>
-                )
-            )
-          );
-        }
-      }
-
-      // subscribe to any frequently changing notification actions
-      const frequentlyChangingNotifications = uiActions.getFrequentlyChangingActionsForTrigger(
-        PANEL_NOTIFICATION_TRIGGER,
-        apiContext
-      );
-
-      for (const frequentlyChangingNotification of frequentlyChangingNotifications) {
-        if (allowedNotificationActions.includes(frequentlyChangingNotification.id)) {
-          subscriptions.add(
-            frequentlyChangingNotification.subscribeToCompatibilityChanges(
-              apiContext,
-              (isCompatible, action) =>
-                handleActionCompatibilityChange(
-                  'notifications',
-                  isCompatible,
-                  action as Action<object>
-                )
-            )
-          );
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      subscriptions.unsubscribe();
-    };
-  }, [api, quickActionIds]);
-
-  useEffect(() => {
-    if (!api) return;
-
-    let cancelled = false;
-    const apiContext = { embeddable: api };
-
-    (async () => {
-      let compatibleActions: Array<Action<object>> = await (async () => {
-        if (getActions) return await getActions(CONTEXT_MENU_TRIGGER, apiContext);
-        return (
-          (await uiActions.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
-            embeddable: api,
-          })) ?? []
-        );
-      })();
-      if (cancelled) return;
-
-      const disabledActions = api.disabledActionIds?.value;
-      if (disabledActions) {
-        compatibleActions = compatibleActions.filter(
-          (action) => disabledActions.indexOf(action.id) === -1
-        );
-      }
-
-      if (actionPredicate) {
-        compatibleActions = compatibleActions.filter(({ id }) => actionPredicate(id));
-      }
-
-      compatibleActions.sort(
-        ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
-      );
-
-      setContextMenuActions(compatibleActions.filter(({ id }) => !quickActionIds.includes(id)));
-      setQuickActions(compatibleActions.filter(({ id }) => quickActionIds.includes(id)));
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [actionPredicate, api, getActions, isContextMenuOpen, parentViewMode, quickActionIds]);
 
   useEffect(() => {
     if (!api) return;
@@ -243,68 +77,15 @@ export const PresentationPanelContextMenu = ({
         closeMenu: () => setIsContextMenuOpen(false),
       });
 
-      const quickActionsPanels = await buildContextMenuForActions({
-        actions: quickActions.map((action) => ({
-          action,
-          context: apiContext,
-          trigger: contextMenuTrigger,
-        })),
-        closeMenu: () => setIsContextMenuOpen(false),
-      });
-
       setMenuPanelsLoading(false);
       setContextMenuPanels(menuPanels);
-      setHoverActionPanels(quickActionsPanels);
     })();
-  }, [api, contextMenuActions, quickActions]);
+  }, [api, contextMenuActions]);
 
   const showNotification = useMemo(
     () => contextMenuActions.some((action) => action.showNotification),
     [contextMenuActions]
   );
-
-  const notificationElements = useMemo(() => {
-    if (!showNotifications || !api) return [];
-    return notifications?.map((notification) => {
-      let notificationComponent = notification.MenuItem ? (
-        React.createElement(notification.MenuItem, {
-          key: notification.id,
-          context: {
-            embeddable: api,
-            trigger: panelNotificationTrigger,
-          },
-        })
-      ) : (
-        <EuiNotificationBadge
-          data-test-subj={`embeddablePanelNotification-${notification.id}`}
-          key={notification.id}
-          style={{ marginTop: euiThemeVars.euiSizeXS, marginRight: euiThemeVars.euiSizeXS }}
-          onClick={() =>
-            notification.execute({ embeddable: api, trigger: panelNotificationTrigger })
-          }
-        >
-          {notification.getDisplayName({ embeddable: api, trigger: panelNotificationTrigger })}
-        </EuiNotificationBadge>
-      );
-
-      if (notification.getDisplayNameTooltip) {
-        const tooltip = notification.getDisplayNameTooltip({
-          embeddable: api,
-          trigger: panelNotificationTrigger,
-        });
-
-        if (tooltip) {
-          notificationComponent = (
-            <EuiToolTip position="top" delay="regular" content={tooltip} key={notification.id}>
-              {notificationComponent}
-            </EuiToolTip>
-          );
-        }
-      }
-
-      return notificationComponent;
-    });
-  }, [api, notifications, showNotifications]);
 
   const contextMenuClasses = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -323,124 +104,36 @@ export const PresentationPanelContextMenu = ({
   );
 
   return (
-    <div className="embPanel__floatingActionsAnchor">
-      {children}
-      {api && (
-        <div className="embPanel__floatingActionsWrapper">
-          {viewMode === 'edit' && (
-            <div
-              data-test-subj={`embPanel__floatingActions__left`}
-              className={classNames(
-                'embPanel__floatingActions',
-                'embPanel__floatingActionsLeft',
-                className,
-                {
-                  'embPanel__floatingActions--openContextMenu': isContextMenuOpen,
-                }
-              )}
-            >
-              <EuiIcon
-                type="grabOmnidirectional"
-                color="text"
-                className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
-                aria-label={i18n.translate('presentationPanel.dragHandle', {
-                  defaultMessage: 'Move panel',
-                })}
-              />
-            </div>
-          )}
-          <div
-            data-test-subj={`embPanel__floatingActions__right`}
-            className={classNames(
-              'embPanel__floatingActions',
-              'embPanel__floatingActionsRight',
-              className,
-              {
-                'embPanel__floatingActions--openContextMenu': isContextMenuOpen,
-              }
-            )}
-          >
-            {menuPanelsLoading ? (
-              <>
-                <EuiSkeletonRectangle width="16px" height="16px" />
-                <EuiSkeletonRectangle width="16px" height="16px" />
-                <EuiSkeletonRectangle width="16px" height="16px" />
-              </>
-            ) : (
-              <>
-                {/* <EuiIcon
-                  type="grabOmnidirectional"
-                  color="text"
-                  className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
-                  aria-label={i18n.translate('presentationPanel.dragHandle', {
-                    defaultMessage: 'Move panel',
-                  })}
-                /> */}
-                {showNotifications && notificationElements}
-                {showDescription && (
-                  <EuiIconTip
-                    title={!hideTitle ? title || undefined : undefined}
-                    content={description}
-                    delay="regular"
-                    position="top"
-                    anchorClassName="embPanel__descriptionTooltipAnchor"
-                    data-test-subj="embeddablePanelDescriptionTooltip"
-                    type="iInCircle"
-                  />
-                )}
-                {hoverActionPanels[0]?.items
-                  ?.filter(({ isSeparator }) => !isSeparator)
-                  .map(({ icon, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
-                    <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
-                      <EuiButtonIcon
-                        iconType={icon as IconType}
-                        color="text"
-                        onClick={onClick as MouseEventHandler}
-                        data-test-subj={dataTestSubj}
-                        aria-label={name as string}
-                      />
-                    </EuiToolTip>
-                  ))}
-                {contextMenuPanels.length && (
-                  <EuiPopover
-                    repositionOnScroll
-                    panelPaddingSize="none"
-                    anchorPosition="downRight"
-                    button={ContextMenuButton}
-                    isOpen={isContextMenuOpen}
-                    className={contextMenuClasses}
-                    closePopover={() => setIsContextMenuOpen(false)}
-                    data-test-subj={
-                      isContextMenuOpen
-                        ? 'embeddablePanelContextMenuOpen'
-                        : 'embeddablePanelContextMenuClosed'
-                    }
-                  >
-                    {menuPanelsLoading ? (
-                      <EuiContextMenuPanel
-                        className="embPanel__optionsMenuPopover-loading"
-                        title={i18n.translate('presentationPanel.contextMenu.loadingTitle', {
-                          defaultMessage: 'Options',
-                        })}
-                      >
-                        <EuiContextMenuItem>
-                          <EuiSkeletonText />
-                        </EuiContextMenuItem>
-                      </EuiContextMenuPanel>
-                    ) : (
-                      <EuiContextMenu
-                        data-test-subj="presentationPanelContextMenuItems"
-                        initialPanelId={'mainMenu'}
-                        panels={contextMenuPanels}
-                      />
-                    )}
-                  </EuiPopover>
-                )}
-              </>
-            )}
-          </div>
-        </div>
+    <EuiPopover
+      repositionOnScroll
+      panelPaddingSize="none"
+      anchorPosition="downRight"
+      button={ContextMenuButton}
+      isOpen={isContextMenuOpen}
+      className={contextMenuClasses}
+      closePopover={() => setIsContextMenuOpen(false)}
+      data-test-subj={
+        isContextMenuOpen ? 'embeddablePanelContextMenuOpen' : 'embeddablePanelContextMenuClosed'
+      }
+    >
+      {menuPanelsLoading ? (
+        <EuiContextMenuPanel
+          className="embPanel__optionsMenuPopover-loading"
+          title={i18n.translate('presentationPanel.contextMenu.loadingTitle', {
+            defaultMessage: 'Options',
+          })}
+        >
+          <EuiContextMenuItem>
+            <EuiSkeletonText />
+          </EuiContextMenuItem>
+        </EuiContextMenuPanel>
+      ) : (
+        <EuiContextMenu
+          data-test-subj="presentationPanelContextMenuItems"
+          initialPanelId={'mainMenu'}
+          panels={contextMenuPanels}
+        />
       )}
-    </div>
+    </EuiPopover>
   );
 };

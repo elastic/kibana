@@ -205,14 +205,7 @@
   .embPanel__floatingActions {
     position: absolute;
     padding: $euiSizeXS;
-    
-    // OVER PANEL
-    // border-radius: $euiBorderRadius;
-    // top: (-$euiSizeL);
-    
-    // UNDER PANEL
-    border-top-right-radius: $euiBorderRadius;
-    border-top-left-radius: $euiBorderRadius;
+    display: flex;
     top: $euiSizeXS;
 
     background-color: $euiColorEmptyShade;
@@ -222,22 +215,13 @@
     &:not(.embPanel__floatingActions--openContextMenu) {
       z-index: -1;
       opacity: 0;
-      // slower transition on hover leave in case the user accidentally stops hover
-      transition: opacity $euiAnimSpeedSlow;
       top: $euiSizeXS;
-      
-      // Always show: REMOVE THESE
-      // opacity: 1;
-      // transition: opacity $euiAnimSpeedFast;
-      // top: -$euiSizeXL;
-      // z-index: $euiZLevel9; 
+      transition: opacity top $euiAnimSpeedSlow;
+      transition-delay: 300ms;
     }
   }
 
-   .embPanel__floatingActionsLeft {
-    left: $euiSize;
-    padding: $euiSizeS;
-
+   .embPanel--dragHandle {
     &:hover {
       cursor: move;
     }
@@ -249,10 +233,6 @@
     }
   }
 
-  .embPanel__floatingActionsRight {
-    right: $euiSize;
-  }
-
   .embPanel__descriptionTooltipAnchor {
     padding: $euiSizeXS;
   }
@@ -260,8 +240,9 @@
   &:hover .embPanel__floatingActions, &:focus-within .embPanel__floatingActions, .embPanel__floatingActions--openContextMenu {
       opacity: 1;
       transition: opacity $euiAnimSpeedFast;
-      top: -$euiSizeXL;
       z-index: $euiZLevel9; 
+      top: -$euiSizeXL;
+      
   }
 
 }

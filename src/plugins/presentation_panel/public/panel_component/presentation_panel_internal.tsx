@@ -15,7 +15,7 @@ import {
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useMemo, useState } from 'react';
-import { PresentationPanelContextMenu } from './panel_header/presentation_panel_context_menu';
+import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
@@ -90,7 +90,7 @@ export const PresentationPanelInternal = <
   }, [dataLoading, blockingError]);
 
   return (
-    <PresentationPanelContextMenu
+    <PresentationPanelHoverActions
       {...{ index, api, getActions, actionPredicate, viewMode, showNotifications }}
     >
       <EuiPanel
@@ -143,6 +143,6 @@ export const PresentationPanelInternal = <
           </EuiErrorBoundary>
         </div>
       </EuiPanel>
-    </PresentationPanelContextMenu>
+    </PresentationPanelHoverActions>
   );
 };
