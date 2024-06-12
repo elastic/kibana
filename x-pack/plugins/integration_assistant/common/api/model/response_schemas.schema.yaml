@@ -1,0 +1,81 @@
+openapi: 3.0.0
+info:
+  title: Response Schemas.
+  version: "not applicable"
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    EcsMappingResponse:
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - mapping
+            - pipeline
+          properties:
+            mapping:
+              $ref: "../model/common_attributes.schema.yaml#/components/schemas/Mapping"
+            pipeline:
+              $ref: "../model/common_attributes.schema.yaml#/components/schemas/Pipeline"
+
+    EcsMappingAPIResponse:
+      discriminator:
+        propertyName: type
+      $ref: "#/components/schemas/EcsMappingResponse"
+
+    CategorizationResponse:
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - docs
+            - pipeline
+          properties:
+            docs:
+              $ref: "../model/common_attributes.schema.yaml#/components/schemas/Docs"
+            pipeline:
+              $ref: "../model/common_attributes.schema.yaml#/components/schemas/Pipeline"
+
+    CategorizationAPIResponse:
+      discriminator:
+        propertyName: type
+      $ref: "#/components/schemas/CategorizationResponse"
+
+    RelatedResponse:
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - docs
+            - pipeline
+          properties:
+            docs:
+              $ref: "../model/common_attributes.schema.yaml#/components/schemas/Docs"
+            pipeline:
+              $ref: "../model/common_attributes.schema.yaml#/components/schemas/Pipeline"
+
+    RelatedAPIResponse:
+      discriminator:
+        propertyName: type
+      $ref: "#/components/schemas/RelatedResponse"
+
+    CheckPipelineResponse:
+      required:
+        - pipelineResults
+      properties:
+        pipelineResults:
+          $ref: "../model/common_attributes.schema.yaml#/components/schemas/PipelineResults"
+        errors:
+          $ref: "../model/common_attributes.schema.yaml#/components/schemas/Errors"
+
+    CheckPipelineAPIResponse:
+      discriminator:
+        propertyName: type
+      $ref: "#/components/schemas/CheckPipelineResponse"
