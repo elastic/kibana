@@ -102,8 +102,7 @@ export async function getEntities({
             filter: [
               ...kqlQuery(kuery),
               ...environmentQuery(environment, ENTITY_ENVIRONMENT),
-              // Not supported for now
-              //...entitiesRangeQuery(start, end),
+              ...entitiesRangeQuery(start, end),
             ],
           },
         },

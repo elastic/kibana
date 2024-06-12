@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { AgentIcon } from '@kbn/custom-icons';
 import { EntityServiceListItem } from '../../../../../../common/assets/types';
 import {
   asMillisecondDuration,
@@ -23,18 +22,9 @@ import { ApmRoutes } from '../../../../routing/apm_route_config';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ServiceLink } from '../../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../../shared/list_metric';
-import { ITableColumn, ManagedTable, SortFunction } from '../../../../shared/managed_table';
+import { ITableColumn } from '../../../../shared/managed_table';
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
-
-export enum ServiceInventoryFieldName {
-  ServiceName = 'identity.service.name',
-  ServiceEnvironment = 'service.environment',
-  Throughput = 'metrics.throughput',
-  Latency = 'metrics.latency',
-  TransactionErrorRate = 'metrics.transactionErrorRate',
-  LogRatePerMinute = 'metrics.logRatePerMinute',
-  LogErrorRate = 'metrics.logErrorRate',
-}
+import { ServiceInventoryFieldName } from './multi_signal_services_table';
 
 export function getServiceColumns({
   query,
@@ -45,8 +35,6 @@ export function getServiceColumns({
   breakpoints: Breakpoints;
   link: any;
 }): Array<ITableColumn<EntityServiceListItem>> {
-  const { isSmall, isLarge, isXl } = breakpoints;
-
   return [
     {
       field: ServiceInventoryFieldName.ServiceName,
@@ -54,30 +42,31 @@ export function getServiceColumns({
         defaultMessage: 'Name',
       }),
       sortable: true,
-      render: (_, { name, agent }) => (
+      render: (_, { serviceName, agentName }) => (
         <TruncateWithTooltip
           data-test-subj="apmServiceListAppLink"
-          text={name}
+          text={serviceName}
           content={
             <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <AgentIcon agentName={agent.name[0]} size="l" />
+                <ServiceLink serviceName={serviceName} agentName={agentName} query={query} />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{name}</EuiFlexItem>
             </EuiFlexGroup>
           }
         />
       ),
     },
     {
-      field: ServiceInventoryFieldName.ServiceEnvironment,
+      field: ServiceInventoryFieldName.Environments,
       name: i18n.translate('xpack.apm.multiSignal.servicesTable.environmentColumnLabel', {
         defaultMessage: 'Environment',
       }),
       sortable: true,
       width: `${unit * 9}px`,
       dataType: 'number',
-      render: (_, { environments }) => <EnvironmentBadge environments={environments ?? []} />,
+      render: (_, { environments }) => {
+        return <EnvironmentBadge environments={environments} />;
+      },
       align: RIGHT_ALIGNMENT,
     },
     {
@@ -88,12 +77,12 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { entity: { metric } }) => {
+      render: (_, { metrics }) => {
         return (
           <ListMetric
             isLoading={false}
             hideSeries={true}
-            valueLabel={asMillisecondDuration(metric.latency)}
+            valueLabel={asMillisecondDuration(metrics.latency)}
           />
         );
       },
@@ -106,30 +95,30 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { entity: { metric } }) => {
+      render: (_, { metrics }) => {
         return (
           <ListMetric
             isLoading={false}
             hideSeries={true}
-            valueLabel={asTransactionRate(metric.throughput)}
+            valueLabel={asTransactionRate(metrics.throughput)}
           />
         );
       },
     },
     {
-      field: ServiceInventoryFieldName.TransactionErrorRate,
+      field: ServiceInventoryFieldName.FailedTransactionRate,
       name: i18n.translate('xpack.apm.multiSignal.servicesTable.transactionErrorRate', {
         defaultMessage: 'Failed transaction rate',
       }),
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { entity: { metric } }) => {
+      render: (_, { metrics }) => {
         return (
           <ListMetric
             isLoading={false}
             hideSeries={true}
-            valueLabel={asPercent(metric.failedTransactionRate, 1)}
+            valueLabel={asPercent(metrics.failedTransactionRate, 1)}
           />
         );
       },
@@ -142,9 +131,9 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { entity: { metric } }) => {
+      render: (_, { metrics }) => {
         return (
-          <ListMetric isLoading={false} hideSeries={true} valueLabel={metric.logRatePerMinute} />
+          <ListMetric isLoading={false} hideSeries={true} valueLabel={metrics.logRatePerMinute} />
         );
       },
     },
@@ -156,12 +145,12 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { entity: { metric } }) => {
+      render: (_, { metrics }) => {
         return (
           <ListMetric
             isLoading={false}
             hideSeries={true}
-            valueLabel={asPercent(metric.logErrorRate, 1)}
+            valueLabel={asPercent(metrics.logErrorRate, 1)}
           />
         );
       },

@@ -17,9 +17,11 @@ import { ManagedTable } from '../../../../shared/managed_table';
 import { getServiceColumns } from './get_service_columns';
 
 export enum ServiceInventoryFieldName {
-  ServiceName = 'service.name',
+  ServiceName = 'serviceName',
+  Environments = 'environments',
   Throughput = 'metrics.throughput',
   Latency = 'metrics.latency',
+  FailedTransactionRate = 'metrics.failedTransactionRate',
   LogRatePerMinute = 'metrics.logRatePerMinute',
   LogErrorRate = 'metrics.logErrorRate',
 }

@@ -6,37 +6,25 @@
  */
 
 import { LogsRatesMetrics } from '@kbn/logs-data-access-plugin/server';
-import { TraceMetrics } from './get_services_transaction_stats';
+import { AgentName } from '../../typings/es_schemas/ui/fields/agent';
 
-export enum SignalType {
-  APM = 'metrics',
+export enum SignalTypes {
+  METRICS = 'metrics',
   LOGS = 'logs',
 }
 
-interface ServiceItem {
-  environment?: string;
-  name: string;
-}
-
-type SignalTypes = Record<SignalType, boolean | undefined>;
-
-interface EntityItem {
-  signalTypes: SignalTypes;
-  identifyingMetadata: string[];
-}
-
-export interface ServiceEntityDocument {
-  asset: {
-    signalTypes: SignalTypes;
-    identifying_metadata: string[];
-  };
-  service: ServiceItem;
+export interface TraceMetrics {
+  latency: number | null;
+  throughput: number | null;
+  failedTransactionRate: number | null;
 }
 
 export interface EntityServiceListItem {
-  asset: EntityItem;
-  service: ServiceItem;
+  dataStreams: SignalTypes[];
   metrics: TraceMetrics & LogsRatesMetrics;
+  environments: string[];
+  serviceName: string;
+  agentName: AgentName;
 }
 
 export interface EntityServicesResponse {

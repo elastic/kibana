@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const ASSET_TYPE = 'asset.type';
-export const LAST_SEEN = 'asset.last_seen';
-export const FIRST_SEEN = 'asset.first_seen';
+export const LAST_SEEN = 'entity.lastSeenTimestamp';
+export const FIRST_SEEN = 'entity.firstSeenTimestamp';
 
-export const ENTITY_ENVIRONMENT = 'entity.identity.service.environment';
+export const ENTITY_ENVIRONMENT = 'entity.identityFields.service.environment';

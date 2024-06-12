@@ -5,29 +5,17 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { toBooleanRt } from '@kbn/io-ts-utils';
 import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import {
-  environmentRt,
-  kueryRt,
-  rangeRt,
-  serviceTransactionDataSourceRt,
-} from '../../default_api_types';
+import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { getServiceEntities } from './get_service_entities';
 import { EntityServicesResponse } from '../../../../common/assets/types';
 
 const servicesEntitiesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/entities/services',
   params: t.type({
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      serviceTransactionDataSourceRt,
-      t.type({ useDurationSummary: toBooleanRt }),
-    ]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   async handler(resources): Promise<EntityServicesResponse> {
@@ -43,8 +31,7 @@ const servicesEntitiesRoute = createApmServerRoute({
       esClient: coreContext.elasticsearch.client.asCurrentUser,
     });
 
-    const { start, end, kuery, documentType, rollupInterval, useDurationSummary, environment } =
-      params.query;
+    const { start, end, kuery, environment } = params.query;
 
     const services = await getServiceEntities({
       assetsESClient,
@@ -53,12 +40,6 @@ const servicesEntitiesRoute = createApmServerRoute({
       kuery,
       environment,
       logger: resources.logger,
-      apmEventClient,
-      logsDataAccessStart,
-      esClient: coreContext.elasticsearch.client.asCurrentUser,
-      documentType,
-      rollupInterval,
-      useDurationSummary,
     });
 
     return { services };

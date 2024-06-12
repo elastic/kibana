@@ -28,12 +28,6 @@ export async function getServiceEntities({
   kuery,
   environment,
   logger,
-  apmEventClient,
-  logsDataAccessStart,
-  esClient,
-  documentType,
-  rollupInterval,
-  useDurationSummary,
 }: {
   assetsESClient: EntitiesESClient;
   start: number;
@@ -41,12 +35,6 @@ export async function getServiceEntities({
   kuery: string;
   environment: string;
   logger: Logger;
-  apmEventClient: APMEventClient;
-  logsDataAccessStart: LogsDataAccessPluginStart;
-  esClient: ElasticsearchClient;
-  documentType: ApmServiceTransactionDocumentType;
-  rollupInterval: RollupInterval;
-  useDurationSummary: boolean;
 }) {
   return withApmSpan('get_service_entities', async () => {
     try {
