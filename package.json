@@ -954,6 +954,7 @@
     "@smithy/util-utf8": "^2.0.0",
     "@tanstack/react-query": "^4.29.12",
     "@tanstack/react-query-devtools": "^4.29.12",
+    "@tanstack/react-virtual": "^3.5.1",
     "@turf/along": "6.0.1",
     "@turf/area": "6.0.1",
     "@turf/bbox": "6.0.1",
