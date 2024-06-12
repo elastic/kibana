@@ -48,7 +48,7 @@
 }
 
 .embPanel__title {
-  @include euiTitle('xxxs');
+  @include euiTitle("xxxs");
   overflow: hidden;
   line-height: 1.5;
   flex-grow: 1;
@@ -106,14 +106,13 @@
   */
 
 .embPanel__optionsMenuButton {
-  background-color: transparentize($euiColorLightShade, .5);
+  background-color: transparentize($euiColorLightShade, 0.5);
   border-bottom-right-radius: 0;
   border-top-left-radius: 0;
 
   &:focus {
-    background-color: transparentize($euiColorLightestShade, .5);
+    background-color: transparentize($euiColorLightestShade, 0.5);
   }
-
 }
 
 .embPanel__optionsMenuPopover-loading {
@@ -124,7 +123,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  content: '•';
+  content: "•";
   transform: translate(50%, -50%);
   color: $euiColorAccent;
   font-size: $euiSizeL;
@@ -153,7 +152,7 @@
     transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
 
     &:hover {
-      background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
+      background-color: transparentize($euiColorWarning, lightOrDarkTheme(0.9, 0.7));
       cursor: move;
     }
   }
@@ -221,7 +220,7 @@
     }
   }
 
-   .embPanel--dragHandle {
+  .embPanel--dragHandle {
     &:hover {
       cursor: move;
     }
@@ -237,12 +236,12 @@
     padding: $euiSizeXS;
   }
 
-  &:hover .embPanel__floatingActions, &:focus-within .embPanel__floatingActions, .embPanel__floatingActions--openContextMenu {
-      opacity: 1;
-      transition: opacity $euiAnimSpeedFast;
-      z-index: $euiZLevel9; 
-      top: -$euiSizeXL;
-      
+  &:hover .embPanel__floatingActions,
+  &:focus-within .embPanel__floatingActions,
+  .embPanel__floatingActions--openContextMenu {
+    opacity: 1;
+    transition: opacity $euiAnimSpeedFast;
+    z-index: $euiZLevel9;
+    top: -$euiSizeXL;
   }
-
 }

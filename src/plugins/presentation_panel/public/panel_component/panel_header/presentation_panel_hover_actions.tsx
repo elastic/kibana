@@ -11,7 +11,6 @@ import classNames from 'classnames';
 import React, {
   MouseEventHandler,
   ReactElement,
-  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -31,17 +30,11 @@ import {
   EuiPopover,
   EuiSkeletonRectangle,
   EuiSkeletonText,
-  EuiThemeSizes,
   EuiToolTip,
   IconType,
-  useMutationObserver,
   useResizeObserver,
 } from '@elastic/eui';
-import {
-  Action,
-  ActionExecutionContext,
-  buildContextMenuForActions,
-} from '@kbn/ui-actions-plugin/public';
+import { Action, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
 import {
   getViewModeSubject,
@@ -147,7 +140,7 @@ export const PresentationPanelHoverActions = ({
     }
   }, 100);
 
-  useEffect(updateCombineHoverActions, [
+  useLayoutEffect(updateCombineHoverActions, [
     anchorWidth,
     combineHoverActions,
     leftActionsWidth,
@@ -389,7 +382,22 @@ export const PresentationPanelHoverActions = ({
       data-test-subj="embeddablePanelToggleMenuIcon"
       aria-label={getContextMenuAriaLabel(title, index)}
       onClick={() => setIsContextMenuOpen((isOpen) => !isOpen)}
-      iconType={'boxesVertical'}
+      iconType="boxesVertical"
+    />
+  );
+
+  const dragHandle = (
+    <EuiIcon
+      // TODO: switch to move icon when it's available
+      type="grabOmnidirectional"
+      color="text"
+      className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
+      aria-label={i18n.translate('presentationPanel.dragHandle', {
+        defaultMessage: 'Move panel',
+      })}
+      css={css`
+        margin: ${euiThemeVars.euiSizeXS};
+      `}
     />
   );
 
@@ -415,17 +423,7 @@ export const PresentationPanelHoverActions = ({
                 ${UNDER_PANEL_BORDER_RADIUS}
               `}
             >
-              <EuiIcon
-                type="grabOmnidirectional"
-                color="text"
-                className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
-                aria-label={i18n.translate('presentationPanel.dragHandle', {
-                  defaultMessage: 'Move panel',
-                })}
-                css={css`
-                  margin: ${euiThemeVars.euiSizeXS};
-                `}
-              />
+              {dragHandle}
             </div>
           )}
           <div
@@ -451,19 +449,7 @@ export const PresentationPanelHoverActions = ({
               </>
             ) : (
               <>
-                {combineHoverActions && (
-                  <EuiIcon
-                    type="grabOmnidirectional"
-                    color="text"
-                    className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
-                    aria-label={i18n.translate('presentationPanel.dragHandle', {
-                      defaultMessage: 'Move panel',
-                    })}
-                    css={css`
-                      margin: ${euiThemeVars.euiSizeXS};
-                    `}
-                  />
-                )}
+                {viewMode === 'edit' && combineHoverActions && dragHandle}
                 {showNotifications && notificationElements}
                 {showDescription && (
                   <EuiIconTip
