@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Agent metrics helper AgentCPU CPU value should have disabled link when agent is not installed or is still loading 1`] = `
+<EuiToolTip
+  content="2.0000 %"
+  delay="regular"
+  display="inlineBlock"
+  position="top"
+>
+  <EuiLink
+    disabled={true}
+  >
+    2.00
+     %
+  </EuiLink>
+</EuiToolTip>
+`;
+
+exports[`Agent metrics helper AgentCPU CPU value should have disabled link when agent is not installed or is still loading 2`] = `
+<EuiToolTip
+  content="2.0000 %"
+  delay="regular"
+  display="inlineBlock"
+  position="top"
+>
+  <EuiLink
+    disabled={true}
+  >
+    2.00
+     %
+  </EuiLink>
+</EuiToolTip>
+`;
+
+exports[`Agent metrics helper AgentCPU should return 0% if cpu is 0.00002 1`] = `
+<EuiToolTip
+  content="0.0020 %"
+  delay="regular"
+  display="inlineBlock"
+  position="top"
+>
+  <EuiLink
+    disabled={false}
+    href="app/dashboards#/view/elastic_agent-01"
+  >
+    0.00
+     %
+  </EuiLink>
+</EuiToolTip>
+`;
+
+exports[`Agent metrics helper AgentCPU should return 5% if cpu is 0.005 1`] = `
+<EuiToolTip
+  content="0.5000 %"
+  delay="regular"
+  display="inlineBlock"
+  position="top"
+>
+  <EuiLink
+    disabled={false}
+    href="app/dashboards#/view/elastic_agent-02"
+  >
+    0.50
+     %
+  </EuiLink>
+</EuiToolTip>
+`;
+
+exports[`Agent metrics helper AgentCPU should return N/A if cpu is undefined 1`] = `
+<MetricNonAvailable
+  agentPolicy={Object {}}
+/>
+`;

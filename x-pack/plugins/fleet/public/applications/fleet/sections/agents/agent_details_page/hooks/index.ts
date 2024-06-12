@@ -6,3 +6,4 @@
  */
 
 export { useAgentRefresh, AgentRefreshContext } from './use_agent';
+export { useAgentDashboardLink } from './use_agent_dashboard_link';
