@@ -237,6 +237,32 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
 
+  const onCommentLine = useCallback(() => {
+    const currentSelection = editor1?.current?.getSelection();
+    const startLineNumber = currentSelection?.startLineNumber;
+    const endLineNumber = currentSelection?.endLineNumber;
+    if (startLineNumber && endLineNumber) {
+      for (let lineNumber = startLineNumber; lineNumber <= endLineNumber; lineNumber++) {
+        const lineContent = editorModel.current?.getLineContent(lineNumber) ?? '';
+        const hasComment = lineContent?.startsWith('//');
+        const commentedLine = hasComment ? lineContent?.replace('//', '') : `//${lineContent}`;
+
+        // executeEdits allows to keep edit in history
+        editor1.current?.executeEdits('comment', [
+          {
+            range: {
+              startLineNumber: lineNumber,
+              startColumn: 0,
+              endLineNumber: lineNumber,
+              endColumn: (lineContent?.length ?? 0) + 1,
+            },
+            text: commentedLine,
+          },
+        ]);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
   }, [isLoading]);
@@ -444,7 +470,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   useEffect(() => {
     const validateQuery = async () => {
-      if (editorModel?.current) {
+      if (editor1?.current) {
         const parserMessages = await parseMessages();
         setClientParserMessages({
           errors: parserMessages?.errors ?? [],
@@ -901,6 +927,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       // eslint-disable-next-line no-bitwise
                       monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
                       onQuerySubmit
+                    );
+
+                    // on CMD/CTRL + / comment out the entire line
+                    editor.addCommand(
+                      // eslint-disable-next-line no-bitwise
+                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
+                      onCommentLine
                     );
 
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);

@@ -16,6 +16,8 @@ servers:
 paths:
   /api/risk_scores/calculation:
     post:
+      x-labels: [ess, serverless]
+      x-internal: true
       summary: Trigger calculation of Risk Scores
       description: Calculates and persists a segment of Risk Scores, returning details about the calculation.
       requestBody:

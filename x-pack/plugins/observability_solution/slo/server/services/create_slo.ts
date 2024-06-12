@@ -8,8 +8,8 @@
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import { asyncForEach } from '@kbn/std';
 import { v4 as uuidv4 } from 'uuid';
-import { getTransformQueryComposite } from './utils/get_transform_compite_query';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
@@ -20,10 +20,12 @@ import {
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
 import { Duration, DurationUnit, SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
+import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
+import { getTransformQueryComposite } from './utils/get_transform_compite_query';
 
 export class CreateSLO {
   constructor(
@@ -40,13 +42,20 @@ export class CreateSLO {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
+    const rollbackOperations = [];
+
     await this.repository.save(slo, { throwOnConflict: true });
+    rollbackOperations.push(() => this.repository.deleteById(slo.id));
 
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
       await this.transformManager.install(slo);
+      rollbackOperations.push(() => this.transformManager.uninstall(rollupTransformId));
+
       await this.transformManager.start(rollupTransformId);
+      rollbackOperations.push(() => this.transformManager.stop(rollupTransformId));
+
       await retryTransientEsErrors(
         () =>
           this.esClient.ingest.putPipeline(
@@ -54,9 +63,18 @@ export class CreateSLO {
           ),
         { logger: this.logger }
       );
+      rollbackOperations.push(() =>
+        this.esClient.ingest.deletePipeline(
+          { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
+          { ignore: [404] }
+        )
+      );
 
       await this.summaryTransformManager.install(slo);
+      rollbackOperations.push(() => this.summaryTransformManager.uninstall(summaryTransformId));
+
       await this.summaryTransformManager.start(summaryTransformId);
+      rollbackOperations.push(() => this.summaryTransformManager.stop(summaryTransformId));
 
       await retryTransientEsErrors(
         () =>
@@ -73,15 +91,17 @@ export class CreateSLO {
         `Cannot install the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back.`
       );
 
-      await this.summaryTransformManager.stop(summaryTransformId);
-      await this.summaryTransformManager.uninstall(summaryTransformId);
-      await this.transformManager.stop(rollupTransformId);
-      await this.transformManager.uninstall(rollupTransformId);
-      await this.esClient.ingest.deletePipeline(
-        { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
-        { ignore: [404] }
-      );
-      await this.repository.deleteById(slo.id);
+      await asyncForEach(rollbackOperations.reverse(), async (operation) => {
+        try {
+          await operation();
+        } catch (rollbackErr) {
+          this.logger.error('Rollback operation failed', rollbackErr);
+        }
+      });
+
+      if (err.meta?.body?.error?.type === 'security_exception') {
+        throw new SecurityException(err.meta.body.error.reason);
+      }
 
       throw err;
     }

@@ -10,28 +10,28 @@ import { merge } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type {
-  ActionDetails,
-  EndpointActivityLogAction,
-  EndpointActivityLogActionResponse,
-  EndpointPendingActions,
-  LogsEndpointAction,
-  LogsEndpointActionResponse,
-  ProcessesEntry,
-  EndpointActionDataParameterTypes,
-  ActionResponseOutput,
-  ResponseActionGetFileOutputContent,
-  ResponseActionGetFileParameters,
-  ResponseActionsExecuteParameters,
-  ResponseActionExecuteOutputContent,
-  ResponseActionUploadOutputContent,
-  ResponseActionUploadParameters,
-  EndpointActionResponseDataOutput,
-  WithAllKeys,
-  ResponseActionScanOutputContent,
-  ResponseActionsScanParameters,
+import {
+  type ActionDetails,
+  type ActionResponseOutput,
+  ActivityLogItemTypes,
+  type EndpointActionDataParameterTypes,
+  type EndpointActionResponseDataOutput,
+  type EndpointActivityLogAction,
+  type EndpointActivityLogActionResponse,
+  type EndpointPendingActions,
+  type LogsEndpointAction,
+  type LogsEndpointActionResponse,
+  type ProcessesEntry,
+  type ResponseActionExecuteOutputContent,
+  type ResponseActionGetFileOutputContent,
+  type ResponseActionGetFileParameters,
+  type ResponseActionScanOutputContent,
+  type ResponseActionsExecuteParameters,
+  type ResponseActionsScanParameters,
+  type ResponseActionUploadOutputContent,
+  type ResponseActionUploadParameters,
+  type WithAllKeys,
 } from '../types';
-import { ActivityLogItemTypes } from '../types';
 import {
   DEFAULT_EXECUTE_ACTION_TIMEOUT,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
@@ -294,7 +294,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             ResponseActionsScanParameters
           >
         ).parameters = {
-          path: '/some/file.txt',
+          path: '/some/folder/to/scan',
         };
       }
 

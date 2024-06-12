@@ -799,7 +799,7 @@
         "label": "getElasticsearchQueryOrThrow",
         "description": [],
         "signature": [
-          "(kuery: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; field?: string | undefined; }; query: { [x: string]: any; }; }[]; }) => never[] | ",
+          "(kuery: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }) => never[] | ",
           "QueryDslQueryContainer",
           " | { bool: ",
           {
@@ -823,7 +823,7 @@
             "label": "kuery",
             "description": [],
             "signature": [
-              "string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; field?: string | undefined; }; query: { [x: string]: any; }; }[]; }"
+              "string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }"
             ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/parse_kuery.ts",
             "deprecated": false,

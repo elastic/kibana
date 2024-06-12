@@ -170,7 +170,7 @@ const getAgentAndPoliciesForEndpointsList = async (
   ).items.reduce<PolicyIds>(
     (list, packagePolicy) => {
       list.packagePolicy[packagePolicy.id as string] = true;
-      list.agentPolicy[packagePolicy.id as string] = packagePolicy.policy_id;
+      list.agentPolicy[packagePolicy.id as string] = packagePolicy.policy_ids[0]; // TODO
 
       return list;
     },
