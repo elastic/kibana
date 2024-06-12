@@ -52,7 +52,7 @@ import type {
   LogsEndpointActionResponse,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   SentinelOneActionRequestCommonMeta,
   SentinelOneActivityDataForType80,
   SentinelOneActivityEsDoc,
@@ -62,6 +62,7 @@ import type {
   SentinelOneIsolationResponseMeta,
   UploadedFileInfo,
   KillProcessRequestBody,
+  SentinelOneKillProcessRequestMeta,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -261,6 +262,19 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           400
         ),
       };
+    }
+
+    // validate that we have a `process_name`. We need this here because the schema for this command
+    // specifically because `KillProcessRequestBody` allows 3 types of parameters.
+    if (payload.command === 'kill-process') {
+      if (!payload.parameters || !('process_name' in payload.parameters)) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            '[body.parameters.process_name]: missing parameter'
+          ),
+        };
+      }
     }
 
     return super.validateRequest(payload);
@@ -609,12 +623,12 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: KillProcessRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-      undefined,
-      {},
-      {} // FIXME:PT define type
+      ResponseActionParametersWithProcessData,
+      KillProcessActionOutputContent,
+      Partial<SentinelOneKillProcessRequestMeta>
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
@@ -626,6 +640,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      // TODO:PT get terminate script id for the os this host is running
 
       if (!error) {
         try {
@@ -658,7 +674,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
 
     const { actionDetails } = await this.handleResponseActionCreation<
-      ResponseActionParametersWithPidOrEntityId,
+      ResponseActionParametersWithProcessData,
       KillProcessActionOutputContent
     >(reqIndexOptions);
 
