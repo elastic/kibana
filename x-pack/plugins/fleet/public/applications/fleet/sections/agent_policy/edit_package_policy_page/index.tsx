@@ -57,7 +57,7 @@ import type {
   PackagePolicyEditExtensionComponentProps,
 } from '../../../types';
 import { SetupTechnology } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services';
+import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 
 import {
   generateNewAgentPolicyWithDefaults,
@@ -114,6 +114,7 @@ export const EditPackagePolicyForm = memo<{
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const { getHref } = useLink();
+  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
 
   const {
     // data
@@ -614,7 +615,11 @@ export const EditPackagePolicyForm = memo<{
                 <EuiSpacer size="xxl" />
               </>
             )}
-            <StepsWithLessPadding steps={steps} />
+            {enableReusableIntegrationPolicies ? (
+              <StepsWithLessPadding steps={steps} />
+            ) : (
+              replaceConfigurePackage || configurePackage
+            )}
             {/* Extra space to accomodate the EuiBottomBar height */}
             <EuiSpacer size="xxl" />
             <EuiSpacer size="xxl" />
