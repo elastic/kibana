@@ -73,7 +73,8 @@ export const SettingsFieldWrapper: React.FC<{
 
   return (
     <EuiDescribedFormGroup
-      title={<h3>{settingsConfig.title}</h3>}
+      fullWidth={true}
+      title={<h4>{settingsConfig.title}</h4>}
       description={
         <>
           {settingsConfig.description}{' '}

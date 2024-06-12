@@ -56,9 +56,7 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
   ]);
 
 const FormWrapper = styled.div`
-  max-width: 800px;
-  margin-right: auto;
-  margin-left: auto;
+  max-width: 1200px;
 `;
 
 export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(

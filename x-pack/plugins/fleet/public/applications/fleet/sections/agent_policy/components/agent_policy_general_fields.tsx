@@ -35,7 +35,7 @@ export const AgentPolicyGeneralFields: React.FunctionComponent<Props> = ({
 
   return (
     <EuiFormRow
-      fullWidth
+      fullWidth={true}
       key="name"
       label={
         nameLabel || (
