@@ -5880,7 +5880,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-feature-flags@link:packages/response-ops/feature_flags":
+"@kbn/response-ops-feature-flag-service@link:packages/response-ops/feature_flag_service":
   version "0.0.0"
   uid ""
 

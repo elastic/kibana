@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../..',
-  roots: ['<rootDir>/packages/response-ops/feature_flags'],
+  roots: ['<rootDir>/packages/response-ops/feature_flag_service'],
 };
