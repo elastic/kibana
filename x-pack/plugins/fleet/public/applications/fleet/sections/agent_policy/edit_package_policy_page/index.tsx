@@ -107,7 +107,7 @@ export const EditPackagePolicyForm = memo<{
   packagePolicyId: string;
   forceUpgrade?: boolean;
   from?: EditPackagePolicyFrom;
-  policyId: string;
+  policyId?: string;
 }>(({ packagePolicyId, policyId, forceUpgrade = false, from = 'edit' }) => {
   const { application, notifications } = useStartServices();
   const {
