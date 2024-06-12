@@ -74,20 +74,22 @@ const monacoEditorOptions: CodeEditorProps['options'] = {
   automaticLayout: false,
 };
 
-const monacoHeightConfig: CodeEditorProps['fitToContent'] = {
-  minLines: 10,
-  maxLines: 50,
-};
-
 const MyEuiModal = styled(EuiModal)`
   width: min(768px, calc(100vw - 16px));
   min-height: 41vh;
   .euiModal__flex {
     width: 60vw;
   }
-  .euiCodeBlock {
-    height: auto !important;
-    max-width: 718px;
+
+  .monaco-editor {
+    /*
+    * height of the codeblock is calculated according to the Modal height of 41vh
+    * and then subtracting the height of the header, footer and the space between the tabs and the codeblock
+    *
+    * headerHeight + footerHeight + tabsHeight + paddingAroundCodeBlock = 208px
+    *
+    */
+    min-height: calc(41vh - 208px) !important;
   }
 `;
 
@@ -243,11 +245,9 @@ export const ModalInspectQuery = ({
           inspectRequests.length > 0 ? (
             inspectRequests.map((inspectRequest, index) => (
               <Fragment key={index}>
-                <EuiSpacer />
                 <CodeEditor
                   languageId={XJsonLang.ID}
                   value={manageStringify(inspectRequest.body)}
-                  fitToContent={monacoHeightConfig}
                   options={monacoEditorOptions}
                 />
               </Fragment>
@@ -264,11 +264,9 @@ export const ModalInspectQuery = ({
           inspectResponses.length > 0 ? (
             responses.map((responseText, index) => (
               <Fragment key={index}>
-                <EuiSpacer />
                 <CodeEditor
                   languageId={XJsonLang.ID}
                   value={responseText}
-                  fitToContent={monacoHeightConfig}
                   options={monacoEditorOptions}
                 />
               </Fragment>
@@ -281,7 +279,12 @@ export const ModalInspectQuery = ({
   }, [inspectRequests, inspectResponses, responses, statistics]);
 
   return (
-    <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
+    <MyEuiModal
+      id="security-solution__inspect-modal"
+      className="security-solution__inspect-modal"
+      onClose={closeModal}
+      data-test-subj="modal-inspect-euiModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.INSPECT} {title}
