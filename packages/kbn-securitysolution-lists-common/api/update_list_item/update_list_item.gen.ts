@@ -17,14 +17,14 @@
 
 import { z } from 'zod';
 
-import { ListItemId, ListItemValue, ListItemMeta } from '../model/list_common.gen';
+import { ListItemId, ListItemValue, ListItemMetadata } from '../model/list_common.gen';
 import { ListItem } from '../model/list_schemas.gen';
 
 export type UpdateListItemRequestBody = z.infer<typeof UpdateListItemRequestBody>;
 export const UpdateListItemRequestBody = z.object({
   id: ListItemId,
   value: ListItemValue,
-  meta: ListItemMeta.optional(),
+  meta: ListItemMetadata.optional(),
   /**
    * Determines when changes made by the request are made visible to search
    */

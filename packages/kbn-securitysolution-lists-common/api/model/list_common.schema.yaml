@@ -41,7 +41,7 @@ components:
     ListDescription:
       $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
-    ListMeta:
+    ListMetadata:
       type: object
       additionalProperties: true
 
@@ -54,6 +54,6 @@ components:
     ListItemDescription:
       $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
-    ListItemMeta:
+    ListItemMetadata:
       type: object
       additionalProperties: true

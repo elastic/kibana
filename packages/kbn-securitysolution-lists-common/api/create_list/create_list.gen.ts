@@ -17,7 +17,13 @@
 
 import { z } from 'zod';
 
-import { ListId, ListName, ListDescription, ListType, ListMeta } from '../model/list_common.gen';
+import {
+  ListId,
+  ListName,
+  ListDescription,
+  ListType,
+  ListMetadata,
+} from '../model/list_common.gen';
 import { List } from '../model/list_schemas.gen';
 
 export type CreateListRequestBody = z.infer<typeof CreateListRequestBody>;
@@ -28,7 +34,7 @@ export const CreateListRequestBody = z.object({
   type: ListType,
   serializer: z.string().optional(),
   deserializer: z.string().optional(),
-  meta: ListMeta.optional(),
+  meta: ListMetadata.optional(),
   version: z.number().int().min(1).optional().default(1),
 });
 export type CreateListRequestBodyInput = z.input<typeof CreateListRequestBody>;

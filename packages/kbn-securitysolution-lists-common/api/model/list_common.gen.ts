@@ -57,8 +57,8 @@ export const ListName = NonEmptyString;
 export type ListDescription = z.infer<typeof ListDescription>;
 export const ListDescription = NonEmptyString;
 
-export type ListMeta = z.infer<typeof ListMeta>;
-export const ListMeta = z.object({}).catchall(z.unknown());
+export type ListMetadata = z.infer<typeof ListMetadata>;
+export const ListMetadata = z.object({}).catchall(z.unknown());
 
 export type ListItemId = z.infer<typeof ListItemId>;
 export const ListItemId = NonEmptyString;
@@ -69,5 +69,5 @@ export const ListItemValue = NonEmptyString;
 export type ListItemDescription = z.infer<typeof ListItemDescription>;
 export const ListItemDescription = NonEmptyString;
 
-export type ListItemMeta = z.infer<typeof ListItemMeta>;
-export const ListItemMeta = z.object({}).catchall(z.unknown());
+export type ListItemMetadata = z.infer<typeof ListItemMetadata>;
+export const ListItemMetadata = z.object({}).catchall(z.unknown());

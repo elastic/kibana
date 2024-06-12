@@ -22,11 +22,11 @@ import {
   ListType,
   ListName,
   ListDescription,
-  ListMeta,
+  ListMetadata,
   ListItemId,
   ListItemValue,
   ListItemDescription,
-  ListItemMeta,
+  ListItemMetadata,
 } from './list_common.gen';
 
 export type List = z.infer<typeof List>;
@@ -38,7 +38,7 @@ export const List = z.object({
   serializer: z.string().optional(),
   deserializer: z.string().optional(),
   immutable: z.boolean(),
-  meta: ListMeta.optional(),
+  meta: ListMetadata.optional(),
   '@timestamp': z.string().datetime().optional(),
   version: z.number().int().min(1),
   _version: z.string().optional(),
@@ -58,7 +58,7 @@ export const ListItem = z.object({
   description: ListItemDescription,
   serializer: z.string().optional(),
   deserializer: z.string().optional(),
-  meta: ListItemMeta.optional(),
+  meta: ListItemMetadata.optional(),
   '@timestamp': z.string().datetime().optional(),
   version: z.number().int().min(1),
   _version: z.string().optional(),
