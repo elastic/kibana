@@ -13,7 +13,7 @@ import { RoleCredentials } from '../../../../shared/services';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
   let roleAuthc: RoleCredentials;
 
@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       it('should return 200 for object that exists and inject metadata', async () =>
-        await supertest
+        await supertestWithoutAuth
           .post(URL)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
           }));
 
       it('should return error for invalid object type', async () =>
-        await supertest
+        await supertestWithoutAuth
           .post(URL)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -86,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
           }));
 
       it('should return mix of successes and errors', async () =>
-        await supertest
+        await supertestWithoutAuth
           .post(URL)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)

@@ -13,7 +13,7 @@ import { RoleCredentials } from '../../../../shared/services';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
   let roleAuthc: RoleCredentials;
 
@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('validate response schema', () => {
       it('search', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(relationshipsUrl('search', '960372e0-3224-11e8-a572-ffca06da1357'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -86,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
         }).not.to.throwError();
       });
       it('dashboard', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(relationshipsUrl('dashboard', 'b70c7ae0-3224-11e8-a572-ffca06da1357'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         }).not.to.throwError();
       });
       it('visualization', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(relationshipsUrl('visualization', 'a42c0580-3224-11e8-a572-ffca06da1357'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         }).not.to.throwError();
       });
       it('index-pattern', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(relationshipsUrl('index-pattern', '8963ca30-3224-11e8-a572-ffca06da1357'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -119,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         }).not.to.throwError();
       });
       it('invalid-refs', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(relationshipsUrl('dashboard', 'invalid-refs'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -133,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('should work', () => {
       it('for searches', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(relationshipsUrl('search', '960372e0-3224-11e8-a572-ffca06da1357'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -169,7 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
       it('for dashboards', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(relationshipsUrl('dashboard', 'b70c7ae0-3224-11e8-a572-ffca06da1357'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -200,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
       it('for visualizations', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(relationshipsUrl('visualization', 'a42c0580-3224-11e8-a572-ffca06da1357'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -240,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
       it('for index patterns', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(relationshipsUrl('index-pattern', '8963ca30-3224-11e8-a572-ffca06da1357'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -279,7 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('should filter based on savedObjectTypes', () => {
       it('search', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(
             relationshipsUrl('search', '960372e0-3224-11e8-a572-ffca06da1357', ['visualization'])
           )
@@ -318,7 +318,7 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
       it('dashboard', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(relationshipsUrl('dashboard', 'b70c7ae0-3224-11e8-a572-ffca06da1357', ['search']))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -350,7 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
       it('visualization', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(
             relationshipsUrl('visualization', 'a42c0580-3224-11e8-a572-ffca06da1357', ['search'])
           )
@@ -377,7 +377,7 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
       it('index-pattern', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(
             relationshipsUrl('index-pattern', '8963ca30-3224-11e8-a572-ffca06da1357', ['search'])
           )
@@ -407,28 +407,28 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('should return 404 no results for', () => {
       it('a search', async () => {
-        await supertest
+        await supertestWithoutAuth
           .get(relationshipsUrl('search', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(404);
       });
       it('a dashboard', async () => {
-        await supertest
+        await supertestWithoutAuth
           .get(relationshipsUrl('dashboard', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(404);
       });
       it('a visualization', async () => {
-        await supertest
+        await supertestWithoutAuth
           .get(relationshipsUrl('visualization', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(404);
       });
       it('an index pattern', async () => {
-        await supertest
+        await supertestWithoutAuth
           .get(relationshipsUrl('index-pattern', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -438,7 +438,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('invalid references', () => {
       it('should return the invalid relations', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .get(relationshipsUrl('dashboard', 'invalid-refs'))
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)

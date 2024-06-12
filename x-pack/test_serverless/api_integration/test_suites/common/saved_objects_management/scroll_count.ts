@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-// import { SavedObjectWithMetadata } from '@kbn/saved-objects-management-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
@@ -16,7 +15,7 @@ const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
   let roleAuthc: RoleCredentials;
 
@@ -53,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
         }
 
-        await supertest
+        await supertestWithoutAuth
           .post(`/api/saved_objects/_import`)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -91,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct count for each included types', async () => {
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(apiUrl)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -120,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns the count for each included types', async () => {
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(apiUrl)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -138,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('only returns count for types to include', async () => {
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(apiUrl)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -154,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('filters on title when `searchString` is provided', async () => {
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(apiUrl)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -173,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('includes all requested types even when none match the search', async () => {
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(apiUrl)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)

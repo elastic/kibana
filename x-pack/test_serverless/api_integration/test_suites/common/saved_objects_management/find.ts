@@ -11,7 +11,7 @@ import { RoleCredentials } from '../../../../shared/services';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
   let roleAuthc: RoleCredentials;
 
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
       it('should return 200 with individual responses', async () => {
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find?type=visualization')
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('unknown type', () => {
         it('should return 200 with empty response', async () => {
-          const { body } = await supertest
+          const { body } = await supertestWithoutAuth
             .get('/api/kibana/management/saved_objects/_find?type=wigwags')
             .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('page beyond total', () => {
         it('should return 200 with empty response', async () => {
-          const { body } = await supertest
+          const { body } = await supertestWithoutAuth
             .get(
               '/api/kibana/management/saved_objects/_find?type=visualization&page=100&perPage=100'
             )
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('unknown search field', () => {
         it('should return 400 when using searchFields', async () => {
-          const { body } = await supertest
+          const { body } = await supertestWithoutAuth
             .get('/api/kibana/management/saved_objects/_find?type=url&searchFields=a')
             .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
@@ -117,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       describe('`hasReference` and `hasReferenceOperator` parameters', () => {
         it('search for a reference', async () => {
-          const { body } = await supertest
+          const { body } = await supertestWithoutAuth
             .get('/api/kibana/management/saved_objects/_find')
             .query({
               type: 'visualization',
@@ -132,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('search for multiple references with OR operator', async () => {
-        await supertest
+        await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find')
           .query({
             type: 'visualization',
@@ -154,7 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('search for multiple references with AND operator', async () => {
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find')
           .query({
             type: 'visualization',
@@ -173,7 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('`sortField` and `sortOrder` parameters', () => {
         it('sort objects by "type" in "asc" order', async () => {
-          const { body } = await supertest
+          const { body } = await supertestWithoutAuth
             .get('/api/kibana/management/saved_objects/_find')
             .query({
               type: ['visualization', 'dashboard'],
@@ -190,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
         // does not work in serverless mode
         it('sort objects by "type" in "desc" order', async () => {
-          const { body } = await supertest
+          const { body } = await supertestWithoutAuth
             .get('/api/kibana/management/saved_objects/_find')
             .query({
               type: ['visualization', 'dashboard'],
@@ -222,7 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should inject meta attributes for searches', async () =>
-        await supertest
+        await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find?type=search')
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -242,7 +242,7 @@ export default function ({ getService }: FtrProviderContext) {
           }));
 
       it('should inject meta attributes for dashboards', async () =>
-        await supertest
+        await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find?type=dashboard')
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -262,7 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
           }));
 
       it('should inject meta attributes for visualizations', async () =>
-        await supertest
+        await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find?type=visualization')
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -284,7 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
           }));
 
       it('should inject meta attributes for index patterns', async () =>
-        await supertest
+        await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find?type=index-pattern')
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
