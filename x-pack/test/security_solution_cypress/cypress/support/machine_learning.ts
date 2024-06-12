@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { rootRequest } from '../tasks/api_calls/common';
 
 /**
@@ -24,7 +25,7 @@ export const executeSetupModuleRequest = ({ moduleName }: { moduleName: string }
     failOnStatusCode: true,
     body: {
       prefix: '',
-      groups: ['auditbeat'],
+      groups: [ML_GROUP_ID],
       indexPatternName: 'auditbeat-*',
       startDatafeed: false,
       useDedicatedIndex: true,
