@@ -124,7 +124,11 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
       },
     },
     savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
-    dashboardContentManagement: { checkForDuplicateDashboardTitle, saveDashboardState },
+    dashboardContentManagement: {
+      checkForDuplicateDashboardTitle,
+      saveDashboardState,
+      findDashboards,
+    },
   } = pluginServices.getServices();
 
   const {
@@ -274,19 +278,39 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
         let newTitle = currentState.title;
 
         if (lastSavedId) {
-          const [baseTitle, baseCount] = extractTitleAndCount(newTitle);
-          const copyCount = baseCount + 1;
-          newTitle = `${baseTitle} (${copyCount})`;
+          const [baseTitle] = extractTitleAndCount(newTitle);
 
-          await checkForDuplicateDashboardTitle({
-            title: newTitle,
-            lastSavedTitle: currentState.title,
-            copyOnSave: true,
-            isTitleDuplicateConfirmed: false,
-            onTitleDuplicate(speculativeSuggestion) {
-              newTitle = speculativeSuggestion;
+          const { hits: recentlyCreatedDashboards } = await findDashboards.search({
+            size: 1,
+            search: baseTitle,
+            options: {
+              onlyTitle: true,
+              sort: {
+                sortField: 'created_at',
+                sortOrder: 'desc',
+              },
             },
           });
+
+          const [, mostRecentDuplicationId] = extractTitleAndCount(
+            recentlyCreatedDashboards[0].attributes.title
+          );
+
+          let copyCount = mostRecentDuplicationId + 1;
+
+          newTitle = `${baseTitle} (${copyCount})`;
+
+          while (
+            !(await checkForDuplicateDashboardTitle({
+              title: newTitle,
+              lastSavedTitle: currentState.title,
+              copyOnSave: true,
+              isTitleDuplicateConfirmed: false,
+            }))
+          ) {
+            copyCount++;
+            newTitle = `${baseTitle} (${copyCount})`;
+          }
 
           switch (interactionMode) {
             case ViewMode.EDIT: {

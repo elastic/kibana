@@ -15,10 +15,7 @@ export interface DashboardDuplicateTitleCheckProps {
   title: string;
   copyOnSave: boolean;
   lastSavedTitle: string;
-  /**
-   * invokes the onTitleDuplicate function if provided with a speculative title that should be collision free
-   */
-  onTitleDuplicate?: (speculativeSuggestion: string) => void;
+  onTitleDuplicate?: () => void;
   isTitleDuplicateConfirmed: boolean;
   searchLimit?: number;
 }
@@ -52,60 +49,34 @@ export async function checkForDuplicateDashboardTitle(
 
   const [baseDashboardName, duplicationId] = extractTitleAndCount(title);
 
-  let searchMatchPageHits;
-  let searchMatchPaginationObject;
-
-  ({ hits: searchMatchPageHits, pagination: searchMatchPaginationObject } =
-    await contentManagement.client.search<
-      DashboardCrudTypes['SearchIn'],
-      DashboardCrudTypes['SearchOut']
-    >({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      query: {
-        text: title ? `${baseDashboardName}*` : undefined,
-        limit: searchLimit,
-        cursor: String(duplicationId ? Math.ceil(duplicationId / searchLimit) : 1),
+  const { hits } = await contentManagement.client.search<
+    DashboardCrudTypes['SearchIn'],
+    DashboardCrudTypes['SearchOut']
+  >({
+    contentTypeId: DASHBOARD_CONTENT_ID,
+    query: {
+      text: title ? `${baseDashboardName}*` : undefined,
+      limit: searchLimit,
+      cursor: String(duplicationId ? Math.ceil(duplicationId / searchLimit) : 1),
+    },
+    options: {
+      onlyTitle: true,
+      sort: {
+        sortField: 'created_at',
+        sortOrder: 'asc',
       },
-      options: { onlyTitle: true },
-    }));
-
-  const isMatchedResultInvalid =
-    // Given we are looking to find the collection of dashboards that's closest to the duplicated dashboard with the last incremented number,
-    // we compare the last item in the page result we got against the total hits to determine if we should self correct
-    searchMatchPageHits.length &&
-    extractTitleAndCount(searchMatchPageHits.slice(-1)[0].attributes.title)[1] >
-      searchMatchPaginationObject.total;
-
-  if (isMatchedResultInvalid) {
-    ({ hits: searchMatchPageHits, pagination: searchMatchPaginationObject } =
-      await contentManagement.client.search<
-        DashboardCrudTypes['SearchIn'],
-        DashboardCrudTypes['SearchOut']
-      >({
-        contentTypeId: DASHBOARD_CONTENT_ID,
-        query: {
-          text: title ? `${baseDashboardName}*` : undefined,
-          limit: searchLimit,
-          cursor: String(Math.ceil(searchMatchPaginationObject.total / searchLimit)),
-        },
-        options: { onlyTitle: true },
-      }));
-  }
+    },
+  });
 
   const duplicate = Boolean(
-    isMatchedResultInvalid ||
-      searchMatchPageHits.find((hit) => hit.attributes.title.toLowerCase() === title.toLowerCase())
+    hits.find((hit) => hit.attributes.title.toLowerCase() === title.toLowerCase())
   );
 
   if (!duplicate) {
     return true;
   }
 
-  const speculativeCollusionFreeTitle = `${baseDashboardName} (${
-    extractTitleAndCount(searchMatchPageHits.slice(-1)[0].attributes.title)[1] + 1
-  })`;
-
-  onTitleDuplicate?.(speculativeCollusionFreeTitle);
+  onTitleDuplicate?.();
 
   return false;
 }
