@@ -19,12 +19,22 @@ main () {
 
   .buildkite/scripts/bootstrap.sh
 
+  cd "$KIBANA_DIR/packages/kbn-esql-validation-autocomplete"
+
+  report_main_step "Generate function definitions"
+
+  yarn make:defs $PARENT_DIR/elasticsearch
+
+  report_main_step "Generate function validation tests"
+  
+  yarn make:tests
+
+  report_main_step "Generate inline function docs"
+
   cd "$KIBANA_DIR/packages/kbn-text-based-editor"
 
-  report_main_step "Generate function docs"
-
   yarn make:docs $PARENT_DIR/elasticsearch
-  
+
   # Check for differences
   set +e
   git diff --exit-code --quiet .
@@ -40,8 +50,8 @@ main () {
   git config --global user.name "$KIBANA_MACHINE_USERNAME"
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
-  PR_TITLE='[ES|QL] Update function docs'
-  PR_BODY='This PR updates the function docs based on the latest metadata from Elasticsearch.'
+  PR_TITLE='[ES|QL] Update function definitions'
+  PR_BODY='This PR updates the function definitions based on the latest metadata from Elasticsearch.'
 
   # Check if a PR already exists
   pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
@@ -54,12 +64,12 @@ main () {
   echo "No existing PR found. Committing changes."
 
   # Make a commit
-  BRANCH_NAME="esql_generate_function_docs_$(date +%s)"
+  BRANCH_NAME="esql_generate_function_definitions_$(date +%s)"
 
   git checkout -b "$BRANCH_NAME"
 
   git add ./**/*
-  git commit -m "Update function docs"
+  git commit -m "Update function definitions"
 
   report_main_step "Changes committed. Creating pull request."
 
