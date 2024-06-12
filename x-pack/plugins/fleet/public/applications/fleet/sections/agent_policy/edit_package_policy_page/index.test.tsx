@@ -141,6 +141,7 @@ jest.mock('react-router-dom', () => ({
   useRouteMatch: jest.fn().mockReturnValue({
     params: {
       packagePolicyId: 'nginx-1',
+      policyId: 'agent-policy-1',
     },
   }),
 }));

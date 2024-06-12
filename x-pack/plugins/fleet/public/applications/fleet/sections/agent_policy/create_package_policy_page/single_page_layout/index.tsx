@@ -81,7 +81,7 @@ import { PostInstallGoogleCloudShellModal } from './components/cloud_security_po
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
 
-const StepsWithLessPadding = styled(EuiSteps)`
+export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
     padding-bottom: ${(props) => props.theme.eui.euiSizeM};
   }
@@ -293,7 +293,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         packageInfo={packageInfo}
         setHasAgentPolicyError={setHasAgentPolicyError}
         updateSelectedTab={updateSelectedPolicyTab}
-        selectedAgentPolicyId={queryParamsPolicyId}
+        selectedAgentPolicyIds={queryParamsPolicyId ? [queryParamsPolicyId] : []}
       />
     ),
     [
