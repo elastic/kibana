@@ -371,12 +371,12 @@ export class DataGridService extends FtrService {
     await this.testSubjects.click('dataGridDisplaySelectorButton');
   }
 
-  public async getCurrentRowHeightValue() {
+  public async getCurrentRowHeightValue(scope: 'row' | 'header' = 'row') {
     const buttonGroup = await this.testSubjects.find(
-      'unifiedDataTableRowHeightSettings_rowHeightButtonGroup'
+      `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_rowHeightButtonGroup`
     );
     let value = '';
-    await this.retry.waitFor('row height value not to be empty', async () => {
+    await this.retry.waitFor(`${scope} height value not to be empty`, async () => {
       // to prevent flakiness
       const selectedButton = await buttonGroup.findByCssSelector(
         '.euiButtonGroupButton-isSelected'
@@ -396,12 +396,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getCurrentHeaderRowHeightValue() {
-    const buttonGroup = await this.testSubjects.find(
-      'unifiedDataTableHeaderRowHeightSettings_rowHeightButtonGroup'
-    );
-    return (
-      await buttonGroup.findByCssSelector('.euiButtonGroupButton-isSelected')
-    ).getVisibleText();
+    return await this.getCurrentRowHeightValue('header');
   }
 
   public async changeHeaderRowHeightValue(newValue: string) {

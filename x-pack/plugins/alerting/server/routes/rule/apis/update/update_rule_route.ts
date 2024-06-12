@@ -31,6 +31,10 @@ export const updateRuleRoute = (
   router.put(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
+      options: {
+        access: 'public',
+        description: `Update a rule`,
+      },
       validate: {
         body: updateBodySchemaV1,
         params: updateParamsSchemaV1,

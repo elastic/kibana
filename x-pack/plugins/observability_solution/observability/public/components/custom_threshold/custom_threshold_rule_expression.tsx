@@ -125,12 +125,18 @@ export default function Expressions(props: Props) {
         const createdSearchSource = await data.search.searchSource.create(
           initialSearchConfiguration
         );
-        setRuleParams('searchConfiguration', {
-          ...initialSearchConfiguration,
-          ...(ruleParams.searchConfiguration?.query && {
-            query: ruleParams.searchConfiguration.query,
-          }),
-        });
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...initialSearchConfiguration,
+              ...(ruleParams.searchConfiguration?.query && {
+                query: ruleParams.searchConfiguration.query,
+              }),
+            },
+            setParamsWarning
+          )
+        );
         setSearchSource(createdSearchSource);
         setDataView(createdSearchSource.getField('index'));
 
@@ -232,7 +238,10 @@ export default function Expressions(props: Props) {
   const onFilterChange = useCallback(
     ({ query }: { query?: Query }) => {
       setParamsWarning(undefined);
-      setRuleParams('searchConfiguration', { ...ruleParams.searchConfiguration, query });
+      setRuleParams(
+        'searchConfiguration',
+        getSearchConfiguration({ ...ruleParams.searchConfiguration, query }, setParamsWarning)
+      );
     },
     [setRuleParams, ruleParams.searchConfiguration]
   );
@@ -442,13 +451,16 @@ export default function Expressions(props: Props) {
         query={ruleParams.searchConfiguration?.query}
         filters={ruleParams.searchConfiguration?.filter}
         onFiltersUpdated={(filter) => {
-          // Since rule params will be sent to the API as is, and we only need meta and query parameters to be
-          // saved in the rule's saved object, we filter extra fields here (such as $state).
-          const filters = filter.map(({ meta, query }) => ({ meta, query }));
-          setRuleParams('searchConfiguration', {
-            ...ruleParams.searchConfiguration,
-            filter: filters,
-          });
+          setRuleParams(
+            'searchConfiguration',
+            getSearchConfiguration(
+              {
+                ...ruleParams.searchConfiguration,
+                filter,
+              },
+              setParamsWarning
+            )
+          );
         }}
       />
       {errors.filterQuery && (

@@ -6,7 +6,7 @@
  */
 
 export { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from './plugin';
-export { INGEST_SAVED_OBJECT_INDEX } from './saved_objects';
+export { INGEST_SAVED_OBJECT_INDEX, FLEET_SETUP_LOCK_TYPE } from './saved_objects';
 export * from './routes';
 export * from './agent';
 export * from './agent_policy';

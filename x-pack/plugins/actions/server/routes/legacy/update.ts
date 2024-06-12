@@ -31,6 +31,10 @@ export const updateActionRoute = (
   router.put(
     {
       path: `${BASE_ACTION_API_PATH}/action/{id}`,
+      options: {
+        access: 'public',
+        description: `Update a connector`,
+      },
       validate: {
         body: bodySchema,
         params: paramSchema,

@@ -20,6 +20,10 @@ export const getAllActionRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}`,
+      options: {
+        access: 'public',
+        description: `Get all connectors`,
+      },
       validate: {},
     },
     router.handleLegacyErrors(async function (context, req, res) {

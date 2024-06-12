@@ -13,7 +13,7 @@ import { z } from 'zod';
  *
  * info:
  *   title: Bulk Actions API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { UUID, NonEmptyString, User } from '../conversations/common_attributes.gen';

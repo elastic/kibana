@@ -54,7 +54,6 @@
     "@kbn/es-types",
     "@kbn/code-editor",
     "@kbn/core-test-helpers-model-versions",
-    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",

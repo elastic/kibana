@@ -73,7 +73,12 @@ export function updateSavedSearch({
       savedSearch.viewMode = state.viewMode;
     }
 
-    savedSearch.breakdownField = state.breakdownField || undefined; // `undefined` instead of an empty string
+    if (typeof state.breakdownField !== 'undefined') {
+      savedSearch.breakdownField = state.breakdownField;
+    } else if (savedSearch.breakdownField) {
+      savedSearch.breakdownField = '';
+    }
+
     savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
 
     // add a flag here to identify text based language queries

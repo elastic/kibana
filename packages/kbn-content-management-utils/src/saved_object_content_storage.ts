@@ -373,8 +373,8 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     }
 
     const { value: optionsToLatest, error: optionsError } = transforms.update.in.options.up<
-      Types['CreateOptions'],
-      Types['CreateOptions']
+      Types['UpdateOptions'],
+      Types['UpdateOptions']
     >(options);
     if (optionsError) {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
