@@ -59,28 +59,6 @@ const onClick =
     close();
   };
 
-/**
- * This method adds "More" item to panels, which have more than 4 items; and
- * moves all items after the thrird one into that "More" sub-menu.
- */
-// const wrapMainPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, id: string) => {
-//   const panel = panels[id];
-//   if (!panel) return;
-//   const maxItemsBeforeWrapping = 10;
-//   if (!panel.items) return;
-//   if (panel.items.length <= maxItemsBeforeWrapping) return;
-//   const visibleItems = panel.items.slice(0, maxItemsBeforeWrapping - 1) as ItemDescriptor[];
-//   const itemsInSubmenu = panel.items.slice(maxItemsBeforeWrapping - 1) as ItemDescriptor[];
-//   const morePanelId = panel.id + '__more';
-
-//   panel.items = visibleItems;
-//   const subPanel: PanelDescriptor = {
-//     id: morePanelId,
-//     items: itemsInSubmenu,
-//   };
-//   panels[morePanelId] = subPanel;
-// };
-
 const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemDescriptor[] => {
   const euiItems: EuiContextMenuPanelItemDescriptor[] = [];
   for (const item of items) {
@@ -176,8 +154,6 @@ export async function buildContextMenuForActions({
       }
     );
   }
-
-  // wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
 
   for (const panel of Object.values(panels)) {
     if (panel._level === 0) {
