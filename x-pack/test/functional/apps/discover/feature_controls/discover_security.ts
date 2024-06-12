@@ -236,12 +236,11 @@ export default function (ctx: FtrProviderContext) {
       it(`Doesn't show short urls for users without those permissions`, async () => {
         await PageObjects.share.clickShareTopNavButton();
         let actualUrl: string = '';
-        const re = new RegExp(
-          deployment.getHostPort().replace(':80', '').replace(':443', '') + '/app/r.*$'
-        );
+
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.not.match(re);
+          // only shows in long urls
+          expect(actualUrl).to.contain(DISCOVER_APP_LOCATOR);
           await PageObjects.share.closeShareModal();
         });
       });
