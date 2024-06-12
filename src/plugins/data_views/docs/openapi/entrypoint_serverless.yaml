@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  title: Data views
-  description: OpenAPI schema for data view endpoints
+  title: Serverless data views
+  description: OpenAPI schema for serverless data view endpoints
   version: '0.1'
   contact:
     name: Kibana Core Team
@@ -49,14 +49,10 @@ paths:
     $ref: 'paths/s@{spaceid}@api@data_views@data_view@{viewid}@runtime_field@{fieldname}.yaml'
 components:
   securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
     apiKeyAuth:
       type: apiKey
       in: header
       name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+      description: These APIs use key-based authentication. You must create an API key and use the encoded value in the request header. 
 security:
-  - basicAuth: []
   - apiKeyAuth: []
