@@ -37,16 +37,11 @@ import { useLicense } from '../../../../hooks/use_license';
 
 const formatThreshold = (threshold: number) => String(threshold);
 
-const AlertDetailsAppSection = ({
-  rule,
-  alert,
-  setAlertSummaryFields,
-}: AlertDetailsAppSectionProps) => {
+const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
   const { logsShared } = useKibanaContextForPlugin().services;
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
-  const alertContext = alert.fields[ALERT_CONTEXT];
   const interval = `${rule.params.timeSize}${rule.params.timeUnit}`;
   const thresholdFill = convertComparatorToFill(rule.params.count.comparator);
   const filter = rule.params.groupBy
