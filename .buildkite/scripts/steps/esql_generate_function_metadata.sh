@@ -35,6 +35,10 @@ main () {
 
   yarn make:docs $PARENT_DIR/elasticsearch
 
+  cd "$KIBANA_DIR"
+
+  node scripts/i18n_check.js --fix
+
   # Check for differences
   set +e
   git diff --exit-code --quiet .
