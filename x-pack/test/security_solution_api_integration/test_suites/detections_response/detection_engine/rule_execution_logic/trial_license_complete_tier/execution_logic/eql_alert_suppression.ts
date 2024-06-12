@@ -7,6 +7,8 @@
 
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
+import sortBy from 'lodash/sortBy';
+
 import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ALERT_SUPPRESSION_START,
@@ -251,6 +253,96 @@ export default ({ getService }: FtrProviderContext) => {
               ],
               [ALERT_ORIGINAL_TIME]: firstTimestamp,
               [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            })
+          );
+        });
+
+        it('deduplicates new alerts if they were previously created without suppression', async () => {
+          const id = uuidv4();
+          const firstTimestamp = new Date().toISOString();
+
+          const ruleWithoutSuppression: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(id),
+            from: 'now-35m',
+            interval: '30m',
+          };
+          const alertSuppression = {
+            group_by: ['host.name'],
+            duration: {
+              value: 300,
+              unit: 'm' as const,
+            },
+            missing_fields_strategy: 'suppress',
+          };
+
+          const firstDocument = {
+            id,
+            '@timestamp': firstTimestamp,
+            host: {
+              name: 'host-a',
+            },
+          };
+          await indexListOfSourceDocuments([firstDocument, firstDocument]);
+
+          const createdRule = await createRule(supertest, log, ruleWithoutSuppression);
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+          expect(alerts.hits.hits).toHaveLength(2);
+          // alert does not have suppression properties
+          alerts.hits.hits.forEach((previewAlert) => {
+            const source = previewAlert._source;
+            expect(source).toHaveProperty('id', id);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+          });
+
+          const secondTimestamp = new Date().toISOString();
+          const secondDocument = {
+            id,
+            '@timestamp': secondTimestamp,
+            host: {
+              name: 'host-a',
+            },
+          };
+
+          await indexListOfSourceDocuments([secondDocument, secondDocument]);
+
+          // update the rule to include suppression
+          await patchRule(supertest, log, {
+            id: createdRule.id,
+            alert_suppression: alertSuppression,
+            enabled: false,
+          });
+          await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+
+          const afterTimestamp = new Date();
+          const secondAlerts = await getOpenAlerts(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatusEnum.succeeded,
+            undefined,
+            afterTimestamp
+          );
+
+          expect(secondAlerts.hits.hits.length).toEqual(3);
+
+          const sortedAlerts = sortBy(secondAlerts.hits.hits, ALERT_ORIGINAL_TIME);
+
+          // third alert is generated with suppression
+          expect(sortedAlerts[2]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: secondTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
             })
           );
         });

@@ -120,7 +120,8 @@
     "@kbn/ebt-tools",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/test-jest-helpers"
   ],
   "exclude": ["target/**/*"]
 }

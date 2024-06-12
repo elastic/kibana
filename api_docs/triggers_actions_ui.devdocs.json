@@ -1205,9 +1205,9 @@
           },
           "<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
@@ -3634,9 +3634,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -4116,9 +4116,9 @@
             "signature": [
               "Omit<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.SanitizedRule",
                 "text": "SanitizedRule"
               },
@@ -4148,9 +4148,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -4164,9 +4164,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -4180,9 +4180,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -4472,9 +4472,9 @@
           },
           "<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
@@ -5624,9 +5624,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -5640,9 +5640,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -5656,9 +5656,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -6392,9 +6392,9 @@
         "signature": [
           "Omit<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
@@ -6506,7 +6506,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "path": "packages/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6529,9 +6529,9 @@
           },
           "<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
@@ -6545,9 +6545,9 @@
           },
           "<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
@@ -6561,9 +6561,9 @@
           },
           "<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
@@ -6584,23 +6584,23 @@
         "signature": [
           "Omit<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleAction",
             "text": "RuleAction"
           },
           ", \"alertsFilter\"> & { alertsFilter?: ",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.SanitizedAlertsFilter",
             "text": "SanitizedAlertsFilter"
           },
           " | undefined; }"
         ],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "path": "packages/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7662,9 +7662,9 @@
             "ActionAccordionFormProps",
             ", \"actionTypeRegistry\" | \"setActions\"> & { setActions: (actions: ",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleAction",
               "text": "RuleAction"
             },
@@ -7688,9 +7688,9 @@
                 "ActionAccordionFormProps",
                 ", \"actionTypeRegistry\" | \"setActions\"> & { setActions: (actions: ",
                 {
-                  "pluginId": "alerting",
+                  "pluginId": "@kbn/alerting-types",
                   "scope": "common",
-                  "docId": "kibAlertingPluginApi",
+                  "docId": "kibKbnAlertingTypesPluginApi",
                   "section": "def-common.RuleAction",
                   "text": "RuleAction"
                 },
@@ -7790,17 +7790,17 @@
           "signature": [
             "<Params extends ",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
             " = ",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
@@ -7860,17 +7860,17 @@
           "signature": [
             "<Params extends ",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
             " = ",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
@@ -8056,7 +8056,7 @@
             "EuiDataGridCellPopoverElementProps",
             " & { alert: ",
             "EcsFieldsResponse",
-            "; }) => React.ReactNode | JSX.Element) | undefined; } & Omit<Partial<",
+            "; }) => React.ReactNode | JSX.Element) | undefined; emptyStateHeight?: \"short\" | \"tall\" | undefined; } & Omit<Partial<",
             "EuiDataGridProps",
             ">, \"renderCellPopover\"> & ",
             "LazyLoadProps",
@@ -8114,7 +8114,7 @@
                 "EuiDataGridCellPopoverElementProps",
                 " & { alert: ",
                 "EcsFieldsResponse",
-                "; }) => React.ReactNode | JSX.Element) | undefined; } & Omit<Partial<",
+                "; }) => React.ReactNode | JSX.Element) | undefined; emptyStateHeight?: \"short\" | \"tall\" | undefined; } & Omit<Partial<",
                 "EuiDataGridProps",
                 ">, \"renderCellPopover\"> & ",
                 "LazyLoadProps"
@@ -8527,9 +8527,9 @@
             },
             "<",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
@@ -8543,9 +8543,9 @@
             },
             "<",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
@@ -8572,9 +8572,9 @@
                 },
                 "<",
                 {
-                  "pluginId": "alerting",
+                  "pluginId": "@kbn/alerting-types",
                   "scope": "common",
-                  "docId": "kibAlertingPluginApi",
+                  "docId": "kibKbnAlertingTypesPluginApi",
                   "section": "def-common.RuleTypeParams",
                   "text": "RuleTypeParams"
                 },

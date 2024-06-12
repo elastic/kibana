@@ -25,6 +25,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { all: true },
       },
+      description: `Check Fleet Server health`,
     })
     .addVersion(
       {

@@ -392,6 +392,8 @@ paths:
                   - items
         '400':
           $ref: '#/components/responses/error'
+        '429':
+          $ref: '#/components/responses/error'
       operationId: install-package-by-upload
       description: ''
       parameters:
@@ -1025,6 +1027,11 @@ paths:
           type: boolean
         name: prerelease
         description: Specify if version is prerelease
+        in: query
+      - schema:
+          type: boolean
+        name: ignoreUnverified
+        description: Ignore if the package is fails signature verification
         in: query
   /agents/setup:
     get:
@@ -2387,6 +2394,11 @@ paths:
               properties:
                 agentPolicyId:
                   type: string
+                force:
+                  type: boolean
+                  description: >-
+                    bypass validation checks that can prevent agent policy
+                    deletion
               required:
                 - agentPolicyId
       parameters:
@@ -4811,6 +4823,11 @@ components:
               - enabled
         policy_id:
           type: string
+          deprecated: true
+        policy_ids:
+          type: array
+          items:
+            type: string
         name:
           type: string
         description:
@@ -5286,6 +5303,14 @@ components:
           type: string
           description: Agent policy ID where that package policy will be added
           example: agent-policy-id
+          deprecated: true
+        policy_ids:
+          type: array
+          items:
+            type: string
+          description: Agent policy IDs where that package policy will be added
+          example:
+            - agent-policy-id
         package:
           type: object
           properties:
@@ -5367,7 +5392,6 @@ components:
             the agent policy is managed.
       required:
         - name
-        - policy_id
         - package
     upgrade_diff:
       title: Package policy Upgrade dryrun

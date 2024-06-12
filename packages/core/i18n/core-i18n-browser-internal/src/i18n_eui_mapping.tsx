@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
@@ -244,13 +242,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnActions.hideColumn': i18n.translate('core.euiColumnActions.hideColumn', {
       defaultMessage: 'Hide column',
     }),
-    'euiColumnActions.sort': ({ schemaLabel }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiColumnActions.sort"
-        defaultMessage="Sort {schemaLabel}"
-        values={{ schemaLabel }}
-      />
-    ),
+    'euiColumnActions.sort': ({ schemaLabel }: EuiValues) =>
+      i18n.translate('core.euiColumnActions.sort', {
+        defaultMessage: 'Sort {schemaLabel}',
+        values: { schemaLabel },
+      }),
     'euiColumnActions.moveLeft': i18n.translate('core.euiColumnActions.moveLeft', {
       defaultMessage: 'Move left',
     }),
@@ -340,20 +336,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: "You've selected all available options",
       }
     ),
-    'euiComboBoxOptionsList.alreadyAdded': ({ label }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiComboBoxOptionsList.alreadyAdded"
-        defaultMessage="{label} has already been added"
-        values={{ label }}
-      />
-    ),
-    'euiComboBoxOptionsList.createCustomOption': ({ searchValue }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiComboBoxOptionsList.createCustomOption"
-        defaultMessage="Add {searchValue} as a custom option"
-        values={{ searchValue }}
-      />
-    ),
+    'euiComboBoxOptionsList.alreadyAdded': ({ label }: EuiValues) =>
+      i18n.translate('core.euiComboBoxOptionsList.alreadyAdded', {
+        defaultMessage: '{label} has already been added',
+        values: { label },
+      }),
+    'euiComboBoxOptionsList.createCustomOption': ({ searchValue }: EuiValues) =>
+      i18n.translate('core.euiComboBoxOptionsList.createCustomOption', {
+        defaultMessage: 'Add {searchValue} as a custom option',
+        values: { searchValue },
+      }),
     'euiComboBoxOptionsList.loadingOptions': i18n.translate(
       'core.euiComboBoxOptionsList.loadingOptions',
       {
@@ -367,20 +359,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: "There aren't any options available",
       }
     ),
-    'euiComboBoxOptionsList.noMatchingOptions': ({ searchValue }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiComboBoxOptionsList.noMatchingOptions"
-        defaultMessage="{searchValue} doesn't match any options"
-        values={{ searchValue }}
-      />
-    ),
-    'euiComboBoxOptionsList.delimiterMessage': ({ delimiter }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiComboBoxOptionsList.delimiterMessage"
-        defaultMessage="Add each item separated by {delimiter}"
-        values={{ delimiter }}
-      />
-    ),
+    'euiComboBoxOptionsList.noMatchingOptions': ({ searchValue }: EuiValues) =>
+      i18n.translate('core.euiComboBoxOptionsList.noMatchingOptions', {
+        defaultMessage: "{searchValue} doesn't match any options",
+        values: { searchValue },
+      }),
+    'euiComboBoxOptionsList.delimiterMessage': ({ delimiter }: EuiValues) =>
+      i18n.translate('core.euiComboBoxOptionsList.delimiterMessage', {
+        defaultMessage: 'Add each item separated by {delimiter}',
+        values: { delimiter },
+      }),
     'euiComboBoxPill.removeSelection': ({ children }: EuiValues) =>
       i18n.translate('core.euiComboBoxPill.removeSelection', {
         defaultMessage: 'Remove {children} from selection in this group',
@@ -953,13 +941,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Error',
       description: 'Error boundary for uncaught exceptions when rendering part of the application',
     }),
-    'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiPagination.pageOfTotalCompressed"
-        defaultMessage="{page} of {total}"
-        values={{ page, total }}
-      />
-    ),
+    'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) =>
+      i18n.translate('core.euiPagination.pageOfTotalCompressed', {
+        defaultMessage: '{page} of {total}',
+        values: { page, total },
+      }),
     'euiPagination.firstRangeAriaLabel': ({ lastPage }: EuiValues) =>
       i18n.translate('core.euiPagination.firstRangeAriaLabel', {
         defaultMessage: 'Skipping pages 2 to {lastPage}',
@@ -1394,13 +1380,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiDatePopoverContent.nowTabButtonEnd',
       { defaultMessage: 'Set end date and time to now' }
     ),
-    'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiAbsoluteTab.dateFormatError"
-        defaultMessage="Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp."
-        values={{ dateFormat }}
-      />
-    ),
+    'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) =>
+      i18n.translate('core.euiAbsoluteTab.dateFormatError', {
+        defaultMessage: 'Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp.',
+        values: { dateFormat },
+      }),
     'euiRelativeTab.fullDescription': ({ unit }: EuiValues) =>
       i18n.translate('core.euiRelativeTab.fullDescription', {
         defaultMessage: 'The unit is changeable. Currently set to {unit}.',
@@ -1470,13 +1454,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiSelectable.noAvailableOptions': i18n.translate('core.euiSelectable.noAvailableOptions', {
       defaultMessage: 'No options available',
     }),
-    'euiSelectable.noMatchingOptions': ({ searchValue }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiSelectable.noMatchingOptions"
-        defaultMessage="{searchValue} doesn't match any options"
-        values={{ searchValue }}
-      />
-    ),
+    'euiSelectable.noMatchingOptions': ({ searchValue }: EuiValues) =>
+      i18n.translate('core.euiSelectable.noMatchingOptions', {
+        defaultMessage: "{searchValue} doesn't match any options",
+        values: { searchValue },
+      }),
     'euiSelectable.screenReaderInstructions': i18n.translate(
       'core.euiSelectable.screenReaderInstructions',
       {

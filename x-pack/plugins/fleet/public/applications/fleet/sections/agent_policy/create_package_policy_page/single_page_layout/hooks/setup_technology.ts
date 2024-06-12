@@ -52,7 +52,7 @@ export const useAgentless = () => {
 
   // TODO: remove this check when CSPM implements the above flag and rely only on `isAgentlessIntegration`
   const isAgentlessPackagePolicy = (packagePolicy: NewPackagePolicy) => {
-    return isAgentlessEnabled && packagePolicy.policy_id === AGENTLESS_POLICY_ID;
+    return isAgentlessEnabled && packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID);
   };
   return {
     isAgentlessEnabled,

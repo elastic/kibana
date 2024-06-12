@@ -124,7 +124,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             error: i18n.translate(
               'xpack.snapshotRestore.repositoryDetails.repositoryNotFoundErrorMessage',
               {
-                defaultMessage: `The repository '{name}' does not exist.`,
+                defaultMessage: `The repository ''{name}'' does not exist.`,
                 values: {
                   name: repositoryName,
                 },

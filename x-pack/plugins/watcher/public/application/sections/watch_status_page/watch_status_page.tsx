@@ -157,7 +157,7 @@ export const WatchStatusPage = ({
                 <span data-test-subj="pageTitle">
                   <FormattedMessage
                     id="xpack.watcher.sections.watchDetail.header"
-                    defaultMessage="Current status for '{watch}'"
+                    defaultMessage="Current status for ''{watch}''"
                     values={{
                       watch: watchName ? watchName : watchId,
                     }}
