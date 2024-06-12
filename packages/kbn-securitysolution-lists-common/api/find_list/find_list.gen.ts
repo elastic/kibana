@@ -17,7 +17,7 @@
 
 import { z } from 'zod';
 
-import { NonEmptyString } from '../../../kbn-openapi-common/schemas/primitives.gen';
+import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import { List } from '../model/list_schemas.gen';
 
 export type FindListsCursor = z.infer<typeof FindListsCursor>;

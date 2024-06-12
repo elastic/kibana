@@ -17,7 +17,7 @@
 
 import { z } from 'zod';
 
-import { NonEmptyString } from '../../../kbn-openapi-common/schemas/primitives.gen';
+import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 
 export type ListId = z.infer<typeof ListId>;
 export const ListId = NonEmptyString;
