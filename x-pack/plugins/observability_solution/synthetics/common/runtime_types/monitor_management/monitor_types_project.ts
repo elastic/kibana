@@ -10,10 +10,10 @@ import { Either } from 'fp-ts/Either';
 import { AlertConfigsCodec } from './alert_config';
 import { ScreenshotOptionCodec } from './monitor_configs';
 
-const ProjectMonitorSchedule = new t.Type<string, string, unknown>(
+const ProjectMonitorSchedule = new t.Type<string | number, string | number, unknown>(
   'ProjectMonitorSchedule',
   t.string.is,
-  (input, context): Either<t.Errors, string> => {
+  (input, context): Either<t.Errors, string | number> => {
     if (typeof input === 'number' || input === '10s' || input === '30s') {
       return t.success(input);
     } else {
