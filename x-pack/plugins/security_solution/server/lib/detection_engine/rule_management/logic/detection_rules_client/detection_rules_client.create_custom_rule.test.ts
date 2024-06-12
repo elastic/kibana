@@ -19,7 +19,7 @@ import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
-import { DetectionRulesClientValidationError } from './utils';
+import { RuleResponseValidationError } from './utils';
 import type { RuleAlertType } from '../../../rule_schema';
 
 jest.mock('../../../../machine_learning/authz');
@@ -78,7 +78,7 @@ describe('DetectionRulesClient.createCustomRule', () => {
 
     await expect(
       detectionRulesClient.createCustomRule({ params: getCreateMachineLearningRulesSchemaMock() })
-    ).rejects.toThrow(DetectionRulesClientValidationError);
+    ).rejects.toThrow(RuleResponseValidationError);
   });
 
   it('calls the rulesClient with legacy ML params', async () => {

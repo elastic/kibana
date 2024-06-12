@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { ZodError } from 'zod';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import type { CreateCustomRuleArgs } from '../detection_rules_client_interface';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { RuleParams } from '../../../../rule_schema';
-import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import { convertCreateAPIToInternalSchema } from '../../../normalization/rule_converters';
-import { transformValidate } from '../../../utils/validate';
-
-import { validateMlAuth, DetectionRulesClientValidationError } from '../utils';
+import { transform } from '../../../utils/utils';
+import { validateMlAuth, RuleResponseValidationError } from '../utils';
 
 export const createCustomRule = async (
   rulesClient: RulesClient,
@@ -29,10 +28,15 @@ export const createCustomRule = async (
     data: internalRule,
   });
 
-  try {
-    return transformValidate(rule);
-  } catch (error) {
-    const zodError = error as ZodError;
-    throw new DetectionRulesClientValidationError(zodError, rule.params.ruleId);
+  /* Trying to convert the rule to a RuleResponse object */
+  const parseResult = RuleResponse.safeParse(transform(rule));
+
+  if (!parseResult.success) {
+    throw new RuleResponseValidationError({
+      message: stringifyZodError(parseResult.error),
+      ruleId: rule.params.ruleId,
+    });
   }
+
+  return parseResult.data;
 };

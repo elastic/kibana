@@ -7,7 +7,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ZodError } from 'zod';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -40,10 +39,16 @@ export class ClientError extends Error {
   }
 }
 
-export class DetectionRulesClientValidationError extends ZodError {
+/**
+ * Represents an error that occurred while validating a RuleResponse object.
+ * Includes the ruleId of the rule that failed validation.
+ * Thrown when a rule does not match the RuleResponse schema.
+ * @extends Error
+ */
+export class RuleResponseValidationError extends Error {
   public readonly ruleId: string;
-  constructor(zodError: ZodError, ruleId: string) {
-    super(zodError.errors);
+  constructor({ message, ruleId }: { message: string; ruleId: string }) {
+    super(message);
     this.ruleId = ruleId;
   }
 }
