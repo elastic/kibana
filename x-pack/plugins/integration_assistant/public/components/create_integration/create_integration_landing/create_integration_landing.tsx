@@ -25,21 +25,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { IntegrationImageHeader } from '../../../common/components/integration_image_header';
 import { ButtonsFooter } from '../../../common/components/buttons_footer';
 import { SectionWrapper } from '../../../common/components/section_wrapper';
-import type { SetPage } from '../../types';
+import { useNavigate, Page } from '../../../common/hooks/use_navigate';
 import * as i18n from './translations';
 
 const useAssistantCardCss = () => {
   const { euiTheme } = useEuiTheme();
   return css`
-    // compensate for EuiCard children margin-block-start
+    /* compensate for EuiCard children margin-block-start */
     margin-block-start: calc(${euiTheme.size.s} * -2);
   `;
 };
 
-interface CreateIntegrationLandingProps {
-  setPage: SetPage;
-}
-export const CreateIntegrationLanding = React.memo<CreateIntegrationLandingProps>(({ setPage }) => {
+export const CreateIntegrationLanding = React.memo(() => {
+  const navigate = useNavigate();
   const assistantCardCss = useAssistantCardCss();
   return (
     <KibanaPageTemplate>
@@ -58,7 +56,7 @@ export const CreateIntegrationLanding = React.memo<CreateIntegrationLandingProps
                 display="plain"
                 hasBorder={true}
                 paddingSize="l"
-                title={''} // this is required
+                title={''} // title shown inside the child component
                 betaBadgeProps={{
                   label: i18n.TECH_PREVIEW,
                   tooltipContent: i18n.TECH_PREVIEW_TOOLTIP,
@@ -94,7 +92,7 @@ export const CreateIntegrationLanding = React.memo<CreateIntegrationLandingProps
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => setPage('assistant')}>
+                    <EuiButton onClick={() => navigate(Page.assistant)}>
                       {i18n.ASSISTANT_BUTTON}
                     </EuiButton>
                   </EuiFlexItem>
@@ -118,7 +116,7 @@ export const CreateIntegrationLanding = React.memo<CreateIntegrationLandingProps
                       defaultMessage="If you have an existing integration package, {link}"
                       values={{
                         link: (
-                          <EuiLink onClick={() => setPage('upload')}>
+                          <EuiLink onClick={() => navigate(Page.upload)}>
                             <FormattedMessage
                               id="xpack.integrationAssistant.createIntegrationLanding.uploadPackageLink"
                               defaultMessage="upload it as a .zip"

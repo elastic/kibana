@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Pages } from './constants';
 
-export type Page = typeof Pages[number];
-export type SetPage = (page: Page) => void;
+import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CreateIntegrationServices } from '../../components/create_integration/types';
+
+export const useKibana = () => _useKibana<CreateIntegrationServices>();

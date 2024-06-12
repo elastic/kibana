@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import { useKibana } from '../../components/create_integration/use_kibana';
+import { useKibana } from '../hooks/use_kibana';
 
 const bottomBarCss = css`
   animation: none !important; // disable the animation to prevent the footer from flickering

@@ -8,12 +8,12 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { ButtonsFooter } from '../../../../common/components/buttons_footer';
-import type { SetPage } from '../../../types';
+import { useNavigate, Page } from '../../../../common/hooks/use_navigate';
 import type { State, Actions } from '../state';
 import * as i18n from './translations';
 
 // Generation button for Step 3
-const Step3ButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
+const AnalyzeButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
   if (!isGenerating) {
     return <>{i18n.ANALYZE_LOGS}</>;
   }
@@ -24,26 +24,27 @@ const Step3ButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating })
     </>
   );
 });
-Step3ButtonText.displayName = 'Step3ButtonText';
+AnalyzeButtonText.displayName = 'AnalyzeButtonText';
 
 interface BottomBarProps {
   currentStep: State['step'];
   isGenerating: State['isGenerating'];
-  setPage: SetPage;
   setStep: Actions['setStep'];
   onGenerate: () => void;
   isNextStepEnabled?: boolean;
 }
 
 export const BottomBar = React.memo<BottomBarProps>(
-  ({ setPage, currentStep, setStep, onGenerate, isGenerating, isNextStepEnabled = false }) => {
+  ({ currentStep, setStep, onGenerate, isGenerating, isNextStepEnabled = false }) => {
+    const navigate = useNavigate();
+
     const onBack = useCallback(() => {
       if (currentStep === 1) {
-        setPage('landing');
+        navigate(Page.landing);
       } else {
         setStep(currentStep - 1);
       }
-    }, [currentStep, setPage, setStep]);
+    }, [currentStep, navigate, setStep]);
 
     const onNext = useCallback(() => {
       if (currentStep === 3) {
@@ -55,7 +56,7 @@ export const BottomBar = React.memo<BottomBarProps>(
 
     const nextButtonText = useMemo(() => {
       if (currentStep === 3) {
-        return <Step3ButtonText isGenerating={isGenerating} />;
+        return <AnalyzeButtonText isGenerating={isGenerating} />;
       }
       if (currentStep === 4) {
         return i18n.ADD_TO_ELASTIC;

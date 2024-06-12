@@ -17,103 +17,93 @@ import { IntegrationStep, isIntegrationStepReady } from './steps/integration_ste
 import { DataStreamStep, isDataStreamStepReady } from './steps/data_stream_step';
 import { ReviewStep, isReviewStepReady } from './steps/review_step';
 import { DeployStep } from './steps/deploy_step';
-import type { SetPage } from '../../types';
 
-interface CreateIntegrationAssistantProps {
-  setPage: SetPage;
-}
-export const CreateIntegrationAssistant = React.memo<CreateIntegrationAssistantProps>(
-  ({ setPage }) => {
-    const { state, actions } = useAssistantState();
+export const CreateIntegrationAssistant = React.memo(() => {
+  const { state, actions } = useAssistantState();
 
-    const {
-      assistantAvailability: { isAssistantEnabled },
-    } = useAssistantContext();
+  const {
+    assistantAvailability: { isAssistantEnabled },
+  } = useAssistantContext();
 
-    const isNextStepEnabled = useMemo(() => {
-      if (state.step === 1) {
-        return isConnectorStepReady(state);
-      } else if (state.step === 2) {
-        return isIntegrationStepReady(state);
-      } else if (state.step === 3) {
-        return isDataStreamStepReady(state);
-      } else if (state.step === 4) {
-        return isReviewStepReady(state);
-      }
-      return false;
-    }, [state]);
-
-    const onGenerate = useCallback(() => actions.setIsGenerating(true), [actions]);
-
-    if (!isAssistantEnabled) {
-      return (
-        <>
-          <EuiSpacer size="xxl" />
-          {'Upgrade'} {/* TODO: implement upgrade page */}
-        </>
-      );
+  const isNextStepEnabled = useMemo(() => {
+    if (state.step === 1) {
+      return isConnectorStepReady(state);
+    } else if (state.step === 2) {
+      return isIntegrationStepReady(state);
+    } else if (state.step === 3) {
+      return isDataStreamStepReady(state);
+    } else if (state.step === 4) {
+      return isReviewStepReady(state);
     }
+    return false;
+  }, [state]);
 
+  const onGenerate = useCallback(() => actions.setIsGenerating(true), [actions]);
+
+  if (!isAssistantEnabled) {
     return (
-      <KibanaPageTemplate>
-        <Header
-          currentStep={state.step}
-          setStep={actions.setStep}
-          isGenerating={state.isGenerating}
-        />
-        <KibanaPageTemplate.Section grow paddingSize="l">
-          {state.step === 1 && (
-            <ConnectorStep
-              connectorId={state.connectorId}
-              setConnectorId={actions.setConnectorId}
-            />
-          )}
-          {state.step === 2 && (
-            <IntegrationStep
-              integrationSettings={state.integrationSettings}
-              setIntegrationSettings={actions.setIntegrationSettings}
-            />
-          )}
-          {state.step === 3 && (
-            <DataStreamStep
-              integrationSettings={state.integrationSettings}
-              connectorId={state.connectorId}
-              isGenerating={state.isGenerating}
-              setIntegrationSettings={actions.setIntegrationSettings}
-              setIsGenerating={actions.setIsGenerating}
-              setResult={actions.setResult}
-              setStep={actions.setStep}
-            />
-          )}
-          {state.step === 4 && (
-            <ReviewStep
-              integrationSettings={state.integrationSettings}
-              connectorId={state.connectorId}
-              isGenerating={state.isGenerating}
-              result={state.result}
-              setIntegrationSettings={actions.setIntegrationSettings}
-              setIsGenerating={actions.setIsGenerating}
-              setResult={actions.setResult}
-            />
-          )}
-          {state.step === 5 && (
-            <DeployStep
-              integrationSettings={state.integrationSettings}
-              result={state.result}
-              connectorId={state.connectorId}
-            />
-          )}
-        </KibanaPageTemplate.Section>
-        <BottomBar
-          currentStep={state.step}
-          setPage={setPage}
-          setStep={actions.setStep}
-          onGenerate={onGenerate}
-          isGenerating={state.isGenerating}
-          isNextStepEnabled={isNextStepEnabled}
-        />
-      </KibanaPageTemplate>
+      <>
+        <EuiSpacer size="xxl" />
+        {'Upgrade'} {/* TODO: implement upgrade page */}
+      </>
     );
   }
-);
+
+  return (
+    <KibanaPageTemplate>
+      <Header
+        currentStep={state.step}
+        setStep={actions.setStep}
+        isGenerating={state.isGenerating}
+      />
+      <KibanaPageTemplate.Section grow paddingSize="l">
+        {state.step === 1 && (
+          <ConnectorStep connectorId={state.connectorId} setConnectorId={actions.setConnectorId} />
+        )}
+        {state.step === 2 && (
+          <IntegrationStep
+            integrationSettings={state.integrationSettings}
+            setIntegrationSettings={actions.setIntegrationSettings}
+          />
+        )}
+        {state.step === 3 && (
+          <DataStreamStep
+            integrationSettings={state.integrationSettings}
+            connectorId={state.connectorId}
+            isGenerating={state.isGenerating}
+            setIntegrationSettings={actions.setIntegrationSettings}
+            setIsGenerating={actions.setIsGenerating}
+            setResult={actions.setResult}
+            setStep={actions.setStep}
+          />
+        )}
+        {state.step === 4 && (
+          <ReviewStep
+            integrationSettings={state.integrationSettings}
+            connectorId={state.connectorId}
+            isGenerating={state.isGenerating}
+            result={state.result}
+            setIntegrationSettings={actions.setIntegrationSettings}
+            setIsGenerating={actions.setIsGenerating}
+            setResult={actions.setResult}
+          />
+        )}
+        {state.step === 5 && (
+          <DeployStep
+            integrationSettings={state.integrationSettings}
+            result={state.result}
+            connectorId={state.connectorId}
+          />
+        )}
+      </KibanaPageTemplate.Section>
+      <BottomBar
+        currentStep={state.step}
+        setStep={actions.setStep}
+        onGenerate={onGenerate}
+        isGenerating={state.isGenerating}
+        isNextStepEnabled={isNextStepEnabled}
+      />
+    </KibanaPageTemplate>
+  );
+});
 CreateIntegrationAssistant.displayName = 'CreateIntegrationAssistant';

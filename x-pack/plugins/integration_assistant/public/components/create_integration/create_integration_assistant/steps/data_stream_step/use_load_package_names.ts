@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useKibana } from '../../../use_kibana';
+import { useKibana } from '../../../../../common/hooks/use_kibana';
 import { getInstalledPackages } from '../../../../../common/lib/api';
 
 export const useLoadPackageNames = () => {

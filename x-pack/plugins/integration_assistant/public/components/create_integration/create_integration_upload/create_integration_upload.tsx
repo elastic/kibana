@@ -15,14 +15,12 @@ import { ButtonsFooter } from '../../../common/components/buttons_footer';
 import { IntegrationImageHeader } from '../../../common/components/integration_image_header';
 import { runInstallPackage, type RequestDeps } from '../../../common/lib/api';
 import { getIntegrationNameFromResponse } from '../../../common/lib/api_parsers';
-import type { SetPage } from '../../types';
+import { useNavigate, Page } from '../../../common/hooks/use_navigate';
 import { DocsLinkSubtitle } from './docs_link_subtitle';
 import * as i18n from './translations';
 
-interface CreateIntegrationUploadProps {
-  setPage: SetPage;
-}
-export const CreateIntegrationUpload = React.memo<CreateIntegrationUploadProps>(({ setPage }) => {
+export const CreateIntegrationUpload = React.memo(() => {
+  const navigate = useNavigate();
   const { http } = useKibana().services;
   const [file, setFile] = useState<Blob>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -30,8 +28,8 @@ export const CreateIntegrationUpload = React.memo<CreateIntegrationUploadProps>(
   const [integrationName, setIntegrationName] = useState<string>();
 
   const onBack = useCallback(() => {
-    setPage('landing');
-  }, [setPage]);
+    navigate(Page.landing);
+  }, [navigate]);
 
   const onChangeFile = useCallback((files: FileList | null) => {
     setFile(files?.[0]);
@@ -57,7 +55,7 @@ export const CreateIntegrationUpload = React.memo<CreateIntegrationUploadProps>(
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(`${i18n.UPLOAD_ERROR}: ${e.message}`);
+          setError(`${i18n.UPLOAD_ERROR}: ${e.body.message}`);
         }
       } finally {
         setIsLoading(false);

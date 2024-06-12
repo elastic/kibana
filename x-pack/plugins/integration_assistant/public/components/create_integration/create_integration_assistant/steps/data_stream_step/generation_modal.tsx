@@ -31,7 +31,7 @@ import {
   runEcsGraph,
   runRelatedGraph,
 } from '../../../../../common/lib/api';
-import { useKibana } from '../../../use_kibana';
+import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
 import * as i18n from './translations';
 
@@ -104,7 +104,7 @@ export const useGeneration = ({
         }
       } catch (e) {
         if (abortController.signal.aborted) return;
-        setError(`Error: ${e.message}`);
+        setError(`Error: ${e.body.message}`);
       }
     })();
     return () => {

@@ -62,7 +62,7 @@ export const useCheckPipeline = ({
         });
       } catch (e) {
         if (abortController.signal.aborted) return;
-        setError(`Error: ${e.message}`);
+        setError(`Error: ${e.body.message}`);
       } finally {
         setIsGenerating(false);
       }

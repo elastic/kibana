@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useKibana } from '../../../use_kibana';
+import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { BuildIntegrationApiRequest } from '../../../../../../common';
 import type { State } from '../../state';
 import { runBuildIntegration, runInstallPackage } from '../../../../../common/lib/api';
@@ -82,7 +82,7 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
         }
       } catch (e) {
         if (abortController.signal.aborted) return;
-        setError(`Error: ${e.message}`);
+        setError(`Error: ${e.body.message}`);
       } finally {
         setIsLoading(false);
       }
