@@ -180,5 +180,16 @@ describe('useGetUpdatedTags hook', () => {
         'second:shiraz',
       ]);
     });
+
+    it('should not mutate input parameters', () => {
+      const inputFilters = getFiltersInOrder();
+      const inputException = getExampleException();
+
+      const { result } = renderHook(() => useGetUpdatedTags(inputException, inputFilters));
+      result.current.getTagsUpdatedBy('third', []);
+
+      expect(inputFilters).toStrictEqual(getFiltersInOrder());
+      expect(inputException).toStrictEqual(getExampleException());
+    });
   });
 });
