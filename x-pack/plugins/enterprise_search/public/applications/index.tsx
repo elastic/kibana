@@ -19,7 +19,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { AuthenticatedUser } from '@kbn/security-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
@@ -99,19 +98,6 @@ export const renderApp = (
 
   resetContext({ createStore: true });
   const store = getContext().store;
-  let user: AuthenticatedUser | null = null;
-  try {
-    core.security?.authc
-      .getCurrentUser()
-      .then((newUser) => {
-        user = newUser || null; // necessary for kea, which can't handle undefined
-      })
-      .catch(() => {
-        user = null;
-      });
-  } catch {
-    user = null;
-  }
   const indexMappingComponent = indexManagementPlugin?.getIndexMappingComponent({ history });
 
   const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
@@ -124,6 +110,7 @@ export const renderApp = (
     config,
     connectorTypes,
     console: plugins.console,
+    coreSecurity: core.security,
     data: plugins.data,
     esConfig,
     getChromeStyle$: chrome.getChromeStyle$,
@@ -148,7 +135,6 @@ export const renderApp = (
     share,
     uiSettings,
     updateSideNavDefinition,
-    user,
   });
   const unmountLicensingLogic = mountLicensingLogic({
     canManageLicense: core.application.capabilities.management?.stack?.license_management,
@@ -160,11 +146,10 @@ export const renderApp = (
     readOnlyMode,
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
-  const { security: drop, ...restCore } = core;
   ReactDOM.render(
     <I18nProvider>
       <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
-        <KibanaContextProvider services={{ ...restCore, ...plugins }}>
+        <KibanaContextProvider services={{ ...core, ...plugins }}>
           <CloudContext>
             <Provider store={store}>
               <Router history={params.history}>
