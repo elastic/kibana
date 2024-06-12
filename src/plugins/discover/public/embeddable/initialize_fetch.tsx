@@ -62,12 +62,16 @@ export function initializeFetch({
 
   // await this.services.profilesManager.resolveRootProfile({ solutionNavId });
 
-  const fetchSubscription = combineLatest([fetch$(api), api.sort$])
+  const fetchSubscription = combineLatest([
+    fetch$(api),
+    api.searchSource$,
+    api.dataViews,
+    api.sort$,
+  ])
     .pipe(
-      switchMap(async ([fetchContext, sort]) => {
+      switchMap(async ([fetchContext, searchSource, dataViews, sort]) => {
+        const dataView = dataViews?.length ? dataViews[0] : undefined;
         api.blockingError.next(undefined);
-        const dataView = api.dataViews.getValue()?.[0];
-        const searchSource = api.searchSource$.getValue();
         if (!dataView || !searchSource) {
           return;
         }

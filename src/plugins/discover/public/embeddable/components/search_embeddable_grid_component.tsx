@@ -102,6 +102,8 @@ export function SearchEmbeddableGridComponent({
       api.defaultPanelDescription
     );
 
+  const isEsql = useMemo(() => isEsqlMode({ searchSource }), [searchSource]);
+
   const savedSearchProps: SavedSearchProps = useMemo(() => {
     return {
       sharedItemTitle: panelTitle || savedSearchTitle,
@@ -112,7 +114,7 @@ export function SearchEmbeddableGridComponent({
       query: searchSource.getField('query'),
       dataView: dataViews?.[0],
       columns: columns ?? [],
-      sort: getSortForEmbeddable(sort, dataViews?.[0], discoverServices.uiSettings, false),
+      sort: getSortForEmbeddable(sort, dataViews?.[0], discoverServices.uiSettings, isEsql),
       rowHeightState: rowHeight,
       headerRowHeightState: headerRowHeight,
       rowsPerPageState: rowsPerPage,
@@ -142,6 +144,7 @@ export function SearchEmbeddableGridComponent({
       interceptedWarnings,
     };
   }, [
+    isEsql,
     searchSource,
     panelTitle,
     panelDescription,
@@ -160,8 +163,6 @@ export function SearchEmbeddableGridComponent({
     discoverServices.uiSettings,
     interceptedWarnings,
   ]);
-
-  const isEsql = useMemo(() => isEsqlMode({ searchSource }), [searchSource]);
 
   const useLegacyTable = useMemo(
     () =>
@@ -211,6 +212,7 @@ export function SearchEmbeddableGridComponent({
   return (
     <DiscoverGridEmbeddableMemoized
       {...searchProps}
+      isPlainRecord={isEsql}
       sampleSizeState={fetchedSampleSize}
       loadingState={searchProps.isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
     />

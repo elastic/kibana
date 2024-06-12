@@ -229,6 +229,13 @@ export const getSearchEmbeddableFactory = ({
           savedObjectId: savedObjectId$,
           defaultPanelTitle: defaultPanelTitle$,
           defaultPanelDescription: defaultPanelDescription$,
+          // getByValueRuntimeSnapshot: () => {
+          //   const savedSearch = searchEmbeddableApi.getSavedSearch();
+          //   return {
+          //     ...omit(savedSearch, 'searchSource'),
+          //     serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
+          //   };
+          // },
           hasTimeRange: () => {
             const fetchContext = fetchContext$.getValue();
             return fetchContext?.timeslice !== undefined || fetchContext?.timeRange !== undefined;

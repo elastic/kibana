@@ -7,8 +7,9 @@
  */
 
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, skip, switchMap } from 'rxjs';
 
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { ROW_HEIGHT_OPTION, SAMPLE_SIZE_SETTING } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type { StateComparators } from '@kbn/presentation-publishing';
@@ -31,6 +32,19 @@ export type SavedSearchAttributesManager = {
   >]: BehaviorSubject<Omit<SearchEmbeddableAttributes, 'serializedSearchSource'>[key]>;
 };
 
+const initializeSearchSource = async (
+  dataService: DiscoverServices['data'],
+  serializedSearchSource?: SerializedSearchSourceFields
+) => {
+  const [searchSource, parentSearchSource] = await Promise.all([
+    dataService.search.searchSource.create(serializedSearchSource),
+    dataService.search.searchSource.create(),
+  ]);
+  searchSource.setParent(parentSearchSource);
+  const dataView = searchSource.getField('index');
+  return { searchSource, dataView };
+};
+
 export const initializeSearchEmbeddableApi = async (
   initialState: SearchEmbeddableRuntimeState,
   {
@@ -43,15 +57,13 @@ export const initializeSearchEmbeddableApi = async (
   searchEmbeddableStateManager: SavedSearchAttributesManager;
   searchEmbeddableComparators: StateComparators<SearchEmbeddableAttributes>;
 }> => {
-  const [searchSource, parentSearchSource] = await Promise.all([
-    discoverServices.data.search.searchSource.create(initialState.serializedSearchSource),
-    discoverServices.data.search.searchSource.create(),
-  ]);
-  searchSource.setParent(parentSearchSource);
-  const searchSource$ = new BehaviorSubject(searchSource);
   const serializedSearchSource$ = new BehaviorSubject(initialState.serializedSearchSource);
-
-  const dataView = searchSource.getField('index');
+  /** We **must** have a search source, so start by initializing it  */
+  const { searchSource, dataView } = await initializeSearchSource(
+    discoverServices.data,
+    initialState.serializedSearchSource
+  );
+  const searchSource$ = new BehaviorSubject(searchSource);
   const dataViews = new BehaviorSubject(dataView ? [dataView] : undefined);
 
   /** This is the state that can be initialized from the saved initial state */
@@ -85,6 +97,19 @@ export const initializeSearchEmbeddableApi = async (
   const defaultRowHeight = discoverServices.uiSettings.get(ROW_HEIGHT_OPTION);
   const defaultRowsPerPage = getDefaultRowsPerPage(discoverServices.uiSettings);
   const defaultSampleSize = discoverServices.uiSettings.get(SAMPLE_SIZE_SETTING);
+
+  /** Keep the search source in sync with the runtime state serialized search source */
+  const cleanup = serializedSearchSource$
+    .pipe(
+      skip(1), // skip the first emit because it was initialized above
+      switchMap((serializedSearchSource) =>
+        initializeSearchSource(discoverServices.data, serializedSearchSource)
+      )
+    )
+    .subscribe(({ searchSource: newSearchSource, dataView: newDataView }) => {
+      searchSource$.next(newSearchSource);
+      dataViews.next(newDataView ? [newDataView] : undefined);
+    });
 
   const getSearchEmbeddableComparators = (): StateComparators<SearchEmbeddableAttributes> => {
     return {
