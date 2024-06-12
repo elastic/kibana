@@ -292,10 +292,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           [
-            { metric: 'cpuUsage', value: '2,500.0%' },
-            { metric: 'memoryUsage', value: '2,000.0%' },
+            { metric: 'cpuUsage', value: '25.0%' },
+            { metric: 'memoryUsage', value: '20.0%' },
           ].forEach(({ metric, value }) => {
-            it.skip(`${metric} tile should show ${value}`, async () => {
+            it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
                 const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
                   metric
@@ -325,6 +325,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should show metadata table', async () => {
             await pageObjects.assetDetails.metadataTableExists();
+          });
+        });
+
+        describe('Logs Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickLogsTab();
+          });
+
+          after(async () => {
+            await retry.try(async () => {
+              await pageObjects.infraHome.closeFlyout();
+            });
+          });
+
+          it('should render logs tab', async () => {
+            await pageObjects.assetDetails.logsExists();
           });
         });
 
