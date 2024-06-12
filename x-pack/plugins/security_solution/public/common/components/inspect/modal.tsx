@@ -76,7 +76,7 @@ const monacoEditorOptions: CodeEditorProps['options'] = {
 
 const MyEuiModal = styled(EuiModal)`
   width: min(768px, calc(100vw - 16px));
-  min-height: 41vh;
+  height: 41vh;
   .euiModal__flex {
     width: 60vw;
   }
@@ -89,7 +89,7 @@ const MyEuiModal = styled(EuiModal)`
     * headerHeight + footerHeight + tabsHeight + paddingAroundCodeBlock = 208px
     *
     */
-    min-height: calc(41vh - 208px) !important;
+    height: calc(41vh - 208px) !important;
   }
 `;
 
