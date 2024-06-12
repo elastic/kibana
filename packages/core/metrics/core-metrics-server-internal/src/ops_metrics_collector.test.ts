@@ -29,7 +29,7 @@ describe('OpsMetricsCollector', () => {
 
   beforeEach(() => {
     const hapiServer = httpServiceMock.createInternalSetupContract().server;
-    const agentManager = new AgentManager(loggerMock.create());
+    const agentManager = new AgentManager(loggerMock.create(), { dnsCacheTtlInSeconds: 0 });
     collector = new OpsMetricsCollector(hapiServer, agentManager, { logger: loggerMock.create() });
 
     mockOsCollector.collect.mockResolvedValue('osMetrics');

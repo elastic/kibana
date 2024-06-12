@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { map, uniq } from 'lodash';
+import { flatMap, uniq } from 'lodash';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
@@ -105,7 +105,7 @@ export const getCloudDefendAgentPolicies = async (
   packagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface
 ): Promise<AgentPolicy[]> =>
-  agentPolicyService.getByIds(soClient, uniq(map(packagePolicies, 'policy_id')), {
+  agentPolicyService.getByIds(soClient, uniq(flatMap(packagePolicies, 'policy_ids')), {
     withPackagePolicies: true,
     ignoreMissing: true,
   });

@@ -45,7 +45,6 @@ describe('extractResponses', () => {
     };
     expect(extractResponses(route, oasConverter)).toEqual({
       200: {
-        description: 'No description',
         content: {
           'application/test+json; Elastic-Api-Version=2023-10-31': {
             schema: {
@@ -60,7 +59,6 @@ describe('extractResponses', () => {
         },
       },
       404: {
-        description: 'No description',
         content: {
           'application/test2+json; Elastic-Api-Version=2023-10-31': {
             schema: {

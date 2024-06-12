@@ -10,6 +10,7 @@ import { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiSpacer } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { CspVulnerabilityFinding } from '../../../common/schemas';
 import { CloudSecurityDataTable } from '../../components/cloud_security_data_table';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
@@ -18,6 +19,7 @@ import { getDefaultQuery, defaultColumns } from './constants';
 import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
+import { createDetectionRuleFromVulnerabilityFinding } from './utils/create_detection_rule_from_vulnerability';
 import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
 
 interface LatestVulnerabilitiesTableProps {
@@ -34,6 +36,12 @@ const isCspVulnerabilityFinding = (
   return source?.vulnerability?.id !== undefined;
 };
 
+const getCspVulnerabilityFinding = (
+  source: Record<string, any> | undefined
+): CspVulnerabilityFinding | false => {
+  return isCspVulnerabilityFinding(source) && (source as CspVulnerabilityFinding);
+};
+
 /**
  * This Wrapper component renders the children if the given row is a CspVulnerabilityFinding
  * it uses React's Render Props pattern
@@ -45,8 +53,7 @@ const CspVulnerabilityFindingRenderer = ({
   row: DataTableRecord;
   children: ({ finding }: { finding: CspVulnerabilityFinding }) => JSX.Element;
 }) => {
-  const source = row.raw._source;
-  const finding = isCspVulnerabilityFinding(source) && (source as CspVulnerabilityFinding);
+  const finding = getCspVulnerabilityFinding(row.raw._source);
   if (!finding) return <></>;
   return children({ finding });
 };
@@ -94,6 +101,14 @@ export const LatestVulnerabilitiesTable = ({
       nonPersistedFilters,
     });
 
+  const createVulnerabilityRuleFn = (rowIndex: number) => {
+    const finding = getCspVulnerabilityFinding(rows[rowIndex].raw._source);
+    if (!finding) return;
+
+    return async (http: HttpSetup) =>
+      createDetectionRuleFromVulnerabilityFinding(http, finding.vulnerability);
+  };
+
   return (
     <>
       {error ? (
@@ -109,6 +124,7 @@ export const LatestVulnerabilitiesTable = ({
           rows={rows}
           total={total}
           flyoutComponent={flyoutComponent}
+          createRuleFn={createVulnerabilityRuleFn}
           cloudPostureDataTable={cloudPostureDataTable}
           loadMore={fetchNextPage}
           title={title}
