@@ -83,7 +83,7 @@ export const PresentationPanelError = ({
         searchErrorDisplay?.body ?? (
           <EuiText size="s">
             <Markdown data-test-subj="errorMessageMarkdown" readOnly>
-              {error?.message?.length
+              {error.message?.length
                 ? error.message
                 : i18n.translate('presentationPanelError.emptyErrorMessage', {
                     defaultMessage: 'Error',
