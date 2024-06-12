@@ -98,7 +98,7 @@ export const LinkContent = ({
     } else {
       const snapshotUrl = getSnapshotUrl();
       // dashboard has specific tests that test long urls only
-      if (objectType === 'dashboard') {
+      if (objectType !== 'search') {
         setTestUrl(snapshotUrl);
       }
       const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
