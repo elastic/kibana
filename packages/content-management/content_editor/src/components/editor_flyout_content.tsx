@@ -28,6 +28,7 @@ import type { Item } from '../types';
 import { MetadataForm } from './metadata_form';
 import { useMetadataForm } from './use_metadata_form';
 import type { CustomValidators } from './use_metadata_form';
+import { ActivityView } from './activity_view';
 
 const getI18nTexts = ({ entityName }: { entityName: string }) => ({
   saveButtonLabel: i18n.translate('contentManagement.contentEditor.saveButtonLabel', {
@@ -147,7 +148,9 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
           tagsReferences={item.tags}
           TagList={TagList}
           TagSelector={TagSelector}
-        />
+        >
+          <ActivityView item={item} />
+        </MetadataForm>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

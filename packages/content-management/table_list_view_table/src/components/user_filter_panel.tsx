@@ -12,8 +12,7 @@ import { EuiFilterButton, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UserProfile, UserProfilesPopover } from '@kbn/user-profile-components';
 import { i18n } from '@kbn/i18n';
-import { useUserProfiles } from '@kbn/content-management-user-profiles';
-import { NoUsersTip } from './user_missing_tip';
+import { useUserProfiles, NoCreatorTip } from '@kbn/content-management-user-profiles';
 
 interface Context {
   enabled: boolean;
@@ -123,7 +122,7 @@ export const UserFilterPanel: FC<{}> = () => {
                 id="contentManagement.tableList.listing.userFilter.emptyMessage"
                 defaultMessage="None of the dashboards have creators"
               />
-              {<NoUsersTip />}
+              {<NoCreatorTip />}
             </p>
           ),
           nullOptionLabel: i18n.translate(
@@ -133,7 +132,7 @@ export const UserFilterPanel: FC<{}> = () => {
             }
           ),
           nullOptionProps: {
-            append: <NoUsersTip />,
+            append: <NoCreatorTip />,
           },
           clearButtonLabel: (
             <FormattedMessage

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { UserAvatarTip } from './src/components';
+export { UserAvatarTip, NoUpdaterTip, NoCreatorTip, ManagedAvatarTip } from './src/components';
 
 export { useUserProfile, useUserProfiles } from './src/queries';
 
