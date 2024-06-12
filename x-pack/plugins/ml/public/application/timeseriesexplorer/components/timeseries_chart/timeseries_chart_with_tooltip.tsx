@@ -26,8 +26,8 @@ const percentFocusChartHeight = 0.77;
 const percentContextChartHeight = 0.15;
 
 function getChartHeights(height: number) {
-  const focusZoomPanelHeight = height * percentFocusZoomPanelHeight;
-  const focusChartHeight = height * percentFocusChartHeight;
+  const focusZoomPanelHeight = Math.round(height * percentFocusZoomPanelHeight);
+  const focusChartHeight = Math.round(height * percentFocusChartHeight);
 
   const heights: {
     focusZoomPanelHeight: number;
@@ -38,7 +38,7 @@ function getChartHeights(height: number) {
     focusZoomPanelHeight,
     focusChartHeight,
     focusHeight: focusZoomPanelHeight + focusChartHeight,
-    contextChartHeight: height * percentContextChartHeight,
+    contextChartHeight: Math.round(height * percentContextChartHeight),
   };
   return heights;
 }
