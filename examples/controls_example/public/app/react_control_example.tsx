@@ -297,7 +297,7 @@ export const ReactControlExample = ({
             } as object,
             references: [
               {
-                name: 'controlGroup_a957862f-beae-4f0c-8a3a-a6ea4c235651:searchControlDataView',
+                name: `controlGroup_${searchControlId}:searchControlDataView`,
                 type: 'index-pattern',
                 id: dataViews?.[0].id!,
               },
