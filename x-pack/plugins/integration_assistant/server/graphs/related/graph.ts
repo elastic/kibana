@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { StateGraphArgs } from '@langchain/langgraph';
+// import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
 import type {
   ActionsClientChatOpenAI,
@@ -19,6 +20,7 @@ import { handleErrors } from './errors';
 import { handleReview } from './review';
 import { RELATED_ECS_FIELDS, RELATED_EXAMPLE_ANSWER } from './constants';
 
+// @ts-expect-error remove after bump to TS@5
 const graphState: StateGraphArgs<RelatedState>['channels'] = {
   lastExecutedChain: {
     value: (x: string, y?: string) => y ?? x,

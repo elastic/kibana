@@ -9,15 +9,11 @@ import nunjucks from 'nunjucks';
 
 import { createSync, generateFields, mergeSamples } from '../util';
 
-interface Doc {
-  [key: string]: unknown;
-}
-
 export function createFieldMapping(
   packageName: string,
   dataStreamName: string,
   specificDataStreamDir: string,
-  docs: Doc[]
+  docs: object[]
 ): void {
   createBaseFields(specificDataStreamDir, packageName, dataStreamName);
   createCustomFields(specificDataStreamDir, docs);
@@ -37,7 +33,7 @@ function createBaseFields(
   createSync(`${specificDataStreamDir}/base-fields.yml`, baseFields);
 }
 
-function createCustomFields(specificDataStreamDir: string, pipelineResults: Doc[]): void {
+function createCustomFields(specificDataStreamDir: string, pipelineResults: object[]): void {
   const mergedResults = mergeSamples(pipelineResults);
   const fieldKeys = generateFields(mergedResults);
   createSync(`${specificDataStreamDir}/fields/fields.yml`, fieldKeys);

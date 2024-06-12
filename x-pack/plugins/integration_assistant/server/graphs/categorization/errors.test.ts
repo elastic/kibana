@@ -13,10 +13,14 @@ import {
   categorizationMockProcessors,
   categorizationExpectedHandlerResponse,
 } from '../../../__jest__/fixtures/categorization';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 
 const mockLlm = new FakeLLM({
   response: JSON.stringify(categorizationMockProcessors, null, 2),
-});
+}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
 const testState: CategorizationState = categorizationTestState;
 
