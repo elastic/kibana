@@ -122,7 +122,7 @@ export default function (ctx: FtrProviderContext) {
         await globalNav.badgeMissingOrFail();
       });
 
-      it('Shows short urls for the right priviledged user', async () => {
+      it('Shows short urls for users with the right privileges', async () => {
         let actualUrl: string = '';
         await PageObjects.share.clickShareTopNavButton();
         const re = new RegExp(
@@ -233,7 +233,7 @@ export default function (ctx: FtrProviderContext) {
         await PageObjects.share.closeShareModal();
       });
 
-      it(`Doesn't show short urls for users without those permissions`, async () => {
+      it(`Doesn't show short urls for users without those privileges`, async () => {
         await PageObjects.share.clickShareTopNavButton();
         let actualUrl: string = '';
 
@@ -307,7 +307,7 @@ export default function (ctx: FtrProviderContext) {
         await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
 
-      it('Shows short urls for users with the right priviledges', async () => {
+      it('Shows short urls for users with the right privileges', async () => {
         await PageObjects.share.clickShareTopNavButton();
         let actualUrl: string = '';
         const re = new RegExp(
