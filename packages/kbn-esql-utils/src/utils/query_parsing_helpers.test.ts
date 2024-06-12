@@ -127,5 +127,13 @@ describe('esql query helpers', () => {
       // | stats  var0 = avg(bytes) by geo.dest`)
       ).toBeFalsy();
     });
+
+    it('should return false for metrics with no aggregation', () => {
+      expect(hasTransformationalCommand('metrics a')).toBeFalsy();
+    });
+
+    it('should return true for metrics with aggregations', () => {
+      expect(hasTransformationalCommand('metrics a var = avg(b)')).toBeTruthy();
+    });
   });
 });
