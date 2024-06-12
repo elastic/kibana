@@ -27,7 +27,7 @@ import {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantItem } from '@kbn/ml-agg-utils';
+import { type SignificantItem } from '@kbn/ml-agg-utils';
 import {
   setPinnedGroup,
   setSelectedGroup,
@@ -41,7 +41,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { LogRateAnalysisResultsTable } from './log_rate_analysis_results_table';
-import { GROUPS_TABLE, useColumns } from './use_columns';
+import { LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE, useColumns } from './use_columns';
 
 const EXPAND_COLUMN_WIDTH = '40px';
 const MAX_GROUP_BADGES = 5;
@@ -237,7 +237,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   ];
 
   const columns = useColumns(
-    GROUPS_TABLE,
+    LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS,
     skippedColumns,
     searchQuery,
     barColorOverride,

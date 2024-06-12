@@ -61,9 +61,13 @@ export const significantItemColumns = {
   ...commonColumns,
 } as const;
 
-export const GROUPS_TABLE = 'groups';
-export const SIG_ITEMS_TABLE = 'significantItems';
-type TableType = typeof GROUPS_TABLE | typeof SIG_ITEMS_TABLE;
+export const LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE = {
+  GROUPS: 'groups',
+  SIGNIFICANT_ITEMS: 'significantItems',
+} as const;
+export type LogRateAnalysisResultsTableType =
+  typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE[keyof typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE];
+
 export type ColumnNames = keyof typeof significantItemColumns | 'unique';
 
 const logRateHelpMessage = i18n.translate(
@@ -94,7 +98,7 @@ const impactMessage = i18n.translate(
 );
 
 export const useColumns = (
-  tableType: TableType,
+  tableType: LogRateAnalysisResultsTableType,
   skippedColumns: string[],
   searchQuery: estypes.QueryDslQueryContainer,
   barColorOverride?: string,
@@ -114,7 +118,7 @@ export const useColumns = (
   const loading = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
 
-  const isGroupsTable = tableType === GROUPS_TABLE;
+  const isGroupsTable = tableType === LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS;
 
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
     return {

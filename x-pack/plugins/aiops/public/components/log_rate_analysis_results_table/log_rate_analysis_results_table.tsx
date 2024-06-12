@@ -23,7 +23,7 @@ import {
 
 import type { GroupTableItemGroup } from '@kbn/aiops-log-rate-analysis/state';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
-import { useColumns, SIG_ITEMS_TABLE } from './use_columns';
+import { useColumns, LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE } from './use_columns';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
@@ -96,7 +96,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   );
 
   const columns = useColumns(
-    SIG_ITEMS_TABLE,
+    LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.SIGNIFICANT_ITEMS,
     skippedColumns,
     searchQuery,
     barColorOverride,
