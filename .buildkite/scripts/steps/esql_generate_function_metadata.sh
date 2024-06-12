@@ -3,7 +3,7 @@ set -euo pipefail
 
 VALIDATION_PACKAGE_DIR="packages/kbn-esql-validation-autocomplete"
 EDITOR_PACKAGE_DIR="packages/kbn-text-based-editor"
-GIT_SCOPE=$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*
+GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
 
 report_main_step () {
   echo "--- $1"
