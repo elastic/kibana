@@ -536,6 +536,8 @@ class AgentPolicyService {
               kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
             }
           ).then(({ total }) => (agentPolicy.agents = total));
+        } else {
+          agentPolicy.agents = 0;
         }
 
         return agentPolicy;
@@ -550,8 +552,6 @@ class AgentPolicyService {
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     }
-
-    agentPolicies.forEach((item) => (item.agents = 0));
 
     return {
       items: agentPolicies,
