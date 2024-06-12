@@ -38,8 +38,8 @@ import type { ThreeVersionsOf } from '../../../../../../../common/api/detection_
 import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 import { calculateFieldsDiffFor } from './diff_calculation_helpers';
 import {
-  simpleDiffAlgorithm,
   numberDiffAlgorithm,
+  simpleDiffAlgorithm,
   singleLineStringDiffAlgorithm,
 } from './algorithms';
 

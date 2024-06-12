@@ -126,7 +126,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
           (fieldDiff) =>
             fieldDiff.has_update ||
             fieldDiff.has_conflict ||
-            // For full transparancy we display all user-customized fields, even if nothing changes in the field's target or merged versions
+            // For full transparency we display all user-customized fields, even if nothing changes in the field's target or merged versions
             fieldDiff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueNoUpdate ||
             fieldDiff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueSameUpdate
         ),
