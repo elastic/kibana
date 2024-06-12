@@ -88,11 +88,7 @@ deploy() {
 
     echo "Write to vault..."
 
-    VAULT_ROLE_ID="$(get_vault_role_id)"
-    VAULT_SECRET_ID="$(get_vault_secret_id)"
-    VAULT_TOKEN=$(retry 5 30 "VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id=$VAULT_ROLE_ID secret_id=$VAULT_SECRET_ID")
-    retry 5 30 "VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print $VAULT_TOKEN"
-    VAULT_ADDR=$LEGACY_VAULT_ADDR vault_set "cloud-deploy/$VAULT_KEY_NAME" \
+    set_kv_in_legacy_vault "cloud-deploy/$VAULT_KEY_NAME" \
      username="$PROJECT_USERNAME" \
      password="$PROJECT_PASSWORD" \
      id="$PROJECT_ID"

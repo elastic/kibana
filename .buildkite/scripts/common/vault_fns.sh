@@ -86,3 +86,27 @@ function get_vault_secret_id() {
 
     echo "$VAULT_SECRET_ID"
 }
+
+function set_kv_in_legacy_vault() {
+  key_path=$1
+  shift
+  fields=("$@")
+
+  OLD_VAULT_ADDR=$VAULT_ADDR
+
+  VAULT_ROLE_ID="$(get_vault_role_id)"
+  VAULT_SECRET_ID="$(get_vault_secret_id)"
+  export VAULT_ADDR=$LEGACY_VAULT_ADDR
+
+  VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+  retry 5 30 vault login -no-print "$VAULT_TOKEN"
+
+  set +e
+  vault_set "$key_path" "${fields[@]}"
+  EXIT_CODE=$?
+  set -e
+
+  export VAULT_ADDR=$OLD_VAULT_ADDR
+
+  return $EXIT_CODE
+}
