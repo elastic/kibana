@@ -91,6 +91,7 @@ export const executeUpdate = async <T>(
     upsert,
     refresh = DEFAULT_REFRESH_SETTING,
     migrationVersionCompatibility,
+    managed,
   } = options;
 
   // Preflight calls to get the doc and check namespaces for multinamespace types.
@@ -178,6 +179,7 @@ export const executeUpdate = async <T>(
       attributes: {
         ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, upsert)),
       },
+      managed,
       created_at: time,
       updated_at: time,
       ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
@@ -236,6 +238,7 @@ export const executeUpdate = async <T>(
     updatedOrCreatedSavedObject = {
       id,
       type,
+      managed,
       created_at: time,
       updated_at: time,
       ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
@@ -342,6 +345,7 @@ export const executeUpdate = async <T>(
     updatedOrCreatedSavedObject = {
       id,
       type,
+      managed,
       updated_at: time,
       ...(updatedBy && { updated_by: updatedBy }),
       version: encodeHitVersion(indexDocResponseBody),

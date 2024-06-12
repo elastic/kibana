@@ -52,6 +52,7 @@ import {
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
+import { markFleetTagsAsManaged } from './epm/kibana/assets/tag_assets';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -204,6 +205,9 @@ async function createSetupSideEffects(
   logger.debug('Backfilling output performance presets');
   await outputService.backfillAllOutputPresets(soClient, esClient);
 
+  logger.debug('Backfilling Fleet-managed tags');
+  await backfillTags();
+
   logger.debug('Setting up Fleet Elasticsearch assets');
   let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
   await ensureFleetGlobalEsAssets(soClient, esClient);
@@ -345,6 +349,15 @@ export async function ensureFleetGlobalEsAssets(
       { concurrency: 10 }
     );
   }
+}
+
+async function backfillTags() {
+  const spaceId = DEFAULT_SPACE_ID; // TODO: replace hard-coded value
+  const savedObjectClientWithSpace = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+  const savedObjectTagClient = appContextService
+    .getSavedObjectsTagging()
+    .createTagClient({ client: savedObjectClientWithSpace });
+  await markFleetTagsAsManaged(savedObjectTagClient, spaceId);
 }
 
 /**

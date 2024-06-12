@@ -35,6 +35,14 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
   /**
+   * Flag indicating if a saved object is managed by Kibana (default=false)
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
+  /**
    * By default, update will merge the provided attributes with the ones present on the document
    * (performing a standard partial update). Setting this option to `false` will change the behavior, performing
    * a "full" update instead, where the provided attributes will fully replace the existing ones.

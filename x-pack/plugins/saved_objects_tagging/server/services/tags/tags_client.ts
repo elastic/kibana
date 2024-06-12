@@ -6,7 +6,11 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { CreateTagOptions, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common/types';
+import {
+  CreateTagOptions,
+  Tag,
+  UpdateTagOptions,
+} from '@kbn/saved-objects-tagging-oss-plugin/common/types';
 import { TagSavedObject, TagAttributes, ITagsClient } from '../../../common/types';
 import { tagSavedObjectTypeName } from '../../../common/constants';
 import { TagValidationError } from './errors';
@@ -34,12 +38,12 @@ export class TagsClient implements ITagsClient {
     return savedObjectToTag(raw);
   }
 
-  public async update(id: string, attributes: TagAttributes) {
+  public async update(id: string, attributes: TagAttributes, options?: UpdateTagOptions) {
     const validation = validateTag(attributes);
     if (!validation.valid) {
       throw new TagValidationError('Error validating tag attributes', validation);
     }
-    const raw = await this.soClient.update<TagAttributes>(this.type, id, attributes);
+    const raw = await this.soClient.update<TagAttributes>(this.type, id, attributes, options);
     return savedObjectToTag(raw as TagSavedObject); // all attributes are updated, this is not a partial
   }
 
