@@ -15,13 +15,13 @@ describe('useGetUpdatedTags hook', () => {
   const secondFilter: TagFilter = (tag) => tag.startsWith('second:') || tag === 'special_second';
   const thirdFilter: TagFilter = (tag) => tag.startsWith('third:');
 
-  const filtersInOrder = {
+  const getFiltersInOrder = () => ({
     first: firstFilter,
     second: secondFilter,
     third: thirdFilter,
-  };
+  });
 
-  const exampleException: Partial<ExceptionListItemSchema> = {
+  const getExampleException = (): Partial<ExceptionListItemSchema> => ({
     tags: [
       'first:mozzarella',
       'first:roquefort',
@@ -33,18 +33,18 @@ describe('useGetUpdatedTags hook', () => {
       'third:tagliatelle',
       'third:penne',
     ],
-  };
+  });
 
   describe('getTagsUpdatedBy', () => {
     describe('when `tags` is undefined', () => {
       it('should return empty array when the update is empty', () => {
-        const { result } = renderHook(() => useGetUpdatedTags({}, filtersInOrder));
+        const { result } = renderHook(() => useGetUpdatedTags({}, getFiltersInOrder()));
 
         expect(result.current.getTagsUpdatedBy('second', [])).toStrictEqual([]);
       });
 
       it('should return new array with the update', () => {
-        const { result } = renderHook(() => useGetUpdatedTags({}, filtersInOrder));
+        const { result } = renderHook(() => useGetUpdatedTags({}, getFiltersInOrder()));
 
         expect(result.current.getTagsUpdatedBy('second', ['special_second'])).toStrictEqual([
           'special_second',
@@ -54,7 +54,9 @@ describe('useGetUpdatedTags hook', () => {
 
     describe('when removing tags from a category', () => {
       it('should be able to remove a tag category from the start', () => {
-        const { result } = renderHook(() => useGetUpdatedTags(exampleException, filtersInOrder));
+        const { result } = renderHook(() =>
+          useGetUpdatedTags(getExampleException(), getFiltersInOrder())
+        );
 
         expect(result.current.getTagsUpdatedBy('first', [])).toStrictEqual([
           'second:cabernet',
@@ -67,7 +69,9 @@ describe('useGetUpdatedTags hook', () => {
       });
 
       it('should be able to remove a tag category from the middle', () => {
-        const { result } = renderHook(() => useGetUpdatedTags(exampleException, filtersInOrder));
+        const { result } = renderHook(() =>
+          useGetUpdatedTags(getExampleException(), getFiltersInOrder())
+        );
 
         expect(result.current.getTagsUpdatedBy('second', [])).toStrictEqual([
           'first:mozzarella',
@@ -79,7 +83,9 @@ describe('useGetUpdatedTags hook', () => {
       });
 
       it('should be able to remove a tag category from the end', () => {
-        const { result } = renderHook(() => useGetUpdatedTags(exampleException, filtersInOrder));
+        const { result } = renderHook(() =>
+          useGetUpdatedTags(getExampleException(), getFiltersInOrder())
+        );
 
         expect(result.current.getTagsUpdatedBy('third', [])).toStrictEqual([
           'first:mozzarella',
@@ -94,7 +100,7 @@ describe('useGetUpdatedTags hook', () => {
       it('should be able to remove all tags category by category and keeping the original order', () => {
         const { result, rerender } = renderHook(
           ({ exception, filters }) => useGetUpdatedTags(exception, filters),
-          { initialProps: { exception: exampleException, filters: filtersInOrder } }
+          { initialProps: { exception: getExampleException(), filters: getFiltersInOrder() } }
         );
 
         let tags = result.current.getTagsUpdatedBy('first', []);
@@ -107,11 +113,11 @@ describe('useGetUpdatedTags hook', () => {
           'third:penne',
         ]);
 
-        rerender({ exception: { tags }, filters: filtersInOrder });
+        rerender({ exception: { tags }, filters: getFiltersInOrder() });
         tags = result.current.getTagsUpdatedBy('second', []);
         expect(tags).toStrictEqual(['third:tagliatelle', 'third:penne']);
 
-        rerender({ exception: { tags }, filters: filtersInOrder });
+        rerender({ exception: { tags }, filters: getFiltersInOrder() });
         tags = result.current.getTagsUpdatedBy('third', []);
         expect(tags).toStrictEqual([]);
       });
@@ -121,7 +127,7 @@ describe('useGetUpdatedTags hook', () => {
       let tags: string[] = [];
       const { result, rerender } = renderHook(
         ({ exception, filters }) => useGetUpdatedTags(exception, filters),
-        { initialProps: { exception: { tags }, filters: filtersInOrder } }
+        { initialProps: { exception: { tags }, filters: getFiltersInOrder() } }
       );
 
       // add middle
@@ -129,12 +135,12 @@ describe('useGetUpdatedTags hook', () => {
       expect(tags).toStrictEqual(['special_second']);
 
       // add last
-      rerender({ exception: { tags }, filters: filtersInOrder });
+      rerender({ exception: { tags }, filters: getFiltersInOrder() });
       tags = result.current.getTagsUpdatedBy('third', ['third:spaghetti']);
       expect(tags).toStrictEqual(['special_second', 'third:spaghetti']);
 
       // add first
-      rerender({ exception: { tags }, filters: filtersInOrder });
+      rerender({ exception: { tags }, filters: getFiltersInOrder() });
       tags = result.current.getTagsUpdatedBy('first', ['first:brie']);
       expect(tags).toStrictEqual(['first:brie', 'special_second', 'third:spaghetti']);
     });
@@ -142,7 +148,7 @@ describe('useGetUpdatedTags hook', () => {
     it('should update category order on any change if filter is changed (although it should not)', () => {
       const { result, rerender } = renderHook(
         ({ exception, filters }) => useGetUpdatedTags(exception, filters),
-        { initialProps: { exception: exampleException, filters: filtersInOrder } }
+        { initialProps: { exception: getExampleException(), filters: getFiltersInOrder() } }
       );
 
       let tags = result.current.getTagsUpdatedBy('second', ['second:shiraz']);
