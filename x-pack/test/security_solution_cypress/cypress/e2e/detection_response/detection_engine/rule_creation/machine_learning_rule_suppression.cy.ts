@@ -52,7 +52,7 @@ describe(
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
-    const jobId = 'v3_linux_anomalous_network_activity_ecs';
+    const jobId = 'v3_linux_anomalous_network_activity';
     const suppressByFields = ['agent.name', 'host.name'];
 
     beforeEach(() => {
