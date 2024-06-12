@@ -35,6 +35,8 @@ main () {
 
   yarn make:docs $PARENT_DIR/elasticsearch
 
+  report_main_step "Run i18n check"
+
   cd "$KIBANA_DIR"
 
   node scripts/i18n_check.js --fix
