@@ -8,13 +8,13 @@
 import { SpacesServiceProvider } from '../../../common/services/spaces';
 import { BsearchSecureService } from '../../../../test_serverless/shared/services/bsearch_secure';
 import { services as serverlessServices } from '../../../../test_serverless/api_integration/services';
-import { SecuritySolutionServerlessSuperTest } from '../services/security_solution_serverless_supertest';
 import { SecuritySolutionServerlessUtils } from '../services/security_solution_serverless_utils';
+import { SecuritySolutionServerlessSuperTest } from '../services/security_solution_serverless_supertest';
 
 export const services = {
   ...serverlessServices,
   spaces: SpacesServiceProvider,
   secureBsearch: BsearchSecureService,
-  supertest: SecuritySolutionServerlessSuperTest,
   securitySolutionUtils: SecuritySolutionServerlessUtils,
+  supertest: SecuritySolutionServerlessSuperTest,
 };

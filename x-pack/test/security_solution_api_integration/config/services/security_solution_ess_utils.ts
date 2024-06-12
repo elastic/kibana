@@ -8,13 +8,15 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { SecuritySolutionUtils } from './types';
 
-export async function SecuritySolutionESSUtils({
+export function SecuritySolutionESSUtils({
   getService,
-}: FtrProviderContext): Promise<SecuritySolutionUtils> {
+}: FtrProviderContext): SecuritySolutionUtils {
   const config = getService('config');
+  const supertest = getService('supertest');
 
   return {
     getUsername: (_role?: string) =>
       Promise.resolve(config.get('servers.kibana.username') as string),
+    createSuperTest: (_role?: string) => Promise.resolve(supertest),
   };
 }

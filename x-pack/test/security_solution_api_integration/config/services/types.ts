@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import TestAgent from 'supertest/lib/agent';
+
 export interface SecuritySolutionUtils {
   getUsername: (role?: string) => Promise<string>;
+  createSuperTest: (role?: string) => Promise<TestAgent<any>>;
 }

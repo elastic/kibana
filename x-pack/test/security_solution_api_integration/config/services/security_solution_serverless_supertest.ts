@@ -5,25 +5,11 @@
  * 2.0.
  */
 
-// import { FtrProviderContext } from '@kbn/ftrcommonfunctionalservices';
-import supertest from 'supertest';
-import { format as formatUrl } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// It is wrapper around supertest that injects Serverless auth headers
+// It is wrapper around supertest that injects Serverless auth headers for the admin user.
 export async function SecuritySolutionServerlessSuperTest({ getService }: FtrProviderContext) {
-  const config = getService('config');
+  const { createSuperTest } = getService('securitySolutionUtils');
 
-  const kbnUrl = formatUrl({
-    ...config.get('servers.kibana'),
-    auth: false,
-  });
-
-  const svlUserManager = getService('svlUserManager');
-  const adminRoleAuthc = await svlUserManager.createApiKeyForRole('admin');
-
-  const svlCommonApi = getService('svlCommonApi');
-  const commonRequestHeader = svlCommonApi.getCommonRequestHeader();
-
-  return supertest.agent(kbnUrl).set(commonRequestHeader).set(adminRoleAuthc.apiKeyHeader);
+  return await createSuperTest('admin');
 }
