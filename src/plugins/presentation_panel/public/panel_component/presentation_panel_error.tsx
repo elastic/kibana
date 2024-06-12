@@ -85,7 +85,7 @@ export const PresentationPanelError = ({
             <Markdown data-test-subj="errorMessageMarkdown" readOnly>
               {error.message?.length
                 ? error.message
-                : i18n.translate('presentationPanelError.emptyErrorMessage', {
+                : i18n.translate('presentationPanel.emptyErrorMessage', {
                     defaultMessage: 'Error',
                   })}
             </Markdown>
