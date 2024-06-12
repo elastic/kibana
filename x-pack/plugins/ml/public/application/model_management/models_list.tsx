@@ -454,7 +454,7 @@ export const ModelsList: FC<Props> = ({
         if (downloadedModelIds.length > 0) {
           // Show success toast
           displaySuccessToast(
-            i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
+            i18n.translate('xpack.ml.trainedModels.modelsList.downloadCompleteSuccess', {
               defaultMessage:
                 '"{modelIds}" {modelIdsLength, plural, one {has} other {have}} been downloaded successfully.',
               values: {
