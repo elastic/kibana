@@ -14,6 +14,7 @@ post:
                 type: string
               id:
                 type: string
+                description: fleet server host id
               host:
                 type: string
                 deprecated: true

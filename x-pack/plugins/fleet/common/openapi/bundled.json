@@ -38,7 +38,8 @@
                       "type": "string"
                     },
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "fleet server host id"
                     },
                     "host": {
                       "type": "string",

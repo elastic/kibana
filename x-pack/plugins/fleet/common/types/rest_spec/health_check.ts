@@ -8,7 +8,7 @@
 export interface PostHealthCheckRequest {
   body: {
     id: string;
-    // deprecated
+    /** @deprecated use id field instead */
     host?: string;
   };
 }
