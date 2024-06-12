@@ -51,6 +51,10 @@ export interface FullStoryShipperConfig extends FullStorySnippetConfig {
    * If this setting is provided, it'll only send the event types specified in this list.
    */
   eventTypesAllowlist?: string[];
+  /**
+   * FullStory only allows calling setVars('page') once per navigation.
+   * This setting defines how much time to hold from calling the API while additional lazy context is being resolved.
+   */
   pageVarsDebounceTimeMs?: number;
 }
 
