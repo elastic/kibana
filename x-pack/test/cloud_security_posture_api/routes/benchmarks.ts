@@ -61,7 +61,7 @@ export default function (providerContext: FtrProviderContext) {
       benchmark: {
         id: rule?.metadata.benchmark.id || 'ruleMetadataBenchmarkIdTest',
         posture_type:
-          rule.metadata?.benchmark.posture_type || ' ruleMetadataBenchmarkPostureTypeTest',
+          rule?.metadata.benchmark.posture_type || ' ruleMetadataBenchmarkPostureTypeTest',
         name: rule?.metadata.benchmark.name || 'ruleMetadataBenchmarkNameTest',
         version: rule?.metadata.benchmark.version || 'ruleMetadataBenchmarkVersionTest',
         rule_number: rule?.metadata.benchmark.rule_number || 'ruleMetadataBenchmarkRuleNumberTest',
