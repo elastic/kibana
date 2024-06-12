@@ -10,9 +10,12 @@ import type { QueryContainer } from '@elastic/eui/src/components/search_bar/quer
 import type { HttpStart } from '@kbn/core/public';
 import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
 
-import type { QueryFilters } from './api_keys_grid/api_keys_table';
-import type { ApiKeyToInvalidate, QueryApiKeyResult } from '../../../common/model';
-import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../../server/routes/api_keys';
+import type { QueryFilters } from '@kbn/security-plugin/public/management/api_keys/api_keys_grid/api_keys_table';
+import type { ApiKeyToInvalidate, QueryApiKeyResult } from '@kbn/security-plugin/common/model';
+import type {
+  UpdateAPIKeyParams,
+  UpdateAPIKeyResult,
+} from '@kbn/security-plugin/server/routes/api_keys';
 
 export type { CreateAPIKeyParams, CreateAPIKeyResult, UpdateAPIKeyParams, UpdateAPIKeyResult };
 

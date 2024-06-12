@@ -7,7 +7,13 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "__mocks__/**/*"
+    "__mocks__/**/*",
+    "../../packages/security/api_key_management/src/components/api_key_flyout.tsx",
+    "../../packages/security/api_key_management/src/components/api_keys_api_client.ts",
+    "../../packages/security/api_key_management/src/components/api_keys_api_client.test.ts",
+    "public/management/api_keys/api_keys_api_client.mock.ts",
+    "../../packages/security/api_key_management/src/api_key.ts",
+    "../../packages/security/api_key_management/src/components/token_field.tsx"
   ],
   "kbn_references": [
     "@kbn/cloud-plugin",

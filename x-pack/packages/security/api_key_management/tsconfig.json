@@ -1,0 +1,13 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "**/*.ts",
+    "../../../plugins/security/public/management/api_keys/api_keys_api_client.mock.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+}

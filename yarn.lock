@@ -6044,7 +6044,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-api-key-management@link:x-pack/packages/security/api_key_management":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-hardening@link:packages/kbn-security-hardening":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-plugin-form-components@link:x-pack/packages/security/plugin_form_components":
   version "0.0.0"
   uid ""
 

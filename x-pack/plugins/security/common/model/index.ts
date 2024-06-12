@@ -15,7 +15,7 @@ export type {
   CrossClusterApiKeyAccess,
   ApiKeyAggregations,
   QueryApiKeyResult,
-} from './api_key';
+} from '@kbn/security-api-key-management';
 export type { EditUser, GetUserDisplayNameParams } from './user';
 export type { GetUserProfileResponse } from './user_profile';
 export {
