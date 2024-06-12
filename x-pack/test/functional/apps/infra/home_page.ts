@@ -309,7 +309,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpu', chartsCount: 1 },
             { metric: 'memory', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
-            it.skip(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
               const containers = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
                 metric
               );
@@ -333,8 +333,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickMetricsTab();
           });
 
-          // Unskip when https://github.com/elastic/kibana/pull/185786 is merged
-          it.skip('should show metrics content', async () => {
+          it('should show metrics content', async () => {
             await pageObjects.assetDetails.metricsChartsContentExists();
           });
         });

@@ -713,8 +713,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          // Unskip when https://github.com/elastic/kibana/pull/185786 is merged
-          describe.skip('Metrics Tab', () => {
+          describe('Metrics Tab', () => {
             before(async () => {
               await pageObjects.assetDetails.clickMetricsTab();
             });
@@ -726,9 +725,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'network', chartsCount: 1 },
             ].forEach(({ metric, chartsCount }) => {
               it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
-                const charts = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
-                  metric
-                );
+                const charts = await pageObjects.assetDetails.getMetricsTabDockerCharts(metric);
                 expect(charts.length).to.equal(chartsCount);
               });
 

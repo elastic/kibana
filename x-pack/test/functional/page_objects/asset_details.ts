@@ -227,6 +227,14 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
     },
 
+    async getMetricsTabDockerCharts(metric: string) {
+      const container = await testSubjects.find('infraAssetDetailsMetricsTabContent');
+      const section = await container.findByTestSubject(
+        `infraAssetDetailsDockerChartsSection${metric}`
+      );
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+    },
+
     async quickAccessItemExists(metric: string) {
       return testSubjects.click(`infraMetricsQuickAccessItem${metric}`);
     },
