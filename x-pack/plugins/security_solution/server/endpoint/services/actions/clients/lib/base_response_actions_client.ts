@@ -55,7 +55,7 @@ import type {
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
   ResponseActionsScanParameters,
@@ -654,7 +654,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     actionRequest: KillProcessRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     throw new ResponseActionsNotSupportedError('kill-process');
   }
@@ -663,7 +663,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     actionRequest: SuspendProcessRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
-    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     throw new ResponseActionsNotSupportedError('suspend-process');
   }

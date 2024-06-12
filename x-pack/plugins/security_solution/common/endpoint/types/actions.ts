@@ -183,16 +183,25 @@ export interface LogsEndpointActionResponse<
 interface ResponseActionParametersWithPid {
   pid: number;
   entity_id?: never;
+  process_name?: never;
 }
 
 interface ResponseActionParametersWithEntityId {
   pid?: never;
+  process_name?: never;
   entity_id: string;
 }
 
-export type ResponseActionParametersWithPidOrEntityId =
+interface ResponseActionParametersWithProcessName {
+  pid?: never;
+  entity_id?: never;
+  process_name: string;
+}
+
+export type ResponseActionParametersWithProcessData =
   | ResponseActionParametersWithPid
-  | ResponseActionParametersWithEntityId;
+  | ResponseActionParametersWithEntityId
+  | ResponseActionParametersWithProcessName;
 
 export interface ResponseActionGetFileParameters {
   path: string;
@@ -209,7 +218,7 @@ export interface ResponseActionsScanParameters {
 
 export type EndpointActionDataParameterTypes =
   | undefined
-  | ResponseActionParametersWithPidOrEntityId
+  | ResponseActionParametersWithProcessData
   | ResponseActionsExecuteParameters
   | ResponseActionGetFileParameters
   | ResponseActionUploadParameters

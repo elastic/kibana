@@ -9,7 +9,7 @@ import type { Readable } from 'stream';
 import type {
   ActionDetails,
   KillProcessActionOutputContent,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   SuspendProcessActionOutputContent,
   GetProcessesActionOutputContent,
   ResponseActionGetFileOutputContent,
@@ -92,14 +92,14 @@ export interface ResponseActionsClient {
     actionRequest: OmitUnsupportedAttributes<KillProcessRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   >;
 
   suspendProcess: (
     actionRequest: OmitUnsupportedAttributes<SuspendProcessRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<
-    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
   >;
 
   runningProcesses: (

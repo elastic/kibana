@@ -34,7 +34,7 @@ import type {
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
@@ -231,11 +231,11 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     actionRequest: KillProcessRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     return this.handleResponseAction<
       KillProcessRequestBody,
-      ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+      ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
     >('kill-process', actionRequest, options);
   }
 
@@ -243,11 +243,11 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     actionRequest: SuspendProcessRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<
-    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     return this.handleResponseAction<
       SuspendProcessRequestBody,
-      ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+      ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
     >('suspend-process', actionRequest, options);
   }
 

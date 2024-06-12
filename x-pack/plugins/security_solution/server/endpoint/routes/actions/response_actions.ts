@@ -47,7 +47,7 @@ import {
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   ResponseActionsExecuteParameters,
   ResponseActionsScanParameters,
   KillProcessRequestBody,
@@ -166,7 +166,7 @@ export function registerResponseActionRoutes(
       withEndpointAuthz(
         { all: ['canKillProcess'] },
         logger,
-        responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        responseActionRequestHandler<ResponseActionParametersWithProcessData>(
           endpointContext,
           'kill-process'
         )
@@ -189,7 +189,7 @@ export function registerResponseActionRoutes(
       withEndpointAuthz(
         { all: ['canSuspendProcess'] },
         logger,
-        responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        responseActionRequestHandler<ResponseActionParametersWithProcessData>(
           endpointContext,
           'suspend-process'
         )
