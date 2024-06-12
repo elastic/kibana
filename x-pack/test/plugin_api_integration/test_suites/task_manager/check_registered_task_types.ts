@@ -58,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.crowdstrike',
         'actions:.d3security',
         'actions:.email',
+        'actions:.gemini',
         'actions:.gen-ai',
         'actions:.index',
         'actions:.jira',

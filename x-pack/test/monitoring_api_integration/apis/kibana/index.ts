@@ -10,7 +10,7 @@ import { installPackage } from '../../packages';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('Kibana', () => {
-    before(() => installPackage(getService('supertest'), 'kibana'));
+    before(async () => await installPackage(getService('supertest'), 'kibana'));
 
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./instances'));

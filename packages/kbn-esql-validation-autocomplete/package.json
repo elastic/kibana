@@ -10,6 +10,7 @@
     "make:defs": "ts-node --transpileOnly ./scripts/generate_function_definitions.ts",
     "postmake:defs": "yarn run lint:fix && yarn run i18n:fix",
     "lint:fix": "cd ../.. && node ./scripts/eslint --fix ./packages/kbn-esql-validation-autocomplete/src/**/*.ts",
-    "i18n:fix": "cd ../.. && node ./scripts/i18n_check.js --fix"
+    "i18n:fix": "cd ../.. && node ./scripts/i18n_check.js --fix",
+    "test:validation": "cd ../.. && yarn test:jest ./packages/kbn-esql-validation-autocomplete/src/validation/validation.test.ts"
   }
 }
