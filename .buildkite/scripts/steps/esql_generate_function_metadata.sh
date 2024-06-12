@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VALIDATION_PACKAGE_DIR="$KIBANA_DIR/packages/kbn-esql-validation-autocomplete"
-EDITOR_PACKAGE_DIR="$KIBANA_DIR/packages/kbn-text-based-editor"
+VALIDATION_PACKAGE_DIR="packages/kbn-esql-validation-autocomplete"
+EDITOR_PACKAGE_DIR="packages/kbn-text-based-editor"
 GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
 
 report_main_step () {
@@ -23,7 +23,7 @@ main () {
 
   .buildkite/scripts/bootstrap.sh
 
-  cd "$VALIDATION_PACKAGE_DIR"
+  cd "$KIBANA_DIR/$VALIDATION_PACKAGE_DIR"
 
   report_main_step "Generate function definitions"
 
@@ -35,7 +35,7 @@ main () {
 
   report_main_step "Generate inline function docs"
 
-  cd "$EDITOR_PACKAGE_DIR"
+  cd "$KIBANA_DIR/$EDITOR_PACKAGE_DIR"
 
   yarn make:docs $PARENT_DIR/elasticsearch
 
