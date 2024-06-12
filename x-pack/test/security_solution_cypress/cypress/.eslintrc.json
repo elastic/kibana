@@ -7,7 +7,7 @@
     "cypress/globals": true
   },
   "rules": {
-    "cypress/no-force": "warn",
+    "cypress/no-force": "error",
     "import/no-extraneous-dependencies": "off"
   }
 }
