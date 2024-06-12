@@ -9,7 +9,7 @@
 import type { EcsEvent } from '@elastic/ecs';
 import { CspBenchmarkRuleMetadata } from '../types/latest';
 
-export type CspFindingBase = {
+export interface CspFindingBase {
   '@timestamp': string;
   cluster_id: string;
   result: CspFindingResult;
@@ -21,7 +21,7 @@ export type CspFindingBase = {
   ecs: {
     version: string;
   };
-};
+}
 
 export interface CspFindingCSPM extends CspFindingBase {
   cloud: CspFindingCloud;
