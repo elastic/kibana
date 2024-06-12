@@ -35,6 +35,7 @@ export const InferenceEndpoints: React.FC = () => {
         <InferenceFlyoutWrapperComponent
           isInferenceFlyoutVisible={isInferenceFlyoutVisible}
           setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
+          inferenceEndpoints={inferenceEndpoints}
         />
       )}
     </>

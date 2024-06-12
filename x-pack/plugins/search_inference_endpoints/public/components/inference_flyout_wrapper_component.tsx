@@ -17,17 +17,20 @@ import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import { SUPPORTED_PYTORCH_TASKS, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import * as i18n from '../../common/translations';
 import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../common/constants';
 import { useKibana } from '../hooks/use_kibana';
 import { docLinks } from '../../common/doc_links';
 
 interface InferenceFlyoutWrapperComponentProps {
+  inferenceEndpoints: InferenceAPIConfigResponse[];
   isInferenceFlyoutVisible: boolean;
   setIsInferenceFlyoutVisible: (isVisible: boolean) => void;
 }
 
 export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperComponentProps> = ({
+  inferenceEndpoints,
   isInferenceFlyoutVisible,
   setIsInferenceFlyoutVisible,
 }) => {
@@ -66,7 +69,18 @@ export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperCom
     }
   );
 
-  const onInferenceEndpointChange = async () => {};
+  const onInferenceEndpointChange = useCallback(
+    async (inferenceId: string) => {
+      const modelsExist = inferenceEndpoints.some((i) => i.model_id === inferenceId);
+      if (modelsExist) {
+        setInferenceEndpointError('Inference Endpoint id already exists');
+      } else {
+        setInferenceEndpointError(undefined);
+      }
+    },
+    [inferenceEndpoints]
+  );
+
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
       setIsCreateInferenceApiLoading(true);
