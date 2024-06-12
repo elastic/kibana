@@ -7,7 +7,10 @@
 
 import { getMachineLearningRule } from '../../../../objects/rule';
 import { TOOLTIP } from '../../../../screens/common';
-import { ALERT_SUPPRESSION_FIELDS_INPUT } from '../../../../screens/create_new_rule';
+import {
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_FIELDS_INPUT,
+} from '../../../../screens/create_new_rule';
 import {
   DEFINITION_DETAILS,
   DETAILS_TITLE,
@@ -18,6 +21,7 @@ import {
 import {
   executeSetupModuleRequest,
   forceStartDatafeeds,
+  stopDatafeeds,
 } from '../../../../support/machine_learning';
 import {
   continueFromDefineStep,
@@ -53,7 +57,7 @@ describe(
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
     const jobId = 'v3_linux_anomalous_network_activity';
-    const suppressByFields = ['agent.name', 'host.name'];
+    const suppressByFields = ['by_field_name', 'by_field_value'];
 
     beforeEach(() => {
       login();
@@ -62,6 +66,10 @@ describe(
 
     describe('with Alert Suppression', () => {
       describe('when no ML jobs have run', () => {
+        before(() => {
+          stopDatafeeds({ jobIds: [jobId] });
+        });
+
         beforeEach(() => {
           mlRule = getMachineLearningRule();
           selectMachineLearningRuleType();
@@ -97,12 +105,11 @@ describe(
             fillDefineMachineLearningRule(mlRule);
           });
 
-          it.only('displays a warning message on the suppression fields', () => {
+          it('displays a warning message on the suppression fields', () => {
             cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
-            cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should(
-              'have.attr',
-              'title',
-              'Alert suppression will be disabled until the Machine Learning jobs are run.'
+            cy.get(ALERT_SUPPRESSION_FIELDS).should(
+              'contain.text',
+              'This list of fields may be incomplete as some Machine Learning jobs are not running.'
             );
           });
         });

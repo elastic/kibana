@@ -808,11 +808,10 @@ export const fillDefineMachineLearningRule = (rule: MachineLearningRuleCreatePro
     : [rule.machine_learning_job_id];
   const text = jobsAsArray
     .map((machineLearningJob) => `${machineLearningJob}{downArrow}{enter}`)
-    .join('');
+    .join('')
+    .concat('{esc}');
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(text);
-
-  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
 
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
     force: true,

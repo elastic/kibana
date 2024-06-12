@@ -52,3 +52,21 @@ export const forceStartDatafeeds = ({ jobIds }: { jobIds: string[] }) =>
       start: new Date().getUTCMilliseconds(),
     },
   });
+
+/**
+ * Calls the internal ML Jobs API to stop the datafeeds for the given job IDs.
+ * @param jobIds the job IDs for which to stop datafeeds
+ * @returns the response from the stop datafeeds request
+ */
+export const stopDatafeeds = ({ jobIds }: { jobIds: string[] }) =>
+  rootRequest({
+    headers: {
+      'elastic-api-version': 1,
+    },
+    method: 'POST',
+    url: '/internal/ml/jobs/stop_datafeeds',
+    failOnStatusCode: true,
+    body: {
+      datafeedIds: jobIds.map((jobId) => `datafeed-${jobId}`),
+    },
+  });
