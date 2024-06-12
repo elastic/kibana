@@ -68,7 +68,7 @@ export const AttackDiscoveries = z.array(AttackDiscovery);
  * The status of the attack discovery.
  */
 export type AttackDiscoveryStatus = z.infer<typeof AttackDiscoveryStatus>;
-export const AttackDiscoveryStatus = z.enum(['running', 'succeeded', 'failed']);
+export const AttackDiscoveryStatus = z.enum(['running', 'succeeded', 'failed', 'canceled']);
 export type AttackDiscoveryStatusEnum = typeof AttackDiscoveryStatus.enum;
 export const AttackDiscoveryStatusEnum = AttackDiscoveryStatus.enum;
 
@@ -133,6 +133,10 @@ export const AttackDiscoveryResponse = z.object({
    * The average generation interval in milliseconds
    */
   averageIntervalMs: z.number().int(),
+  /**
+   * The reason for a status of failed.
+   */
+  failureReason: z.string().optional(),
 });
 
 export type AttackDiscoveryUpdateProps = z.infer<typeof AttackDiscoveryUpdateProps>;
@@ -163,6 +167,10 @@ export const AttackDiscoveryUpdateProps = z.object({
    * The backing index required for update requests.
    */
   backingIndex: z.string(),
+  /**
+   * The reason for a status of failed.
+   */
+  failureReason: z.string().optional(),
 });
 
 export type AttackDiscoveryCreateProps = z.infer<typeof AttackDiscoveryCreateProps>;

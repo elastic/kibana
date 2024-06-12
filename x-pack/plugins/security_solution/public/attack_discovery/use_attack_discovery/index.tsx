@@ -28,6 +28,7 @@ export interface UseAttackDiscovery {
   alertsContextCount: number | null;
   approximateFutureTime: Date | null;
   attackDiscoveries: AttackDiscoveries;
+  failureReason: string | null;
   fetchAttackDiscoveries: () => Promise<void>;
   generationIntervals: GenerationInterval[] | undefined;
   isLoading: boolean;
@@ -73,6 +74,7 @@ export const useAttackDiscovery = ({
   const [attackDiscoveries, setAttackDiscoveries] = useState<AttackDiscoveries>([]);
   const [replacements, setReplacements] = useState<Replacements>({});
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [failureReason, setFailureReason] = useState<string | null>(null);
 
   // number of alerts sent as context to the LLM:
   const [alertsContextCount, setAlertsContextCount] = useState<number | null>(null);
@@ -117,6 +119,11 @@ export const useAttackDiscovery = ({
       if (pollData.alertsContextCount != null) setAlertsContextCount(pollData.alertsContextCount);
       if (pollData.updatedAt) setLastUpdated(new Date(pollData.updatedAt));
       if (pollData.replacements) setReplacements(pollData.replacements);
+      if (pollData.status === 'failed' && pollData.failureReason) {
+        setFailureReason(pollData.failureReason);
+      } else {
+        setFailureReason(null);
+      }
       setAttackDiscoveries(pollData.attackDiscoveries);
       setGenerationIntervals(pollData.generationIntervals);
     }
@@ -161,6 +168,7 @@ export const useAttackDiscovery = ({
     approximateFutureTime,
     attackDiscoveries,
     fetchAttackDiscoveries,
+    failureReason,
     generationIntervals,
     isLoading,
     lastUpdated,

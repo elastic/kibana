@@ -23,6 +23,7 @@ export interface EsAttackDiscoverySchema {
     summary_markdown: string;
     id?: string;
   }>;
+  failure_reason?: string;
   api_config: {
     connector_id: string;
     action_type_id: string;

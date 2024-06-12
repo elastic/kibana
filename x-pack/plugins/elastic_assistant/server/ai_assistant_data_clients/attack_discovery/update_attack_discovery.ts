@@ -44,6 +44,7 @@ export interface UpdateAttackDiscoverySchema {
   replacements?: EsReplacementSchema[];
   status: AttackDiscoveryStatus;
   updated_at?: string;
+  failure_reason?: string;
 }
 
 export interface UpdateAttackDiscoveryParams {
@@ -89,13 +90,14 @@ export const updateAttackDiscovery = async ({
 export const transformToUpdateScheme = (
   updatedAt: string,
   {
+    alertsContextCount,
     apiConfig,
     attackDiscoveries,
-    replacements,
-    id,
-    status,
-    alertsContextCount,
+    failureReason,
     generationIntervals,
+    id,
+    replacements,
+    status,
   }: AttackDiscoveryUpdateProps
 ): UpdateAttackDiscoverySchema => {
   const averageIntervalMsObj =
@@ -112,8 +114,7 @@ export const transformToUpdateScheme = (
         }
       : {};
   return {
-    id,
-    updated_at: updatedAt,
+    alerts_context_count: alertsContextCount,
     api_config: {
       action_type_id: apiConfig?.actionTypeId,
       connector_id: apiConfig?.connectorId,
@@ -121,14 +122,6 @@ export const transformToUpdateScheme = (
       model: apiConfig?.model,
       provider: apiConfig?.provider,
     },
-    replacements: replacements
-      ? Object.keys(replacements).map((key) => ({
-          uuid: key,
-          value: replacements[key],
-        }))
-      : undefined,
-    status,
-    alerts_context_count: alertsContextCount,
     attack_discoveries:
       attackDiscoveries?.map((attackDiscovery) => ({
         id: attackDiscovery.id ?? uuid.v4(),
@@ -140,6 +133,16 @@ export const transformToUpdateScheme = (
         summary_markdown: attackDiscovery.summaryMarkdown,
         timestamp: updatedAt,
       })) ?? [],
+    failure_reason: failureReason,
+    id,
+    replacements: replacements
+      ? Object.keys(replacements).map((key) => ({
+          uuid: key,
+          value: replacements[key],
+        }))
+      : undefined,
+    status,
+    updated_at: updatedAt,
     ...averageIntervalMsObj,
   };
 };

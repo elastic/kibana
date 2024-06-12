@@ -52,9 +52,14 @@ export const usePollApi = ({
   }, [connectorId]);
 
   const handleResponse = useCallback(
-    (responseData: AttackDiscoveryResponse) => {
+    (responseData: AttackDiscoveryResponse | null) => {
       if (connectorId == null || connectorId === '') {
         throw new Error('Invalid connector id');
+      }
+      if (responseData == null) {
+        setStatus(null);
+        setData(null);
+        return;
       }
       setStatus(responseData.status);
       setApproximateFutureTime(
@@ -92,22 +97,12 @@ export const usePollApi = ({
       if (!parsedResponse.success) {
         throw new Error('Failed to parse the attack discovery GET response');
       }
-      if (parsedResponse.data.entryExists === false || parsedResponse.data.data == null) {
-        setStatus(null);
-        setData(null);
-      } else if (
-        parsedResponse.data.data.status === attackDiscoveryStatus.succeeded ||
-        parsedResponse.data.data.status === attackDiscoveryStatus.failed
-      ) {
-        handleResponse(parsedResponse.data.data);
-      } else if (parsedResponse.data.data.status === attackDiscoveryStatus.running) {
-        handleResponse(parsedResponse.data.data);
+      handleResponse(parsedResponse.data.data ?? null);
+      if (parsedResponse?.data?.data?.status === attackDiscoveryStatus.running) {
         // poll every 3 seconds if attack discovery is running
         timeoutIdRef.current = setTimeout(() => {
           pollApi();
         }, 3000);
-      } else {
-        throw new Error('Invalid status from attack discovery GET response');
       }
     } catch (error) {
       setStatus(null);

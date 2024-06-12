@@ -338,6 +338,7 @@ export const handleToolError = ({
         id: attackDiscoveryId,
         replacements: latestReplacements,
         backingIndex,
+        failureReason: error.message,
       },
       authenticatedUser,
     })

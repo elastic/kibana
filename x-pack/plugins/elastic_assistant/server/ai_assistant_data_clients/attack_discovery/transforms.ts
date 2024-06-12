@@ -57,6 +57,7 @@ export const transformESSearchToAttackDiscovery = (
             durationMs: interval.duration_ms,
           })) ?? [],
         averageIntervalMs: adSchema.average_interval_ms ?? 0,
+        failureReason: adSchema.failure_reason,
       };
 
       return ad;

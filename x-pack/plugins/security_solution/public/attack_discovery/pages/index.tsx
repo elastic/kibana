@@ -71,6 +71,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     alertsContextCount,
     approximateFutureTime,
     attackDiscoveries,
+    failureReason,
     fetchAttackDiscoveries,
     generationIntervals,
     isLoading,
@@ -224,6 +225,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
               alertsContextCount={alertsContextCount}
               alertsCount={knowledgeBase.latestAlerts}
               attackDiscoveriesCount={attackDiscoveriesCount}
+              failureReason={failureReason}
               connectorId={connectorId}
               isLoading={isLoading}
               onGenerate={onGenerate}

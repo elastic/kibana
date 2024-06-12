@@ -58,6 +58,7 @@ components:
         - running
         - succeeded
         - failed
+        - canceled
 
     GenerationInterval:
       type: object
@@ -128,8 +129,11 @@ components:
           items:
             $ref: '#/components/schemas/GenerationInterval'
         averageIntervalMs:
-            type: integer
-            description: The average generation interval in milliseconds
+          type: integer
+          description: The average generation interval in milliseconds
+        failureReason:
+          type: string
+          description: The reason for a status of failed.
 
     AttackDiscoveryUpdateProps:
       type: object
@@ -162,6 +166,9 @@ components:
         backingIndex:
           type: string
           description: The backing index required for update requests.
+        failureReason:
+          type: string
+          description: The reason for a status of failed.
 
     AttackDiscoveryCreateProps:
       type: object

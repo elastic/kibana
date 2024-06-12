@@ -158,6 +158,11 @@ export const attackDiscoveryFieldMap: FieldMap = {
     array: false,
     required: false,
   },
+  failure_reason: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   generation_intervals: {
     type: 'nested',
     array: true,
