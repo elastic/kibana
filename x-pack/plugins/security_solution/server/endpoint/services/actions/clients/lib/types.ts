@@ -8,7 +8,6 @@
 import type { Readable } from 'stream';
 import type {
   ActionDetails,
-  KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
   ResponseActionParametersWithPidOrEntityId,
   SuspendProcessActionOutputContent,
@@ -24,6 +23,8 @@ import type {
   UploadedFileInfo,
   ResponseActionScanOutputContent,
   ResponseActionsScanParameters,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -88,14 +89,14 @@ export interface ResponseActionsClient {
   ) => Promise<ActionDetails>;
 
   killProcess: (
-    actionRequest: OmitUnsupportedAttributes<KillOrSuspendProcessRequestBody>,
+    actionRequest: OmitUnsupportedAttributes<KillProcessRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   >;
 
   suspendProcess: (
-    actionRequest: OmitUnsupportedAttributes<KillOrSuspendProcessRequestBody>,
+    actionRequest: OmitUnsupportedAttributes<SuspendProcessRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>

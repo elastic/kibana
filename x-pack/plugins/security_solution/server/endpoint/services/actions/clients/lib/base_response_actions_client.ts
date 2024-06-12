@@ -49,7 +49,6 @@ import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   GetProcessesActionOutputContent,
-  KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
   LogsEndpointAction,
   LogsEndpointActionResponse,
@@ -65,6 +64,8 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -650,7 +651,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async killProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: KillProcessRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
@@ -659,7 +660,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async suspendProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: SuspendProcessRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>

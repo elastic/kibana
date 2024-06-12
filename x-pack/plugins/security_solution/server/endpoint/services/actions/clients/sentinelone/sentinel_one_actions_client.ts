@@ -47,7 +47,6 @@ import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
-  KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
   LogsEndpointAction,
   LogsEndpointActionResponse,
@@ -62,6 +61,7 @@ import type {
   SentinelOneIsolationRequestMeta,
   SentinelOneIsolationResponseMeta,
   UploadedFileInfo,
+  KillProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -606,7 +606,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async killProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: KillProcessRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>

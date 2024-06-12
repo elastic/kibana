@@ -5,6 +5,15 @@
  * 2.0.
  */
 
-import { KillOrSuspendProcessRequestSchema } from './common/base';
+import { schema } from '@kbn/config-schema';
+import {
+  BaseActionRequestSchema,
+  KillOrSuspendProcessRequestParametersSchema,
+} from './common/base';
 
-export const SuspendProcessRouteRequestSchema = KillOrSuspendProcessRequestSchema;
+export const SuspendProcessRouteRequestSchema = {
+  body: schema.object({
+    ...BaseActionRequestSchema,
+    parameters: KillOrSuspendProcessRequestParametersSchema,
+  }),
+};

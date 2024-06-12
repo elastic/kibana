@@ -7,15 +7,20 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { UploadActionRequestSchema } from '../..';
+import {
+  KillProcessRouteRequestSchema,
+  SuspendProcessRouteRequestSchema,
+  UploadActionRequestSchema,
+} from '../..';
 import { ExecuteActionRequestSchema } from '../execute_route';
 import { EndpointActionGetFileSchema } from '../get_file_route';
 import { ScanActionRequestSchema } from '../scan_route';
-import { KillOrSuspendProcessRequestSchema, NoParametersRequestSchema } from './base';
+import { NoParametersRequestSchema } from './base';
 
 export const ResponseActionBodySchema = schema.oneOf([
   NoParametersRequestSchema.body,
-  KillOrSuspendProcessRequestSchema.body,
+  KillProcessRouteRequestSchema.body,
+  SuspendProcessRouteRequestSchema.body,
   EndpointActionGetFileSchema.body,
   ExecuteActionRequestSchema.body,
   ScanActionRequestSchema.body,

@@ -8,8 +8,8 @@
 import { memo, useMemo } from 'react';
 import { parsedPidOrEntityIdParameter } from '../lib/utils';
 import type {
-  KillOrSuspendProcessRequestBody,
   SuspendProcessActionOutputContent,
+  SuspendProcessRequestBody,
 } from '../../../../../common/endpoint/types';
 import { useSendSuspendProcessRequest } from '../../../hooks/response_actions/use_send_suspend_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
@@ -20,7 +20,7 @@ export const SuspendProcessActionResult = memo<
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendSuspendProcessRequest();
 
-  const actionRequestBody = useMemo<undefined | KillOrSuspendProcessRequestBody>(() => {
+  const actionRequestBody = useMemo<undefined | SuspendProcessRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const parameters = parsedPidOrEntityIdParameter(command.args.args);
 
@@ -33,10 +33,7 @@ export const SuspendProcessActionResult = memo<
       : undefined;
   }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
 
-  return useConsoleActionSubmitter<
-    KillOrSuspendProcessRequestBody,
-    SuspendProcessActionOutputContent
-  >({
+  return useConsoleActionSubmitter<SuspendProcessRequestBody, SuspendProcessActionOutputContent>({
     ResultComponent,
     setStore,
     store,

@@ -47,10 +47,11 @@ import {
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
-  KillOrSuspendProcessRequestBody,
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
   ResponseActionsScanParameters,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -374,14 +375,12 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
         case 'suspend-process':
           action = await responseActionsClient.suspendProcess(
-            req.body as KillOrSuspendProcessRequestBody
+            req.body as SuspendProcessRequestBody
           );
           break;
 
         case 'kill-process':
-          action = await responseActionsClient.killProcess(
-            req.body as KillOrSuspendProcessRequestBody
-          );
+          action = await responseActionsClient.killProcess(req.body as KillProcessRequestBody);
           break;
 
         case 'get-file':

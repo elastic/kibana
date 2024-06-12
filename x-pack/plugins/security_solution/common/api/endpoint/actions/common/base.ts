@@ -72,15 +72,12 @@ export const NoParametersRequestSchema = {
 };
 export type BaseActionRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
 
-export const KillOrSuspendProcessRequestSchema = {
-  body: schema.object({
-    ...BaseActionRequestSchema,
-    parameters: schema.oneOf([
-      schema.object({ pid: schema.number({ min: 1 }) }),
-      schema.object({ entity_id: schema.string({ minLength: 1 }) }),
-
-      // FIXME:PT code this param so that it applies only to sentinelOne
-      schema.object({ process_name: schema.string({ minLength: 1 }) }),
-    ]),
-  }),
-};
+/**
+ * Base parameters schema used by both `kill-process` and `suspend-process`. Only parameters that apply
+ * to both commands should be added here. Any others that are command specific or EDR vendor
+ * specific should be added to the individual command's schema
+ */
+export const KillOrSuspendProcessRequestParametersSchema = schema.oneOf([
+  schema.object({ pid: schema.number({ min: 1 }) }),
+  schema.object({ entity_id: schema.string({ minLength: 1 }) }),
+]);

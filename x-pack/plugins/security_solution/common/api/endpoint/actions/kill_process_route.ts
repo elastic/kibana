@@ -5,6 +5,17 @@
  * 2.0.
  */
 
-import { KillOrSuspendProcessRequestSchema } from './common/base';
+import { schema } from '@kbn/config-schema';
+import {
+  BaseActionRequestSchema,
+  KillOrSuspendProcessRequestParametersSchema,
+} from './common/base';
 
-export const KillProcessRouteRequestSchema = KillOrSuspendProcessRequestSchema;
+export const KillProcessRouteRequestSchema = {
+  body: schema.object({
+    ...BaseActionRequestSchema,
+    parameters: KillOrSuspendProcessRequestParametersSchema,
+  }),
+};
+// // FIXME:PT code this param so that it applies only to sentinelOne
+// schema.object({ process_name: schema.string({ minLength: 1 }) }),

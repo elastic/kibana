@@ -30,7 +30,6 @@ import type {
   ActionDetails,
   HostMetadata,
   GetProcessesActionOutputContent,
-  KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
@@ -45,6 +44,8 @@ import type {
   UploadedFileInfo,
   ResponseActionsScanParameters,
   ResponseActionScanOutputContent,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type {
   CommonResponseActionMethodOptions,
@@ -227,25 +228,25 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   }
 
   async killProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: KillProcessRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
     return this.handleResponseAction<
-      KillOrSuspendProcessRequestBody,
+      KillProcessRequestBody,
       ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
     >('kill-process', actionRequest, options);
   }
 
   async suspendProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: SuspendProcessRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
     return this.handleResponseAction<
-      KillOrSuspendProcessRequestBody,
+      SuspendProcessRequestBody,
       ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
     >('suspend-process', actionRequest, options);
   }
