@@ -59,6 +59,7 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
           {
             id: '1',
             policy_id: '1',
+            policy_ids: ['1'],
             package: {
               name: 'fleet_server',
               version: '10.0.0',
@@ -67,6 +68,7 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
           {
             id: '2',
             policy_id: '2',
+            policy_ids: ['2'],
             package: {
               name: 'fleet_server',
               version: '10.0.0',

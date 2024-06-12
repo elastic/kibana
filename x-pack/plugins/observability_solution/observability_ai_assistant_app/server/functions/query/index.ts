@@ -26,6 +26,7 @@ import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/se
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
+import { INLINE_ESQL_QUERY_REGEX } from './constants';
 
 export const QUERY_FUNCTION_NAME = 'query';
 
@@ -246,14 +247,6 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
               parameters: {
                 type: 'object',
                 properties: {
-                  guides: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                      enum: ['API', 'KIBANA', 'CROSS_CLUSTER'],
-                    },
-                    description: 'A list of guides',
-                  },
                   commands: {
                     type: 'array',
                     items: {
@@ -298,7 +291,6 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
       }
 
       const args = JSON.parse(response.message.function_call.arguments) as {
-        guides?: string[];
         commands?: string[];
         functions?: string[];
         intention: VisualizeESQLUserIntention;
@@ -307,9 +299,9 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
       const keywords = [
         ...(args.commands ?? []),
         ...(args.functions ?? []),
-        ...(args.guides ?? []),
         'SYNTAX',
         'OVERVIEW',
+        'OPERATORS',
       ].map((keyword) => keyword.toUpperCase());
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
@@ -432,12 +424,26 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
 
       return esqlResponse$.pipe(
         emitWithConcatenatedMessage(async (msg) => {
+          msg.message.content = msg.message.content.replaceAll(
+            INLINE_ESQL_QUERY_REGEX,
+            (_match, query) => {
+              const correction = correctCommonEsqlMistakes(query);
+              if (correction.isCorrection) {
+                resources.logger.debug(
+                  `Corrected query, from: \n${correction.input}\nto:\n${correction.output}`
+                );
+              }
+              return '```esql\n' + correction.output + '\n```';
+            }
+          );
+
           if (msg.message.function_call.name) {
             return msg;
           }
-          const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger)
-            .match(/```esql([\s\S]*?)```/)?.[1]
-            ?.trim();
+
+          const esqlQuery = msg.message.content.match(
+            new RegExp(INLINE_ESQL_QUERY_REGEX, 'ms')
+          )?.[1];
 
           let functionCall: ConcatenatedMessage['message']['function_call'] | undefined;
 
@@ -465,7 +471,6 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
             ...msg,
             message: {
               ...msg.message,
-              content: correctCommonEsqlMistakes(msg.message.content, resources.logger),
               ...(functionCall
                 ? {
                     function_call: functionCall,
