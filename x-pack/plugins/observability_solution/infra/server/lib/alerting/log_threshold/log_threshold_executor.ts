@@ -12,6 +12,7 @@ import {
   ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ElasticsearchClient, IBasePath } from '@kbn/core/server';
@@ -169,11 +170,21 @@ export const createLogThresholdExecutor =
             alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
           };
 
+          const instances = alertInstanceId.split(',');
+          const groups =
+            alertInstanceId !== '*'
+              ? params.groupBy?.reduce((resultGroups: any, groupByItem, index) => {
+                  resultGroups.push({ field: groupByItem, value: instances[index].trim() });
+                  return resultGroups;
+                }, [])
+              : undefined;
+
           const payload = {
             [ALERT_EVALUATION_THRESHOLD]: threshold,
             [ALERT_EVALUATION_VALUE]: value,
             [ALERT_REASON]: reason,
             [ALERT_CONTEXT]: alertContext,
+            [ALERT_GROUP]: groups,
             ...flattenAdditionalContext(rootLevelContext),
           };
 
