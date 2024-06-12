@@ -380,9 +380,14 @@ describe('helpers', () => {
 
       expect(mockLogger.error).toHaveBeenCalledWith(mockError);
       expect(updateAttackDiscovery).toHaveBeenCalledWith({
-        attackDiscoveryUpdateProps: expect.objectContaining({
+        attackDiscoveryUpdateProps: {
           status: attackDiscoveryStatus.failed,
-        }),
+          attackDiscoveries: [],
+          backingIndex: 'backing-index',
+          failureReason: 'Test error',
+          id: 'discovery-id',
+          replacements: {},
+        },
         authenticatedUser: params.authenticatedUser,
       });
       expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
