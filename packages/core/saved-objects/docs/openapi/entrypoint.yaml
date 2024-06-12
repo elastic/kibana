@@ -14,6 +14,7 @@ tags:
 servers:
   - url: /
 paths:
+# Paths in the default space
   '/api/encrypted_saved_objects/_rotate_key':
     $ref: 'paths/api@encrypted_saved_objects@_rotate_key.yaml'
   '/api/saved_objects/_bulk_create':
@@ -40,10 +41,6 @@ paths:
     $ref: 'paths/api@saved_objects@{type}@{id}.yaml'
   '/api/saved_objects/resolve/{type}/{id}':
     $ref: 'paths/api@saved_objects@resolve@{type}@{id}.yaml'
-  '/s/{spaceId}/api/saved_objects/_export':
-    $ref: 'paths/s@{spaceid}@api@saved_objects@_export.yaml'
-  '/s/{spaceId}/api/saved_objects/_import':
-    $ref: 'paths/s@{spaceid}@api@saved_objects@_import.yaml'
 components:
   securitySchemes:
     basicAuth:

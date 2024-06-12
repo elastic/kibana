@@ -1,8 +1,8 @@
 post:
-  summary: Export saved objects in default space
-  operationId: exportSavedObjectsDefaultSpace
+  summary: Retrieve sets of saved objects that you want to import into Kibana.
+  operationId: exportSavedObjects
   description: |
-    Retrieve sets of saved objects that you want to import into Kibana.
+
     You must include `type` or `objects` in the request body.
 
     NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
@@ -17,7 +17,27 @@ post:
     content:
       application/json:
         schema:
-          $ref: '../components/schemas/export_objects_request.yaml'
+          type: object
+          properties:
+            excludeExportDetails:
+              description: Do not add export details entry at the end of the stream.
+              type: boolean
+              default: false
+            includeReferencesDeep:
+              description: Includes all of the referenced objects in the exported objects.
+              type: boolean
+            objects:
+              description: A list of objects to export.
+              type: array
+              items:
+                type: object
+            type:
+              description: The saved object types to include in the export. Use `*` to export all the types.
+              oneOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
         examples:
           exportSavedObjectsRequest:
             $ref: '../components/examples/export_objects_request.yaml'
