@@ -32,15 +32,15 @@ describe('transformAlertingFrameworkHealth', () => {
     ).toEqual({
       decryptionHealth: {
         status: 'ok',
-        timestamp: '2024-01-01T08:00:00.000Z',
+        timestamp: new Date('01-01-2024').toISOString(),
       },
       executionHealth: {
         status: 'ok',
-        timestamp: '2024-01-02T08:00:00.000Z',
+        timestamp: new Date('01-02-2024').toISOString(),
       },
       readHealth: {
         status: 'ok',
-        timestamp: '2024-01-03T08:00:00.000Z',
+        timestamp: new Date('01-03-2024').toISOString(),
       },
     });
   });
@@ -69,15 +69,15 @@ describe('transformAlertingFrameworkHealth', () => {
       alertingFrameworkHealth: {
         decryptionHealth: {
           status: 'ok',
-          timestamp: '2024-01-01T08:00:00.000Z',
+          timestamp: new Date('01-01-2024').toISOString(),
         },
         executionHealth: {
           status: 'ok',
-          timestamp: '2024-01-02T08:00:00.000Z',
+          timestamp: new Date('01-02-2024').toISOString(),
         },
         readHealth: {
           status: 'ok',
-          timestamp: '2024-01-03T08:00:00.000Z',
+          timestamp: new Date('01-03-2024').toISOString(),
         },
       },
       hasPermanentEncryptionKey: true,
