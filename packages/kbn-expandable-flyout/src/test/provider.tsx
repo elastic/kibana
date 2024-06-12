@@ -9,6 +9,7 @@
 import { Provider as ReduxProvider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import React, { FC, PropsWithChildren } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ExpandableFlyoutContextProvider } from '../context';
 import { reducer } from '../reducer';
 import { Context } from '../redux';
@@ -32,10 +33,12 @@ export const TestProvider: FC<PropsWithChildren<TestProviderProps>> = ({
   });
 
   return (
-    <ExpandableFlyoutContextProvider urlKey={urlKey}>
-      <ReduxProvider store={store} context={Context}>
-        {children}
-      </ReduxProvider>
-    </ExpandableFlyoutContextProvider>
+    <I18nProvider>
+      <ExpandableFlyoutContextProvider urlKey={urlKey}>
+        <ReduxProvider store={store} context={Context}>
+          {children}
+        </ReduxProvider>
+      </ExpandableFlyoutContextProvider>
+    </I18nProvider>
   );
 };
