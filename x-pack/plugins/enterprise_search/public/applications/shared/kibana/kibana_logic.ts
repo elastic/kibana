@@ -163,7 +163,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
 export const mountKibanaLogic = (props: KibanaLogicProps) => {
   KibanaLogic(props);
   const unmount = KibanaLogic.mount();
-  props.coreSecurity?.authc.getCurrentUser().then((user) => {
+  props.coreSecurity?.authc.getCurrentUser()?.then((user) => {
     KibanaLogic.actions.setUser(user);
   });
   return unmount;
