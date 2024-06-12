@@ -613,6 +613,16 @@ describe('actions schemas', () => {
       }).toThrow();
     });
 
+    it('should error if agentType is sentinel_one but process_name is not defined', () => {
+      expect(() => {
+        KillProcessRouteRequestSchema.body.validate({
+          endpoint_ids: ['abc'],
+          agent_type: 'sentinel_one',
+          parameters: { pid: 4 },
+        });
+      }).toThrow();
+    });
+
     it('should allow use of process_name if agentType is sentinel_one', () => {
       expect(() => {
         KillProcessRouteRequestSchema.body.validate({

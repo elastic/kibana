@@ -25,6 +25,13 @@ export const KillProcessRouteRequestSchema = {
         if ('process_name' in bodyContent.parameters && bodyContent.agent_type !== 'sentinel_one') {
           return `[parameters.process_name]: is not valid with agent type of ${bodyContent.agent_type}`;
         }
+
+        if (
+          bodyContent.agent_type === 'sentinel_one' &&
+          !('process_name' in bodyContent.parameters)
+        ) {
+          return `[parameters.process_name]: missing parameter for agent type of ${bodyContent.agent_type}`;
+        }
       },
     }
   ),
