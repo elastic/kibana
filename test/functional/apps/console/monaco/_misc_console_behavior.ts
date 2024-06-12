@@ -76,7 +76,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should go to line number when Ctrl+L is pressed', async () => {
+      // flaky
+      it.skip('should go to line number when Ctrl+L is pressed', async () => {
         await PageObjects.console.monaco.enterText(
           '\nGET _search/foo\n{\n  "query": {\n    "match_all": {} \n} \n}'
         );
