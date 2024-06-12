@@ -22,7 +22,10 @@ import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delet
 import { findEntityDefinitions } from './find_entity_definition';
 import { saveEntityDefinition } from './save_entity_definition';
 import { startTransform } from './start_transform';
-import { stopAndDeleteHistoryTransform } from './stop_and_delete_transform';
+import {
+  stopAndDeleteHistoryTransform,
+  stopAndDeleteLatestTransform,
+} from './stop_and_delete_transform';
 import { uninstallEntityDefinition } from './uninstall_entity_definition';
 
 export interface InstallDefinitionParams {
@@ -69,6 +72,7 @@ export async function installEntityDefinition({
     await createAndInstallHistoryTransform(esClient, entityDefinition, logger);
     installState.transforms.history = true;
     await createAndInstallLatestTransform(esClient, entityDefinition, logger);
+    installState.transforms.latest = true;
 
     return entityDefinition;
   } catch (e) {
@@ -87,6 +91,10 @@ export async function installEntityDefinition({
 
     if (installState.transforms.history) {
       await stopAndDeleteHistoryTransform(esClient, definition, logger);
+    }
+
+    if (installState.transforms.latest) {
+      await stopAndDeleteLatestTransform(esClient, definition, logger);
     }
 
     throw e;
