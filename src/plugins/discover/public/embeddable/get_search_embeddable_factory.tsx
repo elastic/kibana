@@ -12,6 +12,7 @@ import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { KibanaExecutionContext } from '@kbn/core/types';
 import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
@@ -51,7 +52,6 @@ import {
   SearchEmbeddableSerializedState,
 } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
-import { KibanaExecutionContext } from '@kbn/core/types';
 
 /** This constant refers to the parts of the saved search state that can be edited from a dashboard */
 const EDITABLE_SAVED_SEARCH_KEYS: Array<keyof SavedSearchAttributes> = [

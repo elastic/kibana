@@ -10,7 +10,6 @@ import { BehaviorSubject, combineLatest, lastValueFrom, switchMap } from 'rxjs';
 
 import {
   buildDataTableRecord,
-  SEARCH_EMBEDDABLE_TYPE,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
@@ -18,24 +17,19 @@ import { EsHitRecord } from '@kbn/discover-utils/types';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import {
-  apiHasExecutionContext,
-  apiHasParentApi,
-  fetch$,
-  FetchContext,
-} from '@kbn/presentation-publishing';
+import { fetch$, FetchContext } from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 
+import { KibanaExecutionContext } from '@kbn/core/types';
 import { createDataViewDataSource, createEsqlDataSource } from '../../common/data_sources';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { SearchEmbeddableApi } from './types';
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
-import { KibanaExecutionContext } from '@kbn/core/types';
 
 export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): boolean => {
   const query = savedSearch.searchSource.getField('query');
@@ -145,7 +139,7 @@ export function initializeFetch({
           }
 
           const executionContext = await getExecutionContext();
-          console.log('executionContext', executionContext);
+
           /**
            * Fetch via saved search
            */
