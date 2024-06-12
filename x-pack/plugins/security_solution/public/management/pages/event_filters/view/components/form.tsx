@@ -29,9 +29,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
+import {
+  EVENT_FILTERS_OPERATORS,
+  hasWrongOperatorWithWildcard,
+} from '@kbn/securitysolution-list-utils';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
-import { OperatingSystem, validateHasWildcardWithWrongOperator } from '@kbn/securitysolution-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
@@ -161,8 +164,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const isGlobal = useMemo(() => isArtifactGlobal(exception), [exception]);
     const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(exception));
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
-    const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] =
-      useState<boolean>(false);
+    const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
+      hasWrongOperatorWithWildcard([exception])
+    );
+
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => [eventsIndexPattern], []);
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
@@ -566,17 +571,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         }
 
         // handle wildcard with wrong operator case
-        setHasWildcardWithWrongOperator(false);
-        arg.exceptionItems[0]?.entries.forEach((e) => {
-          if (
-            validateHasWildcardWithWrongOperator({
-              operator: (e as EventFilterItemEntries[number]).type,
-              value: (e as EventFilterItemEntries[number]).value,
-            })
-          ) {
-            setHasWildcardWithWrongOperator(true);
-          }
-        });
+        setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
 
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
           arg.exceptionItems[0] !== undefined
