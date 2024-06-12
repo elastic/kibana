@@ -63,6 +63,13 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     }),
     icon: 'logstashQueue',
   },
+  [AppIds.DATA_QUALITY]: {
+    category: appCategories.DATA,
+    description: i18n.translate('management.landing.withCardNavigation.dataQualityDescription', {
+      defaultMessage: 'Manage the quality of your logs data.',
+    }),
+    icon: 'indexEdit',
+  },
 
   [AppIds.RULES]: {
     category: appCategories.ALERTS,

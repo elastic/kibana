@@ -28,6 +28,7 @@ export enum AppIds {
   SERVERLESS_SETTINGS = 'settings',
   ROLES = 'roles',
   API_KEYS = 'api_keys',
+  DATA_QUALITY = 'data_quality',
 }
 
 // Create new type that is a union of all the appId values

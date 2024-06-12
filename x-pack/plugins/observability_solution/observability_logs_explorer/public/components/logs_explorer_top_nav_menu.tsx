@@ -27,6 +27,7 @@ import { ConnectedDiscoverLink } from './discover_link';
 import { FeedbackLink } from './feedback_link';
 import { ConnectedOnboardingLink } from './onboarding_link';
 import { AlertsPopover } from './alerts_popover';
+import { ConnectedDatasetQualityLink } from './dataset_quality_link';
 
 export const LogsExplorerTopNavMenu = () => {
   const {
@@ -69,6 +70,8 @@ const ProjectTopNav = () => {
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
+            <VerticalRule />
+            <ConnectedDatasetQualityLink />
             <VerticalRule />
             <FeedbackLink />
             <VerticalRule />
@@ -144,6 +147,8 @@ const ClassicTopNav = () => {
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
+            <VerticalRule />
+            <ConnectedDatasetQualityLink />
             <VerticalRule />
             <AlertsPopover />
             <VerticalRule />
