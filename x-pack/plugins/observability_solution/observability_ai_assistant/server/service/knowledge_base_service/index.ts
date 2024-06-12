@@ -481,17 +481,15 @@ export class KnowledgeBaseService {
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
-    const mappedQueries = queries.map((query) =>
-      typeof query === 'string' ? { boost: 1, text: query } : query
+    this.dependencies.logger.debug(
+      `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
-
-    this.dependencies.logger.debug(`Recalling entries from KB for queries: "${mappedQueries}"`);
     const modelId = await this.dependencies.getModelId();
 
     const [documentsFromKb, documentsFromConnectors] = await Promise.all([
       this.recallFromKnowledgeBase({
         user,
-        queries: mappedQueries,
+        queries,
         categories,
         namespace,
         modelId,
@@ -504,7 +502,7 @@ export class KnowledgeBaseService {
       this.recallFromConnectors({
         asCurrentUser,
         uiSettingsClient,
-        queries: mappedQueries,
+        queries,
         modelId,
       }).catch((error) => {
         this.dependencies.logger.debug('Error getting data from search indices');
