@@ -38,7 +38,8 @@
     "@kbn/home-sample-data-tab",
     "@kbn/analytics-client",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/discover-plugin"
   ],
   "exclude": ["target/**/*"]
 }
