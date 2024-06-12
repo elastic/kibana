@@ -225,7 +225,6 @@
       // slower transition on hover leave in case the user accidentally stops hover
       transition: opacity $euiAnimSpeedSlow;
       top: $euiSizeXS;
-      transform: translateZ(10);
       
       // Always show: REMOVE THESE
       // opacity: 1;
@@ -264,8 +263,5 @@
       top: -$euiSizeXL;
       z-index: $euiZLevel9; 
   }
-
- 
-
 
 }
