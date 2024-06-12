@@ -96,7 +96,7 @@ export const Markdown = ({
         // There was a trick to pass style as a part of props in the legacy React <Markdown> component
         style={restProps.style}
       >
-        {children ?? markdownContent!}
+        {children ?? markdownContent ?? ''}
       </EuiMarkdownFormat>
     );
   }
