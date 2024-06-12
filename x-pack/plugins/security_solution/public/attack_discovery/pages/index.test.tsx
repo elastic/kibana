@@ -64,6 +64,7 @@ jest.mock('../use_attack_discovery', () => ({
     attackDiscoveries: [],
     cachedAttackDiscoveries: {},
     fetchAttackDiscoveries: jest.fn(),
+    failureReason: null,
     generationIntervals: undefined,
     isLoading: false,
     lastUpdated: null,

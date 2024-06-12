@@ -12,6 +12,7 @@ export const getMockUseAttackDiscoveriesWithCachedAttackDiscoveries = (
 ): UseAttackDiscovery => ({
   alertsContextCount: 20,
   approximateFutureTime: null,
+  failureReason: null,
   generationIntervals: [
     {
       date: new Date('2024-04-15T13:48:44.397Z').toISOString(),
@@ -175,19 +176,6 @@ export const getMockUseAttackDiscoveriesWithCachedAttackDiscoveries = (
   isLoading: false,
 });
 
-export const getMockUseAttackDiscoveriesWithNoAttackDiscoveries = (
-  fetchAttackDiscoveries: () => Promise<void>
-): UseAttackDiscovery => ({
-  alertsContextCount: null,
-  approximateFutureTime: null,
-  fetchAttackDiscoveries,
-  generationIntervals: undefined,
-  attackDiscoveries: [],
-  lastUpdated: null,
-  replacements: {},
-  isLoading: false,
-});
-
 export const getMockUseAttackDiscoveriesWithNoAttackDiscoveriesLoading = (
   fetchAttackDiscoveries: () => Promise<void>
 ): UseAttackDiscovery => ({
@@ -196,6 +184,7 @@ export const getMockUseAttackDiscoveriesWithNoAttackDiscoveriesLoading = (
   fetchAttackDiscoveries,
   generationIntervals: undefined,
   attackDiscoveries: [],
+  failureReason: null,
   lastUpdated: null,
   replacements: {},
   isLoading: true, // <-- attack discoveries are being generated

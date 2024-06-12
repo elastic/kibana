@@ -5,63 +5,12 @@
  * 2.0.
  */
 
-import { AssistantAvatar } from '@kbn/elastic-assistant';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import React from 'react';
 
 import * as i18n from './translations';
 
 const FailureComponent: React.FC<{ failureReason: string }> = ({ failureReason }) => {
-  const title = useMemo(
-    () => (
-      <EuiFlexGroup
-        alignItems="center"
-        data-test-subj="emptyPromptTitleContainer"
-        direction="column"
-        gutterSize="none"
-      >
-        <EuiFlexItem data-test-subj="emptyPromptAvatar" grow={false}>
-          <AssistantAvatar size="m" />
-          <EuiSpacer size="m" />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
-            <EuiFlexItem data-test-subj="failureTitle" grow={false}>
-              <span>{i18n.FAILURE_TITLE}</span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    []
-  );
-
-  const body = useMemo(
-    () => (
-      <EuiFlexGroup
-        alignItems="center"
-        data-test-subj="bodyContainer"
-        direction="column"
-        gutterSize="none"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" data-test-subj="bodyText">
-            {failureReason}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [failureReason]
-  );
-
   return (
     <EuiFlexGroup alignItems="center" data-test-subj="failure" direction="column">
       <EuiFlexItem data-test-subj="emptyPromptContainer" grow={false}>
@@ -73,7 +22,7 @@ const FailureComponent: React.FC<{ failureReason: string }> = ({ failureReason }
               {failureReason}
             </EuiText>
           }
-          title={<h2>{i18n.FAILURE_TITLE}</h2>}
+          title={<h2 data-test-subj="failureTitle">{i18n.FAILURE_TITLE}</h2>}
         />
       </EuiFlexItem>
 

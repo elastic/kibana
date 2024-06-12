@@ -9,29 +9,23 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { Failure } from '.';
-import { ATTACK_DISCOVERY_ONLY, LEARN_MORE, NO_ALERTS_TO_ANALYZE } from './translations';
-
+import { LEARN_MORE, FAILURE_TITLE } from './translations';
+const failureReason = "You're a failure";
 describe('Failure', () => {
   beforeEach(() => {
-    render(<Failure />);
-  });
-
-  it('renders the avatar', () => {
-    const avatar = screen.getByTestId('emptyPromptAvatar');
-
-    expect(avatar).toBeInTheDocument();
+    render(<Failure failureReason={failureReason} />);
   });
 
   it('renders the expected title', () => {
-    const title = screen.getByTestId('noAlertsTitle');
+    const title = screen.getByTestId('failureTitle');
 
-    expect(title).toHaveTextContent(NO_ALERTS_TO_ANALYZE);
+    expect(title).toHaveTextContent(FAILURE_TITLE);
   });
 
   it('renders the expected body text', () => {
     const bodyText = screen.getByTestId('bodyText');
 
-    expect(bodyText).toHaveTextContent(ATTACK_DISCOVERY_ONLY);
+    expect(bodyText).toHaveTextContent(failureReason);
   });
 
   describe('link', () => {
