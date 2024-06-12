@@ -74,11 +74,11 @@
                     "type": "string",
                     "deprecated": true
                   }
-                }
-              },
-              "required": [
-                "id"
-              ]
+                },
+                "required": [
+                  "id"
+                ]
+              }
             }
           }
         }

@@ -51,8 +51,8 @@ paths:
                 host:
                   type: string
                   deprecated: true
-            required:
-              - id
+              required:
+                - id
   /setup:
     post:
       summary: Initiate Fleet setup
