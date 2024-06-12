@@ -296,8 +296,14 @@
         ],
         "signature": [
           "(value: unknown, hit: ",
-          "SearchHit",
-          "<unknown>, fieldFormats: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.EsHitRecord",
+            "text": "EsHitRecord"
+          },
+          ", fieldFormats: ",
           {
             "pluginId": "fieldFormats",
             "scope": "public",
@@ -378,8 +384,13 @@
               "The actual search hit (required to get highlight information from)"
             ],
             "signature": [
-              "SearchHit",
-              "<unknown>"
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.EsHitRecord",
+                "text": "EsHitRecord"
+              }
             ],
             "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
             "deprecated": false,
@@ -1357,14 +1368,40 @@
             "section": "def-common.EsHitRecord",
             "text": "EsHitRecord"
           },
-          " extends Omit<",
-          "SearchHit",
-          "<unknown>, \"_source\">"
+          " extends Omit<DiscoverSearchHit, \"_source\" | \"_index\" | \"_id\">"
         ],
         "path": "packages/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.EsHitRecord._index",
+            "type": "string",
+            "tags": [],
+            "label": "_index",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.EsHitRecord._id",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.EsHitRecord._source",
