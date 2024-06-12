@@ -7,10 +7,9 @@
 
 import React, { useMemo, type PropsWithChildren } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import * as i18n from './translations';
 import { useKibana } from '../../../components/create_integration/use_kibana';
-import { ButtonPanel } from '../button_panel';
 import { SectionWrapper } from '../section_wrapper';
 
 export type SectionWrapperProps = PropsWithChildren<{
@@ -38,21 +37,23 @@ export const SuccessSection = React.memo<SectionWrapperProps>(({ integrationName
     <SectionWrapper title={i18n.SUCCESS_TITLE} subtitle={i18n.SUCCESS_DESCRIPTION}>
       <EuiFlexGroup direction="row" gutterSize="l" alignItems="center" justifyContent="center">
         <EuiFlexItem>
-          <ButtonPanel
+          <EuiCard
+            paddingSize="l"
+            titleSize="xs"
             icon={<EuiIcon type="launch" size="l" />}
             title={i18n.ADD_TO_AGENT_TITLE}
             description={i18n.ADD_TO_AGENT_DESCRIPTION}
-            buttonLabel={i18n.ADD_TO_AGENT_BUTTON}
-            href={installIntegrationUrl}
+            footer={<EuiButton href={installIntegrationUrl}>{i18n.ADD_TO_AGENT_BUTTON}</EuiButton>}
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <ButtonPanel
+          <EuiCard
+            paddingSize="l"
+            titleSize="xs"
             icon={<EuiIcon type="eye" size="l" />}
             title={i18n.VIEW_INTEGRATION_TITLE}
             description={i18n.VIEW_INTEGRATION_DESCRIPTION}
-            buttonLabel={i18n.VIEW_INTEGRATION_BUTTON}
-            href={viewIntegrationUrl}
+            footer={<EuiButton href={viewIntegrationUrl}>{i18n.VIEW_INTEGRATION_BUTTON}</EuiButton>}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

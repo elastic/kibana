@@ -12,14 +12,5 @@ export const TITLE = i18n.translate('xpack.integrationAssistant.pages.header.tit
 });
 
 export const ASSISTANT_AVATAR = i18n.translate('xpack.integrationAssistant.pages.header.title', {
-  defaultMessage: 'Powered by Elastic generative AI',
-});
-
-export const BETA = i18n.translate('xpack.integrationAssistant.pages.header.betaBadge', {
-  defaultMessage: 'Technical preview',
-});
-
-export const BETA_TOOLTIP = i18n.translate('xpack.integrationAssistant.pages.header.betaTooltip', {
-  defaultMessage:
-    'This functionality is in technical preview and is subject to change. Please use it with caution in production environments.',
+  defaultMessage: 'Powered by generative AI',
 });

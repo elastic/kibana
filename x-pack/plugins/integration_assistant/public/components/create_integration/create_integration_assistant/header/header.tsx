@@ -7,7 +7,6 @@
 
 import {
   EuiAvatar,
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -29,13 +28,6 @@ const useAvatarCss = () => {
   `;
 };
 
-const useTechPreviewBadgeCss = () => {
-  const { euiTheme } = useEuiTheme();
-  return css`
-    margin-left: ${euiTheme.size.m};
-  `;
-};
-
 const contentCss = css`
   width: 100%;
   max-width: 730px;
@@ -47,7 +39,6 @@ interface HeaderProps {
   isGenerating: boolean;
 }
 export const Header = React.memo<HeaderProps>(({ currentStep, setStep, isGenerating }) => {
-  const techPreviewBadgeCss = useTechPreviewBadgeCss();
   const avatarCss = useAvatarCss();
   return (
     <KibanaPageTemplate.Header>
@@ -77,16 +68,6 @@ export const Header = React.memo<HeaderProps>(({ currentStep, setStep, isGenerat
                       <span>{i18n.TITLE}</span>
                     </h1>
                   </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBetaBadge
-                    // iconType="beaker"
-                    label={i18n.BETA}
-                    tooltipContent={i18n.BETA_TOOLTIP}
-                    size="m"
-                    color="hollow"
-                    css={techPreviewBadgeCss}
-                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
