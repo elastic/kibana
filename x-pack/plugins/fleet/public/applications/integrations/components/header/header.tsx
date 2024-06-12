@@ -54,7 +54,7 @@ export const IntegrationsHeader = ({
                 content={
                   <FormattedMessage
                     id="xpack.fleet.integrations.header.readOnlyTooltip"
-                    defaultMessage="You can view Integrations, but your current privileges don't allow you to perform all actions."
+                    defaultMessage="You can view Integrations, but to perform all actions you need additional privileges."
                   />
                 }
               >
