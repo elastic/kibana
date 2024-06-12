@@ -75,7 +75,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
 
   const generalSettingsWrapper = (children: JSX.Element[]) => (
     <EuiDescribedFormGroup
-      fullWidth={true}
+      fullWidth
       title={
         <h3>
           <FormattedMessage

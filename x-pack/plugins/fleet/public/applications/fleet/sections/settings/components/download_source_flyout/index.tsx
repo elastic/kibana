@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { DownloadSource, FleetProxy } from '../../../../types';
+import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
 
@@ -53,7 +54,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
     [proxies]
   );
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
           <h2 id="FleetEditDownloadSourcesFlyoutTitle">

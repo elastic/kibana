@@ -29,6 +29,7 @@ import {
 } from '@elastic/eui';
 
 import { MultiRowInput } from '../multi_row_input';
+import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 import { useStartServices } from '../../../../hooks';
 import type { FleetServerHost, FleetProxy } from '../../../../types';
 import { TextInput } from '../form';
@@ -60,7 +61,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   );
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
       <EuiFlyoutHeader hasBorder={true}>
         <>
           <EuiTitle size="m">

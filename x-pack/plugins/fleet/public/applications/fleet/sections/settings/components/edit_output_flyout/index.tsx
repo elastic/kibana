@@ -45,6 +45,8 @@ import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import { outputType, RESERVED_CONFIG_YML_KEYS } from '../../../../../../../common/constants';
 
+import { MAX_FLYOUT_WIDTH } from '../../../../constants';
+
 import type { Output, FleetProxy } from '../../../../types';
 
 import { useBreadcrumbs, useFleetStatus, useStartServices } from '../../../../hooks';
@@ -229,7 +231,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
           <h2 id="FleetEditOutputFlyoutTitle">
@@ -436,6 +438,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 }
               >
                 <EuiSelect
+                  fullWidth
                   data-test-subj="settingsOutputsFlyout.presetInput"
                   {...inputs.presetInput.props}
                   onChange={(e) => inputs.presetInput.setValue(e.target.value)}

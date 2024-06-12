@@ -286,7 +286,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
             }
           >
             <AgentPolicyFormRow
-              fullWidth={true}
+              fullWidth
               label={
                 <EuiFlexGroup justifyContent="spaceBetween">
                   <EuiFlexItem>
