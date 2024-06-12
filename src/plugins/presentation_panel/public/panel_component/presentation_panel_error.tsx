@@ -14,7 +14,6 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { Subscription } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import { editPanelAction } from '../panel_actions/panel_actions';
 import { getErrorCallToAction } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi } from './types';
@@ -83,11 +82,7 @@ export const PresentationPanelError = ({
         searchErrorDisplay?.body ?? (
           <EuiText size="s">
             <Markdown data-test-subj="errorMessageMarkdown" readOnly>
-              {error.message.length
-                ? error.message
-                : i18n.translate('presentationPanelError.emptyErrorMessage', {
-                    defaultMessage: 'Error',
-                  })}
+              {error.message}
             </Markdown>
           </EuiText>
         )

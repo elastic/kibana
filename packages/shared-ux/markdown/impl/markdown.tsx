@@ -84,9 +84,6 @@ export const Markdown = ({
 
   // Render EuiMarkdownFormat when readOnly set to true
   if (readOnly) {
-    if (!children && !markdownContent) {
-      throw new Error('Markdown content is required in [readOnly] mode');
-    }
     return (
       <EuiMarkdownFormat
         textSize={'relative'}
