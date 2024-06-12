@@ -154,7 +154,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
         {agentCount ? (
           <ConfirmDeployAgentPolicyModal
             agentCount={agentCount}
-            agentPolicy={agentPolicy}
+            agentPolicies={[agentPolicy]}
             onConfirm={() => {
               setAgentCount(0);
               submitUpdateAgentPolicy();
