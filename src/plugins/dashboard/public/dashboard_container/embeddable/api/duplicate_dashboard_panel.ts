@@ -65,8 +65,8 @@ const duplicateReactEmbeddableInput = async (
   const newTitle = await incrementPanelTitle(dashboard, lastTitle);
 
   /**
-   * For react embeddables that are capable of being saved to the library, we need
-   * to clone them with searialized state and references.
+   * For react embeddables that have library transforms, we need to ensure
+   * to clone them with serialized state and references.
    *
    * TODO: remove this section once all by reference capable react embeddables
    * use in-place library transforms
