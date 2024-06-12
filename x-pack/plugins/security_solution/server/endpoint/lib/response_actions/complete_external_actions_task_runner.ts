@@ -6,7 +6,7 @@
  */
 
 import type { CancellableTask, RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
-import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';

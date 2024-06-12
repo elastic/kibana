@@ -11,7 +11,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Tier } from '../../types';
 import { ProductTier } from '../../../common/product';
 import { NLP_CLEANUP_TASK_EVENT } from '../../telemetry/event_based_telemetry';

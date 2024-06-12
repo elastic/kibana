@@ -18,7 +18,7 @@ import {
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION,
 } from './complete_external_actions_task';
-import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 
 describe('CompleteExternalTaskRunner class', () => {
   let endpointContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
