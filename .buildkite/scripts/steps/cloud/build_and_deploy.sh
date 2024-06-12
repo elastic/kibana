@@ -6,7 +6,7 @@ source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 
-set_kv_in_legacy_vault "cloud-deploy/test" username="test"
+set_in_legacy_vault "cloud-deploy/test" username="test"
 
 export KBN_NP_PLUGINS_BUILT=true
 

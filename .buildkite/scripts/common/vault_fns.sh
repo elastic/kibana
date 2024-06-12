@@ -87,7 +87,7 @@ function get_vault_secret_id() {
     echo "$VAULT_SECRET_ID"
 }
 
-function set_kv_in_legacy_vault() {
+function set_in_legacy_vault() {
   key_path=$1
   shift
   fields=("$@")

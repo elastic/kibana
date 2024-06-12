@@ -88,7 +88,7 @@ deploy() {
 
     echo "Write to vault..."
 
-    set_kv_in_legacy_vault "cloud-deploy/$VAULT_KEY_NAME" \
+    set_in_legacy_vault "cloud-deploy/$VAULT_KEY_NAME" \
      username="$PROJECT_USERNAME" \
      password="$PROJECT_PASSWORD" \
      id="$PROJECT_ID"
