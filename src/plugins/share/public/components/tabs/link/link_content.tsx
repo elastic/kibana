@@ -72,7 +72,6 @@ export const LinkContent = ({
 
       // persist updated url to state
       setUrl(urlWithUpdatedParams);
-
       return urlWithUpdatedParams;
     },
     [urlParams]
@@ -116,7 +115,7 @@ export const LinkContent = ({
   }, [url, delegatedShareUrlHandler, allowShortUrl, createShortUrl, getSnapshotUrl]);
 
   const handleTestUrl = useMemo(() => {
-    if (objectType !== 'search') return getSnapshotUrl();
+    if (objectType !== 'search' || !allowShortUrl) return getSnapshotUrl();
     else if (objectType === 'search' && allowShortUrl) return shortUrlCache;
     return copyUrlHelper();
   }, [objectType, getSnapshotUrl, allowShortUrl, shortUrlCache, copyUrlHelper]);

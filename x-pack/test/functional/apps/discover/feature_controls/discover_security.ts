@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
+import { decompressFromBase64 } from 'lz-string';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getSavedQuerySecurityUtils } from '../../saved_query_management/utils/saved_query_security';
 
@@ -202,6 +204,33 @@ export default function (ctx: FtrProviderContext) {
         await setDiscoverTimeRange();
         await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
         await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
+      });
+
+      it('should allow for copying the snapshot URL', async function () {
+        await PageObjects.share.clickShareTopNavButton();
+        const actualUrl = await PageObjects.share.getSharedUrl();
+        expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
+        const urlSearchParams = new URLSearchParams(actualUrl);
+        expect(JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!)).to.eql({
+          query: {
+            language: 'kuery',
+            query: '',
+          },
+          sort: [['@timestamp', 'desc']],
+          columns: [],
+          interval: 'auto',
+          filters: [],
+          dataViewId: 'logstash-*',
+          timeRange: {
+            from: '2015-09-19T06:31:44.000Z',
+            to: '2015-09-23T18:31:44.000Z',
+          },
+          refreshInterval: {
+            value: 60000,
+            pause: true,
+          },
+        });
+        await PageObjects.share.closeShareModal();
       });
 
       it(`Doesn't show short urls for users without those permissions`, async () => {
