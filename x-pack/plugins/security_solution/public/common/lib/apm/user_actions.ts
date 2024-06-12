@@ -13,6 +13,7 @@ export const SINGLE_RULE_ACTIONS = {
   DUPLICATE: `${APP_UI_ID} singleRuleActions duplicate`,
   EXPORT: `${APP_UI_ID} singleRuleActions export`,
   DELETE: `${APP_UI_ID} singleRuleActions delete`,
+  MANUAL_RULE_RUN: `${APP_UI_ID} singleRuleActions manual run`,
   PREVIEW: `${APP_UI_ID} singleRuleActions preview`,
   SAVE: `${APP_UI_ID} singleRuleActions save`,
 };
