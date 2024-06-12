@@ -147,9 +147,8 @@ export const postAttackDiscoveryRoute = (
 
           toolInstance
             ?.invoke('')
-            .then((rawAttackDiscoveries) => {
-              throw new Error('steph threw an error');
-              return updateAttackDiscoveries({
+            .then((rawAttackDiscoveries) =>
+              updateAttackDiscoveries({
                 apiConfig,
                 attackDiscoveryId,
                 authenticatedUser,
@@ -160,8 +159,8 @@ export const postAttackDiscoveryRoute = (
                 size,
                 startTime,
                 telemetry,
-              });
-            })
+              })
+            )
             .catch((err) =>
               handleToolError({
                 apiConfig,
