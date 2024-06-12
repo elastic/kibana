@@ -21,6 +21,8 @@ import {
   EuiFlexItem,
   EuiText,
   EuiButtonEmpty,
+  EuiImage,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -185,12 +187,17 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       >
                         <EuiFlexGroup responsive={false}>
                           <EuiFlexItem grow={false}>
-                            <img
-                              src={http.staticAssets.getPluginAssetHref('charts_screen.svg')}
-                              width={162}
-                              height={117}
-                              alt=""
-                            />
+                            {status === 'dataReceived' ? (
+                              <EuiImage
+                                src={http.staticAssets.getPluginAssetHref('charts_screen.svg')}
+                                width={162}
+                                height={117}
+                                alt=""
+                                hasShadow
+                              />
+                            ) : (
+                              <EuiSkeletonRectangle width={162} height={117} />
+                            )}
                           </EuiFlexItem>
                           <EuiFlexItem>
                             <div>

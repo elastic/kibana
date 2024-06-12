@@ -359,14 +359,16 @@ async function ensureInstalledIntegrations(
   integrationsToInstall: Integration[],
   packageClient: PackageClient
 ) {
-  const agentPolicyInputs: TemplateAgentPolicyInput[] = [];
-  for (const integration of integrationsToInstall) {
-    const { pkgName, installSource } = integration;
-    if (installSource === 'registry') {
-      const pkg = await packageClient.ensureInstalledPackage({ pkgName });
-      const inputs = await packageClient.getAgentPolicyInputs(pkg.name, pkg.version);
-      agentPolicyInputs.push(...inputs.filter((input) => input.type !== 'httpjson'));
-    } else if (installSource === 'custom') {
+  const returnValues = await Promise.all(
+    integrationsToInstall.map(async (integration) => {
+      const { pkgName, installSource } = integration;
+
+      if (installSource === 'registry') {
+        const pkg = await packageClient.ensureInstalledPackage({ pkgName });
+        const inputs = await packageClient.getAgentPolicyInputs(pkg.name, pkg.version);
+        return inputs.filter((input) => input.type !== 'httpjson');
+      }
+
       const input: TemplateAgentPolicyInput = {
         id: `filestream-${pkgName}`,
         type: 'filestream',
@@ -386,18 +388,18 @@ async function ensureInstalledIntegrations(
           pkgName,
           datasets: [{ name: pkgName, type: 'logs' }],
         });
-        agentPolicyInputs.push(input);
+        return [input];
       } catch (error) {
         // If the error is a naming collision, we can assume the integration is already installed and treat this step as successful
         if (error instanceof NamingCollisionError) {
-          agentPolicyInputs.push(input);
+          return [input];
         } else {
           throw error;
         }
       }
-    }
-  }
-  return agentPolicyInputs;
+    })
+  );
+  return returnValues.flat();
 }
 
 /**
