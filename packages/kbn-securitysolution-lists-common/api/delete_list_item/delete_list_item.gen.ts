@@ -18,7 +18,8 @@
 import { z } from 'zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
-import { ListId, ListItem } from '../model/list_common.gen';
+import { ListId } from '../model/list_common.gen';
+import { ListItem } from '../model/list_schemas.gen';
 
 export type DeleteListItemRequestQuery = z.infer<typeof DeleteListItemRequestQuery>;
 export const DeleteListItemRequestQuery = z.object({

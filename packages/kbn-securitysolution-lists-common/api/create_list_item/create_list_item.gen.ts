@@ -17,13 +17,8 @@
 
 import { z } from 'zod';
 
-import {
-  ListItemId,
-  ListId,
-  ListItemValue,
-  ListItemMeta,
-  ListItem,
-} from '../model/list_common.gen';
+import { ListItemId, ListId, ListItemValue, ListItemMeta } from '../model/list_common.gen';
+import { ListItem } from '../model/list_schemas.gen';
 
 export type CreateListItemRequestBody = z.infer<typeof CreateListItemRequestBody>;
 export const CreateListItemRequestBody = z.object({

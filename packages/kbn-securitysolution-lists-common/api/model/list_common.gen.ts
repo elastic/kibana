@@ -17,7 +17,7 @@
 
 import { z } from 'zod';
 
-import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
+import { NonEmptyString } from '../../../kbn-openapi-common/schemas/primitives.gen';
 
 export type ListId = z.infer<typeof ListId>;
 export const ListId = NonEmptyString;
@@ -60,26 +60,6 @@ export const ListDescription = NonEmptyString;
 export type ListMeta = z.infer<typeof ListMeta>;
 export const ListMeta = z.object({}).catchall(z.unknown());
 
-export type List = z.infer<typeof List>;
-export const List = z.object({
-  id: ListId,
-  type: ListType,
-  name: ListName,
-  description: ListDescription,
-  serializer: z.string().optional(),
-  deserializer: z.string().optional(),
-  immutable: z.boolean(),
-  meta: ListMeta.optional(),
-  '@timestamp': z.string().datetime().optional(),
-  version: z.number().int().min(1),
-  _version: z.string().optional(),
-  tie_breaker_id: z.string(),
-  created_at: z.string().datetime(),
-  created_by: z.string(),
-  updated_at: z.string().datetime(),
-  updated_by: z.string(),
-});
-
 export type ListItemId = z.infer<typeof ListItemId>;
 export const ListItemId = NonEmptyString;
 
@@ -91,23 +71,3 @@ export const ListItemDescription = NonEmptyString;
 
 export type ListItemMeta = z.infer<typeof ListItemMeta>;
 export const ListItemMeta = z.object({}).catchall(z.unknown());
-
-export type ListItem = z.infer<typeof ListItem>;
-export const ListItem = z.object({
-  id: ListItemId,
-  type: ListType,
-  list_id: ListId,
-  value: ListItemValue.optional(),
-  description: ListItemDescription,
-  serializer: z.string().optional(),
-  deserializer: z.string().optional(),
-  meta: ListItemMeta.optional(),
-  '@timestamp': z.string().datetime().optional(),
-  version: z.number().int().min(1),
-  _version: z.string().optional(),
-  tie_breaker_id: z.string(),
-  created_at: z.string().datetime(),
-  created_by: z.string(),
-  updated_at: z.string().datetime(),
-  updated_by: z.string(),
-});

@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+export * from './model/list_common.gen';
+export * from './model/list_schemas.gen';
 export * from './create_list_index/create_list_index.gen';
 export * from './create_list_item/create_list_item.gen';
 export * from './create_list/create_list.gen';

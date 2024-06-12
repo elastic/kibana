@@ -17,7 +17,8 @@
 
 import { z } from 'zod';
 
-import { ListId, List } from '../model/list_common.gen';
+import { ListId } from '../model/list_common.gen';
+import { List } from '../model/list_schemas.gen';
 
 export type GetListRequestQuery = z.infer<typeof GetListRequestQuery>;
 export const GetListRequestQuery = z.object({

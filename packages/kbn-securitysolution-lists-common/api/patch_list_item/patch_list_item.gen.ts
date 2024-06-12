@@ -17,7 +17,8 @@
 
 import { z } from 'zod';
 
-import { ListItemId, ListItemValue, ListItemMeta, ListItem } from '../model/list_common.gen';
+import { ListItemId, ListItemValue, ListItemMeta } from '../model/list_common.gen';
+import { ListItem } from '../model/list_schemas.gen';
 
 export type PatchListItemRequestBody = z.infer<typeof PatchListItemRequestBody>;
 export const PatchListItemRequestBody = z.object({
