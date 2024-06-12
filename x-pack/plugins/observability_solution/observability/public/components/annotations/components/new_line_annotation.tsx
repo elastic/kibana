@@ -22,11 +22,9 @@ export function NewLineAnnotation({
   isCreateOpen: boolean;
 }) {
   const { watch, getValues } = useFormContext<CreateAnnotationParams>();
-  const isRange = watch('annotation.type') === 'range';
-  const timestamp = watch('@timestamp');
-  console.log('timestamp', timestamp);
+  const timestampEnd = watch('@timestampEnd');
 
-  if (!timestamp || isRange) {
+  if (timestampEnd) {
     return null;
   }
   const values = getValues();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const ANNOTATION_RESOURCES_VERSION = 1.0;
+export const ANNOTATION_RESOURCES_VERSION = 1.3;
 
 export const ANNOTATION_INDEX_TEMPLATE_NAME = 'observability-annotations';
 export const ANNOTATION_INDEX_TEMPLATE_PATTERN = `observability-annotation*`;

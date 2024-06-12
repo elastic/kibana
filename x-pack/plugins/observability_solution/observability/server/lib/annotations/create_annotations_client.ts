@@ -9,7 +9,6 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { ANNOTATION_RESOURCES_VERSION } from './index_templates/annotation_index_templates';
-import { ANNOTATION_MAPPINGS } from './component_templates/annotation_mappings_template';
 import {
   Annotation,
   CreateAnnotationParams,
@@ -31,7 +30,6 @@ export function createAnnotationsClient(params: {
   const initIndex = () =>
     createOrUpdateIndex({
       index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
-      mappings: ANNOTATION_MAPPINGS,
       client: esClient,
       logger,
     });
@@ -125,7 +123,6 @@ export function createAnnotationsClient(params: {
             {
               index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
               id: body._id,
-              // expand_wildcards: 'all',
             },
             { meta: true }
           )
@@ -137,7 +134,6 @@ export function createAnnotationsClient(params: {
 
       const response = await esClient.search({
         index: index + `-*`,
-        expand_wildcards: 'all',
         query: {
           bool: {
             filter: [
@@ -157,7 +153,6 @@ export function createAnnotationsClient(params: {
 
       const result = await esClient.search({
         index: index + `-*`,
-        expand_wildcards: 'all',
         size: 10000,
         query: {
           bool: {
@@ -199,7 +194,6 @@ export function createAnnotationsClient(params: {
 
       return await esClient.deleteByQuery({
         index: index + `-*`,
-        expand_wildcards: 'all',
         body: {
           query: {
             term: {

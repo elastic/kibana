@@ -8,22 +8,15 @@
 import { EuiFormRow, EuiFormControlLayout, EuiFormLabel, EuiDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
-import React, { useEffect } from 'react';
+import React from 'react';
+import { CreateAnnotationForm } from './create_annotation';
 
 export function AnnotationRange() {
-  const { control, watch, setValue } = useFormContext();
+  const { control, watch } = useFormContext<CreateAnnotationForm>();
 
-  const annotationType = watch('annotation.type');
-  const timestampStart = watch('@timestamp');
   const timestampEnd = watch('@timestampEnd');
 
-  useEffect(() => {
-    if (annotationType === 'range' && !timestampEnd && timestampStart) {
-      setValue('@timestampEnd', timestampStart);
-    }
-  }, [annotationType, setValue, timestampEnd, timestampStart]);
-
-  if (annotationType === 'range') {
+  if (timestampEnd) {
     return (
       <>
         <EuiFormRow
@@ -45,7 +38,6 @@ export function AnnotationRange() {
             }
           >
             <Controller
-              defaultValue=""
               name="@timestamp"
               control={control}
               rules={{
@@ -79,7 +71,6 @@ export function AnnotationRange() {
             }
           >
             <Controller
-              defaultValue=""
               name="@timestampEnd"
               control={control}
               rules={{
@@ -111,7 +102,6 @@ export function AnnotationRange() {
       })}
     >
       <Controller
-        defaultValue=""
         name="@timestamp"
         control={control}
         rules={{

@@ -33,22 +33,18 @@ export function NewRectAnnotation({
   isCreateOpen: boolean;
 }) {
   const { watch, getValues } = useFormContext<CreateAnnotationParams>();
-  const isRange = watch('annotation.type') === 'range';
   const timestamp = watch('@timestamp');
+  const timestampEnd = watch('@timestampEnd');
 
-  if (!timestamp || !isRange || !isCreateOpen) {
+  if (!timestamp || !timestampEnd || !isCreateOpen) {
     return null;
   }
   const annotation = watch('annotation');
   const values = getValues();
-  const timestampVal = watch('@timestamp');
-  const timestampEnd = watch('@timestampEnd');
   return (
     <ObsRectAnnotation
       annotation={{
         ...values,
-        '@timestamp': timestampVal,
-        '@timestampEnd': timestampEnd,
         annotation,
         ...(sloId ? { slo: { id: sloId, instanceId: sloInstanceId } } : {}),
       }}

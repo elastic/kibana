@@ -9,27 +9,26 @@ import { EuiForm, EuiFormRow, EuiHorizontalRule, EuiSpacer } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
+import { CreateAnnotationForm } from './components/create_annotation';
 import { AnnotationMeta } from './components/annotation_meta';
-import { Annotation, CreateAnnotationParams } from '../../../common/annotations';
+import { Annotation } from '../../../common/annotations';
 import { ComboBox, FieldText, Switch, TextArea } from './components/forward_refs';
 import { AnnotationRange } from './components/annotation_range';
 import { AnnotationAppearance } from './annotation_apearance';
 
 export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation | null }) {
-  const { control, formState } = useFormContext<CreateAnnotationParams>();
+  const { control, formState, watch } = useFormContext<CreateAnnotationForm>();
+
+  const timestampStart = watch('@timestamp');
 
   return (
     <EuiForm id="annotationForm" component="form">
       <AnnotationRange />
       <EuiSpacer size="s" />
       <Controller
-        defaultValue=""
-        name="annotation.type"
+        name="@timestampEnd"
         control={control}
-        rules={{
-          required: 'Annotation type is required',
-        }}
-        render={({ field }) => (
+        render={({ field: { value, ...field } }) => (
           <Switch
             {...field}
             label={i18n.translate(
@@ -38,9 +37,9 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
                 defaultMessage: 'Apply as range',
               }
             )}
-            checked={field.value === 'range'}
+            checked={Boolean(value)}
             onChange={(evt) => {
-              field.onChange(evt.target.checked ? 'range' : 'line');
+              field.onChange(evt.target.checked ? timestampStart : null);
             }}
             compressed
           />

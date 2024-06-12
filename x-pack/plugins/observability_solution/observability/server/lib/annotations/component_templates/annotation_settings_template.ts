@@ -15,7 +15,7 @@ export const getAnnotationSettingsTemplate = () => ({
   template: {
     settings: {
       auto_expand_replicas: '0-1',
-      hidden: true,
+      hidden: false,
     },
   },
   _meta: {

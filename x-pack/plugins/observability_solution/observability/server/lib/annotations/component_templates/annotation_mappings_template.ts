@@ -22,7 +22,7 @@ export const ANNOTATION_MAPPINGS: Mappings = {
       },
     },
     message: {
-      type: 'text',
+      type: 'keyword',
     },
     tags: {
       type: 'keyword',
