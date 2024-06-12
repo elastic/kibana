@@ -497,10 +497,12 @@
             "parentPluginId": "@kbn/security-plugin-types-public",
             "id": "def-public.SecurityPluginSetup.authc",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "authc",
             "description": [
-              "\nExposes authentication information about the currently logged in user."
+              "\nExposes authentication information about the currently logged in user.\n"
             ],
             "signature": [
               {
@@ -512,8 +514,22 @@
               }
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/plugin.tsx"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/public/application/common/components/filebeat_config_flyout/filebeat_config_flyout.tsx"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/security-plugin-types-public",
@@ -599,10 +615,12 @@
             "parentPluginId": "@kbn/security-plugin-types-public",
             "id": "def-public.SecurityPluginStart.authc",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "authc",
             "description": [
-              "\nExposes authentication information about the currently logged in user."
+              "\nExposes authentication information about the currently logged in user.\n"
             ],
             "signature": [
               {
@@ -614,8 +632,78 @@
               }
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/public/plugin.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/plugin.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "imageEmbeddable",
+                "path": "src/plugins/image_embeddable/public/components/image_editor/open_image_editor.tsx"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/index.tsx"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/shared/role_mapping/roles_empty_prompt.tsx"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/shared/role_mapping/roles_empty_prompt.tsx"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/management/links.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/public/plugin.ts"
+              },
+              {
+                "plugin": "cloudLinks",
+                "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/maybe_add_cloud_links.ts"
+              },
+              {
+                "plugin": "observabilityAIAssistantApp",
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/public/hooks/use_current_user.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/public/common/lib/kibana/hooks.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/kibana/hooks.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/observability_solution/apm/public/hooks/use_current_user.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/observability_solution/apm/public/hooks/use_current_user.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/security-plugin-types-public",
@@ -643,10 +731,12 @@
             "parentPluginId": "@kbn/security-plugin-types-public",
             "id": "def-public.SecurityPluginStart.userProfiles",
             "type": "CompoundType",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "userProfiles",
             "description": [
-              "\nA set of methods to work with Kibana user profiles."
+              "\nA set of methods to work with Kibana user profiles.\n"
             ],
             "signature": [
               "Omit<",
@@ -684,8 +774,54 @@
               "<boolean>; }"
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/plugin.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/public/containers/user_profiles/api.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/public/containers/user_profiles/api.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/public/hooks/use_user_profile.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/user_profiles/use_bulk_get_user_profiles.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/user_profiles/use_get_current_user_profile.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/assistant/overlay.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/public/containers/user_profiles/api.test.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false

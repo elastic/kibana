@@ -75,7 +75,7 @@ export function AiAssistantSelectionPage() {
                     <EuiCallOut
                       iconType="warning"
                       title={i18n.translate(
-                        'aiAssistantManagementSelection.aiAssistantSelectionPage.thisFeatureIsDisabledCallOutLabel',
+                        'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityAi.thisFeatureIsDisabledCallOutLabel',
                         {
                           defaultMessage:
                             'This feature is disabled. It can be enabled from Spaces > Features.',
@@ -124,7 +124,7 @@ export function AiAssistantSelectionPage() {
                     <EuiCallOut
                       iconType="warning"
                       title={i18n.translate(
-                        'aiAssistantManagementSelection.aiAssistantSelectionPage.thisFeatureIsDisabledCallOutLabel',
+                        'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAi.thisFeatureIsDisabledCallOutLabel',
                         {
                           defaultMessage:
                             'This feature is disabled. It can be enabled from Spaces > Features.',
