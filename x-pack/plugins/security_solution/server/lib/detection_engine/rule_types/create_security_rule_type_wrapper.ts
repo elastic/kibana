@@ -530,7 +530,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     enrichmentDurations: result.enrichmentTimes,
                   },
                 });
-              } else if (wroteWarningStatus && !hasError && !result.warning) {
+              } else if (
+                !isEmpty(warningMessage) &&
+                wroteWarningStatus &&
+                !hasError &&
+                !result.warning
+              ) {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum['partial failure'],
                   message: warningMessage,
