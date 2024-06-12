@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommandOption, ESQLMessage } from '@kbn/esql-ast';
-import { isColumnItem, isLiteralItem } from '../shared/helpers';
+import { isLiteralItem, isColumnItem } from '../shared/helpers';
 import { getMessageFromId } from '../validation/errors';
 import type { CommandOptionsDefinition } from './types';
 

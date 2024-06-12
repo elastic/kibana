@@ -65,12 +65,27 @@ describe('appendToQuery', () => {
           'from logstash-* // meow',
           'dest',
           undefined,
-          '_exists_',
+          'is_not_null',
           'string'
         )
       ).toBe(
         `from logstash-* // meow
 | where \`dest\` is not null`
+      );
+    });
+
+    it('appends a where clause in an existing query checking that the value is null if the user filters a null value', () => {
+      expect(
+        appendWhereClauseToESQLQuery(
+          'from logstash-* // meow',
+          'dest',
+          undefined,
+          'is_null',
+          'string'
+        )
+      ).toBe(
+        `from logstash-* // meow
+| where \`dest\` is null`
       );
     });
 
@@ -107,7 +122,7 @@ and \`dest\`=="Crete"`
           'from logstash-* | where country IS NOT NULL',
           'country',
           undefined,
-          '_exists_',
+          'is_not_null',
           'string'
         )
       ).toBe(`from logstash-* | where country IS NOT NULL`);

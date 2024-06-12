@@ -350,11 +350,15 @@ Store the saved key on `~/.elastic/cloud.json` using the following format:
 }
 ```
 
-Store the email and password of the account you used to login in the QA Environment at the root directory of your Kibana project on `.ftr/role_users.json`, using the following format:
+By default all our Serverless tests are executed with the `platform_engineer` role. 
+
+So you need to add to your organization a new user that has the required role. You can achieve that by using email aliases.
+
+Store the email and password of the account of the `platform_engineer` user at the root directory of your Kibana project on `.ftr/role_users.json`, using the following format:
 
 ```json
 {
-  "admin": {
+  "platform_engineer": {
     "email": "<email>",
     "password": "<password>"
   }
@@ -380,7 +384,7 @@ If you want to execute a test using Cypress on visual mode with MKI, you need to
 
 ```json
 {
-  "admin": {
+  "platform_engineer": {
     "email": "<email>",
     "password": "<password>"
   },

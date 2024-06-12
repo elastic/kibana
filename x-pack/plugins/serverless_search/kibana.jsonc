@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/serverless-search",
-  "owner": "@elastic/enterprise-search-frontend",
+  "owner": "@elastic/search-kibana",
   "description": "Serverless customizations for search.",
   "plugin": {
     "id": "serverlessSearch",

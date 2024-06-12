@@ -13,16 +13,16 @@ import { z } from 'zod';
  *
  * info:
  *   title: Create Conversation API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import {
   ConversationCreateProps,
   ConversationResponse,
-  UUID,
   ConversationUpdateProps,
   ConversationMessageCreateProps,
 } from './common_attributes.gen';
+import { NonEmptyString } from '../common_attributes.gen';
 
 export type AppendConversationMessageRequestParams = z.infer<
   typeof AppendConversationMessageRequestParams
@@ -31,7 +31,7 @@ export const AppendConversationMessageRequestParams = z.object({
   /**
    * The conversation's `id` value.
    */
-  id: UUID,
+  id: NonEmptyString,
 });
 export type AppendConversationMessageRequestParamsInput = z.input<
   typeof AppendConversationMessageRequestParams
@@ -60,7 +60,7 @@ export const DeleteConversationRequestParams = z.object({
   /**
    * The conversation's `id` value.
    */
-  id: UUID,
+  id: NonEmptyString,
 });
 export type DeleteConversationRequestParamsInput = z.input<typeof DeleteConversationRequestParams>;
 
@@ -72,7 +72,7 @@ export const ReadConversationRequestParams = z.object({
   /**
    * The conversation's `id` value.
    */
-  id: UUID,
+  id: NonEmptyString,
 });
 export type ReadConversationRequestParamsInput = z.input<typeof ReadConversationRequestParams>;
 
@@ -84,7 +84,7 @@ export const UpdateConversationRequestParams = z.object({
   /**
    * The conversation's `id` value.
    */
-  id: UUID,
+  id: NonEmptyString,
 });
 export type UpdateConversationRequestParamsInput = z.input<typeof UpdateConversationRequestParams>;
 

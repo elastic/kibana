@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
@@ -29,6 +29,7 @@ import type { IndexManagementPluginStart } from '@kbn/index-management';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
@@ -63,6 +64,7 @@ import {
 } from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';
+import type { DynamicSideNavItems } from './navigation_tree';
 
 export interface ClientData extends InitialAppData {
   errorConnectingMessage?: string;
@@ -89,6 +91,7 @@ export interface PluginsStart {
   lens?: LensPublicStart;
   licensing?: LicensingPluginStart;
   ml?: MlPluginStart;
+  navigation: NavigationPublicPluginStart;
   searchConnectors?: SearchConnectorsPluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
@@ -98,6 +101,8 @@ export interface PluginsStart {
 export interface ESConfig {
   elasticsearch_host: string;
 }
+
+export type UpdateSideNavDefinitionFn = (items: Partial<DynamicSideNavItems>) => void;
 
 const contentLinks: AppDeepLink[] = [
   {
@@ -205,7 +210,13 @@ export class EnterpriseSearchPlugin implements Plugin {
       this.isSidebarEnabled = style === 'classic';
     });
 
-    return { core: coreStart, isSidebarEnabled: this.isSidebarEnabled, params, plugins };
+    return {
+      core: coreStart,
+      isSidebarEnabled: this.isSidebarEnabled,
+      params,
+      plugins,
+      updateSideNavDefinition: this.updateSideNavDefinition.bind(this),
+    };
   }
 
   private getPluginData() {
@@ -522,7 +533,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public start(core: CoreStart) {
+  private readonly sideNavDynamicItems$ = new BehaviorSubject<DynamicSideNavItems>({});
+
+  public start(core: CoreStart, plugins: PluginsStart) {
     if (!this.config.ui?.enabled) {
       return;
     }
@@ -530,10 +543,20 @@ export class EnterpriseSearchPlugin implements Plugin {
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
 
+    import('./navigation_tree').then(({ getNavigationTreeDefinition }) => {
+      return plugins.navigation.addSolutionNavigation(
+        getNavigationTreeDefinition({ dynamicItems$: this.sideNavDynamicItems$ })
+      );
+    });
+
     // Return empty start contract rather than void in order for plugins
     // that depend on the enterprise search plugin to determine whether it is enabled or not
     return {};
   }
 
   public stop() {}
+
+  private updateSideNavDefinition = (items: Partial<DynamicSideNavItems>) => {
+    this.sideNavDynamicItems$.next({ ...this.sideNavDynamicItems$.getValue(), ...items });
+  };
 }

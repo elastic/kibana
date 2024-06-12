@@ -63,6 +63,7 @@ export function getDocumentCountStatsSplitLabel(
 }
 
 export interface LogRateAnalysisContentProps {
+  /** Optional time range override */
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
@@ -151,6 +152,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     currentSelectedSignificantItem,
     currentSelectedGroup,
     undefined,
+    true,
     timeRange
   );
 

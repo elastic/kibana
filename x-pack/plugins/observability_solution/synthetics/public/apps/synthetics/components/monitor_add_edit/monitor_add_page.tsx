@@ -9,9 +9,11 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
+import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
+import { CanUsePublicLocationsCallout } from './steps/can_use_public_locations_callout';
+import { DisabledCallout } from '../monitors_page/management/disabled_callout';
 import { useEnablement } from '../../hooks';
 import { getServiceLocations, selectServiceLocationsState } from '../../state';
-import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 
 import { useKibanaSpace } from './hooks';
 import { MonitorSteps } from './steps';
@@ -29,6 +31,8 @@ export const MonitorAddPage = () => {
 
   useEnablement();
 
+  const canUsePublicLocations = useCanUsePublicLocations();
+
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getServiceLocations());
@@ -39,17 +43,15 @@ export const MonitorAddPage = () => {
     return <LocationsLoadingError />;
   }
 
-  return locationsLoaded ? (
+  if (!locationsLoaded) {
+    return <LoadingState />;
+  }
+
+  return (
     <MonitorForm space={space?.id}>
+      <DisabledCallout />
+      <CanUsePublicLocationsCallout canUsePublicLocations={canUsePublicLocations} />
       <MonitorSteps stepMap={ADD_MONITOR_STEPS} />
     </MonitorForm>
-  ) : (
-    <LoadingState />
   );
 };
-
-export const MonitorAddPageWithServiceAllowed = React.memo(() => (
-  <ServiceAllowedWrapper>
-    <MonitorAddPage />
-  </ServiceAllowedWrapper>
-));

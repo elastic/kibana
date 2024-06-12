@@ -54,7 +54,7 @@ import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -76,7 +76,6 @@ import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 
 const QUERY_ID = 'UsersDetailsQueryId';
@@ -87,7 +86,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
-  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.hostsPageEvents) ?? timelineDefaults).graphEventId
@@ -285,11 +283,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             )}
 
             <TabNavigation
-              navTabs={navTabsUsersDetails(
-                detailName,
-                hasMlUserPermissions(capabilities),
-                hasEntityAnalyticsCapability
-              )}
+              navTabs={navTabsUsersDetails(detailName, hasMlUserPermissions(capabilities))}
             />
             <EuiSpacer />
             <UsersDetailsTabs

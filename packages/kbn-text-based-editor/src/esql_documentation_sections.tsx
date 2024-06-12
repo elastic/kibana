@@ -106,16 +106,6 @@ Also, similar to the index fields, once an aggregation is performed, a metadata 
 FROM employees [METADATA _index, _id]
 | STATS max = MAX(emp_no) BY _index
 \`\`\`
-
-The \`OPTIONS\` directive of the FROM command allows you to configure the way ES|QL accesses the data to be queried. The argument passed to this directive is a comma-separated list of option name-value pairs, with the option name and the corresponding value double-quoted.
-
-For example:
-
-\`\`\`
-FROM index_pattern [OPTIONS "option1"="value1"[,...[,"optionN"="valueN"]]]
-\`\`\`
-
-Learn more about the \`OPTIONS\` directive in the [main documentation page](https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-index-options.html#esql-index-options).
             `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -182,6 +172,7 @@ The \`SHOW <item>\` source command returns information about the deployment and 
 * Use \`SHOW INFO\` to return the deployment's version, build date and hash.
 * Use \`SHOW FUNCTIONS\` to return a list of all supported functions and a synopsis of each function.
             `,
+              ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
@@ -224,9 +215,9 @@ Refer to the [dissect processor documentation](https://www.elastic.co/guide/en/e
 
 \`\`\`
 ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
-| DISSECT a "%\\{Y\\}-%\\{M\\}-%\\{D\\}T%\\{h\\}:%\\{m\\}:%\\{s\\}Z - %\\{msg\\} - %\\{ip\\}"
-\`\`\`
-            `,
+| DISSECT a "%'\{Y\}-%\{M\}-%\{D\}T%\{h\}:%\{m\}:%\{s\}Z - %\{msg\} - %\{ip\}'"
+\`\`\`            `,
+              ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
@@ -318,6 +309,7 @@ By default (if no \`WITH\` is defined), \`ENRICH\` will add all the enrich field
 
 In case of name collisions, the newly created fields will override the existing fields.
             `,
+              ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
@@ -386,7 +378,7 @@ Refer to the [grok processor documentation](https://www.elastic.co/guide/en/elas
 
 \`\`\`
 ROW a = "12 15.5 15.6 true"
-| GROK a "%\\{NUMBER:b:int\\} %\\{NUMBER:c:float\\} %\\{NUMBER:d:double\\} %\\{WORD:e:boolean\\}"
+| GROK a "%'{NUMBER:b:int}' %'{NUMBER:c:float}' %'{NUMBER:d:double}' %'{WORD:e:boolean}'"
 \`\`\`
             `,
               description:
@@ -533,6 +525,7 @@ FROM employees
 | RENAME first_name AS fn, last_name AS ln
 \`\`\`
             `,
+              ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }

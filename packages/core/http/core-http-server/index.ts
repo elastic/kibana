@@ -141,6 +141,7 @@ export type {
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
+  HttpProtocol,
 } from './src/http_contract';
 
 export type {

@@ -7,6 +7,7 @@
 
 import type { Space } from '@kbn/spaces-plugin/common';
 import Axios from 'axios';
+import Https from 'https';
 import { format as formatUrl } from 'url';
 import util from 'util';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -16,11 +17,21 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const url = formatUrl(config.get('servers.kibana'));
 
+  const certificateAuthorities = config.get('servers.kibana.certificateAuthorities');
+  const httpsAgent: Https.Agent | undefined = certificateAuthorities
+    ? new Https.Agent({
+        ca: certificateAuthorities,
+        // required for self-signed certificates used for HTTPS FTR testing
+        rejectUnauthorized: false,
+      })
+    : undefined;
+
   const axios = Axios.create({
     headers: { 'kbn-xsrf': 'x-pack/ftr/services/spaces/space' },
     baseURL: url,
     maxRedirects: 0,
     validateStatus: () => true, // we do our own validation below and throw better error messages
+    httpsAgent,
   });
 
   return new (class SpacesService {

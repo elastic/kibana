@@ -378,7 +378,7 @@ describe('AlertingEventLogger', () => {
           saved_objects: [
             // @ts-ignore
             ...event.kibana?.saved_objects,
-            { id: 'bbb', type: 'alert', type_id: 'test' },
+            { id: 'bbb', type: 'alert', type_id: 'test', rel: 'primary' },
           ],
         },
       });
@@ -472,7 +472,7 @@ describe('AlertingEventLogger', () => {
           saved_objects: [
             // @ts-ignore
             ...event.kibana?.saved_objects,
-            { id: 'bbb', type: 'alert', type_id: 'test' },
+            { id: 'bbb', type: 'alert', type_id: 'test', rel: 'primary' },
           ],
         },
       });
@@ -567,7 +567,7 @@ describe('AlertingEventLogger', () => {
           saved_objects: [
             // @ts-ignore
             ...event.kibana?.saved_objects,
-            { id: 'bbb', type: 'alert', type_id: 'test' },
+            { id: 'bbb', type: 'alert', type_id: 'test', rel: 'primary' },
           ],
         },
       });
@@ -754,7 +754,7 @@ describe('AlertingEventLogger', () => {
       const event = createAlertRecord(
         backfillContext,
         ruleData,
-        [adHocRunSO, { id: 'bbb', type: 'alert', typeId: 'test' }],
+        [adHocRunSO, { id: 'bbb', type: 'alert', typeId: 'test', relation: 'primary' }],
         alert
       );
 
@@ -1130,7 +1130,7 @@ describe('AlertingEventLogger', () => {
           saved_objects: [
             // @ts-ignore
             ...event.kibana?.saved_objects,
-            { id: 'bbb', type: 'alert', type_id: 'test' },
+            { id: 'bbb', type: 'alert', type_id: 'test', rel: 'primary' },
           ],
         },
       };

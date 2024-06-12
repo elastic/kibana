@@ -15,7 +15,7 @@ export const INVALID_URL = (err: string, url: string) =>
   i18n.translate('xpack.stackConnectors.casesWebhook.configurationErrorNoHostname', {
     defaultMessage: 'error configuring cases webhook action: unable to parse {url}: {err}',
     values: {
-      err,
+      err: err.toString(),
       url,
     },
   });
@@ -24,7 +24,7 @@ export const CONFIG_ERR = (err: string) =>
   i18n.translate('xpack.stackConnectors.casesWebhook.configurationError', {
     defaultMessage: 'error configuring cases webhook action: {err}',
     values: {
-      err,
+      err: err.toString(),
     },
   });
 

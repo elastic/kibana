@@ -9,13 +9,15 @@ import { FunctionRegistrationParameters } from '..';
 import { FunctionVisibility } from '../../../common/functions/types';
 import { getRelevantFieldNames } from './get_relevant_field_names';
 
+export const GET_DATASET_INFO_FUNCTION_NAME = 'get_dataset_info';
+
 export function registerGetDatasetInfoFunction({
   resources,
   functions,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
-      name: 'get_dataset_info',
+      name: GET_DATASET_INFO_FUNCTION_NAME,
       visibility: FunctionVisibility.AssistantOnly,
       description: `Use this function to get information about indices/datasets available and the fields available on them.
 
@@ -26,7 +28,6 @@ export function registerGetDatasetInfoFunction({
         'This function allows the assistant to get information about available indices and their fields.',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           index: {
             type: 'string',
@@ -90,7 +91,7 @@ export function registerGetDatasetInfoFunction({
       return {
         content: {
           indices: [index],
-          fields: relevantFieldNames,
+          fields: relevantFieldNames.fields,
         },
       };
     }

@@ -14,7 +14,7 @@ import type {
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { i18n } from '@kbn/i18n';
-import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics/common';
+import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import {

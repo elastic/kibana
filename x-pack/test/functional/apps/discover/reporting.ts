@@ -36,14 +36,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await browser.refresh();
   };
 
-  const getReport = async () => {
+  const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
     await toasts.dismissAll();
 
     await PageObjects.reporting.openExportTab();
     await PageObjects.reporting.clickGenerateReportButton();
 
-    const url = await PageObjects.reporting.getReportURL(60000);
+    const url = await PageObjects.reporting.getReportURL(timeout);
     const res = await PageObjects.reporting.getResponse(url ?? '');
 
     expect(res.status).to.equal(200);
@@ -173,7 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.saveSearch('large export');
 
         // match file length, the beginning and the end of the csv file contents
-        const { text: csvFile } = await getReport();
+        const { text: csvFile } = await getReport({ timeout: 80 * 1000 });
         expect(csvFile.length).to.be(4826973);
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();

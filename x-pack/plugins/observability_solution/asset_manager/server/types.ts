@@ -11,6 +11,7 @@ import {
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';
 import { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 export interface ElasticsearchAccessorOptions {
   elasticsearchClient: ElasticsearchClient;
@@ -19,6 +20,7 @@ export interface ElasticsearchAccessorOptions {
 export interface AssetManagerPluginSetupDependencies {
   apmDataAccess: ApmDataAccessPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 export interface AssetManagerPluginStartDependencies {
   apmDataAccess: ApmDataAccessPluginStart;

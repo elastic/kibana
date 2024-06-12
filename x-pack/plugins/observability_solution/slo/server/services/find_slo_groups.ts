@@ -17,7 +17,7 @@ import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
 import { typedSearch } from '../utils/queries';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
-import { getElasticsearchQueryOrThrow } from './transform_generators';
+import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 
 const DEFAULT_PAGE = 1;
 const MAX_PER_PAGE = 5000;
@@ -50,12 +50,8 @@ export class FindSLOGroups {
     const groupsFilter = [params.groupsFilter ?? []].flat();
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
-    let parsedFilters: any = {};
-    try {
-      parsedFilters = JSON.parse(filters);
-    } catch (e) {
-      this.logger.error(`Failed to parse filters: ${e.message}`);
-    }
+    const parsedFilters = parseStringFilters(filters, this.logger);
+
     const settings = await getSloSettings(this.soClient);
     const { indices } = await getListOfSummaryIndices(this.esClient, settings);
 

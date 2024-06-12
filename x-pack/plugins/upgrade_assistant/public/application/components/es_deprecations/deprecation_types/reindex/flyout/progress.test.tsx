@@ -42,7 +42,7 @@ describe('ReindexProgress', () => {
           size="xs"
         >
           <h3>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Reindexing in progress… {percents}"
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingInProgressTitle"
               values={
@@ -58,7 +58,7 @@ describe('ReindexProgress', () => {
             Array [
               Object {
                 "status": "inProgress",
-                "title": <FormattedMessage
+                "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Setting {indexName} index to read-only."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.readonlyStepTitle"
                   values={
@@ -72,7 +72,7 @@ describe('ReindexProgress', () => {
               },
               Object {
                 "status": "incomplete",
-                "title": <FormattedMessage
+                "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Create {reindexName} index."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
                   values={
@@ -106,7 +106,7 @@ describe('ReindexProgress', () => {
               },
               Object {
                 "status": "incomplete",
-                "title": <FormattedMessage
+                "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Create {indexName} alias for {reindexName} index."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasCreatedStepTitle"
                   values={
@@ -123,7 +123,7 @@ describe('ReindexProgress', () => {
               },
               Object {
                 "status": "incomplete",
-                "title": <FormattedMessage
+                "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Delete original {indexName} index."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.originalIndexDeletedStepTitle"
                   values={

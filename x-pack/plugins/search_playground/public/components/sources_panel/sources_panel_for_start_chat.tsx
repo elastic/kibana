@@ -34,7 +34,7 @@ export const SourcesPanelForStartChat: React.FC = () => {
         defaultMessage:
           "Select the Elasticsearch indices you'd like to query, providing additional context for the LLM.",
       })}
-      isValid={!!selectedIndices.length}
+      isValid={!!selectedIndices?.length}
       dataTestSubj="selectIndicesChatPanel"
     >
       {!!selectedIndices?.length && (

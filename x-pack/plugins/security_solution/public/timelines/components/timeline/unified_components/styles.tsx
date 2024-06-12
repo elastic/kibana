@@ -177,6 +177,11 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
 
   ${dataGridStyleWithRowRenderer}
+
+  .udtTimeline .euiDataGrid__leftControls {
+    display: flex;
+    align-items: baseline;
+  }
 `;
 
 export const UnifiedTimelineGlobalStyles = createGlobalStyle`

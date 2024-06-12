@@ -25,8 +25,6 @@ import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/
 import { UNIFIED_TIMELINE_CONFIG } from '../utils';
 import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname';
 
-const IS_ROW_RENDERER_LAZY_LOADING_ENABLED = true;
-
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
   enabledRowRenderers: RowRenderer[];

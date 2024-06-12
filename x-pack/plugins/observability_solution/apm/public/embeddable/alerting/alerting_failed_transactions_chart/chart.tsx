@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import moment from 'moment';
+import { ALERT_END } from '@kbn/rule-data-utils';
 import FailedTransactionChart from '../../../components/alerting/ui_components/alert_details_app_section/failed_transaction_chart';
 import { useAlertingProps } from '../use_alerting_props';
 import { TimeRangeCallout } from '../time_range_callout';
@@ -15,6 +17,7 @@ import type { EmbeddableApmAlertingVizProps } from '../types';
 
 export function APMAlertingFailedTransactionsChart({
   rule,
+  alert,
   serviceName,
   environment = ENVIRONMENT_ALL.value,
   rangeFrom = 'now-15m',
@@ -24,6 +27,7 @@ export function APMAlertingFailedTransactionsChart({
   kuery = '',
   filters,
 }: EmbeddableApmAlertingVizProps) {
+  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
   const {
     transactionType: currentTransactionType,
     transactionTypes,
@@ -61,6 +65,8 @@ export function APMAlertingFailedTransactionsChart({
       timeZone={timeZone}
       kuery={kuery}
       filters={filters}
+      alertStart={alert.start}
+      alertEnd={alertEnd}
     />
   );
 }

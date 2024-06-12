@@ -252,7 +252,7 @@ describe('Discover flyout', function () {
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
   });
 
-  it('should not render single/surrounding views for text based', async () => {
+  it('should not render single/surrounding views for ES|QL', async () => {
     const { component } = await mountComponent({
       query: { esql: 'FROM indexpattern' },
     });

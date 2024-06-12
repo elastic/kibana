@@ -11,6 +11,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useEnablement } from '../../../../hooks';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import {
   isStatusEnabled,
@@ -49,6 +50,8 @@ export function useMonitorListColumns({
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
   const canEditSynthetics = useCanEditSynthetics();
+
+  const { isServiceAllowed } = useEnablement();
 
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
 
@@ -187,7 +190,10 @@ export function useMonitorListColumns({
           icon: 'pencil' as const,
           type: 'icon' as const,
           enabled: (fields) =>
-            canEditSynthetics && !isActionLoading(fields) && isPublicLocationsAllowed(fields),
+            canEditSynthetics &&
+            !isActionLoading(fields) &&
+            isPublicLocationsAllowed(fields) &&
+            isServiceAllowed,
           onClick: (fields) => {
             history.push({
               pathname: `/edit-monitor/${fields[ConfigKey.CONFIG_ID]}`,
@@ -226,7 +232,10 @@ export function useMonitorListColumns({
           type: 'icon' as const,
           color: 'danger' as const,
           enabled: (fields) =>
-            canEditSynthetics && !isActionLoading(fields) && isPublicLocationsAllowed(fields),
+            canEditSynthetics &&
+            !isActionLoading(fields) &&
+            isPublicLocationsAllowed(fields) &&
+            isServiceAllowed,
           onClick: (fields) => {
             updateAlertEnabledState({
               monitor: {

@@ -6,7 +6,6 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
@@ -15,6 +14,7 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { ActionsClientLlm } from '@kbn/langchain/server';
 
 import { ATTACK_DISCOVERY } from '../../../common/constants';
 import { getAssistantToolParams } from './helpers';

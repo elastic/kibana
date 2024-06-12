@@ -1483,10 +1483,9 @@ describe('helpers', () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        '/internal/ecs_data_quality_dashboard/results',
+        '/internal/ecs_data_quality_dashboard/results_latest/auditbeat-*',
         expect.objectContaining({
           method: 'GET',
-          query: { pattern: 'auditbeat-*' },
         })
       );
     });

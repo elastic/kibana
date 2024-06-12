@@ -66,7 +66,13 @@ export const PageSimpleStringStream: FC = () => {
       <br />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
+          <EuiButton
+            data-test-subj="responseStreamStartButton"
+            color="primary"
+            size="s"
+            onClick={onClickHandler}
+            aria-label={buttonLabel}
+          >
             {buttonLabel}
           </EuiButton>
         </EuiFlexItem>
@@ -81,7 +87,7 @@ export const PageSimpleStringStream: FC = () => {
       />
       <EuiSpacer />
       <EuiText>
-        <p>{data}</p>
+        <p data-test-subj="responseStreamString">{data}</p>
       </EuiText>
       {errors.length > 0 && (
         <EuiCallOut title="Sorry, there was an error" color="danger" iconType="warning">

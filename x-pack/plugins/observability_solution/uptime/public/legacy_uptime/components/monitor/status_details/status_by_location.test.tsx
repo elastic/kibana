@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18nProvider, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { MonitorLocation } from '../../../../../common/runtime_types';
 import { StatusByLocations } from '.';
 
@@ -51,7 +51,7 @@ describe('StatusByLocation component', () => {
         timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
-    const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
+    const component = renderWithI18nProvider(<StatusByLocations locations={monitorLocations} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -65,7 +65,7 @@ describe('StatusByLocation component', () => {
         timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
-    const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
+    const component = renderWithI18nProvider(<StatusByLocations locations={monitorLocations} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -79,7 +79,7 @@ describe('StatusByLocation component', () => {
         timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
-    const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
+    const component = renderWithI18nProvider(<StatusByLocations locations={monitorLocations} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -100,7 +100,7 @@ describe('StatusByLocation component', () => {
         timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
-    const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
+    const component = renderWithI18nProvider(<StatusByLocations locations={monitorLocations} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -121,7 +121,7 @@ describe('StatusByLocation component', () => {
         timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
-    const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
+    const component = renderWithI18nProvider(<StatusByLocations locations={monitorLocations} />);
     expect(component).toMatchSnapshot();
   });
 });

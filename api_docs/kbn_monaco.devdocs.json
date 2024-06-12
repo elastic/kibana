@@ -504,20 +504,6 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getMetaFields",
-            "type": "Function",
-            "tags": [],
-            "label": "getMetaFields",
-            "description": [],
-            "signature": [
-              "CallbackFn<{}, string> | undefined"
-            ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
             "id": "def-common.ESQLCallbacks.getPolicies",
             "type": "Function",
             "tags": [],

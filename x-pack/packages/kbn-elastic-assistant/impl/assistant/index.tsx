@@ -90,6 +90,7 @@ import { clearPresentationData } from '../connectorland/connector_setup/helpers'
 import { getGenAiConfig } from '../connectorland/helpers';
 import { AssistantAnimatedIcon } from './assistant_animated_icon';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { InstallKnowledgeBaseButton } from '../knowledge_base/install_knowledge_base_button';
 
 export interface Props {
   conversationTitle?: string;
@@ -330,7 +331,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Show missing connector callout if no connectors are configured
 
   const showMissingConnectorCallout = useMemo(() => {
-    if (!isLoading && areConnectorsFetched) {
+    if (!isLoading && areConnectorsFetched && currentConversation?.id !== '') {
       if (!currentConversation?.apiConfig?.connectorId) {
         return true;
       }
@@ -341,7 +342,13 @@ const AssistantComponent: React.FC<Props> = ({
     }
 
     return false;
-  }, [areConnectorsFetched, connectors, currentConversation?.apiConfig?.connectorId, isLoading]);
+  }, [
+    areConnectorsFetched,
+    connectors,
+    currentConversation?.apiConfig?.connectorId,
+    currentConversation?.id,
+    isLoading,
+  ]);
 
   const isSendingDisabled = useMemo(() => {
     return isDisabled || showMissingConnectorCallout;
@@ -697,8 +704,8 @@ const AssistantComponent: React.FC<Props> = ({
           conversation: payload,
           apiConfig: {
             ...payload?.apiConfig,
-            connectorId: defaultConnector?.id as string,
-            actionTypeId: defaultConnector?.actionTypeId as string,
+            connectorId: (defaultConnector?.id as string) ?? '',
+            actionTypeId: (defaultConnector?.actionTypeId as string) ?? '.gen-ai',
             provider: apiConfig?.apiProvider,
             model: apiConfig?.defaultModel,
           },
@@ -719,12 +726,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEffect(() => {
     (async () => {
-      if (
-        showMissingConnectorCallout &&
-        areConnectorsFetched &&
-        defaultConnector &&
-        currentConversation
-      ) {
+      if (areConnectorsFetched && currentConversation?.id === '') {
         const conversation = await mutateAsync(currentConversation);
         if (currentConversation.id === '' && conversation) {
           setCurrentConversationId(conversation.id);
@@ -862,6 +864,9 @@ const AssistantComponent: React.FC<Props> = ({
                     isFlyoutMode
                   />
                 </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <InstallKnowledgeBaseButton />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
@@ -944,6 +949,7 @@ const AssistantComponent: React.FC<Props> = ({
                     conversations={conversations}
                     refetchConversationsState={refetchConversationsState}
                     onConversationCreate={handleCreateConversation}
+                    isAssistantEnabled={isAssistantEnabled}
                   />
 
                   {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
@@ -983,16 +989,19 @@ const AssistantComponent: React.FC<Props> = ({
                     )
                   }
                 >
-                  <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
-                    <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
-                  </EuiFlexGroup>
-                  {/* <BlockBotCallToAction
-                    connectorPrompt={connectorPrompt}
-                    http={http}
-                    isAssistantEnabled={isAssistantEnabled}
-                    isWelcomeSetup={isWelcomeSetup}
-                  /> */}
+                  {!isAssistantEnabled ? (
+                    <BlockBotCallToAction
+                      connectorPrompt={connectorPrompt}
+                      http={http}
+                      isAssistantEnabled={isAssistantEnabled}
+                      isWelcomeSetup={isWelcomeSetup}
+                    />
+                  ) : (
+                    <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+                      <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
                 </EuiFlyoutBody>
                 <EuiFlyoutFooter
                   css={css`

@@ -38,6 +38,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/unified-data-table",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/react-kibana-mount"
   ]
 }

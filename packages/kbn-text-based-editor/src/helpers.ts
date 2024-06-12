@@ -228,3 +228,11 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
     }
   }
 };
+
+export const getESQLSources = async (dataViews: DataViewsPublicPluginStart) => {
+  const [remoteIndices, localIndices] = await Promise.all([
+    getRemoteIndicesList(dataViews),
+    getIndicesList(dataViews),
+  ]);
+  return [...localIndices, ...remoteIndices];
+};

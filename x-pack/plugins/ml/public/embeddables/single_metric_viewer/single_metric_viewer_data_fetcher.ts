@@ -52,8 +52,12 @@ export const initializeSingleMetricViewerDataFetcher = (
     ([singleMetricViewerData, fetchContext]) => {
       let bounds;
       let lastRefresh;
-      if (timefilter !== undefined && fetchContext.timeRange !== undefined) {
-        bounds = timefilter.calculateBounds(fetchContext.timeRange);
+      if (timefilter !== undefined) {
+        bounds = timefilter.calculateBounds(
+          fetchContext?.timeRange
+            ? fetchContext?.timeRange
+            : api.timeRange$?.value ?? timefilter.getTime()
+        );
         lastRefresh = Date.now();
       }
       singleMetricViewerData$.next({ singleMetricViewerData, bounds, lastRefresh });

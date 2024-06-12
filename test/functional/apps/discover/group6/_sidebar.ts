@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should show filters by type in text-based view', async function () {
+      it('should show filters by type in ES|QL view', async function () {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
         let options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should show empty fields in text-based view', async function () {
+      it('should show empty fields in ES|QL view', async function () {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.discover.selectTextBaseLang();
 
@@ -427,7 +427,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      it('should show selected and available fields in text-based mode', async function () {
+      it('should show selected and available fields in ES|QL mode', async function () {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(

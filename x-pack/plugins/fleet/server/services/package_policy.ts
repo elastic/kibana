@@ -43,6 +43,7 @@ import {
   isInputOnlyPolicyTemplate,
   getNormalizedDataStreams,
   getNormalizedInputs,
+  isRootPrivilegesRequired,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -170,15 +171,6 @@ async function getPkgInfoAssetsMap({
 
   return packageInfosandAssetsMap;
 }
-
-export const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
-  'auto_configure',
-  'create_doc',
-  'maintenance',
-  'monitor',
-  'read',
-  'read_cross_cluster',
-]);
 
 class PackagePolicyClientImpl implements PackagePolicyClient {
   public async create(
@@ -328,6 +320,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           logger,
         });
       }
+
+      const requiresRoot = isRootPrivilegesRequired(pkgInfo);
+      if (enrichedPackagePolicy.package && requiresRoot) {
+        enrichedPackagePolicy.package = {
+          ...enrichedPackagePolicy.package,
+          requires_root: requiresRoot,
+        };
+      }
     }
 
     const isoDate = new Date().toISOString();
@@ -457,6 +457,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             : inputs;
 
           elasticsearch = pkgInfo?.elasticsearch;
+
+          const requiresRoot = isRootPrivilegesRequired(pkgInfo);
+          if (packagePolicy.package && requiresRoot) {
+            packagePolicy.package = {
+              ...packagePolicy.package,
+              requires_root: requiresRoot,
+            };
+          }
         }
 
         policiesToCreate.push({
@@ -862,6 +870,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         assetsMap
       );
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
+
+      const requiresRoot = isRootPrivilegesRequired(pkgInfo);
+      if (restOfPackagePolicy.package && requiresRoot) {
+        restOfPackagePolicy.package = {
+          ...restOfPackagePolicy.package,
+          requires_root: requiresRoot,
+        };
+      }
     }
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
@@ -1042,6 +1058,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               assetsMap
             );
             elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
+
+            const requiresRoot = isRootPrivilegesRequired(pkgInfo);
+            if (restOfPackagePolicy.package && requiresRoot) {
+              restOfPackagePolicy.package = {
+                ...restOfPackagePolicy.package,
+                requires_root: requiresRoot,
+              };
+            }
           }
         }
 
@@ -2171,6 +2195,15 @@ export function _applyIndexPrivileges(
     return streamOut;
   }
 
+  const isServerless = appContextService.getCloud()?.isServerlessEnabled;
+  const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
+    'auto_configure',
+    'create_doc',
+    'maintenance',
+    'monitor',
+    'read',
+    ...(isServerless ? [] : ['read_cross_cluster']),
+  ]);
   const [valid, invalid] = partition(indexPrivileges, (permission) =>
     DATA_STREAM_ALLOWED_INDEX_PRIVILEGES.has(permission)
   );

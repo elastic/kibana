@@ -19,6 +19,7 @@ import {
   EuiDescriptionListDescription,
   EuiLink,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { useAuthz, useLink } from '../../../../../hooks';
@@ -26,6 +27,7 @@ import type { AgentPolicy } from '../../../../../types';
 import { AgentPolicyActionMenu, LinkedAgentCount } from '../../../components';
 import { AddAgentHelpPopover } from '../../../../../components';
 import { FLEET_SERVER_PACKAGE } from '../../../../../../../../common/constants';
+import { getRootIntegrations } from '../../../../../../../../common/services';
 
 export interface HeaderRightContentProps {
   isLoading: boolean;
@@ -130,36 +132,55 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
                           }}
                         />
                       ) : (
-                        <EuiToolTip
-                          content={
-                            <EuiFlexGroup direction="column" gutterSize="xs">
-                              <EuiFlexItem>
-                                <FormattedMessage
-                                  id="xpack.fleet.policyDetails.summary.usedByUnprivilegedTooltip"
-                                  defaultMessage="{count, plural, one {# unprivileged agent} other {# unprivileged agents}}"
-                                  values={{ count: agentPolicy.unprivileged_agents || 0 }}
+                        <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+                          <EuiFlexItem grow={false}>
+                            <EuiToolTip
+                              content={
+                                <EuiFlexGroup direction="column" gutterSize="xs">
+                                  <EuiFlexItem>
+                                    <FormattedMessage
+                                      id="xpack.fleet.policyDetails.summary.usedByUnprivilegedTooltip"
+                                      defaultMessage="{count, plural, one {# unprivileged agent} other {# unprivileged agents}}"
+                                      values={{ count: agentPolicy.unprivileged_agents || 0 }}
+                                    />
+                                  </EuiFlexItem>
+                                  <EuiFlexItem>
+                                    <FormattedMessage
+                                      id="xpack.fleet.policyDetails.summary.usedByPrivilegedTooltip"
+                                      defaultMessage="{count, plural, one {# privileged agent} other {# privileged agents}}"
+                                      values={{
+                                        count:
+                                          (agentPolicy.agents || 0) -
+                                          (agentPolicy.unprivileged_agents || 0),
+                                      }}
+                                    />
+                                  </EuiFlexItem>
+                                </EuiFlexGroup>
+                              }
+                            >
+                              <LinkedAgentCount
+                                count={agentPolicy.agents || 0}
+                                agentPolicyId={agentPolicy.id}
+                                showAgentText={true}
+                              />
+                            </EuiToolTip>
+                          </EuiFlexItem>
+                          {getRootIntegrations(agentPolicy.package_policies || []).length > 0 &&
+                            (agentPolicy.unprivileged_agents || 0) > 0 && (
+                              <EuiFlexItem grow={false}>
+                                <EuiIconTip
+                                  type="warning"
+                                  color="warning"
+                                  content={
+                                    <FormattedMessage
+                                      id="xpack.fleet.policyDetails.summary.containsUnprivilegedAgentsWarning"
+                                      defaultMessage="This agent policy contains integrations that require Elastic Agents to have root privileges. Some enrolled agents are running in unprivileged mode."
+                                    />
+                                  }
                                 />
                               </EuiFlexItem>
-                              <EuiFlexItem>
-                                <FormattedMessage
-                                  id="xpack.fleet.policyDetails.summary.usedByPrivilegedTooltip"
-                                  defaultMessage="{count, plural, one {# privileged agent} other {# privileged agents}}"
-                                  values={{
-                                    count:
-                                      (agentPolicy.agents || 0) -
-                                      (agentPolicy.unprivileged_agents || 0),
-                                  }}
-                                />
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          }
-                        >
-                          <LinkedAgentCount
-                            count={agentPolicy.agents || 0}
-                            agentPolicyId={agentPolicy.id}
-                            showAgentText={true}
-                          />
-                        </EuiToolTip>
+                            )}
+                        </EuiFlexGroup>
                       ),
                   },
                   { isDivider: true },

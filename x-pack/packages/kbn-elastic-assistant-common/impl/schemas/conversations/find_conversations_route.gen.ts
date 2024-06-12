@@ -14,7 +14,7 @@ import { ArrayFromString } from '@kbn/zod-helpers';
  *
  * info:
  *   title: Find Conversations API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { ConversationResponse } from './common_attributes.gen';

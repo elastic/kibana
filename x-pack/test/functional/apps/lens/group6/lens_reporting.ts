@@ -73,7 +73,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     for (const type of ['PNG', 'PDF'] as const) {
-      describe(`${type} report`, () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/183567
+      describe.skip(`${type} report`, () => {
         afterEach(async () => {
           await PageObjects.lens.closeShareModal();
         });

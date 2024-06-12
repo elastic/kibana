@@ -20,6 +20,7 @@ import type { ResponseError } from './types';
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token', () => ({
   getOAuthJwtAccessToken: jest.fn(),
@@ -189,7 +190,7 @@ describe('utils', () => {
 
       expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
       expect(createAxiosInstanceMock).toHaveBeenCalledWith({
-        auth: { password: 'password', username: 'username' },
+        headers: getBasicAuthHeader({ username: 'username', password: 'password' }),
       });
     });
 
