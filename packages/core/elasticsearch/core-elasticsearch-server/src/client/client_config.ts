@@ -50,7 +50,7 @@ export interface ElasticsearchClientConfig {
   caFingerprint?: string;
   ssl?: ElasticsearchClientSslConfig;
   apisToRedactInLogs?: ElasticsearchApiToRedactInLogs[];
-  dnsCacheTtlInSeconds: number;
+  dnsCacheTtl: Duration;
 }
 
 /**

@@ -6,7 +6,7 @@
  */
 
 import { expect } from 'expect';
-import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function telemetryConfigTest({ getService }: FtrProviderContext) {
@@ -15,58 +15,59 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('/api/telemetry/v2/config API Telemetry config', function () {
-    const baseConfig = {
-      allowChangingOptInStatus: false,
-      optIn: true,
-      sendUsageFrom: 'server',
-      telemetryNotifyUserAboutOptInDefault: false,
-      labels: {
-        serverless: 'observability',
-      },
-    };
     let roleAuthc: RoleCredentials;
-    let internalReqHeader: InternalRequestHeader;
 
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
+    const baseConfig = {
+      allowChangingOptInStatus: false,
+      optIn: true,
+      sendUsageFrom: 'server',
+      telemetryNotifyUserAboutOptInDefault: false,
+    };
+
     it('GET should get the default config', async () => {
       const { body } = await supertestWithoutAuth
         .get('/api/telemetry/v2/config')
-        .set(internalReqHeader)
+        .set(svlCommonApi.getCommonRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
+
       expect(body).toMatchObject(baseConfig);
     });
 
-    it.skip('GET should get updated labels after dynamically updating them', async () => {
+    it('GET should get updated labels after dynamically updating them', async () => {
+      const { body: initialConfig } = await supertestWithoutAuth
+        .get('/api/telemetry/v2/config')
+        .set(svlCommonApi.getCommonRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .expect(200);
+
       await supertestWithoutAuth
         .put('/internal/core/_settings')
-        .set(internalReqHeader)
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .set('elastic-api-version', '1')
         .send({ 'telemetry.labels.journeyName': 'my-ftr-test' })
         .expect(200, { ok: true });
 
-      const response = await supertestWithoutAuth
+      await supertestWithoutAuth
         .get('/api/telemetry/v2/config')
-        .set(internalReqHeader)
-        .set(roleAuthc.apiKeyHeader);
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({
-        ...baseConfig,
-        labels: expect.objectContaining({
-          ...baseConfig.labels,
-          journeyName: 'my-ftr-test',
-        }),
-      });
+        .set(svlCommonApi.getCommonRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .expect(200, {
+          ...initialConfig,
+          labels: {
+            ...initialConfig.labels,
+            journeyName: 'my-ftr-test',
+          },
+        });
     });
   });
 }
