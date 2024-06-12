@@ -23,7 +23,7 @@ export interface SystemLogsState {
   namespace: string;
 }
 
-export type ObservabilityOnboardingType = 'logFiles' | 'systemLogs';
+export type ObservabilityOnboardingType = 'logFiles' | 'systemLogs' | 'autoDetect';
 
 type ObservabilityOnboardingFlowState = LogFilesState | SystemLogsState | undefined;
 

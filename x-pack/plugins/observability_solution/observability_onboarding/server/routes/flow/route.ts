@@ -15,9 +15,15 @@ import {
 import type { TemplateAgentPolicyInput } from '@kbn/fleet-plugin/common';
 import { dump } from 'js-yaml';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
+import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
+import { getKibanaUrl } from '../../lib/get_fallback_urls';
+import { hasLogMonitoringPrivileges } from '../logs/api_key/has_log_monitoring_privileges';
+import { createShipperApiKey } from '../logs/api_key/create_shipper_api_key';
+import { createInstallApiKey } from '../logs/api_key/create_install_api_key';
+import { getAgentVersion } from '../../lib/get_agent_version';
 
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { ElasticAgentStepPayload, Integration, StepProgressPayloadRT } from '../types';
@@ -129,9 +135,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
       onboardingId: t.string,
     }),
   }),
-  async handler(resources): Promise<{
-    progress: Record<string, { status: string; message?: string }>;
-  }> {
+  async handler(resources): Promise<Pick<SavedObservabilityOnboardingFlow, 'progress'>> {
     const {
       params: {
         path: { onboardingId },
@@ -154,21 +158,11 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
 
     const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
-    const type = savedObservabilityOnboardingState.type;
-
     if (progress['ea-status']?.status === 'complete') {
+      const { agentId } = progress['ea-status']?.payload as ElasticAgentStepPayload;
       try {
-        const hasLogs = await getHasLogs({
-          type,
-          state: savedObservabilityOnboardingState.state,
-          esClient,
-          payload: progress['ea-status']?.payload as ElasticAgentStepPayload,
-        });
-        if (hasLogs) {
-          progress['logs-ingest'] = { status: 'complete' };
-        } else {
-          progress['logs-ingest'] = { status: 'loading' };
-        }
+        const hasLogs = await getHasLogs(esClient, agentId);
+        progress['logs-ingest'] = { status: hasLogs ? 'complete' : 'loading' };
       } catch (error) {
         progress['logs-ingest'] = { status: 'warning', message: error.message };
       }
@@ -177,6 +171,83 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
     }
 
     return { progress };
+  },
+});
+
+/**
+ * This endpoint starts a new onboarding flow and creates two API keys:
+ * 1. A short-lived API key with privileges to install integrations.
+ * 2. An API key with privileges to ingest log and metric data used to configure Elastic Agent.
+ *
+ * It also returns all required information to download the onboarding script and install the
+ * Elastic agent.
+ *
+ * If the user does not have all necessary privileges a 403 Forbidden response is returned.
+ *
+ * This endpoint differs from the existing `POST /internal/observability_onboarding/logs/flow`
+ * endpoint in that it caters for the auto-detect flow where integrations are detected and installed
+ * on the host system, rather than in the Kiabana UI.
+ */
+const createFlowRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'POST /internal/observability_onboarding/flow',
+  options: { tags: [] },
+  params: t.type({
+    body: t.type({
+      name: t.string,
+    }),
+  }),
+  async handler(resources) {
+    const {
+      context,
+      params: {
+        body: { name },
+      },
+      core,
+      request,
+      plugins,
+      kibanaVersion,
+    } = resources;
+    const coreStart = await core.start();
+    const {
+      elasticsearch: { client },
+    } = await context.core;
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+
+    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
+    if (!hasPrivileges) {
+      throw Boom.forbidden('Unauthorized to create log indices');
+    }
+
+    const fleetPluginStart = await plugins.fleet.start();
+
+    const [onboardingFlow, ingestApiKey, installApiKey, elasticAgentVersion] = await Promise.all([
+      saveObservabilityOnboardingFlow({
+        savedObjectsClient,
+        observabilityOnboardingState: {
+          type: 'autoDetect',
+          state: undefined,
+          progress: {},
+        },
+      }),
+      createShipperApiKey(client.asCurrentUser, name),
+      createInstallApiKey(client.asCurrentUser, name),
+      getAgentVersion(fleetPluginStart, kibanaVersion),
+    ]);
+
+    const kibanaUrl = getKibanaUrl(core.setup, plugins.cloud?.setup);
+    const scriptDownloadUrl = new URL(
+      core.setup.http.staticAssets.getPluginAssetHref('auto_detect.sh'),
+      kibanaUrl
+    ).toString();
+
+    return {
+      onboardingFlow,
+      ingestApiKey: ingestApiKey.encoded,
+      installApiKey: installApiKey.encoded,
+      elasticAgentVersion,
+      kibanaUrl,
+      scriptDownloadUrl,
+    };
   },
 });
 
@@ -265,7 +336,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
             payload: integrationsToInstall,
           },
         },
-      } as ObservabilityOnboardingFlow,
+      },
     });
 
     const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
@@ -347,6 +418,7 @@ async function ensureInstalledIntegrations(
 function parseIntegrationsTSV(tsv: string) {
   return Object.values(
     tsv
+      .trim()
       .split('\n')
       .map((line) => line.split('\t', 3))
       .reduce<Record<string, Integration>>((acc, [pkgName, installSource, logFilePath]) => {
@@ -402,6 +474,7 @@ const generateAgentConfig = ({
 };
 
 export const flowRouteRepository = {
+  ...createFlowRoute,
   ...updateOnboardingFlowRoute,
   ...stepProgressUpdateRoute,
   ...getProgressRoute,

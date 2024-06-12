@@ -52,18 +52,19 @@ export interface ObservabilityOnboardingRouteCreateOptions {
   };
 }
 
-export const IntegrationRT = t.union([
-  t.type({
-    pkgName: t.string,
-    installSource: t.literal('registry'),
-  }),
-  t.type({
-    pkgName: t.string,
-    installSource: t.literal('custom'),
-    logFilePaths: t.array(t.string),
-  }),
-]);
+const RegistryIntegrationRT = t.type({
+  pkgName: t.string,
+  installSource: t.literal('registry'),
+});
+const CustomIntegrationRT = t.type({
+  pkgName: t.string,
+  installSource: t.literal('custom'),
+  logFilePaths: t.array(t.string),
+});
+export const IntegrationRT = t.union([RegistryIntegrationRT, CustomIntegrationRT]);
 
+export type RegistryIntegration = t.TypeOf<typeof RegistryIntegrationRT>;
+export type CustomIntegration = t.TypeOf<typeof CustomIntegrationRT>;
 export type Integration = t.TypeOf<typeof IntegrationRT>;
 
 export const ElasticAgentStepPayloadRT = t.type({
