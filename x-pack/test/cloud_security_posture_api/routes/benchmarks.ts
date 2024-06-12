@@ -56,15 +56,15 @@ export default function (providerContext: FtrProviderContext) {
     result: { evaluation },
     rule: {
       name: 'Upper case rule name',
-      id: rule.metadata.id || 'ruleMetadataIdTest',
+      id: rule?.metadata.id || 'ruleMetadataIdTest',
       section: 'Upper case section',
       benchmark: {
-        id: rule.metadata.benchmark.id || 'ruleMetadataBenchmarkIdTest',
+        id: rule?.metadata.benchmark.id || 'ruleMetadataBenchmarkIdTest',
         posture_type:
-          rule.metadata.benchmark.posture_type || ' ruleMetadataBenchmarkPostureTypeTest',
-        name: rule.metadata.benchmark.name || 'ruleMetadataBenchmarkNameTest',
-        version: rule.metadata.benchmark.version || 'ruleMetadataBenchmarkVersionTest',
-        rule_number: rule.metadata.benchmark.rule_number || 'ruleMetadataBenchmarkRuleNumberTest',
+          rule.metadata?.benchmark.posture_type || ' ruleMetadataBenchmarkPostureTypeTest',
+        name: rule?.metadata.benchmark.name || 'ruleMetadataBenchmarkNameTest',
+        version: rule?.metadata.benchmark.version || 'ruleMetadataBenchmarkVersionTest',
+        rule_number: rule?.metadata.benchmark.rule_number || 'ruleMetadataBenchmarkRuleNumberTest',
       },
     },
     orchestrator: {
