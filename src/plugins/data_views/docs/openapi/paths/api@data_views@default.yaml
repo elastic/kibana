@@ -1,5 +1,5 @@
 get:
-  summary: Get the default data view identifier
+  summary: Get the default data view in the default space
   operationId: getDefaultDataViewDefault
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -25,7 +25,7 @@ get:
           schema:
             $ref: '../components/schemas/400_response.yaml'
 post:
-  summary: Set the default data view identifier
+  summary: Set the default data view in the default space
   operationId: setDefaultDatailViewDefault
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
