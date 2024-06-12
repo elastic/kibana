@@ -41,4 +41,8 @@ describe('validateJSON', () => {
       'A maximum of 1 additional fields can be defined at a time.'
     );
   });
+
+  it('does not return an error for an object', () => {
+    expect(validateJSON({ value: { foo: 'test' } })).toBeUndefined();
+  });
 });

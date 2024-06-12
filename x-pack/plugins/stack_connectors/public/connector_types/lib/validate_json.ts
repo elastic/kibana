@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 interface ValidateJSONArgs {
-  value?: string | null;
+  value?: string | null | Record<string, unknown>;
   maxProperties?: number;
 }
+
+const isObject = (value?: ValidateJSONArgs['value']): value is Record<string, unknown> => {
+  return isPlainObject(value);
+};
 
 export const MAX_ATTRIBUTES_ERROR = (length: number) =>
   i18n.translate('xpack.stackConnectors.schema.additionalFieldsLengthError', {
@@ -27,6 +32,10 @@ export const INVALID_JSON_FORMAT = i18n.translate(
 
 export const validateJSON = ({ value, maxProperties }: ValidateJSONArgs) => {
   try {
+    if (isObject(value)) {
+      return;
+    }
+
     if (value) {
       const parsedOtherFields = JSON.parse(value);
 

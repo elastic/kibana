@@ -36,16 +36,32 @@ describe('Credentials', () => {
     expect(await screen.findByText(value)).toBeInTheDocument();
   });
 
-  it('changes the value correctly', async () => {
-    const newValue = JSON.stringify({ bar: 'test' });
-
+  /**
+   * Test for the intermediate release process
+   */
+  it('does not show the component if the value is undefined', async () => {
     render(
       <IntlProvider locale="en">
         <AdditionalFields {...props} value={undefined} />
       </IntlProvider>
     );
 
-    userEvent.paste(await screen.findByTestId('additional_fieldsJsonEditor'), newValue);
+    expect(screen.queryByTestId('additional_fieldsJsonEditor')).not.toBeInTheDocument();
+  });
+
+  it('changes the value correctly', async () => {
+    const newValue = JSON.stringify({ bar: 'test' });
+
+    render(
+      <IntlProvider locale="en">
+        <AdditionalFields {...props} />
+      </IntlProvider>
+    );
+
+    const editor = await screen.findByTestId('additional_fieldsJsonEditor');
+
+    userEvent.clear(editor);
+    userEvent.paste(editor, newValue);
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith(newValue);
@@ -59,7 +75,7 @@ describe('Credentials', () => {
 
     render(
       <IntlProvider locale="en">
-        <AdditionalFields {...props} value={undefined} />
+        <AdditionalFields {...props} />
       </IntlProvider>
     );
 
