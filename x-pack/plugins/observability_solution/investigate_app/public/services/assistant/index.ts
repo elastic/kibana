@@ -24,7 +24,7 @@ import { createAssistantResponseWidget } from '../../widgets/assistant_response_
 import { createEmbeddableWidget } from '../../widgets/embeddable_widget/create_embeddable_widget';
 import { createUserPromptWidget } from '../../widgets/user_prompt_widget/create_user_prompt_widget';
 import { createAskStatusUpdate } from './create_ask_status_update';
-import { getAllDatasets } from './get_all_datasets';
+// import { getAllDatasets } from './get_all_datasets';
 import { getRelevantExistingEmbeddables } from './get_relevant_existing_embeddables';
 import { getStoredEmbeddables } from './get_stored_embeddables';
 import { serializeTimelineForAssistant } from './serialize_timeline_for_assistant';
@@ -116,10 +116,11 @@ export function createAssistantService({
         askUpdates$.next(createAskStatusUpdate(TimelineAskStatusUpdateType.CollectingContext));
 
         const [_datasets, storedEmbeddables, _allDataViews] = await Promise.all([
-          getAllDatasets({
-            datasetQuality,
-            signal,
-          }),
+          // getAllDatasets({
+          //   datasetQuality,
+          //   signal,
+          // }),
+          Promise.resolve([]),
           getStoredEmbeddables({
             embeddable,
             contentManagement,

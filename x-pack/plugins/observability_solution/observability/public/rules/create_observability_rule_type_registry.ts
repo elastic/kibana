@@ -21,14 +21,19 @@ export type ObservabilityRuleTypeFormatter = (options: {
   formatters: { asDuration: AsDuration; asPercent: AsPercent };
 }) => { reason: string; link?: string; hasBasePath?: boolean };
 
+export type InvestigateDetailsAppSectionProps<TParams extends Record<string, any>> = {
+  alert: TopAlert;
+  rule: Rule<TParams>;
+} & GlobalWidgetParameters &
+  Pick<WidgetRenderAPI, 'blocks' | 'onWidgetAdd'>;
+
 export interface ObservabilityRuleTypeModel<
   TParams extends Record<string, any> = Record<string, unknown>
 > extends RuleTypeModel<TParams> {
   format: ObservabilityRuleTypeFormatter;
   investigateDetailsAppSection?: (
-    options: { alert: TopAlert; rule: Rule<TParams> } & GlobalWidgetParameters &
-      Pick<WidgetRenderAPI, 'blocks' | 'onWidgetAdd'>
-  ) => React.ReactElement;
+    options: InvestigateDetailsAppSectionProps<TParams>
+  ) => React.ReactNode;
   priority?: number;
 }
 

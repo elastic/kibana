@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getSurveyFeedbackURL } from '@kbn/observability-shared-plugin/public';

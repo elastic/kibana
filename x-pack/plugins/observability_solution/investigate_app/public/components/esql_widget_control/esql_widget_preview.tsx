@@ -198,6 +198,8 @@ export function EsqlWidgetPreview({
             values={displayedProps.value.values}
             dataView={displayedProps.value.dataView}
             esqlQuery={esqlQuery}
+            start={timeRange.from}
+            end={timeRange.to}
           />
         </PreviewContainer>
       </EuiFlexItem>

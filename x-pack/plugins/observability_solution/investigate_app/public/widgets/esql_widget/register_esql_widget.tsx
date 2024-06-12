@@ -16,6 +16,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { ESQL_WIDGET_NAME } from '../../constants';
 import type { RegisterWidgetOptions } from '../register_widgets';
 import { useKibana } from '../../hooks/use_kibana';
@@ -35,6 +37,7 @@ export function EsqlWidget({
   allColumns,
   values,
   blocks,
+  dateHistogramResults,
 }: {
   suggestion: Suggestion;
   dataView: DataView;
@@ -43,6 +46,12 @@ export function EsqlWidget({
   allColumns: ESQLSearchResponse['all_columns'];
   values: ESQLSearchResponse['values'];
   blocks: WidgetRenderAPI['blocks'];
+  dateHistogramResults?: {
+    query: string;
+    columns: ESQLSearchResponse['columns'];
+    values: ESQLSearchResponse['values'];
+    groupingExpression: string;
+  };
 }) {
   const {
     dependencies: {
@@ -104,16 +113,92 @@ export function EsqlWidget({
     return undefined;
   }, [datatable.columns, datatable.rows]);
 
+  const previewInput = useAbortableAsync(
+    async ({ signal }) => {
+      if (!dateHistogramResults) {
+        return undefined;
+      }
+
+      const lensHelper = await lens.stateHelperApi();
+
+      const suggestionsFromLensHelper = await lensHelper.suggestions(
+        {
+          dataViewSpec: dataView.toSpec(),
+          fieldName: '',
+          textBasedColumns: [
+            {
+              id: dateHistogramResults.groupingExpression,
+              name: i18n.translate('xpack.investigateApp.esqlWidget.groupedByDateLabel', {
+                defaultMessage: '@timestamp',
+              }),
+              meta: {
+                type: 'date',
+              },
+            },
+            {
+              id: 'count',
+              name: 'count',
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
+          query: {
+            esql: dateHistogramResults.query,
+          },
+        },
+        dataView,
+        ['lnsDatatable']
+      );
+
+      const suggestionForHistogram = suggestionsFromLensHelper?.[0];
+
+      if (!suggestionForHistogram) {
+        return undefined;
+      }
+
+      return getLensAttrsForSuggestion({
+        suggestion: suggestionForHistogram,
+        dataView,
+        query: dateHistogramResults.query,
+        table: getDatatableFromEsqlResponse({
+          columns: dateHistogramResults.columns,
+          values: dateHistogramResults.values,
+        }),
+      });
+    },
+    [dataView, lens, dateHistogramResults]
+  );
+
   if (input.attributes.visualizationType === 'lnsDatatable') {
     return (
-      <ESQLDataGrid
-        rows={values}
-        columns={datatable.columns}
-        dataView={dataView}
-        query={memoizedQueryObject}
-        flyoutType="overlay"
-        initialColumns={initialColumns}
-      />
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem
+          grow={false}
+          className={css`
+            height: 128px;
+            > div {
+              height: 100%;
+            }
+          `}
+        >
+          {previewInput.value ? (
+            <lens.EmbeddableComponent {...previewInput.value} />
+          ) : (
+            <EuiLoadingSpinner size="s" />
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ESQLDataGrid
+            rows={values}
+            columns={datatable.columns}
+            dataView={dataView}
+            query={memoizedQueryObject}
+            flyoutType="overlay"
+            initialColumns={initialColumns}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -170,28 +255,55 @@ export function registerEsqlWidget({
           : []),
       ];
 
-      const filter = {
+      const getFilter = () => ({
         bool: {
           filter: [...esFilters],
         },
-      };
+      });
 
-      const [meta, response] = await Promise.all([
-        esql.meta({ query: esqlQuery, signal, filter }),
-        esql.query({ query: esqlQuery, signal, filter }),
-      ]);
+      const mainResponse = await esql.queryWithMeta({
+        query: esqlQuery,
+        signal,
+        filter: getFilter(),
+      });
 
-      const suggestion = suggestionFromParameters || meta.suggestions[0];
+      const suggestion = suggestionFromParameters || mainResponse.meta.suggestions[0];
+
+      const groupingExpression = `BUCKET(@timestamp, 50, "${timeRange.from}", "${timeRange.to}")`;
+      const dateHistoQuery = `${esqlQuery} | STATS count = COUNT(*) BY ${groupingExpression}`;
+
+      const dateHistoResponse =
+        suggestion.visualizationId === 'lnsDatatable' &&
+        mainResponse.query.columns.find((column) => column.name === '@timestamp')
+          ? await esql.queryWithMeta({
+              query: dateHistoQuery,
+              signal,
+              filter: getFilter(),
+            })
+          : undefined;
 
       return {
-        columns: response.columns,
-        values: response.values,
-        suggestion,
-        dataView: meta.dataView,
+        main: {
+          columns: mainResponse.query.columns,
+          values: mainResponse.query.values,
+          suggestion,
+          dataView: mainResponse.meta.dataView,
+        },
+        dateHistogram: dateHistoResponse
+          ? {
+              columns: dateHistoResponse.query.columns,
+              values: dateHistoResponse.query.values,
+              query: dateHistoQuery,
+              groupingExpression,
+            }
+          : undefined,
       };
     },
     ({ widget, blocks }) => {
-      const { dataView, columns, values, suggestion } = widget.data;
+      const {
+        main: { dataView, columns, values, suggestion },
+        dateHistogram,
+      } = widget.data;
       return (
         <EsqlWidget
           dataView={dataView}
@@ -201,6 +313,7 @@ export function registerEsqlWidget({
           suggestion={suggestion}
           esqlQuery={widget.parameters.esql}
           blocks={blocks}
+          dateHistogramResults={dateHistogram}
         />
       );
     }
