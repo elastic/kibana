@@ -23,7 +23,7 @@ describe('checkForDuplicateDashboardTitle', () => {
     jest.clearAllMocks();
   });
 
-  it('uses the passed searchLimit when performing name collusion check', async () => {
+  it('uses the passed searchLimit when performing name collision check', async () => {
     const [baseDashboardName] = extractTitleAndCount(newTitle);
 
     (
@@ -263,7 +263,7 @@ describe('checkForDuplicateDashboardTitle', () => {
     );
   });
 
-  it('invokes onTitleDuplicate with a speculative collusion free value when the new title provided is a duplicate match', async () => {
+  it('invokes onTitleDuplicate with a speculative collision free value when the new title provided is a duplicate match', async () => {
     const searchLimit = 20;
     const searchResultTotal = 11;
 
