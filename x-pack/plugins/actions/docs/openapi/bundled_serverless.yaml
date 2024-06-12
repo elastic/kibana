@@ -3334,6 +3334,15 @@ components:
           supported_feature_ids:
             - generativeAIForSecurity
           is_system_action_type: false
+        - id: .gemini
+          name: Google Gemini
+          enabled: true
+          enabled_in_config: true
+          enabled_in_license: true
+          minimum_license_required: enterprise
+          supported_feature_ids:
+            - generativeAI
+          is_system_action_type: false
   responses:
     '401':
       description: Authorization information is missing or invalid.
