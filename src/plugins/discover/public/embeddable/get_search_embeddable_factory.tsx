@@ -22,6 +22,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import {
   apiHasAppContext,
+  apiHasExecutionContext,
   apiHasParentApi,
   FetchContext,
   initializeTimeRange,
@@ -50,6 +51,7 @@ import {
   SearchEmbeddableSerializedState,
 } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
+import { KibanaExecutionContext } from '@kbn/core/types';
 
 /** This constant refers to the parts of the saved search state that can be edited from a dashboard */
 const EDITABLE_SAVED_SEARCH_KEYS: Array<keyof SavedSearchAttributes> = [
@@ -216,7 +218,26 @@ export const getSearchEmbeddableFactory = ({
         const editPath = discoverServices.core.http.basePath.remove(editUrl);
         const editApp = useRedirect ? 'r' : 'discover';
 
-        return { path: editPath, app: editApp };
+        return { path: editPath, app: editApp, editUrl };
+      };
+
+      const getExecutionContext = async () => {
+        const { editUrl } = await getAppTarget();
+        const childContext: KibanaExecutionContext = {
+          type: SEARCH_EMBEDDABLE_TYPE,
+          name: 'discover',
+          id: savedObjectId$.getValue(),
+          description: api.panelTitle?.getValue() || api.defaultPanelTitle?.getValue() || '',
+          url: editUrl,
+        };
+        const executionContext =
+          apiHasParentApi(api) && apiHasExecutionContext(api.parentApi)
+            ? {
+                ...api.parentApi?.executionContext,
+                child: childContext,
+              }
+            : childContext;
+        return executionContext;
       };
 
       const api: SearchEmbeddableApi = buildApi(
@@ -330,6 +351,7 @@ export const getSearchEmbeddableFactory = ({
           fetchWarnings$,
         },
         discoverServices,
+        getExecutionContext,
       });
 
       return {

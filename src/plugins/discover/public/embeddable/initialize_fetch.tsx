@@ -35,6 +35,7 @@ import { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { SearchEmbeddableApi } from './types';
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
+import { KibanaExecutionContext } from '@kbn/core/types';
 
 export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): boolean => {
   const query = savedSearch.searchSource.getField('query');
@@ -44,6 +45,7 @@ export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): bool
 export function initializeFetch({
   api,
   discoverServices,
+  getExecutionContext,
 }: {
   api: SearchEmbeddableApi & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
@@ -52,6 +54,7 @@ export function initializeFetch({
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
   };
   discoverServices: DiscoverServices;
+  getExecutionContext: () => Promise<KibanaExecutionContext>;
 }) {
   const requestAdapter = new RequestAdapter();
   let abortController = new AbortController(); // ???
@@ -141,6 +144,8 @@ export function initializeFetch({
             };
           }
 
+          const executionContext = await getExecutionContext();
+          console.log('executionContext', executionContext);
           /**
            * Fetch via saved search
            */
@@ -158,17 +163,7 @@ export function initializeFetch({
                     'This request queries Elasticsearch to fetch the data for the search.',
                 }),
               },
-              executionContext:
-                apiHasParentApi(api) && apiHasExecutionContext(api.parentApi)
-                  ? api.parentApi?.executionContext
-                  : {
-                      type: SEARCH_EMBEDDABLE_TYPE,
-                      name: 'discover',
-                      id: searchSource.getId(),
-                      description:
-                        api.panelTitle?.getValue() || api.defaultPanelTitle?.getValue() || '',
-                      // url: this.output.editUrl,
-                    },
+              executionContext,
               disableWarningToasts: true,
             })
           );
