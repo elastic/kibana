@@ -20,14 +20,15 @@ interface DockerContainerDocument extends Fields {
   'cloud.provider'?: string;
   'cloud.instance.id'?: string;
   'cloud.image.id'?: string;
+  'event.dataset'?: string;
 }
 
 export class DockerContainer extends Entity<DockerContainerDocument> {
   metrics() {
     return new DockerContainerMetrics({
       ...this.fields,
-      'docker.cpu.total.pct': 25,
-      'docker.memory.usage.pct': 20,
+      'docker.cpu.total.pct': 0.25,
+      'docker.memory.usage.pct': 0.2,
       'docker.network.inbound.bytes': 100,
       'docker.network.outbound.bytes': 200,
       'docker.diskio.read.ops': 10,

@@ -30,6 +30,7 @@ const scenario: Scenario<InfraDocument> = async (runOptions) => {
             'cloud.instance.id': 'instance-1',
             'cloud.image.id': 'image-1',
             'cloud.provider': 'aws',
+            'event.dataset': 'docker.container',
           });
         });
 

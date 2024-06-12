@@ -40,9 +40,13 @@ export const Overview = () => {
   const state = useIntersectingState(ref, { dateRange });
 
   const metadataSummarySection = isFullPageView ? (
-    <MetadataSummaryList metadata={metadata} loading={metadataLoading} />
+    <MetadataSummaryList metadata={metadata} loading={metadataLoading} assetType={asset.type} />
   ) : (
-    <MetadataSummaryListCompact metadata={metadata} loading={metadataLoading} />
+    <MetadataSummaryListCompact
+      metadata={metadata}
+      loading={metadataLoading}
+      assetType={asset.type}
+    />
   );
 
   return (
