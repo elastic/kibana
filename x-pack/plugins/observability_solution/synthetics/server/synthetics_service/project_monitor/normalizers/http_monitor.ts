@@ -24,6 +24,8 @@ import {
   getUnsupportedKeysError,
   getInvalidUrlsOrHostsError,
   getHasTLSFields,
+  isValidURL,
+  getUnparseableUrlError,
 } from './common_fields';
 
 export const getNormalizeHTTPFields = ({
@@ -53,6 +55,8 @@ export const getNormalizeHTTPFields = ({
   const urls = getOptionalListField(monitor.urls);
   if (urls.length !== 1) {
     errors.push(getInvalidUrlsOrHostsError(monitor, 'urls', version));
+  } else if (isValidURL(urls[0]) === false) {
+    errors.push(getUnparseableUrlError(monitor, version));
   }
   if (unsupportedKeys.length) {
     errors.push(getUnsupportedKeysError(monitor, unsupportedKeys, version));

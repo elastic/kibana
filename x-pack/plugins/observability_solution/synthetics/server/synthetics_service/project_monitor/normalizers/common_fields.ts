@@ -290,6 +290,24 @@ export const getInvalidUrlsOrHostsError = (
   ),
 });
 
+export const getUnparseableUrlError = (monitor: ProjectMonitor, version: string) => ({
+  id: monitor.id,
+  reason: INVALID_CONFIGURATION_TITLE,
+  details: i18n.translate(
+    'xpack.synthetics.projectMonitorApi.validation.unparseableUrl.description',
+    {
+      defaultMessage:
+        '`{monitorType}` project monitors must specify a valid URL for field `{key}` in version `{version}`. Your monitor definition with ID `{monitorId}` was not saved.',
+      values: {
+        monitorType: monitor.type,
+        key: 'monitor.urls',
+        version,
+        monitorId: monitor.id,
+      },
+    }
+  ),
+});
+
 const getInvalidLocationError = (
   invalidPublic: string[],
   invalidPrivate: string[],
@@ -349,6 +367,20 @@ export const getValueInSeconds = (value: string) => {
 export const getOptionalListField = (value?: string[] | string): string[] => {
   if (!value) return [];
   return Array.isArray(value) ? value : [value];
+};
+
+/**
+ * Does a best-effort check to ensure that the `monitor.url` field will evaluate to a valid URL.
+ * @param url the value of a single entry in the `monitor.url` list intended to pass to the service
+ * @returns `true` if `new URL` does not throw an error, `false` otherwise
+ */
+export const isValidURL = (url: string): boolean => {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 /**
