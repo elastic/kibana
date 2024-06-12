@@ -8,14 +8,19 @@ const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
 const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
 const SETUP_TECHNOLOGY = 'setup-technology-selector';
 const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
-const AWS_ORGANIZATION_TEST_ID = 'awsOrganizationAccountTestId';
 
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'svlCommonPage', 'cisAddIntegration', 'header']);
+  const pageObjects = getPageObjects([
+    'settings',
+    'common',
+    'svlCommonPage',
+    'cisAddIntegration',
+    'header',
+  ]);
 
   describe('CIS Integration Page', function () {
     // TODO: we need to check if the tests are running on MKI. There is a suspicion that installing csp package via Kibana server args is not working on MKI.
@@ -27,7 +32,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
-      await cisIntegration.navigateToAddIntegrationCspmPage();
+
+      await pageObjects.common.navigateToUrl(
+        'fleet',
+        'integrations/cloud_security_posture/add-integration/cspm',
+        {
+          shouldUseHashForSubUrl: false,
+        }
+      );
+    });
+
+    after(async () => {
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('CIS_AWS Single Account Launch Cloud formation', () => {
@@ -65,7 +81,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('CIS_AWS ORG Account Launch Cloud formation', () => {
       it('should show CIS_AWS Launch Cloud formation button when setup technology selector is Agentless and credentials selector is direct access keys', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(AWS_ORGANIZATION_TEST_ID);
         await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY);
         await cisIntegration.selectValue(SETUP_TECHNOLOGY, 'Agentless');
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
@@ -80,7 +95,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should hide CIS_AWS Launch Cloud formation button when setup technology selector is Agent-based and credentials selector is direct access keys', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(AWS_ORGANIZATION_TEST_ID);
         await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY);
         await cisIntegration.selectValue(SETUP_TECHNOLOGY, 'Agent-based');
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
@@ -95,7 +109,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should hide CIS_AWS Launch Cloud formation button when setup technology selector is Agentless and credentials selector is temporary access', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(AWS_ORGANIZATION_TEST_ID);
         await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY);
         await cisIntegration.selectValue(SETUP_TECHNOLOGY, 'Agentless');
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);

@@ -110,6 +110,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         maintenanceWindows: {
           pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
         },
+        fleet: {
+          pathname: '/app/fleet',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {
