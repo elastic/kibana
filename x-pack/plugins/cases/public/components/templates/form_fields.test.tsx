@@ -101,7 +101,7 @@ describe('form fields', () => {
     expect(await screen.findByTestId('caseDescription')).toBeInTheDocument();
   });
 
-  it('renders case fields with existing', async () => {
+  it('renders case fields with existing value', async () => {
     appMockRenderer.render(
       <FormTestComponent
         formDefaultValue={{

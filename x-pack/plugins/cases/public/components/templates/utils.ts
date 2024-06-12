@@ -62,7 +62,7 @@ export const templateDeserializer = (data: TemplateConfiguration): TemplateFormP
   return data;
 };
 
-export const templateSerializer = (data: TemplateFormProps): TemplateFormProps => {
+export const getTemplateSerializedData = (data: TemplateFormProps): TemplateFormProps => {
   if (data !== null) {
     const { fields = null, ...rest } = data;
     const connectorFields = getConnectorsFormSerializer({ fields });

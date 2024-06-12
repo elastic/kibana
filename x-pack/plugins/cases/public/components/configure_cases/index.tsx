@@ -47,6 +47,7 @@ import { Templates } from '../templates';
 import type { TemplateFormProps } from '../templates/types';
 import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
+import { getTemplateSerializedData } from '../templates/utils';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -399,6 +400,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   const onTemplateSave = useCallback(
     (data: TemplateFormProps) => {
+      const serializedData = getTemplateSerializedData(data);
       const {
         connectorId,
         fields,
@@ -409,7 +411,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         templateTags,
         templateDescription,
         ...otherCaseFields
-      } = data;
+      } = serializedData;
 
       const transformedCustomFields = templateCustomFields
         ? transformCustomFieldsData(templateCustomFields, customFields)

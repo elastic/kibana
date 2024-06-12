@@ -67,12 +67,14 @@ export const CONNECTOR_FIELDS = i18n.translate('xpack.cases.templates.connectorF
 
 export const DELETE_TITLE = (name: string) =>
   i18n.translate('xpack.cases.templates.deleteTitle', {
-    defaultMessage: `Delete ${name} ?`,
+    values: { name },
+    defaultMessage: 'Delete {name} ?',
   });
 
 export const DELETE_MESSAGE = (name: string) =>
   i18n.translate('xpack.cases.templates.deleteMessage', {
-    defaultMessage: `This action will permanently delete ${name}.`,
+    values: { name },
+    defaultMessage: 'This action will permanently delete {name}.',
   });
 
 export const MAX_TEMPLATE_LIMIT = (maxTemplates: number) =>

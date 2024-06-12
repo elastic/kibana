@@ -12,7 +12,7 @@ import type { ActionConnector } from '../../../common/types/domain';
 import type { FormState } from '../configure_cases/flyout';
 import { schema } from './schema';
 import { FormFields } from './form_fields';
-import { templateDeserializer, templateSerializer } from './utils';
+import { templateDeserializer } from './utils';
 import type { TemplateFormProps } from './types';
 import type { CasesConfigurationUI } from '../../containers/types';
 
@@ -43,7 +43,7 @@ const FormComponent: React.FC<Props> = ({
     },
     options: { stripEmptyFields: false },
     schema,
-    serializer: templateSerializer,
+    // serializer: templateSerializer,
     deserializer: templateDeserializer,
   });
 

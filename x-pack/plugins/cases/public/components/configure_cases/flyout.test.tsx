@@ -490,9 +490,13 @@ describe('CommonFlyout ', () => {
           name: 'Template name',
           templateDescription: 'Template description',
           templateTags: ['foo'],
+          title: '',
+          description: '',
+          tags: [],
+          severity: '',
+          category: null,
           connectorId: 'none',
           syncAlerts: true,
-          fields: null,
         });
       });
     });
@@ -539,12 +543,14 @@ describe('CommonFlyout ', () => {
           key: 'random_key',
           name: 'Template 1',
           templateDescription: 'test description',
+          templateTags: [],
           title: 'Case using template',
           description: 'This is a case description',
           category: 'new',
+          tags: [],
+          severity: '',
           connectorId: 'none',
           syncAlerts: true,
-          fields: null,
         });
       });
     });
@@ -585,14 +591,20 @@ describe('CommonFlyout ', () => {
           key: 'random_key',
           name: 'Template 1',
           templateDescription: 'test description',
+          templateTags: [],
+          title: '',
+          tags: [],
+          severity: '',
+          description: '',
+          category: null,
           connectorId: 'none',
           syncAlerts: true,
           customFields: {
             [customFieldsConfigurationMock[0].key]: 'this is a sample text!',
             [customFieldsConfigurationMock[1].key]: true,
+            [customFieldsConfigurationMock[2].key]: '',
             [customFieldsConfigurationMock[3].key]: false,
           },
-          fields: null,
         });
       });
     });
@@ -642,12 +654,18 @@ describe('CommonFlyout ', () => {
           key: 'random_key',
           name: 'Template 1',
           templateDescription: 'test description',
+          templateTags: [],
+          title: '',
+          tags: [],
+          severity: '',
+          description: '',
+          category: null,
           connectorId: 'servicenow-1',
           fields: {
             category: 'software',
             urgency: '1',
-            impact: null,
-            severity: null,
+            impact: '',
+            severity: '',
             subcategory: null,
           },
           syncAlerts: true,
@@ -715,7 +733,7 @@ describe('CommonFlyout ', () => {
             first_custom_field_key: 'Updated custom field value',
           },
           description: 'case desc',
-          fields: null,
+          category: null,
           key: 'test_template_4',
           name: 'Template name',
           severity: 'low',

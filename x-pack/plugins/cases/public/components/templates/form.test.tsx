@@ -17,7 +17,11 @@ import {
   MAX_TEMPLATE_TAG_LENGTH,
 } from '../../../common/constants';
 import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
-import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
+import {
+  connectorsMock,
+  customFieldsConfigurationMock,
+  templatesConfigurationMock,
+} from '../../containers/mock';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
 import type { FormState } from '../configure_cases/flyout';
@@ -83,7 +87,7 @@ describe('TemplateForm', () => {
       initialValue: {
         key: 'template_key_1',
         name: 'Template 1',
-        templateDescription: 'Sample description',
+        description: 'Sample description',
       },
     };
     appMockRenderer.render(<TemplateForm {...newProps} />);
@@ -107,9 +111,11 @@ describe('TemplateForm', () => {
       initialValue: {
         key: 'template_key_1',
         name: 'Template 1',
-        templateDescription: 'Sample description',
-        title: 'Case with template 1',
-        description: 'case description',
+        description: 'Sample description',
+        caseFields: {
+          title: 'Case with template 1',
+          description: 'case description',
+        },
       },
     };
     appMockRenderer.render(<TemplateForm {...newProps} />);
@@ -173,9 +179,13 @@ describe('TemplateForm', () => {
         name: 'Template 1',
         templateDescription: 'this is a first template',
         templateTags: ['foo', 'bar'],
+        title: '',
+        description: '',
+        severity: '',
+        tags: [],
         connectorId: 'none',
         syncAlerts: true,
-        fields: null,
+        category: null,
       });
     });
   });
@@ -185,18 +195,19 @@ describe('TemplateForm', () => {
 
     const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
-    appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
+    appMockRenderer.render(
+      <TemplateForm
+        {...{
+          ...defaultProps,
+          initialValue: { key: 'template_1_key', name: 'Template 1' },
+          onChange: onChangeState,
+        }}
+      />
+    );
 
     await waitFor(() => {
       expect(formState).not.toBeUndefined();
     });
-
-    userEvent.paste(await screen.findByTestId('template-name-input'), 'Template 1');
-
-    userEvent.paste(
-      await screen.findByTestId('template-description-input'),
-      'this is a first template'
-    );
 
     const caseTitle = await screen.findByTestId('caseTitle');
     userEvent.paste(within(caseTitle).getByTestId('input'), 'Case with Template 1');
@@ -222,14 +233,55 @@ describe('TemplateForm', () => {
       expect(data).toEqual({
         key: expect.anything(),
         name: 'Template 1',
-        templateDescription: 'this is a first template',
+        templateDescription: '',
+        templateTags: [],
         title: 'Case with Template 1',
         description: 'This is a case description',
         tags: ['template-1'],
+        severity: '',
         category: 'new',
         connectorId: 'none',
         syncAlerts: true,
-        fields: null,
+      });
+    });
+  });
+
+  it('serializes the case field data correctly with existing fields', async () => {
+    let formState: FormState<TemplateFormProps>;
+
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
+
+    const newProps = {
+      ...defaultProps,
+      initialValue: templatesConfigurationMock[3],
+      connectors: [],
+      onChange: onChangeState,
+      isEditMode: true,
+    };
+
+    appMockRenderer.render(<TemplateForm {...newProps} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    await act(async () => {
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toBe(true);
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        name: 'Fourth test template',
+        title: 'Case with sample template 4',
+        description: 'case desc',
+        templateDescription: 'This is a fourth test template',
+        tags: ['sample-4'],
+        connectorId: 'none',
+        severity: 'low',
+        syncAlerts: true,
+        category: null,
+        templateTags: ['foo', 'bar'],
       });
     });
   });
@@ -243,6 +295,7 @@ describe('TemplateForm', () => {
       <TemplateForm
         {...{
           ...defaultProps,
+          initialValue: { key: 'template_1_key', name: 'Template 1' },
           currentConfiguration: {
             ...defaultProps.currentConfiguration,
             connector: {
@@ -265,13 +318,6 @@ describe('TemplateForm', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('template-name-input'), 'Template 1');
-
-    userEvent.paste(
-      await screen.findByTestId('template-description-input'),
-      'this is a first template'
-    );
-
     expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
     userEvent.selectOptions(await screen.findByTestId('urgencySelect'), '1');
@@ -286,13 +332,90 @@ describe('TemplateForm', () => {
       expect(data).toEqual({
         key: expect.anything(),
         name: 'Template 1',
-        templateDescription: 'this is a first template',
+        tags: [],
+        templateDescription: '',
+        templateTags: [],
+        title: '',
+        description: '',
+        category: null,
+        severity: '',
         connectorId: 'servicenow-1',
         fields: {
           category: 'software',
           urgency: '1',
-          impact: null,
-          severity: null,
+          impact: '',
+          severity: '',
+          subcategory: null,
+        },
+        syncAlerts: true,
+      });
+    });
+  });
+
+  it('serializes the connector fields data correctly with existing connector', async () => {
+    let formState: FormState<TemplateFormProps>;
+
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
+
+    const newProps = {
+      ...defaultProps,
+      initialValue: {
+        key: 'template_1_key',
+        name: 'Template 1',
+        caseFields: {
+          connector: {
+            id: 'servicenow-1',
+            type: ConnectorTypes.serviceNowITSM,
+            name: 'my-SN-connector',
+            fields: null,
+          },
+        },
+      },
+      connectors: connectorsMock,
+      currentConfiguration: {
+        ...defaultProps.currentConfiguration,
+        connector: {
+          id: 'resilient-2',
+          name: 'My Resilient connector',
+          type: ConnectorTypes.resilient,
+          fields: null,
+        },
+      },
+      onChange: onChangeState,
+      isEditMode: true,
+    };
+
+    appMockRenderer.render(<TemplateForm {...newProps} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
+
+    userEvent.selectOptions(await screen.findByTestId('categorySelect'), ['Denial of Service']);
+
+    await act(async () => {
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toBe(true);
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        name: 'Template 1',
+        tags: [],
+        templateDescription: '',
+        templateTags: [],
+        title: '',
+        description: '',
+        category: null,
+        severity: '',
+        connectorId: 'servicenow-1',
+        fields: {
+          category: 'Denial of Service',
+          urgency: '',
+          impact: '',
+          severity: '',
           subcategory: null,
         },
         syncAlerts: true,
@@ -309,6 +432,10 @@ describe('TemplateForm', () => {
       <TemplateForm
         {...{
           ...defaultProps,
+          initialValue: {
+            key: 'template_1_key',
+            name: 'Template 1',
+          },
           currentConfiguration: {
             ...defaultProps.currentConfiguration,
             customFields: customFieldsConfigurationMock,
@@ -321,13 +448,6 @@ describe('TemplateForm', () => {
     await waitFor(() => {
       expect(formState).not.toBeUndefined();
     });
-
-    userEvent.paste(await screen.findByTestId('template-name-input'), 'Template 1');
-
-    userEvent.paste(
-      await screen.findByTestId('template-description-input'),
-      'this is a first template'
-    );
 
     const customFieldsElement = await screen.findByTestId('caseCustomFields');
 
@@ -360,15 +480,91 @@ describe('TemplateForm', () => {
       expect(data).toEqual({
         key: expect.anything(),
         name: 'Template 1',
-        templateDescription: 'this is a first template',
+        tags: [],
+        templateDescription: '',
+        templateTags: [],
+        title: '',
+        description: '',
+        severity: '',
+        category: null,
         connectorId: 'none',
         syncAlerts: true,
         customFields: {
           test_key_1: 'My text test value 1',
           test_key_2: true,
+          test_key_3: '',
           test_key_4: true,
         },
-        fields: null,
+      });
+    });
+  });
+
+  it('serializes the custom fields data correctly with existing custom fields', async () => {
+    let formState: FormState<TemplateFormProps>;
+
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
+
+    const newProps = {
+      ...defaultProps,
+      initialValue: {
+        key: 'template_1_key',
+        name: 'Template 1',
+        caseFields: {
+          customFields: [
+            {
+              type: CustomFieldTypes.TEXT,
+              key: 'test_key_1',
+              value: 'this is my first custom field value',
+            },
+            {
+              type: CustomFieldTypes.TOGGLE,
+              key: 'test_key_2',
+              value: false,
+            },
+          ],
+        },
+      },
+      onChange: onChangeState,
+      currentConfiguration: {
+        ...defaultProps.currentConfiguration,
+        customFields: customFieldsConfigurationMock,
+      },
+    };
+    appMockRenderer.render(<TemplateForm {...newProps} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    const toggleField = customFieldsConfigurationMock[1];
+
+    userEvent.click(
+      await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
+    );
+
+    await act(async () => {
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toBe(true);
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        name: 'Template 1',
+        tags: [],
+        templateDescription: '',
+        templateTags: [],
+        title: '',
+        description: '',
+        severity: '',
+        category: null,
+        connectorId: 'none',
+        syncAlerts: true,
+        customFields: {
+          test_key_1: 'this is my first custom field value',
+          test_key_2: true,
+          test_key_3: '',
+          test_key_4: false,
+        },
       });
     });
   });
