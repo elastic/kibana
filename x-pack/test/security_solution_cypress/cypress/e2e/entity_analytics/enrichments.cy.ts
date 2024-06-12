@@ -36,7 +36,7 @@ const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 describe(
   'Enrichment',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

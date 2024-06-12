@@ -22,7 +22,7 @@ export function defineGetRolesRoutes({
     {
       path: '/api/security/role/{name}',
       options: {
-        description: `Get a role`,
+        summary: `Get a role`,
       },
       validate: {
         params: schema.object({ name: schema.string({ minLength: 1 }) }),
