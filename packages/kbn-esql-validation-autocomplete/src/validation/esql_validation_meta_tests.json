@@ -10522,6 +10522,11 @@
       "warning": []
     },
     {
+      "query": "from a_index | sort coalesce(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = concat(\"a\", \"a\")",
       "error": [],
       "warning": []
@@ -15973,6 +15978,47 @@
     },
     {
       "query": "row nullVar = null | eval mv_zip(nullVar, nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_zip(to_string(true), to_string(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where length(mv_zip(stringField, stringField)) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where length(mv_zip(booleanField, booleanField)) > 0",
+      "error": [
+        "Argument of [mv_zip] must be [string], found value [booleanField] type [boolean]",
+        "Argument of [mv_zip] must be [string], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_zip(stringField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_zip(to_string(booleanField), to_string(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_zip(booleanField, booleanField)",
+      "error": [
+        "Argument of [mv_zip] must be [string], found value [booleanField] type [boolean]",
+        "Argument of [mv_zip] must be [string], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort mv_zip(stringField, stringField)",
       "error": [],
       "warning": []
     },
@@ -25642,6 +25688,87 @@
     },
     {
       "query": "row nullVar = null | eval mv_append(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = repeat(\"a\", 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row repeat(\"a\", 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = repeat(to_string(true), to_integer(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = repeat(true, true)",
+      "error": [
+        "Argument of [repeat] must be [string], found value [true] type [boolean]",
+        "Argument of [repeat] must be [number], found value [true] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where length(repeat(stringField, numberField)) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where length(repeat(booleanField, booleanField)) > 0",
+      "error": [
+        "Argument of [repeat] must be [string], found value [booleanField] type [boolean]",
+        "Argument of [repeat] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = repeat(stringField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval repeat(stringField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = repeat(to_string(booleanField), to_integer(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval repeat(booleanField, booleanField)",
+      "error": [
+        "Argument of [repeat] must be [string], found value [booleanField] type [boolean]",
+        "Argument of [repeat] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval repeat(stringField, numberField, extraArg)",
+      "error": [
+        "Error: [repeat] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort repeat(stringField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval repeat(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval repeat(nullVar, nullVar)",
       "error": [],
       "warning": []
     }
