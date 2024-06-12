@@ -29,7 +29,7 @@
           "\nPrepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context\nshould not be used.  Instead, refer to `KibanaRootContextProvider` to set up the root of Kibana."
         ],
         "signature": [
-          "({ theme: { theme$ }, globalStyles: globalStylesProp, colorMode: colorModeProp, children, }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ theme: { theme$ }, globalStyles: globalStylesProp, colorMode: colorModeProp, modify, children, }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/react-kibana-context-root",
             "scope": "common",
@@ -48,7 +48,7 @@
             "id": "def-common.KibanaEuiProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  theme: { theme$ },\n  globalStyles: globalStylesProp,\n  colorMode: colorModeProp,\n  children,\n}",
+            "label": "{\n  theme: { theme$ },\n  globalStyles: globalStylesProp,\n  colorMode: colorModeProp,\n  modify,\n  children,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<React.PropsWithChildren<",

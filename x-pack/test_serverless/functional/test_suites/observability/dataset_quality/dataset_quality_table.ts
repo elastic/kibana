@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows the right number of rows in correct order', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       await datasetNameCol.sort('descending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql([...datasetNames].reverse());
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows degraded docs percentage', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       await datasetNameCol.sort('ascending');
 
       const degradedDocsCol = cols['Degraded Docs (%)'];
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it.skip('shows the updated size of the index', async () => {
       const testDatasetIndex = 2;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       await datasetNameCol.sort('ascending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
 
@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('sorts by dataset name', async () => {
       // const header = await PageObjects.datasetQuality.getDatasetTableHeader('Dataset Name');
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
 
       // Sort ascending
       await datasetNameCol.sort('ascending');
@@ -157,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.navigateTo();
 
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
 
       // Sort ascending
       await datasetNameCol.sort('ascending');
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('goes to log explorer page when opened', async () => {
       const rowIndexToOpen = 1;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       const actionsCol = cols.Actions;
 
       const datasetName = (await datasetNameCol.getCellTexts())[rowIndexToOpen];
@@ -190,7 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.navigateTo();
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols['Last Activity'];
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
 
       // Set time range to Last 1 minute
       const filtersContainer = await testSubjects.find(

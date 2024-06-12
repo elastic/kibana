@@ -12,25 +12,7 @@ import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { AgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../../types';
 
-import { useGetPackagePolicies } from '../../../../../hooks';
-
 import { StepDefinePackagePolicy } from './step_define_package_policy';
-
-jest.mock('../../../../../hooks', () => {
-  return {
-    ...jest.requireActual('../../../../../hooks'),
-    useGetPackagePolicies: jest.fn().mockReturnValue({
-      data: {
-        items: [{ name: 'nginx-1' }, { name: 'other-policy' }],
-      },
-      isLoading: false,
-    }),
-    useFleetStatus: jest.fn().mockReturnValue({ isReady: true } as any),
-    sendGetStatus: jest
-      .fn()
-      .mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
-  };
-});
 
 describe('StepDefinePackagePolicy', () => {
   const packageInfo: PackageInfo = {
@@ -63,18 +45,32 @@ describe('StepDefinePackagePolicy', () => {
       },
     ],
   };
-  const agentPolicy: AgentPolicy = {
-    id: 'agent-policy-1',
-    namespace: 'ns',
-    name: 'Agent policy 1',
-    is_managed: false,
-    status: 'active',
-    updated_at: '',
-    updated_by: '',
-    revision: 1,
-    package_policies: [],
-    is_protected: false,
-  };
+  const agentPolicies: AgentPolicy[] = [
+    {
+      id: 'agent-policy-1',
+      namespace: 'ns',
+      name: 'Agent policy 1',
+      is_managed: false,
+      status: 'active',
+      updated_at: '',
+      updated_by: '',
+      revision: 1,
+      package_policies: [],
+      is_protected: false,
+    },
+    {
+      id: 'agent-policy-2',
+      namespace: 'default',
+      name: 'Agent policy 2',
+      is_managed: false,
+      status: 'active',
+      updated_at: '',
+      updated_by: '',
+      revision: 1,
+      package_policies: [],
+      is_protected: false,
+    },
+  ];
   let packagePolicy: NewPackagePolicy;
   const mockUpdatePackagePolicy = jest.fn().mockImplementation((val: any) => {
     packagePolicy = {
@@ -96,7 +92,7 @@ describe('StepDefinePackagePolicy', () => {
   const render = () =>
     (renderResult = testRenderer.render(
       <StepDefinePackagePolicy
-        agentPolicy={agentPolicy}
+        agentPolicies={agentPolicies}
         packageInfo={packageInfo}
         packagePolicy={packagePolicy}
         updatePackagePolicy={mockUpdatePackagePolicy}
@@ -111,6 +107,7 @@ describe('StepDefinePackagePolicy', () => {
       description: 'desc',
       namespace: 'default',
       policy_id: '',
+      policy_ids: [''],
       enabled: true,
       inputs: [],
     };
@@ -138,27 +135,11 @@ describe('StepDefinePackagePolicy', () => {
 
       waitFor(() => {
         expect(renderResult.getByRole('switch')).toHaveAttribute('aria-label', 'Advanced var');
+        expect(renderResult.getByTestId('packagePolicyNamespaceInput')).toHaveAttribute(
+          'placeholder',
+          'ns'
+        );
       });
-    });
-  });
-
-  it('should set incremented name if other package policies exist', () => {
-    (useGetPackagePolicies as jest.MockedFunction<any>).mockReturnValueOnce({
-      data: {
-        items: [
-          { name: 'apache-1' },
-          { name: 'apache-2' },
-          { name: 'apache-9' },
-          { name: 'apache-10' },
-        ],
-      },
-      isLoading: false,
-    });
-
-    render();
-
-    waitFor(() => {
-      expect(renderResult.getByDisplayValue('apache-11')).toBeInTheDocument();
     });
   });
 
