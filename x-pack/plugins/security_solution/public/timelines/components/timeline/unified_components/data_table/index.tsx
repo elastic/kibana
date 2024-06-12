@@ -305,6 +305,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const onUpdateRowHeight = useCallback(
       (newRowHeight: number) => {
+        console.log("NEW ROW HEIGHT!!!: ", newRowHeight);
         if (newRowHeight !== rowHeight) {
           dispatch(timelineActions.updateRowHeight({ id: timelineId, rowHeight: newRowHeight }));
         }
@@ -390,6 +391,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           visibleColumns={visibleColumns}
           visibleRowData={visibleRowData}
           eventIdToNoteIds={eventIdToNoteIds}
+          rowHeight={rowHeight}
           setCustomGridBodyProps={setCustomGridBodyProps}
           events={events}
           enabledRowRenderers={enabledRowRenderers}
@@ -405,6 +407,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         eventIdToNoteIds,
         cellContext?.eventIdsAddingNotes,
         cellContext?.onToggleShowNotes,
+        rowHeight,
         refetch,
       ]
     );

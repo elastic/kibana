@@ -31,6 +31,7 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   eventIdToNoteIds?: Record<string, string[]> | null;
   eventIdsAddingNotes?: Set<string>;
   onToggleShowNotes: (eventId?: string) => void;
+  rowHeight?: number;
   refetch?: () => void;
 };
 
@@ -56,6 +57,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       visibleColumns,
       visibleRowData,
       rows,
+      rowHeight,
       enabledRowRenderers,
       events = [],
       eventIdToNoteIds = {},
@@ -98,6 +100,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
               rowIndex={rowIndex}
               key={rowIndex}
               visibleColumns={visibleColumns}
+              rowHeight={rowHeight}
               Cell={Cell}
               enabledRowRenderers={enabledRowRenderers}
               notes={notes}
@@ -127,7 +130,7 @@ const CustomGridRow = styled.div.attrs<{
   width: fit-content;
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
   . euiDataGridRowCell--controlColumn {
-    height: 40px;
+    height: ${(props: { $rowHeight: number }) => props.$rowHeight}em;
   }
   .udt--customRow {
     border-radius: 0;
@@ -160,9 +163,12 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
 }))`
   display: flex;
   align-items: center;
-  height: 36px;
+  height: ${(props: { $rowHeight: number }) => props.$rowHeight}em;
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     height: 100%;
     .unifiedDataTable__rowControl {
       margin-top: 0;
@@ -182,7 +188,7 @@ type CustomTimelineDataGridSingleRowProps = {
   onToggleShowNotes: (eventId?: string) => void;
 } & Pick<
   CustomTimelineDataGridBodyProps,
-  'visibleColumns' | 'Cell' | 'enabledRowRenderers' | 'refetch'
+  'visibleColumns' | 'Cell' | 'enabledRowRenderers' | 'refetch' | 'rowHeight'
 >;
 
 /**
@@ -204,6 +210,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     eventId = '',
     onToggleShowNotes,
     refetch,
+    rowHeight = 3,
   } = props;
   const dispatch = useDispatch();
   const { canShowRowRenderer } = useStatefulRowRenderer({
@@ -250,9 +257,10 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   return (
     <CustomGridRow
       className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
+      $rowHeight={rowHeight}
       key={rowIndex}
     >
-      <CustomGridRowCellWrapper className={eventTypeRowClassName}>
+      <CustomGridRowCellWrapper className={eventTypeRowClassName} $rowHeight={rowHeight}>
         {visibleColumns.map((column, colIndex) => {
           // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
           if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
