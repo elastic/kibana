@@ -20,7 +20,7 @@ const servicesEntitiesRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   async handler(resources): Promise<EntityServicesResponse> {
     const { context, params, request, plugins } = resources;
-    const [coreContext, apmEventClient, logsDataAccessStart] = await Promise.all([
+    const [coreContext] = await Promise.all([
       context.core,
       getApmEventClient(resources),
       plugins.logsDataAccess.start(),

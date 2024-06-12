@@ -5,12 +5,14 @@
  * 2.0.
  */
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { APIReturnType } from '../../../../../../observability_ai_assistant/public';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { EmptyMessage } from '../../../shared/empty_message';
 import {
   MultiSignalServicesTable,
   ServiceInventoryFieldName,
@@ -73,8 +75,6 @@ export const MultiSignalInventory = () => {
 
   const initialSortField = tiebreakerField;
 
-  const noItemsMessage = <div>no service</div>;
-
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
@@ -84,7 +84,13 @@ export const MultiSignalInventory = () => {
           initialSortField={initialSortField}
           initialPageSize={INITIAL_PAGE_SIZE}
           initialSortDirection={INITIAL_SORT_DIRECTION}
-          noItemsMessage={noItemsMessage}
+          noItemsMessage={
+            <EmptyMessage
+              heading={i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
+                defaultMessage: 'No services found',
+              })}
+            />
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>
