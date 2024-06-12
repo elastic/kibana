@@ -12,6 +12,8 @@ servers:
 paths:
   /internal/asset_criticality:
     delete:
+      x-labels: [ess, serverless]
+      x-internal: true
       operationId: AssetCriticalityDeleteRecord
       summary: Delete Criticality Record
       parameters:
