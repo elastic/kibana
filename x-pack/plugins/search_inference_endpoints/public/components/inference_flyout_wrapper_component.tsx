@@ -60,6 +60,9 @@ export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperCom
       taskType: InferenceTaskType;
       modelConfig: ModelConfig;
     }) => {
+      if (!ml) {
+        throw new Error(i18n.UNABLE_TO_CREATE_INFERENCE_ENDPOINT);
+      }
       await ml?.mlApi?.inferenceModels?.createInferenceEndpoint(inferenceId, taskType, modelConfig);
     },
     {
@@ -73,7 +76,7 @@ export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperCom
     async (inferenceId: string) => {
       const modelsExist = inferenceEndpoints.some((i) => i.model_id === inferenceId);
       if (modelsExist) {
-        setInferenceEndpointError('Inference Endpoint id already exists');
+        setInferenceEndpointError(i18n.INFERENCE_ENDPOINT_ALREADY_EXISTS);
       } else {
         setInferenceEndpointError(undefined);
       }
@@ -110,7 +113,7 @@ export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperCom
       } catch (error) {
         const errorObj = extractErrorProperties(error);
         if (errorObj.statusCode === 403) {
-          setInferenceAddError('Forbidden to access trained models');
+          setInferenceAddError(i18n.FORBIDDEN_TO_ACCESS_TRAINED_MODELS);
         } else {
           setInferenceAddError(errorObj.message);
         }

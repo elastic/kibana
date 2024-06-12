@@ -73,3 +73,24 @@ export const E5_DESCRIPTION = i18n.translate(
 export const ERROR_TITLE = i18n.translate('xpack.searchInferenceEndpoints.inferenceId.errorTitle', {
   defaultMessage: 'Error adding inference endpoint',
 });
+
+export const UNABLE_TO_CREATE_INFERENCE_ENDPOINT = i18n.translate(
+  'xpack.searchInferenceEndpoints.inferenceFlyoutWrapperComponent.unableTocreateInferenceEndpointError',
+  {
+    defaultMessage: 'Unable to create an inference endpoint.',
+  }
+);
+
+export const INFERENCE_ENDPOINT_ALREADY_EXISTS = i18n.translate(
+  'xpack.searchInferenceEndpoints.inferenceFlyoutWrapperComponent.inferenceEndpointAlreadyExistsError',
+  {
+    defaultMessage: 'Inference Endpoint id already exists',
+  }
+);
+
+export const FORBIDDEN_TO_ACCESS_TRAINED_MODELS = i18n.translate(
+  'xpack.searchInferenceEndpoints.inferenceFlyoutWrapperComponent.forbiddenToAccessTrainedModelsError',
+  {
+    defaultMessage: 'Forbidden to access trained models',
+  }
+);
