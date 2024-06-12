@@ -1,8 +1,4 @@
 {
-  "genai:qa:serverless": {},
-  "genai:qa:serverless:release": {},
-  "nlp_cleanup_task:complete:qa:serverless": {},
-  "nlp_cleanup_task:complete:qa:serverless:release": {},
   "nlp_cleanup_task:essentials:qa:serverless": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },
@@ -17,8 +13,6 @@
       { "product_line": "cloud", "product_tier": "essentials" }
     ]
   },
-  "entity_analytics:qa:serverless": {},
-  "entity_analytics:qa:serverless:release": {},
   "entity_analytics:essentials:qa:serverless": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },
@@ -33,14 +27,6 @@
       { "product_line": "cloud", "product_tier": "essentials" }
     ]
   },
-  "exception_lists_items:qa:serverless": {},
-  "exception_lists_items:qa:serverless:release": {},
-  "lists_items:qa:serverless": {},
-  "lists_items:qa:serverless:release": {},
-  "user_roles:qa:serverless": {},
-  "user_roles:qa:serverless:release": {},
-  "telemetry:qa:serverless": {},
-  "telemetry:qa:serverless:release": {},
   "exception_workflows:essentials:qa:serverless": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },
@@ -113,10 +99,6 @@
       { "product_line": "endpoint", "product_tier": "essentials" }
     ]
   },
-  "actions:qa:serverless": {},
-  "actions:qa:serverless:release": {},
-  "alerts:qa:serverless": {},
-  "alerts:qa:serverless:release": {},
   "alerts:essentials:qa:serverless": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },
@@ -129,10 +111,6 @@
       { "product_line": "endpoint", "product_tier": "essentials" }
     ]
   },
-  "rule_execution_logic:qa:serverless": {},
-  "rule_execution_logic:qa:serverless:release": {},
-  "rule_creation:qa:serverless": {},
-  "rule_creation:qa:serverless:release": {},
   "rule_creation:essentials:qa:serverless": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },
@@ -145,8 +123,6 @@
       { "product_line": "endpoint", "product_tier": "essentials" }
     ]
   },
-  "rule_update:qa:serverless": {},
-  "rule_update:qa:serverless:release": {},
   "rule_update:essentials:qa:serverless": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },
@@ -159,8 +135,6 @@
       { "product_line": "endpoint", "product_tier": "essentials" }
     ]
   },
-  "rule_patch:qa:serverless": {},
-  "rule_patch:qa:serverless:release": {},
   "rule_patch:essentials:qa:serverless": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },
@@ -173,16 +147,6 @@
       { "product_line": "endpoint", "product_tier": "essentials" }
     ]
   },
-  "prebuilt_rules_management:qa:serverless": {},
-  "prebuilt_rules_management:qa:serverless:release": {},
-  "prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless": {},
-  "prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless:release": {},
-  "prebuilt_rules_large_prebuilt_rules_package:qa:serverless": {},
-  "prebuilt_rules_large_prebuilt_rules_package:qa:serverless:release": {},
-  "prebuilt_rules_update_prebuilt_rules_package:qa:serverless": {},
-  "prebuilt_rules_update_prebuilt_rules_package:qa:serverless:release": {},
-  "rule_delete:qa:serverless": {},
-  "rule_delete:qa:serverless:release": {},
   "rule_delete:essentials:qa:serverless": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },
@@ -195,8 +159,6 @@
       { "product_line": "endpoint", "product_tier": "essentials" }
     ]
   },
-  "rule_import_export:qa:serverless": {},
-  "rule_import_export:qa:serverless:release": {},
   "rule_import_export:essentials:qa:serverless": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },
@@ -209,8 +171,6 @@
       { "product_line": "endpoint", "product_tier": "essentials" }
     ]
   },
-  "rule_management:qa:serverless": {},
-  "rule_management:qa:serverless:release": {},
   "rules_management:essentials:qa:serverless": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },
@@ -223,10 +183,6 @@
       { "product_line": "endpoint", "product_tier": "essentials" }
     ]
   },
-  "rule_bulk_actions:qa:serverless": {},
-  "rule_bulk_actions:qa:serverless:release": {},
-  "rule_read:qa:serverless": {},
-  "rule_read:qa:serverless:release": {},
   "rule_read:essentials:qa:serverless": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },

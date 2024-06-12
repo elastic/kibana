@@ -71,11 +71,16 @@ async function parseProductTypes(log: ToolingLog): Promise<ProductType[] | undef
   }
 
   const apiConfigs = JSON.parse(fs.readFileSync('./scripts/api_configs.json', 'utf8'));
-  const productTypes: ProductType[] = apiConfigs[process.env.TARGET_SCRIPT][
-    'productTypes'
-  ] as ProductType[];
-  log.info(`ProductTypes: ${productTypes}`);
-  return productTypes && productTypes.length > 0 ? productTypes : undefined;
+  try {
+    const productTypes: ProductType[] = apiConfigs[process.env.TARGET_SCRIPT][
+      'productTypes'
+    ] as ProductType[];
+    return productTypes && productTypes.length > 0 ? productTypes : undefined;
+  } catch (err) {
+    // If the configuration for the script is not needed, it can be omitted from the json file.
+    log.warning(`Extended configuration was not found for script : ${process.env.TARGET_SCRIPT}`);
+    return undefined;
+  }
 }
 
 export const cli = () => {
