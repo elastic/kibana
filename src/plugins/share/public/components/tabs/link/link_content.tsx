@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { IShareContext } from '../../context';
 
 type LinkProps = Pick<
@@ -50,10 +50,9 @@ export const LinkContent = ({
   delegatedShareUrlHandler,
 }: LinkProps) => {
   const [url, setUrl] = useState<string>('');
-  const [testUrl, setTestUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [isTextCopied, setTextCopied] = useState(false);
-  const [, setShortUrlCache] = useState<string | undefined>(undefined);
+  const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
 
   const getUrlWithUpdatedParams = useCallback(
     (tempUrl: string): string => {
@@ -73,7 +72,6 @@ export const LinkContent = ({
 
       // persist updated url to state
       setUrl(urlWithUpdatedParams);
-      setTestUrl(urlWithUpdatedParams);
 
       return urlWithUpdatedParams;
     },
@@ -90,29 +88,15 @@ export const LinkContent = ({
       const shortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
       const urlWithLoc = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
       setShortUrlCache(urlWithLoc);
-      // discover has specific tests that test short url for specific permissions
-      if (objectType === 'search') {
-        setTestUrl(urlWithLoc);
-      }
       return urlWithLoc;
     } else {
       const snapshotUrl = getSnapshotUrl();
-      // dashboard has specific tests that test long urls only
-      if (objectType !== 'search') {
-        setTestUrl(snapshotUrl);
-      }
       const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
       setShortUrlCache(shortUrl.url);
-      setTestUrl(shortUrl.url);
+
       return shortUrl.url;
     }
-  }, [
-    shareableUrlLocatorParams,
-    objectType,
-    urlService.shortUrls,
-    getSnapshotUrl,
-    setShortUrlCache,
-  ]);
+  }, [shareableUrlLocatorParams, urlService.shortUrls, getSnapshotUrl, setShortUrlCache]);
 
   const copyUrlHelper = useCallback(async () => {
     let urlToCopy = url;
@@ -128,8 +112,14 @@ export const LinkContent = ({
     copyToClipboard(urlToCopy);
     setUrl(urlToCopy);
     setTextCopied(true);
+    return urlToCopy;
   }, [url, delegatedShareUrlHandler, allowShortUrl, createShortUrl, getSnapshotUrl]);
 
+  const handleTestUrl = useMemo(() => {
+    if (objectType !== 'search') return getSnapshotUrl();
+    else if (objectType === 'search' && allowShortUrl) return shortUrlCache;
+    return copyUrlHelper();
+  }, [objectType, getSnapshotUrl, allowShortUrl, shortUrlCache, copyUrlHelper]);
   return (
     <>
       <EuiForm>
@@ -171,7 +161,7 @@ export const LinkContent = ({
             <EuiButton
               fill
               data-test-subj="copyShareUrlButton"
-              data-share-url={testUrl === '' ? copyUrlHelper() : testUrl}
+              data-share-url={handleTestUrl}
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
               onClick={copyUrlHelper}
               color={objectType === 'lens' && isDirty ? 'warning' : 'primary'}
