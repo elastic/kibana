@@ -119,23 +119,24 @@ export interface UnallowedValueSearchResult {
 
 export type IlmPhase = 'hot' | 'warm' | 'cold' | 'frozen' | 'unmanaged';
 
-export interface IncompatibleMappingItem {
+export interface IncompatibleFieldMappingItem {
   fieldName: string;
   expectedValue: string;
   actualValue: string;
   description: string;
-  reason: 'mapping';
 }
 
-export interface IncompatibleValueItem {
+export interface ActualIncompatibleValue {
+  name: string;
+  count: number;
+}
+
+export interface IncompatibleFieldValueItem {
   fieldName: string;
-  expectedValue: string[];
-  actualValue: string[];
+  expectedValues: string[];
+  actualValues: ActualIncompatibleValue[];
   description: string;
-  reason: 'value';
 }
-
-export type IncompatibleFieldItem = IncompatibleMappingItem | IncompatibleValueItem;
 
 export interface SameFamilyFieldItem {
   fieldName: string;

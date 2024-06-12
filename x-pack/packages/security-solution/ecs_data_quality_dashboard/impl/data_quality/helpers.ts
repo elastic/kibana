@@ -21,7 +21,8 @@ import type {
   EnrichedFieldMetadata,
   ErrorSummary,
   IlmPhase,
-  IncompatibleFieldItem,
+  IncompatibleFieldMappingItem,
+  IncompatibleFieldValueItem,
   MeteringStatsIndex,
   PartitionedFieldMetadata,
   PartitionedFieldMetadataStats,
@@ -468,7 +469,8 @@ export interface StorageResult {
   ecsFieldCount: number;
   customFieldCount: number;
   incompatibleFieldCount: number;
-  incompatibleFieldItems: IncompatibleFieldItem[];
+  incompatibleFieldMappingItems: IncompatibleFieldMappingItem[];
+  incompatibleFieldValueItems: IncompatibleFieldValueItem[];
   sameFamilyFieldCount: number;
   sameFamilyFields: string[];
   sameFamilyFieldItems: SameFamilyFieldItem[];
@@ -491,29 +493,26 @@ export const formatStorageResult = ({
   report: DataQualityIndexCheckedParams;
   partitionedFieldMetadata: PartitionedFieldMetadata;
 }): StorageResult => {
-  const incompatibleFieldItems: IncompatibleFieldItem[] = [];
+  const incompatibleFieldMappingItems: IncompatibleFieldMappingItem[] = [];
+  const incompatibleFieldValueItems: IncompatibleFieldValueItem[] = [];
   const sameFamilyFieldItems: SameFamilyFieldItem[] = [];
 
   partitionedFieldMetadata.incompatible.forEach((field) => {
     if (field.type !== field.indexFieldType) {
-      // Mapping incompatibility
-      incompatibleFieldItems.push({
+      incompatibleFieldMappingItems.push({
         fieldName: field.indexFieldName,
         expectedValue: field.type,
         actualValue: field.indexFieldType,
         description: field.description,
-        reason: 'mapping',
       });
     }
 
     if (field.indexInvalidValues.length > 0) {
-      // Value incompatibility
-      incompatibleFieldItems.push({
+      incompatibleFieldValueItems.push({
         fieldName: field.indexFieldName,
-        expectedValue: field.allowed_values?.map((x) => x.name) ?? [],
-        actualValue: field.indexInvalidValues.map((v) => v.fieldName),
+        expectedValues: field.allowed_values?.map((x) => x.name) ?? [],
+        actualValues: field.indexInvalidValues.map((v) => ({ name: v.fieldName, count: v.count })),
         description: field.description,
-        reason: 'value',
       });
     }
   });
@@ -538,7 +537,8 @@ export const formatStorageResult = ({
     ecsFieldCount: partitionedFieldMetadata.ecsCompliant.length,
     customFieldCount: partitionedFieldMetadata.custom.length,
     incompatibleFieldCount: partitionedFieldMetadata.incompatible.length,
-    incompatibleFieldItems,
+    incompatibleFieldMappingItems,
+    incompatibleFieldValueItems,
     sameFamilyFieldCount: partitionedFieldMetadata.sameFamily.length,
     sameFamilyFields: report.sameFamilyFields ?? [],
     sameFamilyFieldItems,

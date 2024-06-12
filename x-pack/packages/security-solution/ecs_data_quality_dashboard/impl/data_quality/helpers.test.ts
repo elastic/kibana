@@ -1433,18 +1433,32 @@ describe('helpers', () => {
         ecsFieldCount: 2,
         customFieldCount: 4,
         incompatibleFieldCount: 3,
-        incompatibleFieldItems: [
+        incompatibleFieldMappingItems: [
           {
             fieldName: 'event.category',
             expectedValue: 'keyword',
             actualValue: 'constant_keyword',
             description:
               'This is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy.\n`event.category` represents the "big buckets" of ECS categories. For example, filtering on `event.category:process` yields all events relating to process activity. This field is closely related to `event.type`, which is used as a subcategory.\nThis field is an array. This will allow proper categorization of some events that fall in multiple categories.',
-            reason: 'mapping',
           },
           {
+            fieldName: 'host.name',
+            expectedValue: 'keyword',
+            actualValue: 'text',
+            description:
+              'Name of the host.\nIt can contain what `hostname` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.',
+          },
+          {
+            fieldName: 'source.ip',
+            expectedValue: 'ip',
+            actualValue: 'text',
+            description: 'IP address of the source (IPv4 or IPv6).',
+          },
+        ],
+        incompatibleFieldValueItems: [
+          {
             fieldName: 'event.category',
-            expectedValue: [
+            expectedValues: [
               'authentication',
               'configuration',
               'database',
@@ -1464,25 +1478,9 @@ describe('helpers', () => {
               'vulnerability',
               'web',
             ],
-            actualValue: ['an_invalid_category'],
+            actualValues: [{ name: 'an_invalid_category', count: 2 }],
             description:
               'This is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy.\n`event.category` represents the "big buckets" of ECS categories. For example, filtering on `event.category:process` yields all events relating to process activity. This field is closely related to `event.type`, which is used as a subcategory.\nThis field is an array. This will allow proper categorization of some events that fall in multiple categories.',
-            reason: 'value',
-          },
-          {
-            fieldName: 'host.name',
-            expectedValue: 'keyword',
-            actualValue: 'text',
-            description:
-              'Name of the host.\nIt can contain what `hostname` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.',
-            reason: 'mapping',
-          },
-          {
-            fieldName: 'source.ip',
-            expectedValue: 'ip',
-            actualValue: 'text',
-            description: 'IP address of the source (IPv4 or IPv6).',
-            reason: 'mapping',
           },
         ],
         sameFamilyFieldCount: 1,

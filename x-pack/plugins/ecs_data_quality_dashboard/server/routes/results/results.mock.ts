@@ -19,10 +19,11 @@ export const resultDocument: ResultDocument = {
   ecsFieldCount: 677,
   customFieldCount: 904,
   incompatibleFieldCount: 1,
-  incompatibleFieldItems: [
+  incompatibleFieldMappingItems: [],
+  incompatibleFieldValueItems: [
     {
       fieldName: 'event.category',
-      expectedValue: [
+      expectedValues: [
         `authentication`,
         `configuration`,
         `database`,
@@ -42,10 +43,9 @@ export const resultDocument: ResultDocument = {
         'vulnerability',
         'web',
       ],
-      actualValue: ['behavior'],
+      actualValues: [{ name: 'behavior', count: 6 }],
       description:
         'This is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy.\n`event.category` represents the "big buckets" of ECS categories. For example, filtering on `event.category:process` yields all events relating to process activity. This field is closely related to `event.type`, which is used as a subcategory.\nThis field is an array. This will allow proper categorization of some events that fall in multiple categories.',
-      reason: 'value',
     },
   ],
   sameFamilyFieldCount: 0,
