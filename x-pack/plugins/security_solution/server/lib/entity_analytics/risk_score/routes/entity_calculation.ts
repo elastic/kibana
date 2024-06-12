@@ -146,6 +146,10 @@ export const riskScoreEntityCalculationRoute = (
             });
           }
 
+          if (result.scores_written > 0) {
+            await riskScoreService.scheduleLatestTransformNow();
+          }
+
           const score =
             result.scores_written === 1 ? result.scores?.[identifierType]?.[0] : undefined;
 

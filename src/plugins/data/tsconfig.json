@@ -55,11 +55,8 @@
     "@kbn/core-test-helpers-model-versions",
     "@kbn/react-kibana-mount",
     "@kbn/search-types",
-<<<<<<< named-params-system
-    "@kbn/esql-utils"
-=======
     "@kbn/safer-lodash-set",
->>>>>>> main
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",
