@@ -16,7 +16,7 @@ import type { MapCache } from 'lodash';
 
 export type MonacoMessage = monaco.editor.IMarkerData;
 
-interface FleetResponse {
+interface IntegrationsResponse {
   items: Array<{
     name: string;
     title?: string;
@@ -26,6 +26,9 @@ interface FleetResponse {
     }>;
   }>;
 }
+
+const INTEGRATIONS_API = '/api/fleet/epm/packages/installed';
+const API_VERSION = '2023-10-31';
 
 export const useDebounceWithOptions = (
   fn: Function,
@@ -248,13 +251,13 @@ const getIntegrations = async (core: CoreStart) => {
   // import { EPM_API_ROUTES, API_VERSIONS } from '@kbn/fleet-plugin/common';
   // but it complicates things as we need to use an x-pack plugin as dependency to get 2 constants
   // and this needs to be done in various places in the codebase which use the editor
-  const route = '/api/fleet/epm/packages/installed';
+  // https://github.com/elastic/kibana/issues/186061
   const response = (await core.http
-    .get(route, { query: undefined, version: '2023-10-31' })
+    .get(INTEGRATIONS_API, { query: undefined, version: API_VERSION })
     .catch((error) => {
       // eslint-disable-next-line no-console
       console.error('Failed to fetch integrations', error);
-    })) as FleetResponse;
+    })) as IntegrationsResponse;
 
   return (
     response?.items?.map((source) => ({

@@ -14,7 +14,6 @@ import type {
   ESQLCommandOption,
   ESQLFunction,
   ESQLSingleAstItem,
-  ESQLSource,
 } from '@kbn/esql-ast';
 import { partition } from 'lodash';
 import type { EditorContext, SuggestionRawDefinition } from './types';
@@ -85,6 +84,7 @@ import {
   getFunctionsToIgnoreForStats,
   getParamAtPosition,
   getQueryForFields,
+  getSourcesFromCommands,
   isAggFunctionUsedAlready,
 } from './helper';
 import { FunctionArgSignature } from '../definitions/types';
@@ -853,11 +853,8 @@ async function getExpressionSuggestionsByType(
         const policies = await getPolicies();
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
-        const fromCommand = commands.find(({ name }) => name === 'from');
-        const args = (fromCommand?.args ?? []) as ESQLSource[];
-        const indices = args.filter((arg) => arg.sourceType === 'index');
-
-        // If there's a source defined, suggest the dataStreams
+        const indices = getSourcesFromCommands(commands, 'index');
+        // This is going to be empty for simple indices, and not empty for integrations
         if (indices.length === 1 && indices[0].text) {
           const source = indices[0].text.replace(EDITOR_MARKER, '');
           const dataSourcesList = await getDataSourcesList();
