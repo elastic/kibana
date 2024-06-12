@@ -23,6 +23,7 @@ import {
   EuiButtonEmpty,
   EuiImage,
   EuiSkeletonRectangle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -44,6 +45,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const command = data ? getAutoDetectCommand(data) : undefined;
   const [isTextCopied, setTextCopied] = useState(false);
+  const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
 
   if (error) {
     return <EmptyPrompt error={error} onRetryClick={refetch} />;
@@ -173,7 +175,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                     {registryIntegrations.map((integration) => (
                       <AccordionWithIcon
                         key={integration.pkgName}
-                        id={integration.pkgName}
+                        id={`${accordionId}_${integration.pkgName}`}
                         iconType="desktop"
                         title={i18n.translate(
                           'xpack.observability_onboarding.autoDetectPanel.h3.getStartedWithNginxLabel',
@@ -227,7 +229,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                     ))}
                     {customIntegrations.length > 0 && (
                       <AccordionWithIcon
-                        id="custom"
+                        id={`${accordionId}_custom`}
                         iconType="documents"
                         title={i18n.translate(
                           'xpack.observability_onboarding.autoDetectPanel.h3.getStartedWithlogLabel',
