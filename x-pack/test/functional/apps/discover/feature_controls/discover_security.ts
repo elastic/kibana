@@ -210,7 +210,6 @@ export default function (ctx: FtrProviderContext) {
         const re = new RegExp(
           deployment.getHostPort().replace(':80', '').replace(':443', '') + '/app/r.*$'
         );
-        await PageObjects.share.clickShareTopNavButton();
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.not.match(re);
