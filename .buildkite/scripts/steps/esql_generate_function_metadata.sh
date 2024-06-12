@@ -3,7 +3,7 @@ set -euo pipefail
 
 VALIDATION_PACKAGE_DIR="packages/kbn-esql-validation-autocomplete"
 EDITOR_PACKAGE_DIR="packages/kbn-text-based-editor"
-GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
+GIT_SCOPE=$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*
 
 report_main_step () {
   echo "--- $1"
@@ -47,7 +47,7 @@ main () {
 
   # Check for differences
   set +e
-  git diff "$GIT_SCOPE" --exit-code --quiet .
+  git diff $GIT_SCOPE --exit-code --quiet .
   if [ $? -eq 0 ]; then
     echo "No differences found. Our work is done here."
     exit
@@ -60,8 +60,8 @@ main () {
   git config --global user.name "$KIBANA_MACHINE_USERNAME"
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
-  PR_TITLE='[ES|QL] Update function definitions'
-  PR_BODY='This PR updates the function definitions based on the latest metadata from Elasticsearch.'
+  PR_TITLE='[ES|QL] Update function metadata'
+  PR_BODY='This PR updates the function definitions and inline docs based on the latest metadata from Elasticsearch.'
 
   # Check if a PR already exists
   pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
@@ -78,7 +78,7 @@ main () {
 
   git checkout -b "$BRANCH_NAME"
 
-  git add "$GIT_SCOPE"
+  git add $GIT_SCOPE
   git commit -m "Update function metadata"
 
   report_main_step "Changes committed. Creating pull request."
