@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -64,7 +65,7 @@ describe('resolveRule', () => {
     };
     http.get.mockResolvedValueOnce(resolvedValue);
 
-    expect(await resolveRule({ http, ruleId })).toEqual({
+    expect(await resolveRule({ http, id: ruleId })).toEqual({
       id: '1/',
       params: {
         aggType: 'count',

@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { triggersActionsUiConfig } from './config_api';
+import { fetchUiConfig } from '.';
 
-describe('triggersActionsUiConfig', () => {
+describe('fetchUiConfig', () => {
   const http = httpServiceMock.createStartContract();
 
-  test('should call triggersActionsUiConfig API', async () => {
-    const result = await triggersActionsUiConfig({ http });
+  test('should call fetchUiConfig API', async () => {
+    const result = await fetchUiConfig({ http });
     expect(result).toEqual(undefined);
     expect(http.get.mock.calls).toMatchInlineSnapshot(`
       Array [

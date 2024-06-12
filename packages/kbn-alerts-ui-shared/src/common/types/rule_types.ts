@@ -16,9 +16,17 @@ import type {
   RuleNotifyWhenType,
   ActionGroup,
   SanitizedRule as AlertingSanitizedRule,
-  RuleAction,
+  SanitizedRuleAction as RuleAction,
   RuleSystemAction,
+  ResolvedSanitizedRule,
 } from '@kbn/alerting-types';
+import { RuleType } from '@kbn/triggers-actions-ui-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { TypeRegistry } from '../type_registry';
+
+export type RuleTypeWithDescription = RuleType<string, string> & { description?: string };
+
+export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;
 
 export type RuleTypeParams = Record<string, unknown>;
 
@@ -35,11 +43,11 @@ export interface ValidationResult {
   errors: Record<string, any>;
 }
 
-type RuleUiAction = RuleAction | RuleSystemAction;
+export type RuleUiAction = RuleAction | RuleSystemAction;
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
-type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
+export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   AlertingSanitizedRule<Params>,
   'alertTypeId' | 'actions' | 'systemActions'
 > & {
@@ -47,10 +55,15 @@ type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   actions: RuleUiAction[];
 };
 
-type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
+export type ResolvedRule = Omit<
+  ResolvedSanitizedRule<RuleTypeParams>,
+  'alertTypeId' | 'actions' | 'systemActions'
+> & {
+  ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
+  actions: RuleUiAction[];
+};
 
-export type InitialRule = Partial<Rule> &
-  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
+export type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
 
 export interface RuleTypeParamsExpressionProps<
   Params extends RuleTypeParams = RuleTypeParams,
@@ -95,3 +108,5 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
 }
+
+export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
