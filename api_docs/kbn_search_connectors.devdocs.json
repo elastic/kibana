@@ -279,7 +279,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | undefined; serviceType?: string | null | undefined; instant_response?: boolean | undefined; }) => Promise<",
+          " | undefined; serviceType?: string | null | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -450,20 +450,6 @@
                 "description": [],
                 "signature": [
                   "string | null | undefined"
-                ],
-                "path": "packages/kbn-search-connectors/lib/create_connector.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/search-connectors",
-                "id": "def-common.createConnector.$2.instant_response",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "instant_response",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
                 ],
                 "path": "packages/kbn-search-connectors/lib/create_connector.ts",
                 "deprecated": false,
