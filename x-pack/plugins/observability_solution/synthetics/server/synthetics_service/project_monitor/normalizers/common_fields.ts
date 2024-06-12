@@ -347,10 +347,8 @@ export const getValueInSeconds = (value: string) => {
  * @returns {array} Returns an array
  */
 export const getOptionalListField = (value?: string[] | string): string[] => {
-  if (Array.isArray(value)) {
-    return value;
-  }
-  return value ? value.split(',') : [];
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
 };
 
 /**

@@ -48,7 +48,7 @@ describe('http normalizers', () => {
         enabled: false,
         id: 'my-monitor-2',
         name: 'My Monitor 2',
-        urls: ['http://localhost:9200', 'http://anotherurl:9200'],
+        urls: ['http://localhost:9200', 'http://anotherurl:9200?withComma=1,2,3'],
         schedule: 60,
         timeout: '80s',
         'check.request': {
