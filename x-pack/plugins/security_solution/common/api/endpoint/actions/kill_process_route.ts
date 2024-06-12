@@ -22,10 +22,8 @@ export const KillProcessRouteRequestSchema = {
     },
     {
       validate(bodyContent) {
-        if (bodyContent.parameters.process_name && bodyContent.agent_type !== 'sentinel_one') {
-          return `[request body.parameters.process_name]: is not valid with agent type of ${
-            bodyContent.agentType ?? 'endpoint'
-          }`;
+        if ('process_name' in bodyContent.parameters && bodyContent.agent_type !== 'sentinel_one') {
+          return `[parameters.process_name]: is not valid with agent type of ${bodyContent.agent_type}`;
         }
       },
     }
