@@ -91,7 +91,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
                     defaultMessage="Tagging data collected from {inputCount, plural, one {input {inputs} is} other {inputs {inputs} are}} not supported."
                     values={{
                       inputCount: unsupportedInputs.length,
-                      inputs: unsupportedInputs.join(', '),
+                      inputs: <strong>{unsupportedInputs.join(', ')}</strong>,
                     }}
                   />
                 </p>

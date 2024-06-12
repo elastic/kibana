@@ -69,10 +69,9 @@ describe('CustomFields', () => {
     const unsupportedInputsWarning = renderResult.getByText('Unsupported Inputs');
     expect(unsupportedInputsWarning).toBeInTheDocument();
 
-    const strongElements = renderResult.container.querySelectorAll('strong');
-    const unsupportedInputs = Array.from(strongElements).map((element) =>
-      element.textContent?.replace(/, /g, '')
-    );
+    const strongElements = renderResult.container.querySelector('strong');
+    const unsupportedInputs =
+      strongElements?.textContent?.split(', ').map((element) => element.trim()) ?? [];
 
     expect(unsupportedInputs.sort()).toEqual(unsupportedInputTypes.sort());
   });
