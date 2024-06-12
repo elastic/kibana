@@ -85,6 +85,16 @@ export const Sidebar = () => {
                 name: 'Rule Definition',
                 onClick: () => history.push('/rule_definition'),
               },
+              {
+                id: 'rule-actions',
+                name: 'Rule Actions',
+                onClick: () => history.push('/rule_actions'),
+              },
+              {
+                id: 'rule-details',
+                name: 'Rule Details',
+                onClick: () => history.push('/rule_details'),
+              },
             ],
           },
         ]}

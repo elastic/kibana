@@ -196,7 +196,13 @@
               " | undefined) => void; setControlStyle: (payload: ",
               "ControlStyle",
               ") => void; setChainingSystem: (payload: ",
-              "ControlGroupChainingSystem",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupChainingSystem",
+                "text": "ControlGroupChainingSystem"
+              },
               ") => void; setDefaultControlWidth: (payload: ",
               {
                 "pluginId": "controls",
@@ -1434,6 +1440,38 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.removePanel",
+            "type": "Function",
+            "tags": [],
+            "label": "removePanel",
+            "description": [],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.removePanel.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.ControlGroupContainer.onRemoveEmbeddable",
             "type": "Function",
             "tags": [],
@@ -2111,10 +2149,13 @@
             "text": "ControlOutput"
           },
           ", any> implements ",
-          "IClearableControl",
-          "<",
-          "ControlInput",
-          ">"
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.CanClearSelections",
+            "text": "CanClearSelections"
+          }
         ],
         "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
         "deprecated": false,
@@ -2913,7 +2954,7 @@
               {
                 "parentPluginId": "controls",
                 "id": "def-public.OptionsListEmbeddableFactory.presaveTransformFunction.$2",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "embeddable",
                 "description": [],
@@ -3296,10 +3337,13 @@
             "text": "ControlOutput"
           },
           ", any> implements ",
-          "IClearableControl",
-          "<",
-          "ControlInput",
-          ">"
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.CanClearSelections",
+            "text": "CanClearSelections"
+          }
         ],
         "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
         "deprecated": false,
@@ -4206,7 +4250,7 @@
               {
                 "parentPluginId": "controls",
                 "id": "def-public.RangeSliderEmbeddableFactory.presaveTransformFunction.$2",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "embeddable",
                 "description": [],
@@ -4576,6 +4620,36 @@
       },
       {
         "parentPluginId": "controls",
+        "id": "def-public.CanClearSelections",
+        "type": "Interface",
+        "tags": [],
+        "label": "CanClearSelections",
+        "description": [],
+        "path": "src/plugins/controls/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.CanClearSelections.clearSelections",
+            "type": "Function",
+            "tags": [],
+            "label": "clearSelections",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/controls/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-public.ControlEditorProps",
         "type": "Interface",
         "tags": [],
@@ -4675,6 +4749,104 @@
                 "description": [],
                 "signature": [
                   "boolean"
+                ],
+                "path": "src/plugins/controls/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.ControlEmbeddable",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlEmbeddable",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.ControlEmbeddable",
+            "text": "ControlEmbeddable"
+          },
+          "<TControlEmbeddableInput, TControlEmbeddableOutput> extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<TControlEmbeddableInput, TControlEmbeddableOutput, any>"
+        ],
+        "path": "src/plugins/controls/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlEmbeddable.isChained",
+            "type": "Function",
+            "tags": [],
+            "label": "isChained",
+            "description": [],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
+            "path": "src/plugins/controls/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlEmbeddable.renderPrepend",
+            "type": "Function",
+            "tags": [],
+            "label": "renderPrepend",
+            "description": [],
+            "signature": [
+              "(() => React.ReactNode) | undefined"
+            ],
+            "path": "src/plugins/controls/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlEmbeddable.selectionsToFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "selectionsToFilters",
+            "description": [],
+            "signature": [
+              "((input: Partial<TControlEmbeddableInput>) => Promise<",
+              "ControlGroupFilterOutput",
+              ">) | undefined"
+            ],
+            "path": "src/plugins/controls/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlEmbeddable.selectionsToFilters.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "Partial<TControlEmbeddableInput>"
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
@@ -5245,7 +5417,7 @@
               {
                 "parentPluginId": "controls",
                 "id": "def-public.IEditableControlFactory.presaveTransformFunction.$2",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "embeddable",
                 "description": [],
@@ -5787,24 +5959,15 @@
       },
       {
         "parentPluginId": "controls",
-        "id": "def-public.ControlEmbeddable",
-        "type": "Type",
+        "id": "def-public.CONTROL_WIDTH_OPTIONS",
+        "type": "Array",
         "tags": [],
-        "label": "ControlEmbeddable",
+        "label": "CONTROL_WIDTH_OPTIONS",
         "description": [],
         "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<TControlEmbeddableInput, TControlEmbeddableOutput, any> & { isChained?: (() => boolean) | undefined; renderPrepend?: (() => React.ReactNode) | undefined; selectionsToFilters?: ((input: Partial<TControlEmbeddableInput>) => Promise<",
-          "ControlGroupFilterOutput",
-          ">) | undefined; }"
+          "{ id: string; 'data-test-subj': string; label: string; }[]"
         ],
-        "path": "src/plugins/controls/public/types.ts",
+        "path": "src/plugins/controls/public/control_group/editor/editor_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6624,7 +6787,13 @@
           "; ignoreParentSettings?: ",
           "ParentIgnoreSettings",
           " | undefined; chainingSystem: ",
-          "ControlGroupChainingSystem",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupChainingSystem",
+            "text": "ControlGroupChainingSystem"
+          },
           "; showApplySelections?: boolean | undefined; } | undefined"
         ],
         "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
@@ -7553,6 +7722,21 @@
       },
       {
         "parentPluginId": "controls",
+        "id": "def-common.ControlGroupChainingSystem",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlGroupChainingSystem",
+        "description": [],
+        "signature": [
+          "\"HIERARCHICAL\" | \"NONE\""
+        ],
+        "path": "src/plugins/controls/common/control_group/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-common.ControlInputTransform",
         "type": "Type",
         "tags": [],
@@ -7669,6 +7853,18 @@
       },
       {
         "parentPluginId": "controls",
+        "id": "def-common.DEFAULT_CONTROL_GROW",
+        "type": "boolean",
+        "tags": [],
+        "label": "DEFAULT_CONTROL_GROW",
+        "description": [],
+        "path": "src/plugins/controls/common/control_group/control_group_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-common.DEFAULT_CONTROL_STYLE",
         "type": "CompoundType",
         "tags": [],
@@ -7733,7 +7929,13 @@
             "text": "ControlsPanels"
           },
           "; chainingSystem: ",
-          "ControlGroupChainingSystem",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupChainingSystem",
+            "text": "ControlGroupChainingSystem"
+          },
           "; showApplySelections?: boolean | undefined; }"
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",

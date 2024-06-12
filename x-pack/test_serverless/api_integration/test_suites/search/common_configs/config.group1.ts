@@ -28,6 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../../common/core'),
       require.resolve('../../common/reporting'),
       require.resolve('../../common/console'),
+      require.resolve('../../common/telemetry'),
     ],
     junit: {
       reportName: 'Serverless Search API Integration Tests - Common Group 1',

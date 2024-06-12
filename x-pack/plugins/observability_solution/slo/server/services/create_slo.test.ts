@@ -24,8 +24,8 @@ import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
 describe('CreateSLO', () => {
-  let esClientMock: ElasticsearchClientMock;
-  let loggerMock: jest.Mocked<MockedLogger>;
+  let mockEsClient: ElasticsearchClientMock;
+  let mockLogger: jest.Mocked<MockedLogger>;
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
@@ -34,17 +34,17 @@ describe('CreateSLO', () => {
   jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    loggerMock = loggingSystemMock.createLogger();
+    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockLogger = loggingSystemMock.createLogger();
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     createSLO = new CreateSLO(
-      esClientMock,
+      mockEsClient,
       mockRepository,
       mockTransformManager,
       mockSummaryTransformManager,
-      loggerMock,
+      mockLogger,
       'some-space',
       httpServiceMock.createStartContract().basePath
     );
@@ -82,10 +82,10 @@ describe('CreateSLO', () => {
 
       expect(mockTransformManager.install).toHaveBeenCalled();
       expect(mockTransformManager.start).toHaveBeenCalled();
-      expect(esClientMock.ingest.putPipeline.mock.calls[0]).toMatchSnapshot();
+      expect(mockEsClient.ingest.putPipeline.mock.calls[0]).toMatchSnapshot();
       expect(mockSummaryTransformManager.install).toHaveBeenCalled();
       expect(mockSummaryTransformManager.start).toHaveBeenCalled();
-      expect(esClientMock.index.mock.calls[0]).toMatchSnapshot();
+      expect(mockEsClient.index.mock.calls[0]).toMatchSnapshot();
 
       expect(response).toEqual(expect.objectContaining({ id: 'unique-id' }));
     });
@@ -156,7 +156,7 @@ describe('CreateSLO', () => {
   });
 
   describe('unhappy path', () => {
-    it('rollbacks new resources on failure', async () => {
+    it('rollbacks completed operations when rollup transform install fails', async () => {
       mockTransformManager.install.mockRejectedValue(new Error('Rollup transform install error'));
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
@@ -164,12 +164,48 @@ describe('CreateSLO', () => {
         'Rollup transform install error'
       );
 
-      expect(mockSummaryTransformManager.stop).toHaveBeenCalled();
-      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
+      expect(mockRepository.deleteById).toHaveBeenCalled();
+
+      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockTransformManager.stop).not.toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockEsClient.ingest.deletePipeline).not.toHaveBeenCalled();
+    });
+
+    it('rollbacks completed operations when summary transform start fails', async () => {
+      mockSummaryTransformManager.start.mockRejectedValue(
+        new Error('Summary transform install error')
+      );
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
+        'Summary transform install error'
+      );
+
+      expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(mockTransformManager.stop).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
-      expect(esClientMock.ingest.deletePipeline).toHaveBeenCalled();
+      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalled();
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
+
+      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
+    });
+
+    it('rollbacks completed operations when create temporary document fails', async () => {
+      mockEsClient.index.mockRejectedValue(new Error('temporary document index failed'));
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
+        'temporary document index failed'
+      );
+
       expect(mockRepository.deleteById).toHaveBeenCalled();
+      expect(mockTransformManager.stop).toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).toHaveBeenCalled();
+      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalled();
+      expect(mockSummaryTransformManager.stop).toHaveBeenCalled();
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
     });
   });
 });
