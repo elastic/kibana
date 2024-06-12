@@ -17,6 +17,21 @@ export interface ServiceEntities {
   entity: Entity;
 }
 
+export interface MergedServiceEntities {
+  serviceName: string;
+  agentName?: string;
+  dataStreams: string[];
+  environments: string[];
+  metrics: EntityMetrics[];
+}
+
+export interface EntityMetrics {
+  latency?: number | null;
+  failedTransactionRate?: number | null;
+  throughput?: number | null;
+  logErrorRate?: number | null;
+  logRatePerMinute?: number | null;
+}
 interface Entity {
   id: string;
   latestTimestamp: string;
@@ -26,13 +41,7 @@ interface Entity {
       environment?: string;
     };
   };
-  metrics: {
-    latency: number;
-    failedTransactionRate: number;
-    throughput: number;
-    logErrorRate: number;
-    logRatePerMinute: number;
-  };
+  metrics: EntityMetrics;
 }
 
 interface EntitiesRaw {
@@ -111,21 +120,3 @@ export async function getEntities({
     };
   });
 }
-
-// enti {
-//   agent: { name: [ 'nodejs' ] },
-//   data_stream: { type: [ 'metrics', 'logs' ] },
-//   entity: {
-//     indexPatterns: [ 'logs-*', 'metrics-*' ],
-//     latestTimestamp: '2024-06-05T10:34:40.810Z',
-//     metric: {
-//       logRatePerMinute: 0,
-//       logErrorRate: null,
-//       throughput: 0,
-//       failedTransactionRate: 0.3333333333333333
-//     },
-//     identity: { service: [Object] },
-//     id: 'multi-signal-service:synthtrace-env-2',
-//     definitionId: 'apm-services'
-//   }
-// }

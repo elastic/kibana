@@ -8,7 +8,11 @@
 import { compact, uniq } from 'lodash';
 import { MergedServiceEntities, ServiceEntities } from '../get_entities';
 
-export function mergeEntities({ entities }: { entities: ServiceEntities[] }) {
+export function mergeEntities({
+  entities,
+}: {
+  entities: ServiceEntities[];
+}): MergedServiceEntities[] {
   const map = new Map();
   const mergedEntities = entities.reduce((prev, current) => {
     const key = current.serviceName;

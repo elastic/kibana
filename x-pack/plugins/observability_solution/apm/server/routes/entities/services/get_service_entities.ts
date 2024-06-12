@@ -8,23 +8,20 @@ import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
-import { merge, uniq } from 'lodash';
 import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { joinByKey } from '../../../../common/utils/join_by_key';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { EntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getEntities } from '../get_entities';
 import { getServiceNamesPerSignalType } from '../utils/get_service_names_per_signal_type';
-import { calculateAverageMetrics } from './calculate_metrics';
+import { calculateAvgMetrics } from './calculate_avg_metrics';
 import { getServicesTransactionStats } from './get_services_transaction_stats';
 import { mergeEntities } from './merge_entities';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
 
-export async function getServiceAssets({
+export async function getServiceEntities({
   assetsESClient,
   start,
   end,
@@ -62,21 +59,7 @@ export async function getServiceAssets({
         size: MAX_NUMBER_OF_SERVICES,
       });
 
-      console.log('entities', JSON.stringify(entities));
-
-      // const serviceEntities = response.hits.hits.map((hit) => {
-      //   return {
-      //     name: hit._source.entity.id.split(':')[0],
-      //     environments: hit._source.entity.id.split(':')[1] ?? null,
-      //     ...(hit._source as ServiceAssetDocument),
-      //   };
-      // });
-
-      // const mergeEntitiesRe = mergeEntities({ entities: serviceEntities });
-      // console.log('mergeEntities', mergeEntitiesRe);
-      // const entitiesAverages = calculateAverageMetrics(mergeEntitiesRe);
-      // console.log('calculateAverageMetrics', entitiesAverages);
-      // return entitiesAverages;
+      return calculateAvgMetrics(mergeEntities({ entities }));
     } catch (error) {
       // If the index does not exist, handle it gracefully
       if (

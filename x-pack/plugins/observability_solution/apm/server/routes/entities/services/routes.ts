@@ -15,7 +15,7 @@ import {
   rangeRt,
   serviceTransactionDataSourceRt,
 } from '../../default_api_types';
-import { getServiceAssets as getServiceEntities } from './get_service_assets';
+import { getServiceEntities } from './get_service_entities';
 import { EntityServicesResponse } from '../../../../common/assets/types';
 
 const servicesEntitiesRoute = createApmServerRoute({
