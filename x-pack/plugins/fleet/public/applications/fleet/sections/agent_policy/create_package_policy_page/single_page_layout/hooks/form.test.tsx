@@ -106,7 +106,7 @@ describe('useOnSubmit', () => {
 
       expect(renderResult.result.current.packagePolicy).toEqual({
         id: 'new-id',
-        policy_id: '',
+        policy_ids: [],
         namespace: 'newspace',
         description: '',
         enabled: true,
@@ -146,7 +146,7 @@ describe('useOnSubmit', () => {
         inputs: [],
         name: 'apache-1',
         namespace: '',
-        policy_id: '',
+        policy_ids: [],
         package: {
           name: 'apache',
           title: 'Apache',
@@ -191,7 +191,7 @@ describe('useOnSubmit', () => {
       inputs: [],
       name: 'apache-11',
       namespace: '',
-      policy_id: '',
+      policy_ids: [],
       package: {
         name: 'apache',
         title: 'Apache',
