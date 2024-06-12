@@ -12,7 +12,7 @@ import { createFleetTestRendererMock } from '../mock';
 
 import type { AgentPolicy, Agent } from '../types';
 
-import { AgentPolicySummaryLine } from './link_and_revision';
+import { AgentPolicySummaryLine } from './agent_policy_summary_line';
 
 describe('AgentPolicySummaryLine', () => {
   let testRenderer: TestRenderer;

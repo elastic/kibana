@@ -23,10 +23,10 @@ export const AgentPolicySummaryLine = memo<{
   withDescription?: boolean;
 }>(({ policy, agent, direction = 'row', withDescription = false }) => {
   const { getHref } = useLink();
+
   const { name, id, is_managed: isManaged, description } = policy;
 
   const revision = agent ? agent.policy_revision : policy.revision;
-
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
@@ -50,7 +50,6 @@ export const AgentPolicySummaryLine = memo<{
                   {name || id}
                 </EuiLink>
               </EuiFlexItem>
-
               {isManaged && (
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
@@ -70,7 +69,6 @@ export const AgentPolicySummaryLine = memo<{
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-
           {revision && (
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="xs" style={NO_WRAP_WHITE_SPACE}>
