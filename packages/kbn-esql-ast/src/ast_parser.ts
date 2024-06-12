@@ -25,8 +25,13 @@ export function getAstAndSyntaxErrors(text: string | undefined): {
     return { ast: [], errors: [] };
   }
   const errorListener = new ESQLErrorListener();
-  const parseListener = new AstListener();
-  const parser = getParser(CharStreams.fromString(text), errorListener, parseListener);
+  const { parser, tokenStream } = getParser(CharStreams.fromString(text), errorListener);
+  const parseListener = new AstListener(tokenStream);
+  if (parseListener) {
+    // @ts-expect-error the addParseListener API does exist and is documented here
+    // https://github.com/antlr/antlr4/blob/dev/doc/listeners.md
+    parser.addParseListener(parseListener);
+  }
 
   parser[ROOT_STATEMENT]();
 

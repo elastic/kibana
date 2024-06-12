@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
+import type { CommonTokenStream, ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
 import {
   type ShowInfoContext,
   type MetaFunctionsContext,
@@ -61,6 +61,13 @@ import type { ESQLAst, ESQLAstMetricsCommand } from './types';
 export class AstListener implements ESQLParserListener {
   private ast: ESQLAst = [];
 
+  constructor(private tokenStream: CommonTokenStream) {}
+
+  private getTextWithWhitespace(ctx: ParserRuleContext) {
+    // @ts-expect-error getSourceInterval does exist
+    return this.tokenStream.getText(ctx.getSourceInterval());
+  }
+
   public getAst() {
     return { ast: this.ast };
   }
@@ -71,12 +78,14 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitShowInfo(ctx: ShowInfoContext) {
-    const commandAst = createCommand('show', ctx);
+    const commandAst = createCommand('show', ctx, this.getTextWithWhitespace(ctx));
 
     this.ast.push(commandAst);
-    commandAst.text = ctx.getText();
+    commandAst.text = this.getTextWithWhitespace(ctx);
     if (textExistsAndIsValid(ctx.INFO().getText())) {
-      commandAst?.args.push(createFunction('info', ctx, getPosition(ctx.INFO().symbol)));
+      commandAst?.args.push(
+        createFunction('info', ctx, this.getTextWithWhitespace(ctx), getPosition(ctx.INFO().symbol))
+      );
     }
   }
 
@@ -86,12 +95,19 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitMetaFunctions(ctx: MetaFunctionsContext) {
-    const commandAst = createCommand('meta', ctx);
+    const commandAst = createCommand('meta', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(commandAst);
     // update the text
-    commandAst.text = ctx.getText();
+    commandAst.text = this.getTextWithWhitespace(ctx);
     if (textExistsAndIsValid(ctx.FUNCTIONS().getText())) {
-      commandAst?.args.push(createFunction('functions', ctx, getPosition(ctx.FUNCTIONS().symbol)));
+      commandAst?.args.push(
+        createFunction(
+          'functions',
+          ctx,
+          this.getTextWithWhitespace(ctx),
+          getPosition(ctx.FUNCTIONS().symbol)
+        )
+      );
     }
   }
 
@@ -108,7 +124,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitWhereCommand(ctx: WhereCommandContext) {
-    const command = createCommand('where', ctx);
+    const command = createCommand('where', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
     command.args.push(...collectBooleanExpression(ctx.booleanExpression()));
   }
@@ -118,7 +134,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitRowCommand(ctx: RowCommandContext) {
-    const command = createCommand('row', ctx);
+    const command = createCommand('row', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
     command.args.push(...collectAllFieldsStatements(ctx.fields()));
   }
@@ -128,7 +144,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitFromCommand(ctx: FromCommandContext) {
-    const commandAst = createCommand('from', ctx);
+    const commandAst = createCommand('from', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(commandAst);
     commandAst.args.push(...collectAllSourceIdentifiers(ctx));
     const metadataContext = ctx.metadata();
@@ -137,6 +153,7 @@ export class AstListener implements ESQLParserListener {
     if (metadataContent) {
       const option = createOption(
         metadataContent.METADATA().getText().toLowerCase(),
+        this.getTextWithWhitespace(metadataContent),
         metadataContent
       );
       commandAst.args.push(option);
@@ -150,7 +167,7 @@ export class AstListener implements ESQLParserListener {
    */
   exitMetricsCommand(ctx: MetricsCommandContext): void {
     const node: ESQLAstMetricsCommand = {
-      ...createAstBaseItem('metrics', ctx),
+      ...createAstBaseItem('metrics', ctx, this.getTextWithWhitespace(ctx)),
       type: 'command',
       args: [],
       indices: ctx
@@ -174,7 +191,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitEvalCommand(ctx: EvalCommandContext) {
-    const commandAst = createCommand('eval', ctx);
+    const commandAst = createCommand('eval', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(commandAst);
     commandAst.args.push(...collectAllFieldsStatements(ctx.fields()));
   }
@@ -184,7 +201,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitStatsCommand(ctx: StatsCommandContext) {
-    const command = createCommand('stats', ctx);
+    const command = createCommand('stats', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
 
     // STATS expression is optional
@@ -201,7 +218,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitLimitCommand(ctx: LimitCommandContext) {
-    const command = createCommand('limit', ctx);
+    const command = createCommand('limit', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
     if (ctx.getToken(esql_parser.INTEGER_LITERAL, 0)) {
       const literal = createLiteral('number', ctx.INTEGER_LITERAL());
@@ -216,7 +233,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitSortCommand(ctx: SortCommandContext) {
-    const command = createCommand('sort', ctx);
+    const command = createCommand('sort', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
     command.args.push(...visitOrderExpression(ctx.orderExpression_list()));
   }
@@ -226,7 +243,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitKeepCommand(ctx: KeepCommandContext) {
-    const command = createCommand('keep', ctx);
+    const command = createCommand('keep', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
     command.args.push(...collectAllColumnIdentifiers(ctx));
   }
@@ -236,7 +253,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitDropCommand(ctx: DropCommandContext) {
-    const command = createCommand('drop', ctx);
+    const command = createCommand('drop', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
     command.args.push(...collectAllColumnIdentifiers(ctx));
   }
@@ -246,7 +263,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitRenameCommand(ctx: RenameCommandContext) {
-    const command = createCommand('rename', ctx);
+    const command = createCommand('rename', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
     command.args.push(...visitRenameClauses(ctx.renameClause_list()));
   }
@@ -256,7 +273,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitDissectCommand(ctx: DissectCommandContext) {
-    const command = createCommand('dissect', ctx);
+    const command = createCommand('dissect', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
     command.args.push(...visitDissect(ctx));
   }
@@ -266,7 +283,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitGrokCommand(ctx: GrokCommandContext) {
-    const command = createCommand('grok', ctx);
+    const command = createCommand('grok', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
     command.args.push(...visitGrok(ctx));
   }
@@ -276,7 +293,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitMvExpandCommand(ctx: MvExpandCommandContext) {
-    const command = createCommand('mv_expand', ctx);
+    const command = createCommand('mv_expand', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
     command.args.push(...collectAllColumnIdentifiers(ctx));
   }
@@ -286,7 +303,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   enterShowCommand(ctx: ShowCommandContext) {
-    const command = createCommand('show', ctx);
+    const command = createCommand('show', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
   }
 
@@ -295,7 +312,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   enterMetaCommand(ctx: MetaCommandContext) {
-    const command = createCommand('meta', ctx);
+    const command = createCommand('meta', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
   }
   /**
@@ -303,7 +320,7 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitEnrichCommand(ctx: EnrichCommandContext) {
-    const command = createCommand('enrich', ctx);
+    const command = createCommand('enrich', ctx, this.getTextWithWhitespace(ctx));
     this.ast.push(command);
     command.args.push(...getPolicyName(ctx), ...getMatchField(ctx), ...getEnrichClauses(ctx));
   }

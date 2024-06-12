@@ -139,7 +139,11 @@ export function getMatchField(ctx: EnrichCommandContext) {
   }
   const identifier = ctx.qualifiedNamePattern();
   if (identifier) {
-    const fn = createOption(ctx.ON()!.getText().toLowerCase(), ctx);
+    const fn = createOption(
+      ctx.ON()!.getText().toLowerCase(),
+      ctx,
+      this.getTextWithWhitespace(ctx)
+    );
     if (textExistsAndIsValid(identifier.getText())) {
       fn.args.push(createColumn(identifier));
     }

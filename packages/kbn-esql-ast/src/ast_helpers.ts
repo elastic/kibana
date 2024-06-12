@@ -40,33 +40,42 @@ export function nonNullable<T>(v: T): v is NonNullable<T> {
 
 export function createAstBaseItem<Name = string>(
   name: Name,
-  ctx: ParserRuleContext
+  ctx: ParserRuleContext,
+  textWithWhitespace: string
 ): ESQLAstBaseItem<Name> {
   return {
     name,
-    text: ctx.getText(),
+    text: textWithWhitespace,
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception),
   };
 }
 
-export function createCommand(name: string, ctx: ParserRuleContext): ESQLCommand {
+export function createCommand(
+  name: string,
+  ctx: ParserRuleContext,
+  textWithWhitespace: string
+): ESQLCommand {
   return {
     type: 'command',
     name,
-    text: ctx.getText(),
+    text: textWithWhitespace,
     args: [],
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception),
   };
 }
 
-export function createList(ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLList {
+export function createList(
+  ctx: ParserRuleContext,
+  values: ESQLLiteral[],
+  textWithWhitespace: string
+): ESQLList {
   return {
     type: 'list',
     name: ctx.getText(),
     values,
-    text: ctx.getText(),
+    text: textWithWhitespace,
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception),
   };
@@ -148,12 +157,15 @@ export function createLiteral(
   };
 }
 
-export function createTimeUnit(ctx: QualifiedIntegerLiteralContext): ESQLTimeInterval {
+export function createTimeUnit(
+  ctx: QualifiedIntegerLiteralContext,
+  textWithWhitespace: string
+): ESQLTimeInterval {
   return {
     type: 'timeInterval',
     quantity: Number(ctx.integerValue().INTEGER_LITERAL().getText()),
     unit: ctx.UNQUOTED_IDENTIFIER().symbol.text,
-    text: ctx.getText(),
+    text: textWithWhitespace,
     location: getPosition(ctx.start, ctx.stop),
     name: `${ctx.integerValue().INTEGER_LITERAL().getText()} ${
       ctx.UNQUOTED_IDENTIFIER().symbol.text
@@ -165,12 +177,13 @@ export function createTimeUnit(ctx: QualifiedIntegerLiteralContext): ESQLTimeInt
 export function createFunction(
   name: string,
   ctx: ParserRuleContext,
+  textWithWhitespace: string,
   customPosition?: ESQLLocation
 ): ESQLFunction {
   return {
     type: 'function',
     name,
-    text: ctx.getText(),
+    text: textWithWhitespace,
     location: customPosition ?? getPosition(ctx.start, ctx.stop),
     args: [],
     incomplete: Boolean(ctx.exception),
@@ -331,11 +344,15 @@ export function createColumn(ctx: ParserRuleContext): ESQLColumn {
   };
 }
 
-export function createOption(name: string, ctx: ParserRuleContext): ESQLCommandOption {
+export function createOption(
+  name: string,
+  ctx: ParserRuleContext,
+  textWithWhitespace: string
+): ESQLCommandOption {
   return {
     type: 'option',
     name,
-    text: ctx.getText(),
+    text: textWithWhitespace,
     location: getPosition(ctx.start, ctx.stop),
     args: [],
     incomplete: Boolean(
