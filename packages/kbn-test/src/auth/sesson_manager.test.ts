@@ -97,7 +97,7 @@ describe('SamlSessionManager', () => {
     test(`'getUserData' should return the correct email & fullname`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
       const data = await samlSessionManager.getUserData(roleViewer);
-      expect(data).toEqual({ email, fullname });
+      expect(data).toEqual({ email, fullname, username });
     });
 
     test(`throws error when role is not in 'supportedRoles'`, async () => {
@@ -230,7 +230,7 @@ describe('SamlSessionManager', () => {
     test(`'getUserData' should return the correct email & fullname`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
       const data = await samlSessionManager.getUserData(roleViewer);
-      expect(data).toEqual({ email: cloudEmail, fullname: cloudFullname });
+      expect(data).toEqual({ email: cloudEmail, fullname: cloudFullname, username: cloudUsername });
     });
 
     test(`throws error for non-existing role when 'supportedRoles' is defined`, async () => {
