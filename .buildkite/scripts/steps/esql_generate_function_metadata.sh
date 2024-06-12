@@ -3,6 +3,7 @@ set -euo pipefail
 
 VALIDATION_PACKAGE_DIR="$KIBANA_DIR/packages/kbn-esql-validation-autocomplete"
 EDITOR_PACKAGE_DIR="$KIBANA_DIR/packages/kbn-text-based-editor"
+GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
 
 report_main_step () {
   echo "--- $1"
@@ -46,7 +47,7 @@ main () {
 
   # Check for differences
   set +e
-  git diff --exit-code --quiet .
+  git diff "$GIT_SCOPE" --exit-code --quiet .
   if [ $? -eq 0 ]; then
     echo "No differences found. Our work is done here."
     exit
@@ -77,7 +78,7 @@ main () {
 
   git checkout -b "$BRANCH_NAME"
 
-  git add "$EDITOR_PACKAGE_DIR/**/*" "$VALIDATION_PACKAGE_DIR/**/*"
+  git add "$GIT_SCOPE"
   git commit -m "Update function metadata"
 
   report_main_step "Changes committed. Creating pull request."
