@@ -131,7 +131,7 @@
     "@formatjs/intl-pluralrules": "^5.2.12",
     "@formatjs/intl-relativetimeformat": "^11.2.12",
     "@formatjs/intl-utils": "^3.8.4",
-    "@grpc/grpc-js": "^1.6.8",
+    "@grpc/grpc-js": "^1.8.22",
     "@hapi/accept": "^5.0.2",
     "@hapi/boom": "^9.1.4",
     "@hapi/cookie": "^11.0.2",
