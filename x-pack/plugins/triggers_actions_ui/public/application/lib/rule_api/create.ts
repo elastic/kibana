@@ -45,7 +45,20 @@ export const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
         : {}),
       ...('alertsFilter' in action && action.alertsFilter
         ? {
-            alerts_filter: action.alertsFilter,
+            alerts_filter: {
+              ...(action.alertsFilter.query ? { query: action.alertsFilter.query } : {}),
+              ...(action.alertsFilter.timeframe
+                ? { timeframe: action.alertsFilter.timeframe }
+                : {}),
+              ...(action.alertsFilter.prebuiltQuery &&
+              action.alertsFilter.prebuiltQuery.severityImproving
+                ? {
+                    prebuilt_query: {
+                      severity_improving: action.alertsFilter.prebuiltQuery.severityImproving,
+                    },
+                  }
+                : {}),
+            },
           }
         : {}),
       ...('useAlertDataForTemplate' in action &&

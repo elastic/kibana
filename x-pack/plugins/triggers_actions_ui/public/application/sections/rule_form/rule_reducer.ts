@@ -33,6 +33,7 @@ interface CommandType<
     | 'setRuleActionProperty'
     | 'setRuleActionFrequency'
     | 'setRuleActionAlertsFilter'
+    | 'setRuleActionAlertsSeverityImproving'
     | 'setAlertDelayProperty'
 > {
   type: T;
@@ -104,6 +105,10 @@ export type RuleReducerAction =
   | {
       command: CommandType<'setRuleActionAlertsFilter'>;
       payload: Payload<string, RuleActionAlertsFilterProperty>;
+    }
+  | {
+      command: CommandType<'setRuleActionAlertsSeverityImproving'>;
+      payload: Payload<string, RuleActionParam>;
     }
   | {
       command: CommandType<'setAlertDelayProperty'>;
@@ -263,6 +268,44 @@ export const getRuleReducer =
 
           const { alertsFilter, ...rest } = oldSanitizedAction;
           const updatedAlertsFilter = { ...alertsFilter, [key]: value };
+
+          const updatedAction = {
+            ...rest,
+            ...(!isEmpty(updatedAlertsFilter) ? { alertsFilter: updatedAlertsFilter } : {}),
+          };
+          rule.actions.splice(index, 0, updatedAction);
+          return {
+            ...state,
+            rule: {
+              ...rule,
+              actions: [...rule.actions],
+            },
+          };
+        }
+      }
+      case 'setRuleActionAlertsSeverityImproving': {
+        const { value, index } = action.payload as Payload<string, RuleActionParam>;
+        if (index === undefined || rule.actions[index] == null) {
+          return state;
+        } else {
+          const oldAction = rule.actions.splice(index, 1)[0];
+          if (actionTypeRegistry.get(oldAction.actionTypeId).isSystemActionType) {
+            return state;
+          }
+          const oldSanitizedAction = oldAction as SanitizedRuleAction;
+          if (
+            oldSanitizedAction.alertsFilter &&
+            isEqual(oldSanitizedAction.alertsFilter.prebuiltQuery?.severityImproving, value)
+          )
+            return state;
+
+          const { alertsFilter, ...rest } = oldSanitizedAction;
+          const updatedAlertsFilter = {
+            ...alertsFilter,
+            ...(alertsFilter?.prebuiltQuery
+              ? { prebuiltQuery: { ...alertsFilter?.prebuiltQuery, severityImproving: value } }
+              : { prebuiltQuery: { severityImproving: value } }),
+          };
 
           const updatedAction = {
             ...rest,

@@ -180,6 +180,11 @@ const rawRuleAlertsFilterSchema = schema.object({
       dsl: schema.maybe(schema.string()),
     })
   ),
+  prebuiltQuery: schema.maybe(
+    schema.object({
+      severityImproving: schema.maybe(schema.boolean()),
+    })
+  ),
   timeframe: schema.maybe(
     schema.object({
       days: schema.arrayOf(ISOWeekdaysSchema),

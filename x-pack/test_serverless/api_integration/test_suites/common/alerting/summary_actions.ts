@@ -11,6 +11,7 @@ import {
   ALERT_ACTION_GROUP,
   ALERT_FLAPPING,
   ALERT_INSTANCE_ID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
@@ -24,6 +25,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   TAGS,
+  ALERT_PREVIOUS_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
 import { omit, padStart } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -194,6 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
+        [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
@@ -323,6 +326,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
+        [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
@@ -546,6 +550,7 @@ export default function ({ getService }: FtrProviderContext) {
         ['kibana.alert.evaluation.threshold']: -1,
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
+        [ALERT_PREVIOUS_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_STATUS]: 'active',

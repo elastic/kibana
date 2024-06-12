@@ -8,7 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
-import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
+import {
+  alertsFilterQuerySchemaV1,
+  alertsPrebuiltQuerySchemaV1,
+} from '../../../../alerts_filter_query';
 
 export const actionFrequencySchema = schema.object({
   summary: schema.boolean({
@@ -29,6 +32,7 @@ export const actionFrequencySchema = schema.object({
 export const actionAlertsFilterSchema = schema.object(
   {
     query: schema.maybe(alertsFilterQuerySchemaV1),
+    prebuilt_query: schema.maybe(alertsPrebuiltQuerySchemaV1),
     timeframe: schema.maybe(
       schema.object(
         {

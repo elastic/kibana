@@ -92,6 +92,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         'test.patternFiringAad',
         'test.waitingRule',
         'test.patternFiringAutoRecoverFalse',
+        'test.severity',
       ],
       privileges: {
         all: {
@@ -123,6 +124,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.patternFiringAad',
                 'test.waitingRule',
                 'test.patternFiringAutoRecoverFalse',
+                'test.severity',
               ],
             },
           },
@@ -157,6 +159,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.patternFiringAad',
                 'test.waitingRule',
                 'test.patternFiringAutoRecoverFalse',
+                'test.severity',
               ],
             },
           },

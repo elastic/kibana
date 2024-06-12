@@ -46,7 +46,21 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): ActionReques
               },
             }
           : {}),
-        ...(alertsFilter ? { alertsFilter } : {}),
+        ...(alertsFilter
+          ? {
+              alertsFilter: {
+                ...(alertsFilter.query ? { query: alertsFilter.query } : {}),
+                ...(alertsFilter.prebuilt_query && alertsFilter.prebuilt_query.severity_improving
+                  ? {
+                      prebuiltQuery: {
+                        severityImproving: alertsFilter.prebuilt_query.severity_improving,
+                      },
+                    }
+                  : {}),
+                ...(alertsFilter.timeframe ? { timeframe: alertsFilter.timeframe } : {}),
+              },
+            }
+          : {}),
       };
     }
   );

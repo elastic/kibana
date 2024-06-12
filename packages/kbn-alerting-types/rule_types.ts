@@ -36,6 +36,9 @@ export interface AlertsFilterTimeframe extends SavedObjectAttributes {
 }
 
 export interface AlertsFilter extends SavedObjectAttributes {
+  prebuiltQuery?: {
+    severityImproving?: boolean;
+  };
   query?: {
     kql: string;
     filters: Filter[];
@@ -187,6 +190,9 @@ export interface AlertDelay extends SavedObjectAttributes {
 }
 
 export interface SanitizedAlertsFilter extends AlertsFilter {
+  prebuiltQuery?: {
+    severityImproving?: boolean;
+  };
   query?: {
     kql: string;
     filters: Filter[];

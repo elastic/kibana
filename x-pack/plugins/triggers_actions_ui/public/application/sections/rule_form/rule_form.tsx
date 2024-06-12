@@ -402,6 +402,16 @@ export const RuleForm = ({
     [dispatch]
   );
 
+  const setActionAlertsSeverityImprovingProperty = useCallback(
+    (key: string, value: RuleActionParam, index: number) => {
+      dispatch({
+        command: { type: 'setRuleActionAlertsSeverityImproving' },
+        payload: { key, value, index },
+      });
+    },
+    [dispatch]
+  );
+
   const setAlertDelayProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setAlertDelayProperty' }, payload: { key, value } });
   };
@@ -962,6 +972,7 @@ export const RuleForm = ({
             actionTypeRegistry={actionTypeRegistry}
             setActionFrequencyProperty={setActionFrequencyProperty}
             setActionAlertsFilterProperty={setActionAlertsFilterProperty}
+            setActionAlertsSeverityImprovingProperty={setActionAlertsSeverityImprovingProperty}
             defaultSummaryMessage={ruleTypeModel?.defaultSummaryMessage || summaryMessage}
             minimumThrottleInterval={[ruleInterval, ruleIntervalUnit]}
           />
