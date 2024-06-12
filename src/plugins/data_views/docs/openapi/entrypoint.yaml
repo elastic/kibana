@@ -56,7 +56,10 @@ components:
       type: apiKey
       in: header
       name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+      description: >
+        Serverless APIs support only key-based authentication.
+        You must create an API key and use the encoded value in the request header.
+        For example: 'Authorization: ApiKey base64AccessApiKey'.
 security:
   - basicAuth: []
   - apiKeyAuth: []
