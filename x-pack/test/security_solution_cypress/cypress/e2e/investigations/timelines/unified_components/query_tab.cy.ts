@@ -93,7 +93,6 @@ describe(
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('agent.type')).should('not.exist');
     });
 
-    // these tests are skipped until we implement the expandable flyout in the unified table for timeline
     context('flyout', () => {
       it('should be able to open/close details details/host/user flyout', () => {
         cy.log('Event Details Flyout');
