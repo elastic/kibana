@@ -132,14 +132,18 @@ export const ModalInspectQuery = ({
     inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname)
   );
 
-  const requests: string[] = [request, ...(additionalRequests != null ? additionalRequests : [])];
-  const responses: string[] = [
-    response,
-    ...(additionalResponses != null ? additionalResponses : []),
-  ];
+  const requests: string[] = useMemo(
+    () => [request, ...(additionalRequests != null ? additionalRequests : [])],
+    [request, additionalRequests]
+  );
 
-  const inspectRequests: Request[] = parseInspectStrings(requests);
-  const inspectResponses: Response[] = parseInspectStrings(responses);
+  const responses: string[] = useMemo(
+    () => [response, ...(additionalResponses != null ? additionalResponses : [])],
+    [response, additionalResponses]
+  );
+
+  const inspectRequests: Request[] = useMemo(() => parseInspectStrings(requests), [requests]);
+  const inspectResponses: Response[] = useMemo(() => parseInspectStrings(responses), [responses]);
 
   const isSourcererPattern = useMemo(
     () =>
@@ -152,124 +156,129 @@ export const ModalInspectQuery = ({
   const statistics: Array<{
     title: NonNullable<ReactNode | string>;
     description: NonNullable<ReactNode | string>;
-  }> = [
-    {
-      title: (
-        <span data-test-subj="index-pattern-title">
-          {i18n.INDEX_PATTERN}{' '}
-          <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="iInCircle" />
-        </span>
-      ),
-      description: (
-        <span data-test-subj="index-pattern-description">
-          <p>
-            {formatIndexPatternRequested(
-              adHocDataViews != null && adHocDataViews.length > 0
-                ? adHocDataViews
-                : inspectRequests[0]?.index ?? []
-            )}
-          </p>
-
-          {!isSourcererPattern && (
+  }> = useMemo(
+    () => [
+      {
+        title: (
+          <span data-test-subj="index-pattern-title">
+            {i18n.INDEX_PATTERN}{' '}
+            <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="iInCircle" />
+          </span>
+        ),
+        description: (
+          <span data-test-subj="index-pattern-description">
             <p>
-              <small>
-                <i data-test-subj="not-sourcerer-msg">{i18n.INSPECT_PATTERN_DIFFERENT}</i>
-              </small>
+              {formatIndexPatternRequested(
+                adHocDataViews != null && adHocDataViews.length > 0
+                  ? adHocDataViews
+                  : inspectRequests[0]?.index ?? []
+              )}
             </p>
-          )}
-        </span>
-      ),
-    },
 
-    {
-      title: (
-        <span data-test-subj="query-time-title">
-          {i18n.QUERY_TIME}{' '}
-          <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="iInCircle" />
-        </span>
-      ),
-      description: (
-        <span data-test-subj="query-time-description">
-          {inspectResponses[0]?.took === 0
-            ? '0ms'
-            : inspectResponses[0]?.took
-            ? `${numeral(inspectResponses[0].took).format('0,0')}ms`
-            : i18n.SOMETHING_WENT_WRONG}
-        </span>
-      ),
-    },
-    {
-      title: (
-        <span data-test-subj="request-timestamp-title">
-          {i18n.REQUEST_TIMESTAMP}{' '}
-          <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="iInCircle" />
-        </span>
-      ),
-      description: (
-        <span data-test-subj="request-timestamp-description">{new Date().toISOString()}</span>
-      ),
-    },
-  ];
+            {!isSourcererPattern && (
+              <p>
+                <small>
+                  <i data-test-subj="not-sourcerer-msg">{i18n.INSPECT_PATTERN_DIFFERENT}</i>
+                </small>
+              </p>
+            )}
+          </span>
+        ),
+      },
 
-  const tabs = [
-    {
-      id: 'statistics',
-      'data-test-subj': 'modal-inspect-statistics-tab',
-      name: 'Statistics',
-      content: (
-        <>
-          <EuiSpacer />
-          <EuiDescriptionList
-            listItems={statistics}
-            type="responsiveColumn"
-            columnWidths={[3, 7]}
-          />
-        </>
-      ),
-    },
-    {
-      id: 'request',
-      name: 'Request',
-      'data-test-subj': 'modal-inspect-request-tab',
-      content:
-        inspectRequests.length > 0 ? (
-          inspectRequests.map((inspectRequest, index) => (
-            <Fragment key={index}>
-              <EuiSpacer />
-              <CodeEditor
-                languageId={XJsonLang.ID}
-                value={manageStringify(inspectRequest.body)}
-                fitToContent={monacoHeightConfig}
-                options={monacoEditorOptions}
-              />
-            </Fragment>
-          ))
-        ) : (
-          <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
+      {
+        title: (
+          <span data-test-subj="query-time-title">
+            {i18n.QUERY_TIME}{' '}
+            <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="iInCircle" />
+          </span>
         ),
-    },
-    {
-      id: 'response',
-      name: 'Response',
-      'data-test-subj': 'modal-inspect-response-tab',
-      content:
-        inspectResponses.length > 0 ? (
-          responses.map((responseText, index) => (
-            <Fragment key={index}>
-              <EuiSpacer />
-              <CodeEditor
-                languageId={XJsonLang.ID}
-                value={responseText}
-                fitToContent={monacoHeightConfig}
-                options={monacoEditorOptions}
-              />
-            </Fragment>
-          ))
-        ) : (
-          <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
+        description: (
+          <span data-test-subj="query-time-description">
+            {inspectResponses[0]?.took === 0
+              ? '0ms'
+              : inspectResponses[0]?.took
+              ? `${numeral(inspectResponses[0].took).format('0,0')}ms`
+              : i18n.SOMETHING_WENT_WRONG}
+          </span>
         ),
-    },
-  ];
+      },
+      {
+        title: (
+          <span data-test-subj="request-timestamp-title">
+            {i18n.REQUEST_TIMESTAMP}{' '}
+            <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="iInCircle" />
+          </span>
+        ),
+        description: (
+          <span data-test-subj="request-timestamp-description">{new Date().toISOString()}</span>
+        ),
+      },
+    ],
+    [adHocDataViews, inspectRequests, inspectResponses, isSourcererPattern]
+  );
+
+  const tabs = useMemo(() => {
+    return [
+      {
+        id: 'statistics',
+        'data-test-subj': 'modal-inspect-statistics-tab',
+        name: 'Statistics',
+        content: (
+          <>
+            <EuiSpacer />
+            <EuiDescriptionList
+              listItems={statistics}
+              type="responsiveColumn"
+              columnWidths={[3, 7]}
+            />
+          </>
+        ),
+      },
+      {
+        id: 'request',
+        name: 'Request',
+        'data-test-subj': 'modal-inspect-request-tab',
+        content:
+          inspectRequests.length > 0 ? (
+            inspectRequests.map((inspectRequest, index) => (
+              <Fragment key={index}>
+                <EuiSpacer />
+                <CodeEditor
+                  languageId={XJsonLang.ID}
+                  value={manageStringify(inspectRequest.body)}
+                  fitToContent={monacoHeightConfig}
+                  options={monacoEditorOptions}
+                />
+              </Fragment>
+            ))
+          ) : (
+            <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
+          ),
+      },
+      {
+        id: 'response',
+        name: 'Response',
+        'data-test-subj': 'modal-inspect-response-tab',
+        content:
+          inspectResponses.length > 0 ? (
+            responses.map((responseText, index) => (
+              <Fragment key={index}>
+                <EuiSpacer />
+                <CodeEditor
+                  languageId={XJsonLang.ID}
+                  value={responseText}
+                  fitToContent={monacoHeightConfig}
+                  options={monacoEditorOptions}
+                />
+              </Fragment>
+            ))
+          ) : (
+            <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
+          ),
+      },
+    ];
+  }, [inspectRequests, inspectResponses, responses, statistics]);
 
   return (
     <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
