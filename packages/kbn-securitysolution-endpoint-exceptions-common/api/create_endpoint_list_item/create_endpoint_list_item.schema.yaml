@@ -1,0 +1,83 @@
+openapi: 3.0.0
+info:
+  title: Create endpoint list item API endpoint
+  version: '2023-10-31'
+paths:
+  /api/endpoint_list/items:
+    post:
+      x-labels: [serverless, ess]
+      operationId: CreateEndpointListItem
+      x-codegen-enabled: true
+      summary: Creates an endpoint list item
+      tags:
+        - Endpoint exceptions API
+      requestBody:
+        description: Exception list item's properties
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item_id:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemHumanId'
+                type:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemType'
+                name:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemName'
+                description:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemDescription'
+                entries:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
+                os_types:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemOsTypeArray'
+                tags:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemTags'
+                meta:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemMeta'
+                comments:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemCommentArray'
+              required:
+                - type
+                - name
+                - description
+                - entries
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../model/endpoint_list_common.schema.yaml#/components/schemas/EndpointListItem'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        409:
+          description: Endpoint list item already exists response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
