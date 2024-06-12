@@ -19,7 +19,8 @@ export type ESQLSingleAstItem =
   | ESQLList
   | ESQLLiteral
   | ESQLCommandMode
-  | ESQLInlineCast;
+  | ESQLInlineCast
+  | ESQLUnknownItem;
 
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
@@ -60,10 +61,14 @@ export interface ESQLFunction extends ESQLAstBaseItem {
   args: ESQLAstItem[];
 }
 
-export interface ESQLInlineCast extends ESQLAstBaseItem {
+export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem {
   type: 'inlineCast';
-  value: ESQLAstItem | ESQLAstItem[] | undefined;
+  value: ValueType;
   castType: string;
+}
+
+export interface ESQLUnknownItem extends ESQLAstBaseItem {
+  type: 'unknown';
 }
 
 export interface ESQLTimeInterval extends ESQLAstBaseItem {

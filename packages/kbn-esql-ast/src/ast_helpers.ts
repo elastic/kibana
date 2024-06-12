@@ -34,6 +34,7 @@ import type {
   ESQLAstItem,
   ESQLCommandMode,
   ESQLInlineCast,
+  ESQLUnknownItem,
 } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -133,11 +134,20 @@ export function textExistsAndIsValid(text: string | undefined): text is string {
 
 export function createLiteral(
   type: ESQLLiteral['literalType'],
-  node: TerminalNode | undefined
-): ESQLLiteral | undefined {
+  node: TerminalNode | null
+): ESQLLiteral {
   if (!node) {
-    return;
+    return {
+      type: 'literal',
+      name: 'unknown',
+      text: 'unknown',
+      value: 'unknown',
+      literalType: type,
+      location: { min: 0, max: 0 },
+      incomplete: false,
+    } as ESQLLiteral;
   }
+
   const text = node.getText();
 
   const partialLiteral: Omit<ESQLLiteral, 'literalType' | 'value'> = {
@@ -358,5 +368,15 @@ export function createOption(name: string, ctx: ParserRuleContext): ESQLCommandO
           return Boolean(c.isErrorNode);
         })
     ),
+  };
+}
+
+export function createUnknownItem(ctx: ParserRuleContext): ESQLUnknownItem {
+  return {
+    type: 'unknown',
+    name: 'unknown',
+    text: ctx.getText(),
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
   };
 }
