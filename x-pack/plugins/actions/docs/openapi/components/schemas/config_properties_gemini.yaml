@@ -1,6 +1,5 @@
 title: Connector request properties for an Google Gemini connector
-description: >
-  Defines properties for connectors when type is `.gemini`.
+description: Defines properties for connectors when type is `.gemini`.
 type: object
 required:
   - apiUrl
@@ -19,4 +18,4 @@ properties:
     description: The GCP region where the Vertex AI endpoint enabled.
   gcpProjectID:
     type: string
-    description: The project that has Vertex AI endpoint enabled.
+    description: The Google ProjectID that has Vertex AI endpoint enabled.

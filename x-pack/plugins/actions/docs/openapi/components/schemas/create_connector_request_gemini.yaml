@@ -1,6 +1,5 @@
 title: Create Google Gemini connector request
-description: >
-  The Google Gemini connector uses axios to send a POST request to Google Gemini.
+description: The Google Gemini connector uses axios to send a POST request to Google Gemini.
 type: object
 required:
   - config

@@ -482,7 +482,7 @@
       },
       "create_connector_request_gemini": {
         "title": "Create Google Gemini connector request",
-        "description": "The Google Gemini connector uses axios to send a POST request to Google Gemini.\n",
+        "description": "The Google Gemini connector uses axios to send a POST request to Google Gemini.",
         "type": "object",
         "required": [
           "config",
@@ -1327,7 +1327,7 @@
       },
       "config_properties_gemini": {
         "title": "Connector request properties for an Google Gemini connector",
-        "description": "Defines properties for connectors when type is `.gemini`.\n",
+        "description": "Defines properties for connectors when type is `.gemini`.",
         "type": "object",
         "required": [
           "apiUrl",
@@ -1350,7 +1350,7 @@
           },
           "gcpProjectID": {
             "type": "string",
-            "description": "The project that has Vertex AI endpoint enabled."
+            "description": "The Google ProjectID that has Vertex AI endpoint enabled."
           }
         }
       },
@@ -1364,7 +1364,7 @@
         "properties": {
           "credentialsJSON": {
             "type": "string",
-            "description": "The service account credentials JSON file. The service account should have Vertex AI user IAM role assigned to it.\n"
+            "description": "The service account credentials JSON file. The service account should have Vertex AI user IAM role assigned to it."
           }
         }
       },
