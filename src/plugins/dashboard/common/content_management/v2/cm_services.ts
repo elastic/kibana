@@ -10,11 +10,13 @@ import {
   createResultSchema,
   objectTypeToGetResultSchema,
   savedObjectSchema,
+  searchOptionsSchemas,
 } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   controlGroupInputSchema as controlGroupInputSchemaV1,
   dashboardAttributesSchema as dashboardAttributesSchemaV1,
+  dashboardSearchOptionsSchema as dashboardSearchOptionsSchemaV1,
   serviceDefinition as serviceDefinitionV1,
 } from '../v1';
 
@@ -33,6 +35,18 @@ export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
 );
 
 export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
+
+export const dashboardSearchOptionsSchema = dashboardSearchOptionsSchemaV1.extends(
+  {
+    sort: schema.maybe(
+      schema.object({
+        sortField: searchOptionsSchemas.sortField,
+        sortOrder: searchOptionsSchemas.sortOrder,
+      })
+    ),
+  },
+  { unknowns: 'ignore' }
+);
 
 // Content management service definition.
 export const serviceDefinition: ServicesDefinition = {
@@ -65,7 +79,12 @@ export const serviceDefinition: ServicesDefinition = {
     },
   },
   search: {
-    in: serviceDefinitionV1.search?.in,
+    in: {
+      ...serviceDefinitionV1.search?.in,
+      options: {
+        schema: schema.maybe(dashboardSearchOptionsSchema),
+      },
+    },
   },
   mSearch: {
     out: {

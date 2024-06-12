@@ -19,4 +19,5 @@ export {
   dashboardSavedObjectSchema,
   controlGroupInputSchema,
   dashboardAttributesSchema,
+  dashboardSearchOptionsSchema,
 } from './cm_services';

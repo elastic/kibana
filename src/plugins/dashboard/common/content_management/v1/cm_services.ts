@@ -62,14 +62,11 @@ export const dashboardAttributesSchema = schema.object(
 
 export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
 
-const searchOptionsSchema = schema.maybe(
-  schema.object(
-    {
-      onlyTitle: schema.maybe(schema.boolean()),
-    },
-    { unknowns: 'forbid' }
-  )
-);
+export const dashboardSearchOptionsSchema = schema
+  .object({
+    onlyTitle: schema.maybe(schema.boolean()),
+  })
+  .extends({}, { unknowns: 'forbid' });
 
 const createOptionsSchema = schema.object({
   id: schema.maybe(createOptionsSchemas.id),
@@ -120,7 +117,7 @@ export const serviceDefinition: ServicesDefinition = {
   search: {
     in: {
       options: {
-        schema: searchOptionsSchema,
+        schema: schema.maybe(dashboardSearchOptionsSchema),
       },
     },
   },

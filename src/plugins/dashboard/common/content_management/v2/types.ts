@@ -36,5 +36,10 @@ export type DashboardCrudTypes = ContentManagementCrudTypes<
   {
     /** Flag to indicate to only search the text on the "title" field */
     onlyTitle?: boolean;
+    /** allow sorting on dashboard field */
+    sort?: {
+      sortField: string;
+      sortOrder: 'desc' | 'asc';
+    };
   }
 >;
