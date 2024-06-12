@@ -33,6 +33,7 @@ export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
    * Adds a forced focus ring to the whole component
    */
   isActive?: boolean;
+  isSelected?: boolean;
   /**
    * Custom drag handle element
    */
@@ -75,6 +76,7 @@ export const SIZES = Object.keys(sizeToClassNameMap) as ButtonSize[];
 export function FieldButton({
   size,
   isActive = false,
+  isSelected = false,
   fieldIcon,
   fieldName,
   fieldInfoIcon,
@@ -93,6 +95,7 @@ export function FieldButton({
     {
       'kbnFieldButton-isActive': isActive,
       'kbnFieldButton--flushBoth': flush === 'both',
+      'kbnFieldButton--isSelected': isSelected,
     },
     className
   );
