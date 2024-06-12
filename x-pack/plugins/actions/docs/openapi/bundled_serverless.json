@@ -36,7 +36,7 @@
   "paths": {
     "/api/actions/connector": {
       "post": {
-        "summary": "Creates a connector.",
+        "summary": "Create a connector",
         "operationId": "createConnector",
         "tags": [
           "connectors"
@@ -103,7 +103,7 @@
     },
     "/api/actions/connector/{connectorId}": {
       "get": {
-        "summary": "Retrieves a connector by ID.",
+        "summary": "Get a connector information",
         "operationId": "getConnector",
         "tags": [
           "connectors"
@@ -138,7 +138,7 @@
         }
       },
       "delete": {
-        "summary": "Deletes a connector.",
+        "summary": "Delete a connector",
         "operationId": "deleteConnector",
         "tags": [
           "connectors"
@@ -164,7 +164,7 @@
         }
       },
       "post": {
-        "summary": "Creates a connector.",
+        "summary": "Create a connector",
         "operationId": "createConnectorId",
         "tags": [
           "connectors"
@@ -221,7 +221,7 @@
         }
       },
       "put": {
-        "summary": "Updates the attributes for a connector.",
+        "summary": "Update a connector",
         "operationId": "updateConnector",
         "tags": [
           "connectors"
@@ -274,7 +274,7 @@
     },
     "/api/actions/connectors": {
       "get": {
-        "summary": "Retrieves all connectors.",
+        "summary": "Get all connectors",
         "operationId": "getConnectors",
         "tags": [
           "connectors"
@@ -306,7 +306,7 @@
     },
     "/api/actions/connector_types": {
       "get": {
-        "summary": "Retrieves a list of all connector types.",
+        "summary": "Get all connector types",
         "operationId": "getConnectorTypes",
         "tags": [
           "connectors"

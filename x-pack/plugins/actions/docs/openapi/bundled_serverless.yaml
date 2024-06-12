@@ -21,7 +21,7 @@ tags:
 paths:
   /api/actions/connector:
     post:
-      summary: Creates a connector.
+      summary: Create a connector
       operationId: createConnector
       tags:
         - connectors
@@ -62,7 +62,7 @@ paths:
           $ref: '#/components/responses/401'
   /api/actions/connector/{connectorId}:
     get:
-      summary: Retrieves a connector by ID.
+      summary: Get a connector information
       operationId: getConnector
       tags:
         - connectors
@@ -83,7 +83,7 @@ paths:
         '404':
           $ref: '#/components/responses/404'
     delete:
-      summary: Deletes a connector.
+      summary: Delete a connector
       operationId: deleteConnector
       tags:
         - connectors
@@ -98,7 +98,7 @@ paths:
         '404':
           $ref: '#/components/responses/404'
     post:
-      summary: Creates a connector.
+      summary: Create a connector
       operationId: createConnectorId
       tags:
         - connectors
@@ -134,7 +134,7 @@ paths:
         '401':
           $ref: '#/components/responses/401'
     put:
-      summary: Updates the attributes for a connector.
+      summary: Update a connector
       operationId: updateConnector
       tags:
         - connectors
@@ -165,7 +165,7 @@ paths:
           $ref: '#/components/responses/404'
   /api/actions/connectors:
     get:
-      summary: Retrieves all connectors.
+      summary: Get all connectors
       operationId: getConnectors
       tags:
         - connectors
@@ -185,7 +185,7 @@ paths:
           $ref: '#/components/responses/401'
   /api/actions/connector_types:
     get:
-      summary: Retrieves a list of all connector types.
+      summary: Get all connector types
       operationId: getConnectorTypes
       tags:
         - connectors
@@ -3254,15 +3254,6 @@ components:
           minimum_license_required: enterprise
           supported_feature_ids:
             - generativeAIForSecurity
-          is_system_action_type: false
-        - id: .gemini
-          name: Google Gemini
-          enabled: true
-          enabled_in_config: true
-          enabled_in_license: true
-          minimum_license_required: enterprise
-          supported_feature_ids:
-            - generativeAI
           is_system_action_type: false
   responses:
     '401':

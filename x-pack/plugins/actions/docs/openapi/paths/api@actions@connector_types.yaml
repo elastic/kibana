@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a list of all connector types.
+  summary: Get all connector types
   operationId: getConnectorTypes
   tags:
     - connectors

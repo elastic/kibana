@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a list of all connector types.
+  summary: Get connector types
   operationId: legacyGetConnectorTypes
   deprecated: true
   description: Deprecated in 7.13.0. Use the get all connector types API instead.
