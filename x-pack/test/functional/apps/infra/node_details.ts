@@ -693,6 +693,31 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               await searchInput.clearValue();
             });
           });
+
+          // Unskip when https://github.com/elastic/kibana/pull/185786 is merged
+          describe.skip('Metrics Tab', () => {
+            before(async () => {
+              await pageObjects.assetDetails.clickMetricsTab();
+            });
+
+            [
+              { metric: 'cpu', chartsCount: 1 },
+              { metric: 'memory', chartsCount: 1 },
+              { metric: 'disk', chartsCount: 1 },
+              { metric: 'network', chartsCount: 1 },
+            ].forEach(({ metric, chartsCount }) => {
+              it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
+                const charts = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
+                  metric
+                );
+                expect(charts.length).to.equal(chartsCount);
+              });
+
+              it(`should render a quick access for ${metric} in the side panel`, async () => {
+                await pageObjects.assetDetails.quickAccessItemExists(metric);
+              });
+            });
+          });
         });
       });
     });

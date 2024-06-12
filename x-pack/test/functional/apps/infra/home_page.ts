@@ -328,6 +328,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
+        describe('Metrics Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetricsTab();
+          });
+
+          // Unskip when https://github.com/elastic/kibana/pull/185786 is merged
+          it.skip('should show metrics content', async () => {
+            await pageObjects.assetDetails.metricsChartsContentExists();
+          });
+        });
+
         describe('Logs Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickLogsTab();
