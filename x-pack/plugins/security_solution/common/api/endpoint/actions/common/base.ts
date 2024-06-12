@@ -71,13 +71,3 @@ export const NoParametersRequestSchema = {
   body: schema.object({ ...BaseActionRequestSchema }),
 };
 export type BaseActionRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
-
-/**
- * Base parameters schema used by both `kill-process` and `suspend-process`. Only parameters that apply
- * to both commands should be added here. Any others that are command specific or EDR vendor
- * specific should be added to the individual command's schema
- */
-export const KillOrSuspendProcessRequestParametersSchema = schema.oneOf([
-  schema.object({ pid: schema.number({ min: 1 }) }),
-  schema.object({ entity_id: schema.string({ minLength: 1 }) }),
-]);

@@ -6,16 +6,28 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  BaseActionRequestSchema,
-  KillOrSuspendProcessRequestParametersSchema,
-} from './common/base';
+import { BaseActionRequestSchema } from './common/base';
 
 export const KillProcessRouteRequestSchema = {
-  body: schema.object({
-    ...BaseActionRequestSchema,
-    parameters: KillOrSuspendProcessRequestParametersSchema,
-  }),
+  body: schema.object(
+    {
+      ...BaseActionRequestSchema,
+      parameters: schema.oneOf([
+        schema.object({ pid: schema.number({ min: 1 }) }),
+        schema.object({ entity_id: schema.string({ minLength: 1 }) }),
+
+        // Process Name currently applies only to SentinelOne (validated below)
+        schema.object({ process_name: schema.string({ minLength: 1 }) }),
+      ]),
+    },
+    {
+      validate(bodyContent) {
+        if (bodyContent.parameters.process_name && bodyContent.agent_type !== 'sentinel_one') {
+          return `[request body.parameters.process_name]: is not valid with agent type of ${
+            bodyContent.agentType ?? 'endpoint'
+          }`;
+        }
+      },
+    }
+  ),
 };
-// // FIXME:PT code this param so that it applies only to sentinelOne
-// schema.object({ process_name: schema.string({ minLength: 1 }) }),

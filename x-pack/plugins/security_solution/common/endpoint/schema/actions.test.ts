@@ -601,6 +601,31 @@ describe('actions schemas', () => {
     });
   });
 
+  describe('KillProcessRequestSchema for SentinelOne', () => {
+    it('should error if agentType is not sentinel_one and process_name parameter is used', () => {
+      expect(() => {
+        KillProcessRouteRequestSchema.body.validate({
+          endpoint_ids: ['abc'],
+          parameters: {
+            process_name: 'explorer.exe',
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should allow use of process_name if agentType is sentinel_one', () => {
+      expect(() => {
+        KillProcessRouteRequestSchema.body.validate({
+          endpoint_ids: ['abc'],
+          agent_type: 'sentinel_one',
+          parameters: {
+            process_name: 'explorer.exe',
+          },
+        });
+      }).not.toThrow();
+    });
+  });
+
   describe('ExecuteActionRequestSchema', () => {
     it('should not accept when no endpoint_ids', () => {
       expect(() => {

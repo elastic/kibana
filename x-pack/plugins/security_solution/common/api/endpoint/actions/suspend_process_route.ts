@@ -6,14 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  BaseActionRequestSchema,
-  KillOrSuspendProcessRequestParametersSchema,
-} from './common/base';
+import { BaseActionRequestSchema } from './common/base';
 
 export const SuspendProcessRouteRequestSchema = {
   body: schema.object({
     ...BaseActionRequestSchema,
-    parameters: KillOrSuspendProcessRequestParametersSchema,
+    parameters: schema.oneOf([
+      schema.object({ pid: schema.number({ min: 1 }) }),
+      schema.object({ entity_id: schema.string({ minLength: 1 }) }),
+    ]),
   }),
 };
