@@ -100,6 +100,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionScanEnabled: false,
 
   /**
+   * Enables the ability to send Response actions to Crowdstrike and persist the results
+   * in ES.
+   */
+  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
