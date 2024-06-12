@@ -10847,6 +10847,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/alerting/rules/backfill/_schedule\""
+        ],
+        "path": "x-pack/plugins/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.INTERNAL_ALERTING_SNOOZE_RULE",
         "type": "string",
         "tags": [],

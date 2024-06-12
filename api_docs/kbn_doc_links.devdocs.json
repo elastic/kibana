@@ -854,7 +854,7 @@
             "label": "ecs",
             "description": [],
             "signature": [
-              "{ readonly guide: string; }"
+              "{ readonly guide: string; readonly dataStreams: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
