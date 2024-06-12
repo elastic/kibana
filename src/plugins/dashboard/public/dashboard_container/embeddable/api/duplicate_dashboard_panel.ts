@@ -8,10 +8,16 @@
 
 import { isReferenceOrValueEmbeddable, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
-import { stateHasTitles } from '@kbn/presentation-publishing';
+import {
+  apiHasInPlaceLibraryTransforms,
+  apiHasLibraryTransforms,
+  apiPublishesPanelTitle,
+  getPanelTitle,
+  stateHasTitles,
+} from '@kbn/presentation-publishing';
 import { filter, map, max } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { DashboardPanelState } from '../../../../common';
+import { DashboardPanelState, prefixReferencesFromPanel } from '../../../../common';
 import { dashboardClonePanelActionStrings } from '../../../dashboard_actions/_dashboard_actions_strings';
 import { pluginServices } from '../../../services/plugin_services';
 import { placeClonePanel } from '../../panel_placement';
@@ -55,11 +61,39 @@ const duplicateReactEmbeddableInput = async (
 ) => {
   const id = uuidv4();
   const child = dashboard.children$.value[idToDuplicate];
-  const runtimeSnapshot = apiHasSnapshottableState(child) ? child.snapshotRuntimeState() : {};
-  if (stateHasTitles(runtimeSnapshot) && runtimeSnapshot.title) {
-    const newTitle = await incrementPanelTitle(dashboard, runtimeSnapshot.title);
-    runtimeSnapshot.title = newTitle;
+  const lastTitle = apiPublishesPanelTitle(child) ? getPanelTitle(child) ?? '' : '';
+  const newTitle = await incrementPanelTitle(dashboard, lastTitle);
+
+  /**
+   * For react embeddables that are capable of being saved to the library, we need
+   * to clone them with searialized state and references.
+   *
+   * TODO: remove this section once all by reference capable react embeddables
+   * use in-place library transforms
+   */
+  if (apiHasLibraryTransforms(child)) {
+    const byValueSerializedState = await child.getByValueState();
+    if (panelToClone.references) {
+      dashboard.savedObjectReferences.push(
+        ...prefixReferencesFromPanel(id, panelToClone.references)
+      );
+    }
+    return {
+      type: panelToClone.type,
+      explicitInput: {
+        ...byValueSerializedState,
+        title: newTitle,
+        id,
+      },
+    };
   }
+
+  const runtimeSnapshot = (() => {
+    if (apiHasInPlaceLibraryTransforms(child)) return child.getByValueRuntimeSnapshot();
+    return apiHasSnapshottableState(child) ? child.snapshotRuntimeState() : {};
+  })();
+  if (stateHasTitles(runtimeSnapshot)) runtimeSnapshot.title = newTitle;
+
   dashboard.setRuntimeStateForChild(id, runtimeSnapshot);
   return {
     type: panelToClone.type,

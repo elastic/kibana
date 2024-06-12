@@ -25,15 +25,12 @@ import React from 'react';
  *
  * Before adding anything to this interface, please be certain that it belongs in *every* embeddable.
  */
-export interface DefaultEmbeddableApi<
-  SerializedState extends object = object,
-  RuntimeState extends object = SerializedState
-> extends DefaultPresentationPanelApi,
+export interface DefaultEmbeddableApi<SerializedState extends object = object>
+  extends DefaultPresentationPanelApi,
     HasType,
     PublishesPhaseEvents,
     PublishesUnsavedChanges,
-    HasSerializableState<SerializedState>,
-    HasSnapshottableState<RuntimeState> {}
+    HasSerializableState<SerializedState> {}
 
 /**
  * Defines the subset of the default embeddable API that the `setApi` method uses, which allows implementors
@@ -103,7 +100,7 @@ export interface ReactEmbeddableFactory<
     buildApi: (
       apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, Api>,
       comparators: StateComparators<RuntimeState>
-    ) => Api,
+    ) => Api & HasSnapshottableState<RuntimeState>,
     uuid: string,
     parentApi: unknown | undefined,
     /** `setApi` should be used when the unsaved changes logic in `buildApi` is unnecessary */

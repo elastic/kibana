@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { HasSerializedChildState, SerializedPanelState } from '@kbn/presentation-containers';
+import {
+  HasSerializedChildState,
+  HasSnapshottableState,
+  SerializedPanelState,
+} from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import {
   apiPublishesDataLoading,
@@ -158,7 +162,7 @@ export const ReactEmbeddableRenderer = <
           } as unknown as SetReactEmbeddableApiRegistration<SerializedState, Api>);
 
           cleanupFunction.current = () => cleanup();
-          return fullApi;
+          return fullApi as Api & HasSnapshottableState<RuntimeState>;
         };
 
         const { api, Component } = await factory.buildEmbeddable(

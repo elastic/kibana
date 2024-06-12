@@ -123,6 +123,11 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           unlinkFromLibrary: () => {
             savedBookId$.next(undefined);
           },
+          getByValueRuntimeSnapshot: () => {
+            const snapshot = api.snapshotRuntimeState();
+            delete snapshot.savedBookId;
+            return snapshot;
+          },
         },
         {
           savedBookId: [savedBookId$, (val) => savedBookId$.next(val)],
