@@ -9,37 +9,22 @@ import React from 'react';
 
 import { EuiButton, EuiCard } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
+import * as i18n from '../../../common/translations';
 
 interface ElserPromptProps {
-  addEndpointLabel: string;
   setIsInferenceFlyoutVisible: (value: boolean) => void;
 }
-export const ElserPrompt: React.FC<ElserPromptProps> = ({
-  addEndpointLabel,
-  setIsInferenceFlyoutVisible,
-}) => (
+export const ElserPrompt: React.FC<ElserPromptProps> = ({ setIsInferenceFlyoutVisible }) => (
   <EuiCard
     display="plain"
     hasBorder
     textAlign="left"
     data-test-subj="elserPromptForEmptyState"
-    description={i18n.translate(
-      'xpack.searchInferenceEndpoints.inferenceEndpoints.addEmptyPrompt.elserDescription',
-      {
-        defaultMessage:
-          'ELSER is a sparse vector NLP model trained by Elastic for semantic search. Recommended for English language.',
-      }
-    )}
-    title={i18n.translate(
-      'xpack.searchInferenceEndpoints.inferenceEndpoints.addEmptyPrompt.elserTitle',
-      {
-        defaultMessage: 'ELSER',
-      }
-    )}
+    title={i18n.ELSER_TITLE}
+    description={i18n.ELSER_DESCRIPTION}
     footer={
       <EuiButton iconType="plusInCircle" onClick={() => setIsInferenceFlyoutVisible(true)}>
-        {addEndpointLabel}
+        {i18n.ADD_ENDPOINT_LABEL}
       </EuiButton>
     }
   />

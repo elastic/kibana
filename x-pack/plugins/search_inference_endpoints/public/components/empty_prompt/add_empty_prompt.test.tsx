@@ -15,12 +15,7 @@ const setIsInferenceFlyoutVisibleMock = jest.fn();
 
 describe('When empty prompt is loaded', () => {
   beforeEach(() => {
-    render(
-      <AddEmptyPrompt
-        addEndpointLabel="Add endpoint"
-        setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisibleMock}
-      />
-    );
+    render(<AddEmptyPrompt setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisibleMock} />);
   });
 
   it('should display the description for creation of the first inference endpoint', () => {

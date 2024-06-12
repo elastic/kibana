@@ -12,12 +12,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
-import { i18n } from '@kbn/i18n';
 import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import { SUPPORTED_PYTORCH_TASKS, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import * as i18n from '../../common/translations';
 import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../common/constants';
 import { useKibana } from '../hooks/use_kibana';
 import { docLinks } from '../../common/doc_links';
@@ -114,16 +114,7 @@ export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperCom
       errorCallout={
         inferenceAddError && (
           <EuiFlexItem grow={false}>
-            <EuiCallOut
-              color="danger"
-              iconType="error"
-              title={i18n.translate(
-                'xpack.searchInferenceEndpoints.inferenceEndpoints.inferenceId.errorTitle',
-                {
-                  defaultMessage: 'Error adding inference endpoint',
-                }
-              )}
-            >
+            <EuiCallOut color="danger" iconType="error" title={i18n.ERROR_TITLE}>
               <EuiText>
                 <FormattedMessage
                   id="xpack.searchInferenceEndpoints.inferenceEndpoints.inferenceId.errorDescription"

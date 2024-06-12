@@ -7,32 +7,20 @@
 
 import React from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import * as i18n from '../../common/translations';
 
 interface InferenceEndpointsHeaderProps {
-  addEndpointLabel: string;
   setIsInferenceFlyoutVisible: (isVisible: boolean) => void;
 }
 
 export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> = ({
-  addEndpointLabel,
   setIsInferenceFlyoutVisible,
 }) => (
   <EuiPageTemplate.Header
     css={{ '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' } }}
     data-test-subj="allInferenceEndpointsPage"
-    pageTitle={i18n.translate(
-      'xpack.searchInferenceEndpoints.inferenceEndpoints.allInferenceEndpoints.title',
-      {
-        defaultMessage: 'Inference endpoints',
-      }
-    )}
-    description={i18n.translate(
-      'xpack.searchInferenceEndpoints.inferenceEndpoints.allInferenceEndpoints.description',
-      {
-        defaultMessage: 'Manage your inference endpoints.',
-      }
-    )}
+    pageTitle={i18n.INFERENCE_ENDPOINT_LABEL}
+    description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
     rightSideItems={[
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem>
@@ -44,7 +32,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
             fill
             onClick={() => setIsInferenceFlyoutVisible(true)}
           >
-            {addEndpointLabel}
+            {i18n.ADD_ENDPOINT_LABEL}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>,

@@ -16,9 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
-import { FormattedMessage } from '@kbn/i18n-react';
+import * as i18n from '../../../common/translations';
 
 import inferenceEndpoint from '../../assets/images/inference_endpoint.svg';
 
@@ -28,36 +26,19 @@ import { MultilingualE5Prompt } from './multilingual_e5_prompt';
 import './add_empty_prompt.scss';
 
 interface AddEmptyPromptProps {
-  addEndpointLabel: string;
   setIsInferenceFlyoutVisible: (value: boolean) => void;
 }
 
-export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({
-  addEndpointLabel,
-  setIsInferenceFlyoutVisible,
-}) => {
+export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFlyoutVisible }) => {
   return (
     <EuiEmptyPrompt
       className="addEmptyPrompt"
       layout="horizontal"
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.searchInferenceEndpoints.inferenceEndpoints.addEmptyPrompt.h2.createFirstInferenceEndpointLabel"
-            defaultMessage="Inference Endpoints"
-          />
-        </h2>
-      }
+      title={<h2>{i18n.INFERENCE_ENDPOINT_LABEL}</h2>}
       body={
         <EuiFlexGroup direction="column">
           <EuiFlexItem data-test-subj="createFirstInferenceEndpointDescription">
-            {i18n.translate(
-              'xpack.searchInferenceEndpoints.inferenceEndpoints.addEmptyPrompt.createFirstInferenceEndpointDescription',
-              {
-                defaultMessage:
-                  'Connect to your third-party model provider to create an inference endpoint for semantic search.',
-              }
-            )}
+            {i18n.CREATE_FIRST_INFERENCE_ENDPOINT_DESCRIPTION}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <div>
@@ -68,7 +49,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({
                 data-test-subj="addEndpointButtonForEmptyPrompt"
                 onClick={() => setIsInferenceFlyoutVisible(true)}
               >
-                {addEndpointLabel}
+                {i18n.ADD_ENDPOINT_LABEL}
               </EuiButton>
             </div>
           </EuiFlexItem>
@@ -77,28 +58,15 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({
       footer={
         <EuiFlexGroup gutterSize="xs" direction="column">
           <EuiFlexItem>
-            <strong>
-              {i18n.translate(
-                'xpack.searchInferenceEndpoints.inferenceEndpoints.addEmptyPrompt.startWithPreparedEndpointsLabel',
-                {
-                  defaultMessage: 'Get started quickly with our prepared endpoints:',
-                }
-              )}
-            </strong>
+            <strong>{i18n.START_WITH_PREPARED_ENDPOINTS_LABEL}</strong>
           </EuiFlexItem>
           <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <ElserPrompt
-                addEndpointLabel={addEndpointLabel}
-                setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
-              />
+              <ElserPrompt setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <MultilingualE5Prompt
-                addEndpointLabel={addEndpointLabel}
-                setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
-              />
+              <MultilingualE5Prompt setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexGroup>

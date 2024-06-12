@@ -9,19 +9,11 @@ import React, { useState } from 'react';
 
 import { EuiPageTemplate } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
 import { TabularPage } from './all_inference_endpoints/tabular_page';
 import { EmptyPromptPage } from './empty_prompt_page';
 import { InferenceEndpointsHeader } from './inference_endpoints_header';
 import { InferenceFlyoutWrapperComponent } from './inference_flyout_wrapper_component';
-
-const addEndpointLabel = i18n.translate(
-  'xpack.searchInferenceEndpoints.inferenceEndpoints.newInferenceEndpointButtonLabel',
-  {
-    defaultMessage: 'Add endpoint',
-  }
-);
 
 export const InferenceEndpoints: React.FC = () => {
   const { inferenceEndpoints } = useQueryInferenceEndpoints();
@@ -30,17 +22,11 @@ export const InferenceEndpoints: React.FC = () => {
   return (
     <>
       {inferenceEndpoints.length > 0 && (
-        <InferenceEndpointsHeader
-          addEndpointLabel={addEndpointLabel}
-          setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
-        />
+        <InferenceEndpointsHeader setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible} />
       )}
       <EuiPageTemplate.Section className="eui-yScroll">
         {inferenceEndpoints.length === 0 ? (
-          <EmptyPromptPage
-            addEndpointLabel={addEndpointLabel}
-            setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
-          />
+          <EmptyPromptPage setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible} />
         ) : (
           <TabularPage inferenceEndpoints={inferenceEndpoints} />
         )}
