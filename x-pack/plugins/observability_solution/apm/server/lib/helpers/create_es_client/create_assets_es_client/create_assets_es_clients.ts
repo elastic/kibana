@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/common/utils/unwrap_es_response';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 
-const ENTITIES_INDEX_NAME = '.entities-*.summary*';
+const ENTITIES_INDEX_NAME = '.entities-*';
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,

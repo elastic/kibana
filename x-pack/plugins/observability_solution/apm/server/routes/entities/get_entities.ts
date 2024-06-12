@@ -35,7 +35,7 @@ export interface EntityMetrics {
 interface Entity {
   id: string;
   latestTimestamp: string;
-  identity: {
+  identityFields: {
     service: {
       name: string;
       environment?: string;
@@ -113,7 +113,7 @@ export async function getEntities({
 
   return entities.map((entity): ServiceEntities => {
     return {
-      serviceName: entity.entity.identity.service.name,
+      serviceName: entity.entity.identityFields.service.name,
       agentName: entity.agent.name[0],
       dataStreams: entity.data_stream.type,
       entity: entity.entity,

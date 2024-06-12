@@ -48,7 +48,7 @@ export async function getServiceEntities({
   rollupInterval: RollupInterval;
   useDurationSummary: boolean;
 }) {
-  return withApmSpan('get_service_assets', async () => {
+  return withApmSpan('get_service_entities', async () => {
     try {
       const entities = await getEntities({
         assetsESClient,
