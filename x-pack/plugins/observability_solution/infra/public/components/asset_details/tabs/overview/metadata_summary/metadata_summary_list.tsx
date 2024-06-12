@@ -29,6 +29,7 @@ import { Section } from '../../../components/section';
 interface MetadataSummaryProps {
   metadata: InfraMetadata | null;
   loading: boolean;
+  assetType: string;
 }
 interface MetadataSummaryWrapperProps {
   visibleMetadata: MetadataData[];
@@ -42,7 +43,7 @@ export interface MetadataData {
   tooltipLink?: string;
 }
 
-const extendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+const hostExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   {
     field: 'cloudProvider',
     value: metadataInfo?.cloud?.provider,
@@ -56,7 +57,7 @@ const extendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] =
   },
 ];
 
-const metadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+const hostMetadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   {
     field: 'hostIp',
     value: metadataInfo?.host?.ip,
@@ -67,6 +68,47 @@ const metadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
     field: 'hostOsVersion',
     value: metadataInfo?.host?.os?.version,
     tooltipFieldLabel: 'host.os.version',
+  },
+];
+
+const containerExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+  {
+    field: 'runtime',
+    value: metadataInfo?.container?.runtime,
+    tooltipFieldLabel: 'container.runtime',
+  },
+  {
+    field: 'cloudInstanceId',
+    value: metadataInfo?.cloud?.instance?.id,
+    tooltipFieldLabel: 'cloud.instance.id',
+  },
+  {
+    field: 'cloudImageId',
+    value: metadataInfo?.cloud?.imageId,
+    tooltipFieldLabel: 'cloud.image.id',
+  },
+  {
+    field: 'cloudProvider',
+    value: metadataInfo?.cloud?.provider,
+    tooltipFieldLabel: 'cloud.provider',
+  },
+];
+
+const containerMetadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+  {
+    field: 'containerId',
+    value: metadataInfo?.container?.id,
+    tooltipFieldLabel: 'container.id',
+  },
+  {
+    field: 'containerImageName',
+    value: metadataInfo?.container?.imageName,
+    tooltipFieldLabel: 'container.image.name',
+  },
+  {
+    field: 'hostName',
+    value: metadataInfo?.host?.name,
+    tooltipFieldLabel: 'host.name',
   },
 ];
 
@@ -138,13 +180,54 @@ const MetadataSummaryListWrapper = ({
     </Section>
   );
 };
-export const MetadataSummaryList = ({ metadata, loading }: MetadataSummaryProps) => (
-  <MetadataSummaryListWrapper
-    visibleMetadata={[...metadataData(metadata?.info), ...extendedMetadata(metadata?.info)]}
-    loading={loading}
-  />
-);
+export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSummaryProps) => {
+  switch (assetType) {
+    case 'host':
+      return (
+        <MetadataSummaryListWrapper
+          visibleMetadata={[
+            ...hostMetadataData(metadata?.info),
+            ...hostExtendedMetadata(metadata?.info),
+          ]}
+          loading={loading}
+        />
+      );
+    case 'container':
+      return (
+        <MetadataSummaryListWrapper
+          visibleMetadata={[
+            ...containerMetadataData(metadata?.info),
+            ...containerExtendedMetadata(metadata?.info),
+          ]}
+          loading={loading}
+        />
+      );
+    default:
+      return <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} />;
+  }
+};
 
-export const MetadataSummaryListCompact = ({ metadata, loading }: MetadataSummaryProps) => (
-  <MetadataSummaryListWrapper visibleMetadata={metadataData(metadata?.info)} loading={loading} />
-);
+export const MetadataSummaryListCompact = ({
+  metadata,
+  loading,
+  assetType,
+}: MetadataSummaryProps) => {
+  switch (assetType) {
+    case 'host':
+      return (
+        <MetadataSummaryListWrapper
+          visibleMetadata={hostMetadataData(metadata?.info)}
+          loading={loading}
+        />
+      );
+    case 'container':
+      return (
+        <MetadataSummaryListWrapper
+          visibleMetadata={containerMetadataData(metadata?.info)}
+          loading={loading}
+        />
+      );
+    default:
+      return <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} />;
+  }
+};
