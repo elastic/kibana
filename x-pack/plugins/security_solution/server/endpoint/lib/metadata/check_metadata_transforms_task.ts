@@ -16,7 +16,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server';
 import { ElasticsearchAssetType, FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import type { EndpointAppContext } from '../../types';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
@@ -110,7 +110,7 @@ export class CheckMetadataTransformsTask {
           taskInstance.id
         }] from task instance. Current version is [${this.getTaskId()}]`
       );
-      return DELETE_TASK_RUN_RESULT;
+      return getDeleteTaskRunResult();
     }
 
     const [{ elasticsearch }] = await core.getStartServices();

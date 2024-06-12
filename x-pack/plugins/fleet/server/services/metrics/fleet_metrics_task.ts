@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
-import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
@@ -73,7 +73,7 @@ export class FleetMetricsTask {
         .info(
           `Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
         );
-      return DELETE_TASK_RUN_RESULT;
+      return getDeleteTaskRunResult();
     }
     if (!this.esClient) {
       appContextService.getLogger().debug('esClient not set, skipping Fleet metrics task');

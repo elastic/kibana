@@ -6,7 +6,7 @@
  */
 
 import type { CancellableTask, RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
-import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';
@@ -107,7 +107,7 @@ export class CompleteExternalActionsTaskRunner
       this.log.info(
         `Outdated task version. Got [${this.taskInstanceId}] from task instance. Current version is [${this.taskId}]`
       );
-      return DELETE_TASK_RUN_RESULT;
+      return getDeleteTaskRunResult();
     }
 
     this.log.debug(`Started: Checking status of external response actions`);

@@ -24,7 +24,7 @@ import {
   TaskPersistence,
   asTaskManagerStatEvent,
 } from '../task_events';
-import { ConcreteTaskInstance, DELETE_TASK_RUN_RESULT, TaskStatus } from '../task';
+import { ConcreteTaskInstance, getDeleteTaskRunResult, TaskStatus } from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
@@ -1161,7 +1161,7 @@ describe('TaskManagerRunner', () => {
             title: 'Bar!',
             createTaskRunner: () => ({
               async run() {
-                return DELETE_TASK_RUN_RESULT;
+                return getDeleteTaskRunResult();
               },
             }),
           },

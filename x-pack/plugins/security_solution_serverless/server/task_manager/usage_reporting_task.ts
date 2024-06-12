@@ -8,7 +8,7 @@
 import type { Response } from 'node-fetch';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import { usageReportingService } from '../common/services';
@@ -117,7 +117,7 @@ export class SecurityUsageReportingTask {
       this.logger.info(
         `Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
       );
-      return DELETE_TASK_RUN_RESULT;
+      return getDeleteTaskRunResult();
     }
 
     const [{ elasticsearch }] = await core.getStartServices();

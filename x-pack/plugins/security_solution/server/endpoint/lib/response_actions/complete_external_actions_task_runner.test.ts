@@ -18,7 +18,7 @@ import {
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION,
 } from './complete_external_actions_task';
-import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server';
 
 describe('CompleteExternalTaskRunner class', () => {
   let endpointContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -69,7 +69,7 @@ describe('CompleteExternalTaskRunner class', () => {
     );
     const result = await runnerInstance.run();
 
-    expect(result).toEqual(DELETE_TASK_RUN_RESULT);
+    expect(result).toEqual(getDeleteTaskRunResult());
 
     expect(endpointContextServicesMock.createLogger().info).toHaveBeenCalledWith(
       `Outdated task version. Got [old-id] from task instance. Current version is [endpoint:complete-external-response-actions-1.0.0]`

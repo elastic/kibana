@@ -89,7 +89,10 @@ export type FailedRunResult = SuccessfulRunResult & {
 
 export type RunResult = FailedRunResult | SuccessfulRunResult;
 
-export const DELETE_TASK_RUN_RESULT: SuccessfulRunResult = { state: {}, shouldDeleteTask: true };
+export const getDeleteTaskRunResult = () => ({
+  state: {},
+  shouldDeleteTask: true,
+});
 
 export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
   !!((result as FailedRunResult)?.error ?? false);

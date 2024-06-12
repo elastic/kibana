@@ -18,7 +18,7 @@ import {
   EphemeralTask,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
-import { DELETE_TASK_RUN_RESULT, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import { getDeleteTaskRunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
@@ -198,7 +198,7 @@ export class SampleTaskManagerFixturePlugin
             });
 
             if (count === 5) {
-              return DELETE_TASK_RUN_RESULT;
+              return getDeleteTaskRunResult();
             }
             return {
               state: { count },

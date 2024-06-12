@@ -13,8 +13,7 @@ import type {
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
+import { getDeleteTaskRunResult, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -205,7 +204,7 @@ describe('SecurityUsageReportingTask', () => {
     it('should do nothing if task instance id is outdated', async () => {
       const result = await runTask({ ...buildMockTaskInstance(), id: 'old-id' });
 
-      expect(result).toEqual(DELETE_TASK_RUN_RESULT);
+      expect(result).toEqual(getDeleteTaskRunResult());
 
       expect(reportUsageSpy).not.toHaveBeenCalled();
       expect(meteringCallbackMock).not.toHaveBeenCalled();

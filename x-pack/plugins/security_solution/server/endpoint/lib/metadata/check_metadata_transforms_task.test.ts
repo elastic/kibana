@@ -17,13 +17,12 @@ import { createMockEndpointAppContext } from '../../mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { getDeleteTaskRunResult, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
 import type { RunResult } from '@kbn/task-manager-plugin/server/task';
-import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
 import type { EsAssetReference, Installation } from '@kbn/fleet-plugin/common';
 import { ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
 
@@ -134,7 +133,7 @@ describe('check metadata transforms task', () => {
       expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
       expect(esClient.transform.startTransform).not.toHaveBeenCalled();
 
-      expect(result).toEqual(DELETE_TASK_RUN_RESULT);
+      expect(result).toEqual(getDeleteTaskRunResult());
     });
 
     describe('transforms restart', () => {

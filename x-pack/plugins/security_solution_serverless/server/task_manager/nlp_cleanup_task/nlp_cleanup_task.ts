@@ -11,7 +11,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server';
 import type { Tier } from '../../types';
 import { ProductTier } from '../../../common/product';
 import { NLP_CLEANUP_TASK_EVENT } from '../../telemetry/event_based_telemetry';
@@ -81,7 +81,7 @@ export class NLPCleanupTask {
                   this.logger.info(
                     `Task ${taskInstance.id} no longer needed for current productTier, disabling...`
                   );
-                  return DELETE_TASK_RUN_RESULT;
+                  return getDeleteTaskRunResult();
                 }
                 return this.runTask(taskInstance, core);
               },
@@ -135,7 +135,7 @@ export class NLPCleanupTask {
     // Check that this task is current
     if (taskInstance.id !== this.taskId) {
       // old task, return
-      return DELETE_TASK_RUN_RESULT;
+      return getDeleteTaskRunResult();
     }
 
     const [{ elasticsearch }] = await core.getStartServices();

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
@@ -75,7 +75,7 @@ export class FleetUsageSender {
         .info(
           `Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
         );
-      return DELETE_TASK_RUN_RESULT;
+      return getDeleteTaskRunResult();
     }
     appContextService.getLogger().info('Running Fleet Usage telemetry send task');
 

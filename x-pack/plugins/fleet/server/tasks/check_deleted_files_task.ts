@@ -11,7 +11,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
@@ -105,7 +105,7 @@ export class CheckDeletedFilesTask {
       this.logger.info(
         `Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
       );
-      return DELETE_TASK_RUN_RESULT;
+      return getDeleteTaskRunResult();
     }
 
     this.logger.info(`[runTask()] started`);

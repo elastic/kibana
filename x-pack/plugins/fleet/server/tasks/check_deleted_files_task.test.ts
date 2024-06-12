@@ -8,8 +8,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { getDeleteTaskRunResult, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -214,7 +213,7 @@ describe('check deleted files task', () => {
       expect(esClient.search).not.toHaveBeenCalled();
       expect(esClient.updateByQuery).not.toHaveBeenCalled();
 
-      expect(result).toEqual(DELETE_TASK_RUN_RESULT);
+      expect(result).toEqual(getDeleteTaskRunResult());
     });
   });
 });
