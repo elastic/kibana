@@ -53,6 +53,7 @@ import {
   type Message,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
+import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
 import {
   KnowledgeBaseEntryOperationType,
@@ -210,17 +211,17 @@ export class ObservabilityAIAssistantClient {
           );
         }
 
-        const kbInstructions$ = from(this.fetchKnowledgeBaseInstructions()).pipe(shareReplay());
+        const userInstructions$ = from(this.fetchUserInstructions()).pipe(shareReplay());
 
         // from the initial messages, override any system message with
         // the one that is based on the instructions (registered, request, kb)
-        const messagesWithUpdatedSystemMessage$ = kbInstructions$.pipe(
-          map((knowledgeBaseInstructions) => {
+        const messagesWithUpdatedSystemMessage$ = userInstructions$.pipe(
+          map((userInstructions) => {
             // this is what we eventually store in the conversation
             const messagesWithUpdatedSystemMessage = replaceSystemMessage(
               getSystemMessageFromInstructions({
                 registeredInstructions: functionClient.getInstructions(),
-                knowledgeBaseInstructions,
+                userInstructions,
                 requestInstructions,
                 availableFunctionNames: functionClient
                   .getFunctions()
@@ -267,11 +268,11 @@ export class ObservabilityAIAssistantClient {
         // messages and the knowledge base instructions
         const nextEvents$ = combineLatest([
           messagesWithUpdatedSystemMessage$,
-          kbInstructions$,
+          userInstructions$,
         ]).pipe(
-          switchMap(([messagesWithUpdatedSystemMessage, knowledgeBaseInstructions]) => {
+          switchMap(([messagesWithUpdatedSystemMessage, userInstructions]) => {
             // if needed, inject a context function request here
-            const contextRequest = functionClient.hasFunction('context')
+            const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
               ? getContextFunctionRequestIfNeeded(messagesWithUpdatedSystemMessage)
               : undefined;
 
@@ -297,7 +298,7 @@ export class ObservabilityAIAssistantClient {
                 // start out with the max number of function calls
                 functionCallsLeft: MAX_FUNCTION_CALLS,
                 functionClient,
-                knowledgeBaseInstructions,
+                userInstructions,
                 requestInstructions,
                 signal,
                 logger: this.dependencies.logger,
@@ -693,7 +694,7 @@ export class ObservabilityAIAssistantClient {
     queries,
     categories,
   }: {
-    queries: string[];
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
@@ -755,12 +756,10 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  fetchKnowledgeBaseInstructions = async () => {
-    const knowledgeBaseInstructions = await this.dependencies.knowledgeBaseService.getInstructions(
+  fetchUserInstructions = async () => {
+    return this.dependencies.knowledgeBaseService.getUserInstructions(
       this.dependencies.namespace,
       this.dependencies.user
     );
-
-    return knowledgeBaseInstructions;
   };
 }
