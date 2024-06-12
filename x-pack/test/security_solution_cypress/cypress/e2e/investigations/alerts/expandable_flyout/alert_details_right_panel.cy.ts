@@ -215,6 +215,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
     cy.log('should investigate in timeline');
 
+    openTakeActionButton();
     selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE);
     cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_SECTION)
       .first()
