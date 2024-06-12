@@ -12,12 +12,12 @@ import { PresentationPanelError } from './presentation_panel_error';
 
 describe('PresentationPanelError', () => {
   test('should display error', async () => {
-    render(<PresentationPanelError error={new Error('Simulated error')}/>);
+    render(<PresentationPanelError error={new Error('Simulated error')} />);
     await waitFor(() => screen.getByTestId('errorMessageMarkdown'));
   });
 
   test('should display error with empty message', async () => {
-    render(<PresentationPanelError error={new Error('')}/>);
+    render(<PresentationPanelError error={new Error('')} />);
     await waitFor(() => screen.getByTestId('errorMessageMarkdown'));
-  })
+  });
 });
