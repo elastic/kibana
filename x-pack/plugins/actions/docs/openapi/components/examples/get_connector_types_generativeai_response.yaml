@@ -18,7 +18,6 @@ value:
     supported_feature_ids:
       - generativeAI
     is_system_action_type: false
-
   - id: .gemini
     name: Google Gemini
     enabled: true
