@@ -80,7 +80,7 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChar
 export const KubernetesContainerCharts = React.forwardRef<
   HTMLDivElement,
   MetricsChartsFields & { metric: ContainerMetricTypes }
->(({ assetId, dataView, dateRange, metric }, ref) => {
+>(({ assetId, dataView, dateRange, metric, onShowAll }, ref) => {
   const { charts } = useK8sContainerPageViewMetricsCharts({
     metric,
     metricsDataViewId: dataView?.id,
@@ -121,9 +121,26 @@ export const KubernetesContainerCharts = React.forwardRef<
           }
         />
       }
-      data-test-subj="infraAssetDetailsK8ContainerChartsSection"
-      id="k8sContainerCharts"
+      data-test-subj={`infraAssetDetailsK8ContainerChartsSection${metric}`}
+      id={metric}
       ref={ref}
+      extraAction={
+        onShowAll ? (
+          <EuiButtonEmpty
+            data-test-subj="infraAssetDetailsKubernetesChartsShowAllButton"
+            onClick={() => onShowAll(metric)}
+            size="xs"
+            flush="both"
+            iconSide="right"
+            iconType="sortRight"
+          >
+            <FormattedMessage
+              id="xpack.infra.assetDetails.charts.kubernetes.showAllButton"
+              defaultMessage="Show all"
+            />
+          </EuiButtonEmpty>
+        ) : null
+      }
     >
       <ChartsGrid columns={2}>
         {charts.map((chart) => (

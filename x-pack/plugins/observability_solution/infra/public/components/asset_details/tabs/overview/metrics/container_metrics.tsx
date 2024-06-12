@@ -12,6 +12,8 @@ import { DockerCharts } from '../../../charts/docker_charts';
 import { INTEGRATIONS } from '../../../constants';
 import { useIntegrationCheck } from '../../../hooks/use_integration_check';
 import { KubernetesContainerCharts } from '../../../charts/kubernetes_charts';
+import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
+import { ContentTabIds } from '../../../types';
 
 interface Props {
   assetId: string;
@@ -20,10 +22,15 @@ interface Props {
 }
 
 export const ContainerMetrics = (props: Props) => {
+  const { showTab } = useTabSwitcherContext();
   const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
   const isKubernetesContainer = useIntegrationCheck({
     dependsOn: INTEGRATIONS.kubernetesContainer,
   });
+
+  const onClick = (metric: string) => {
+    showTab(ContentTabIds.METRICS, { scrollTo: metric });
+  };
 
   if (!isDockerContainer && !isKubernetesContainer) {
     return null;
@@ -34,16 +41,16 @@ export const ContainerMetrics = (props: Props) => {
       <EuiFlexGrid columns={2} gutterSize="s">
         {isDockerContainer && (
           <>
-            <DockerCharts {...props} metric="cpu" />
-            <DockerCharts {...props} metric="memory" />
-            <DockerCharts {...props} metric="network" />
-            <DockerCharts {...props} metric="disk" />
+            <DockerCharts {...props} metric="cpu" onShowAll={onClick} />
+            <DockerCharts {...props} metric="memory" onShowAll={onClick} />
+            <DockerCharts {...props} metric="network" onShowAll={onClick} />
+            <DockerCharts {...props} metric="disk" onShowAll={onClick} />
           </>
         )}
         {!isDockerContainer && isKubernetesContainer && (
           <>
-            <KubernetesContainerCharts {...props} metric="cpu" />
-            <KubernetesContainerCharts {...props} metric="memory" />
+            <KubernetesContainerCharts {...props} metric="cpu" onShowAll={onClick} />
+            <KubernetesContainerCharts {...props} metric="memory" onShowAll={onClick} />
           </>
         )}
       </EuiFlexGrid>
