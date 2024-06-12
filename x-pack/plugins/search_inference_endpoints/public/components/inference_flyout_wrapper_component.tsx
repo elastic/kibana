@@ -104,7 +104,15 @@ export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperCom
 
   useEffect(() => {
     const fetchAvailableTrainedModels = async () => {
-      setAvailableTrainedModels((await ml?.mlApi?.trainedModels?.getTrainedModels()) ?? []);
+      let models;
+      try {
+        models = await ml?.mlApi?.trainedModels?.getTrainedModels();
+      } catch (error) {
+        const errorObj = extractErrorProperties(error);
+        setInferenceAddError(errorObj.message);
+      } finally {
+        setAvailableTrainedModels(models || []);
+      }
     };
     fetchAvailableTrainedModels();
   }, [ml]);
