@@ -32,7 +32,6 @@ export const {{@key}}: z.ZodType<{{@key}}> = {{> zod_schema_item }};
 export type {{@key}} = z.infer<typeof {{@key}}>;
 export const {{@key}} = {{> zod_schema_item}};
 {{/if}}
-
 {{#if enum}}
 {{#unless (isSingle enum)}}
 export type {{@key}}Enum = typeof {{@key}}.enum;
