@@ -53,13 +53,13 @@ describe('Create ', () => {
     );
   });
 
-  it('does not render default value when in isTemplateEditMode', async () => {
+  it('does not render default value when in isEditMode', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Create
           isLoading={false}
           customFieldConfiguration={customFieldConfiguration}
-          isTemplateEditMode={true}
+          isEditMode={true}
         />
       </FormTestComponent>
     );

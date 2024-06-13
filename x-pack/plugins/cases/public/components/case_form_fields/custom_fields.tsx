@@ -44,7 +44,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
           customFieldConfiguration={customField}
           key={customField.key}
           setAsOptional={setCustomFieldsOptional}
-          isTemplateEditMode={isTemplateEditMode}
+          isEditMode={isTemplateEditMode}
         />
       );
     }

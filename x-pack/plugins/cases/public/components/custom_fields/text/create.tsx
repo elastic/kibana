@@ -17,13 +17,13 @@ const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
   customFieldConfiguration,
   isLoading,
   setAsOptional,
-  isTemplateEditMode,
+  isEditMode,
 }) => {
   const { key, label, required, defaultValue } = customFieldConfiguration;
   const config = getTextFieldConfig({
     required: setAsOptional ? false : required,
     label,
-    ...(defaultValue && !isTemplateEditMode && { defaultValue: String(defaultValue) }),
+    ...(defaultValue && !isEditMode && { defaultValue: String(defaultValue) }),
   });
 
   return (

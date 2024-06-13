@@ -62,7 +62,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
         />
       ),
     }),
-    [isSubmitting, configurationCustomFields]
+    [isSubmitting, configurationCustomFields, isEditMode]
   );
 
   const thirdStep = useMemo(
