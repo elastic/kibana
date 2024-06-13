@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectsResolveResponse,
-} from '@kbn/core/server';
+import type { SavedObjectAttributes } from '@kbn/core/server';
 
 import type {
   SanitizedRule,
@@ -17,7 +13,7 @@ import type {
   AlertsFilterTimeframe,
   RuleAction,
   RuleSystemAction,
-  RuleTypeParams,
+  RuleActionParam,
 } from '@kbn/alerting-types';
 
 export type {
@@ -26,6 +22,7 @@ export type {
   SanitizedRule,
   RuleTypeParams,
   RuleActionParams,
+  RuleActionParam,
   IntervalSchedule,
   RuleActionFrequency,
   AlertsFilterTimeframe,
@@ -45,6 +42,9 @@ export type {
   AlertDelay,
   SanitizedAlertsFilter,
   SanitizedRuleAction,
+  AlertsHealth,
+  AlertingFrameworkHealth,
+  ResolvedSanitizedRule,
 } from '@kbn/alerting-types';
 
 export {
@@ -68,18 +68,10 @@ export const RuleLastRunOutcomeOrderMap: Record<RuleLastRunOutcomes, number> = {
 
 export type RuleAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
 
-export type RuleActionParam = SavedObjectAttribute;
-
 export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
 
 export type RuleActionKey = keyof RuleAction;
 export type RuleSystemActionKey = keyof RuleSystemAction;
-
-export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
-  Omit<SavedObjectsResolveResponse, 'saved_object'> & {
-    outcome: string;
-    alias_target_id?: string;
-  };
 
 export type SanitizedRuleConfig = Pick<
   SanitizedRule,
@@ -105,27 +97,6 @@ export type SanitizedRuleConfig = Pick<
   ruleTypeId: string;
   ruleTypeName: string;
 };
-
-export enum HealthStatus {
-  OK = 'ok',
-  Warning = 'warn',
-  Error = 'error',
-}
-
-export interface AlertsHealth {
-  decryptionHealth: {
-    status: HealthStatus;
-    timestamp: string;
-  };
-  executionHealth: {
-    status: HealthStatus;
-    timestamp: string;
-  };
-  readHealth: {
-    status: HealthStatus;
-    timestamp: string;
-  };
-}
 
 export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
   duration?: number;

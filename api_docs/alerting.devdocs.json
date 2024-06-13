@@ -1646,9 +1646,9 @@
             "signature": [
               "() => Promise<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.AlertsHealth",
                 "text": "AlertsHealth"
               },
@@ -2906,9 +2906,9 @@
             "signature": [
               "() => Promise<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.AlertsHealth",
                 "text": "AlertsHealth"
               },
@@ -5305,9 +5305,9 @@
           "ResolveParams",
           ") => Promise<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ResolvedSanitizedRule",
             "text": "ResolvedSanitizedRule"
           },
@@ -6704,7 +6704,7 @@
         "tags": [],
         "label": "AlertingFrameworkHealth",
         "description": [],
-        "path": "x-pack/plugins/alerting/common/index.ts",
+        "path": "packages/kbn-alerting-types/alerting_framework_health_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6715,7 +6715,7 @@
             "tags": [],
             "label": "isSufficientlySecure",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/index.ts",
+            "path": "packages/kbn-alerting-types/alerting_framework_health_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6726,7 +6726,7 @@
             "tags": [],
             "label": "hasPermanentEncryptionKey",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/index.ts",
+            "path": "packages/kbn-alerting-types/alerting_framework_health_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6739,14 +6739,14 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.AlertsHealth",
                 "text": "AlertsHealth"
               }
             ],
-            "path": "x-pack/plugins/alerting/common/index.ts",
+            "path": "packages/kbn-alerting-types/alerting_framework_health_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6904,7 +6904,7 @@
         "tags": [],
         "label": "AlertsHealth",
         "description": [],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "path": "packages/kbn-alerting-types/alerting_framework_health_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6918,15 +6918,15 @@
             "signature": [
               "{ status: ",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.HealthStatus",
                 "text": "HealthStatus"
               },
               "; timestamp: string; }"
             ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "path": "packages/kbn-alerting-types/alerting_framework_health_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6940,15 +6940,15 @@
             "signature": [
               "{ status: ",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.HealthStatus",
                 "text": "HealthStatus"
               },
               "; timestamp: string; }"
             ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "path": "packages/kbn-alerting-types/alerting_framework_health_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6962,15 +6962,15 @@
             "signature": [
               "{ status: ",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.HealthStatus",
                 "text": "HealthStatus"
               },
               "; timestamp: string; }"
             ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "path": "packages/kbn-alerting-types/alerting_framework_health_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -10424,18 +10424,6 @@
     "enums": [
       {
         "parentPluginId": "alerting",
-        "id": "def-common.HealthStatus",
-        "type": "Enum",
-        "tags": [],
-        "label": "HealthStatus",
-        "description": [],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.MaintenanceWindowStatus",
         "type": "Enum",
         "tags": [],
@@ -11532,7 +11520,7 @@
           },
           "<unknown>, \"saved_object\"> & { outcome: string; alias_target_id?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "path": "packages/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11669,7 +11657,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "path": "packages/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
