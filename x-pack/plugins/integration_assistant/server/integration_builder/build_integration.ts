@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { join as joinPath } from 'path';
+import { resolve as resolvePath } from 'path';
 import { tmpdir } from 'os';
 import nunjucks from 'nunjucks';
 import AdmZip from 'adm-zip';
@@ -18,22 +18,22 @@ import { createPipeline } from './pipeline';
 import { generateUniqueId, ensureDirSync, copySync, createSync } from '../util';
 
 export async function buildPackage(integration: Integration): Promise<Buffer> {
-  const templateDir = joinPath(__dirname, '../templates');
-  const agentTemplates = joinPath(templateDir, 'agent');
-  const manifestTemplates = joinPath(templateDir, 'manifest');
-  const systemTestTemplates = joinPath(templateDir, 'system_tests');
+  const templateDir = resolvePath(__dirname, '../templates');
+  const agentTemplates = resolvePath(templateDir, 'agent');
+  const manifestTemplates = resolvePath(templateDir, 'manifest');
+  const systemTestTemplates = resolvePath(templateDir, 'system_tests');
   nunjucks.configure([templateDir, agentTemplates, manifestTemplates, systemTestTemplates], {
     autoescape: false,
   });
 
-  const tmpDir = joinPath(tmpdir(), `integration-assistant-${generateUniqueId()}`);
+  const tmpDir = resolvePath(tmpdir(), `integration-assistant-${generateUniqueId()}`);
   const packageDirectoryName = `${integration.name}-0.1.0`;
   const packageDir = createDirectories(tmpDir, integration, packageDirectoryName);
-  const dataStreamsDir = joinPath(packageDir, 'data_stream');
+  const dataStreamsDir = resolvePath(packageDir, 'data_stream');
 
   for (const dataStream of integration.dataStreams) {
     const dataStreamName = dataStream.name;
-    const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
+    const specificDataStreamDir = resolvePath(dataStreamsDir, dataStreamName);
 
     createDatastream(integration.name, specificDataStreamDir, dataStream);
     createAgentInput(specificDataStreamDir, dataStream.inputTypes);
@@ -50,7 +50,7 @@ function createDirectories(
   integration: Integration,
   packageDirectoryName: string
 ): string {
-  const packageDir = joinPath(tmpDir, packageDirectoryName);
+  const packageDir = resolvePath(tmpDir, packageDirectoryName);
   ensureDirSync(tmpDir);
   ensureDirSync(packageDir);
   createPackage(packageDir, integration);
@@ -67,24 +67,24 @@ function createPackage(packageDir: string, integration: Integration): void {
 }
 
 function createLogo(packageDir: string, integration: Integration): void {
-  const logoDir = joinPath(packageDir, 'img');
+  const logoDir = resolvePath(packageDir, 'img');
   ensureDirSync(logoDir);
 
   if (integration?.logo !== undefined) {
     const buffer = Buffer.from(integration.logo, 'base64');
-    createSync(joinPath(logoDir, 'logo.svg'), buffer);
+    createSync(resolvePath(logoDir, 'logo.svg'), buffer);
   } else {
-    const imgTemplateDir = joinPath(__dirname, '../templates/img');
-    copySync(joinPath(imgTemplateDir, 'logo.svg'), joinPath(logoDir, 'logo.svg'));
+    const imgTemplateDir = resolvePath(__dirname, '../templates/img');
+    copySync(resolvePath(imgTemplateDir, 'logo.svg'), resolvePath(logoDir, 'logo.svg'));
   }
 }
 
 function createBuildFile(packageDir: string): void {
   const buildFile = nunjucks.render('build.yml.njk', { ecs_version: '8.11.0' });
-  const buildDir = joinPath(packageDir, '_dev/build');
+  const buildDir = resolvePath(packageDir, '_dev/build');
 
   ensureDirSync(buildDir);
-  createSync(joinPath(buildDir, 'build.yml'), buildFile);
+  createSync(resolvePath(buildDir, 'build.yml'), buildFile);
 }
 
 function createChangelog(packageDir: string): void {
@@ -92,22 +92,22 @@ function createChangelog(packageDir: string): void {
     initial_version: '0.1.0',
   });
 
-  createSync(joinPath(packageDir, 'changelog.yml'), changelogTemplate);
+  createSync(resolvePath(packageDir, 'changelog.yml'), changelogTemplate);
 }
 
 function createReadme(packageDir: string, integration: Integration) {
-  const readmeDirPath = joinPath(packageDir, '_dev/build/docs/');
+  const readmeDirPath = resolvePath(packageDir, '_dev/build/docs/');
   ensureDirSync(readmeDirPath);
   const readmeTemplate = nunjucks.render('readme.md.njk', {
     package_name: integration.name,
     data_streams: integration.dataStreams,
   });
 
-  createSync(joinPath(readmeDirPath, 'README.md'), readmeTemplate);
+  createSync(resolvePath(readmeDirPath, 'README.md'), readmeTemplate);
 }
 
 async function createZipArchive(tmpDir: string, packageDirectoryName: string): Promise<Buffer> {
-  const tmpPackageDir = joinPath(tmpDir, packageDirectoryName);
+  const tmpPackageDir = resolvePath(tmpDir, packageDirectoryName);
   const zip = new AdmZip();
   zip.addLocalFolder(tmpPackageDir, packageDirectoryName);
   const buffer = zip.toBuffer();
@@ -142,5 +142,5 @@ function createPackageManifest(packageDir: string, integration: Integration): vo
     inputs: uniqueInputsList,
   });
 
-  createSync(joinPath(packageDir, 'manifest.yml'), packageManifest);
+  createSync(resolvePath(packageDir, 'manifest.yml'), packageManifest);
 }
