@@ -16,7 +16,7 @@ import { FLEET_KUBERNETES_PACKAGE } from '../../../../../../../../common';
 
 const CenteredRoundedBottomBar = styled(EuiBottomBar)`
   max-width: 820px;
-  margin: 0 auto;
+  margin: 0 auto !important; /* !important is needed for serverless */
   border-radius: 8px 8px 0px 0px;
 `;
 const NoAnimationCenteredRoundedBottomBar = styled(CenteredRoundedBottomBar)`
