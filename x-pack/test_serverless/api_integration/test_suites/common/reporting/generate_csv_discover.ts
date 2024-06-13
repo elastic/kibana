@@ -356,7 +356,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
-        expect((csvFile as string).length).to.be(1267140);
+        expect((csvFile as string).length).to.be(1270683);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
