@@ -153,6 +153,7 @@ const mockPackagePolicy = {
   package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
   enabled: true,
   policy_id: 'agent-policy-1',
+  policy_ids: ['agent-policy-1'],
   inputs: [
     {
       type: 'logfile',

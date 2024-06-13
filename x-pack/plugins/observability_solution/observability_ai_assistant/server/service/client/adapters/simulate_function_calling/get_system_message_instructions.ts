@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CONTEXT_FUNCTION_NAME } from '../../../../functions/context';
 import { FunctionDefinition } from '../../../../../common';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';
 
@@ -17,7 +18,7 @@ export function getSystemMessageInstructions({
     return `In this environment, you have access to a set of tools you can use to answer the user's question.
 
     ${
-      functions?.find((fn) => fn.name === 'context')
+      functions?.find((fn) => fn.name === CONTEXT_FUNCTION_NAME)
         ? `The "context" tool is ALWAYS used after a user question. Even if it was used before, your job is to answer the last user question,
     even if the "context" tool was executed after that. Consider the tools you need to answer the user's question.`
         : ''

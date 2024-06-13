@@ -59,6 +59,7 @@ describe('config schema', () => {
             "apisToRedactInLogs": Array [],
             "compression": false,
             "customHeaders": Object {},
+            "dnsCacheTtl": "P0D",
             "healthCheck": Object {
               "delay": "PT2.5S",
               "startupDelay": "PT0.5S",

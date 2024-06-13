@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFlat, EcsVersion } from '@elastic/ecs';
+import { EcsVersion } from '@elastic/ecs';
 
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -16,7 +16,8 @@ import { checkIndex } from './check_index';
 import { useDataQualityContext } from '../../../data_quality_context';
 import { getAllIndicesToCheck } from './helpers';
 import * as i18n from '../../../../translations';
-import type { EcsMetadata, IndexToCheck, OnCheckCompleted } from '../../../../types';
+import type { IndexToCheck, OnCheckCompleted } from '../../../../types';
+import { EcsFlatTyped } from '../../../../constants';
 
 const CheckAllButton = styled(EuiButton)`
   width: 112px;
@@ -97,7 +98,7 @@ const CheckAllComponent: React.FC<Props> = ({
             abortController: abortController.current,
             batchId,
             checkAllStartTime: startTime,
-            ecsMetadata: EcsFlat as unknown as Record<string, EcsMetadata>,
+            ecsMetadata: EcsFlatTyped,
             formatBytes,
             formatNumber,
             httpFetch,
