@@ -15,7 +15,7 @@ import type {
   UpgradePackagePolicyDryRunResponse,
 } from '../../../../../../../common/types/rest_spec';
 import {
-  sendGetOneAgentPolicy,
+  sendBulkGetAgentPolicies,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
   sendGetSettings,
@@ -174,21 +174,15 @@ export function usePackagePolicyWithRelatedData(
           throw packagePolicyError;
         }
 
-        const newAgentPolicies = [];
-        for (const policyId of packagePolicyData!.item.policy_ids) {
-          const { data: agentPolicyData, error: agentPolicyError } = await sendGetOneAgentPolicy(
-            policyId
-          );
+        const { data, error: agentPolicyError } = await sendBulkGetAgentPolicies(
+          packagePolicyData!.item.policy_ids
+        );
 
-          if (agentPolicyError) {
-            throw agentPolicyError;
-          }
-
-          if (agentPolicyData?.item) {
-            newAgentPolicies.push(agentPolicyData.item);
-          }
+        if (agentPolicyError) {
+          throw agentPolicyError;
         }
-        setAgentPolicies(newAgentPolicies);
+
+        setAgentPolicies(data?.items ?? []);
 
         const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
           await sendUpgradePackagePolicyDryRun([packagePolicyId]);
