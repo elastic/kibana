@@ -105,14 +105,7 @@ export function useEsqlMode({
 
             const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
-            // console.log('query', query.esql, prev.current.query);
-            // console.log('columns', nextColumns, prev.current.recentlyUpdatedToColumns);
-            // console.log('indexPatternChanged', indexPatternChanged);
-            // console.log('addColumnsToState', addColumnsToState);
-            // console.log('changeViewMode', changeViewMode);
-
             if (!indexPatternChanged && !addColumnsToState && !changeViewMode) {
-              // console.log('complete');
               sendComplete();
               return;
             }
@@ -126,11 +119,9 @@ export function useEsqlMode({
                 ...(addColumnsToState && { columns: nextColumns }),
                 ...(changeViewMode && { viewMode: undefined }),
               };
-              // console.log('change URL state', nextState);
               await stateContainer.appState.replaceUrlState(nextState);
             }
 
-            // console.log('all complete');
             sendComplete();
           } else {
             // cleanup for a "regular" query
