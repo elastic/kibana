@@ -13,7 +13,7 @@ import { getDataStreamsStats } from '.';
 jest.mock('../../../services/data_stream', () => {
   return {
     dataStreamService: {
-      getMatchingDataStreamsStats: jest.fn().mockImplementation(() => {
+      getStreamsStats: jest.fn().mockImplementation(() => {
         return [
           {
             data_stream: 'logs-elastic_agent-default',
@@ -72,24 +72,41 @@ jest.mock('../../../services/index_stats', () => {
   };
 });
 
+const dataStream = 'logs-nginx.access-default';
+
 describe('getDataStreams', () => {
   it('Passes the correct parameters to the DataStreamService', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     await getDataStreamsStats({
       esClient: esClientMock,
-      type: 'logs',
-      datasetQuery: 'nginx',
+      dataStreams: [dataStream],
     });
-    expect(dataStreamService.getMatchingDataStreamsStats).toHaveBeenCalledWith(expect.anything(), {
-      type: 'logs',
-      dataset: '*nginx*',
-    });
+    expect(dataStreamService.getStreamsStats).toHaveBeenCalledWith(expect.anything(), [dataStream]);
   });
+
+  it('returns an empty list when no dataStreams are provided', async () => {
+    jest.clearAllMocks();
+
+    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    const results = await getDataStreamsStats({
+      esClient: esClientMock,
+      dataStreams: [],
+    });
+    expect(dataStreamService.getStreamsStats).not.toHaveBeenCalled();
+    expect(results.items).toEqual([]);
+  });
+
   it('Formats the items correctly', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     const results = await getDataStreamsStats({
       esClient: esClientMock,
-      type: 'logs',
+      dataStreams: [
+        'logs-elastic_agent-default',
+        'logs-elastic_agent.filebeat-default',
+        'logs-elastic_agent.fleet_server-default',
+        'logs-elastic_agent.metricbeat-default',
+        'logs-test.test-default',
+      ],
     });
     expect(results.items.sort()).toEqual([
       {
