@@ -10,4 +10,17 @@
   "exclude": [
     "target/**/*"
   ],
+  "kbn_references": [
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/security-plugin-form-components",
+    "@kbn/code-editor",
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/security-plugin-types-common",
+    "@kbn/security-plugin-types-server",
+    "@kbn/security-plugin",
+    "@kbn/ui-theme",
+  ],
 }
