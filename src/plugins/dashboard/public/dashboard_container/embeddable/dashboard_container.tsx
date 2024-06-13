@@ -170,6 +170,7 @@ export class DashboardContainer
   public creationEndTime?: number;
   public firstLoad: boolean = true;
   private hadContentfulRender = false;
+  private scrollPosition?: number;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
@@ -589,7 +590,7 @@ export class DashboardContainer
     this.setExpandedPanelId(panelId);
 
     if (panelId && window.scrollY > 0) {
-      localStorage.setItem(this.getScrollPositionStorageKey(panelId), String(window.scrollY));
+      this.scrollPosition = window.scrollY;
       return;
     }
 
@@ -597,9 +598,6 @@ export class DashboardContainer
       this.setScrollToPanelId(previousPanelId);
     }
   };
-
-  public getScrollPositionStorageKey = (suffix: string) =>
-    `dashboard.scrollPosition_${this.id}_${suffix}`;
 
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
@@ -773,22 +771,18 @@ export class DashboardContainer
     this.setScrollToPanelId(undefined);
 
     this.untilEmbeddableLoaded(id).then(() => {
-      panelRef.scrollIntoView({ block: 'center' });
-
-      panelRef.ontransitionend = () => {
-        const scrollPosition = localStorage.getItem(this.getScrollPositionStorageKey(id));
-
-        if (scrollPosition) {
-          // Scroll to the last scroll position after the transition ends to ensure the panel is in the right position before scrolling
+      if (this.scrollPosition) {
+        panelRef.ontransitionend = () => {
+          // Scroll to the last scroll position after the transition ends to ensure the panel is back in the right position before scrolling
           // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
-          window.scrollTo({ top: parseInt(scrollPosition, 10) });
-          localStorage.removeItem(this.getScrollPositionStorageKey(id));
-          return;
-        }
+          window.scrollTo({ top: this.scrollPosition });
+          this.scrollPosition = undefined;
+          panelRef.ontransitionend = null;
+        };
+        return;
+      }
 
-        // If there is no stored scroll position, we should attempt to scroll the panel into view again in case the panel has moved
-        panelRef.scrollIntoView({ block: 'center' });
-      };
+      panelRef.scrollIntoView({ block: 'center' });
     });
   };
 
