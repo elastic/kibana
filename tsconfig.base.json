@@ -1358,6 +1358,8 @@
       "@kbn/resizable-layout-examples-plugin/*": ["examples/resizable_layout_examples/*"],
       "@kbn/resolver-test-plugin": ["x-pack/test/plugin_functional/plugins/resolver_test"],
       "@kbn/resolver-test-plugin/*": ["x-pack/test/plugin_functional/plugins/resolver_test/*"],
+      "@kbn/response-ops-feature-flag-service": ["packages/response-ops/feature_flag_service"],
+      "@kbn/response-ops-feature-flag-service/*": ["packages/response-ops/feature_flag_service/*"],
       "@kbn/response-stream-plugin": ["examples/response_stream"],
       "@kbn/response-stream-plugin/*": ["examples/response_stream/*"],
       "@kbn/rison": ["packages/kbn-rison"],
@@ -1862,7 +1864,8 @@
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": ["typings/@emotion"],
+      "@langchain/langgraph": ["typings/@langchain/langgraph"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

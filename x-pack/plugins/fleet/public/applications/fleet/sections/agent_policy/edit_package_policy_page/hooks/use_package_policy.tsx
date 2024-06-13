@@ -74,13 +74,14 @@ export function usePackagePolicyWithRelatedData(
     description: '',
     namespace: '',
     policy_id: '',
+    policy_ids: [''],
     enabled: true,
     inputs: [],
     version: '',
   });
   const [originalPackagePolicy, setOriginalPackagePolicy] =
     useState<GetOnePackagePolicyResponse['item']>();
-  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
+  const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
   const [loadingError, setLoadingError] = useState<Error>();
@@ -170,17 +171,21 @@ export function usePackagePolicyWithRelatedData(
           throw packagePolicyError;
         }
 
-        const { data: agentPolicyData, error: agentPolicyError } = await sendGetOneAgentPolicy(
-          packagePolicyData!.item.policy_id
-        );
+        const newAgentPolicies = [];
+        for (const policyId of packagePolicyData!.item.policy_ids) {
+          const { data: agentPolicyData, error: agentPolicyError } = await sendGetOneAgentPolicy(
+            policyId
+          );
 
-        if (agentPolicyError) {
-          throw agentPolicyError;
-        }
+          if (agentPolicyError) {
+            throw agentPolicyError;
+          }
 
-        if (agentPolicyData?.item) {
-          setAgentPolicy(agentPolicyData.item);
+          if (agentPolicyData?.item) {
+            newAgentPolicies.push(agentPolicyData.item);
+          }
         }
+        setAgentPolicies(newAgentPolicies);
 
         const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
           await sendUpgradePackagePolicyDryRun([packagePolicyId]);
@@ -352,7 +357,7 @@ export function usePackagePolicyWithRelatedData(
     isUpgrade,
     savePackagePolicy,
     isLoadingData,
-    agentPolicy,
+    agentPolicies,
     loadingError,
     packagePolicy,
     originalPackagePolicy,

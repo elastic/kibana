@@ -13,10 +13,14 @@ import {
   relatedMockProcessors,
   relatedExpectedHandlerResponse,
 } from '../../../__jest__/fixtures/related';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 
 const mockLlm = new FakeLLM({
   response: JSON.stringify(relatedMockProcessors, null, 2),
-});
+}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
 const testState: RelatedState = relatedTestState;
 

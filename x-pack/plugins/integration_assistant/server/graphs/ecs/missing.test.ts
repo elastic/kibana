@@ -9,10 +9,14 @@ import { FakeLLM } from '@langchain/core/utils/testing';
 import { handleMissingKeys } from './missing';
 import type { EcsMappingState } from '../../types';
 import { ecsTestState } from '../../../__jest__/fixtures/ecs_mapping';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 
 const mockLlm = new FakeLLM({
   response: '{ "message": "ll callback later."}',
-});
+}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
 const testState: EcsMappingState = ecsTestState;
 

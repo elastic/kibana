@@ -25,10 +25,14 @@ import { handleCategorization } from './categorization';
 import { handleErrors } from './errors';
 import { handleInvalidCategorization } from './invalid';
 import { testPipeline, combineProcessors } from '../../util';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 
 const mockLlm = new FakeLLM({
   response: "I'll callback later.",
-});
+}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
 jest.mock('./errors');
 jest.mock('./review');
