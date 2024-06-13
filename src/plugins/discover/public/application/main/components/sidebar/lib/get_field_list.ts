@@ -11,6 +11,7 @@ import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/public';
 import { isNestedFieldParent } from '@kbn/discover-utils';
+import { convertColumnToDataViewField } from '@kbn/esql-utils';
 
 export function getDataViewFieldList(
   dataView: DataView | undefined | null,
@@ -65,15 +66,5 @@ export function getEsqlQueryFieldList(esqlQueryColumns?: DatatableColumn[]): Dat
   if (!esqlQueryColumns) {
     return [];
   }
-  return esqlQueryColumns.map(
-    (column) =>
-      new DataViewField({
-        name: column.name,
-        type: column.meta?.type ?? 'unknown',
-        esTypes: column.meta?.esType ? [column.meta?.esType] : undefined,
-        searchable: true,
-        aggregatable: false,
-        isNull: Boolean(column?.isNull),
-      })
-  );
+  return esqlQueryColumns.map(convertColumnToDataViewField);
 }

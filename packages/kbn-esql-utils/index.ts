@@ -20,6 +20,7 @@ export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
+  convertColumnToDataViewField,
   TextBasedLanguages,
 } from './src';
 

@@ -18,3 +18,4 @@ export {
 } from './utils/query_parsing_helpers';
 export { appendToESQLQuery, appendWhereClauseToESQLQuery } from './utils/append_to_query';
 export { getESQLQueryColumns, getESQLQueryColumnsRaw, getESQLResults } from './utils/run_query';
+export { convertColumnToDataViewField } from './utils/convert_to_data_view_field';
