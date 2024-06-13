@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { type ESQLSource, getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import type { ESQLSource, ESQLFunction, ESQLColumn } from '@kbn/esql-ast';
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 500;
 
@@ -41,7 +42,33 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
   return pipes.filter((statement) => !/DROP\s/i.test(statement)).join('|');
 }
 
-// this should be done with ast parsing
+/**
+ * The ?latest and ?earliest named parameters are used to pass the timepicker time range to the ESQL query.
+ * @param esql:string
+ * @returns boolean
+ */
 export const hasTimeNamedParams = (esql: string) => {
   return /\?earliest/i.test(esql) && /\?latest/i.test(esql);
+};
+
+/**
+ * When the ?earliest and ?latest params are used, we want to retrieve the timefield from the query.
+ * @param esql:string
+ * @returns string
+ */
+export const getTimeFieldFromESQLQuery = (esql: string) => {
+  const { ast } = getAstAndSyntaxErrors(esql);
+  const whereCommand = ast.find(({ name }) => name === 'where');
+  const whereClause =
+    whereCommand && esql.substring(whereCommand?.location.min, whereCommand?.location.max);
+  if (!whereClause) {
+    return;
+  }
+  // const matches = whereClause.match(new RegExp(field + '(.*)' + String(filterValue)));
+  // not sure if the best way to add this here is with ast parsing or with regex,
+  // we need to add the named parameters first to the lexer and parser
+  const args = (whereCommand?.args ?? []) as ESQLFunction[];
+  const functionArgs = args.filter((arg) => arg.type === 'function');
+  const timeFieldArg = (functionArgs[0].args as ESQLColumn[]).find((arg) => arg.type === 'column');
+  return timeFieldArg?.text;
 };

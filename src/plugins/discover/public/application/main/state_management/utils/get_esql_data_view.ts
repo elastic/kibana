@@ -10,6 +10,7 @@ import {
   getESQLAdHocDataview,
   getIndexPatternFromESQLQuery,
   hasTimeNamedParams,
+  getTimeFieldFromESQLQuery,
 } from '@kbn/esql-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../../build_services';
@@ -33,8 +34,10 @@ export async function getEsqlDataView(
       dataViewObj.timeFieldName = '@timestamp';
     }
 
+    // If the query has the ?earliest and ?latest named parameters we set the timeFieldName to timestamp
     if (hasTimeNamedParams(query.esql)) {
-      dataViewObj.timeFieldName = 'timestamp';
+      const timeField = getTimeFieldFromESQLQuery(query.esql);
+      dataViewObj.timeFieldName = timeField;
     }
     return dataViewObj;
   }
