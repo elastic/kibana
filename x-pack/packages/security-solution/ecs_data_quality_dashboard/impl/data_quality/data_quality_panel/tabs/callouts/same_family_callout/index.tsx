@@ -10,28 +10,28 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import * as i18n from '../../../index_properties/translations';
-import type { EnrichedFieldMetadata } from '../../../../types';
+import type { EcsBasedFieldMetadata } from '../../../../types';
 
 interface Props {
   children?: React.ReactNode;
-  enrichedFieldMetadata: EnrichedFieldMetadata[];
+  ecsBasedFieldMetadata: EcsBasedFieldMetadata[];
 }
 
-const SameFamilyCalloutComponent: React.FC<Props> = ({ children, enrichedFieldMetadata }) => {
+const SameFamilyCalloutComponent: React.FC<Props> = ({ children, ecsBasedFieldMetadata }) => {
   const title = useMemo(
     () => (
       <span data-test-subj="title">
-        {i18n.SAME_FAMILY_CALLOUT_TITLE(enrichedFieldMetadata.length)}
+        {i18n.SAME_FAMILY_CALLOUT_TITLE(ecsBasedFieldMetadata.length)}
       </span>
     ),
-    [enrichedFieldMetadata.length]
+    [ecsBasedFieldMetadata.length]
   );
 
   return (
     <EuiCallOut color="primary" size="s" title={title}>
       <div data-test-subj="fieldsDefinedByEcs">
         {i18n.SAME_FAMILY_CALLOUT({
-          fieldCount: enrichedFieldMetadata.length,
+          fieldCount: ecsBasedFieldMetadata.length,
           version: EcsVersion,
         })}
       </div>
