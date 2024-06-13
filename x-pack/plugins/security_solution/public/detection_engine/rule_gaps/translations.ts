@@ -125,3 +125,20 @@ export const BACKFILL_TABLE_SUBTITLE = i18n.translate(
     defaultMessage: 'View and manage backfill runs',
   }
 );
+
+export const BACKFILL_SCHEDULE_SUCCESS = (numRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.containers.detectionEngine.backfillSchedule.scheduleRuleRunSuccessTitle',
+    {
+      values: { numRules },
+      defaultMessage:
+        'Successfully scheduled backfill for {numRules, plural, =1 {# rule} other {# rules}}',
+    }
+  );
+
+export const BACKFILL_SCHEDULE_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.backfillSchedule.scheduleRuleRunErrorTitle',
+  {
+    defaultMessage: 'Error while scheduling backfill',
+  }
+);
