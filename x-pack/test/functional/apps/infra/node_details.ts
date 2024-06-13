@@ -680,6 +680,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
+          it('should show / hide alerts section with no alerts and show / hide closed section content', async () => {
+            await pageObjects.assetDetails.alertsSectionCollapsibleExist();
+            // Collapsed by default
+            await pageObjects.assetDetails.alertsSectionClosedContentNoAlertsExist();
+            // Expand
+            await pageObjects.assetDetails.alertsSectionCollapsibleClick();
+            await pageObjects.assetDetails.alertsSectionClosedContentNoAlertsMissing();
+            // Check if buttons exist
+            await pageObjects.assetDetails.overviewLinkToAlertsExist();
+            await pageObjects.assetDetails.overviewOpenAlertsFlyoutExist();
+          });
+
           describe('Metadata Tab', () => {
             before(async () => {
               await pageObjects.assetDetails.clickMetadataTab();
