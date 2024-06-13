@@ -33,8 +33,8 @@ const TagsComponent: React.FC<Props> = ({ isLoading }) => {
         idAria: 'caseTags',
         'data-test-subj': 'caseTags',
         euiFieldProps: {
-          placeholder: '',
           fullWidth: true,
+          placeholder: '',
           disabled: isLoading || isLoadingTags,
           options,
           noSuggestions: false,
