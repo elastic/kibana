@@ -25,6 +25,8 @@ import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 const mockedChartStartContract = chartPluginMock.createStartContract();
 const mockedLensStartContract = lensPluginMock.createStartContract();
 
+Date.now = jest.fn(() => new Date('2024-06-13T07:00:33.381Z').getTime());
+
 jest.mock('../../../containers/metrics_source', () => ({
   useMetricsDataViewContext: () => ({
     metricsView: { dataViewReference: 'index' },

@@ -20,7 +20,7 @@ Array [
         "color": "#F04E9833",
         "id": "metric_threshold_active_alert_range_annotation",
         "key": Object {
-          "endTimestamp": "2024-06-12T07:34:05.328Z",
+          "endTimestamp": "2024-06-13T07:00:33.381Z",
           "timestamp": "2023-03-28T13:40:00.000Z",
           "type": "range",
         },
