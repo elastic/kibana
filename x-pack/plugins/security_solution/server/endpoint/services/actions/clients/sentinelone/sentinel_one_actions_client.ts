@@ -17,6 +17,8 @@ import type {
   SentinelOneGetActivitiesResponse,
   SentinelOneGetAgentsParams,
   SentinelOneGetAgentsResponse,
+  SentinelOneGetRemoteScriptsParams,
+  SentinelOneGetRemoteScriptsResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
@@ -24,6 +26,7 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
+import type { Mutable } from 'utility-types';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 import type {
   NormalizedExternalConnectorClient,
@@ -48,6 +51,7 @@ import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   KillProcessActionOutputContent,
+  KillProcessRequestBody,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionGetFileOutputContent,
@@ -60,9 +64,8 @@ import type {
   SentinelOneGetFileResponseMeta,
   SentinelOneIsolationRequestMeta,
   SentinelOneIsolationResponseMeta,
-  UploadedFileInfo,
-  KillProcessRequestBody,
   SentinelOneKillProcessRequestMeta,
+  UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -211,6 +214,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async getAgentDetails(
     agentUUID: string
   ): Promise<SentinelOneGetAgentsResponse['data'][number]> {
+    // FIXME:PT can results for a "short time" so that we don't keep querying the API
+
     const executeOptions: NormalizedExternalConnectorClientExecuteOptions<
       SentinelOneGetAgentsParams,
       SUB_ACTION
@@ -641,18 +646,24 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
 
-      // TODO:PT get terminate script id for the os this host is running
-
       if (!error) {
+        const s1AgentDetails = await this.getAgentDetails(reqIndexOptions.endpoint_ids[0]);
+        const terminateScriptInfo = await this.fetchScriptInfo(
+          'killProcess',
+          s1AgentDetails.osType
+        );
+
         try {
           const s1Response = await this.sendAction(SUB_ACTION.EXECUTE_SCRIPT, {
             filter: {
               uuids: actionRequest.endpoint_ids[0],
             },
             script: {
-              scriptId: '1466645476786791838', // FIXME:PT get the S1 terminate process script info by OS
-              taskDescription: 'tbd....',
+              scriptId: terminateScriptInfo.id,
+              taskDescription: this.buildExternalComment(reqIndexOptions),
               requiresApproval: false,
+              // TODO:PT test if `process_name` should be quoted to avoid issues
+              // TODO:PT check to see if the input args are different for Windows
               inputParams: `--terminate --processes ${actionRequest.parameters.process_name} --force`,
               outputDestination: 'SentinelCloud',
             },
@@ -747,6 +758,59 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         }
       }
     }
+  }
+
+  /**
+   * retrieve script info. for scripts that are used to handle our response actions
+   * @param scriptType
+   * @param osType
+   * @private
+   */
+  private async fetchScriptInfo(
+    scriptType: 'killProcess',
+    osType: string
+  ): Promise<{
+    scriptId: string;
+    buildScriptArgs: (options: object) => string;
+    scriptInfo: SentinelOneGetRemoteScriptsResponse['data'][number];
+  }> {
+    const searchQueryParams: Mutable<SentinelOneGetRemoteScriptsParams> = {
+      query: '',
+      osTypes: osType,
+    };
+
+    switch (scriptType) {
+      case 'killProcess':
+        searchQueryParams.query = 'terminate';
+        break;
+
+      default:
+        throw new ResponseActionsClientError(
+          `Unable to fetch SentinelOne script for OS [${osType}]. Unknown script type [${scriptType}]`
+        );
+    }
+
+    const { data: scriptSearchResults } =
+      await this.sendAction<SentinelOneGetRemoteScriptsResponse>(
+        SUB_ACTION.GET_REMOTE_SCRIPTS,
+        searchQueryParams
+      );
+
+    // We are looking for the script that is provided out of the box by SentinelOne - that script should
+    // have a `creator` of `SentinelOne` with a `creatorId` of `-1`.
+    const terminateScript = (scriptSearchResults?.data ?? []).find((scriptInfo) => {
+      return scriptInfo.creator === 'SentinelOne' && scriptInfo.creatorId === '-1';
+    });
+
+    if (!terminateScript) {
+      throw new ResponseActionsClientError(
+        `Unable to retrieve Terminate Script info. from SentinelOne ([${scriptType}][${osType}])`
+      );
+    }
+
+    // FIXME:PT create return type based on script type and OS
+
+    return terminateScript;
   }
 
   private async fetchGetFileResponseEsDocForAgentId(
