@@ -37,7 +37,6 @@ export const DeprecatedPrompt = () => {
         }
         actions={
           <EuiButton
-            data-test-subj="createRollupJobButton"
             href={documentationLinks.fleet.datastreamsDownsampling}
             target="_blank"
             fill
