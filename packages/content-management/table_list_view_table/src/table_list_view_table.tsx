@@ -54,7 +54,10 @@ import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
 
 interface ContentEditorConfig
-  extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
+  extends Pick<
+    OpenContentEditorParams,
+    'isReadonly' | 'onSave' | 'customValidators' | 'showActivityView'
+  > {
   enabled?: boolean;
 }
 

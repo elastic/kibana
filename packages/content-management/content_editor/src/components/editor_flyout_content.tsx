@@ -56,6 +56,7 @@ export interface Props {
   }) => Promise<void>;
   customValidators?: CustomValidators;
   onCancel: () => void;
+  showActivityView?: boolean;
 }
 
 const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
@@ -69,6 +70,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   onSave,
   onCancel,
   customValidators,
+  showActivityView,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -149,7 +151,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
           TagList={TagList}
           TagSelector={TagSelector}
         >
-          <ActivityView item={item} />
+          {showActivityView && <ActivityView item={item} />}
         </MetadataForm>
       </EuiFlyoutBody>
 
