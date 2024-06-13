@@ -13,41 +13,46 @@ import { FetchContext, useBatchedPublishingSubjects } from '@kbn/presentation-pu
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 
 import { FieldStatisticsTable } from '../../application/main/components/field_stats_table';
-import type { SearchEmbeddableApi } from '../types';
+import type { SearchEmbeddableStateManager, SearchEmbeddableApi } from '../types';
+import { isEsqlMode } from '../initialize_fetch';
 
 interface SavedSearchEmbeddableComponentProps {
-  onAddFilter: DocViewFilterFn;
   api: SearchEmbeddableApi & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
   };
+  onAddFilter: DocViewFilterFn;
+  stateManager: SearchEmbeddableStateManager;
 }
 
 export function SearchEmbeddablFieldStatsTableComponent({
   api,
   onAddFilter,
+  stateManager,
 }: SavedSearchEmbeddableComponentProps) {
-  const [fetchContext, dataViews, columns] = useBatchedPublishingSubjects(
+  const [fetchContext, dataViews, savedSearch, columns] = useBatchedPublishingSubjects(
     api.fetchContext$,
     api.dataViews,
-    api.columns$
+    api.savedSearch$,
+    stateManager.columns
   );
 
   const dataView = useMemo(() => {
     return dataViews?.[0];
   }, [dataViews]);
 
-  if (!dataView) return <></>;
+  const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
 
+  if (!dataView) return <></>;
   return (
     <FieldStatisticsTable
       dataView={dataView}
       columns={columns ?? []}
-      savedSearch={api.getSavedSearch()}
+      savedSearch={savedSearch}
       filters={fetchContext?.filters}
       query={fetchContext?.query}
       onAddFilter={onAddFilter}
       searchSessionId={fetchContext?.searchSessionId}
-      // isEsqlMode={isEsqlMode}
+      isEsqlMode={isEsql}
     />
   );
 }

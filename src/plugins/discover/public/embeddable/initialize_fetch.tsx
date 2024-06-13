@@ -28,7 +28,7 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../common/dat
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
-import { SearchEmbeddableApi } from './types';
+import { SearchEmbeddableStateManager, SearchEmbeddableApi } from './types';
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
 
 export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): boolean => {
@@ -38,6 +38,7 @@ export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): bool
 
 export function initializeFetch({
   api,
+  stateManager,
   discoverServices,
   getExecutionContext,
 }: {
@@ -47,6 +48,7 @@ export function initializeFetch({
     blockingError: BehaviorSubject<Error | undefined>;
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
   };
+  stateManager: SearchEmbeddableStateManager;
   discoverServices: DiscoverServices;
   getExecutionContext: () => Promise<KibanaExecutionContext>;
 }) {
@@ -61,16 +63,16 @@ export function initializeFetch({
 
   const fetchSubscription = combineLatest([
     fetch$(api),
-    api.searchSource$,
+    api.savedSearch$,
     api.dataViews,
-    api.sort$,
-    api.sampleSize$,
+    stateManager.sort,
+    stateManager.sampleSize,
   ])
     .pipe(
-      switchMap(async ([fetchContext, searchSource, dataViews, sort, sampleSize]) => {
+      switchMap(async ([fetchContext, savedSearch, dataViews, sort, sampleSize]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
         api.blockingError.next(undefined);
-        if (!dataView || !searchSource) {
+        if (!dataView || !savedSearch.searchSource) {
           return;
         }
         // Abort any in-progress requests
@@ -80,7 +82,7 @@ export function initializeFetch({
         const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
         updateSearchSource(
           discoverServices,
-          searchSource,
+          savedSearch.searchSource,
           dataView,
           sort,
           getAllowedSampleSize(sampleSize, discoverServices.uiSettings),
@@ -92,7 +94,7 @@ export function initializeFetch({
         );
 
         const searchSessionId = fetchContext.searchSessionId;
-        const searchSourceQuery = searchSource.getField('query');
+        const searchSourceQuery = savedSearch.searchSource.getField('query');
 
         try {
           api.dataLoading.next(true);
@@ -109,7 +111,7 @@ export function initializeFetch({
             query: searchSourceQuery,
           });
 
-          const esqlMode = isEsqlMode({ searchSource });
+          const esqlMode = isEsqlMode(savedSearch);
           if (
             esqlMode &&
             searchSourceQuery &&
@@ -144,7 +146,7 @@ export function initializeFetch({
            * Fetch via saved search
            */
           const { rawResponse: resp } = await lastValueFrom(
-            searchSource.fetch$({
+            savedSearch.searchSource.fetch$({
               abortSignal: abortController.signal,
               sessionId: searchSessionId,
               inspector: {
@@ -183,13 +185,13 @@ export function initializeFetch({
       api.dataLoading.next(false);
       if (next) {
         if (next.hasOwnProperty('rows')) {
-          api.rows$.next(next.rows ?? []);
+          stateManager.rows.next(next.rows ?? []);
         }
         if (next.hasOwnProperty('hitCount')) {
-          api.totalHitCount$.next(next.hitCount);
+          stateManager.totalHitCount.next(next.hitCount);
         }
         if (next.hasOwnProperty('columnsMeta')) {
-          api.columnsMeta$.next(next.columnsMeta);
+          stateManager.columnsMeta.next(next.columnsMeta);
         }
         if (next.hasOwnProperty('fetchContext') && next.fetchContext !== undefined) {
           api.fetchContext$.next(next.fetchContext);

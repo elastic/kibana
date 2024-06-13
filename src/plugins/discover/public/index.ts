@@ -29,10 +29,10 @@ export type {
   TopNavCustomization,
 } from './customizations';
 export {
-  SEARCH_EMBEDDABLE_TYPE, // TODO: Move this too
+  SEARCH_EMBEDDABLE_TYPE,
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
-  apiHasSavedSearch,
-  type HasSavedSearch,
+  apiPublishesSavedSearch,
+  type PublishesSavedSearch,
   type HasTimeRange,
 } from './embeddable';
 export { loadSharingDataHelpers, getSortForEmbeddable } from './utils';

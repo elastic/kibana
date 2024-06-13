@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ISearchSource } from '@kbn/data-plugin/common';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
@@ -17,16 +16,12 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesSavedObjectId,
+  PublishingSubject,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
-import {
-  SavedSearch,
-  SerializableSavedSearch,
-  SortOrder,
-} from '@kbn/saved-search-plugin/common/types';
-import type { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { SavedSearch, SerializableSavedSearch } from '@kbn/saved-search-plugin/common/types';
 import { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { BehaviorSubject } from 'rxjs';
 
@@ -34,10 +29,8 @@ import type { DiscoverServices } from '../build_services';
 import type { DocTableEmbeddableSearchProps } from '../components/doc_table/doc_table_embeddable';
 import type { DiscoverGridEmbeddableSearchProps } from './components/saved_search_grid';
 
-export type SearchEmbeddableAttributes = Pick<
+export type SearchEmbeddableState = Pick<
   SerializableSavedSearch,
-  | 'serializedSearchSource'
-  | 'managed'
   | 'rowHeight'
   | 'rowsPerPage'
   | 'headerRowHeight'
@@ -46,19 +39,33 @@ export type SearchEmbeddableAttributes = Pick<
   | 'sampleSize'
   | 'breakdownField'
   | 'viewMode'
->;
+> & {
+  rows: DataTableRecord[];
+  columnsMeta: DataTableColumnsMeta | undefined;
+  totalHitCount: number | undefined;
+};
+
+export type SearchEmbeddableStateManager = {
+  [key in keyof Required<SearchEmbeddableState>]: BehaviorSubject<SearchEmbeddableState[key]>;
+};
+
+export type SearchEmbeddableSerializedAttributes = Omit<
+  SearchEmbeddableState,
+  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource'
+> &
+  Pick<SerializableSavedSearch, 'serializedSearchSource'>;
 
 export type SearchEmbeddableSerializedState = SerializedTitles &
   SerializedTimeRange &
   Pick<SerializableSavedSearch, 'sort' | 'columns'> & {
     // by value
-    attributes?: SearchEmbeddableAttributes;
+    attributes?: SearchEmbeddableSerializedAttributes;
 
     // by reference
     savedObjectId?: string;
   };
 
-export type SearchEmbeddableRuntimeState = SearchEmbeddableAttributes &
+export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
   SerializedTitles &
   SerializedTimeRange & {
     savedObjectTitle?: string;
@@ -71,36 +78,22 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
-  PublishesSavedSearchAttributes &
+  PublishesSavedSearch &
+  PublishesDataViews &
   HasInPlaceLibraryTransforms &
   HasTimeRange &
   PublishesWritableTimeRange &
   Partial<HasEditCapabilities & PublishesSavedObjectId>;
 
-export interface PublishesSavedSearchAttributes extends PublishesDataViews, HasSavedSearch {
-  // TODO: Make these part of the **state manager** instead - doesn't need to be in public api
-  rows$: BehaviorSubject<DataTableRecord[]>;
-  totalHitCount$: BehaviorSubject<number | undefined>;
-  columns$: BehaviorSubject<string[] | undefined>;
-  columnsMeta$: BehaviorSubject<DataTableColumnsMeta | undefined>;
-  sort$: BehaviorSubject<SortOrder[] | undefined>;
-  sampleSize$: BehaviorSubject<number | undefined>;
-  searchSource$: BehaviorSubject<ISearchSource>;
-  rowHeight$: BehaviorSubject<number | undefined>;
-  headerRowHeight$: BehaviorSubject<number | undefined>;
-  rowsPerPage$: BehaviorSubject<number | undefined>;
-  savedSearchViewMode$: BehaviorSubject<VIEW_MODE | undefined>;
+export interface PublishesSavedSearch {
+  savedSearch$: PublishingSubject<SavedSearch>;
 }
 
-export interface HasSavedSearch {
-  getSavedSearch: () => SavedSearch;
-}
-
-export const apiHasSavedSearch = (
+export const apiPublishesSavedSearch = (
   api: EmbeddableApiContext['embeddable']
-): api is HasSavedSearch => {
-  const embeddable = api as HasSavedSearch;
-  return Boolean(embeddable.getSavedSearch) && typeof embeddable.getSavedSearch === 'function';
+): api is PublishesSavedSearch => {
+  const embeddable = api as PublishesSavedSearch;
+  return Boolean(embeddable.savedSearch$);
 };
 
 export interface HasTimeRange {

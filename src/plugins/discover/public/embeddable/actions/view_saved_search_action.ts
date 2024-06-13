@@ -22,12 +22,12 @@ import {
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import type { DiscoverAppLocator } from '../../../common';
-import { apiHasSavedSearch, HasSavedSearch } from '../types';
+import { PublishesSavedSearch, apiPublishesSavedSearch } from '../types';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
-type ViewSavedSearchActionApi = CanAccessViewMode & HasType & HasSavedSearch;
+type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
 
 const compatibilityCheck = (
   api: EmbeddableApiContext['embeddable']
@@ -37,7 +37,7 @@ const compatibilityCheck = (
     getInheritedViewMode(api) === ViewMode.VIEW &&
     apiHasType(api) &&
     apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE) &&
-    apiHasSavedSearch(api)
+    apiPublishesSavedSearch(api)
   );
 };
 

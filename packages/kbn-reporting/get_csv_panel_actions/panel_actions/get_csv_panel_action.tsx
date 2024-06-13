@@ -20,8 +20,8 @@ import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-p
 import {
   loadSharingDataHelpers,
   SEARCH_EMBEDDABLE_TYPE,
-  apiHasSavedSearch,
-  HasSavedSearch,
+  apiPublishesSavedSearch,
+  PublishesSavedSearch,
   HasTimeRange,
 } from '@kbn/discover-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -82,13 +82,13 @@ interface ExecutionParams {
   i18nStart: I18nStart;
 }
 
-type GetCsvActionApi = HasType & HasSavedSearch & CanAccessViewMode & HasTimeRange; // TODO: Fix this?
+type GetCsvActionApi = HasType & PublishesSavedSearch & CanAccessViewMode & HasTimeRange; // TODO: Fix this?
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is GetCsvActionApi => {
   return (
     apiHasType(api) &&
     apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE) &&
-    apiHasSavedSearch(api) &&
+    apiPublishesSavedSearch(api) &&
     apiCanAccessViewMode(api)
   );
 };
@@ -261,7 +261,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       throw new IncompatibleActionError();
     }
 
-    const savedSearch = embeddable.getSavedSearch();
+    const savedSearch = embeddable.savedSearch$.getValue();
 
     if (!savedSearch || this.isDownloading) {
       return;

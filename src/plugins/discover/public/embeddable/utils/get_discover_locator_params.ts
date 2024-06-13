@@ -9,12 +9,12 @@
 import type { Filter } from '@kbn/es-query';
 import { PublishesSavedObjectId, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { DiscoverAppLocatorParams } from '../../../common';
-import { HasSavedSearch } from '../types';
+import { PublishesSavedSearch } from '../types';
 
 export const getDiscoverLocatorParams = (
-  api: HasSavedSearch & Partial<PublishesSavedObjectId & PublishesUnifiedSearch>
+  api: PublishesSavedSearch & Partial<PublishesSavedObjectId & PublishesUnifiedSearch>
 ) => {
-  const savedSearch = api.getSavedSearch();
+  const savedSearch = api.savedSearch$.getValue();
 
   const dataView = savedSearch?.searchSource.getField('index');
   const savedObjectId = api.savedObjectId?.getValue();

@@ -8,6 +8,7 @@
 
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { BehaviorSubject } from 'rxjs';
 
 import { discoverServiceMock } from '../../__mocks__/services';
@@ -21,7 +22,7 @@ const services = discoverServiceMock;
 
 const compatibleEmbeddableApi: SearchEmbeddableApi = {
   type: SEARCH_EMBEDDABLE_TYPE,
-  getSavedSearch: jest.fn(),
+  savedSearch$: new BehaviorSubject({} as unknown as SavedSearch),
   parentApi: {
     viewMode: new BehaviorSubject('view'),
   },

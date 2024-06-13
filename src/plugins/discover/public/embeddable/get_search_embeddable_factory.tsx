@@ -141,18 +141,20 @@ export const getSearchEmbeddableFactory = ({
       const fetchContext$ = new BehaviorSubject<FetchContext | undefined>(undefined);
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
 
-      const { searchEmbeddableApi, searchEmbeddableComparators, searchEmbeddableStateManager } =
-        await initializeSearchEmbeddableApi(initialState, { discoverServices });
+      const {
+        searchEmbeddableApi,
+        searchEmbeddableComparators,
+        searchEmbeddableStateManager,
+        cleanup,
+      } = await initializeSearchEmbeddableApi(initialState, { discoverServices });
 
       const serializeState = async (): Promise<
         SerializedPanelState<SearchEmbeddableSerializedState>
       > => {
-        const searchSource = searchEmbeddableApi.searchSource$.getValue();
+        const savedSearch = searchEmbeddableApi.savedSearch$.getValue();
+        const searchSource = savedSearch.searchSource;
         const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
-        const savedSearchAttributes = toSavedSearchAttributes(
-          searchEmbeddableApi.getSavedSearch(),
-          searchSourceJSON
-        );
+        const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
         const savedObjectId = savedObjectId$.getValue();
         if (savedObjectId) {
@@ -258,6 +260,7 @@ export const getSearchEmbeddableFactory = ({
           //   };
           // },
           hasTimeRange: () => {
+            /** TODO: Move this into the action rather than exporting it in the API */
             const fetchContext = fetchContext$.getValue();
             return fetchContext?.timeslice !== undefined || fetchContext?.timeRange !== undefined;
           },
@@ -274,7 +277,7 @@ export const getSearchEmbeddableFactory = ({
           libraryId$: savedObjectId$,
           saveToLibrary: async (title: string) => {
             const savedObjectId = await save({
-              ...searchEmbeddableApi.getSavedSearch(),
+              ...api.savedSearch$.getValue(),
               title,
             });
             defaultPanelTitle$.next(title);
@@ -330,7 +333,7 @@ export const getSearchEmbeddableFactory = ({
             path: appTarget.path,
             state: {
               embeddableId: uuid,
-              valueInput: searchEmbeddableApi.getSavedSearch(),
+              valueInput: api.savedSearch$.getValue(),
               originatingApp: parentApiContext.currentAppId,
               searchSessionId: fetchContext$.getValue()?.searchSessionId,
               originatingPath: parentApiContext.getCurrentPath?.(),
@@ -352,32 +355,32 @@ export const getSearchEmbeddableFactory = ({
         },
         discoverServices,
         getExecutionContext,
+        stateManager: searchEmbeddableStateManager,
       });
 
       return {
         api,
         Component: () => {
-          const [dataViews, columns, searchSource, savedSearchViewMode] =
-            useBatchedPublishingSubjects(
-              searchEmbeddableApi.dataViews,
-              searchEmbeddableApi.columns$,
-              searchEmbeddableApi.searchSource$,
-              searchEmbeddableApi.savedSearchViewMode$
-            );
+          const [savedSearch, dataViews, columns] = useBatchedPublishingSubjects(
+            api.savedSearch$,
+            api.dataViews,
+            searchEmbeddableStateManager.columns
+          );
 
           useEffect(() => {
             return () => {
+              cleanup();
               unsubscribeFromFetch();
             };
           }, []);
 
           const viewMode = useMemo(() => {
-            if (!searchSource) return;
+            if (!savedSearch.searchSource) return;
             return getValidViewMode({
-              viewMode: savedSearchViewMode,
-              isEsqlMode: isEsqlMode({ searchSource }),
+              viewMode: savedSearch.viewMode,
+              isEsqlMode: isEsqlMode(savedSearch),
             });
-          }, [savedSearchViewMode, searchSource]);
+          }, [savedSearch]);
 
           const onAddFilter = useCallback(
             async (field, value, operator) => {
@@ -423,6 +426,7 @@ export const getSearchEmbeddableFactory = ({
                       fetchContext$,
                     }}
                     onAddFilter={onAddFilter}
+                    stateManager={searchEmbeddableStateManager}
                   />
                 ) : (
                   <CellActionsProvider
@@ -432,7 +436,7 @@ export const getSearchEmbeddableFactory = ({
                   >
                     <SearchEmbeddableGridComponent
                       api={{ ...api, fetchWarnings$ }}
-                      onAddFilter={isEsqlMode({ searchSource }) ? undefined : onAddFilter}
+                      onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
                       stateManager={searchEmbeddableStateManager}
                     />
                   </CellActionsProvider>

@@ -31,15 +31,18 @@ import { getSortForEmbeddable } from '../../utils';
 import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
 import { isEsqlMode } from '../initialize_fetch';
-import { SavedSearchAttributesManager } from '../initialize_search_embeddable_api';
-import type { EmbeddableComponentSearchProps, SearchEmbeddableApi } from '../types';
+import type {
+  EmbeddableComponentSearchProps,
+  SearchEmbeddableStateManager,
+  SearchEmbeddableApi,
+} from '../types';
 import { DiscoverGridEmbeddable } from './saved_search_grid';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & { fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]> };
   query?: AggregateQuery | Query;
   onAddFilter?: DocViewFilterFn;
-  stateManager: SavedSearchAttributesManager;
+  stateManager: SearchEmbeddableStateManager;
 }
 
 const DiscoverDocTableEmbeddableMemoized = React.memo(DiscoverDocTableEmbeddable);
@@ -66,8 +69,10 @@ export function SearchEmbeddableGridComponent({
   const discoverServices = useDiscoverServices();
   const [
     loading,
-    searchSource,
+    savedSearch,
     dataViews,
+    savedSearchId,
+    interceptedWarnings,
     rows,
     totalHitCount,
     columns,
@@ -77,23 +82,21 @@ export function SearchEmbeddableGridComponent({
     rowHeight,
     headerRowHeight,
     rowsPerPage,
-    savedSearchId,
-    interceptedWarnings,
   ] = useBatchedPublishingSubjects(
     api.dataLoading,
-    api.searchSource$,
+    api.savedSearch$,
     api.dataViews,
-    api.rows$,
-    api.totalHitCount$,
-    api.columns$,
-    api.columnsMeta$,
-    api.sort$,
-    api.sampleSize$,
-    api.rowHeight$,
-    api.headerRowHeight$,
-    api.rowsPerPage$,
     api.savedObjectId,
-    api.fetchWarnings$
+    api.fetchWarnings$,
+    stateManager.rows,
+    stateManager.totalHitCount,
+    stateManager.columns,
+    stateManager.columnsMeta,
+    stateManager.sort,
+    stateManager.sampleSize,
+    stateManager.rowHeight,
+    stateManager.headerRowHeight,
+    stateManager.rowsPerPage
   );
 
   const [panelTitle, panelDescription, savedSearchTitle, savedSearchDescription] =
@@ -104,7 +107,7 @@ export function SearchEmbeddableGridComponent({
       api.defaultPanelDescription
     );
 
-  const isEsql = useMemo(() => isEsqlMode({ searchSource }), [searchSource]);
+  const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
 
   const savedSearchProps: SavedSearchProps = useMemo(() => {
     return {
@@ -113,7 +116,7 @@ export function SearchEmbeddableGridComponent({
       searchDescription: panelDescription || savedSearchDescription,
       columnsMeta,
       savedSearchId,
-      query: searchSource.getField('query'),
+      query: savedSearch.searchSource.getField('query'),
       dataView: dataViews?.[0],
       columns: columns ?? [],
       sort: getSortForEmbeddable(sort, dataViews?.[0], discoverServices.uiSettings, isEsql),
@@ -147,7 +150,7 @@ export function SearchEmbeddableGridComponent({
     };
   }, [
     isEsql,
-    searchSource,
+    savedSearch,
     panelTitle,
     panelDescription,
     savedSearchTitle,

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { BehaviorSubject } from 'rxjs';
 import { savedSearchMock } from '../../__mocks__/saved_search';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
@@ -15,7 +16,7 @@ describe('getDiscoverLocatorParams', () => {
     expect(
       getDiscoverLocatorParams({
         savedObjectId: new BehaviorSubject<string | undefined>('savedObjectId'),
-        getSavedSearch: () => savedSearchMock,
+        savedSearch$: new BehaviorSubject<SavedSearch>(savedSearchMock),
       })
     ).toEqual({
       savedSearchId: 'savedObjectId',
@@ -25,7 +26,7 @@ describe('getDiscoverLocatorParams', () => {
   it('should return Discover params if input has no savedObjectId', () => {
     expect(
       getDiscoverLocatorParams({
-        getSavedSearch: () => savedSearchMock,
+        savedSearch$: new BehaviorSubject<SavedSearch>(savedSearchMock),
       })
     ).toEqual({
       dataViewId: savedSearchMock.searchSource.getField('index')?.id,
