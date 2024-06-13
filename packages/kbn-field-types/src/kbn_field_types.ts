@@ -55,6 +55,10 @@ export function esFieldTypeToKibanaFieldType(type: string) {
       return KBN_FIELD_TYPES.STRING;
     case '_version':
       return KBN_FIELD_TYPES.NUMBER;
+    case 'counter_integer':
+    case 'counter_long':
+    case 'counter_double':
+      return KBN_FIELD_TYPES.COUNTER;
     case 'datetime':
       return KBN_FIELD_TYPES.DATE;
     default:

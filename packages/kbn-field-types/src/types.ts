@@ -85,4 +85,5 @@ export enum KBN_FIELD_TYPES {
   NESTED = 'nested',
   HISTOGRAM = 'histogram',
   MISSING = 'missing',
+  COUNTER = 'counter',
 }
