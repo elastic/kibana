@@ -14,6 +14,7 @@ import type {
   NewPackagePolicy,
   PackageInfo,
 } from '../../../../../types';
+import { sendCreateAgentPolicy, useConfig } from '../../../../../hooks';
 import { SetupTechnology } from '../../../../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
@@ -75,6 +76,8 @@ export function useSetupTechnology({
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   packageInfo?: PackageInfo;
 }) {
+  const config = useConfig();
+  const agentlessAPI = config.agentless?.api.url;
   const { isAgentlessEnabled, isAgentlessIntegration } = useAgentless();
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
@@ -97,10 +100,10 @@ export function useSetupTechnology({
       }
     };
 
-    if (isAgentlessEnabled) {
+    if (isAgentlessEnabled && !agentlessAPI) {
       fetchAgentlessPolicy();
     }
-  }, [isAgentlessEnabled]);
+  }, [isAgentlessEnabled, agentlessAPI]);
 
   const handleSetupTechnologyChange = useCallback(
     (setupTechnology) => {
@@ -112,6 +115,10 @@ export function useSetupTechnology({
         if (agentlessPolicy) {
           updateAgentPolicy(agentlessPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
+        } else if (agentlessAPI) {
+          console.log('CREATE AGENT POLICY');
+          // sendCreateAgentPolicy());
+          // setSelectedPolicyTab(SelectedPolicyTab.NEW);
         }
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         updateNewAgentPolicy(newAgentPolicy);
@@ -122,6 +129,7 @@ export function useSetupTechnology({
     },
     [
       isAgentlessEnabled,
+      agentlessAPI,
       selectedSetupTechnology,
       agentlessPolicy,
       updateAgentPolicy,
@@ -132,6 +140,7 @@ export function useSetupTechnology({
   );
 
   return {
+    isAgentlessEnabled,
     handleSetupTechnologyChange,
     agentlessPolicy,
     selectedSetupTechnology,
