@@ -113,6 +113,9 @@ describe('Security Plugin', () => {
               "useRbacForRequest": [Function],
             },
           },
+          "experimental": Object {
+            "isFipsEnabled": [Function],
+          },
           "license": Object {
             "features$": Observable {
               "operator": [Function],

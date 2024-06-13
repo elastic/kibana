@@ -6,6 +6,7 @@
  */
 
 import type { SecurityLicense } from '@kbn/security-plugin-types-common';
+import { Experimental } from '@kbn/security-plugin/server/experimental';
 import type { AuditServiceSetup } from './audit';
 import type { PrivilegeDeprecationsService, AuthorizationServiceSetup } from './authorization';
 import type { AuthenticationServiceStart } from './authentication';
@@ -29,6 +30,11 @@ export interface SecurityPluginSetup {
    * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
    */
   privilegeDeprecationsService: PrivilegeDeprecationsService;
+
+  /**
+   * Exposes experimental features
+   */
+  experimental: Experimental;
 }
 
 /**

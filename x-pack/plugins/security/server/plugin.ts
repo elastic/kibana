@@ -357,6 +357,9 @@ export class SecurityPlugin
         license,
         logger: this.logger.get('deprecations'),
       }),
+      experimental: {
+        isFipsEnabled: this.fipsServiceSetup.isKibanaFipsModeEnabled,
+      },
     });
   }
 
