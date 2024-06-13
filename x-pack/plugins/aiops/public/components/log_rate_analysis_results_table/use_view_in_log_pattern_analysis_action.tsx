@@ -11,7 +11,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isSignificantItem, type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
-import type { GroupTableItem, TableItemAction } from '@kbn/aiops-components';
+import type { GroupTableItem, TableItemAction } from '@kbn/aiops-log-rate-analysis/state';
 
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
