@@ -117,6 +117,8 @@
   - [MARK\_VERSION\_INDEX\_READY\_CONFLICT](#mark_version_index_ready_conflict)
     - [Next action](#next-action-38)
     - [New control state](#new-control-state-37)
+  - [FATAL](#fatal)
+  - [DONE](#done)
 - [Manual QA Test Plan](#manual-qa-test-plan)
   - [1. Legacy pre-migration](#1-legacy-pre-migration)
   - [2. Plugins enabled/disabled](#2-plugins-enableddisabled)
@@ -200,33 +202,33 @@ index.
 
 1. If `.kibana` is pointing to more than one index.
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 2. If `.kibana` is pointing to an index that belongs to a later version of
     Kibana .e.g. a 7.11.0 instance found the `.kibana` alias pointing to
     `.kibana_7.12.0_001` fail the migration
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 3. If `waitForMigrations` was set we're running on a background-tasks node and
 we should not participate in the migration but instead wait for the ui node(s)
 to complete the migration.
 
-    → `WAIT_FOR_MIGRATION_COMPLETION`
+    → [WAIT_FOR_MIGRATION_COMPLETION](#wait_for_migration_completion)
 
 4. If the `.kibana` alias exists we’re migrating from either a v1 or v2 index
 and the migration source index is the index the `.kibana` alias points to.
 
-    → `WAIT_FOR_YELLOW_SOURCE`
+    → [WAIT_FOR_YELLOW_SOURCE](#wait_for_yellow_source)
 
 5. If `.kibana` is a concrete index, we’re migrating from a legacy index
 
-    → `LEGACY_SET_WRITE_BLOCK`
+    → [LEGACY_SET_WRITE_BLOCK](#legacy_set_write_block)
 
 6. If there are no `.kibana` indices, this is a fresh deployment. Initialize a
    new saved objects index
 
-    → `CREATE_NEW_TARGET`
+    → [CREATE_NEW_TARGET](#create_new_target)
 
 ## CREATE_NEW_TARGET
 
@@ -240,11 +242,11 @@ Create the target index. This operation is idempotent, if the index already exis
 
 1. If the action succeeds
 
-    → `MARK_VERSION_INDEX_READY`
+    → [MARK_VERSION_INDEX_READY](#mark_version_index_ready)
 
 2. If the action fails with a `index_not_green_timeout`
 
-    → `CREATE_NEW_TARGET`
+    → [CREATE_NEW_TARGET](#create_new_target)
 
 ## LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION
 
@@ -258,11 +260,11 @@ Same description and behavior as [CHECK\_CLUSTER\_ROUTING\_ALLOCATION](#check_cl
 
 1. If `cluster.routing.allocation.enabled` has a compatible value.
 
-    → `LEGACY_SET_WRITE_BLOCK`
+    → [LEGACY_SET_WRITE_BLOCK](#legacy_set_write_block)
 
 2. If it has a value that will not allow creating new *saved object* indices.
 
-    → `LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION` (retry)
+    → [LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION](#legacy_check_cluster_routing_allocation) (retry)
 
 ## LEGACY_SET_WRITE_BLOCK
 
@@ -283,11 +285,11 @@ This is the first of a series of `LEGACY_*` control states that will:
 
 1. If the write block was successfully added
 
-    → `LEGACY_CREATE_REINDEX_TARGET`
+    → [LEGACY_CREATE_REINDEX_TARGET](#legacy_create_reindex_target)
 
 2. If the write block failed because the index doesn't exist, it means another instance already completed the legacy pre-migration. Proceed to the next step.
 
-    → `LEGACY_CREATE_REINDEX_TARGET`
+    → [LEGACY_CREATE_REINDEX_TARGET](#legacy_create_reindex_target)
 
 ## LEGACY_CREATE_REINDEX_TARGET
 
@@ -303,11 +305,11 @@ saved objects index in 7.4 it will be reindexed into `.kibana_pre7.4.0_001`)
 
 1. If the index creation succeeds
 
-    → `LEGACY_REINDEX`
+    → [LEGACY_REINDEX](#legacy_reindex)
 
 2. If the index creation task failed with a `index_not_green_timeout`
 
-    → `LEGACY_REINDEX_WAIT_FOR_TASK`
+    → [LEGACY_REINDEX_WAIT_FOR_TASK](#legacy_reindex_wait_for_task)
 
 ## LEGACY_REINDEX
 
@@ -321,7 +323,7 @@ original task manager documents into valid saved objects)
 
 ### New control state
 
-→ `LEGACY_REINDEX_WAIT_FOR_TASK`
+→ [LEGACY_REINDEX_WAIT_FOR_TASK](#legacy_reindex_wait_for_task)
 
 ## LEGACY_REINDEX_WAIT_FOR_TASK
 
@@ -335,16 +337,16 @@ Wait for up to 60s for the reindex task to complete.
 
 1. If the reindex task completed
 
-    → `LEGACY_DELETE`
+    → [LEGACY_DELETE](#legacy_delete)
 
 2. If the reindex task failed with a `target_index_had_write_block` or
    `index_not_found_exception` another instance already completed this step
 
-    → `LEGACY_DELETE`
+    → [LEGACY_DELETE](#legacy_delete)
 
 3. If the reindex task is still in progress
 
-    → `LEGACY_REINDEX_WAIT_FOR_TASK`
+    → [LEGACY_REINDEX_WAIT_FOR_TASK](#legacy_reindex_wait_for_task)
 
 ## LEGACY_DELETE
 
@@ -359,12 +361,12 @@ new `.kibana` alias that points to `.kibana_pre6.5.0_001`.
 
 1. If the action succeeds
 
-    → `SET_SOURCE_WRITE_BLOCK`
+    → [SET_SOURCE_WRITE_BLOCK](#set_source_write_block)
 
 2. If the action fails with `remove_index_not_a_concrete_index` or
    `index_not_found_exception` another instance has already completed this step.
 
-    → `SET_SOURCE_WRITE_BLOCK`
+    → [SET_SOURCE_WRITE_BLOCK](#set_source_write_block)
 
 ## WAIT_FOR_MIGRATION_COMPLETION
 
@@ -376,11 +378,11 @@ new `.kibana` alias that points to `.kibana_pre6.5.0_001`.
 
 1. If the ui node finished the migration
 
-    → `DONE`
+    → [DONE](#done)
 
 2. Otherwise wait 2s and check again
 
-    → `WAIT_FOR_MIGRATION_COMPLETION`
+    → [WAIT_FOR_MIGRATION_COMPLETION](#wait_for_migration_completion)
 
 ## WAIT_FOR_YELLOW_SOURCE
 
@@ -394,11 +396,11 @@ Wait for the source index to become yellow. This means the index's primary has b
 
 1. If the action succeeds
 
-    → `UPDATE_SOURCE_MAPPINGS_PROPERTIES`
+    → [UPDATE_SOURCE_MAPPINGS_PROPERTIES](#update_source_mappings_properties)
 
 2. If the action fails with a `index_not_yellow_timeout`
 
-    → `WAIT_FOR_YELLOW_SOURCE`
+    → [WAIT_FOR_YELLOW_SOURCE](#wait_for_yellow_source)
 
 ## UPDATE_SOURCE_MAPPINGS_PROPERTIES
 
@@ -418,19 +420,19 @@ The latter usually happens when a new plugin is enabled that brings some incompa
 
 1. If the mappings are updated and the migration is already completed.
 
-    → `OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT`
+    → [OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT](#outdated_documents_search_open_pit)
 
 2. If the mappings are updated and the migration is still in progress.
 
-    → `CLEANUP_UNKNOWN_AND_EXCLUDED`
+    → [CLEANUP_UNKNOWN_AND_EXCLUDED](#cleanup_unknown_and_excluded)
 
 3. If the mappings are not updated due to incompatible changes and the migration is still in progress.
 
-    → `CHECK_CLUSTER_ROUTING_ALLOCATION`
+    → [CHECK_CLUSTER_ROUTING_ALLOCATION](#check_cluster_routing_allocation)
 
 4. If the mappings are not updated due to incompatible changes and the migration is already completed.
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 ## CLEANUP_UNKNOWN_AND_EXCLUDED
 
@@ -449,11 +451,11 @@ In order to allow Kibana to discard unknown saved objects, users must set the [m
 
 1. If unknown docs are found and Kibana is not configured to ignore them.
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 2. If the delete operation is launched and we can wait for it.
 
-    → `CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK`
+    → [CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK](#cleanup_unknown_and_excluded_wait_for_task)
 
 ## CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
 
@@ -467,19 +469,19 @@ The cleanup task on the previous step is launched asynchronously, tracked by a s
 
 1. If the task finishes before the timeout.
 
-    → `PREPARE_COMPATIBLE_MIGRATION`
+    → [PREPARE_COMPATIBLE_MIGRATION](#prepare_compatible_migration)
 
 2. If we hit the timeout whilst waiting for the task to be completed, but we still have some retry attempts left.
 
-    → `CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK`
+    → [CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK](#cleanup_unknown_and_excluded_wait_for_task)
 
 3. If some errors occur whilst cleaning up, there could be other instances performing the cleanup in parallel, deleting the documents that we intend to delete. In that scenario, we will launch the operation again.
 
-    → `CLEANUP_UNKNOWN_AND_EXCLUDED`
+    → [CLEANUP_UNKNOWN_AND_EXCLUDED](#cleanup_unknown_and_excluded)
 
 4. If we hit the timeout and we run out of retries.
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 ## PREPARE_COMPATIBLE_MIGRATION
 
@@ -493,15 +495,15 @@ At this point, we have successfully updated the index mappings. We are performin
 
 1. If the aliases are updated successfully and some documents have been deleted on the previous step.
 
-    → `REFRESH_SOURCE`
+    → [REFRESH_SOURCE](#refresh_source)
 
 2. If the aliases are updated successfully and we did not delete any documents on the previous step.
 
-    → `OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT`
+    → [OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT](#outdated_documents_search_open_pit)
 
 3. When unexpected errors occur when updating the aliases.
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 ## REFRESH_SOURCE
 
@@ -515,11 +517,11 @@ We are performing a *compatible migration*, and we discarded some unknown and ex
 
 1. If the index is refreshed successfully.
 
-    → `OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT`
+    → [OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT](#outdated_documents_search_open_pit)
 
 2. When unexpected errors occur during the refresh.
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 ## CHECK_CLUSTER_ROUTING_ALLOCATION
 
@@ -543,11 +545,11 @@ The check only considers persistent and transient settings and does not take sta
 
 1. If `cluster.routing.allocation.enabled` has a compatible value.
 
-    → `CHECK_UNKNOWN_DOCUMENTS`
+    → [CHECK_UNKNOWN_DOCUMENTS](#check_unknown_documents)
 
 2. If it has a value that will not allow creating new *saved object* indices.
 
-    → `CHECK_CLUSTER_ROUTING_ALLOCATION` (retry)
+    → [CHECK_CLUSTER_ROUTING_ALLOCATION](#check_cluster_routing_allocation) (retry)
 
 ## CHECK_UNKNOWN_DOCUMENTS
 
@@ -559,11 +561,11 @@ During a *reindex migration*, these documents can be discarded if Kibana is conf
 
 1. If no unknown documents are found, or Kibana is configured to discard them.
 
-    → `SET_SOURCE_WRITE_BLOCK`
+    → [SET_SOURCE_WRITE_BLOCK](#set_source_write_block)
 
 2. If some unknown documents are found and Kibana is NOT configured to discard them.
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 ## SET_SOURCE_WRITE_BLOCK
 
@@ -575,7 +577,7 @@ Set a write block on the source index to prevent any older Kibana instances from
 
 ### New control state
 
-→ `CREATE_REINDEX_TEMP`
+→ [CREATE_REINDEX_TEMP](#create_reindex_temp)
 
 ## CREATE_REINDEX_TEMP
 
@@ -592,11 +594,11 @@ This operation is idempotent, if the index already exist, we wait until its stat
 
 1. If the action succeeds
 
-    → `REINDEX_SOURCE_TO_TEMP_OPEN_PIT`
+    → [REINDEX_SOURCE_TO_TEMP_OPEN_PIT](#reindex_source_to_temp_open_pit)
 
 2. If the action fails with a `index_not_green_timeout`
 
-    → `CREATE_REINDEX_TEMP`
+    → [CREATE_REINDEX_TEMP](#create_reindex_temp)
 
 ## REINDEX_SOURCE_TO_TEMP_OPEN_PIT
 
@@ -608,7 +610,7 @@ Open a PIT. Since there is a write block on the source index there is basically 
 
 ### New control state
 
-→ `REINDEX_SOURCE_TO_TEMP_READ`
+→ [REINDEX_SOURCE_TO_TEMP_READ](#reindex_source_to_temp_read)
 
 ## REINDEX_SOURCE_TO_TEMP_READ
 
@@ -622,11 +624,11 @@ Read the next batch of outdated documents from the source index by using search 
 
 1. If the batch contained > 0 documents
 
-    → `REINDEX_SOURCE_TO_TEMP_TRANSFORM`
+    → [REINDEX_SOURCE_TO_TEMP_TRANSFORM](#reindex_source_to_temp_transform)
 
 2. If there are no more documents returned
 
-    → `REINDEX_SOURCE_TO_TEMP_CLOSE_PIT`
+    → [REINDEX_SOURCE_TO_TEMP_CLOSE_PIT](#reindex_source_to_temp_close_pit)
 
 ## REINDEX_SOURCE_TO_TEMP_TRANSFORM
 
@@ -643,7 +645,7 @@ ensuring that each Kibana instance generates the same new `_id` for the same doc
 
 ### New control state
 
-→ `REINDEX_SOURCE_TO_TEMP_INDEX_BULK`
+→ [REINDEX_SOURCE_TO_TEMP_INDEX_BULK](#reindex_source_to_temp_index_bulk)
 
 ## REINDEX_SOURCE_TO_TEMP_INDEX_BULK
 
@@ -668,11 +670,11 @@ completed this step:
 
 1. If `currentBatch` is the last batch in `bulkOperationBatches`
 
-    → `REINDEX_SOURCE_TO_TEMP_READ`
+    → [REINDEX_SOURCE_TO_TEMP_READ](#reindex_source_to_temp_read)
 
 2. If there are more batches left in `bulkOperationBatches`
 
-    → `REINDEX_SOURCE_TO_TEMP_INDEX_BULK`
+    → [REINDEX_SOURCE_TO_TEMP_INDEX_BULK](#reindex_source_to_temp_index_bulk)
 
 ## REINDEX_SOURCE_TO_TEMP_CLOSE_PIT
 
@@ -682,7 +684,7 @@ completed this step:
 
 ### New control state
 
-→ `SET_TEMP_WRITE_BLOCK`
+→ [SET_TEMP_WRITE_BLOCK](#set_temp_write_block)
 
 ## SET_TEMP_WRITE_BLOCK
 
@@ -694,7 +696,7 @@ Set a write block on the temporary index so that we can clone it.
 
 ### New control state
 
-→ `CLONE_TEMP_TO_TARGET`
+→ [CLONE_TEMP_TO_TARGET](#clone_temp_to_target)
 
 ## CLONE_TEMP_TO_TARGET
 
@@ -710,11 +712,11 @@ We can’t use the temporary index as our target index because one instance can 
 
 1. If the action succeeds.
 
-    → `REFRESH_TARGET`
+    → [REFRESH_TARGET](#refresh_target)
 
 2. If the action fails with an `index_not_green_timeout`.
 
-    → `CLONE_TEMP_TO_TARGET`
+    → [CLONE_TEMP_TO_TARGET](#clone_temp_to_target)
 
 ## REFRESH_TARGET
 
@@ -728,11 +730,11 @@ We refresh the temporary clone index, to make sure newly added documents are tak
 
 1. If the index is refreshed successfully.
 
-    → `OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT`
+    → [OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT](#outdated_documents_search_open_pit)
 
 2. When unexpected errors occur during the refresh.
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 ## OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT
 
@@ -747,11 +749,11 @@ This operation is performed in batches, leveraging the [Point in Time API](https
 
 1. If the PIT is created successfully.
 
-    → `OUTDATED_DOCUMENTS_SEARCH_READ`
+    → [OUTDATED_DOCUMENTS_SEARCH_READ](#outdated_documents_search_read)
 
 2. When unexpected errors occur whilst creating the PIT.
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 ## OUTDATED_DOCUMENTS_SEARCH_READ
 
@@ -772,19 +774,19 @@ and transform them to ensure that everything is up to date.
 
 1. Found outdated documents.
 
-    → `OUTDATED_DOCUMENTS_TRANSFORM`
+    → [OUTDATED_DOCUMENTS_TRANSFORM](#outdated_documents_transform)
 
 2. There aren't any outdated documents left to read, and we can proceed with the flow.
 
-    → `OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT`
+    → [OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT](#outdated_documents_search_close_pit)
 
 3. There aren't any outdated documents left to read, but we encountered *corrupt* documents or *transform errors*, and Kibana is not configured to ignore them (using `migrations.discardCorruptObjects` flag).
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 4. If we encounter an error of the form `es_response_too_large` whilst reading *saved object* documents, we retry with a smaller batch size.
 
-    → `OUTDATED_DOCUMENTS_SEARCH_READ`
+    → [OUTDATED_DOCUMENTS_SEARCH_READ](#outdated_documents_search_read)
 
 ## OUTDATED_DOCUMENTS_TRANSFORM
 
@@ -796,15 +798,15 @@ and transform them to ensure that everything is up to date.
 
 1. If all of the outdated documents in the current batch are transformed successfully, or Kibana is configured to ignore *corrupt* documents and *transform* errors. We managed to break down the current set of documents into smaller batches successfully, so we can start indexing them one by one.
 
-    → `TRANSFORMED_DOCUMENTS_BULK_INDEX`
+    → [TRANSFORMED_DOCUMENTS_BULK_INDEX](#transformed_documents_bulk_index)
 
 2. If the batch contains corrupt documents or transform errors, and Kibana is not configured to discard them, we do not index them, we simply read the next batch, accumulating encountered errors.
 
-    → `OUTDATED_DOCUMENTS_SEARCH_READ`
+    → [OUTDATED_DOCUMENTS_SEARCH_READ](#outdated_documents_search_read)
 
 3. If we can't split the set of documents in batches small enough to not exceed the `maxBatchSize`, we fail the migration.
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 ## TRANSFORMED_DOCUMENTS_BULK_INDEX
 
@@ -818,11 +820,11 @@ Once transformed we use an index operation to overwrite the outdated document wi
 
 1. We have more batches to bulk index.
 
-    → `TRANSFORMED_DOCUMENTS_BULK_INDEX`
+    → [TRANSFORMED_DOCUMENTS_BULK_INDEX](#transformed_documents_bulk_index)
 
 2. We have indexed all the batches of the current read operation. Proceed to read more documents.
 
-    → `OUTDATED_DOCUMENTS_SEARCH_READ`
+    → [OUTDATED_DOCUMENTS_SEARCH_READ](#outdated_documents_search_read)
 
 ## OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT
 
@@ -836,15 +838,15 @@ After reading, transforming and bulk indexingn all saved objects, we can close o
 
 1. If we can close the PIT successfully, and we did update some documents.
 
-    → `OUTDATED_DOCUMENTS_REFRESH`
+    → [OUTDATED_DOCUMENTS_REFRESH](#outdated_documents_refresh)
 
 2. If we can close the PIT successfully, and we did not update any documents.
 
-    → `CHECK_TARGET_MAPPINGS`
+    → [CHECK_TARGET_MAPPINGS](#check_target_mappings)
 
 3. An unexpected error occurred whilst closing the PIT.
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 ## OUTDATED_DOCUMENTS_REFRESH
 
@@ -858,11 +860,11 @@ We updated some outdated documents, we must refresh the target index to pick up 
 
 1. If the index is refreshed successfully.
 
-    → `CHECK_TARGET_MAPPINGS`
+    → [CHECK_TARGET_MAPPINGS](#check_target_mappings)
 
 2. When unexpected errors occur during the refresh.****
 
-    → `FATAL`
+    → [FATAL](#fatal)
 
 ## CHECK_TARGET_MAPPINGS
 
@@ -876,11 +878,11 @@ Compare the calculated mappings' hashes against those stored in the `<index>.map
 
 1. If calculated mappings don't match, we must update them.
 
-    → `UPDATE_TARGET_MAPPINGS_PROPERTIES`
+    → [UPDATE_TARGET_MAPPINGS_PROPERTIES](#update_target_mappings_properties)
 
 2. If calculated mappings and stored mappings match, we can skip directly to the next step.
 
-    → `CHECK_VERSION_INDEX_READY_ACTIONS`
+    → [CHECK_VERSION_INDEX_READY_ACTIONS](#check_version_index_ready_actions)
 
 ## UPDATE_TARGET_MAPPINGS_PROPERTIES
 
@@ -893,7 +895,7 @@ update the mappings and then use an update_by_query to ensure that all fields ar
 
 ### New control state
 
-→ `UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK`
+→ [UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK](#update_target_mappings_properties_wait_for_task)
 
 ## UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK
 
@@ -903,7 +905,7 @@ update the mappings and then use an update_by_query to ensure that all fields ar
 
 ### New control state
 
-→ `MARK_VERSION_INDEX_READY`
+→ [MARK_VERSION_INDEX_READY](#mark_version_index_ready)
 
 ## CHECK_VERSION_INDEX_READY_ACTIONS
 
@@ -917,11 +919,11 @@ None
 
 1. If there are some `versionIndexReadyActions`, we performed a full migration and need to point the aliases to our newly migrated index.
 
-    → `MARK_VERSION_INDEX_READY`
+    → [MARK_VERSION_INDEX_READY](#mark_version_index_ready)
 
 2. If there are no `versionIndexReadyActions`, another instance already completed this migration and we only transformed outdated documents and updated the mappings for in case a new plugin was enabled.
 
-    → `DONE`
+    → [DONE](#done)
 
 ## MARK_VERSION_INDEX_READY
 
@@ -939,11 +941,11 @@ Atomically apply the `versionIndexReadyActions` using the _alias actions API. By
 
 1. If all the actions succeed we’re ready to serve traffic
 
-    → `DONE`
+    → [DONE](#done)
 
 2. If action (1) fails with alias_not_found_exception or action (3) fails with index_not_found_exception another instance already completed the migration
 
-    → `MARK_VERSION_INDEX_READY_CONFLICT`
+    → [MARK_VERSION_INDEX_READY_CONFLICT](#mark_version_index_ready_conflict)
 
 ## MARK_VERSION_INDEX_READY_CONFLICT
 
@@ -959,11 +961,19 @@ If another instance completed a migration from the same source we need to verify
 
 1. If the current and version aliases are pointing to the same index the instance that completed the migration was on the same version and it’s safe to start serving traffic.
 
-    → `DONE`
+    → [DONE](#done)
 
 2. If the other instance was running a different version we fail the migration. Once we restart one of two things can happen: the other instance is an older version and we will restart the migration, or, it’s a newer version and we will refuse to start up.
 
-    → `FATAL`
+    → [FATAL](#fatal)
+
+## FATAL
+
+Unfortunately, this migrator failed at some step. Please check the logs and identify the cause. Once addressed, restart Kibana again to restart / resume the migration.
+
+## DONE
+
+Congratulations, this migrator finished the saved objects migration for its index.
 
 # Manual QA Test Plan
 
