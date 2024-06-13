@@ -1,5 +1,5 @@
-import { MergedServiceEntities, EntityMetrics } from '../get_entities';
 import { mapValues } from 'lodash';
+import { MergedServiceEntities, EntityMetrics } from '../get_entities';
 
 export function calculateAvgMetrics(entities: MergedServiceEntities[]) {
   return entities.map((entity) => {

@@ -27,6 +27,7 @@ export function apmMetricsNotAvailablePopover() {
         <EuiLink
           href="https://demo.elastic.co/app/observabilityOnboarding/customLogs/?category=logs"
           external
+          data-test-subj="apmMetricsNotAvailablePopoverLink"
         >
           {i18n.translate('xpack.apm.servicesTable.notAvailable.footer', {
             defaultMessage: 'See documentation',

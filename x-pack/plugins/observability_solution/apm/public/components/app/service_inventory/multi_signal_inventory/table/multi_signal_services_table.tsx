@@ -8,11 +8,10 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { omit } from 'lodash';
 import React, { useMemo } from 'react';
-import { FETCH_STATUS } from '../../../../../../../observability_shared/public';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
-import { isFailure, isPending } from '../../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isFailure, isPending } from '../../../../../hooks/use_fetcher';
 import { ManagedTable } from '../../../../shared/managed_table';
 import { getServiceColumns } from './get_service_columns';
 

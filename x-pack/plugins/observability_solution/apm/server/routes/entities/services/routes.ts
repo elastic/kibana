@@ -26,7 +26,7 @@ const servicesEntitiesRoute = createApmServerRoute({
       plugins.logsDataAccess.start(),
     ]);
 
-    const assetsESClient = await createEntitiesESClient({
+    const entitiesESClient = await createEntitiesESClient({
       request,
       esClient: coreContext.elasticsearch.client.asCurrentUser,
     });
@@ -34,7 +34,7 @@ const servicesEntitiesRoute = createApmServerRoute({
     const { start, end, kuery, environment } = params.query;
 
     const services = await getServiceEntities({
-      assetsESClient,
+      entitiesESClient,
       start,
       end,
       kuery,

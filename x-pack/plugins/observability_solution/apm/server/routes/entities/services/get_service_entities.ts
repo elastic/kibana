@@ -5,31 +5,25 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
+import { Logger } from '@kbn/core/server';
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
-import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
-import { RollupInterval } from '../../../../common/rollup';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { EntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getEntities } from '../get_entities';
-import { getServiceNamesPerSignalType } from '../utils/get_service_names_per_signal_type';
 import { calculateAvgMetrics } from './calculate_avg_metrics';
-import { getServicesTransactionStats } from './get_services_transaction_stats';
 import { mergeEntities } from './merge_entities';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
 
 export async function getServiceEntities({
-  assetsESClient,
+  entitiesESClient,
   start,
   end,
   kuery,
   environment,
   logger,
 }: {
-  assetsESClient: EntitiesESClient;
+  entitiesESClient: EntitiesESClient;
   start: number;
   end: number;
   kuery: string;
@@ -39,7 +33,7 @@ export async function getServiceEntities({
   return withApmSpan('get_service_entities', async () => {
     try {
       const entities = await getEntities({
-        assetsESClient,
+        entitiesESClient,
         start,
         end,
         kuery,

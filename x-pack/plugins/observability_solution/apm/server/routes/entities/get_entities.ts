@@ -77,14 +77,14 @@ export function entitiesRangeQuery(start: number, end: number): QueryDslQueryCon
 }
 
 export async function getEntities({
-  assetsESClient,
+  entitiesESClient,
   start,
   end,
   environment,
   kuery,
   size,
 }: {
-  assetsESClient: EntitiesESClient;
+  entitiesESClient: EntitiesESClient;
   start: number;
   end: number;
   environment: string;
@@ -92,7 +92,7 @@ export async function getEntities({
   size: number;
 }) {
   const entities = (
-    await assetsESClient.search(`get_entities`, {
+    await entitiesESClient.search(`get_entities`, {
       body: {
         size,
         track_total_hits: false,
