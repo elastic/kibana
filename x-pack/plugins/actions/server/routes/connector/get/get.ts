@@ -26,8 +26,8 @@ export const getConnectorRoute = (
       options: {
         access: 'public',
         summary: `Get connector information`,
-        description:
-          'You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
+        // description:
+        //   'You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
       },
       validate: {
         params: getConnectorParamsSchemaV1,
