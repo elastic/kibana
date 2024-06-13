@@ -8,7 +8,6 @@
 
 export * from './types';
 export * from './profiles';
-export { registerProfileProviders } from './profile_providers';
 export { getMergedAccessor } from './composable_profile';
 export { ProfilesManager } from './profiles_manager';
 export { useProfileAccessor, useRootProfile } from './hooks';

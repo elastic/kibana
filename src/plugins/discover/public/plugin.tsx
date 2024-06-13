@@ -461,7 +461,7 @@ export class DiscoverPlugin
 
   private async createProfilesManager() {
     if (!this.profileProvidersRegistered) {
-      const { registerProfileProviders } = await import('./context_awareness');
+      const { registerProfileProviders } = await import('./context_awareness/profile_providers');
       const enabledProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
 
       registerProfileProviders({
