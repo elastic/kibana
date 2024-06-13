@@ -100,6 +100,7 @@ export const generate = async (config: GeneratorConfig) => {
         version: 'Bundle (no version)',
       },
       imports: {},
+      recursiveRefs: new Set<string>(),
     });
 
     await fs.writeFile(bundle.outFile, result);

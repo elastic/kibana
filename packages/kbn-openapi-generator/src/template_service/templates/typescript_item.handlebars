@@ -1,0 +1,86 @@
+{{~#if type~}}
+  {{~> (concat "type_" type)~}}
+{{~/if~}}
+
+{{~#if $ref~}}
+  {{referenceName}}
+  {{~#if nullable}} | null {{/if~}}
+{{~/if~}}
+
+{{~#if allOf~}}
+  {{~#each allOf~}}
+    {{~> typescript_item ~}}
+    {{~#unless @last~}}&{{~/unless~}} 
+  {{~/each~}}
+{{~/if~}}
+
+{{~#if anyOf~}}
+  {{~#each anyOf~}}
+    {{~> typescript_item ~}}
+    {{~#unless @last~}}|{{~/unless~}} 
+  {{~/each~}}
+{{~/if~}}
+
+{{~#if oneOf~}}
+  {{~#each oneOf~}}
+    {{~> typescript_item ~}}
+    {{~#unless @last~}}|{{~/unless~}} 
+  {{~/each~}}
+{{~/if~}}
+
+{{#if (isUnknown .)}}
+unknown
+{{/if}}
+
+{{~#*inline "type_array"~}}
+  ({{~> typescript_item items ~}})[]
+{{~/inline~}}
+
+{{~#*inline "type_boolean"~}}
+  boolean
+{{~/inline~}}
+
+{{~#*inline "type_integer"~}}
+  number
+{{~/inline~}}
+
+{{~#*inline "type_number"~}}
+  number
+{{~/inline~}}
+
+{{~#*inline "type_object"~}}
+  {{~#if (eq x-modify "partial")}} Partial< {{/if~}}
+  {
+    {{#each properties}}
+      {{#if description}}
+      /** 
+      * {{{description}}} 
+      */
+      {{/if}}
+      {{#if (startsWithSpecialChar @key)}}
+        '{{@key}}'{{#unless (includes ../required @key)}}?{{/unless}}: {{> typescript_item }};
+      {{else}}
+        {{@key}}{{#unless (includes ../required @key)}}?{{/unless}}: {{> typescript_item }};
+      {{/if}}
+    {{/each}}
+    {{~#if additionalProperties}}
+      {{~#if (eq additionalProperties true)~}}
+        [key: string]: unknown;
+      {{~else~}}
+        [key: string]: {{> typescript_item additionalProperties}};
+      {{~/if~}}
+    {{~/if~}}
+  }
+  {{~#if (eq x-modify "partial")}} > {{/if~}}
+{{~/inline~}}
+
+{{~#*inline "type_string"~}}
+  {{~#if enum~}}
+    {{~#each enum~}}
+      '{{.}}'
+      {{~#unless @last~}}|{{~/unless~}} 
+    {{~/each~}}
+  {{~else~}}
+  string
+  {{~/if~}}
+{{~/inline~}}

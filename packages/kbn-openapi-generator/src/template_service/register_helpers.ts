@@ -7,6 +7,7 @@
  */
 
 import type Handlebars from '@kbn/handlebars';
+import { HelperOptions } from 'handlebars';
 import { snakeCase, camelCase } from 'lodash';
 
 export function registerHelpers(handlebarsInstance: typeof Handlebars) {
@@ -54,6 +55,34 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
     'replace',
     (val: string, searchValue: string, replaceValue: string) => {
       return val.replace(searchValue, replaceValue);
+    }
+  );
+
+  /**
+   * Checks whether provided reference is a known recursive reference or a part of recursive chain
+   *
+   * It's expected that `context.recursiveRefs` has been filled by the parser.
+   */
+  handlebarsInstance.registerHelper('isRecursiveRef', (ref: string, options: HelperOptions) => {
+    if (!options.data?.root?.recursiveRefs) {
+      return false;
+    }
+
+    const recursiveRefs: Set<string> = options.data.root.recursiveRefs;
+
+    return recursiveRefs.has(ref);
+  });
+
+  handlebarsInstance.registerHelper(
+    'isRecursiveSchema',
+    (schemaName: string, options: HelperOptions) => {
+      if (!options.data?.root?.recursiveRefs) {
+        return false;
+      }
+
+      const recursiveRefs: Set<string> = options.data.root.recursiveRefs;
+
+      return recursiveRefs.has(`#/components/schemas/${schemaName}`);
     }
   );
 }

@@ -6,7 +6,11 @@
 {{~/if~}}
 
 {{~#if $ref~}}
-  {{referenceName}}
+  {{~#if (isRecursiveRef $ref)~}}
+    z.lazy(() => {{referenceName}})
+  {{~else~}}
+    {{referenceName}}
+  {{~/if~}}
   {{~#if nullable}}.nullable(){{/if~}}
   {{~#if (eq requiredBool false)}}.optional(){{/if~}}
   {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
@@ -127,4 +131,3 @@ z.unknown()
   {{~#if pattern}}.regex(/{{pattern}}/){{/if~}}
   {{~/if~}}
 {{~/inline~}}
-
