@@ -1224,7 +1224,7 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /WORKSPACE.bazel @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-esql
-/.buildkite/scripts/steps/esql_generate_function_definitions.sh @elastic/kibana-esql
+/.buildkite/scripts/steps/esql_generate_function_metadata.sh @elastic/kibana-esql
 /.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
