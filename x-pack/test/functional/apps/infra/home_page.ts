@@ -309,7 +309,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpu', chartsCount: 1 },
             { metric: 'memory', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
-            it.skip(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
               const containers = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
                 metric
               );
@@ -332,6 +332,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should show metadata table', async () => {
             await pageObjects.assetDetails.metadataTableExists();
+          });
+        });
+
+        describe('Metrics Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetricsTab();
+          });
+
+          it('should show metrics content', async () => {
+            await pageObjects.assetDetails.metricsChartsContentExists();
           });
         });
 
