@@ -13,17 +13,17 @@ import { hasRef } from './helpers/has_ref';
 import { traverseObject } from './helpers/traverse_object';
 
 /**
- * Extracts recursive references from a provided document.
+ * Extracts circular references from a provided document.
  * Currently only local references are supported.
  */
-export function getRecursiveRefs(document: OpenApiDocument): Set<string> {
+export function getCircularRefs(document: OpenApiDocument): Set<string> {
   // Process only local references
   // Local references start with `#/`
   const refs = findRefs(document).filter((ref) => ref.startsWith('#/'));
-  const recursiveRefs = new Set<string>();
+  const circularRefs = new Set<string>();
 
   // We need to start traversal from each reference to make sure we caught
-  // all recursive cycles. Use BFS algorithm on top of traverseObject function.
+  // all circular cycles. Use BFS algorithm on top of traverseObject function.
   for (const ref of new Set(refs)) {
     const refsToVisit = [[ref, new Set<string>()] as const];
 
@@ -42,7 +42,7 @@ export function getRecursiveRefs(document: OpenApiDocument): Set<string> {
           }
 
           if (visitedRefsSet.has(node.$ref)) {
-            recursiveRefs.add(node.$ref);
+            circularRefs.add(node.$ref);
             return;
           }
 
@@ -52,7 +52,7 @@ export function getRecursiveRefs(document: OpenApiDocument): Set<string> {
     }
   }
 
-  return recursiveRefs;
+  return circularRefs;
 }
 
 /**

@@ -25,7 +25,7 @@ import {
   {{/if}}
   */
 {{/if}}
-{{#if (isRecursiveSchema @key)}}
+{{#if (isCircularSchema @key)}}
 export type {{@key}} = {{> typescript_item}};
 export const {{@key}}: z.ZodType<{{@key}}> = {{> zod_schema_item }};
 {{else}}

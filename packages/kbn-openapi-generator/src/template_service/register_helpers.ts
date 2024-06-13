@@ -59,30 +59,35 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   );
 
   /**
-   * Checks whether provided reference is a known recursive reference or a part of recursive chain
+   * Checks whether provided reference is a known circular reference or a part of circular chain.
    *
    * It's expected that `context.recursiveRefs` has been filled by the parser.
    */
-  handlebarsInstance.registerHelper('isRecursiveRef', (ref: string, options: HelperOptions) => {
-    if (!options.data?.root?.recursiveRefs) {
+  handlebarsInstance.registerHelper('isCircularRef', (ref: string, options: HelperOptions) => {
+    if (!options.data?.root?.circularRefs) {
       return false;
     }
 
-    const recursiveRefs: Set<string> = options.data.root.recursiveRefs;
+    const circularRefs: Set<string> = options.data.root.circularRefs;
 
-    return recursiveRefs.has(ref);
+    return circularRefs.has(ref);
   });
 
+  /**
+   * Checks whether provided schema is circular or a part of the circular chain.
+   *
+   * It's expected that `context.circularRefs` has been filled by the parser.
+   */
   handlebarsInstance.registerHelper(
-    'isRecursiveSchema',
+    'isCircularSchema',
     (schemaName: string, options: HelperOptions) => {
-      if (!options.data?.root?.recursiveRefs) {
+      if (!options.data?.root?.circularRefs) {
         return false;
       }
 
-      const recursiveRefs: Set<string> = options.data.root.recursiveRefs;
+      const circularRefs: Set<string> = options.data.root.circularRefs;
 
-      return recursiveRefs.has(`#/components/schemas/${schemaName}`);
+      return circularRefs.has(`#/components/schemas/${schemaName}`);
     }
   );
 }

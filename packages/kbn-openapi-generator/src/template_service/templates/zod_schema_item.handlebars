@@ -6,7 +6,7 @@
 {{~/if~}}
 
 {{~#if $ref~}}
-  {{~#if (isRecursiveRef $ref)~}}
+  {{~#if (isCircularRef $ref)~}}
     z.lazy(() => {{referenceName}})
   {{~else~}}
     {{referenceName}}
