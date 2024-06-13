@@ -12,6 +12,8 @@ servers:
 paths:
   /internal/asset_criticality/upload_csv:
     post:
+      x-labels: [ess, serverless]
+      x-internal: true
       summary: Uploads a CSV file containing asset criticality data
       requestBody:
         content:

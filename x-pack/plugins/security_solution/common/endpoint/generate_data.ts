@@ -30,7 +30,6 @@ import type {
   SafeEndpointEvent,
 } from './types';
 import { HostPolicyResponseActionStatus } from './types';
-import { policyFactory } from './models/policy_config';
 import {
   ancestryArray,
   entityIDSafeVersion,
@@ -41,6 +40,7 @@ import {
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import type { EventOptions } from './types/generator';
 import { BaseDataGenerator } from './data_generators/base_data_generator';
+import { FleetPackagePolicyGenerator } from './data_generators/fleet_package_policy_generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
 /**
@@ -1578,46 +1578,8 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   /**
    * Generates a Fleet `package policy` that includes the Endpoint Policy data
    */
-  public generatePolicyPackagePolicy(): PolicyData {
-    const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
-    // FIXME: remove and use new FleetPackagePolicyGenerator (#2262)
-    return {
-      id: this.seededUUIDv4(),
-      name: 'Endpoint Policy',
-      description: 'Policy to protect the worlds data',
-      created_at: created,
-      created_by: 'elastic',
-      updated_at: new Date().toISOString(),
-      updated_by: 'elastic',
-      policy_id: this.seededUUIDv4(),
-      enabled: true,
-      inputs: [
-        {
-          type: 'endpoint',
-          enabled: true,
-          streams: [],
-          config: {
-            artifact_manifest: {
-              value: {
-                manifest_version: '1.0.0',
-                schema_version: 'v1',
-                artifacts: {},
-              },
-            },
-            policy: {
-              value: policyFactory(),
-            },
-          },
-        },
-      ],
-      namespace: 'default',
-      package: {
-        name: 'endpoint',
-        title: 'Elastic Endpoint',
-        version: '1.0.0',
-      },
-      revision: 1,
-    };
+  public generatePolicyPackagePolicy(seed: string = 'seed'): PolicyData {
+    return new FleetPackagePolicyGenerator(seed).generateEndpointPackagePolicy();
   }
 
   /**
