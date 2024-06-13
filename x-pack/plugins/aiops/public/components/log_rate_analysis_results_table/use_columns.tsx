@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
+import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { FieldStatsPopover } from '../field_stats_popover';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -61,9 +61,13 @@ export const significantItemColumns = {
   ...commonColumns,
 } as const;
 
-export const GROUPS_TABLE = 'groups';
-export const SIG_ITEMS_TABLE = 'significantItems';
-type TableType = typeof GROUPS_TABLE | typeof SIG_ITEMS_TABLE;
+export const LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE = {
+  GROUPS: 'groups',
+  SIGNIFICANT_ITEMS: 'significantItems',
+} as const;
+export type LogRateAnalysisResultsTableType =
+  typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE[keyof typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE];
+
 export type ColumnNames = keyof typeof significantItemColumns | 'unique';
 
 const logRateHelpMessage = i18n.translate(
@@ -94,12 +98,9 @@ const impactMessage = i18n.translate(
 );
 
 export const useColumns = (
-  tableType: TableType,
+  tableType: LogRateAnalysisResultsTableType,
   skippedColumns: string[],
   searchQuery: estypes.QueryDslQueryContainer,
-  timeRangeMs: TimeRangeMs,
-  loading: boolean,
-  zeroDocsFallback: boolean,
   barColorOverride?: string,
   barHighlightColorOverride?: string,
   isExpandedRow: boolean = false
@@ -111,7 +112,13 @@ export const useColumns = (
   const viewInLogPatternAnalysisAction = useViewInLogPatternAnalysisAction(dataView.id);
   const copyToClipBoardAction = useCopyToClipboardAction();
 
-  const isGroupsTable = tableType === GROUPS_TABLE;
+  const { earliest, latest } = useAppSelector((s) => s.logRateAnalysis);
+  const timeRangeMs = { from: earliest ?? 0, to: latest ?? 0 };
+
+  const loading = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
+  const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
+
+  const isGroupsTable = tableType === LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS;
 
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
     return {
