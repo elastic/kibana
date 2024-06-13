@@ -11,7 +11,7 @@ import { assertNever } from '@kbn/std';
 import { SLI_OPTIONS } from '../../../../slo_edit/constants';
 import { GroupByField } from '../../slo_list_group_by';
 
-export function useGroupName(groupBy: GroupByField, group: string, summary: GroupSummary) {
+export function useGroupName(groupBy: GroupByField, group: string, summary?: GroupSummary) {
   const groupName = group.toLowerCase();
 
   switch (groupBy) {
@@ -20,7 +20,7 @@ export function useGroupName(groupBy: GroupByField, group: string, summary: Grou
     case 'status':
       return groupName;
     case 'slo.instanceId':
-      if (groupName === ALL_VALUE) {
+      if (groupName === ALL_VALUE || !summary) {
         return i18n.translate('xpack.slo.group.ungroupedInstanceId', {
           defaultMessage: 'Ungrouped',
         });
