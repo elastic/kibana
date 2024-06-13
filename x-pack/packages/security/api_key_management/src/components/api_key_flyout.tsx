@@ -161,7 +161,7 @@ const WRITE_ONLY_BOILERPLATE = `{
   }
 }`;
 
-const httpErrorText = i18n.translate('xpack.plugins.security.httpError', {
+const httpErrorText = i18n.translate('xpack.security.httpError', {
   defaultMessage: 'Could not initialize http client.',
 });
 
