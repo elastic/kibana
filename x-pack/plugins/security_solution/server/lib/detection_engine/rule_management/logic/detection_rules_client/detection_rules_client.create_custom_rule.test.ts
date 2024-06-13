@@ -33,7 +33,10 @@ describe('DetectionRulesClient.createCustomRule', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+
     rulesClient = rulesClientMock.create();
+    rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
     detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
   });
 
