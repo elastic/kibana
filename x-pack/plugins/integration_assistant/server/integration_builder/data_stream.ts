@@ -6,7 +6,7 @@
  */
 
 import nunjucks from 'nunjucks';
-import { join as joinPath } from 'path';
+import { resolve as resolvePath } from 'path';
 import type { DataStream } from '../../common';
 import { copySync, createSync, ensureDirSync, listDirSync } from '../util';
 
@@ -16,7 +16,7 @@ export function createDatastream(
   dataStream: DataStream
 ): void {
   const dataStreamName = dataStream.name;
-  const pipelineDir = joinPath(specificDataStreamDir, 'elasticsearch', 'ingest_pipeline');
+  const pipelineDir = resolvePath(specificDataStreamDir, 'elasticsearch', 'ingest_pipeline');
   const title = dataStream.title;
   const description = dataStream.description;
 
@@ -57,16 +57,16 @@ export function createDatastream(
     data_streams: dataStreams,
   });
 
-  createSync(joinPath(specificDataStreamDir, 'manifest.yml'), finalManifest);
+  createSync(resolvePath(specificDataStreamDir, 'manifest.yml'), finalManifest);
 }
 
 function createDataStreamFolders(specificDataStreamDir: string, pipelineDir: string): void {
-  const dataStreamTemplatesDir = joinPath(__dirname, '../templates/data_stream');
+  const dataStreamTemplatesDir = resolvePath(__dirname, '../templates/data_stream');
   const items = listDirSync(dataStreamTemplatesDir);
 
   for (const item of items) {
-    const s = joinPath(dataStreamTemplatesDir, item);
-    const d = joinPath(specificDataStreamDir, item);
+    const s = resolvePath(dataStreamTemplatesDir, item);
+    const d = resolvePath(specificDataStreamDir, item);
     copySync(s, d);
   }
 
@@ -79,18 +79,18 @@ function createPipelineTests(
   packageName: string,
   dataStreamName: string
 ): void {
-  const pipelineTestTemplatesDir = joinPath(__dirname, '../templates/pipeline_tests');
-  const pipelineTestsDir = joinPath(specificDataStreamDir, '_dev/test/pipeline');
+  const pipelineTestTemplatesDir = resolvePath(__dirname, '../templates/pipeline_tests');
+  const pipelineTestsDir = resolvePath(specificDataStreamDir, '_dev/test/pipeline');
   ensureDirSync(pipelineTestsDir);
   const items = listDirSync(pipelineTestTemplatesDir);
   for (const item of items) {
-    const s = joinPath(pipelineTestTemplatesDir, item);
-    const d = joinPath(pipelineTestsDir, item.replaceAll('_', '-'));
+    const s = resolvePath(pipelineTestTemplatesDir, item);
+    const d = resolvePath(pipelineTestsDir, item.replaceAll('_', '-'));
     copySync(s, d);
   }
   const formattedPackageName = packageName.replace(/_/g, '-');
   const formattedDataStreamName = dataStreamName.replace(/_/g, '-');
-  const testFileName = joinPath(
+  const testFileName = resolvePath(
     pipelineTestsDir,
     `test-${formattedPackageName}-${formattedDataStreamName}.log`
   );
