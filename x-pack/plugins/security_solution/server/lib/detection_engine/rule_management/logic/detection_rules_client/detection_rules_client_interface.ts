@@ -19,7 +19,7 @@ import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 export interface IDetectionRulesClient {
   createCustomRule: (args: CreateCustomRuleArgs) => Promise<RuleResponse>;
   createPrebuiltRule: (args: CreatePrebuiltRuleArgs) => Promise<RuleResponse>;
-  updateRule: (args: UpdateRuleArgs) => Promise<RuleAlertType>;
+  updateRule: (args: UpdateRuleArgs) => Promise<RuleResponse>;
   patchRule: (args: PatchRuleArgs) => Promise<RuleAlertType>;
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleAlertType>;
