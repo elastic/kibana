@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
-import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
@@ -70,8 +70,12 @@ export class FleetUsageSender {
     }
     // Check that this task is current
     if (taskInstance.id !== this.taskId) {
-      throwUnrecoverableError(new Error('Outdated task version for task: ' + taskInstance.id));
-      return;
+      appContextService
+        .getLogger()
+        .info(
+          `Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
+        );
+      return getDeleteTaskRunResult();
     }
     appContextService.getLogger().info('Running Fleet Usage telemetry send task');
 
