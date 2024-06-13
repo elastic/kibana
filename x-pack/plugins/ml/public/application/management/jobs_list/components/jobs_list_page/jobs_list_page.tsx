@@ -111,6 +111,9 @@ export const JobsListPage: FC<Props> = ({
   }
 
   function onCloseSyncFlyout() {
+    if (typeof refreshJobs === 'function') {
+      refreshJobs();
+    }
     setShowSyncFlyout(false);
   }
 
