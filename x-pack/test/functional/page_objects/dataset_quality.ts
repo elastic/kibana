@@ -56,7 +56,7 @@ const texts = {
   datasetHealthPoor: 'Poor',
   datasetHealthDegraded: 'Degraded',
   datasetHealthGood: 'Good',
-  activeDatasets: 'Active Datasets',
+  activeDatasets: 'Active Data Sets',
   estimatedData: 'Estimated Data',
   docsCountTotal: 'Docs count (total)',
   size: 'Size',
