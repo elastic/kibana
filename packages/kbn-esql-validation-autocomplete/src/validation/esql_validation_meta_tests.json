@@ -10648,6 +10648,11 @@
       "warning": []
     },
     {
+      "query": "from a_index | sort coalesce(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = concat(\"a\", \"a\")",
       "error": [],
       "warning": []

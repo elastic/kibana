@@ -25,7 +25,7 @@ const createConfig = (
     sniffInterval: false,
     requestHeadersWhitelist: ['authorization'],
     hosts: ['http://localhost:80'],
-    dnsCacheTtlInSeconds: 0,
+    dnsCacheTtl: duration(0, 'seconds'),
     ...parts,
   };
 };
