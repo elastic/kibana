@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('shows sort by dataset name and show namespace', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       await datasetNameCol.sort('descending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(
