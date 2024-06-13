@@ -9,7 +9,7 @@ import React, { ReactElement } from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { MemoryHistory } from 'history/createMemoryHistory';
 import { createMemoryHistory, History } from 'history';
-import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl, renderWithI18nProvider, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
 import { mockState } from '../__mocks__/uptime_store.mock';
@@ -43,7 +43,7 @@ const helperWithRouter: <R>(
 };
 
 export const renderWithRouter = (component: ReactElement, customHistory?: MemoryHistory) => {
-  return helperWithRouter(renderWithIntl, component, customHistory);
+  return helperWithRouter(renderWithI18nProvider, component, customHistory);
 };
 
 export const shallowWithRouter = (component: ReactElement, customHistory?: MemoryHistory) => {
@@ -55,7 +55,7 @@ export const mountWithRouter = (component: ReactElement, customHistory?: MemoryH
 };
 
 export const renderWithRouterRedux = (component: ReactElement, customHistory?: MemoryHistory) => {
-  return helperWithRouter(renderWithIntl, component, customHistory, true);
+  return helperWithRouter(renderWithI18nProvider, component, customHistory, true);
 };
 
 export const shallowWithRouterRedux = (component: ReactElement, customHistory?: MemoryHistory) => {
@@ -84,7 +84,7 @@ export function render<ExtraCore>(
     ...mockState,
     ...state,
   };
-  return renderWithIntl(
+  return renderWithI18nProvider(
     <MountWithReduxProvider state={testState}>
       <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
         {ui}

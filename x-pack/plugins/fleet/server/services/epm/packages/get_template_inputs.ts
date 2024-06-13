@@ -16,7 +16,7 @@ import type {
   PackageInfo,
   NewPackagePolicy,
   PackagePolicyInput,
-  FullAgentPolicyInputStream,
+  TemplateAgentPolicyInput,
 } from '../../../../common/types';
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
 
@@ -30,8 +30,8 @@ type Format = 'yml' | 'json';
 // Function based off storedPackagePolicyToAgentInputs, it only creates the `streams` section instead of the FullAgentPolicyInput
 export const templatePackagePolicyToFullInputStreams = (
   packagePolicyInputs: PackagePolicyInput[]
-): FullAgentPolicyInputStream[] => {
-  const fullInputsStreams: FullAgentPolicyInputStream[] = [];
+): TemplateAgentPolicyInput[] => {
+  const fullInputsStreams: TemplateAgentPolicyInput[] = [];
 
   if (!packagePolicyInputs || packagePolicyInputs.length === 0) return fullInputsStreams;
 
@@ -61,8 +61,25 @@ export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
   pkgName: string,
   pkgVersion: string,
+  format: 'yml',
+  prerelease?: boolean,
+  ignoreUnverified?: boolean
+): Promise<string>;
+export async function getTemplateInputs(
+  soClient: SavedObjectsClientContract,
+  pkgName: string,
+  pkgVersion: string,
+  format: 'json',
+  prerelease?: boolean,
+  ignoreUnverified?: boolean
+): Promise<{ inputs: TemplateAgentPolicyInput[] }>;
+export async function getTemplateInputs(
+  soClient: SavedObjectsClientContract,
+  pkgName: string,
+  pkgVersion: string,
   format: Format,
-  prerelease?: boolean
+  prerelease?: boolean,
+  ignoreUnverified?: boolean
 ) {
   const packageInfoMap = new Map<string, PackageInfo>();
   let packageInfo: PackageInfo;
@@ -75,6 +92,7 @@ export async function getTemplateInputs(
       pkgName,
       pkgVersion,
       prerelease,
+      ignoreUnverified,
     });
   }
   const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');
@@ -83,6 +101,7 @@ export async function getTemplateInputs(
     logger: appContextService.getLogger(),
     packageInfo,
     savedObjectsClient: soClient,
+    ignoreUnverified,
   });
 
   const compiledInputs = await _compilePackagePolicyInputs(

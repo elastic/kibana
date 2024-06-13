@@ -56,6 +56,9 @@ export class AIAssistantManagementSelectionPlugin
           {
             defaultMessage:
               '<em>[technical preview]</em> Whether to show the Observability AI Assistant menu item in Observability, everywhere, or nowhere.',
+            values: {
+              em: (chunks) => `<em>${chunks}</em>`,
+            },
           }
         ),
         schema: schema.oneOf(

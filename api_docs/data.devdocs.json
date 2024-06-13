@@ -4053,6 +4053,60 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.SearchSource.loadDataViewFields",
+            "type": "Function",
+            "tags": [],
+            "label": "loadDataViewFields",
+            "description": [],
+            "signature": [
+              "(dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ") => Promise<Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/search_source/search_source.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.SearchSource.loadDataViewFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewLazy",
+                    "text": "DataViewLazy"
+                  }
+                ],
+                "path": "src/plugins/data/common/search/search_source/search_source.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.SearchSource.getSerializedFields",
             "type": "Function",
             "tags": [],
@@ -7613,6 +7667,61 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.ISearchStartSearchSource.createLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "createLazy",
+            "description": [],
+            "signature": [
+              "(fields?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SerializedSearchSourceFields",
+                "text": "SerializedSearchSourceFields"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchSource",
+                "text": "ISearchSource"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.ISearchStartSearchSource.createLazy.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "fields",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SerializedSearchSourceFields",
+                    "text": "SerializedSearchSourceFields"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/data/common/search/search_source/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.ISearchStartSearchSource.createEmpty",
             "type": "Function",
             "tags": [],
@@ -9682,7 +9791,23 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          ") => Promise<Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ">>; getSerializedFields: (recurse?: boolean) => ",
           {
             "pluginId": "data",
             "scope": "common",

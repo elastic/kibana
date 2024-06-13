@@ -859,9 +859,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       performancePresets: `${FLEET_DOCS}es-output-settings.html#es-output-settings-performance-tuning-settings`,
       scalingKubernetesResourcesAndLimits: `${FLEET_DOCS}scaling-on-kubernetes.html#_specifying_resources_and_limits_in_agent_manifests`,
       roleAndPrivileges: `${FLEET_DOCS}fleet-roles-and-privileges.html`,
+      proxiesSettings: `${FLEET_DOCS}fleet-agent-proxy-support.html`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/index.html`,
+      dataStreams: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/ecs-data_stream.html`,
     },
     clients: {
       /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
