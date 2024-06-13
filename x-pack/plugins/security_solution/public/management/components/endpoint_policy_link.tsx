@@ -52,7 +52,7 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
     backLink,
     children,
     policyExists = true,
-    isOutdated,
+    isOutdated = false,
     tooltip = true,
     revision,
     textSize = 's',
@@ -80,13 +80,6 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
       const content = (
         <EuiText className="eui-displayInline eui-textTruncate" size={textSize}>
           {children}
-          {(!policyId || !policyExists) && (
-            <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-              <EuiIcon size="m" type="warning" color="warning" />
-              &nbsp;
-              {POLICY_NOT_FOUND_MESSAGE}
-            </EuiText>
-          )}
         </EuiText>
       );
 
@@ -98,84 +91,96 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
       ) : (
         content
       );
-    }, [
-      children,
-      clickHandler,
-      displayAsLink,
-      euiLinkProps,
-      policyExists,
-      policyId,
-      textSize,
-      toRouteUrl,
-    ]);
+    }, [children, clickHandler, displayAsLink, euiLinkProps, textSize, toRouteUrl]);
+
+    const policyNoLongerAvailableMessage = useMemo(() => {
+      return (
+        ((!policyId || !policyExists) && (
+          <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+            <EuiIcon size="m" type="warning" color="warning" />
+            &nbsp;
+            {POLICY_NOT_FOUND_MESSAGE}
+          </EuiText>
+        )) ||
+        null
+      );
+    }, [policyExists, policyId]);
 
     const tooltipContent: React.ReactNode | undefined = useMemo(() => {
       const content = tooltip === true ? children : tooltip || undefined;
       return content ? (
         <div className="eui-textBreakAll" style={{ width: '100%' }}>
           {content}
-          {policyExists === false && <>&nbsp;{`(${POLICY_NOT_FOUND_MESSAGE})`}</>}
+          {policyNoLongerAvailableMessage && <>&nbsp;{`(${POLICY_NOT_FOUND_MESSAGE})`}</>}
         </div>
       ) : (
         content
       );
-    }, [children, policyExists, tooltip]);
+    }, [children, policyNoLongerAvailableMessage, tooltip]);
 
     return (
-      <EuiFlexGroup
-        wrap={false}
-        responsive={false}
-        gutterSize="xs"
-        alignItems="center"
-        justifyContent="spaceAround"
-        data-test-subj={testId()}
-      >
-        <EuiFlexItem data-test-subj={testId('policyName')} className="eui-textTruncate">
-          {tooltipContent ? (
-            <EuiToolTip content={tooltipContent} anchorClassName="eui-textTruncate">
-              {displayValue}
-            </EuiToolTip>
-          ) : (
-            displayValue
-          )}
-        </EuiFlexItem>
-
-        {revision && (
-          <EuiFlexItem grow={false} className="eui-textTruncate">
-            <EuiText
-              color="subdued"
-              size="xs"
-              className="eui-textTruncate"
-              data-test-subj={testId('version')}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpointPolicyLink.policyVersion"
-                defaultMessage="rev. {revision}"
-                values={{ revision }}
-              />
-            </EuiText>
+      <div>
+        <EuiFlexGroup
+          wrap={false}
+          responsive={false}
+          gutterSize="xs"
+          alignItems="center"
+          data-test-subj={testId()}
+        >
+          <EuiFlexItem
+            data-test-subj={testId('policyName')}
+            className="eui-textTruncate"
+            grow={false}
+            style={{ minWidth: '40px' }}
+          >
+            {tooltipContent ? (
+              <EuiToolTip content={tooltipContent} anchorClassName="eui-textTruncate">
+                {displayValue}
+              </EuiToolTip>
+            ) : (
+              displayValue
+            )}
           </EuiFlexItem>
-        )}
 
-        {isOutdated && (
-          <EuiFlexItem grow={false} className="eui-textTruncate">
-            <EuiText
-              color="subdued"
-              size="xs"
-              className="eui-textTruncate"
-              data-test-subj={testId('outdatedMsg')}
-            >
-              <EuiIcon size="m" type="warning" color="warning" className="eui-alignTop" />
-              <span className="eui-displayInlineBlock">
+          {revision && (
+            <EuiFlexItem grow={false}>
+              <EuiText
+                color="subdued"
+                size="xs"
+                className="eui-textTruncate"
+                data-test-subj={testId('version')}
+              >
                 <FormattedMessage
-                  id="xpack.securitySolution.endpointPolicyLink.outdatedMessage"
-                  defaultMessage="Out-of-date"
+                  id="xpack.securitySolution.endpointPolicyLink.policyVersion"
+                  defaultMessage="rev. {revision}"
+                  values={{ revision }}
                 />
-              </span>
-            </EuiText>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+              </EuiText>
+            </EuiFlexItem>
+          )}
+
+          {isOutdated && (
+            <EuiFlexItem grow={false}>
+              <EuiText
+                color="subdued"
+                size="xs"
+                className="eui-textTruncate"
+                data-test-subj={testId('outdatedMsg')}
+              >
+                <EuiIcon size="m" type="warning" color="warning" className="eui-alignTop" />
+                <span className="eui-displayInlineBlock">
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpointPolicyLink.outdatedMessage"
+                    defaultMessage="Out-of-date"
+                  />
+                </span>
+              </EuiText>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+
+        {policyNoLongerAvailableMessage}
+      </div>
     );
   }
 );
