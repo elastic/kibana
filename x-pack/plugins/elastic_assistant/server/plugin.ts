@@ -52,6 +52,8 @@ export class ElasticAssistantPlugin
   ) {
     this.logger.debug('elasticAssistant: Setup');
 
+    // TODO: Remove before merge, this is so the suite will be triggered
+
     this.assistantService = new AIAssistantService({
       logger: this.logger.get('service'),
       ml: plugins.ml,

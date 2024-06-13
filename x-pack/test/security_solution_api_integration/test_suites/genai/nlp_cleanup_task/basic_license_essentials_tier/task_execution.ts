@@ -40,7 +40,6 @@ export default ({ getService }: FtrProviderContext): void => {
           // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846
           await ml.api.assureMlStatsIndexExists();
           // Create a light-weight model that has a `model_type` of `pytorch`
-          // TODO: Remove before merge, this is so the suite will be triggered
           await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id);
         });
 
