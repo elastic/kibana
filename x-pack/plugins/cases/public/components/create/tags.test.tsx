@@ -33,7 +33,7 @@ describe('Tags', () => {
 
   it('it renders', async () => {
     appMockRender.render(
-      <FormTestComponent>
+      <FormTestComponent formDefaultValue={{ tags: [] }}>
         <Tags isLoading={false} />
       </FormTestComponent>
     );
@@ -43,8 +43,8 @@ describe('Tags', () => {
 
   it('it renders existing tags when provided', async () => {
     appMockRender.render(
-      <FormTestComponent>
-        <Tags isLoading={false} currentTags={['foo', 'bar']} />
+      <FormTestComponent formDefaultValue={{ tags: ['foo', 'bar'] }}>
+        <Tags isLoading={false} />
       </FormTestComponent>
     );
 
@@ -55,7 +55,7 @@ describe('Tags', () => {
 
   it('it changes the tags', async () => {
     appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={{ tags: [] }} onSubmit={onSubmit}>
         <Tags isLoading={false} />
       </FormTestComponent>
     );
@@ -72,8 +72,8 @@ describe('Tags', () => {
 
   it('it adds the tags to existing array', async () => {
     appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Tags isLoading={false} currentTags={['foo', 'bar']} />
+      <FormTestComponent formDefaultValue={{ tags: ['foo', 'bar'] }} onSubmit={onSubmit}>
+        <Tags isLoading={false} />
       </FormTestComponent>
     );
 
@@ -89,12 +89,19 @@ describe('Tags', () => {
 
   it('it shows error when tag is empty', async () => {
     appMockRender.render(
-      <FormTestComponent>
+      <FormTestComponent formDefaultValue={{ tags: [] }} onSubmit={onSubmit}>
         <Tags isLoading={false} />
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), ' {enter}');
+    userEvent.type(screen.getByRole('combobox'), ' ');
+    userEvent.keyboard('enter');
+
+    userEvent.click(await screen.findByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({ data: {} }, false);
+    });
 
     expect(await screen.findByText('A tag must contain at least one non-space character.'));
   });
@@ -103,13 +110,19 @@ describe('Tags', () => {
     const longTag = 'z'.repeat(MAX_LENGTH_PER_TAG + 1);
 
     appMockRender.render(
-      <FormTestComponent>
+      <FormTestComponent formDefaultValue={{ tags: [longTag] }} onSubmit={onSubmit}>
         <Tags isLoading={false} />
       </FormTestComponent>
     );
 
-    userEvent.paste(screen.getByRole('combobox'), `${longTag}`);
-    userEvent.keyboard('{enter}');
+    // userEvent.paste(screen.getByRole('combobox'), `${longTag}`);
+    // userEvent.keyboard('{enter}');
+
+    userEvent.click(await screen.findByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({ data: { tags: [longTag] } }, false);
+    });
 
     expect(
       await screen.findByText(

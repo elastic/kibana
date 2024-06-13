@@ -25,6 +25,7 @@ const useGetChoicesMock = useGetChoices as jest.Mock;
 describe('form fields', () => {
   let appMockRenderer: AppMockRenderer;
   const onSubmit = jest.fn();
+  const formDefaultValue = { tags: [] };
   const defaultProps = {
     connectors: connectorsMock,
     currentConfiguration: {
@@ -52,7 +53,7 @@ describe('form fields', () => {
 
   it('renders correctly', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -62,7 +63,7 @@ describe('form fields', () => {
 
   it('renders all steps', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -75,7 +76,7 @@ describe('form fields', () => {
 
   it('renders template fields correctly', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -88,7 +89,7 @@ describe('form fields', () => {
 
   it('renders case fields', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -133,7 +134,7 @@ describe('form fields', () => {
 
   it('renders sync alerts correctly', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -151,7 +152,7 @@ describe('form fields', () => {
     };
 
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...newProps} />
       </FormTestComponent>
     );
@@ -161,7 +162,7 @@ describe('form fields', () => {
 
   it('renders default connector correctly', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -184,7 +185,7 @@ describe('form fields', () => {
     };
 
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...newProps} />
       </FormTestComponent>
     );
@@ -200,7 +201,7 @@ describe('form fields', () => {
     });
 
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -210,7 +211,7 @@ describe('form fields', () => {
 
   it('calls onSubmit with template fields', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -247,7 +248,7 @@ describe('form fields', () => {
 
   it('calls onSubmit with case fields', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -296,7 +297,7 @@ describe('form fields', () => {
     };
 
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...newProps} />
       </FormTestComponent>
     );
@@ -353,7 +354,7 @@ describe('form fields', () => {
     };
 
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...newProps} />
       </FormTestComponent>
     );

@@ -24,6 +24,7 @@ jest.mock('../../containers/user_profiles/api');
 describe('CaseFormFields', () => {
   let appMock: AppMockRenderer;
   const onSubmit = jest.fn();
+  const formDefaultValue = { tags: [] };
   const defaultProps = {
     isLoading: false,
     configurationCustomFields: [],
@@ -36,7 +37,7 @@ describe('CaseFormFields', () => {
 
   it('renders correctly', async () => {
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -46,7 +47,7 @@ describe('CaseFormFields', () => {
 
   it('renders case fields correctly', async () => {
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -60,7 +61,7 @@ describe('CaseFormFields', () => {
 
   it('does not render customFields when empty', () => {
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -70,7 +71,7 @@ describe('CaseFormFields', () => {
 
   it('renders customFields when not empty', async () => {
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields
           isLoading={false}
           configurationCustomFields={customFieldsConfigurationMock}
@@ -83,7 +84,7 @@ describe('CaseFormFields', () => {
 
   it('does not render assignees when no platinum license', () => {
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -99,7 +100,7 @@ describe('CaseFormFields', () => {
     appMock = createAppMockRenderer({ license });
 
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -109,7 +110,7 @@ describe('CaseFormFields', () => {
 
   it('calls onSubmit with case fields', async () => {
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -182,7 +183,7 @@ describe('CaseFormFields', () => {
     };
 
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...newProps} />
       </FormTestComponent>
     );
@@ -231,6 +232,7 @@ describe('CaseFormFields', () => {
       <FormTestComponent
         formDefaultValue={{
           customFields: { [customFieldsConfigurationMock[0].key]: 'Test custom filed value' },
+          tags: [],
         }}
         onSubmit={onSubmit}
       >
@@ -266,7 +268,7 @@ describe('CaseFormFields', () => {
     appMock = createAppMockRenderer({ license });
 
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -304,6 +306,7 @@ describe('CaseFormFields', () => {
       <FormTestComponent
         formDefaultValue={{
           assignees: [{ uid: userProfiles[1].uid }],
+          tags: [],
         }}
         onSubmit={onSubmit}
       >

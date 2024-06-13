@@ -31,6 +31,7 @@ export interface CustomFieldType<T extends CaseUICustomField> {
     customFieldConfiguration: CasesConfigurationUICustomField;
     isLoading: boolean;
     setAsOptional?: boolean;
+    isTemplateEditMode?: boolean;
   }>;
 }
 

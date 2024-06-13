@@ -58,6 +58,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
           configurationCustomFields={configurationCustomFields}
           isLoading={isSubmitting}
           setCustomFieldsOptional={true}
+          isEditMode={isEditMode}
         />
       ),
     }),
