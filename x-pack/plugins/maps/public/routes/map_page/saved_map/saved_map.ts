@@ -473,7 +473,6 @@ export class SavedMap {
           attributes: this._attributes,
         });
         const savedObjectsTagging = getSavedObjectsTagging();
-        // Attribute service deviates from Saved Object client by including references as a child to attributes in stead of a sibling
         const tagReferences =
           savedObjectsTagging && tags ? savedObjectsTagging.ui.updateTagsReferences([], tags) : [];
         const { id: savedObjectId } = await saveToLibrary(
