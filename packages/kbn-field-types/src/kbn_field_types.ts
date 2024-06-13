@@ -49,7 +49,7 @@ export const castEsToKbnFieldTypeName = (esType: ES_FIELD_TYPES | string): KBN_F
 export const getFilterableKbnTypeNames = (): string[] =>
   registeredKbnTypes.filter((type) => type.filterable).map((type) => type.name);
 
-function categorize(type: string) {
+function categorizeFieldType(type: string) {
   // We can have  'counter_integer', 'counter_long', 'counter_double'...
   if (type.includes('counter')) {
     return 'counter';
@@ -58,7 +58,7 @@ function categorize(type: string) {
 }
 
 export function esFieldTypeToKibanaFieldType(type: string) {
-  const fieldTypeCategory = categorize(type);
+  const fieldTypeCategory = categorizeFieldType(type);
   switch (fieldTypeCategory) {
     case ES_FIELD_TYPES._INDEX:
       return KBN_FIELD_TYPES.STRING;
