@@ -62,9 +62,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityTable: '[data-test-subj="datasetQualityTable"]',
     datasetQualityTableColumn: (column: number) =>
       `[data-test-subj="datasetQualityTable"] .euiTableRowCell:nth-child(${column})`,
-    datasetSearchInput: '[placeholder="Filter datasets"]',
-    showFullDatasetNamesSwitch: 'button[aria-label="Show full dataset names"]',
-    showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive datasets"]',
+    datasetSearchInput: '[placeholder="Filter data sets"]',
+    showFullDatasetNamesSwitch: 'button[aria-label="Show full data set names"]',
+    showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive data sets"]',
     superDatePickerApplyButton: '.euiQuickSelect__applyButton',
   };
 
@@ -215,10 +215,10 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       const table = await this.getDatasetsTable();
       return parseDatasetTable(table, [
         '0',
-        'Dataset Name',
+        'Data Set Name',
         'Namespace',
         'Size',
-        'Dataset Quality',
+        'Data Set Quality',
         'Degraded Docs (%)',
         'Last Activity',
         'Actions',
@@ -264,7 +264,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     async openDatasetFlyout(datasetName: string) {
       const cols = await this.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       const testDatasetRowIndex = datasetNameColCellTexts.findIndex(
         (dName) => dName === datasetName
@@ -534,7 +534,7 @@ const texts = {
   datasetHealthPoor: 'Poor',
   datasetHealthDegraded: 'Degraded',
   datasetHealthGood: 'Good',
-  activeDatasets: 'Active Datasets',
+  activeDatasets: 'Active Data Sets',
   estimatedData: 'Estimated Data',
   docsCountTotal: 'Docs count (total)',
   size: 'Size',
