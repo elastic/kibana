@@ -56,7 +56,7 @@ describe('createRegExpPatternFrom should create a regular expression starting fr
     expect('*:metrics-system.syslog-*,logs-system.errors-*').not.toMatch(regExpPattern);
   });
 
-  it('tests positive for patterns with trialing commas', () => {
+  it('tests positive for patterns with trailing commas', () => {
     expect('logs-*,').toMatch(regExpPattern);
     expect('cluster1:logs-*,logs-*,').toMatch(regExpPattern);
   });
