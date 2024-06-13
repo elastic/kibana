@@ -38,5 +38,6 @@
     "@kbn/charts-plugin",
     "@kbn/data-plugin",
     "@kbn/search-types",
+    "@kbn/utility-types",
   ]
 }
