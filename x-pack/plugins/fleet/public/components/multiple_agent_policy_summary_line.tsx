@@ -99,8 +99,13 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
                         defaultMessage: 'This integration is shared by',
                       })}
                     </EuiPopoverTitle>
-                    <div style={{ width: '300px' }}>
-                      <EuiListGroup listItems={listItems} color="primary" size="s" />
+                    <div style={{ width: '280px' }}>
+                      <EuiListGroup
+                        listItems={listItems}
+                        color="primary"
+                        size="s"
+                        gutterSize="none"
+                      />
                     </div>
                     <EuiPopoverFooter>
                       {/* TODO: implement missing onClick function */}
