@@ -141,7 +141,7 @@ export const useEntityAnalyticsRoutes = () => {
       }
     ): Promise<AssetCriticalityRecord> =>
       http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_PUBLIC_URL, {
-        version: '1',
+        version: API_VERSIONS.public.v1,
         method: 'POST',
         body: JSON.stringify({
           id_value: params.idValue,
@@ -155,7 +155,7 @@ export const useEntityAnalyticsRoutes = () => {
       params: Pick<AssetCriticality, 'idField' | 'idValue'> & { refresh?: 'wait_for' }
     ): Promise<{ deleted: true }> => {
       await http.fetch(ASSET_CRITICALITY_PUBLIC_URL, {
-        version: '1',
+        version: API_VERSIONS.public.v1,
         method: 'DELETE',
         query: { id_value: params.idValue, id_field: params.idField, refresh: params.refresh },
       });
@@ -171,7 +171,7 @@ export const useEntityAnalyticsRoutes = () => {
       params: Pick<AssetCriticality, 'idField' | 'idValue'>
     ): Promise<AssetCriticalityRecord> => {
       return http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_PUBLIC_URL, {
-        version: '1',
+        version: API_VERSIONS.public.v1,
         method: 'GET',
         query: { id_value: params.idValue, id_field: params.idField },
       });
@@ -188,7 +188,7 @@ export const useEntityAnalyticsRoutes = () => {
       return http.fetch<AssetCriticalityCsvUploadResponse>(
         ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
         {
-          version: '1',
+          version: API_VERSIONS.public.v1,
           method: 'POST',
           headers: {
             'Content-Type': undefined, // Lets the browser set the appropriate content type

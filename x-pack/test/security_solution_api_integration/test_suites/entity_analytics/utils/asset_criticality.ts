@@ -16,6 +16,7 @@ import {
   ASSET_CRITICALITY_INTERNAL_STATUS_URL,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
   ENABLE_ASSET_CRITICALITY_SETTING,
+  API_VERSIONS,
 } from '@kbn/security-solution-plugin/common/constants';
 import type { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { Client } from '@elastic/elasticsearch';
@@ -111,7 +112,7 @@ export const assetCriticalityRouteHelpersFactory = (
     await supertest
       .get(routeWithNamespace(ASSET_CRITICALITY_INTERNAL_STATUS_URL, namespace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
@@ -122,7 +123,7 @@ export const assetCriticalityRouteHelpersFactory = (
     await supertest
       .post(routeWithNamespace(ASSET_CRITICALITY_PUBLIC_URL, namespace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(body)
       .expect(expectStatusCode),
@@ -136,7 +137,7 @@ export const assetCriticalityRouteHelpersFactory = (
     return supertest
       .delete(route)
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(expectStatusCode);
   },
@@ -150,7 +151,7 @@ export const assetCriticalityRouteHelpersFactory = (
     return supertest
       .get(route)
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(expectStatusCode);
   },
@@ -162,7 +163,7 @@ export const assetCriticalityRouteHelpersFactory = (
     return supertest
       .post(routeWithNamespace(ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL, namespace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .attach('file', file, { filename: 'asset_criticality.csv' })
       .expect(expectStatusCode);
@@ -177,7 +178,7 @@ export const assetCriticalityRouteHelpersFactoryNoAuth = (
     await supertestWithoutAuth
       .get(ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL)
       .auth(username, password)
-      .set('elastic-api-version', '1')
+      .set('elastic-api-version', API_VERSIONS.internal.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
