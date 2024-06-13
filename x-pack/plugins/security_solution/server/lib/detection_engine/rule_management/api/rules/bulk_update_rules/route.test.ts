@@ -32,7 +32,7 @@ describe('Bulk update rules route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    clients.rulesManagementClient.updateRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.detectionRulesClient.updateRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
     bulkUpdateRulesRoute(server.router, logger);
@@ -66,7 +66,7 @@ describe('Bulk update rules route', () => {
     });
 
     test('returns an error if update throws', async () => {
-      clients.rulesManagementClient.updateRule.mockImplementation(() => {
+      clients.detectionRulesClient.updateRule.mockImplementation(() => {
         throw new Error('Test error');
       });
 
@@ -85,7 +85,7 @@ describe('Bulk update rules route', () => {
     });
 
     it('returns a 403 error object if mlAuthz fails', async () => {
-      clients.rulesManagementClient.updateRule.mockImplementationOnce(async () => {
+      clients.detectionRulesClient.updateRule.mockImplementationOnce(async () => {
         throw new HttpAuthzError('mocked validation message');
       });
 

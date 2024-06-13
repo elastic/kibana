@@ -67,7 +67,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/controls-plugin",
     "@kbn/search-types",
-    "@kbn/alerting-comparators"
+    "@kbn/alerting-comparators",
+    "@kbn/alerting-types"
   ],
   "exclude": ["target/**/*"]
 }

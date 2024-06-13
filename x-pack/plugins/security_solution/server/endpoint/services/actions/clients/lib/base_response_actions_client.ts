@@ -40,9 +40,9 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import type {
   CommonResponseActionMethodOptions,
+  GetFileDownloadMethodResponse,
   ProcessPendingActionsMethodOptions,
   ResponseActionsClient,
-  GetFileDownloadMethodResponse,
 } from './types';
 import type {
   ActionDetails,
@@ -57,12 +57,14 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   ResponseActionParametersWithPidOrEntityId,
+  ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
+  ResponseActionsScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
-  WithAllKeys,
   UploadedFileInfo,
+  WithAllKeys,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -70,6 +72,7 @@ import type {
   IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
   ResponseActionsRequestBody,
+  ScanActionRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
@@ -690,6 +693,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
     throw new ResponseActionsNotSupportedError('upload');
+  }
+
+  public async scan(
+    actionRequest: ScanActionRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>> {
+    throw new ResponseActionsNotSupportedError('scan');
   }
 
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {

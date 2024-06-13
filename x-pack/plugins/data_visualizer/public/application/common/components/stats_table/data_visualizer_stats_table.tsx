@@ -35,10 +35,6 @@ import { IndexBasedNumberContentPreview } from './components/field_data_row/numb
 
 import { useTableSettings } from './use_table_settings';
 import { TopValuesPreview } from './components/field_data_row/top_values_preview';
-import type {
-  FieldVisConfig,
-  FileBasedFieldVisConfig,
-} from '../../../../../common/types/field_vis_config';
 import { isIndexBasedFieldVisConfig } from '../../../../../common/types/field_vis_config';
 import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
@@ -47,12 +43,12 @@ import { DistinctValues } from './components/field_data_row/distinct_values';
 import { FieldTypeIcon } from '../field_type_icon';
 import './_index.scss';
 import type { FieldStatisticTableEmbeddableProps } from '../../../index_data_visualizer/embeddables/grid_embeddable/types';
+import type { DataVisualizerTableItem } from './types';
 
 const FIELD_NAME = 'fieldName';
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
-export type DataVisualizerTableItem = FieldVisConfig | FileBasedFieldVisConfig;
 interface DataVisualizerTableProps<T extends object> {
   items: T[];
   pageState: DataVisualizerTableState;

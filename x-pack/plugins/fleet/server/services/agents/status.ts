@@ -130,14 +130,14 @@ export async function getAgentStatusForAgentPolicy(
   const allActive = allStatuses - combinedStatuses.unenrolled - combinedStatuses.inactive;
   return {
     ...combinedStatuses,
+    all: allStatuses,
+    active: allActive,
     /* @deprecated no agents will have other status */
     other: 0,
     /* @deprecated Agent events do not exists anymore */
     events: 0,
     /* @deprecated use active instead */
     total: allActive,
-    all: allStatuses,
-    active: allActive,
   };
 }
 export async function getIncomingDataByAgentsId(

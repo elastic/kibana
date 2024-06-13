@@ -7,7 +7,6 @@
 
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
@@ -15,7 +14,6 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -45,7 +43,6 @@ import { getGroupFilters } from '../../../../../common/custom_threshold_rule/hel
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertSummaryField } from '../../../..';
 import { AlertParams } from '../../types';
-import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../custom_threshold';
 import { CustomThresholdRule, CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
@@ -236,17 +233,7 @@ export default function AlertDetailsAppSection({
                 <h4 data-test-subj={`chartTitle-${index}`}>{chartTitleAndTooltip[index].title}</h4>
               </EuiTitle>
             </EuiToolTip>
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.observability.customThreshold.rule.alertDetailsAppSection.criterion.subtitle"
-                defaultMessage="Last {lookback} {timeLabel}"
-                values={{
-                  lookback: criterion.timeSize,
-                  timeLabel: TIME_LABELS[criterion.timeUnit as keyof typeof TIME_LABELS],
-                }}
-              />
-            </EuiText>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiFlexGroup>
               <EuiFlexItem style={{ minHeight: 150, minWidth: 160 }} grow={1}>
                 <Threshold

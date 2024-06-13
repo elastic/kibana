@@ -22,7 +22,7 @@ import {
   TestProviders,
 } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { sourcererPaths } from '../../../sourcerer/containers';
+import { sourcererPaths } from '../../../sourcerer/containers/sourcerer_paths';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
