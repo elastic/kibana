@@ -29,7 +29,7 @@ const isApiCompatible = (api: unknown | null): api is ExpandPanelActionApi =>
 export class ExpandPanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EXPAND_PANEL;
   public readonly id = ACTION_EXPAND_PANEL;
-  public order = 19;
+  public order = 9;
   public grouping = [dashboardActionGroup];
 
   constructor() {}
