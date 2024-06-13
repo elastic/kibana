@@ -11,6 +11,7 @@ import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-ht
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
+import { ReadKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
 import { getKnowledgeBaseStatus } from '../assistant/api';
 
 const KNOWLEDGE_BASE_STATUS_QUERY_KEY = ['elastic-assistant', 'knowledge-base-status'];
@@ -19,13 +20,6 @@ export interface UseKnowledgeBaseStatusParams {
   http: HttpSetup;
   resource?: string;
   toasts?: IToasts;
-}
-
-export interface GetKnowledgeBaseStatusResponse {
-  elser_exists: boolean;
-  esql_exists?: boolean;
-  index_exists: boolean;
-  pipeline_exists: boolean;
 }
 
 /**
@@ -42,10 +36,7 @@ export const useKnowledgeBaseStatus = ({
   http,
   resource,
   toasts,
-}: UseKnowledgeBaseStatusParams): UseQueryResult<
-  GetKnowledgeBaseStatusResponse,
-  IHttpFetchError
-> => {
+}: UseKnowledgeBaseStatusParams): UseQueryResult<ReadKnowledgeBaseResponse, IHttpFetchError> => {
   return useQuery(
     KNOWLEDGE_BASE_STATUS_QUERY_KEY,
     async ({ signal }) => {

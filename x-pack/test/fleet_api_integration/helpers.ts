@@ -15,7 +15,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { KbnClient } from '@kbn/test';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../api_integration/ftr_provider_context';
 
 export function warnAndSkipTest(mochaContext: Mocha.Context, log: ToolingLog) {
@@ -25,9 +25,25 @@ export function warnAndSkipTest(mochaContext: Mocha.Context, log: ToolingLog) {
   mochaContext.skip();
 }
 
+export function isDockerRegistryEnabledOrSkipped(providerContext: FtrProviderContext) {
+  if (process.env.FLEET_SKIP_RUNNING_PACKAGE_REGISTRY === 'true') {
+    return true;
+  }
+
+  const { getService } = providerContext;
+  const dockerServers = getService('dockerServers');
+  const server = dockerServers.get('registry');
+
+  return server.enabled;
+}
+
 export function skipIfNoDockerRegistry(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const dockerServers = getService('dockerServers');
+
+  if (process.env.FLEET_SKIP_RUNNING_PACKAGE_REGISTRY === 'true') {
+    return;
+  }
 
   const server = dockerServers.get('registry');
   const log = getService('log');
@@ -109,7 +125,7 @@ export async function generateAgent(
   });
 }
 
-export function setPrereleaseSetting(supertest: SuperTest<Test>) {
+export function setPrereleaseSetting(supertest: SuperTestAgent) {
   before(async () => {
     await supertest
       .put('/api/fleet/settings')
@@ -126,7 +142,7 @@ export function setPrereleaseSetting(supertest: SuperTest<Test>) {
 }
 
 export const generateNAgentPolicies = async (
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   number: number,
   overwrite?: Partial<CreateAgentPolicyRequest['body']>
 ): Promise<AgentPolicy[]> => {
@@ -142,7 +158,7 @@ export const generateNAgentPolicies = async (
 };
 
 export const generateAgentPolicy = async (
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   overwrite?: Partial<CreateAgentPolicyRequest['body']>
 ): Promise<AgentPolicy> => {
   const response = await supertest

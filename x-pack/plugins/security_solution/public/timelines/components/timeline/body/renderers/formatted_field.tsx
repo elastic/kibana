@@ -13,14 +13,17 @@ import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/css';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import type { BrowserField } from '../../../../../common/containers/source';
 import {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
 } from '../../../../../../common/field_maps/field_names';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
-import { SentinelOneAgentStatus } from '../../../../../detections/components/host_isolation/sentinel_one_agent_status';
-import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
+import {
+  AgentStatus,
+  EndpointAgentStatusById,
+} from '../../../../../common/components/agents/agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
@@ -104,6 +107,8 @@ const FormattedFieldValueComponent: React.FC<{
   value,
   linkValue,
 }) => {
+  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
+
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
@@ -273,7 +278,7 @@ const FormattedFieldValueComponent: React.FC<{
     fieldName === AGENT_STATUS_FIELD_NAME &&
     fieldFromBrowserField?.name === SENTINEL_ONE_AGENT_ID_FIELD
   ) {
-    return <SentinelOneAgentStatus agentId={String(value ?? '')} />;
+    return <AgentStatus agentId={String(value ?? '')} agentType="sentinel_one" />;
   } else if (fieldName === ALERT_HOST_CRITICALITY || fieldName === ALERT_USER_CRITICALITY) {
     return (
       <AssetCriticalityLevel
@@ -287,7 +292,13 @@ const FormattedFieldValueComponent: React.FC<{
       />
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
-    return (
+    return agentStatusClientEnabled ? (
+      <AgentStatus
+        agentId={String(value ?? '')}
+        agentType="endpoint"
+        data-test-subj="endpointHostAgentStatus"
+      />
+    ) : (
       <EndpointAgentStatusById
         endpointAgentId={String(value ?? '')}
         data-test-subj="endpointHostAgentStatus"

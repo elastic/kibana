@@ -23,6 +23,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import moment from 'moment';
 import React, { useState } from 'react';
 import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
@@ -73,7 +74,6 @@ const getFirstGroupBy = (slo: SLOWithSummaryResponse) => {
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refetchRules }: Props) {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const [isMouseOver, setIsMouseOver] = useState(false);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
@@ -107,24 +107,39 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
   return (
     <>
       <EuiPanel
+        className="sloCardItem"
         panelRef={containerRef as React.Ref<HTMLDivElement>}
-        onMouseOver={() => {
-          if (!isMouseOver) {
-            setIsMouseOver(true);
-          }
-        }}
-        onMouseLeave={() => {
-          if (isMouseOver) {
-            setIsMouseOver(false);
-          }
-        }}
         paddingSize="none"
         css={css`
           height: 182px;
           overflow: hidden;
           position: relative;
+
+          & .sloCardItemActions_hover {
+            pointer-events: none;
+            opacity: 0;
+
+            &:focus-within {
+              pointer-events: auto;
+              opacity: 1;
+            }
+          }
+          &:hover .sloCardItemActions_hover {
+            pointer-events: auto;
+            opacity: 1;
+          }
         `}
-        title={slo.summary.status}
+        title={
+          slo.summary.summaryUpdatedAt
+            ? i18n.translate('xpack.slo.sloCardItem.euiPanel.lastUpdatedLabel', {
+                defaultMessage: '{status}, Last updated: {value}',
+                values: {
+                  status: slo.summary.status,
+                  value: moment(slo.summary.summaryUpdatedAt).fromNow(),
+                },
+              })
+            : slo.summary.status
+        }
       >
         <SloCardChart
           slo={slo}
@@ -139,7 +154,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
             />
           }
         />
-        {(isMouseOver || isActionsPopoverOpen) && (
+        <div className={isActionsPopoverOpen ? '' : 'sloCardItemActions_hover'}>
           <SloCardItemActions
             slo={slo}
             rules={rules}
@@ -151,7 +166,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
             setDashboardAttachmentReady={setDashboardAttachmentReady}
             setResetConfirmationModalOpen={setResetConfirmationModalOpen}
           />
-        )}
+        </div>
       </EuiPanel>
 
       <BurnRateRuleFlyout

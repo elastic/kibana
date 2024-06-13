@@ -126,7 +126,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
   }, [usageTracker]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="l">
+    <EuiFlyout ownFocus onClose={onClose} size="l" data-test-subj="viewQueryFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
@@ -216,6 +216,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
                               />
                             ),
                             checked: checked ? 'on' : undefined,
+                            'data-test-subj': 'queryField',
                           };
                         })}
                         listProps={{

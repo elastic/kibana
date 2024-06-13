@@ -13,10 +13,7 @@ import { USERS_PATH } from '../../../../common/constants';
 
 const getTabsOnUsersUrl = (tabName: UsersTableType) => `${USERS_PATH}/${tabName}`;
 
-export const navTabsUsers = (
-  hasMlUserPermissions: boolean,
-  isRiskyUserEnabled: boolean
-): UsersNavTab => {
+export const navTabsUsers = (hasMlUserPermissions: boolean): UsersNavTab => {
   const hiddenTabs = [];
 
   const userNavTabs = {
@@ -54,10 +51,6 @@ export const navTabsUsers = (
 
   if (!hasMlUserPermissions) {
     hiddenTabs.push(UsersTableType.anomalies);
-  }
-
-  if (!isRiskyUserEnabled) {
-    hiddenTabs.push(UsersTableType.risk);
   }
 
   return omit(hiddenTabs, userNavTabs);

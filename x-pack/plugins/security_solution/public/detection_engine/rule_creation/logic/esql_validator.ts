@@ -6,11 +6,10 @@
  */
 
 import { isEmpty } from 'lodash';
-
+import type { QueryClient } from '@tanstack/react-query';
 import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 
 import { KibanaServices } from '../../../common/lib/kibana';
-import { securitySolutionQueryClient } from '../../../common/containers/query_client/query_client_provider';
 
 import type { ValidationError, ValidationFunc } from '../../../shared_imports';
 import { isEsqlRule } from '../../../../common/detection_engine/utils';
@@ -48,7 +47,7 @@ export const computeHasMetadataOperator = (esqlQuery: string) => {
 export const esqlValidator = async (
   ...args: Parameters<ValidationFunc>
 ): Promise<ValidationError<ERROR_CODES> | void | undefined> => {
-  const [{ value, formData }] = args;
+  const [{ value, formData, customData }] = args;
   const { query: queryValue } = value as FieldValueQueryBar;
   const query = queryValue.query as string;
   const { ruleType } = formData as DefineStepRule;
@@ -59,19 +58,19 @@ export const esqlValidator = async (
   }
 
   try {
+    const queryClient = (customData.value as { queryClient: QueryClient | undefined })?.queryClient;
+
     const services = KibanaServices.get();
+    const { isEsqlQueryAggregating, isMissingMetadataOperator } = parseEsqlQuery(query);
 
-    const isEsqlQueryAggregating = computeIsESQLQueryAggregating(query);
-
-    // non-aggregating query which does not have metadata, is not a valid one
-    if (!isEsqlQueryAggregating && !computeHasMetadataOperator(query)) {
+    if (isMissingMetadataOperator) {
       return {
         code: ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
         message: i18n.ESQL_VALIDATION_MISSING_ID_IN_QUERY_ERROR,
       };
     }
 
-    const columns = await securitySolutionQueryClient.fetchQuery(
+    const columns = await queryClient?.fetchQuery(
       getEsqlQueryConfig({ esqlQuery: query, search: services.data.search.search })
     );
 
@@ -91,4 +90,18 @@ export const esqlValidator = async (
   } catch (error) {
     return constructValidationError(error);
   }
+};
+
+/**
+ * check if esql query valid for Security rule:
+ * - if it's non aggregation query it must have metadata operator
+ */
+export const parseEsqlQuery = (query: string) => {
+  const isEsqlQueryAggregating = computeIsESQLQueryAggregating(query);
+
+  return {
+    isEsqlQueryAggregating,
+    // non-aggregating query which does not have [metadata], is not a valid one
+    isMissingMetadataOperator: !isEsqlQueryAggregating && !computeHasMetadataOperator(query),
+  };
 };

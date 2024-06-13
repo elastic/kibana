@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
@@ -36,7 +36,7 @@ const createRequest = ({ type, id, namespace }: BulkUpdateTestCase) => ({
   ...(namespace && { namespace }), // individual "object namespace" string
 });
 
-export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_update');
   const expectResponseBody =
     (
@@ -118,7 +118,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
             const requestBody = test.request.map((x) => ({ ...x, ...attrs }));
             await supertest
               .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(requestBody)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

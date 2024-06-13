@@ -10,7 +10,7 @@ import { isReferenceOrValueEmbeddable, PanelNotFoundError } from '@kbn/embeddabl
 import { apiPublishesPanelTitle, getPanelTitle } from '@kbn/presentation-publishing';
 import { filter, map, max } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { DashboardPanelState } from '../../../../common';
+import { DashboardPanelState, prefixReferencesFromPanel } from '../../../../common';
 import { dashboardClonePanelActionStrings } from '../../../dashboard_actions/_dashboard_actions_strings';
 import { pluginServices } from '../../../services/plugin_services';
 import { placeClonePanel } from '../../panel_placement';
@@ -56,6 +56,9 @@ const duplicateReactEmbeddableInput = async (
   const lastTitle = apiPublishesPanelTitle(child) ? getPanelTitle(child) ?? '' : '';
   const newTitle = await incrementPanelTitle(dashboard, lastTitle);
   const id = uuidv4();
+  if (panelToClone.references) {
+    dashboard.savedObjectReferences.push(...prefixReferencesFromPanel(id, panelToClone.references));
+  }
   return {
     type: panelToClone.type,
     explicitInput: {

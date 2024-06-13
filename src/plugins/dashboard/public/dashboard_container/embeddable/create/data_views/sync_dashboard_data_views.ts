@@ -7,6 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, PublishesDataViews } from '@kbn/presentation-publishing';
 import { uniqBy } from 'lodash';
 import { combineLatest, map, Observable, of, switchMap } from 'rxjs';
@@ -32,18 +33,11 @@ export function startSyncingDashboardDataViews(this: DashboardContainer) {
       )
     : of([]);
 
-  const childDataViewsPipe: Observable<DataView[]> = this.children$.pipe(
-    switchMap((children) => {
-      const childrenThatPublishDataViews: PublishesDataViews[] = [];
-      for (const child of Object.values(children)) {
-        if (apiPublishesDataViews(child)) childrenThatPublishDataViews.push(child);
-      }
-      if (childrenThatPublishDataViews.length === 0) return of([]);
-      return combineLatest(childrenThatPublishDataViews.map((child) => child.dataViews));
-    }),
-    map(
-      (nextDataViews) => nextDataViews.flat().filter((dataView) => Boolean(dataView)) as DataView[]
-    )
+  const childDataViewsPipe = combineCompatibleChildrenApis<PublishesDataViews, DataView[]>(
+    this,
+    'dataViews',
+    apiPublishesDataViews,
+    []
   );
 
   return combineLatest([controlGroupDataViewsPipe, childDataViewsPipe])

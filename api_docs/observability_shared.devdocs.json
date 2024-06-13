@@ -3490,6 +3490,21 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.INVENTORY_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "INVENTORY_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"INVENTORY_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/inventory_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.LazyObservabilityPageTemplateProps",
         "type": "Type",
         "tags": [],

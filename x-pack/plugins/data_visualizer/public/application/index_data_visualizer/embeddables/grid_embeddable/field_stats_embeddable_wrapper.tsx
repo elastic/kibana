@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import type { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,18 +28,15 @@ const EmbeddableESQLFieldStatsTableWrapper = dynamic(
 const EmbeddableFieldStatsTableWrapper = dynamic(() => import('./embeddable_field_stats_table'));
 
 function isESQLFieldStatisticTableEmbeddableState(
-  input: unknown
+  input: FieldStatisticTableEmbeddableProps
 ): input is ESQLDataVisualizerGridEmbeddableState {
   return isPopulatedObject(input, ['esql']) && input.esql === true;
 }
 
 function isFieldStatisticTableEmbeddableState(
-  input: unknown
+  input: FieldStatisticTableEmbeddableProps
 ): input is Required<FieldStatisticTableEmbeddableProps, 'dataView'> {
-  return (
-    isPopulatedObject(input, ['dataView']) &&
-    (!isPopulatedObject(input, ['esql']) || input.esql === false)
-  );
+  return isPopulatedObject(input, ['dataView']) && Boolean(input.esql) === false;
 }
 
 const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps) => {
@@ -104,17 +101,54 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
     unifiedSearch,
   };
 
-  const kibanaRenderServices = pick(coreStart, 'analytics', 'i18n', 'theme');
-  const datePickerDeps: DatePickerDependencies = {
-    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
-    uiSettingsKeys: UI_SETTINGS,
-  };
+  const { overridableServices } = props;
+
+  const kibanaRenderServices = useMemo(
+    () => pick(coreStart, 'analytics', 'i18n', 'theme'),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  const servicesWithOverrides = useMemo(
+    () => ({ ...services, ...(overridableServices ?? {}) }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const datePickerDeps: DatePickerDependencies = useMemo(
+    () => ({
+      ...pick(servicesWithOverrides, [
+        'data',
+        'http',
+        'notifications',
+        'theme',
+        'uiSettings',
+        'i18n',
+      ]),
+      uiSettingsKeys: UI_SETTINGS,
+    }),
+    [servicesWithOverrides]
+  );
 
   return (
     <KibanaRenderContextProvider {...kibanaRenderServices}>
-      <KibanaContextProvider services={services}>
+      <KibanaContextProvider services={servicesWithOverrides}>
         <DatePickerContextProvider {...datePickerDeps}>
-          <FieldStatisticsWrapperContent {...props} />
+          <FieldStatisticsWrapperContent
+            dataView={props.dataView}
+            esql={props.esql}
+            filters={props.filters}
+            lastReloadRequestTime={props.lastReloadRequestTime}
+            onAddFilter={props.onAddFilter}
+            onTableUpdate={props.onTableUpdate}
+            query={props.query}
+            samplingOption={props.samplingOption}
+            savedSearch={props.savedSearch}
+            sessionId={props.sessionId}
+            shouldGetSubfields={props.shouldGetSubfields}
+            showPreviewByDefault={props.showPreviewByDefault}
+            totalDocuments={props.totalDocuments}
+            visibleFieldNames={props.visibleFieldNames}
+          />
         </DatePickerContextProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

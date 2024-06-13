@@ -18,6 +18,7 @@ import {
 
 export const initialValue: EmbeddedConsoleStore = produce<EmbeddedConsoleStore>(
   {
+    consoleHasBeenOpened: false,
     view: EmbeddableConsoleView.Closed,
   },
   identity
@@ -31,6 +32,7 @@ export const reducer: Reducer<EmbeddedConsoleStore, EmbeddedConsoleAction> = (st
           ? EmbeddableConsoleView.Alternate
           : EmbeddableConsoleView.Console;
         if (state.view !== newView) {
+          draft.consoleHasBeenOpened = true;
           draft.view = newView;
           draft.loadFromContent = action.payload?.content;
           return draft;

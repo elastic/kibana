@@ -451,7 +451,7 @@
           "\nRenders a group of filter pills"
         ],
         "signature": [
-          "(props: Pick<",
+          "(props: Omit<",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
@@ -459,15 +459,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
-          {
-            "pluginId": "unifiedSearch",
-            "scope": "public",
-            "docId": "kibUnifiedSearchPluginApi",
-            "section": "def-public.FilterItemsProps",
-            "text": "FilterItemsProps"
-          },
-          ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
+          ", \"intl\"> & { forwardedRef?: React.Ref<any> | undefined; } & { children?: React.ReactNode; }) => JSX.Element"
         ],
         "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
         "deprecated": false,
@@ -481,7 +473,7 @@
             "label": "props",
             "description": [],
             "signature": [
-              "Pick<",
+              "Omit<",
               {
                 "pluginId": "unifiedSearch",
                 "scope": "public",
@@ -489,15 +481,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
-              {
-                "pluginId": "unifiedSearch",
-                "scope": "public",
-                "docId": "kibUnifiedSearchPluginApi",
-                "section": "def-public.FilterItemsProps",
-                "text": "FilterItemsProps"
-              },
-              ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
+              ", \"intl\"> & { forwardedRef?: React.Ref<any> | undefined; } & { children?: React.ReactNode; }"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
@@ -1353,7 +1337,7 @@
               "This is injected by the lazer loader"
             ],
             "signature": [
-              "ReactIntl.InjectedIntl"
+              "IntlShape"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
             "deprecated": false,

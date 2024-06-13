@@ -144,7 +144,7 @@
           "section": "def-common.NonEmptyStringBrand",
           "text": "NonEmptyStringBrand"
         },
-        ">; }; })>; }"
+        ">; } & { kuery?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; }; })>; }"
       ],
       "path": "x-pack/plugins/observability_solution/apm/public/plugin.ts",
       "deprecated": false,

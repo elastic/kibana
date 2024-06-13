@@ -146,7 +146,7 @@ const fullStatusResponse: () => Type<Omit<StatusResponse, 'metrics'>> = () =>
     },
     {
       meta: {
-        id: 'core.status.response',
+        id: 'core_status_response',
         description: `Kibana's operational status as well as a detailed breakdown of plugin statuses indication of various loads (like event loop utilization and network traffic) at time of request.`,
       },
     }
@@ -163,7 +163,7 @@ const redactedStatusResponse = () =>
     },
     {
       meta: {
-        id: 'core.status.redactedResponse',
+        id: 'core_status_redactedResponse',
         description: `A minimal representation of Kibana's operational status.`,
       },
     }

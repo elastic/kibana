@@ -480,6 +480,101 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ESQLAstMetricsCommand",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLAstMetricsCommand",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstMetricsCommand",
+            "text": "ESQLAstMetricsCommand"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommand",
+            "text": "ESQLCommand"
+          },
+          "<\"metrics\">"
+        ],
+        "path": "packages/kbn-esql-ast/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstMetricsCommand.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLSource",
+                "text": "ESQLSource"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstMetricsCommand.aggregates",
+            "type": "Array",
+            "tags": [],
+            "label": "aggregates",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstItem",
+                "text": "ESQLAstItem"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstMetricsCommand.grouping",
+            "type": "Array",
+            "tags": [],
+            "label": "grouping",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstItem",
+                "text": "ESQLAstItem"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ESQLColumn",
         "type": "Interface",
         "tags": [],
@@ -493,7 +588,9 @@
             "section": "def-common.ESQLColumn",
             "text": "ESQLColumn"
           },
-          " extends ESQLAstBaseItem"
+          " extends ",
+          "ESQLAstBaseItem",
+          "<string>"
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -542,7 +639,9 @@
             "section": "def-common.ESQLCommand",
             "text": "ESQLCommand"
           },
-          " extends ESQLAstBaseItem"
+          "<Name> extends ",
+          "ESQLAstBaseItem",
+          "<Name>"
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -601,7 +700,9 @@
             "section": "def-common.ESQLCommandMode",
             "text": "ESQLCommandMode"
           },
-          " extends ESQLAstBaseItem"
+          " extends ",
+          "ESQLAstBaseItem",
+          "<string>"
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -639,7 +740,9 @@
             "section": "def-common.ESQLCommandOption",
             "text": "ESQLCommandOption"
           },
-          " extends ESQLAstBaseItem"
+          " extends ",
+          "ESQLAstBaseItem",
+          "<string>"
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -698,7 +801,9 @@
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
-          " extends ESQLAstBaseItem"
+          " extends ",
+          "ESQLAstBaseItem",
+          "<string>"
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -863,7 +968,9 @@
             "section": "def-common.ESQLSource",
             "text": "ESQLSource"
           },
-          " extends ESQLAstBaseItem"
+          " extends ",
+          "ESQLAstBaseItem",
+          "<string>"
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -915,7 +1022,9 @@
             "section": "def-common.ESQLTimeInterval",
             "text": "ESQLTimeInterval"
           },
-          " extends ESQLAstBaseItem"
+          " extends ",
+          "ESQLAstBaseItem",
+          "<string>"
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -1039,10 +1148,39 @@
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
             "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstCommand",
+            "text": "ESQLAstCommand"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-esql-ast/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ESQLAstCommand",
+        "type": "Type",
+        "tags": [],
+        "label": "ESQLAstCommand",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
             "section": "def-common.ESQLCommand",
             "text": "ESQLCommand"
           },
-          "[]"
+          "<string> | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstMetricsCommand",
+            "text": "ESQLAstMetricsCommand"
+          }
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",
         "deprecated": false,

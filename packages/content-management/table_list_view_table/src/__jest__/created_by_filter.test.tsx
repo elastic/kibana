@@ -45,6 +45,16 @@ const hits: UserContentCommonSchema[] = [
     createdBy: 'u_2',
     references: [],
   },
+  {
+    id: 'item-4',
+    type: 'dashboard',
+    updatedAt: '2020-01-01T00:00:00Z',
+    attributes: {
+      title: 'Item 4',
+    },
+    managed: true,
+    references: [],
+  },
 ];
 
 describe('created_by filter', () => {
@@ -111,8 +121,8 @@ describe('created_by filter', () => {
     // wait until first render
     expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
 
-    // 3 items in the list
-    expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(3);
+    // 5 items in the list
+    expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(4);
 
     userEvent.click(screen.getByTestId('userFilterPopoverButton'));
 
@@ -122,12 +132,12 @@ describe('created_by filter', () => {
 
     userEvent.click(popover.getByTestId('userProfileSelectableOption-user1'));
 
-    // 2 item in the list
+    // 1 item in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(1);
 
     userEvent.click(popover.getByTestId('userProfileSelectableOption-user2'));
 
-    // 2 item in the list
+    // 2 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(2);
   });
 
@@ -137,8 +147,8 @@ describe('created_by filter', () => {
     // wait until first render
     expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
 
-    // 3 items in the list
-    expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(3);
+    // 5 items in the list
+    expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(4);
 
     userEvent.click(screen.getByTestId('userFilterPopoverButton'));
 
@@ -150,22 +160,22 @@ describe('created_by filter', () => {
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(1);
   });
 
-  test('"no creators" options shouldn\'t appear if all objects have creators', async () => {
+  test('"no creators" options shouldn\'t appear if all objects have creators or managed', async () => {
     render(
       <TableListView
         {...requiredProps}
         createdByEnabled={true}
         findItems={async () => ({
-          hits: [hits[1], hits[2]],
-          total: 2,
+          hits: [hits[1], hits[2], hits[3]],
+          total: 3,
         })}
       />
     );
 
     // wait until first render
     expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
-    // 2 items in the list
-    expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(2);
+    // 3 items in the list
+    expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(3);
 
     userEvent.click(screen.getByTestId('userFilterPopoverButton'));
 

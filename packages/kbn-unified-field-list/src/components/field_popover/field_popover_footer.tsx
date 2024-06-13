@@ -7,16 +7,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiPopoverFooter, EuiSpacer } from '@elastic/eui';
+import { EuiPopoverFooter } from '@elastic/eui';
 import { type FieldVisualizeButtonProps, getFieldVisualizeButton } from '../field_visualize_button';
-import { FieldCategorizeButtonProps, getFieldCategorizeButton } from '../field_categorize_button';
 import { ErrorBoundary } from '../error_boundary';
 
-export type FieldPopoverFooterProps = FieldVisualizeButtonProps | FieldCategorizeButtonProps;
+export type FieldPopoverFooterProps = FieldVisualizeButtonProps;
 
 const FieldPopoverFooterComponent: React.FC<FieldPopoverFooterProps> = (props) => {
   const [visualizeButton, setVisualizeButton] = useState<JSX.Element | null>(null);
-  const [categorizeButton, setCategorizeButton] = useState<JSX.Element | null>(null);
 
   useEffect(() => {
     getFieldVisualizeButton(props)
@@ -25,21 +23,9 @@ const FieldPopoverFooterComponent: React.FC<FieldPopoverFooterProps> = (props) =
         // eslint-disable-next-line no-console
         console.error(error);
       });
-    getFieldCategorizeButton(props)
-      .then(setCategorizeButton)
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error(error);
-      });
   }, [props]);
 
-  return visualizeButton || categorizeButton ? (
-    <EuiPopoverFooter>
-      {visualizeButton}
-      {visualizeButton && categorizeButton ? <EuiSpacer size="s" /> : null}
-      {categorizeButton}
-    </EuiPopoverFooter>
-  ) : null;
+  return visualizeButton ? <EuiPopoverFooter>{visualizeButton}</EuiPopoverFooter> : null;
 };
 
 export const FieldPopoverFooter: React.FC<FieldPopoverFooterProps> = (props) => {

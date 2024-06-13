@@ -37,7 +37,7 @@ export function AlertActiveTimeRangeAnnotation({ alertStart, alertEnd, color, id
           details: RECT_ANNOTATION_TITLE,
         },
       ]}
-      style={{ fill: color, opacity: 1 }}
+      style={{ fill: color, opacity: 0.1 }}
     />
   );
 }

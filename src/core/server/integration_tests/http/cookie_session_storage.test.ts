@@ -134,7 +134,7 @@ describe('Cookie based SessionStorage', () => {
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
-      const cookies = response.get('set-cookie');
+      const cookies = response.get('set-cookie')!;
       expect(cookies).toBeDefined();
       expect(cookies).toHaveLength(1);
 
@@ -172,7 +172,7 @@ describe('Cookie based SessionStorage', () => {
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
-      const cookies = response.get('set-cookie');
+      const cookies = response.get('set-cookie')!;
       expect(cookies).toBeDefined();
       expect(cookies).toHaveLength(1);
 
@@ -204,7 +204,7 @@ describe('Cookie based SessionStorage', () => {
 
       const response = await supertest(innerServer.listener).get('/').expect(200, { value: null });
 
-      const cookies = response.get('set-cookie');
+      const cookies = response.get('set-cookie')!;
       expect(cookies).not.toBeDefined();
     });
 
@@ -237,7 +237,7 @@ describe('Cookie based SessionStorage', () => {
         .get('/')
         .expect(200, { value: userData });
 
-      const cookies = response.get('set-cookie');
+      const cookies = response.get('set-cookie')!;
       expect(cookies).toBeDefined();
 
       await delay(sessionDurationMs);
@@ -283,7 +283,7 @@ describe('Cookie based SessionStorage', () => {
         .get('/')
         .expect(200, { value: userData });
 
-      const cookies = response.get('set-cookie');
+      const cookies = response.get('set-cookie')!;
       expect(cookies).toBeDefined();
 
       const sessionCookie = retrieveSessionCookie(cookies[0]);
@@ -418,7 +418,7 @@ describe('Cookie based SessionStorage', () => {
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
-      const cookies = response.get('set-cookie');
+      const cookies = response.get('set-cookie')!;
       const sessionCookie = retrieveSessionCookie(cookies[0]);
 
       const response2 = await supertest(innerServer.listener)
@@ -475,7 +475,7 @@ describe('Cookie based SessionStorage', () => {
 
           const response = await supertest(innerServer.listener).get('/').expect(200);
 
-          const cookies = response.get('set-cookie');
+          const cookies = response.get('set-cookie')!;
           expect(cookies).toBeDefined();
           expect(cookies).toHaveLength(1);
 

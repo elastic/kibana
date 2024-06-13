@@ -57,8 +57,21 @@ export default ({ getService }: FtrProviderContext): void => {
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
           setup: '# some setup markdown',
+          required_fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'my-non-ecs-field', type: 'keyword' },
+          ],
         };
+
         const ruleToExport = getCustomQueryRuleParams(defaultableFields);
+
+        const expectedRule = {
+          ...ruleToExport,
+          required_fields: [
+            { name: '@timestamp', type: 'date', ecs: true },
+            { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
+          ],
+        };
 
         await securitySolutionApi.createRule({ body: ruleToExport });
 
@@ -69,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
 
-        expect(exportedRule).toMatchObject(defaultableFields);
+        expect(exportedRule).toMatchObject(expectedRule);
       });
 
       it('should have export summary reflecting a number of rules', async () => {

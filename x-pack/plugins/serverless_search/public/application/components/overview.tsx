@@ -44,6 +44,7 @@ import {
   API_KEY_PLACEHOLDER,
   CLOUD_ID_PLACEHOLDER,
   ELASTICSEARCH_URL_PLACEHOLDER,
+  DEFAULT_INGESTION_PIPELINE,
 } from '../constants';
 import { javaDefinition } from './languages/java';
 import { languageDefinitions } from './languages/languages';
@@ -55,6 +56,7 @@ import { PipelineOverviewButton } from './pipeline_overview_button';
 import { SelectClientCallouts } from './select_client_callouts';
 import { PipelineManageButton } from './pipeline_manage_button';
 import { OPTIONAL_LABEL } from '../../../common/i18n_string';
+import { useIngestPipelines } from '../hooks/api/use_ingest_pipelines';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
@@ -82,12 +84,16 @@ export const ElasticsearchOverview = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+  const [selectedPipeline, setSelectedPipeline] = React.useState<string>('');
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
     apiKey: clientApiKey,
     cloudId,
+    ingestPipeline: selectedPipeline,
   };
+
+  const { data: pipelineData } = useIngestPipelines();
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
@@ -302,7 +308,8 @@ export const ElasticsearchOverview = () => {
             'ingestData',
             codeSnippetArguments
           )}
-          consoleRequest={getConsoleRequest('ingestData')}
+          ingestPipelineData={pipelineData?.pipelines}
+          consoleRequest={getConsoleRequest('ingestData', codeSnippetArguments)}
           languages={languageDefinitions}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
@@ -312,6 +319,9 @@ export const ElasticsearchOverview = () => {
           consolePlugin={consolePlugin}
           sharePlugin={share}
           additionalIngestionPanel={<ConnectorIngestionPanel assetBasePath={assetBasePath} />}
+          selectedPipeline={selectedPipeline}
+          setSelectedPipeline={setSelectedPipeline}
+          defaultIngestPipeline={DEFAULT_INGESTION_PIPELINE}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section

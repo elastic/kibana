@@ -44,7 +44,7 @@ describe('getValueForSelectedField', () => {
     );
   });
 
-  test('should return undefined for missing key', () => {
+  test('should return empty string for missing key', () => {
     const hit = {
       _index: 'sample-index',
       _id: '8jSNY48B6iHEi98DL1C-',
@@ -58,6 +58,23 @@ describe('getValueForSelectedField', () => {
       },
     };
 
-    expect(getValueForSelectedField(hit._source, 'metadata.sources')).toBeUndefined();
+    expect(getValueForSelectedField(hit._source, 'metadata.sources')).toBe('');
+  });
+
+  test('should return empty string for nested key', () => {
+    const hit = {
+      _index: 'sample-index',
+      _id: '8jSNY48B6iHEi98DL1C-',
+      _score: 0.7789394,
+      _source: {
+        test: 'The Shawshank Redemption',
+        metadata: {
+          source:
+            'Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion',
+        },
+      },
+    };
+
+    expect(getValueForSelectedField(hit._source, 'bla.sources')).toBe('');
   });
 });

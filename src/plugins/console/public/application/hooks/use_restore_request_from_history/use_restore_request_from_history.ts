@@ -7,13 +7,23 @@
  */
 
 import { useCallback } from 'react';
+import { SenseEditor } from '../../models';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
 import { ESRequest } from '../../../types';
 import { restoreRequestFromHistory } from './restore_request_from_history';
+import { restoreRequestFromHistoryToMonaco } from './restore_request_from_history_to_monaco';
+import { MonacoEditorActionsProvider } from '../../containers/editor/monaco/monaco_editor_actions_provider';
 
-export const useRestoreRequestFromHistory = () => {
-  return useCallback((req: ESRequest) => {
-    const editor = registry.getInputEditor();
-    restoreRequestFromHistory(editor, req);
-  }, []);
+export const useRestoreRequestFromHistory = (isMonacoEnabled: boolean) => {
+  return useCallback(
+    async (req: ESRequest) => {
+      const editor = registry.getInputEditor();
+      if (isMonacoEnabled) {
+        await restoreRequestFromHistoryToMonaco(editor as MonacoEditorActionsProvider, req);
+      } else {
+        restoreRequestFromHistory(editor as SenseEditor, req);
+      }
+    },
+    [isMonacoEnabled]
+  );
 };

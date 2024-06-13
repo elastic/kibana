@@ -86,20 +86,19 @@ export class UnifiedManifestClient {
     manifestIds: string[]
   ): Promise<SavedObjectsBulkResponse<InternalUnifiedManifestSchema>> {
     return this.savedObjectsClient.bulkGet(
-      manifestIds.map((id) => ({ id, type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE })),
-      { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
+      manifestIds.map((id) => ({ id, type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE }))
     );
   }
 
   public async getAllUnifiedManifests(
-    cb: (unifiedManifests: InternalUnifiedManifestSchema[]) => void | Promise<void>,
     options?: FetchAllUnifiedManifestsOptions
-  ): Promise<void> {
+  ): Promise<InternalUnifiedManifestSchema[]> {
     const unifiedManifestsFetcher = this.fetchAllUnifiedManifests(this.savedObjectsClient, options);
-
+    const allUnifiedManifests: InternalUnifiedManifestSchema[] = [];
     for await (const unifiedManifests of unifiedManifestsFetcher) {
-      await cb(unifiedManifests);
+      allUnifiedManifests.push(...unifiedManifests);
     }
+    return allUnifiedManifests;
   }
 
   /**
@@ -127,8 +126,7 @@ export class UnifiedManifestClient {
           attributes,
           ...(version ? { version } : {}),
         };
-      }),
-      { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
+      })
     );
   }
 
@@ -144,8 +142,7 @@ export class UnifiedManifestClient {
     manifestIds: string[]
   ): Promise<SavedObjectsBulkDeleteResponse> {
     return this.savedObjectsClient.bulkDelete(
-      manifestIds.map((id) => ({ id, type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE })),
-      { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
+      manifestIds.map((id) => ({ id, type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE }))
     );
   }
 
@@ -160,7 +157,7 @@ export class UnifiedManifestClient {
       fields = [],
       kuery,
       sortOrder = 'asc',
-      sortField = 'created',
+      sortField = 'created_at',
     }: FetchAllUnifiedManifestsOptions = {}
   ): AsyncIterable<InternalUnifiedManifestSchema[]> {
     return createSoFindIterable<InternalUnifiedManifestBaseSchema>({

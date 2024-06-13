@@ -1,5 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+
 exports[`Summary Search Client returns the summary documents without duplicate temporary summary documents 1`] = `
 Array [
   Object {
@@ -48,6 +49,7 @@ Object {
         },
         "sliValue": -1,
         "status": "NO_DATA",
+        "summaryUpdatedAt": null,
       },
     },
     Object {
@@ -63,6 +65,7 @@ Object {
         },
         "sliValue": -1,
         "status": "NO_DATA",
+        "summaryUpdatedAt": null,
       },
     },
     Object {
@@ -78,6 +81,7 @@ Object {
         },
         "sliValue": -1,
         "status": "NO_DATA",
+        "summaryUpdatedAt": null,
       },
     },
     Object {
@@ -93,6 +97,7 @@ Object {
         },
         "sliValue": -1,
         "status": "NO_DATA",
+        "summaryUpdatedAt": null,
       },
     },
     Object {
@@ -108,6 +113,7 @@ Object {
         },
         "sliValue": -1,
         "status": "NO_DATA",
+        "summaryUpdatedAt": null,
       },
     },
   ],

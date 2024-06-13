@@ -8,7 +8,7 @@
 import React, { useState, useCallback } from 'react';
 import { EuiHeaderLink, EuiFlyout } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSourceContext } from '../../../containers/metrics_source';
+import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { FlyoutHome } from './flyout_home';
 import { JobSetupScreen } from './job_setup_screen';
 import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
@@ -17,8 +17,8 @@ import { MetricK8sModuleProvider } from '../../../containers/ml/modules/metrics_
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 
 export const AnomalyDetectionFlyout = ({
-  hideJobType,
-  hideSelectGroup,
+  hideJobType = false,
+  hideSelectGroup = false,
 }: {
   hideJobType?: boolean;
   hideSelectGroup?: boolean;
@@ -27,7 +27,7 @@ export const AnomalyDetectionFlyout = ({
   const [showFlyout, setShowFlyout] = useState(false);
   const [screenName, setScreenName] = useState<'home' | 'setup'>('home');
   const [screenParams, setScreenParams] = useState<any | null>(null);
-  const { source } = useSourceContext();
+  const { metricsView } = useMetricsDataViewContext();
 
   const { space } = useActiveKibanaSpace();
 
@@ -48,7 +48,7 @@ export const AnomalyDetectionFlyout = ({
     setShowFlyout(false);
   }, []);
 
-  if (source?.configuration.metricAlias == null || space == null) {
+  if (!metricsView?.indices || !space) {
     return null;
   }
 
@@ -68,12 +68,12 @@ export const AnomalyDetectionFlyout = ({
       </EuiHeaderLink>
       {showFlyout && (
         <MetricHostsModuleProvider
-          indexPattern={source?.configuration.metricAlias ?? ''}
+          indexPattern={metricsView?.indices ?? ''}
           sourceId={'default'}
           spaceId={space.id}
         >
           <MetricK8sModuleProvider
-            indexPattern={source?.configuration.metricAlias ?? ''}
+            indexPattern={metricsView?.indices ?? ''}
             sourceId={'default'}
             spaceId={space.id}
           >

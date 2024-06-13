@@ -228,7 +228,7 @@ export const parseBody = (value: string): string[] => {
         break;
       }
       case 'f': {
-        if (peek(1) === 'a' && peek(2) === 'l' && peek(3) === 's' && peek(3) === 'e') {
+        if (peek(1) === 'a' && peek(2) === 'l' && peek(3) === 's' && peek(4) === 'e') {
           next();
           next();
           next();

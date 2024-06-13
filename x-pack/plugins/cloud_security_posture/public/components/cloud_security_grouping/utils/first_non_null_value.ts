@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ECSField } from '@kbn/securitysolution-grouping/src';
+import { ECSField } from '@kbn/grouping/src';
 
 /**
  * Return first non-null value. If the field contains an array, this will return the first value that isn't null. If the field isn't an array it'll be returned unless it's null.

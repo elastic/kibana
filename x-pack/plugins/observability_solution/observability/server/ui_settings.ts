@@ -45,6 +45,7 @@ import {
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
   profilingFetchTopNFunctionsFromStacktraces,
+  enableInfrastructureContainerAssetView,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -244,6 +245,20 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
   },
+  [enableInfrastructureContainerAssetView]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInfrastructureContainerAssetView', {
+      defaultMessage: 'Container view',
+    }),
+    value: true,
+    description: i18n.translate(
+      'xpack.observability.enableInfrastructureContainerAssetViewDescription',
+      {
+        defaultMessage: 'Enable the Container asset view in the Infrastructure app.',
+      }
+    ),
+    schema: schema.boolean(),
+  },
   [enableInfrastructureProfilingIntegration]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInfrastructureProfilingIntegration', {
@@ -268,9 +283,9 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
       {
         defaultMessage:
-          '{betaLabel} Enable option to link custom dashboards in the asset details view.',
+          '{technicalPreviewLabel} Enable option to link custom dashboards in the asset details view.',
         values: {
-          betaLabel: `<em>[${betaLabel}]</em>`,
+          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
         },
       }
     ),
@@ -518,23 +533,18 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 1.7,
     description: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingDescription', {
-      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the {uptimeLink} survey
-      </br></br>
+      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the <a>Uptime Institute</a> survey
+      
       You can also use the PUE that corresponds with your cloud provider:
-      <ul style="list-style-type: none;margin-left: 4px;">
+      '<ul style="list-style-type: none;margin-left: 4px;">
         <li><strong>AWS:</strong> 1.135</li>
         <li><strong>GCP:</strong> 1.1</li>
         <li><strong>Azure:</strong> 1.185</li>
-      </ul>
+      </ul>'
       `,
       values: {
-        uptimeLink:
-          '<a href="https://ela.st/uptimeinstitute" target="_blank" rel="noopener noreferrer">' +
-          i18n.translate(
-            'xpack.observability.profilingDatacenterPUEUiSettingDescription.uptimeLink',
-            { defaultMessage: 'Uptime Institute' }
-          ) +
-          '</a>',
+        a: (chunks) =>
+          `<a href="https://ela.st/uptimeinstitute" target="_blank" rel="noopener noreferrer">${chunks}</a>`,
       },
     }),
     schema: schema.number({ min: 0 }),
