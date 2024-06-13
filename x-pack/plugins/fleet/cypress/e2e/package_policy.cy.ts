@@ -14,6 +14,7 @@ describe('Edit package policy', () => {
     package: { name: 'fleet_server', title: 'Fleet Server', version: '1.1.0' },
     enabled: true,
     policy_id: 'fleet-server-policy',
+    policy_ids: ['fleet-server-policy'],
     output_id: 'fleet-default-output',
     inputs: [
       {

@@ -9,7 +9,7 @@ import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/consta
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
-import type { IDetectionRulesClient } from '../../../rule_management/logic/rule_management/detection_rules_client';
+import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 
 /**
  * Upgrades existing prebuilt rules given a set of rules and output index.
