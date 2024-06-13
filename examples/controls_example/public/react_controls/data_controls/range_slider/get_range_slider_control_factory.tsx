@@ -11,6 +11,7 @@ import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, switchMap, tap } from 'rxjs';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
 import {
@@ -170,6 +171,29 @@ export const getRangesliderControlFactory = (
           }
         });
 
+      const outputFilterSubscription = value$.subscribe((value) => {
+        const dataView = dataControlApi.dataViews?.value?.[0];
+        const fieldName = dataControlStateManager.fieldName.value;
+        const dataViewField =
+          dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+        const min = parseFloat(value?.[0] ?? '');
+        const max = parseFloat(value?.[1] ?? '');
+
+        let rangeFilter: Filter | undefined;
+        if (value && dataView && dataViewField && !isNaN(min) && !isNaN(max)) {
+          const params = {
+            gte: min,
+            lte: max,
+          } as RangeFilterParams;
+
+          rangeFilter = buildRangeFilter(dataViewField, params, dataView);
+          rangeFilter.meta.key = fieldName;
+          rangeFilter.meta.type = 'range';
+          rangeFilter.meta.params = params;
+        }
+        api.setOutputFilter(rangeFilter);
+      });
+
       return {
         api,
         Component: () => {
@@ -188,6 +212,7 @@ export const getRangesliderControlFactory = (
             return () => {
               fieldChangedSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
+              outputFilterSubscription.unsubscribe();
             };
           }, []);
 
