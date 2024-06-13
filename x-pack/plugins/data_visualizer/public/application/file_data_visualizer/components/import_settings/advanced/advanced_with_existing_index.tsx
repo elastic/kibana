@@ -12,6 +12,7 @@ import React from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import {
@@ -25,6 +26,7 @@ import {
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { differenceWith } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { CombinedField } from '../../../../common/components/combined_fields';
 
 import { IngestPipeline, Mappings } from './inputs';
@@ -102,6 +104,7 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
     Array<EuiComboBoxOptionOption<string>>
   >([]);
   const [missingFields, setMissingFields] = useState<Field[]>([]);
+  const [incompatibleMappingsWarnings, setIncompatibleMappingsWarning] = useState<string[]>([]);
   const [pipelineIdErrors, setPipelineIdErrors] = useState<string[]>([]);
 
   useEffect(
@@ -158,7 +161,9 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
 
   useEffect(
     function initMissingFields() {
-      setMissingFields(getMissingFields(originalMappingsString, mappingsString));
+      const result = getMissingFields(originalMappingsString, mappingsString);
+      setMissingFields(result.missingFields);
+      setIncompatibleMappingsWarning(result.incompatibleMappings ?? []);
     },
     [originalMappingsString, mappingsString]
   );
@@ -228,9 +233,6 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
     },
     [findPipelineOption, pipelineId]
   );
-
-  // !!!!!!!!  add a check to see if the mappings are too different
-  // if so, block the import and show a warning
 
   return (
     <>
@@ -311,7 +313,12 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
                 <>
                   <EuiSwitch
                     compressed
-                    label="Use existing pipeline"
+                    label={i18n.translate(
+                      'xpack.dataVisualizer.file.advancedImportSettingsIndex.useExistingPipeline',
+                      {
+                        defaultMessage: 'Use existing pipeline',
+                      }
+                    )}
                     checked={!createNewPipeline}
                     onChange={(e) => onCreateNewPipelineChange(!e.target.checked)}
                   />
@@ -319,7 +326,12 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
                   {createNewPipeline ? (
                     <>
                       <EuiFormRow
-                        label="Pipeline ID"
+                        label={i18n.translate(
+                          'xpack.dataVisualizer.file.advancedImportSettingsIndex.pipelineId',
+                          {
+                            defaultMessage: 'Pipeline ID',
+                          }
+                        )}
                         isInvalid={pipelineIdErrors.length > 0}
                         error={pipelineIdErrors}
                       >
@@ -347,6 +359,7 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <MappingsWarning warnings={incompatibleMappingsWarnings} />
         </>
       ) : null}
     </>
@@ -359,9 +372,73 @@ function extractFields(mappingsString: string): Field[] {
   return Object.entries(mappings.properties).map(([name, { type }]) => ({ name, type }));
 }
 
-function getMissingFields(originalMappingsString: string, mappingsString: string): Field[] {
+const mappingsWarnings = {
+  tooManyNewFields: i18n.translate(
+    'xpack.dataVisualizer.file.advancedImportSettingsIndex.tooManyNewFields',
+    {
+      defaultMessage: 'More than half of the fields in the file are new to this index',
+    }
+  ),
+  someTypesAreDifferent: i18n.translate(
+    'xpack.dataVisualizer.file.advancedImportSettingsIndex.someTypesAreDifferent',
+    {
+      defaultMessage: 'Some field types are different',
+    }
+  ),
+};
+
+function getMissingFields(
+  originalMappingsString: string,
+  mappingsString: string
+): {
+  missingFields: Field[];
+  incompatibleMappings: string[];
+} {
   const originalFields = extractFields(originalMappingsString);
   const fields = extractFields(mappingsString);
+  const missingFields = differenceWith(originalFields, fields, (a, b) => a.name === b.name);
 
-  return differenceWith(originalFields, fields, (a, b) => a.name === b.name);
+  let newFields = 0;
+  const incompatibleMappings = [];
+
+  for (const f of fields) {
+    const originalField = originalFields.find((of) => of.name === f.name);
+    if (originalField === undefined) {
+      newFields++;
+    } else if (originalField !== undefined && originalField.type !== f.type) {
+      incompatibleMappings.push(mappingsWarnings.someTypesAreDifferent);
+      break;
+    }
+  }
+
+  if (newFields >= fields.length / 2) {
+    incompatibleMappings.push(mappingsWarnings.tooManyNewFields);
+  }
+
+  return {
+    missingFields,
+    incompatibleMappings,
+  };
 }
+
+const MappingsWarning: FC<{ warnings: string[] }> = ({ warnings }) => {
+  return (
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.advancedImportSettingsIndex.mappingWarningTitle"
+          defaultMessage="Possibly incompatible mappings"
+        />
+      }
+      color="warning"
+      iconType="warning"
+    >
+      {warnings.map((warning, i) => (
+        <React.Fragment key={warning}>
+          {warning}
+          {i < warnings.length - 1 ? <EuiSpacer size="s" /> : null}
+        </React.Fragment>
+      ))}
+    </EuiCallOut>
+  );
+};
