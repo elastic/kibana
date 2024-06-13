@@ -136,7 +136,7 @@
           "\nHelper to build multiple DataTableRecords at once, saved a bit of testing code lines"
         ],
         "signature": [
-          "(docs: ",
+          "({\n  records,\n  dataView,\n  processRecord,\n}: { records: ",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
@@ -144,7 +144,7 @@
             "section": "def-common.EsHitRecord",
             "text": "EsHitRecord"
           },
-          "[], dataView: ",
+          "[]; dataView?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -152,7 +152,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined, { processRecord }: { processRecord?: ((record: ",
+          " | undefined; processRecord?: ((record: ",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
@@ -177,57 +177,9 @@
           {
             "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.buildDataTableRecordList.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "docs",
-            "description": [
-              "Array of documents returned from Elasticsearch"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.EsHitRecord",
-                "text": "EsHitRecord"
-              },
-              "[]"
-            ],
-            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.buildDataTableRecordList.$2",
             "type": "Object",
             "tags": [],
-            "label": "dataView",
-            "description": [
-              "this current data view"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | undefined"
-            ],
-            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.buildDataTableRecordList.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "{ processRecord }",
+            "label": "{\n  records,\n  dataView,\n  processRecord,\n}",
             "description": [],
             "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
             "deprecated": false,
@@ -235,7 +187,49 @@
             "children": [
               {
                 "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.buildDataTableRecordList.$3.processRecord",
+                "id": "def-common.buildDataTableRecordList.$1.records",
+                "type": "Array",
+                "tags": [],
+                "label": "records",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.EsHitRecord",
+                    "text": "EsHitRecord"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.buildDataTableRecordList.$1.dataView",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.buildDataTableRecordList.$1.processRecord",
                 "type": "Function",
                 "tags": [],
                 "label": "processRecord",
@@ -257,7 +251,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/discover-utils",
-                    "id": "def-common.buildDataTableRecordList.$3.processRecord.$1",
+                    "id": "def-common.buildDataTableRecordList.$1.processRecord.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "record",
