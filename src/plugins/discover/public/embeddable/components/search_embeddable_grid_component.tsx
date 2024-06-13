@@ -75,13 +75,7 @@ export function SearchEmbeddableGridComponent({
     interceptedWarnings,
     rows,
     totalHitCount,
-    columns,
     columnsMeta,
-    sort,
-    sampleSize,
-    rowHeight,
-    headerRowHeight,
-    rowsPerPage,
   ] = useBatchedPublishingSubjects(
     api.dataLoading,
     api.savedSearch$,
@@ -90,13 +84,7 @@ export function SearchEmbeddableGridComponent({
     api.fetchWarnings$,
     stateManager.rows,
     stateManager.totalHitCount,
-    stateManager.columns,
-    stateManager.columnsMeta,
-    stateManager.sort,
-    stateManager.sampleSize,
-    stateManager.rowHeight,
-    stateManager.headerRowHeight,
-    stateManager.rowsPerPage
+    stateManager.columnsMeta
   );
 
   const [panelTitle, panelDescription, savedSearchTitle, savedSearchDescription] =
@@ -118,12 +106,17 @@ export function SearchEmbeddableGridComponent({
       savedSearchId,
       query: savedSearch.searchSource.getField('query'),
       dataView: dataViews?.[0],
-      columns: columns ?? [],
-      sort: getSortForEmbeddable(sort, dataViews?.[0], discoverServices.uiSettings, isEsql),
-      rowHeightState: rowHeight,
-      headerRowHeightState: headerRowHeight,
-      rowsPerPageState: rowsPerPage,
-      sampleSizeState: sampleSize,
+      columns: savedSearch.columns ?? [],
+      sort: getSortForEmbeddable(
+        savedSearch.sort,
+        dataViews?.[0],
+        discoverServices.uiSettings,
+        isEsql
+      ),
+      rowHeightState: savedSearch.rowHeight,
+      headerRowHeightState: savedSearch.headerRowHeight,
+      rowsPerPageState: savedSearch.rowsPerPage,
+      sampleSizeState: savedSearch.sampleSize,
       onUpdateRowHeight: (newRowHeight: number | undefined) => {
         stateManager.rowHeight.next(newRowHeight);
       },
@@ -157,13 +150,7 @@ export function SearchEmbeddableGridComponent({
     savedSearchDescription,
     savedSearchId,
     dataViews,
-    columns,
     columnsMeta,
-    sort,
-    sampleSize,
-    rowHeight,
-    headerRowHeight,
-    rowsPerPage,
     stateManager,
     discoverServices.uiSettings,
     interceptedWarnings,

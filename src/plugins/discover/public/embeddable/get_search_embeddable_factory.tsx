@@ -9,7 +9,7 @@
 import { omit, pick } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { KibanaExecutionContext } from '@kbn/core/types';
@@ -31,11 +31,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import {
-  SavedSearchAttributes,
-  toSavedSearchAttributes,
-  VIEW_MODE,
-} from '@kbn/saved-search-plugin/common';
+import { toSavedSearchAttributes, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 
@@ -44,6 +40,7 @@ import { getValidViewMode } from '../application/main/utils/get_valid_view_mode'
 import { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
+import { EDITABLE_PANEL_KEYS, EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import {
@@ -52,23 +49,6 @@ import {
   SearchEmbeddableSerializedState,
 } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
-
-/** This constant refers to the parts of the saved search state that can be edited from a dashboard */
-const EDITABLE_SAVED_SEARCH_KEYS: Array<keyof SavedSearchAttributes> = [
-  'sort',
-  'columns',
-  'rowHeight',
-  'sampleSize',
-  'rowsPerPage',
-  'headerRowHeight',
-];
-
-/** This constant refers to the dashboard panel specific state */
-const EDITABLE_PANEL_KEYS = [
-  'title', // panel title
-  'description', // panel description
-  'timeRange', // panel custom time range
-];
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -147,6 +127,11 @@ export const getSearchEmbeddableFactory = ({
         searchEmbeddableStateManager,
         cleanup,
       } = await initializeSearchEmbeddableApi(initialState, { discoverServices });
+
+      const solutionNavId = await firstValueFrom(
+        discoverServices.core.chrome.getActiveSolutionNavId$()
+      );
+      await discoverServices.profilesManager.resolveRootProfile({ solutionNavId });
 
       const serializeState = async (): Promise<
         SerializedPanelState<SearchEmbeddableSerializedState>

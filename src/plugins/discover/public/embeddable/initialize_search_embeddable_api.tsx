@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, map, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, Observable, skip } from 'rxjs';
 
 import { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -20,12 +21,12 @@ import { DataTableColumnsMeta } from '@kbn/unified-data-table';
 
 import { getDefaultRowsPerPage } from '../../common/constants';
 import { DiscoverServices } from '../build_services';
-import { DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
+import { DEFAULT_HEADER_ROW_HEIGHT_LINES, EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 import {
   PublishesSavedSearch,
-  SearchEmbeddableStateManager,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedAttributes,
+  SearchEmbeddableStateManager,
 } from './types';
 
 const initializeSearchSource = async (
@@ -112,10 +113,23 @@ export const initializeSearchEmbeddableApi = async (
   const defaultSampleSize = discoverServices.uiSettings.get(SAMPLE_SIZE_SETTING);
 
   const savedSearch$ = new BehaviorSubject(initializedSavedSearch(stateManager, searchSource));
-  const syncSavedSearch = searchSource$
+
+  /** This will fire when any of the **editable** state changes */
+  const onAnyStateChange: Observable<Partial<SearchEmbeddableSerializedAttributes>> = combineLatest(
+    pick(stateManager, EDITABLE_SAVED_SEARCH_KEYS)
+  );
+
+  /** Keep the saved search in sync with any state changes */
+  const syncSavedSearch = combineLatest([onAnyStateChange, searchSource$])
     .pipe(
-      skip(1), // it was initialized above
-      map((newSearchSource) => initializedSavedSearch(stateManager, newSearchSource))
+      skip(1),
+      map(
+        ([newState, newSearchSource]) =>
+          ({
+            ...newState,
+            searchSource: newSearchSource,
+          } as SavedSearch)
+      )
     )
     .subscribe((newSavedSearch) => {
       savedSearch$.next(newSavedSearch);

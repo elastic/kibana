@@ -55,12 +55,6 @@ export function initializeFetch({
   const requestAdapter = new RequestAdapter();
   let abortController = new AbortController(); // ???
 
-  // const solutionNavId = await firstValueFrom(
-  //   this.services.core.chrome.getActiveSolutionNavId$()
-  // );
-
-  // await this.services.profilesManager.resolveRootProfile({ solutionNavId });
-
   const fetchSubscription = combineLatest([
     fetch$(api),
     api.savedSearch$,
