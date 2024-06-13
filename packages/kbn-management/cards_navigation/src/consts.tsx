@@ -68,7 +68,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     description: i18n.translate('management.landing.withCardNavigation.dataQualityDescription', {
       defaultMessage: 'Manage the quality of your logs data.',
     }),
-    icon: 'indexEdit',
+    icon: 'documents',
   },
 
   [AppIds.RULES]: {
