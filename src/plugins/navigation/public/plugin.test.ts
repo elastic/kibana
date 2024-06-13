@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import type { Space } from '@kbn/spaces-plugin/public';
 import type { BuildFlavor } from '@kbn/config';
 import type { UserSettingsData } from '@kbn/user-profile-components';
 import { SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
@@ -44,6 +46,7 @@ const setup = (
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   const cloud = cloudMock.createStart();
   const cloudExperiments = cloudExperimentsMock.createStartMock();
+  const spaces = spacesPluginMock.createStartContract();
   cloudExperiments.getVariation.mockImplementation((key) => {
     if (key === SOLUTION_NAV_FEATURE_FLAG_NAME) {
       return Promise.resolve(config.featureOn);
@@ -65,6 +68,7 @@ const setup = (
     unifiedSearch,
     cloud,
     cloudExperiments,
+    spaces,
     config,
     setChromeStyle,
   };
@@ -93,18 +97,50 @@ describe('Navigation Plugin', () => {
   describe('feature flag enabled', () => {
     const featureOn = true;
 
-    // TODO: this test will have to be updated when we will read the space state
-    it.skip('should add the default solution navs **and** set the active nav', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup({ featureOn });
+    it('should change the active solution navigation', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments, spaces } = setup({
+        featureOn,
+      });
 
-      plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
+      spaces.getActiveSpace$ = jest
+        .fn()
+        .mockReturnValue(of({ solution: 'search' } as Pick<Space, 'solution'>));
+
+      plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments, spaces });
       await new Promise((resolve) => setTimeout(resolve));
 
-      expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalled();
+      expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith('es');
+    });
 
-      expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith(
-        'security'
-      );
+    describe('addSolutionNavigation()', () => {
+      it('should update the solution navigation definitions', async () => {
+        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup({
+          featureOn,
+        });
+
+        const { addSolutionNavigation } = plugin.start(coreStart, {
+          unifiedSearch,
+          cloud,
+          cloudExperiments,
+        });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        const definition = {
+          id: 'es',
+          title: 'Elasticsearch',
+          navigationTree$: of({ body: [] }),
+        };
+        addSolutionNavigation(definition);
+
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalledWith({
+          es: {
+            ...definition,
+            sideNavComponent: expect.any(Function),
+          },
+        });
+      });
     });
 
     describe('set Chrome style', () => {
@@ -114,6 +150,37 @@ describe('Navigation Plugin', () => {
         );
 
         plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('classic');
+      });
+
+      it('should set the Chrome style to "classic" when spaces plugin is not available', async () => {
+        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
+          { featureOn: true } // feature not enabled but no spaces plugin
+        );
+
+        plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('classic');
+      });
+
+      it('should set the Chrome style to "classic" when active space solution is "classic"', async () => {
+        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments, spaces } = setup({
+          featureOn: true,
+        });
+
+        // Spaces plugin is available but activeSpace is undefined
+        spaces.getActiveSpace$ = jest.fn().mockReturnValue(of(undefined));
+        plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments, spaces });
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('classic');
+
+        // Spaces plugin is available and activeSpace has solution "classic"
+        coreStart.chrome.setChromeStyle.mockReset();
+        spaces.getActiveSpace$ = jest
+          .fn()
+          .mockReturnValue(of({ solution: 'classic' } as Pick<Space, 'solution'>));
+        plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments, spaces });
         await new Promise((resolve) => setTimeout(resolve));
         expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('classic');
       });
@@ -129,15 +196,25 @@ describe('Navigation Plugin', () => {
         expect(coreStart.chrome.setChromeStyle).not.toHaveBeenCalled();
       });
 
-      // TODO: this test will have to be updated when we will read the space state
-      it.skip('should set the Chrome style to "project" when the feature is enabled', async () => {
-        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup({
+      it('should set the Chrome style to "project" when space solution is a known solution', async () => {
+        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments, spaces } = setup({
           featureOn: true,
         });
 
-        plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
+        for (const solution of ['search', 'observability', 'security']) {
+          spaces.getActiveSpace$ = jest
+            .fn()
+            .mockReturnValue(of({ solution } as Pick<Space, 'solution'>));
+          plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments, spaces });
+          await new Promise((resolve) => setTimeout(resolve));
+          expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('project');
+          coreStart.chrome.setChromeStyle.mockReset();
+        }
+
+        spaces.getActiveSpace$ = jest.fn().mockReturnValue(of({ solution: 'unknown' }));
+        plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments, spaces });
         await new Promise((resolve) => setTimeout(resolve));
-        expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('project');
+        expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('classic');
       });
     });
 
