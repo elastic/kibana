@@ -35,6 +35,7 @@ class PipelineListUi extends React.Component {
       showConfirmDeleteModal: false,
       showEnableMonitoringAlert: false,
       selection: [],
+      searchTerm: '',
     };
   }
 
@@ -56,7 +57,7 @@ class PipelineListUi extends React.Component {
         <h2>
           <FormattedMessage
             id="xpack.logstash.pipelineList.noPipelinesTitle"
-            defaultMessage="No pipelines"
+            defaultMessage="No pipelines found"
           />
         </h2>
       }
@@ -90,6 +91,31 @@ class PipelineListUi extends React.Component {
     />
   );
 
+  getFilteredPipelines = (pipelines, searchTerm) => {
+    if (!searchTerm.trim()) {
+      return pipelines;
+    }
+
+    const searchTerms = searchTerm.split(' ').filter((term) => term !== '');
+    const filteredPipelines = pipelines.filter((pipeline) => {
+      return searchTerms.every((term) => {
+        if (term.startsWith('id:')) {
+          const idTerm = term.slice(3);
+          return pipeline.id.toLowerCase().includes(idTerm.toLowerCase());
+        } else {
+          return Object.values(pipeline).some((value) => {
+            if (typeof value === 'string') {
+              return value.toLowerCase().includes(term.toLowerCase());
+            }
+            return false;
+          });
+        }
+      });
+    });
+
+    return filteredPipelines;
+  };
+
   loadPipelines = () => {
     const { isReadOnly, licenseService, pipelinesService, toastNotifications, intl } = this.props;
 
@@ -109,14 +135,17 @@ class PipelineListUi extends React.Component {
     return pipelinesService
       .getPipelineList()
       .then((pipelines) => {
+        const { searchTerm } = this.state;
+        const filteredPipelines = this.getFilteredPipelines(pipelines, searchTerm);
+
         this.setState({
           isLoading: false,
           isForbidden: false,
           isSelectable: true,
-          pipelines,
+          pipelines: filteredPipelines,
         });
 
-        if (!pipelines.length) {
+        if (!filteredPipelines.length) {
           this.setState({
             columns: [],
             message: this.getEmptyPrompt(),
@@ -287,6 +316,12 @@ class PipelineListUi extends React.Component {
 
   onSelectionChange = (selection) => this.setState({ selection });
 
+  onSearchChange = (searchTerm) => {
+    this.setState({ searchTerm }, () => {
+      this.loadPipelines();
+    });
+  };
+
   render() {
     const { clonePipeline, createPipeline, isReadOnly, openPipeline } = this.props;
     const { isSelectable, message, pipelines, selection, showConfirmDeleteModal } = this.state;
@@ -317,6 +352,7 @@ class PipelineListUi extends React.Component {
           onDeleteSelectedPipelines={this.onDeleteSelectedPipelines}
           onSelectionChange={this.onSelectionChange}
           openPipeline={openPipeline}
+          onSearchChange={this.onSearchChange}
         />
 
         <ConfirmDeleteModal
