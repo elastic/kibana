@@ -110,7 +110,7 @@ export const TakeActionDropdown = React.memo(
     const isAgentEndpoint = useMemo(() => ecsData?.agent?.type?.includes('endpoint'), [ecsData]);
     const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
 
-    const osQueryAgentId = useMemo(
+    const osqueryAgentId = useMemo(
       () => getAlertDetailsFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
       [detailsData]
     );
@@ -208,13 +208,13 @@ export const TakeActionDropdown = React.memo(
     });
 
     const osqueryAvailable = osquery?.isOsqueryAvailable({
-      agentId: osQueryAgentId,
+      agentId: osqueryAgentId,
     });
 
     const handleOnOsqueryClick = useCallback(() => {
-      onOsqueryClick(osQueryAgentId);
+      onOsqueryClick(osqueryAgentId);
       setIsPopoverOpen(false);
-    }, [onOsqueryClick, setIsPopoverOpen, osQueryAgentId]);
+    }, [onOsqueryClick, setIsPopoverOpen, osqueryAgentId]);
 
     const osqueryActionItem = useMemo(
       () =>
