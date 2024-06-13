@@ -18,7 +18,7 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_INDEX,
   ENROLLMENT_API_KEYS_INDEX,
-  INDEX_NAME,
+  INGEST_SAVED_OBJECT_INDEX,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
 
@@ -238,7 +238,7 @@ describe('getFieldSpecs', () => {
   });
 
   it('returns fieldSpecs for Fleet agent policies', () => {
-    expect(getFieldSpecs(INDEX_NAME, AGENT_POLICY_SAVED_OBJECT_TYPE)).toEqual([
+    expect(getFieldSpecs(INGEST_SAVED_OBJECT_INDEX, AGENT_POLICY_SAVED_OBJECT_TYPE)).toEqual([
       {
         aggregatable: true,
         esTypes: ['keyword'],
@@ -404,6 +404,6 @@ describe('getFieldSpecs', () => {
   });
 
   it('returns empty array if indexPattern is not one of the previous', async () => {
-    expect(getFieldSpecs(INDEX_NAME, PACKAGE_POLICY_SAVED_OBJECT_TYPE)).toEqual([]);
+    expect(getFieldSpecs(INGEST_SAVED_OBJECT_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE)).toEqual([]);
   });
 });

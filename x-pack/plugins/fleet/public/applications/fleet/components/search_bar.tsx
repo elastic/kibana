@@ -16,7 +16,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../hooks';
-import { INDEX_NAME } from '../constants';
 import {
   AGENT_POLICY_MAPPINGS,
   AGENT_MAPPINGS,
@@ -24,7 +23,8 @@ import {
   AGENTS_INDEX,
   ENROLLMENT_API_KEYS_INDEX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../common/constants';
+  INGEST_SAVED_OBJECT_INDEX,
+} from '../constants';
 
 const NoWrapQueryStringInput = styled(QueryStringInput)`
   .kbnQueryBar__textarea {
@@ -47,7 +47,7 @@ const getMappings = (indexPattern: string, fieldPrefix: string) => {
       return AGENT_MAPPINGS;
     // Saved Objects are stored in .kibana_ingest.
     // Currently, the search bar is only used to query agent policies.
-    case INDEX_NAME:
+    case INGEST_SAVED_OBJECT_INDEX:
       switch (fieldPrefix) {
         case AGENT_POLICY_SAVED_OBJECT_TYPE:
           return AGENT_POLICY_MAPPINGS;
@@ -63,7 +63,7 @@ const getMappings = (indexPattern: string, fieldPrefix: string) => {
 
 const getFieldName = (indexPattern: string, fieldPrefix: string, name: string) => {
   // Add Saved Object prefix if the field refers to a SO and is not already prefixed.
-  if (indexPattern !== INDEX_NAME || name.startsWith(fieldPrefix)) {
+  if (indexPattern !== INGEST_SAVED_OBJECT_INDEX || name.startsWith(fieldPrefix)) {
     return name;
   }
   return `${fieldPrefix}.${name}`;
