@@ -56,7 +56,13 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
               statusCode: 401,
             });
           }
-          const attackDiscovery = await dataClient?.findAttackDiscoveryByConnectorId({
+          if (!dataClient) {
+            return resp.error({
+              body: `Attack discovery data client not initialized`,
+              statusCode: 500,
+            });
+          }
+          const attackDiscovery = await dataClient.findAttackDiscoveryByConnectorId({
             connectorId,
             authenticatedUser,
           });
