@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import React, { useState, type FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPanel,
   EuiSteps,
   EuiCodeBlock,
-  EuiButton,
   EuiSpacer,
   EuiSkeletonText,
-  EuiToolTip,
-  copyToClipboard,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,6 +34,7 @@ import { AccordionWithIcon } from './accordion_with_icon';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { EmptyPrompt } from './empty_prompt';
 import { isRegistryIntegration, isCustomIntegration } from './get_installed_integrations';
+import { CopyToClipboardButton } from './copy_to_clipboard_button';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   const {
@@ -44,7 +42,6 @@ export const AutoDetectPanel: FunctionComponent = () => {
   } = useKibana<ObservabilityOnboardingContextValue>();
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const command = data ? getAutoDetectCommand(data) : undefined;
-  const [isTextCopied, setTextCopied] = useState(false);
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
 
   if (error) {
@@ -93,39 +90,11 @@ export const AutoDetectPanel: FunctionComponent = () => {
                   {command}
                 </EuiCodeBlock>
                 <EuiSpacer />
-                <EuiToolTip
-                  content={
-                    isTextCopied
-                      ? i18n.translate(
-                          'xpack.observability_onboarding.autoDetectPanel.copiedToClipboardTooltip',
-                          {
-                            defaultMessage: 'Command copied',
-                          }
-                        )
-                      : null
-                  }
-                >
-                  <EuiButton
-                    data-test-subj="observabilityOnboardingAutoDetectPanelCopyToClipboardButton"
-                    onBlur={() => setTextCopied(false)}
-                    onMouseLeave={() => setTextCopied(false)}
-                    onClick={() => {
-                      if (command) {
-                        copyToClipboard(command);
-                        setTextCopied(true);
-                      }
-                    }}
-                    isDisabled={!command}
-                    iconType="copyClipboard"
-                    color="primary"
-                    fill={status === 'notStarted'}
-                  >
-                    {i18n.translate(
-                      'xpack.observability_onboarding.autoDetectPanel.copyToClipboardButtonLabel',
-                      { defaultMessage: 'Copy to clipboard' }
-                    )}
-                  </EuiButton>
-                </EuiToolTip>
+                <CopyToClipboardButton
+                  text={command}
+                  color="primary"
+                  fill={status === 'notStarted'}
+                />
               </>
             ) : (
               <EuiSkeletonText lines={6} />
