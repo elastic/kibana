@@ -132,26 +132,15 @@ export const ImportSettings: FC<Props> = ({
           {reuseIndex ? (
             <AdvancedWithExistingIndexSettings
               index={index}
-              dataView={dataView}
               initialized={initialized}
               onIndexChange={onIndexChange}
-              createDataView={createDataView}
-              onCreateDataViewChange={onCreateDataViewChange}
-              onDataViewChange={onDataViewChange}
-              indexSettingsString={indexSettingsString}
               mappingsString={mappingsString}
               pipelineString={pipelineString}
-              onIndexSettingsStringChange={onIndexSettingsStringChange}
               onMappingsStringChange={onMappingsStringChange}
               onPipelineStringChange={onPipelineStringChange}
               pipelineId={pipelineId}
               onPipelineIdChange={onPipelineIdChange}
               indexNameError={indexNameError}
-              dataViewNameError={dataViewNameError}
-              combinedFields={combinedFields}
-              onCombinedFieldsChange={onCombinedFieldsChange}
-              results={results}
-              canCreateDataView={canCreateDataView}
               originalMappingsString={originalMappingsString}
               originalPipelineString={originalPipelineString}
               createNewPipeline={createNewPipeline}

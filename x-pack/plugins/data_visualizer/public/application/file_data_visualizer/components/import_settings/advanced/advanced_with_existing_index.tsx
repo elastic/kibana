@@ -24,10 +24,8 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { differenceWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { CombinedField } from '../../../../common/components/combined_fields';
 
 import { IngestPipeline, Mappings } from './inputs';
 import { useExistingIndices } from './use_existing_indices';
@@ -39,26 +37,15 @@ interface Field {
 
 interface Props {
   index: string;
-  dataView: string;
   initialized: boolean;
   onIndexChange(index: string, skipValidation?: boolean): void;
-  createDataView: boolean;
-  onCreateDataViewChange(): void;
-  onDataViewChange(): void;
-  indexSettingsString: string;
   mappingsString: string;
   pipelineString: string;
-  onIndexSettingsStringChange(): void;
   onMappingsStringChange(mappings: string): void;
   onPipelineStringChange(pipeline: string): void;
   pipelineId: string | null;
   onPipelineIdChange(pipelineId: string | null): void;
   indexNameError: string;
-  dataViewNameError: string;
-  combinedFields: CombinedField[];
-  onCombinedFieldsChange(combinedFields: CombinedField[]): void;
-  results: FindFileStructureResponse;
-  canCreateDataView: boolean;
   originalMappingsString: string;
   originalPipelineString: string;
   createNewPipeline: boolean;
@@ -67,26 +54,15 @@ interface Props {
 
 export const AdvancedWithExistingIndexSettings: FC<Props> = ({
   index,
-  dataView,
   initialized,
   onIndexChange,
-  createDataView,
-  onCreateDataViewChange,
-  onDataViewChange,
-  indexSettingsString,
   mappingsString,
   pipelineString,
-  onIndexSettingsStringChange,
   onMappingsStringChange,
   onPipelineStringChange,
   pipelineId,
   onPipelineIdChange,
   indexNameError,
-  dataViewNameError,
-  combinedFields,
-  onCombinedFieldsChange,
-  results,
-  canCreateDataView,
   originalMappingsString,
   originalPipelineString,
   createNewPipeline,
