@@ -19,7 +19,7 @@ import type { Group } from '../../../common/custom_threshold_rule/types';
 import { NavigateToCaseView } from '../../hooks/use_case_view_navigation';
 import { formatCase } from './helpers/format_cases';
 import { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
-import { Groups } from '../../pages/alert_details/components/groups';
+import { Groups } from '../alert_sources/groups';
 
 interface AlertOverviewField {
   id: string;

@@ -54,6 +54,7 @@ import {
   UngroupedSearchQueryResponseRT,
   ExecutionTimeRange,
   Criterion,
+  Group,
 } from '../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
@@ -83,9 +84,13 @@ export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type LogThresholdAlertState = AlertState; // no specific state used
 export type LogThresholdAlertContext = AlertContext; // no specific instance context used
 
-export type LogThresholdAlert = Omit<ObservabilityLogsAlert, 'kibana.alert.evaluation.values'> & {
+export type LogThresholdAlert = Omit<
+  ObservabilityLogsAlert,
+  'kibana.alert.evaluation.values' | 'kibana.alert.group'
+> & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   'kibana.alert.evaluation.values'?: Array<number | null>;
+  [ALERT_GROUP]?: Group[];
 };
 
 export type LogThresholdAlertReporter = (
@@ -173,7 +178,7 @@ export const createLogThresholdExecutor =
           const instances = alertInstanceId.split(',');
           const groups =
             alertInstanceId !== '*'
-              ? params.groupBy?.reduce((resultGroups: any, groupByItem, index) => {
+              ? params.groupBy?.reduce<Group[]>((resultGroups, groupByItem, index) => {
                   resultGroups.push({ field: groupByItem, value: instances[index].trim() });
                   return resultGroups;
                 }, [])

@@ -37,6 +37,7 @@ import {
   BurnRateAllowedActionGroups,
   BurnRateRuleParams,
   BurnRateRuleTypeState,
+  Group,
   WindowSchema,
 } from './types';
 import {
@@ -50,6 +51,10 @@ import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
 import { getSloSummary } from './lib/summary_repository';
+
+export type BurnRateAlert = Omit<ObservabilitySloAlert, 'kibana.alert.group'> & {
+  [ALERT_GROUP]?: Group[];
+};
 
 export const getRuleExecutor = ({
   basePath,
@@ -65,7 +70,7 @@ export const getRuleExecutor = ({
       BurnRateAlertState,
       BurnRateAlertContext,
       BurnRateAllowedActionGroups,
-      ObservabilitySloAlert
+      BurnRateAlert
     >
   ): ReturnType<
     ExecutorType<
@@ -127,7 +132,7 @@ export const getRuleExecutor = ({
         const instances = instanceId.split(',');
         const groups =
           instanceId !== ALL_VALUE
-            ? [slo.groupBy].flat().reduce((resultGroups: any, groupByItem, index) => {
+            ? [slo.groupBy].flat().reduce<Group[]>((resultGroups, groupByItem, index) => {
                 resultGroups.push({ field: groupByItem, value: instances[index].trim() });
                 return resultGroups;
               }, [])

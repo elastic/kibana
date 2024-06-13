@@ -18,9 +18,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { TopAlert } from '../../..';
-import { Groups } from './groups';
-import { Tags } from './tags';
-import { getSources } from '../../../components/alert_overview/helpers/get_sources';
+import { Groups } from '../../../components/alert_sources/groups';
+import { Tags } from '../../../components/tags';
+import { getSources } from '../../../components/alert_sources/get_sources';
 import { useKibana } from '../../../utils/kibana_react';
 import { paths } from '../../../../common/locators/paths';
 
@@ -45,7 +45,8 @@ export function AlertSummary({ alert, alertSummaryFields }: AlertSummaryProps) {
   const tags = alert.fields[TAGS];
 
   const ruleLink = http.basePath.prepend(paths.observability.ruleDetails(ruleId));
-  const commonAlertSummaryFields = [];
+  const commonFieldsAtStart = [];
+  const commonFieldsAtEnd = [];
   const groups = getSources(alert) as Array<{ field: string; value: string }>;
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export function AlertSummary({ alert, alertSummaryFields }: AlertSummaryProps) {
   }, [alertStart, alertEnd]);
 
   if (groups && groups.length > 0) {
-    commonAlertSummaryFields.push({
+    commonFieldsAtStart.push({
       label: i18n.translate('xpack.observability.alertDetails.alertSummaryField.source', {
         defaultMessage: 'Source',
       }),
@@ -64,7 +65,7 @@ export function AlertSummary({ alert, alertSummaryFields }: AlertSummaryProps) {
   }
 
   if (tags && tags.length > 0) {
-    commonAlertSummaryFields.push({
+    commonFieldsAtEnd.push({
       label: i18n.translate('xpack.observability.alertDetails.alertSummaryField.tags', {
         defaultMessage: 'Tags',
       }),
@@ -72,7 +73,7 @@ export function AlertSummary({ alert, alertSummaryFields }: AlertSummaryProps) {
     });
   }
 
-  commonAlertSummaryFields.push({
+  commonFieldsAtEnd.push({
     label: i18n.translate('xpack.observability.alertDetails.alertSummaryField.rule', {
       defaultMessage: 'Rule',
     }),
@@ -83,7 +84,11 @@ export function AlertSummary({ alert, alertSummaryFields }: AlertSummaryProps) {
     ),
   });
 
-  const alertSummary = [...commonAlertSummaryFields, ...(alertSummaryFields ?? [])];
+  const alertSummary = [
+    ...commonFieldsAtStart,
+    ...(alertSummaryFields ?? []),
+    ...commonFieldsAtEnd,
+  ];
 
   return (
     <div data-test-subj="alert-summary-container">

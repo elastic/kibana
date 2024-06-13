@@ -9,7 +9,6 @@ import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
-import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import {
   IBasePath,
   IUiSettingsClient,
@@ -55,7 +54,7 @@ import { SLODefinition, StoredSLODefinition } from '../../../domain/models';
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { createSLO } from '../../../services/fixtures/slo';
-import { getRuleExecutor } from './executor';
+import { BurnRateAlert, getRuleExecutor } from './executor';
 import {
   generateAboveThresholdKey,
   generateBurnRateKey,
@@ -164,7 +163,7 @@ describe('BurnRateRuleExecutor', () => {
       BurnRateAlertState,
       BurnRateAlertContext,
       BurnRateAllowedActionGroups,
-      ObservabilitySloAlert
+      BurnRateAlert
     >
   >;
 
