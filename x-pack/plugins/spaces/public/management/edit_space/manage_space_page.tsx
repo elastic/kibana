@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { difference } from 'lodash';
 import React, { Component } from 'react';
+import type { Observable, Subscription } from 'rxjs';
 
 import type { Capabilities, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
@@ -55,6 +56,7 @@ interface Props {
   capabilities: Capabilities;
   history: ScopedHistory;
   allowFeatureVisibility: boolean;
+  isSolutionNavEnabled$: Observable<boolean>;
 }
 
 interface State {
@@ -68,12 +70,13 @@ interface State {
     isInvalid: boolean;
     error?: string;
   };
+  isSolutionNavEnabled: boolean;
 }
 
 export class ManageSpacePage extends Component<Props, State> {
   private readonly validator: SpaceValidator;
   private initialSpaceState: State['space'] | null = null;
-  private isSolutionNavEnabled = true;
+  private subscription: Subscription | null = null;
 
   constructor(props: Props) {
     super(props);
@@ -86,6 +89,7 @@ export class ManageSpacePage extends Component<Props, State> {
         color: getSpaceColor({}),
       },
       features: [],
+      isSolutionNavEnabled: false,
     };
   }
 
@@ -110,11 +114,21 @@ export class ManageSpacePage extends Component<Props, State> {
         }),
       });
     }
+
+    this.subscription = this.props.isSolutionNavEnabled$.subscribe((isEnabled) => {
+      this.setState({ isSolutionNavEnabled: isEnabled });
+    });
   }
 
   public async componentDidUpdate(previousProps: Props) {
     if (this.props.spaceId !== previousProps.spaceId && this.props.spaceId) {
       await this.loadSpace(this.props.spaceId, Promise.resolve(this.state.features));
+    }
+  }
+
+  public componentWillUnmount() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 
@@ -164,7 +178,7 @@ export class ManageSpacePage extends Component<Props, State> {
           validator={this.validator}
         />
 
-        {this.isSolutionNavEnabled && (
+        {this.state.isSolutionNavEnabled && (
           <>
             <EuiSpacer size="l" />
             <SolutionView space={this.state.space} onChange={this.onSpaceChange} />
