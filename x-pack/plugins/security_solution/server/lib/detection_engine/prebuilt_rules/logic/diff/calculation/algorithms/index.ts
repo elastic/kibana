@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './map_embeddable';
-export * from './types';
-export * from './map_embeddable_factory';
+export { numberDiffAlgorithm } from './number_diff_algorithm';
+export { singleLineStringDiffAlgorithm } from './single_line_string_diff_algorithm';
+export { simpleDiffAlgorithm } from './simple_diff_algorithm';

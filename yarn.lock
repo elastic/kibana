@@ -5932,6 +5932,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/sample-task-plugin-mget@link:x-pack/test/task_manager_claimer_mget/plugins/sample_task_plugin_mget":
+  version "0.0.0"
+  uid ""
+
 "@kbn/sample-task-plugin@link:x-pack/test/plugin_api_integration/plugins/sample_task_plugin":
   version "0.0.0"
   uid ""

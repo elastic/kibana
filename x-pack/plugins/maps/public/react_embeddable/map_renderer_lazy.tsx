@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { Props } from './map_component';
+import type { Props } from './map_renderer';
 
 const Component = dynamic(async () => {
-  const { MapComponent } = await import('./map_component');
+  const { MapRenderer } = await import('./map_renderer');
   return {
-    default: MapComponent,
+    default: MapRenderer,
   };
 });
 
-export function MapComponentLazy(props: Props) {
+export function MapRendererLazy(props: Props) {
   return <Component {...props} />;
 }

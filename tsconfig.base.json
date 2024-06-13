@@ -1384,6 +1384,8 @@
       "@kbn/saml-provider-plugin/*": ["x-pack/test/security_api_integration/plugins/saml_provider/*"],
       "@kbn/sample-task-plugin": ["x-pack/test/plugin_api_integration/plugins/sample_task_plugin"],
       "@kbn/sample-task-plugin/*": ["x-pack/test/plugin_api_integration/plugins/sample_task_plugin/*"],
+      "@kbn/sample-task-plugin-mget": ["x-pack/test/task_manager_claimer_mget/plugins/sample_task_plugin_mget"],
+      "@kbn/sample-task-plugin-mget/*": ["x-pack/test/task_manager_claimer_mget/plugins/sample_task_plugin_mget/*"],
       "@kbn/saved-object-export-transforms-plugin": ["test/plugin_functional/plugins/saved_object_export_transforms"],
       "@kbn/saved-object-export-transforms-plugin/*": ["test/plugin_functional/plugins/saved_object_export_transforms/*"],
       "@kbn/saved-object-import-warnings-plugin": ["test/plugin_functional/plugins/saved_object_import_warnings"],

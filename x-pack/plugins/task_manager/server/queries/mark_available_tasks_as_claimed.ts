@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskStatus, TaskPriority } from '../task';
 import {
   ScriptBasedSortClause,
   ScriptClause,
@@ -65,6 +67,8 @@ export const InactiveTasks: MustNotCondition = {
       {
         bool: {
           should: [{ term: { 'task.status': 'running' } }, { term: { 'task.status': 'claiming' } }],
+          // needed since default value is 0 when there is a `must` in the `bool`
+          minimum_should_match: 1,
           must: { range: { 'task.retryAt': { gt: 'now' } } },
         },
       },
@@ -78,6 +82,18 @@ export const EnabledTask: MustCondition = {
       {
         term: {
           'task.enabled': true,
+        },
+      },
+    ],
+  },
+};
+
+export const RecognizedTask: MustNotCondition = {
+  bool: {
+    must_not: [
+      {
+        term: {
+          'task.status': TaskStatus.Unrecognized,
         },
       },
     ],
@@ -115,6 +131,46 @@ if (doc['task.runAt'].size()!=0) {
   },
 };
 export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as estypes.SortCombinations;
+
+function getSortByPriority(definitions: TaskTypeDictionary): estypes.SortCombinations | undefined {
+  if (definitions.size() === 0) return;
+
+  return {
+    _script: {
+      type: 'number',
+      order: 'desc',
+      script: {
+        lang: 'painless',
+        // Use priority if explicitly specified in task definition, otherwise default to 50 (Normal)
+        // TODO: we could do this locally as well, but they may starve
+        source: `
+          String taskType = doc['task.taskType'].value;
+          if (params.priority_map.containsKey(taskType)) {
+            return params.priority_map[taskType];
+          } else {
+            return ${TaskPriority.Normal};
+          }
+        `,
+        params: {
+          priority_map: definitions
+            .getAllDefinitions()
+            .reduce<Record<string, TaskPriority>>((acc, taskDefinition) => {
+              if (taskDefinition.priority) {
+                acc[taskDefinition.type] = taskDefinition.priority;
+              }
+              return acc;
+            }, {}),
+        },
+      },
+    },
+  };
+}
+
+export function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombinations[] {
+  const sortByPriority = getSortByPriority(definitions);
+  if (!sortByPriority) return [SortByRunAtAndRetryAt];
+  return [sortByPriority, SortByRunAtAndRetryAt];
+}
 
 export interface UpdateFieldsAndMarkAsFailedOpts {
   fieldUpdates: {
