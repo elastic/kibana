@@ -50,7 +50,7 @@ export const registerProfileProviders = ({
   });
 };
 
-const registerEnabledProfileProviders = <
+export const registerEnabledProfileProviders = <
   TProvider extends BaseProfileProvider<{}>,
   TService extends BaseProfileService<TProvider, {}>
 >({
