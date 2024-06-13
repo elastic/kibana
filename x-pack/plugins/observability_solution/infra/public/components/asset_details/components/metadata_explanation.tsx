@@ -47,7 +47,8 @@ const MetadataExplanationTooltipContent = React.memo(
               >
                 <FormattedMessage
                   id="xpack.infra.assetDetails.metadata.tooltip.documentationLink"
-                  defaultMessage={metadataField}
+                  defaultMessage="{metadataField}"
+                  values={{ metadataField }}
                 />
               </EuiLink>
             ),
