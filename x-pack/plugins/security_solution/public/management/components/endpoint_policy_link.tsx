@@ -6,60 +6,177 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import type { EuiLinkAnchorProps } from '@elastic/eui';
-import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
+import type { EuiLinkAnchorProps, EuiTextProps } from '@elastic/eui';
+import { EuiLink, EuiText, EuiIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { getPolicyDetailPath } from '../common/routing';
 import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useAppUrl } from '../../common/lib/kibana/hooks';
 import type { PolicyDetailsRouteState } from '../../../common/endpoint/types';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 
-/**
- * A policy link (to details) that first checks to see if the policy id exists against
- * the `nonExistingPolicies` value in the store. If it does not exist, then regular
- * text is returned.
- */
-export const EndpointPolicyLink = memo<
-  Omit<EuiLinkAnchorProps, 'href'> & {
-    policyId: string;
-    missingPolicies?: Record<string, boolean>;
-    backLink?: PolicyDetailsRouteState['backLink'];
-  }
->(({ policyId, backLink, children, missingPolicies = {}, ...otherProps }) => {
-  const { getAppUrl } = useAppUrl();
-  const { toRoutePath, toRouteUrl } = useMemo(() => {
-    const path = policyId ? getPolicyDetailPath(policyId) : '';
-    return {
-      toRoutePath: backLink ? { pathname: path, state: { backLink } } : path,
-      toRouteUrl: getAppUrl({ path }),
-    };
-  }, [policyId, getAppUrl, backLink]);
-  const clickHandler = useNavigateByRouterEventHandler(toRoutePath);
+const POLICY_NOT_FOUND_MESSAGE = i18n.translate(
+  'xpack.securitySolution.endpointPolicyLink.policyNotFound',
+  { defaultMessage: 'Policy no longer available!' }
+);
 
-  if (!policyId || missingPolicies[policyId]) {
+export type EndpointPolicyLinkProps = Omit<EuiLinkAnchorProps, 'href'> & {
+  policyId: string;
+  /**
+   * If defined, then a tooltip will also be shown when a user hovers over the dispplayed value (`children`).
+   * When set to `true`, the tooltip content will be the same as the value that is
+   * displayed (`children`). The tooltip can also be customized by passing in the content to be shown.
+   */
+  tooltip?: boolean | React.ReactNode;
+  /** The revision of the policy that the Endpoint is running with (normally obtained from the host's metadata */
+  revision?: number;
+  /** Will display an "out of date" message */
+  isOutdated?: boolean;
+  /** Text size to be applied to the display content (`children`) */
+  textSize?: EuiTextProps['size'];
+  /**
+   * If policy still exists. In some cases, we could be displaying the policy name for a policy
+   * that no longer exists (ex. it was deleted, but we still have data in ES that references that deleted policy)
+   * When set to `true`, a link to the policy wil not be shown and the display value (`children`)
+   * will have a message appended to it indicating policy no longer available.
+   */
+  policyExists?: boolean;
+  backLink?: PolicyDetailsRouteState['backLink'];
+};
+
+export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
+  ({
+    policyId,
+    backLink,
+    children,
+    policyExists = true,
+    isOutdated,
+    tooltip = true,
+    revision,
+    textSize = 's',
+    ...euiLinkProps
+  }) => {
+    const { getAppUrl } = useAppUrl();
+    const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
+    const testId = useTestIdGenerator(euiLinkProps['data-test-subj']);
+
+    const { toRoutePath, toRouteUrl } = useMemo(() => {
+      const path = policyId ? getPolicyDetailPath(policyId) : '';
+      return {
+        toRoutePath: backLink ? { pathname: path, state: { backLink } } : path,
+        toRouteUrl: getAppUrl({ path }),
+      };
+    }, [policyId, getAppUrl, backLink]);
+
+    const clickHandler = useNavigateByRouterEventHandler(toRoutePath);
+
+    const displayAsLink = useMemo(() => {
+      return Boolean(canReadPolicyManagement && policyId && policyExists);
+    }, [canReadPolicyManagement, policyExists, policyId]);
+
+    const displayValue = useMemo(() => {
+      const content = (
+        <EuiText className="eui-displayInline eui-textTruncate" size={textSize}>
+          {children}
+          {(!policyId || !policyExists) && (
+            <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+              <EuiIcon size="m" type="warning" color="warning" />
+              &nbsp;
+              {POLICY_NOT_FOUND_MESSAGE}
+            </EuiText>
+          )}
+        </EuiText>
+      );
+
+      return displayAsLink ? (
+        // eslint-disable-next-line @elastic/eui/href-or-on-click
+        <EuiLink href={toRouteUrl} onClick={clickHandler} {...euiLinkProps}>
+          {content}
+        </EuiLink>
+      ) : (
+        content
+      );
+    }, [
+      children,
+      clickHandler,
+      displayAsLink,
+      euiLinkProps,
+      policyExists,
+      policyId,
+      textSize,
+      toRouteUrl,
+    ]);
+
+    const tooltipContent: React.ReactNode | undefined = useMemo(() => {
+      const content = tooltip === true ? children : tooltip || undefined;
+      return content ? (
+        <div className="eui-textBreakAll" style={{ width: '100%' }}>
+          {content}
+          {policyExists === false && <>&nbsp;{`(${POLICY_NOT_FOUND_MESSAGE})`}</>}
+        </div>
+      ) : (
+        content
+      );
+    }, [children, policyExists, tooltip]);
+
     return (
-      <span className={otherProps.className} data-test-subj={otherProps['data-test-subj']}>
-        {children}
-        {
-          <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-            <EuiIcon size="m" type="warning" color="warning" />
-            &nbsp;
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyNotFound"
-              defaultMessage="Policy not found!"
-            />
-          </EuiText>
-        }
-      </span>
+      <EuiFlexGroup
+        wrap={false}
+        responsive={false}
+        gutterSize="xs"
+        alignItems="center"
+        justifyContent="spaceAround"
+        data-test-subj={testId()}
+      >
+        <EuiFlexItem data-test-subj={testId('policyName')} className="eui-textTruncate">
+          {tooltipContent ? (
+            <EuiToolTip content={tooltipContent} anchorClassName="eui-textTruncate">
+              {displayValue}
+            </EuiToolTip>
+          ) : (
+            displayValue
+          )}
+        </EuiFlexItem>
+
+        {revision && (
+          <EuiFlexItem grow={false} className="eui-textTruncate">
+            <EuiText
+              color="subdued"
+              size="xs"
+              className="eui-textTruncate"
+              data-test-subj={testId('version')}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.endpointPolicyLink.policyVersion"
+                defaultMessage="rev. {revision}"
+                values={{ revision }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        )}
+
+        {isOutdated && (
+          <EuiFlexItem grow={false} className="eui-textTruncate">
+            <EuiText
+              color="subdued"
+              size="xs"
+              className="eui-textTruncate"
+              data-test-subj={testId('outdatedMsg')}
+            >
+              <EuiIcon size="m" type="warning" color="warning" className="eui-alignTop" />
+              <span className="eui-displayInlineBlock">
+                <FormattedMessage
+                  id="xpack.securitySolution.endpointPolicyLink.outdatedMessage"
+                  defaultMessage="Out-of-date"
+                />
+              </span>
+            </EuiText>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     );
   }
-
-  return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink href={toRouteUrl} onClick={clickHandler} {...otherProps}>
-      {children}
-    </EuiLink>
-  );
-});
-
+);
 EndpointPolicyLink.displayName = 'EndpointPolicyLink';
