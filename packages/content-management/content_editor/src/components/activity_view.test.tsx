@@ -83,9 +83,11 @@ test('should render updater card', async () => {
     expect(createdByCard).toHaveTextContent(/June 13/);
   });
 
-  const updatedByCard = screen.getByTestId('updatedByCard');
-  expect(updatedByCard).toHaveTextContent(/PETE/);
-  expect(updatedByCard).toHaveTextContent(/June 14/);
+  await waitFor(() => {
+    const updatedByCard = screen.getByTestId('updatedByCard');
+    expect(updatedByCard).toHaveTextContent(/PETE/);
+    expect(updatedByCard).toHaveTextContent(/June 14/);
+  });
 });
 
 test('should handle managed objects', async () => {
