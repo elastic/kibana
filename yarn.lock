@@ -5921,6 +5921,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/sample-task-plugin-mget@link:x-pack/test/task_manager_claimer_mget/plugins/sample_task_plugin_mget":
+  version "0.0.0"
+  uid ""
+
 "@kbn/sample-task-plugin@link:x-pack/test/plugin_api_integration/plugins/sample_task_plugin":
   version "0.0.0"
   uid ""
@@ -6010,6 +6014,10 @@
   uid ""
 
 "@kbn/search-index-documents@link:packages/kbn-search-index-documents":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-inference-endpoints@link:x-pack/plugins/search_inference_endpoints":
   version "0.0.0"
   uid ""
 
