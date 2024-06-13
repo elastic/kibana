@@ -15,7 +15,7 @@ paths:
         - name: 'connectorId'
           in: path
           required: true
-          description: The connector id for which to get the attack discovery
+          description: The connector id for which to cancel a pending attack discovery
           schema:
             $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       responses:

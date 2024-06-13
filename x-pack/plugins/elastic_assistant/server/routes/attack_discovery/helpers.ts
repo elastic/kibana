@@ -236,7 +236,12 @@ export const updateAttackDiscoveryStatusToCanceled = async (
     authenticatedUser,
   });
   if (foundAttackDiscovery == null) {
-    throw new Error(`Could not find attack discovery for connector id ${connectorId}`);
+    throw new Error(`Could not find attack discovery for connector id: ${connectorId}`);
+  }
+  if (foundAttackDiscovery.status !== 'running') {
+    throw new Error(
+      `Connector id ${connectorId} does not have a running attack discovery, and therefore cannot be canceled.`
+    );
   }
   const updatedAttackDiscovery = await dataClient?.updateAttackDiscovery({
     attackDiscoveryUpdateProps: {
@@ -248,7 +253,7 @@ export const updateAttackDiscoveryStatusToCanceled = async (
   });
 
   if (!updatedAttackDiscovery) {
-    throw new Error(`Could not update attack discovery for connectorId: ${connectorId}`);
+    throw new Error(`Could not update attack discovery for connector id: ${connectorId}`);
   }
 
   return updatedAttackDiscovery;
@@ -284,8 +289,10 @@ export const invokeAttackDiscoveryTool = ({
 }) => {
   toolInstance
     ?.invoke('')
-    .then((rawAttackDiscoveries: string) =>
-      updateAttackDiscoveries({
+    .then((rawAttackDiscoveries: string) => {
+      console.log('invokeAttackDiscoveryTool then ', rawAttackDiscoveries);
+      console.log('updateAttackDiscoveries', updateAttackDiscoveries);
+      return updateAttackDiscoveries({
         apiConfig,
         attackDiscoveryId,
         authenticatedUser,
@@ -296,8 +303,8 @@ export const invokeAttackDiscoveryTool = ({
         size,
         startTime,
         telemetry,
-      })
-    )
+      });
+    })
     .catch((err) =>
       handleToolError({
         apiConfig,

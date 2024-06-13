@@ -12,6 +12,7 @@ import {
   attackDiscoveryStatus,
   getAssistantToolParams,
   handleToolError,
+  updateAttackDiscoveryStatusToCanceled,
   updateAttackDiscoveryStatusToRunning,
   updateAttackDiscoveries,
 } from './helpers';
@@ -204,6 +205,75 @@ describe('helpers', () => {
       await expect(
         updateAttackDiscoveryStatusToRunning(mockDataClient, mockAuthenticatedUser, mockApiConfig)
       ).rejects.toThrow('Could not create attack discovery for connectorId: connector-id');
+    });
+  });
+
+  describe('updateAttackDiscoveryStatusToCanceled', () => {
+    const existingAd = {
+      id: 'existing-id',
+      backingIndex: 'index',
+      status: attackDiscoveryStatus.running,
+    };
+    it('should update existing attack discovery to canceled', async () => {
+      findAttackDiscoveryByConnectorId.mockResolvedValue(existingAd);
+      updateAttackDiscovery.mockResolvedValue(existingAd);
+
+      const result = await updateAttackDiscoveryStatusToCanceled(
+        mockDataClient,
+        mockAuthenticatedUser,
+        mockApiConfig.connectorId
+      );
+
+      expect(findAttackDiscoveryByConnectorId).toHaveBeenCalledWith({
+        connectorId: mockApiConfig.connectorId,
+        authenticatedUser: mockAuthenticatedUser,
+      });
+      expect(updateAttackDiscovery).toHaveBeenCalledWith({
+        attackDiscoveryUpdateProps: expect.objectContaining({
+          status: attackDiscoveryStatus.canceled,
+        }),
+        authenticatedUser: mockAuthenticatedUser,
+      });
+      expect(result).toEqual(existingAd);
+    });
+
+    it('should throw an error if attack discovery is not running', async () => {
+      findAttackDiscoveryByConnectorId.mockResolvedValue({
+        ...existingAd,
+        status: attackDiscoveryStatus.succeeded,
+      });
+      await expect(
+        updateAttackDiscoveryStatusToCanceled(
+          mockDataClient,
+          mockAuthenticatedUser,
+          mockApiConfig.connectorId
+        )
+      ).rejects.toThrow(
+        'Connector id connector-id does not have a running attack discovery, and therefore cannot be canceled.'
+      );
+    });
+
+    it('should throw an error if attack discovery does not exist', async () => {
+      findAttackDiscoveryByConnectorId.mockResolvedValue(null);
+      await expect(
+        updateAttackDiscoveryStatusToCanceled(
+          mockDataClient,
+          mockAuthenticatedUser,
+          mockApiConfig.connectorId
+        )
+      ).rejects.toThrow('Could not find attack discovery for connector id: connector-id');
+    });
+    it('should throw error if updateAttackDiscovery returns null', async () => {
+      findAttackDiscoveryByConnectorId.mockResolvedValue(existingAd);
+      updateAttackDiscovery.mockResolvedValue(null);
+
+      await expect(
+        updateAttackDiscoveryStatusToCanceled(
+          mockDataClient,
+          mockAuthenticatedUser,
+          mockApiConfig.connectorId
+        )
+      ).rejects.toThrow('Could not update attack discovery for connector id: connector-id');
     });
   });
 

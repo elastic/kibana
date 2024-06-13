@@ -22,7 +22,7 @@ import { AttackDiscoveryResponse } from './common_attributes.gen';
 export type AttackDiscoveryCancelRequestParams = z.infer<typeof AttackDiscoveryCancelRequestParams>;
 export const AttackDiscoveryCancelRequestParams = z.object({
   /**
-   * The connector id for which to get the attack discovery
+   * The connector id for which to cancel a pending attack discovery
    */
   connectorId: NonEmptyString,
 });
