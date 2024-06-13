@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+VALIDATION_PACKAGE_DIR="packages/kbn-esql-validation-autocomplete"
+EDITOR_PACKAGE_DIR="packages/kbn-text-based-editor"
+GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
+
 report_main_step () {
   echo "--- $1"
 }
@@ -19,7 +23,7 @@ main () {
 
   .buildkite/scripts/bootstrap.sh
 
-  cd "$KIBANA_DIR/packages/kbn-esql-validation-autocomplete"
+  cd "$KIBANA_DIR/$VALIDATION_PACKAGE_DIR"
 
   report_main_step "Generate function definitions"
 
@@ -29,9 +33,21 @@ main () {
   
   yarn make:tests
 
+  report_main_step "Generate inline function docs"
+
+  cd "$KIBANA_DIR/$EDITOR_PACKAGE_DIR"
+
+  yarn make:docs $PARENT_DIR/elasticsearch
+
+  report_main_step "Run i18n check"
+
+  cd "$KIBANA_DIR"
+
+  node scripts/i18n_check.js --fix
+
   # Check for differences
   set +e
-  git diff --exit-code --quiet .
+  git diff --exit-code --quiet $GIT_SCOPE 
   if [ $? -eq 0 ]; then
     echo "No differences found. Our work is done here."
     exit
@@ -44,8 +60,8 @@ main () {
   git config --global user.name "$KIBANA_MACHINE_USERNAME"
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
-  PR_TITLE='[ES|QL] Update function definitions'
-  PR_BODY='This PR updates the function definitions based on the latest metadata from Elasticsearch.'
+  PR_TITLE='[ES|QL] Update function metadata'
+  PR_BODY='This PR updates the function definitions and inline docs based on the latest metadata from Elasticsearch.'
 
   # Check if a PR already exists
   pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
@@ -58,12 +74,12 @@ main () {
   echo "No existing PR found. Committing changes."
 
   # Make a commit
-  BRANCH_NAME="esql_generate_function_definitions_$(date +%s)"
+  BRANCH_NAME="esql_generate_function_metadata_$(date +%s)"
 
   git checkout -b "$BRANCH_NAME"
 
-  git add ./**/*
-  git commit -m "Update function definitions"
+  git add $GIT_SCOPE
+  git commit -m "Update function metadata"
 
   report_main_step "Changes committed. Creating pull request."
 
