@@ -8973,6 +8973,11 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval CEIL(23::long)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval trim(to_double(\"23\")::string::double::long::string::double)",
       "error": [
         "Argument of [trim] must be [string], found value [to_double(\"23\")::string::double::long::string::double] type [double]"
@@ -8980,16 +8985,23 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval trim(trim(numberField)::string)",
+      "query": "from a_index | eval to_lower(trim(numberField)::string)",
       "error": [
-        "wrong type"
+        "Argument of [trim] must be [string], found value [numberField] type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval trim(trim(trim(numberField)::string)::string)",
+      "query": "from a_index | eval to_upper(trim(numberField)::string::string::string::string)",
       "error": [
-        "wrong type"
+        "Argument of [trim] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_lower(to_upper(trim(numberField)::string)::string)",
+      "error": [
+        "Argument of [trim] must be [string], found value [numberField] type [number]"
       ],
       "warning": []
     },

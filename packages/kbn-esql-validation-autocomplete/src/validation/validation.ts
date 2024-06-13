@@ -325,6 +325,13 @@ function extractCompatibleSignaturesForFunction(
   });
 }
 
+function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
+  if (isInlineCastItem(arg)) {
+    return removeInlineCasts(arg.value);
+  }
+  return arg;
+}
+
 function validateFunction(
   astFunction: ESQLFunction,
   parentCommand: string,
@@ -429,7 +436,15 @@ function validateFunction(
       return signature.params[i]?.constantOnly;
     });
     const wrappedArray = Array.isArray(arg) ? arg : [arg];
-    for (const subArg of wrappedArray) {
+    for (const _subArg of wrappedArray) {
+      /**
+       * we need to remove the inline casts
+       * to see if there's a function under there
+       *
+       * e.g. for ABS(CEIL(numberField)::int), we need to validate CEIL(numberField)
+       */
+      const subArg = removeInlineCasts(_subArg);
+
       if (isFunctionItem(subArg)) {
         const messagesFromArg = validateFunction(
           subArg,

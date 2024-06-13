@@ -1960,6 +1960,7 @@ describe('validation logic', () => {
         'Argument of [trim] must be [string], found value ["23"::double] type [double]',
       ]);
       testErrorsAndWarnings('from a_index | eval trim(23::string)', []);
+      testErrorsAndWarnings('from a_index | eval CEIL(23::long)', []);
       testErrorsAndWarnings(
         'from a_index | eval trim(to_double("23")::string::double::long::string::double)',
         [
@@ -1968,10 +1969,17 @@ describe('validation logic', () => {
       );
 
       // still validates nested functions when they are casted
-      testErrorsAndWarnings('from a_index | eval trim(trim(numberField)::string)', ['wrong type']);
-      testErrorsAndWarnings('from a_index | eval trim(trim(trim(numberField)::string)::string)', [
-        'wrong type',
+      testErrorsAndWarnings('from a_index | eval to_lower(trim(numberField)::string)', [
+        'Argument of [trim] must be [string], found value [numberField] type [number]',
       ]);
+      testErrorsAndWarnings(
+        'from a_index | eval to_upper(trim(numberField)::string::string::string::string)',
+        ['Argument of [trim] must be [string], found value [numberField] type [number]']
+      );
+      testErrorsAndWarnings(
+        'from a_index | eval to_lower(to_upper(trim(numberField)::string)::string)',
+        ['Argument of [trim] must be [string], found value [numberField] type [number]']
+      );
     });
 
     describe(FUNCTION_DESCRIBE_BLOCK_NAME, () => {
