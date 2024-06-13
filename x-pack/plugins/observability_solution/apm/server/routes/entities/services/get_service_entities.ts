@@ -10,8 +10,8 @@ import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/serve
 import { EntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getEntities } from '../get_entities';
-import { calculateAvgMetrics } from './calculate_avg_metrics';
-import { mergeEntities } from './merge_entities';
+import { calculateAvgMetrics } from '../utils/calculate_avg_metrics';
+import { mergeEntities } from '../utils/merge_entities';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
 
