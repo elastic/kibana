@@ -60,7 +60,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_ADD_TO_LIBRARY;
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 8;
-  public grouping = [{ id: 'general', order: 5 }];
+  public grouping = [{ id: 'general', order: 10 }];
 
   private toastsService;
 

@@ -36,6 +36,7 @@ type ItemDescriptor = EuiContextMenuPanelItemDescriptor & {
 };
 
 type PanelDescriptor = EuiContextMenuPanelDescriptor & {
+  _order?: number;
   _level?: number;
   _icon?: string;
   items: ItemDescriptor[];
@@ -71,7 +72,7 @@ const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemD
 const removePanelMetaFields = (panels: PanelDescriptor[]): EuiContextMenuPanelDescriptor[] => {
   const euiPanels: EuiContextMenuPanelDescriptor[] = [];
   for (const panel of panels) {
-    const { _level: omit, _icon: omit2, ...rest } = panel;
+    const { _level: omit, _icon: omit2, _order: omit3, ...rest } = panel;
     euiPanels.push({ ...rest, items: removeItemMetaFields(rest.items) });
   }
   return euiPanels;
@@ -113,6 +114,7 @@ export async function buildContextMenuForActions({
             title: name,
             items: [],
             _level: i,
+            _order: group.order || 0,
             _icon: group.getIconType ? group.getIconType(context) : 'empty',
           };
           if (parentPanel) {
@@ -155,7 +157,13 @@ export async function buildContextMenuForActions({
     );
   }
 
-  for (const panel of Object.values(panels)) {
+  // write this function to sort panels by order then group order then title
+  const sortedPanels = Object.values(panels).sort((a, b) => {
+    const orderComparison = (b._order || 0) - (a._order || 0);
+    return orderComparison;
+  });
+
+  for (const panel of sortedPanels) {
     if (panel._level === 0) {
       if (panels.mainMenu.items.length > 0) {
         panels.mainMenu.items.push({

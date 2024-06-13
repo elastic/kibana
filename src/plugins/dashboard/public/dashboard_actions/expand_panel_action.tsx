@@ -15,6 +15,7 @@ import {
   HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { dashboardActionGroup } from '.';
 
 import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
 
@@ -28,8 +29,8 @@ const isApiCompatible = (api: unknown | null): api is ExpandPanelActionApi =>
 export class ExpandPanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EXPAND_PANEL;
   public readonly id = ACTION_EXPAND_PANEL;
-  public order = 19; // right after Explore in Discover which is 20
-  public grouping = [{ id: 'general', order: 5 }];
+  public order = 19;
+  public grouping = [dashboardActionGroup];
 
   constructor() {}
 
