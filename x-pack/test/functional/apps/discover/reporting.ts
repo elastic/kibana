@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Key } from 'selenium-webdriver';
 import moment from 'moment';
+import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -103,8 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
-      // Discover defaults to short urls - is this test helpful? Clarify in separate PR
-      xit('generates a report with single timefilter', async () => {
+      it('generates a report with single timefilter', async () => {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
         await PageObjects.discover.saveSearch('single-timefilter-search');
@@ -116,22 +115,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openExportTab();
         const copyButton = await testSubjects.find('shareReportingCopyURL');
-        const reportURL = (await copyButton.getAttribute('data-share-url')) ?? '';
+        const reportURL = decodeURIComponent(
+          (await copyButton.getAttribute('data-share-url')) ?? ''
+        );
 
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =
-          decodeURIComponent(reportURL).split(
-            'query:(range:(order_date:(format:strict_date_optional_time'
-          ).length - 1;
+          reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length - 1;
         const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
 
         expect(timeFiltersNumberInSharedURL).to.be(1);
         expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
 
         expect(timeFiltersNumberInReportURL).to.be(1);
+
         expect(
-          decodeURIComponent(reportURL).includes(
-            'query:(range:(order_date:(format:strict_date_optional_time'
+          reportURL.includes(
+            `query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))`
           )
         ).to.be(true);
 
@@ -296,6 +296,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       beforeEach(async () => {
         await setupPage();
+      });
+
+      afterEach(async () => {
+        await PageObjects.reporting.checkForReportingToasts();
       });
 
       it('generates a report with data', async () => {
