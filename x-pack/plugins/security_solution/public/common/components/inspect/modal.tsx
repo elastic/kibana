@@ -234,6 +234,7 @@ export const ModalInspectQuery = ({
             inspectRequests.map((inspectRequest, index) => (
               <Fragment key={index}>
                 <EuiCodeBlock
+                  data-test-subj="modal-inspect-request-preview"
                   language="json"
                   fontSize="m"
                   paddingSize="m"
@@ -260,6 +261,7 @@ export const ModalInspectQuery = ({
             responses.map((responseText, index) => (
               <Fragment key={index}>
                 <EuiCodeBlock
+                  data-test-subj="modal-inspect-response-preview"
                   language="json"
                   fontSize="m"
                   paddingSize="m"

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { KIBANA_CODE_EDITOR } from '../../../../screens/search_bar';
 import {
   INSPECT_MODAL,
   INSPECT_MODAL_REQUEST_TAB,
@@ -35,6 +34,7 @@ import {
 } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { openTab } from '../../../../tasks/inspect';
+import { CODE_BLOCK } from '../../../../screens/common';
 
 describe(
   'Unsaved Timeline query tab',
@@ -65,7 +65,7 @@ describe(
       openTab(INSPECT_MODAL_REQUEST_TAB);
       cy.get(INSPECT_MODAL_REQUEST_TAB).should('have.attr', 'aria-selected', 'true');
       cy.get(INSPECT_MODAL).within(() => {
-        cy.get(KIBANA_CODE_EDITOR)
+        cy.get(CODE_BLOCK)
           .should('be.visible')
           .then(($codeEditor) => {
             const { height } = $codeEditor[0].getBoundingClientRect();
@@ -76,7 +76,7 @@ describe(
       openTab(INSPECT_MODAL_RESPONSE_TAB);
       cy.get(INSPECT_MODAL_RESPONSE_TAB).should('have.attr', 'aria-selected', 'true');
       cy.get(INSPECT_MODAL).within(() => {
-        cy.get(KIBANA_CODE_EDITOR)
+        cy.get(CODE_BLOCK)
           .should('be.visible')
           .then(($codeEditor) => {
             const { height } = $codeEditor[0].getBoundingClientRect();
