@@ -497,7 +497,9 @@ describe('Discover flyout', function () {
             _source: { date: '2020-20-01T12:12:12.124', name: 'test2', extension: 'jpg' },
           },
         ];
-        const records = buildDataTableRecordList(hits as EsHitRecord[], dataViewMock, {
+        const records = buildDataTableRecordList({
+          records: hits as EsHitRecord[],
+          dataView: dataViewMock,
           processRecord: (record) => services.profilesManager.resolveDocumentProfile({ record }),
         });
         const { component } = await mountComponent({ records, services });
