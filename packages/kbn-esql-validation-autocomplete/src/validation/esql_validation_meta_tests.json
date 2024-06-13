@@ -8944,6 +8944,56 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval 1::string",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1::foo",
+      "error": [
+        "Invalid type [foo] for casting"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1::string::long::double",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval trim(\"23\"::double)",
+      "error": [
+        "wrong type"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval trim(to_double(\"23\")::string)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval trim(to_double(\"23\")::string::double::long::string::double)",
+      "error": [
+        "wrong type"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval trim(trim(numberField)::string)",
+      "error": [
+        "wrong type"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval trim(trim(trim(numberField)::string)::string)",
+      "error": [
+        "wrong type"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = date_diff(\"month\", \"2023-12-02T11:00:00.000Z\", \"2023-12-02T11:00:00.000Z\")",
       "error": [],
       "warning": []

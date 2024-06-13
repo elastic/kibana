@@ -1945,6 +1945,31 @@ describe('validation logic', () => {
       });
     });
 
+    describe('inline casting', () => {
+      // accepts casting
+      testErrorsAndWarnings('from a_index | eval 1::string', []);
+
+      // errors if the cast type is invalid
+      testErrorsAndWarnings('from a_index | eval 1::foo', ['Invalid type [foo] for casting']);
+
+      // accepts casting with multiple types
+      testErrorsAndWarnings('from a_index | eval 1::string::long::double', []);
+
+      // takes into account casting in function arguments
+      testErrorsAndWarnings('from a_index | eval trim("23"::double)', ['wrong type']);
+      testErrorsAndWarnings('from a_index | eval trim(to_double("23")::string)', []);
+      testErrorsAndWarnings(
+        'from a_index | eval trim(to_double("23")::string::double::long::string::double)',
+        ['wrong type']
+      );
+
+      // still validates nested functions when they are casted
+      testErrorsAndWarnings('from a_index | eval trim(trim(numberField)::string)', ['wrong type']);
+      testErrorsAndWarnings('from a_index | eval trim(trim(trim(numberField)::string)::string)', [
+        'wrong type',
+      ]);
+    });
+
     describe(FUNCTION_DESCRIBE_BLOCK_NAME, () => {
       describe('date_diff', () => {
         testErrorsAndWarnings(
