@@ -6,12 +6,12 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { createAssist as Assist } from '../utils/assist';
-import { clipContext, ConversationalChain } from './conversational_chain';
-import { FakeListChatModel, FakeStreamingLLM } from '@langchain/core/utils/testing';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { experimental_StreamData, Message } from 'ai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { FakeListChatModel, FakeStreamingLLM } from '@langchain/core/utils/testing';
+import { Message, experimental_StreamData } from 'ai';
+import { createAssist as Assist } from '../utils/assist';
+import { ConversationalChain, clipContext } from './conversational_chain';
 
 describe('conversational chain', () => {
   const createTestChain = async ({
