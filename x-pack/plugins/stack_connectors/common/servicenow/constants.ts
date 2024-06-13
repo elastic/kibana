@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export {
-  useLogRateAnalysisStateContext,
-  LogRateAnalysisStateProvider,
-} from './log_rate_analysis_state_provider';
-export type { GroupTableItem, GroupTableItemGroup, TableItemAction } from './types';
+export const MAX_ADDITIONAL_FIELDS_LENGTH = 20;
