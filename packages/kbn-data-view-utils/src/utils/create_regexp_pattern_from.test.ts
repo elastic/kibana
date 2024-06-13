@@ -28,6 +28,7 @@ describe('createRegExpPatternFrom should create a regular expression starting fr
     expect('foo-logs-*').toMatch(regExpPattern);
     expect('foo-logs-*-*').toMatch(regExpPattern);
     expect('foo-logs-system.syslog-*').toMatch(regExpPattern);
+    expect('.ds-kibana_sample_data_logs-2024.06.13-000001').toMatch(regExpPattern);
 
     expect('foo-logss*').not.toMatch(regExpPattern);
     expect('foo-logss-*').not.toMatch(regExpPattern);
