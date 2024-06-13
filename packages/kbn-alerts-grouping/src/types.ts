@@ -13,7 +13,6 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import {
-  GenericBuckets,
   GroupingProps,
   GroupOption,
   GroupPanelRenderer,
@@ -30,8 +29,6 @@ export interface GroupModel {
 export interface AlertsGroupingState {
   [groupingId: string]: GroupModel;
 }
-
-type NumberOrNull = number | null;
 
 export interface AlertsGroupingProps<T extends Record<string, unknown> = {}> {
   /**
@@ -99,42 +96,5 @@ export interface AlertsGroupingProps<T extends Record<string, unknown> = {}> {
     notifications: NotificationsStart;
     dataViews: DataViewsServicePublic;
     http: HttpSetup;
-  };
-}
-
-export interface AlertsGroupingAggregation {
-  unitsCount?: {
-    value?: NumberOrNull;
-  };
-  description?: {
-    buckets?: GenericBuckets[];
-  };
-  severitiesSubAggregation?: {
-    buckets?: GenericBuckets[];
-  };
-  countSeveritySubAggregation?: {
-    value?: NumberOrNull;
-  };
-  usersCountAggregation?: {
-    value?: NumberOrNull;
-  };
-  hostsCountAggregation?: {
-    value?: NumberOrNull;
-  };
-  ipsCountAggregation?: {
-    value?: NumberOrNull;
-  };
-  rulesCountAggregation?: {
-    value?: NumberOrNull;
-  };
-  ruleTags?: {
-    doc_count_error_upper_bound?: number;
-    sum_other_doc_count?: number;
-    buckets?: GenericBuckets[];
-  };
-  stackByMultipleFields1?: {
-    buckets?: GenericBuckets[];
-    doc_count_error_upper_bound?: number;
-    sum_other_doc_count?: number;
   };
 }
