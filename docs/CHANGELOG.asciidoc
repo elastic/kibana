@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.14.1>>
 * <<release-notes-8.14.0>>
 * <<release-notes-8.13.4>>
 * <<release-notes-8.13.3>>
@@ -66,6 +67,25 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.14.1]]
+== {kib} 8.14.1
+
+The 8.14.1 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.14.1]]
+=== Bug Fixes
+Data Discovery::
+* Notify the user about issues with access to the default data view ({kibana-pull}184740[#184740]).
+Discover::
+* Fixes resetting of breakdown field in a saved search ({kibana-pull}184668[#184668]).
+Elastic Security::
+For the Elastic Security 8.14.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes restart upgrade disabled condition ({kibana-pull}184586[#184586]).
+Observability::
+* Fixes editing enabled state for project monitor ({kibana-pull}184775[#184775]).
+
 [[release-notes-8.14.0]]
 == {kib} 8.14.0
 
