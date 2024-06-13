@@ -41,6 +41,7 @@ export function registerRoutes({
   migratorPromise,
   kibanaVersion,
   kibanaIndex,
+  isServerless,
 }: {
   http: InternalHttpServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
@@ -49,20 +50,30 @@ export function registerRoutes({
   migratorPromise: Promise<IKibanaMigrator>;
   kibanaVersion: string;
   kibanaIndex: string;
+  isServerless: boolean;
 }) {
   const router =
     http.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
-  registerGetRoute(router, { config, coreUsageData, logger });
-  registerResolveRoute(router, { config, coreUsageData, logger });
-  registerCreateRoute(router, { config, coreUsageData, logger });
-  registerDeleteRoute(router, { config, coreUsageData, logger });
-  registerFindRoute(router, { config, coreUsageData, logger });
-  registerUpdateRoute(router, { config, coreUsageData, logger });
-  registerBulkGetRoute(router, { config, coreUsageData, logger });
-  registerBulkCreateRoute(router, { config, coreUsageData, logger });
-  registerBulkResolveRoute(router, { config, coreUsageData, logger });
-  registerBulkUpdateRoute(router, { config, coreUsageData, logger });
-  registerBulkDeleteRoute(router, { config, coreUsageData, logger });
+
+  const internalOnServerless = isServerless ? 'internal' : 'public';
+
+  registerGetRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+  registerResolveRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+  registerCreateRoute(router, {
+    config,
+    coreUsageData,
+    logger,
+    access: internalOnServerless,
+  });
+  registerDeleteRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+  registerFindRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+  registerUpdateRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+  registerBulkGetRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+  registerBulkCreateRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+  registerBulkResolveRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+  registerBulkUpdateRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+  registerBulkDeleteRoute(router, { config, coreUsageData, logger, access: internalOnServerless });
+
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });

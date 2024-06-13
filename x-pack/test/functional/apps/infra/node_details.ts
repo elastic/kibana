@@ -38,6 +38,8 @@ const START_HOST_KUBERNETES_SECTION_DATE = moment.utc(
 const END_HOST_KUBERNETES_SECTION_DATE = moment.utc(
   DATES.metricsAndLogs.hosts.kubernetesSectionEndDate
 );
+const START_CONTAINER_DATE = moment.utc(DATE_WITH_DOCKER_DATA_FROM);
+const END_CONTAINER_DATE = moment.utc(DATE_WITH_DOCKER_DATA_TO);
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const observability = getService('observability');
@@ -651,23 +653,63 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         describe('when container asset view is enabled', () => {
-          it('should show asset container details page', async () => {
+          before(async () => {
             await setInfrastructureContainerAssetViewUiSetting(true);
             await navigateToNodeDetails('container-id-0', 'container-id-0', 'container');
             await pageObjects.header.waitUntilLoadingHasFinished();
-
+            await pageObjects.timePicker.setAbsoluteRange(
+              START_CONTAINER_DATE.format(DATE_PICKER_FORMAT),
+              END_CONTAINER_DATE.format(DATE_PICKER_FORMAT)
+            );
+          });
+          it('should show asset container details page', async () => {
             await pageObjects.assetDetails.getOverviewTab();
           });
 
           [
             { metric: 'cpu', chartsCount: 1 },
             { metric: 'memory', chartsCount: 1 },
+            { metric: 'disk', chartsCount: 1 },
+            { metric: 'network', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
-            it.skip(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
               const charts = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
                 metric
               );
               expect(charts.length).to.equal(chartsCount);
+            });
+          });
+
+          describe('Metadata Tab', () => {
+            before(async () => {
+              await pageObjects.assetDetails.clickMetadataTab();
+            });
+
+            it('should show metadata table', async () => {
+              await pageObjects.assetDetails.metadataTableExists();
+            });
+          });
+          describe('Logs Tab', () => {
+            before(async () => {
+              await pageObjects.assetDetails.clickLogsTab();
+            });
+
+            it('should render logs tab', async () => {
+              await pageObjects.assetDetails.logsExists();
+            });
+
+            it('preserves search term between page reloads', async () => {
+              const searchInput = await pageObjects.assetDetails.getLogsSearchField();
+
+              expect(await searchInput.getAttribute('value')).to.be('');
+
+              await searchInput.type('test');
+              await refreshPageWithDelay();
+
+              await retry.try(async () => {
+                expect(await searchInput.getAttribute('value')).to.be('test');
+              });
+              await searchInput.clearValue();
             });
           });
         });
