@@ -293,21 +293,3 @@ const groupByAssetId = (packageSpecsAssets: PackageSpecTagsAssets[]): GroupedAss
   });
   return groupedAssets;
 };
-
-export async function markFleetTagsAsManaged(savedObjectTagClient: ITagsClient, spaceId: string) {
-  const managedTagId = getManagedTagId(spaceId);
-  const managedTag = await savedObjectTagClient.get(managedTagId).catch(() => {});
-  if (!managedTag) {
-    return;
-  }
-  // TODO: This doesn't actually update the tag...
-  const updatedManagedTag = await savedObjectTagClient.update(
-    managedTagId,
-    {
-      name: managedTag.name,
-      description: managedTag.description,
-      color: managedTag.color,
-    },
-    { managed: true }
-  );
-}

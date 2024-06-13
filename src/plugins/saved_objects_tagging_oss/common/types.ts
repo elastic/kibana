@@ -33,15 +33,11 @@ export interface CreateTagOptions {
   managed?: boolean;
 }
 
-export interface UpdateTagOptions {
-  managed?: boolean;
-}
-
 export interface ITagsClient {
   create(attributes: TagAttributes, options?: CreateTagOptions): Promise<Tag>;
   get(id: string): Promise<Tag>;
   getAll(options?: GetAllTagsOptions): Promise<Tag[]>;
   findByName(name: string, options?: { exact?: boolean }): Promise<Tag | null>;
   delete(id: string): Promise<void>;
-  update(id: string, attributes: TagAttributes, options?: UpdateTagOptions): Promise<Tag>;
+  update(id: string, attributes: TagAttributes): Promise<Tag>;
 }
