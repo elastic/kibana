@@ -120,44 +120,262 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
       name: 'Kubernetes',
       prompt: 'Install the collector via kubectl apply -f otel-collector-k8s.yml.',
       content: `apiVersion: v1
-      kind: Service
-      metadata:
-        name: my-nginx-svc
-        labels:
-          app: nginx
-      spec:
-        type: LoadBalancer
-        ports:
-        - port: 80
-        selector:
-          app: nginx
-      ---
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: my-nginx
-        labels:
-          app: nginx
-        env:
-        - name: ELASTICSEARCH_URL
-          value: ${setup?.elasticsearchUrl}
-        - name: ELASTICSEARCH_API_KEY
-          value: ${apiKeyData?.apiKeyEncoded}
-      spec:
-        replicas: 3
-        selector:
-          matchLabels:
-            app: nginx
-        template:
+kind: ServiceAccount
+metadata:
+  name: daemonset-opentelemetry-collector
+  namespace: default
+  labels:
+    app.kubernetes.io/name: elastic-opentelemetry-collector
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: daemonset-opentelemetry-collector-agent
+  namespace: default
+  labels:
+    app.kubernetes.io/name: elastic-opentelemetry-collector
+data:
+  otel.yaml: |
+    exporters:
+      debug:
+        verbosity: detailed
+      elasticsearch/logs:
+        endpoints: 
+        - ${setup?.elasticsearchUrl}
+        api_key: ${apiKeyData?.apiKeyEncoded}
+        logs_index: otel_logs_index
+        mapping:
+          mode: ecs
+        sending_queue:
+          enabled: true
+          num_consumers: 20
+          queue_size: 1000
+    processors:
+      k8sattributes:
+        filter:
+          node_from_env_var: K8S_NODE_NAME
+        passthrough: false
+        pod_association:
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.ip
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.uid
+          - sources:
+              - from: connection
+        extract:
           metadata:
-            labels:
-              app: nginx
-          spec:
-            containers:
-            - name: nginx
-              image: nginx:1.14.2
-              ports:
-              - containerPort: 80`,
+            - "k8s.namespace.name"
+            - "k8s.deployment.name"
+            - "k8s.statefulset.name"
+            - "k8s.daemonset.name"
+            - "k8s.cronjob.name"
+            - "k8s.job.name"
+            - "k8s.node.name"
+            - "k8s.pod.name"
+            - "k8s.pod.uid"
+            - "k8s.pod.start_time"
+    receivers:
+      filelog:
+        retry_on_failure:
+          enabled: true
+        start_at: end
+        exclude:
+        - /var/log/pods/default_daemonset-opentelemetry-collector*_*/elastic-opentelemetry-collector/*.log
+        include:
+        - /var/log/pods/*/*/*.log
+        include_file_name: false
+        include_file_path: true
+        operators:
+        - id: get-format
+          routes:
+          - expr: body matches "^\\{"
+            output: parser-docker
+          - expr: body matches "^[^ Z]+ "
+            output: parser-crio
+          - expr: body matches "^[^ Z]+Z"
+            output: parser-containerd
+          type: router
+        - id: parser-crio
+          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+          timestamp:
+            layout: 2006-01-02T15:04:05.999999999Z07:00
+            layout_type: gotime
+            parse_from: attributes.time
+          type: regex_parser
+        - combine_field: attributes.log
+          combine_with: ""
+          id: crio-recombine
+          is_last_entry: attributes.logtag == 'F'
+          max_log_size: 102400
+          output: extract_metadata_from_filepath
+          source_identifier: attributes["log.file.path"]
+          type: recombine
+        - id: parser-containerd
+          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+          timestamp:
+            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            parse_from: attributes.time
+          type: regex_parser
+        - combine_field: attributes.log
+          combine_with: ""
+          id: containerd-recombine
+          is_last_entry: attributes.logtag == 'F'
+          max_log_size: 102400
+          output: extract_metadata_from_filepath
+          source_identifier: attributes["log.file.path"]
+          type: recombine
+        - id: parser-docker
+          output: extract_metadata_from_filepath
+          timestamp:
+            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            parse_from: attributes.time
+          type: json_parser
+        - id: extract_metadata_from_filepath
+          parse_from: attributes["log.file.path"]
+          regex: ^.*\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[a-f0-9\-]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
+          type: regex_parser
+        - from: attributes.stream
+          to: attributes["log.iostream"]
+          type: move
+        - from: attributes.container_name
+          to: resource["k8s.container.name"]
+          type: move
+        - from: attributes.namespace
+          to: resource["k8s.namespace.name"]
+          type: move
+        - from: attributes.pod_name
+          to: resource["k8s.pod.name"]
+          type: move
+        - from: attributes.restart_count
+          to: resource["k8s.container.restart_count"]
+          type: move
+        - from: attributes.uid
+          to: resource["k8s.pod.uid"]
+          type: move
+        - from: attributes.log
+          to: body
+          type: move
+    service:
+      pipelines:
+        logs:
+          exporters:
+          # ES exported is disabled until https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/33454
+          # is included in the distro
+          #- elasticsearch/logs 
+          - debug
+          processors:
+          - k8sattributes
+          receivers:
+          - filelog
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: daemonset-opentelemetry-collector-agent
+  namespace: default
+  labels:
+    app.kubernetes.io/name: elastic-opentelemetry-collector
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: elastic-opentelemetry-collector
+      component: agent-collector
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: elastic-opentelemetry-collector
+        component: agent-collector
+    spec:
+      serviceAccountName: daemonset-opentelemetry-collector
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      containers:
+        - name: elastic-opentelemetry-collector
+          command: [/usr/share/elastic-agent/elastic-agent]
+          args: ["otel", "-c", "/etc/elastic-agent/otel.yaml"]
+          image: docker.elastic.co/beats/elastic-agent:${setup?.elasticAgentVersion}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: ES_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  key: es_endpoint
+                  name: elastic-secret
+            - name: ES_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: es_api_key
+                  name: elastic-secret
+          volumeMounts:
+            - mountPath: /etc/elastic-agent/otel.yaml
+              name: opentelemetry-collector-configmap
+              readOnly: true
+              subPath: otel.yaml
+            - name: varlogpods
+              mountPath: /var/log/pods
+              readOnly: true
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: varlibotelcol
+              mountPath: /var/lib/otelcol
+      volumes:
+        - name: opentelemetry-collector-configmap
+          configMap:
+            name: daemonset-opentelemetry-collector-agent
+            defaultMode: 0640
+        - name: varlogpods
+          hostPath:
+            path: /var/log/pods
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+        - name: varlibotelcol
+          hostPath:
+            path: /var/lib/otelcol
+            type: DirectoryOrCreate
+      hostNetwork: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: daemonset-opentelemetry-collector
+  labels:
+    app.kubernetes.io/name: elastic-opentelemetry-collector
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "namespaces", "nodes"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["extensions"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: daemonset-opentelemetry-collector
+  labels:
+    app.kubernetes.io/name: elastic-opentelemetry-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: daemonset-opentelemetry-collector
+subjects:
+  - kind: ServiceAccount
+    name: daemonset-opentelemetry-collector
+    namespace: default
+---`,
       type: 'download',
       check: 'kubectl get pods -l app=nginx',
       fileName: 'otel-collector-k8s.yml',
@@ -269,7 +487,7 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
                     />
 
                     <EuiFlexItem>
-                      <EuiCodeBlock language="sh" isCopyable>
+                      <EuiCodeBlock language="sh" isCopyable overflowHeight={300}>
                         {selectedContent.content}
                       </EuiCodeBlock>
                     </EuiFlexItem>
