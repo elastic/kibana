@@ -5,8 +5,8 @@
   },
   "include": [
     "index.ts",
-    "server/**/*.ts",
-    "common/**/*.ts",
+    "server/**/*",
+    "common/**/*",
     "public/**/*",
     "__jest__/**/*",
     "../../typings/**/*"
