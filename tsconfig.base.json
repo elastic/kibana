@@ -1428,6 +1428,8 @@
       "@kbn/search-examples-plugin/*": ["examples/search_examples/*"],
       "@kbn/search-index-documents": ["packages/kbn-search-index-documents"],
       "@kbn/search-index-documents/*": ["packages/kbn-search-index-documents/*"],
+      "@kbn/search-inference-endpoints": ["x-pack/plugins/search_inference_endpoints"],
+      "@kbn/search-inference-endpoints/*": ["x-pack/plugins/search_inference_endpoints/*"],
       "@kbn/search-notebooks": ["x-pack/plugins/search_notebooks"],
       "@kbn/search-notebooks/*": ["x-pack/plugins/search_notebooks/*"],
       "@kbn/search-playground": ["x-pack/plugins/search_playground"],
