@@ -96,6 +96,8 @@ interface CommonApiKeyFlyoutProps {
   http?: CoreStart['http'];
   currentUser?: AuthenticatedUser;
   isLoadingCurrentUser?: boolean;
+  defaultMetadata?: string;
+  defaultRoleDescriptors?: string;
 }
 
 interface CreateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
@@ -166,6 +168,8 @@ const httpErrorText = i18n.translate('xpack.plugins.security.httpError', {
 export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   onSuccess,
   onCancel,
+  defaultMetadata,
+  defaultRoleDescriptors,
   apiKey,
   canManageCrossClusterApiKeys = false,
   readOnly = false,
@@ -237,6 +241,14 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
       }
     }
   }, [currentUser, roles]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    formik.setFieldValue('role_descriptors', defaultRoleDescriptors);
+  }, [defaultRoleDescriptors]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    formik.setFieldValue('metadata', defaultMetadata);
+  }, [defaultRoleDescriptors]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isLoading = isLoadingCurrentUser || isLoadingRoles;
 

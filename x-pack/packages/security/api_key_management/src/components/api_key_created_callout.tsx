@@ -19,7 +19,6 @@ export interface ApiKeyCreatedCalloutProps {
 export const ApiKeyCreatedCallout: FunctionComponent<ApiKeyCreatedCalloutProps> = ({
   createdApiKey,
 }) => {
-  const concatenated = `${createdApiKey.id}:${createdApiKey.api_key}`;
   return (
     <EuiCallOut
       color="success"
@@ -35,43 +34,51 @@ export const ApiKeyCreatedCallout: FunctionComponent<ApiKeyCreatedCalloutProps> 
           defaultMessage="Copy this key now. You will not be able to view it again."
         />
       </p>
-      <SelectableTokenField
-        options={[
-          {
-            key: 'encoded',
-            value: createdApiKey.encoded,
-            icon: 'empty',
-            label: i18n.translate('xpack.security.management.apiKeys.encodedLabel', {
-              defaultMessage: 'Encoded',
-            }),
-            description: i18n.translate('xpack.security.management.apiKeys.encodedDescription', {
-              defaultMessage: 'Format used to make requests to Elasticsearch REST API.',
-            }),
-          },
-          {
-            key: 'beats',
-            value: concatenated,
-            icon: 'logoBeats',
-            label: i18n.translate('xpack.security.management.apiKeys.beatsLabel', {
-              defaultMessage: 'Beats',
-            }),
-            description: i18n.translate('xpack.security.management.apiKeys.beatsDescription', {
-              defaultMessage: 'Format used to configure Beats.',
-            }),
-          },
-          {
-            key: 'logstash',
-            value: concatenated,
-            icon: 'logoLogstash',
-            label: i18n.translate('xpack.security.management.apiKeys.logstashLabel', {
-              defaultMessage: 'Logstash',
-            }),
-            description: i18n.translate('xpack.security.management.apiKeys.logstashDescription', {
-              defaultMessage: 'Format used to configure Logstash.',
-            }),
-          },
-        ]}
-      />
     </EuiCallOut>
+  );
+};
+
+export const ApiKeySelectableTokenField: FunctionComponent<ApiKeyCreatedCalloutProps> = ({
+  createdApiKey,
+}) => {
+  const concatenated = `${createdApiKey.id}:${createdApiKey.api_key}`;
+  return (
+    <SelectableTokenField
+      options={[
+        {
+          key: 'encoded',
+          value: createdApiKey.encoded,
+          icon: 'empty',
+          label: i18n.translate('xpack.security.management.apiKeys.encodedLabel', {
+            defaultMessage: 'Encoded',
+          }),
+          description: i18n.translate('xpack.security.management.apiKeys.encodedDescription', {
+            defaultMessage: 'Format used to make requests to Elasticsearch REST API.',
+          }),
+        },
+        {
+          key: 'beats',
+          value: concatenated,
+          icon: 'logoBeats',
+          label: i18n.translate('xpack.security.management.apiKeys.beatsLabel', {
+            defaultMessage: 'Beats',
+          }),
+          description: i18n.translate('xpack.security.management.apiKeys.beatsDescription', {
+            defaultMessage: 'Format used to configure Beats.',
+          }),
+        },
+        {
+          key: 'logstash',
+          value: concatenated,
+          icon: 'logoLogstash',
+          label: i18n.translate('xpack.security.management.apiKeys.logstashLabel', {
+            defaultMessage: 'Logstash',
+          }),
+          description: i18n.translate('xpack.security.management.apiKeys.logstashDescription', {
+            defaultMessage: 'Format used to configure Logstash.',
+          }),
+        },
+      ]}
+    />
   );
 };
