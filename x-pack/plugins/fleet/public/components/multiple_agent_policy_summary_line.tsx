@@ -66,38 +66,41 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
                   {name || id}
                 </EuiBadge>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge
-                  color="hollow"
-                  data-test-subj="agentPoliciesNumberBadge"
-                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                  onClickAriaLabel="Open agent policies popover"
-                >
-                  {`+${policies.length - 1}`}
-                </EuiBadge>
-                <EuiPopover
-                  isOpen={isPopoverOpen}
-                  closePopover={closePopover}
-                  anchorPosition="downCenter"
-                >
-                  <EuiPopoverTitle>
-                    {i18n.translate('xpack.fleet.agentPolicySummaryLine.popover.title', {
-                      defaultMessage: 'This integration is shared by',
-                    })}
-                  </EuiPopoverTitle>
-                  <div style={{ width: '300px' }}>
-                    <EuiListGroup listItems={listItems} color="primary" size="s" />
-                  </div>
-                  <EuiPopoverFooter>
-                    {/* TODO: implement missing onClick function */}
-                    <EuiButton fullWidth size="s">
-                      {i18n.translate('xpack.fleet.agentPolicySummaryLine.popover.button', {
-                        defaultMessage: 'Manage agent policies',
+              {policies.length > 1 && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    color="hollow"
+                    data-test-subj="agentPoliciesNumberBadge"
+                    onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                    onClickAriaLabel="Open agent policies popover"
+                  >
+                    {`+${policies.length - 1}`}
+                  </EuiBadge>
+                  <EuiPopover
+                    data-test-subj="agentPoliciesPopover"
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
+                    anchorPosition="downCenter"
+                  >
+                    <EuiPopoverTitle>
+                      {i18n.translate('xpack.fleet.agentPolicySummaryLine.popover.title', {
+                        defaultMessage: 'This integration is shared by',
                       })}
-                    </EuiButton>
-                  </EuiPopoverFooter>
-                </EuiPopover>
-              </EuiFlexItem>
+                    </EuiPopoverTitle>
+                    <div style={{ width: '300px' }}>
+                      <EuiListGroup listItems={listItems} color="primary" size="s" />
+                    </div>
+                    <EuiPopoverFooter>
+                      {/* TODO: implement missing onClick function */}
+                      <EuiButton fullWidth size="s">
+                        {i18n.translate('xpack.fleet.agentPolicySummaryLine.popover.button', {
+                          defaultMessage: 'Manage agent policies',
+                        })}
+                      </EuiButton>
+                    </EuiPopoverFooter>
+                  </EuiPopover>
+                </EuiFlexItem>
+              )}
               {isManaged && (
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
