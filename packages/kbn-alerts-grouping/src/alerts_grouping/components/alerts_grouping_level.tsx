@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { memo, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, ReactElement, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -135,41 +135,37 @@ export const AlertsGroupingLevel = memo(
       uniqueValue,
     ]);
 
-    const [finalQuery, setFinalQuery] = useState(queryGroups);
-
     const { data: alertGroupsData, isLoading: isLoadingGroups } = useFindAlertsQuery<
       GroupingAggregation<AlertsGroupingAggregation>
     >({
       http,
       toasts: notifications.toasts,
-      enabled: finalQuery && !isNoneGroup([selectedGroup]),
+      enabled: queryGroups && !isNoneGroup([selectedGroup]),
       params: {
         feature_ids: featureIds,
-        ...finalQuery,
+        ...queryGroups,
       },
     });
 
-    const queriedGroup = useRef<string | null>(null);
+    const queriedGroup = useMemo<string | null>(
+      () =>
+        !isNoneGroup([selectedGroup])
+          ? queryGroups?.runtime_mappings?.groupByField?.script?.params?.selectedGroup
+          : null,
+      [queryGroups?.runtime_mappings?.groupByField?.script?.params?.selectedGroup, selectedGroup]
+    );
 
     const aggs = useMemo(
       // queriedGroup because `selectedGroup` updates before the query response
       () =>
         parseGroupingQuery(
           // fallback to selectedGroup if queriedGroup.current is null, this happens in tests
-          queriedGroup.current === null ? selectedGroup : queriedGroup.current,
+          queriedGroup === null ? selectedGroup : queriedGroup,
           uniqueValue,
           alertGroupsData?.aggregations
         ),
-      [alertGroupsData?.aggregations, selectedGroup, uniqueValue]
+      [alertGroupsData?.aggregations, queriedGroup, selectedGroup, uniqueValue]
     );
-
-    useEffect(() => {
-      if (!isNoneGroup([selectedGroup])) {
-        queriedGroup.current =
-          queryGroups?.runtime_mappings?.groupByField?.script?.params?.selectedGroup ?? '';
-        setFinalQuery(queryGroups);
-      }
-    }, [queryGroups, selectedGroup]);
 
     return useMemo(
       () =>
