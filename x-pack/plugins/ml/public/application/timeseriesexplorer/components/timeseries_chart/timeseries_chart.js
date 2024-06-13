@@ -171,6 +171,11 @@ class TimeseriesChartIntl extends Component {
     ).getTimeBuckets;
 
     const { svgWidth } = this.props;
+    const {
+      focusHeight: focusHeightIncoming,
+      focusZoomPanelHeight: focusZoomPanelIncoming,
+      focusChartHeight: focusChartIncoming,
+    } = this.props.heights ?? {};
 
     this.vizWidth = svgWidth - margin.left - margin.right;
     const vizWidth = this.vizWidth;
@@ -178,10 +183,7 @@ class TimeseriesChartIntl extends Component {
     this.focusXScale = d3.time.scale().range([0, vizWidth]);
     this.focusYScale = d3.scale
       .linear()
-      .range([
-        this.props.heights?.focusHeight ?? focusHeight,
-        this.props.heights?.focusZoomPanelHeight ?? focusZoomPanelHeight,
-      ]);
+      .range([focusHeightIncoming ?? focusHeight, focusZoomPanelIncoming ?? focusZoomPanelHeight]);
     const focusXScale = this.focusXScale;
     const focusYScale = this.focusYScale;
 
@@ -189,7 +191,7 @@ class TimeseriesChartIntl extends Component {
       .axis()
       .scale(focusXScale)
       .orient('bottom')
-      .innerTickSize(-(this.props.heights?.focusChartHeight ?? focusChartHeight))
+      .innerTickSize(-(focusChartIncoming ?? focusChartHeight))
       .outerTickSize(0)
       .tickPadding(10);
     this.focusYAxis = d3.svg
@@ -227,7 +229,7 @@ class TimeseriesChartIntl extends Component {
       .linear()
       .range([
         this.props.heights?.contextChartHeight ?? contextChartHeight,
-        contextChartLineTopMargin,
+        this.props.heights?.contextChartLineTopMargin ?? contextChartLineTopMargin,
       ]);
 
     this.fieldFormat = undefined;
@@ -301,6 +303,7 @@ class TimeseriesChartIntl extends Component {
       contextChartData,
       contextForecastData,
       detectorIndex,
+      heights,
       modelPlotEnabled,
       selectedJob,
       svgWidth,
@@ -308,15 +311,20 @@ class TimeseriesChartIntl extends Component {
       showAnnotations,
     } = this.props;
 
+    const {
+      chartSpacing: chartSpacingIncoming,
+      contextChartHeight: contextChartIncoming,
+      focusHeight: focusHeightIncoming,
+      margintTopHeight: marginTopIncoming,
+    } = heights ?? {};
+
     const createFocusChart = this.createFocusChart.bind(this);
     const drawContextElements = this.drawContextElements.bind(this);
     const focusXScale = this.focusXScale;
     const focusYAxis = this.focusYAxis;
     const focusYScale = this.focusYScale;
 
-    const svgHeight =
-      (incomingSvgHeight && incomingSvgHeight + contextChartHeight) ??
-      getSvgHeight(showAnnotations);
+    const svgHeight = incomingSvgHeight ?? getSvgHeight(showAnnotations);
 
     // Clear any existing elements from the visualization,
     // then build the svg elements for the bubble chart.
@@ -406,14 +414,17 @@ class TimeseriesChartIntl extends Component {
     focusXScale.range([0, this.vizWidth]);
     focusYAxis.innerTickSize(-this.vizWidth);
 
-    if (incomingSvgHeight !== undefined) {
-      focusYScale.range([0, incomingSvgHeight]);
+    if (focusHeightIncoming !== undefined) {
+      focusYScale.range([focusHeightIncoming, 0]);
     }
 
     const focus = svg
       .append('g')
       .attr('class', 'focus-chart')
-      .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+      .attr(
+        'transform',
+        'translate(' + margin.left + ',' + (marginTopIncoming ?? margin.top) + ')'
+      );
 
     const context = svg
       .append('g')
@@ -423,7 +434,9 @@ class TimeseriesChartIntl extends Component {
         'translate(' +
           margin.left +
           ',' +
-          ((this.props.heights?.focusHeight ?? focusHeight) + margin.top + chartSpacing) +
+          ((focusHeightIncoming ?? focusHeight) +
+            (marginTopIncoming ?? margin.top) +
+            (chartSpacingIncoming ?? chartSpacing)) +
           ')'
       );
 
@@ -435,15 +448,15 @@ class TimeseriesChartIntl extends Component {
       .attr('x', 0)
       .attr('y', 0)
       .attr('width', this.vizWidth)
-      .attr('height', this.props.heights?.focusHeight ?? focusHeight)
+      .attr('height', focusHeightIncoming ?? focusHeight)
       .style('fill', 'white');
 
     // Draw each of the component elements.
-    createFocusChart(focus, this.vizWidth, this.props.heights?.focusHeight ?? focusHeight);
+    createFocusChart(focus, this.vizWidth, focusHeightIncoming ?? focusHeight);
     drawContextElements(
       context,
       this.vizWidth,
-      this.props.heights?.contextChartHeight ?? contextChartHeight,
+      contextChartIncoming ?? contextChartHeight,
       swimlaneHeight,
       annotationHeight
     );
@@ -514,6 +527,11 @@ class TimeseriesChartIntl extends Component {
     // as we want to re-render the paths and points when the zoom area changes.
 
     const { contextForecastData } = this.props;
+    const {
+      focusZoomPanelHeight: focusZoomPanelIncoming,
+      focusChartHeight: focusChartIncoming,
+      chartSpacing: chartSpacingIncoming,
+    } = this.props.heights ?? {};
 
     // Add a group at the top to display info on the chart aggregation interval
     // and links to set the brush span to 1h, 1d, 1w etc.
@@ -523,7 +541,7 @@ class TimeseriesChartIntl extends Component {
       .attr('x', 0)
       .attr('y', 0)
       .attr('width', fcsWidth)
-      .attr('height', this.props.heights?.focusZoomPanelHeight ?? focusZoomPanelHeight)
+      .attr('height', focusZoomPanelIncoming ?? focusZoomPanelHeight)
       .attr('class', 'chart-border');
     this.createZoomInfoElements(zoomGroup, fcsWidth);
 
@@ -545,9 +563,9 @@ class TimeseriesChartIntl extends Component {
       .call(annotateBrush)
       .selectAll('rect')
       .attr('x', brushX)
-      .attr('y', this.props.heights?.focusZoomPanelHeight ?? focusZoomPanelHeight)
+      .attr('y', focusZoomPanelIncoming ?? focusZoomPanelHeight)
       .attr('width', brushWidth)
-      .attr('height', this.props.heights?.focusChartHeight ?? focusChartHeight);
+      .attr('height', focusChartIncoming ?? focusChartHeight);
 
     fcsGroup.append('g').classed('mlAnnotations', true);
 
@@ -555,9 +573,9 @@ class TimeseriesChartIntl extends Component {
     fcsGroup
       .append('rect')
       .attr('x', 0)
-      .attr('y', this.props.heights?.focusZoomPanelHeight ?? focusZoomPanelHeight)
+      .attr('y', focusZoomPanelIncoming ?? focusZoomPanelHeight)
       .attr('width', fcsWidth)
-      .attr('height', this.props.heights?.focusChartHeight ?? focusChartHeight)
+      .attr('height', focusChartIncoming ?? focusChartHeight)
       .attr('class', 'chart-border');
 
     // Add background for x axis.
@@ -567,25 +585,25 @@ class TimeseriesChartIntl extends Component {
       .attr('x', 0)
       .attr('y', fcsHeight)
       .attr('width', fcsWidth)
-      .attr('height', chartSpacing);
+      .attr('height', chartSpacingIncoming ?? chartSpacing);
     xAxisBg
       .append('line')
       .attr('x1', 0)
       .attr('y1', fcsHeight)
       .attr('x2', 0)
-      .attr('y2', fcsHeight + chartSpacing);
+      .attr('y2', fcsHeight + (chartSpacingIncoming ?? chartSpacing));
     xAxisBg
       .append('line')
       .attr('x1', fcsWidth)
       .attr('y1', fcsHeight)
       .attr('x2', fcsWidth)
-      .attr('y2', fcsHeight + chartSpacing);
+      .attr('y2', fcsHeight + (chartSpacingIncoming ?? chartSpacing));
     xAxisBg
       .append('line')
       .attr('x1', 0)
-      .attr('y1', fcsHeight + chartSpacing)
+      .attr('y1', fcsHeight + (chartSpacingIncoming ?? chartSpacing))
       .attr('x2', fcsWidth)
-      .attr('y2', fcsHeight + chartSpacing);
+      .attr('y2', fcsHeight + (chartSpacingIncoming ?? chartSpacing));
 
     const axes = fcsGroup.append('g');
     axes
@@ -595,7 +613,7 @@ class TimeseriesChartIntl extends Component {
     axes.append('g').attr('class', 'y axis');
 
     // Create the elements for the metric value line and model bounds area.
-    fcsGroup.append('path').attr('class', 'area bounds');
+    fcsGroup.append('path');
     fcsGroup.append('path').attr('class', 'values-line');
     fcsGroup.append('g').attr('class', 'focus-chart-markers');
 
@@ -790,11 +808,17 @@ class TimeseriesChartIntl extends Component {
         .classed('hidden', !showModelBounds);
     }
 
+    const {
+      focusZoomPanelHeight: focusZoomPanelIncoming,
+      focusChartHeight: focusChartIncoming,
+      focusHeight: focusHeightIncoming,
+    } = this.props.heights ?? {};
+
     renderAnnotations(
       focusChart,
       focusAnnotationData,
-      this.props.heights?.focusZoomPanelHeight ?? focusZoomPanelHeight,
-      this.props.heights?.focusChartHeight ?? focusChartHeight,
+      focusZoomPanelIncoming ?? focusZoomPanelHeight,
+      focusChartIncoming ?? focusChartHeight,
       this.focusXScale,
       showAnnotations,
       showFocusChartTooltip,
@@ -927,9 +951,7 @@ class TimeseriesChartIntl extends Component {
       .attr('x', (d) => this.focusXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
       .attr('y', (d) => {
         const focusYValue = this.focusYScale(d.value);
-        return isNaN(focusYValue)
-          ? -(this.props.heights?.focusHeight ?? focusHeight) - 3
-          : focusYValue - 3;
+        return isNaN(focusYValue) ? -(focusHeightIncoming ?? focusHeight) - 3 : focusYValue - 3;
       });
 
     // Plot any forecast data in scope.
@@ -1150,7 +1172,10 @@ class TimeseriesChartIntl extends Component {
 
     this.contextYScale = d3.scale
       .linear()
-      .range([cxtChartHeight, contextChartLineTopMargin])
+      .range([
+        cxtChartHeight,
+        this.props.heights?.contextChartLineTopMargin ?? contextChartLineTopMargin,
+      ])
       .domain([chartLimits.min, chartLimits.max]);
 
     const borders = cxtGroup.append('g').attr('class', 'axis');
@@ -1321,6 +1346,10 @@ class TimeseriesChartIntl extends Component {
     const brush = this.brush;
     const contextXScale = this.contextXScale;
     const mask = this.mask;
+    const {
+      contextChartHeight: contextChartIncoming,
+      contextChartLineTopMargin: topMarginIncoming,
+    } = this.props.heights ?? {};
 
     // Create the brush for zooming in to the focus area of interest.
     brush.x(contextXScale).on('brush', brushing).on('brushend', brushed);
@@ -1331,10 +1360,7 @@ class TimeseriesChartIntl extends Component {
       .call(brush)
       .selectAll('rect')
       .attr('y', -1)
-      .attr(
-        'height',
-        (this.props.heights?.contextChartHeight ?? contextChartHeight) + swimlaneHeight + 1
-      )
+      .attr('height', (contextChartIncoming ?? contextChartHeight) + swimlaneHeight + 1)
       .attr('width', this.vizWidth);
 
     const handleBrushExtent = brush.extent();
@@ -1349,7 +1375,7 @@ class TimeseriesChartIntl extends Component {
       .append('rect')
       .attr('class', 'top-border')
       .attr('y', -2)
-      .attr('height', contextChartLineTopMargin);
+      .attr('height', topMarginIncoming ?? contextChartLineTopMargin);
 
     // Draw the brush handles using SVG foreignObject elements.
     // Note these are not supported on IE11 and below, so will not appear in IE.

@@ -21,24 +21,40 @@ import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import type { SourceIndicesWithGeoFields } from '../../../explorer/explorer_utils';
 
-const percentFocusZoomPanelHeight = 0.06;
-const percentFocusChartHeight = 0.77;
-const percentContextChartHeight = 0.15;
+const percentFocusZoomPanelHeight = 0.051;
+const percentFocusChartHeight = 0.634;
+const percentContextChartHeight = 0.122;
+const percentContextChartLineTopMargin = 0.006;
+const percentChartSpacing = 0.051;
+const percentMarginTop = 0.02;
+const percentMarginBottom = 0.0306;
+const minSvgHeight = 470;
+
+interface Heights {
+  focusZoomPanelHeight: number;
+  focusChartHeight: number;
+  focusHeight: number;
+  contextChartHeight: number;
+  contextChartLineTopMargin: number;
+  chartSpacing: number;
+  marginTop: number;
+  marginBottom: number;
+}
 
 function getChartHeights(height: number) {
-  const focusZoomPanelHeight = Math.round(height * percentFocusZoomPanelHeight);
-  const focusChartHeight = Math.round(height * percentFocusChartHeight);
+  const actualHeight = height < minSvgHeight ? minSvgHeight : height;
+  const focusZoomPanelHeight = Math.round(actualHeight * percentFocusZoomPanelHeight);
+  const focusChartHeight = Math.round(actualHeight * percentFocusChartHeight);
 
-  const heights: {
-    focusZoomPanelHeight: number;
-    focusChartHeight: number;
-    focusHeight: number;
-    contextChartHeight: number;
-  } = {
+  const heights: Heights = {
     focusZoomPanelHeight,
     focusChartHeight,
     focusHeight: focusZoomPanelHeight + focusChartHeight,
-    contextChartHeight: Math.round(height * percentContextChartHeight),
+    contextChartHeight: Math.round(actualHeight * percentContextChartHeight),
+    contextChartLineTopMargin: Math.round(actualHeight * percentContextChartLineTopMargin),
+    chartSpacing: Math.round(actualHeight * percentChartSpacing),
+    marginTop: Math.round(actualHeight * percentMarginTop),
+    marginBottom: Math.round(actualHeight * percentMarginBottom),
   };
   return heights;
 }
@@ -159,6 +175,14 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     contextAggregationInterval,
   ]);
 
+  let heights: Heights | undefined;
+
+  if (chartProps.svgHeight) {
+    heights = getChartHeights(chartProps.svgHeight);
+    const actualHeight = chartProps.svgHeight < minSvgHeight ? minSvgHeight : chartProps.svgHeight;
+    chartProps.svgHeight = actualHeight + heights.marginBottom;
+  }
+
   return (
     <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
       <MlTooltipComponent>
@@ -170,7 +194,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
             bounds={bounds}
             detectorIndex={detectorIndex}
             embeddableMode={embeddableMode}
-            heights={chartProps.svgHeight ? getChartHeights(chartProps.svgHeight) : undefined}
+            heights={heights}
             renderFocusChartOnly={renderFocusChartOnly}
             selectedJob={selectedJob}
             showAnnotations={showAnnotations}
