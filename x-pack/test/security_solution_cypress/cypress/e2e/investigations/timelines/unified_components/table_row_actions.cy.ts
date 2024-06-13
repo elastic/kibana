@@ -14,8 +14,8 @@ import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
 import {
-  addFilter,
   createNewTimeline,
+  executeTimelineKQL,
   executeTimelineSearch,
   openTimelineEventContextMenu,
 } from '../../../../tasks/timeline';
@@ -47,11 +47,7 @@ describe(
     });
 
     it('should refresh the table when alert status is changed', () => {
-      addFilter({
-        field: 'kibana.alert.workflow_status',
-        operator: 'is',
-        value: 'open',
-      });
+      executeTimelineKQL('kibana.alert.workflow_status:open');
       cy.get(GET_UNIFIED_DATA_GRID_CELL('@timestamp', 0)).should('be.visible');
       openTimelineEventContextMenu();
       cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
