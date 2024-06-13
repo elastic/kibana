@@ -37,6 +37,7 @@ import {
   RISK_ENGINE_SETTINGS_URL,
   ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   RISK_SCORE_ENTITY_CALCULATION_URL,
+  API_VERSIONS,
 } from '../../../common/constants';
 import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 import type { SnakeToCamelCase } from '../common/utils';
