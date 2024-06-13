@@ -19,6 +19,7 @@ import {
   ScopedHistory,
   IUiSettingsClient,
   ChromeStart,
+  SecurityServiceStart,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -49,6 +50,7 @@ export interface KibanaLogicProps {
   config: ClientConfigType;
   connectorTypes?: ConnectorDefinition[];
   console?: ConsolePluginStart;
+  coreSecurity?: SecurityServiceStart;
   data?: DataPublicPluginStart;
   esConfig: ESConfig;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
@@ -70,7 +72,6 @@ export interface KibanaLogicProps {
   share?: SharePluginStart;
   uiSettings?: IUiSettingsClient;
   updateSideNavDefinition: UpdateSideNavDefinitionFn;
-  user: AuthenticatedUser | null;
 }
 
 export interface KibanaValues {
@@ -107,6 +108,9 @@ export interface KibanaValues {
 }
 
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
+  actions: {
+    setUser: (user: AuthenticatedUser | null) => ({ user }),
+  },
   path: ['enterprise_search', 'kibana_logic'],
   reducers: ({ props }) => ({
     application: [props.application, {}],
@@ -144,7 +148,12 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     share: [props.share || null, {}],
     uiSettings: [props.uiSettings, {}],
     updateSideNavDefinition: [props.updateSideNavDefinition, {}],
-    user: [props.user || null, {}],
+    user: [
+      props.user || null,
+      {
+        setUser: (_, { user }) => user || null,
+      },
+    ],
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: CloudSetup) => Boolean(cloud?.isCloudEnabled)],
@@ -154,5 +163,8 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
 export const mountKibanaLogic = (props: KibanaLogicProps) => {
   KibanaLogic(props);
   const unmount = KibanaLogic.mount();
+  props.coreSecurity?.authc.getCurrentUser()?.then((user) => {
+    KibanaLogic.actions.setUser(user);
+  });
   return unmount;
 };

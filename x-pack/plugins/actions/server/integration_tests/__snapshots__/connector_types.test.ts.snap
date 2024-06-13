@@ -26462,6 +26462,85 @@ Object {
                   "presence": "optional",
                 },
                 "keys": Object {
+                  "additional_fields": Object {
+                    "flags": Object {
+                      "default": null,
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "matches": Array [
+                      Object {
+                        "schema": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "metas": Array [
+                            Object {
+                              "x-oas-get-additional-properties": [Function],
+                            },
+                          ],
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "key": Object {
+                                  "flags": Object {
+                                    "error": [Function],
+                                  },
+                                  "rules": Array [
+                                    Object {
+                                      "args": Object {
+                                        "method": [Function],
+                                      },
+                                      "name": "custom",
+                                    },
+                                    Object {
+                                      "args": Object {
+                                        "method": [Function],
+                                      },
+                                      "name": "custom",
+                                    },
+                                  ],
+                                  "type": "string",
+                                },
+                                "value": Object {
+                                  "flags": Object {
+                                    "error": [Function],
+                                  },
+                                  "metas": Array [
+                                    Object {
+                                      "x-oas-any-type": true,
+                                    },
+                                  ],
+                                  "type": "any",
+                                },
+                              },
+                              "name": "entries",
+                            },
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "record",
+                        },
+                      },
+                      Object {
+                        "schema": Object {
+                          "allow": Array [
+                            null,
+                          ],
+                          "flags": Object {
+                            "error": [Function],
+                            "only": true,
+                          },
+                          "type": "any",
+                        },
+                      },
+                    ],
+                    "type": "alternatives",
+                  },
                   "category": Object {
                     "flags": Object {
                       "default": null,
@@ -28617,6 +28696,85 @@ Object {
                   "presence": "optional",
                 },
                 "keys": Object {
+                  "additional_fields": Object {
+                    "flags": Object {
+                      "default": null,
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "matches": Array [
+                      Object {
+                        "schema": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "metas": Array [
+                            Object {
+                              "x-oas-get-additional-properties": [Function],
+                            },
+                          ],
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "key": Object {
+                                  "flags": Object {
+                                    "error": [Function],
+                                  },
+                                  "rules": Array [
+                                    Object {
+                                      "args": Object {
+                                        "method": [Function],
+                                      },
+                                      "name": "custom",
+                                    },
+                                    Object {
+                                      "args": Object {
+                                        "method": [Function],
+                                      },
+                                      "name": "custom",
+                                    },
+                                  ],
+                                  "type": "string",
+                                },
+                                "value": Object {
+                                  "flags": Object {
+                                    "error": [Function],
+                                  },
+                                  "metas": Array [
+                                    Object {
+                                      "x-oas-any-type": true,
+                                    },
+                                  ],
+                                  "type": "any",
+                                },
+                              },
+                              "name": "entries",
+                            },
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "record",
+                        },
+                      },
+                      Object {
+                        "schema": Object {
+                          "allow": Array [
+                            null,
+                          ],
+                          "flags": Object {
+                            "error": [Function],
+                            "only": true,
+                          },
+                          "type": "any",
+                        },
+                      },
+                    ],
+                    "type": "alternatives",
+                  },
                   "category": Object {
                     "flags": Object {
                       "default": null,
