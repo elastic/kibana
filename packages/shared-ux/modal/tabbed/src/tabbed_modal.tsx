@@ -113,6 +113,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       }}
       style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
       maxWidth={true}
+      aria-labelledby="shareContextModal"
       data-test-subj="shareContextModal"
     >
       <EuiModalHeader>
