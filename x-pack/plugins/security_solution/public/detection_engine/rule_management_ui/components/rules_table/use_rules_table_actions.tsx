@@ -8,6 +8,7 @@
 import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
@@ -23,12 +24,16 @@ import {
 } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useDownloadExportedRules } from '../../../rule_management/logic/bulk_actions/use_download_exported_rules';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
+import type { TimeRange } from '../../../rule_gaps/types';
+import { useScheduleRuleRun } from '../../../rule_gaps/logic/use_schedule_rule_run';
 
 export const useRulesTableActions = ({
   showExceptionsDuplicateConfirmation,
+  showManualRuleRunConfirmation,
   confirmDeletion,
 }: {
   showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+  showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
   confirmDeletion: () => Promise<boolean>;
 }): Array<DefaultItemAction<Rule>> => {
   const { navigateToApp } = useKibana().services.application;
@@ -37,6 +42,9 @@ export const useRulesTableActions = ({
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
+  const { scheduleRuleRun } = useScheduleRuleRun();
+
+  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
 
   return [
     {
@@ -109,6 +117,29 @@ export const useRulesTableActions = ({
       },
       enabled: (rule: Rule) => !rule.immutable,
     },
+    ...(isManualRuleRunEnabled
+      ? [
+          {
+            type: 'icon',
+            'data-test-subj': 'manualRuleRunAction',
+            description: i18n.MANUAL_RULE_RUN,
+            icon: 'play',
+            name: i18n.MANUAL_RULE_RUN,
+            onClick: async (rule: Rule) => {
+              startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
+              const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
+              if (modalManualRuleRunConfirmationResult === null) {
+                return;
+              }
+              await scheduleRuleRun({
+                ruleIds: [rule.id],
+                timeRange: modalManualRuleRunConfirmationResult,
+              });
+            },
+            enabled: (rule: Rule) => rule.enabled,
+          } as DefaultItemAction<Rule>,
+        ]
+      : []),
     {
       type: 'icon',
       'data-test-subj': 'deleteRuleAction',

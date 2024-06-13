@@ -9,7 +9,8 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { EuiSuperSelect } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -23,13 +24,17 @@ import {
 
 import { Error } from '../../../../../components';
 import type { AgentPolicy, Output, PackageInfo } from '../../../../../types';
-import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../../../services';
+import {
+  isPackageLimited,
+  doesAgentPolicyAlreadyIncludePackage,
+  ExperimentalFeaturesService,
+} from '../../../../../services';
 import {
   useGetAgentPolicies,
   useGetOutputs,
-  sendGetOneAgentPolicy,
   useFleetStatus,
   useGetPackagePolicies,
+  sendBulkGetAgentPolicies,
 } from '../../../../../hooks';
 import {
   FLEET_APM_PACKAGE,
@@ -37,6 +42,8 @@ import {
   outputType,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../../../../../common/constants';
+
+import { AgentPolicyMultiSelect } from './components/agent_policy_multi_select';
 
 const AgentPolicyFormRow = styled(EuiFormRow)`
   .euiFormRow__label {
@@ -77,7 +84,9 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
     () =>
       packagePoliciesForThisPackage?.items.reduce(
         (acc: { [key: string]: boolean }, packagePolicy) => {
-          acc[packagePolicy.policy_id] = true;
+          packagePolicy.policy_ids.forEach((policyId) => {
+            acc[policyId] = true;
+          });
           return acc;
         },
         {}
@@ -124,7 +133,7 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
                       <EuiText size="s">
                         <FormattedMessage
                           id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyDisabledAPMLogstashOuputText"
-                          defaultMessage="Logstash output for agent integration is not supported with APM"
+                          defaultMessage="Logstash output for integrations is not supported with APM"
                         />
                       </EuiText>
                     </>
@@ -145,11 +154,55 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
     ]
   );
 
+  const agentPolicyMultiOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
+    () =>
+      packageInfo && !isOutputLoading && !isAgentPoliciesLoading && !isLoadingPackagePolicies
+        ? agentPolicies.map((policy) => {
+            const isLimitedPackageAlreadyInPolicy =
+              isPackageLimited(packageInfo) &&
+              packagePoliciesForThisPackageByAgentPolicyId?.[policy.id];
+
+            const isAPMPackageAndDataOutputIsLogstash =
+              packageInfo?.name === FLEET_APM_PACKAGE &&
+              getDataOutputForPolicy(policy)?.type === outputType.Logstash;
+
+            return {
+              append: isAPMPackageAndDataOutputIsLogstash ? (
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyDisabledAPMLogstashOuputText"
+                      defaultMessage="Logstash output for integrations is not supported with APM"
+                    />
+                  }
+                >
+                  <EuiIcon size="s" type="warningFilled" />
+                </EuiToolTip>
+              ) : null,
+              key: policy.id,
+              label: policy.name,
+              disabled: isLimitedPackageAlreadyInPolicy || isAPMPackageAndDataOutputIsLogstash,
+              'data-test-subj': 'agentPolicyMultiItem',
+            };
+          })
+        : [],
+    [
+      packageInfo,
+      agentPolicies,
+      packagePoliciesForThisPackageByAgentPolicyId,
+      getDataOutputForPolicy,
+      isOutputLoading,
+      isAgentPoliciesLoading,
+      isLoadingPackagePolicies,
+    ]
+  );
+
   return {
     agentPoliciesError,
     isLoading: isOutputLoading || isAgentPoliciesLoading || isLoadingPackagePolicies,
     agentPolicyOptions,
     agentPolicies,
+    agentPolicyMultiOptions,
   };
 }
 
@@ -161,14 +214,14 @@ function doesAgentPolicyHaveLimitedPackage(policy: AgentPolicy, pkgInfo: Package
 
 export const StepSelectAgentPolicy: React.FunctionComponent<{
   packageInfo?: PackageInfo;
-  agentPolicy: AgentPolicy | undefined;
-  updateAgentPolicy: (agentPolicy: AgentPolicy | undefined) => void;
+  agentPolicies: AgentPolicy[];
+  updateAgentPolicies: (agentPolicies: AgentPolicy[]) => void;
   setHasAgentPolicyError: (hasError: boolean) => void;
   selectedAgentPolicyId?: string;
 }> = ({
   packageInfo,
-  agentPolicy,
-  updateAgentPolicy: updateSelectedAgentPolicy,
+  agentPolicies,
+  updateAgentPolicies: updateSelectedAgentPolicies,
   setHasAgentPolicyError,
   selectedAgentPolicyId,
 }) => {
@@ -176,69 +229,101 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
-  const { isLoading, agentPoliciesError, agentPolicyOptions, agentPolicies } =
-    useAgentPoliciesOptions(packageInfo);
-  // Selected agent policy state
-  const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(
-    agentPolicy?.id ??
-      (selectedAgentPolicyId || (agentPolicies.length === 1 ? agentPolicies[0].id : undefined))
-  );
+  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
+
+  const {
+    isLoading,
+    agentPoliciesError,
+    agentPolicyOptions,
+    agentPolicyMultiOptions,
+    agentPolicies: existingAgentPolicies,
+  } = useAgentPoliciesOptions(packageInfo);
+
+  const [selectedPolicyIds, setSelectedPolicyIds] = useState<string[]>([]);
 
   const [isLoadingSelectedAgentPolicy, setIsLoadingSelectedAgentPolicy] = useState<boolean>(false);
-  const [selectedAgentPolicy, setSelectedAgentPolicy] = useState<AgentPolicy | undefined>(
-    agentPolicy
-  );
+  const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<AgentPolicy[]>(agentPolicies);
 
-  const updateAgentPolicy = useCallback(
-    (selectedPolicy: AgentPolicy | undefined) => {
-      setSelectedAgentPolicy(selectedPolicy);
-      updateSelectedAgentPolicy(selectedPolicy);
+  const updateAgentPolicies = useCallback(
+    (selectedPolicies: AgentPolicy[]) => {
+      setSelectedAgentPolicies(selectedPolicies);
+      updateSelectedAgentPolicies(selectedPolicies);
     },
-    [updateSelectedAgentPolicy]
+    [updateSelectedAgentPolicies]
   );
   // Update parent selected agent policy state
   useEffect(() => {
     const fetchAgentPolicyInfo = async () => {
-      if (selectedPolicyId) {
+      if (selectedPolicyIds.length > 0) {
         setIsLoadingSelectedAgentPolicy(true);
-        const { data, error } = await sendGetOneAgentPolicy(selectedPolicyId);
+        const { data, error } = await sendBulkGetAgentPolicies(selectedPolicyIds, { full: true });
         if (error) {
           setSelectedAgentPolicyError(error);
-          updateAgentPolicy(undefined);
-        } else if (data && data.item) {
+          updateAgentPolicies([]);
+        } else if (data && data.items) {
           setSelectedAgentPolicyError(undefined);
-          updateAgentPolicy(data.item);
+          updateAgentPolicies(data.items);
         }
         setIsLoadingSelectedAgentPolicy(false);
       } else {
         setSelectedAgentPolicyError(undefined);
-        updateAgentPolicy(undefined);
+        updateAgentPolicies([]);
       }
     };
-    if (!agentPolicy || selectedPolicyId !== agentPolicy.id) {
+    const agentPoliciesHaveAllSelectedIds = selectedPolicyIds.every((id) =>
+      agentPolicies.map((policy) => policy.id).includes(id)
+    );
+    if (agentPolicies.length === 0 || !agentPoliciesHaveAllSelectedIds) {
       fetchAgentPolicyInfo();
+    } else if (agentPoliciesHaveAllSelectedIds && selectedPolicyIds.length < agentPolicies.length) {
+      setSelectedAgentPolicyError(undefined);
+      updateAgentPolicies(agentPolicies.filter((policy) => selectedPolicyIds.includes(policy.id)));
     }
-  }, [selectedPolicyId, agentPolicy, updateAgentPolicy]);
+  }, [selectedPolicyIds, agentPolicies, updateAgentPolicies]);
 
   // Try to select default agent policy
   useEffect(() => {
-    if (!selectedPolicyId && agentPolicies.length && agentPolicyOptions.length) {
-      const enabledOptions = agentPolicyOptions.filter((option) => !option.disabled);
-      if (enabledOptions.length === 1) {
-        setSelectedPolicyId(enabledOptions[0].value as string | undefined);
+    if (
+      selectedPolicyIds.length === 0 &&
+      existingAgentPolicies.length &&
+      (enableReusableIntegrationPolicies
+        ? agentPolicyMultiOptions.length
+        : agentPolicyOptions.length)
+    ) {
+      if (enableReusableIntegrationPolicies) {
+        const enabledOptions = agentPolicyMultiOptions.filter((option) => !option.disabled);
+        if (enabledOptions.length === 1) {
+          setSelectedPolicyIds([enabledOptions[0].key!]);
+        } else if (selectedAgentPolicyId) {
+          setSelectedPolicyIds([selectedAgentPolicyId]);
+        }
+      } else {
+        const enabledOptions = agentPolicyOptions.filter((option) => !option.disabled);
+        if (enabledOptions.length === 1) {
+          setSelectedPolicyIds([enabledOptions[0].value]);
+        } else if (selectedAgentPolicyId) {
+          setSelectedPolicyIds([selectedAgentPolicyId]);
+        }
       }
     }
-  }, [agentPolicies, agentPolicyOptions, selectedPolicyId]);
+  }, [
+    agentPolicyOptions,
+    agentPolicyMultiOptions,
+    enableReusableIntegrationPolicies,
+    selectedAgentPolicyId,
+    selectedPolicyIds,
+    existingAgentPolicies,
+  ]);
 
   // Bubble up any issues with agent policy selection
   useEffect(() => {
-    if (selectedPolicyId && !selectedAgentPolicyError) {
+    if (selectedPolicyIds.length > 0 && !selectedAgentPolicyError) {
       setHasAgentPolicyError(false);
     } else setHasAgentPolicyError(true);
-  }, [selectedAgentPolicyError, selectedPolicyId, setHasAgentPolicyError]);
+  }, [selectedAgentPolicyError, selectedPolicyIds, setHasAgentPolicyError]);
 
   const onChange = useCallback(
-    (newValue: string) => setSelectedPolicyId(newValue === '' ? undefined : newValue),
+    (newValue: string) => setSelectedPolicyIds(newValue === '' ? [] : [newValue]),
     []
   );
 
@@ -296,24 +381,28 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 </EuiFlexGroup>
               }
               helpText={
-                isFleetReady && selectedPolicyId && !isLoadingSelectedAgentPolicy ? (
+                isFleetReady && selectedPolicyIds.length > 0 && !isLoadingSelectedAgentPolicy ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
-                    defaultMessage="{count, plural, one {# agent is} other {# agents are}} enrolled with the selected agent policy."
+                    defaultMessage="{count, plural, one {# agent is} other {# agents are}} enrolled with the selected agent policies."
                     values={{
-                      count: selectedAgentPolicy?.agents ?? 0,
+                      count: selectedAgentPolicies.reduce(
+                        (acc, curr) => acc + (curr.agents ?? 0),
+                        0
+                      ),
                     }}
                   />
                 ) : null
               }
               isInvalid={Boolean(
-                !selectedPolicyId ||
+                selectedPolicyIds.length === 0 ||
                   !packageInfo ||
-                  (selectedAgentPolicy &&
-                    doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo))
+                  selectedAgentPolicies.every((selectedAgentPolicy) =>
+                    doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo)
+                  )
               )}
               error={
-                !selectedPolicyId ? (
+                selectedPolicyIds.length === 0 ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.noPolicySelectedError"
                     defaultMessage="An agent policy is required."
@@ -326,21 +415,30 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 )
               }
             >
-              <EuiSuperSelect
-                placeholder={i18n.translate(
-                  'xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyPlaceholderText',
-                  {
-                    defaultMessage: 'Select an agent policy to add this integration to',
-                  }
-                )}
-                fullWidth
-                isLoading={isLoading || !packageInfo || isLoadingSelectedAgentPolicy}
-                options={agentPolicyOptions}
-                valueOfSelected={selectedPolicyId}
-                onChange={onChange}
-                data-test-subj="agentPolicySelect"
-                aria-label="Select Agent Policy"
-              />
+              {enableReusableIntegrationPolicies ? (
+                <AgentPolicyMultiSelect
+                  isLoading={isLoading || !packageInfo || isLoadingSelectedAgentPolicy}
+                  selectedPolicyIds={selectedPolicyIds}
+                  setSelectedPolicyIds={setSelectedPolicyIds}
+                  agentPolicyMultiOptions={agentPolicyMultiOptions}
+                />
+              ) : (
+                <EuiSuperSelect
+                  placeholder={i18n.translate(
+                    'xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyPlaceholderText',
+                    {
+                      defaultMessage: 'Select an agent policy to add this integration to',
+                    }
+                  )}
+                  fullWidth
+                  isLoading={isLoading || !packageInfo || isLoadingSelectedAgentPolicy}
+                  options={agentPolicyOptions}
+                  valueOfSelected={selectedPolicyIds[0]}
+                  onChange={onChange}
+                  data-test-subj="agentPolicySelect"
+                  aria-label="Select Agent Policy"
+                />
+              )}
             </AgentPolicyFormRow>
           </EuiDescribedFormGroup>
         </EuiFlexItem>

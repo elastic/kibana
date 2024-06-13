@@ -35,6 +35,7 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
     package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
+    policy_ids: ['5347cd10-0368-11ed-8df7-a7424c6f5167'],
     inputs: [
       getHttpInput(props),
       {
@@ -565,6 +566,7 @@ export const ignoreTestFields = [
   'updated_at',
   'updated_by',
   'policy_id',
+  'policy_ids',
   'version',
   'revision',
 ];
