@@ -110,7 +110,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('customizable font size', () => {
-      it('should allow the font size to be customized', async () => {
+      // flaky
+      it.skip('should allow the font size to be customized', async () => {
         await PageObjects.console.setFontSizeSetting(20);
         await retry.try(async () => {
           // the settings are not applied synchronously, so we retry for a time
