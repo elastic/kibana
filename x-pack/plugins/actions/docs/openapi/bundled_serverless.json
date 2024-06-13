@@ -4358,7 +4358,9 @@
         "enum": [
           "alerting",
           "cases",
-          "generativeAI",
+          "generativeAIForSecurity",
+          "generativeAIForObservability",
+          "generativeAIForSearchPlayground",
           "siem",
           "uptime"
         ]
@@ -4598,7 +4600,9 @@
             "enabled_in_license": true,
             "minimum_license_required": "enterprise",
             "supported_feature_ids": [
-              "generativeAI"
+              "generativeAIForSecurity",
+              "generativeAIForObservability",
+              "generativeAIForSearchPlayground"
             ],
             "is_system_action_type": false
           },
@@ -4610,7 +4614,9 @@
             "enabled_in_license": true,
             "minimum_license_required": "enterprise",
             "supported_feature_ids": [
-              "generativeAI"
+              "generativeAIForSecurity",
+              "generativeAIForObservability",
+              "generativeAIForSearchPlayground"
             ],
             "is_system_action_type": false
           },
@@ -4622,7 +4628,7 @@
             "enabled_in_license": true,
             "minimum_license_required": "enterprise",
             "supported_feature_ids": [
-              "generativeAI"
+              "generativeAIForSecurity"
             ],
             "is_system_action_type": false
           }
