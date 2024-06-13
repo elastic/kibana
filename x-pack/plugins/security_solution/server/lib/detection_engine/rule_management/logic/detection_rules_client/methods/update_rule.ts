@@ -59,7 +59,7 @@ export const updateRule = async (
     ruleUpdate.enabled
   );
 
-  /* Trying to convert the rule to a RuleResponse object */
+  /* Trying to convert the internal rule to a RuleResponse object */
   const parseResult = RuleResponse.safeParse(transform({ ...updatedInternalRule, enabled }));
 
   if (!parseResult.success) {

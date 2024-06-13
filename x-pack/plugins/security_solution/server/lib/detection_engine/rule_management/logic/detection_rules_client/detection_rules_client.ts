@@ -47,13 +47,13 @@ export const createDetectionRulesClient = (
     });
   },
 
-  async updateRule(args: UpdateRuleArgs): Promise<RuleAlertType> {
+  async updateRule(args: UpdateRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.updateRule', async () => {
       return updateRule(rulesClient, args, mlAuthz);
     });
   },
 
-  async patchRule(args: PatchRuleArgs): Promise<RuleAlertType> {
+  async patchRule(args: PatchRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.patchRule', async () => {
       return patchRule(rulesClient, args, mlAuthz);
     });

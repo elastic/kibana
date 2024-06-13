@@ -20,7 +20,7 @@ export interface IDetectionRulesClient {
   createCustomRule: (args: CreateCustomRuleArgs) => Promise<RuleResponse>;
   createPrebuiltRule: (args: CreatePrebuiltRuleArgs) => Promise<RuleResponse>;
   updateRule: (args: UpdateRuleArgs) => Promise<RuleResponse>;
-  patchRule: (args: PatchRuleArgs) => Promise<RuleAlertType>;
+  patchRule: (args: PatchRuleArgs) => Promise<RuleResponse>;
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleAlertType>;
   importRule: (args: ImportRuleArgs) => Promise<RuleAlertType>;
