@@ -226,12 +226,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
           <EuiTitle>
             <h3>{NOTES}</h3>
           </EuiTitle>
-          <NotePreviews
-            eventIdToNoteIds={eventIdToNoteIds}
-            notes={notes}
-            timelineId={timelineId}
-            showTimelineDescription
-          />
+          <NotePreviews notes={notes} timelineId={timelineId} showTimelineDescription />
           <EuiSpacer size="s" />
           {!isImmutable && kibanaSecuritySolutionsPrivileges.crud === true && (
             <AddNote

@@ -142,6 +142,8 @@ export interface TimelineModel {
   isDataProviderVisible: boolean;
   /** used to mark the timeline as unsaved in the UI */
   changed?: boolean;
+  /** the note id pending deletion */
+  confirmingNoteId?: string | null;
 }
 
 export type SubsetTimelineModel = Readonly<
