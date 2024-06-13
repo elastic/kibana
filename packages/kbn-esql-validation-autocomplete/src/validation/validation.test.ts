@@ -2690,6 +2690,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort coalesce(numberField)', []);
         testErrorsAndWarnings('from a_index | eval coalesce(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval coalesce(nullVar)', []);
+        testErrorsAndWarnings('from a_index | sort coalesce(booleanField)', []);
       });
 
       describe('concat', () => {
@@ -5077,6 +5078,33 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | eval mv_zip(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_zip(nullVar, nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = mv_zip(to_string(true), to_string(true))', []);
+        testErrorsAndWarnings(
+          'from a_index | where length(mv_zip(stringField, stringField)) > 0',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where length(mv_zip(booleanField, booleanField)) > 0',
+          [
+            'Argument of [mv_zip] must be [string], found value [booleanField] type [boolean]',
+            'Argument of [mv_zip] must be [string], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = mv_zip(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_zip(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval mv_zip(booleanField, booleanField)', [
+          'Argument of [mv_zip] must be [string], found value [booleanField] type [boolean]',
+          'Argument of [mv_zip] must be [string], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort mv_zip(stringField, stringField)', []);
       });
 
       describe('now', () => {
@@ -10333,6 +10361,51 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_append(booleanField, booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_append(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_append(nullVar, nullVar)', []);
+      });
+
+      describe('repeat', () => {
+        testErrorsAndWarnings('row var = repeat("a", 5)', []);
+        testErrorsAndWarnings('row repeat("a", 5)', []);
+        testErrorsAndWarnings('row var = repeat(to_string(true), to_integer(true))', []);
+
+        testErrorsAndWarnings('row var = repeat(true, true)', [
+          'Argument of [repeat] must be [string], found value [true] type [boolean]',
+          'Argument of [repeat] must be [number], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | where length(repeat(stringField, numberField)) > 0',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where length(repeat(booleanField, booleanField)) > 0',
+          [
+            'Argument of [repeat] must be [string], found value [booleanField] type [boolean]',
+            'Argument of [repeat] must be [number], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = repeat(stringField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval repeat(stringField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = repeat(to_string(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval repeat(booleanField, booleanField)', [
+          'Argument of [repeat] must be [string], found value [booleanField] type [boolean]',
+          'Argument of [repeat] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval repeat(stringField, numberField, extraArg)', [
+          'Error: [repeat] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort repeat(stringField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval repeat(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval repeat(nullVar, nullVar)', []);
       });
     });
   });
