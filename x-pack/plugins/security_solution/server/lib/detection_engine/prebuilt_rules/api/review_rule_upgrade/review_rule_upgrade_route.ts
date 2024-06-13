@@ -123,12 +123,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,
-          (fieldDiff) =>
-            fieldDiff.has_update ||
-            fieldDiff.has_conflict ||
-            // For full transparency we display all user-customized fields, even if nothing changes in the field's target or merged versions
-            fieldDiff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueNoUpdate ||
-            fieldDiff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueSameUpdate
+          (fieldDiff) => fieldDiff.diff_outcome !== ThreeWayDiffOutcome.StockValueNoUpdate
         ),
         has_conflict: ruleDiff.has_conflict,
       },
