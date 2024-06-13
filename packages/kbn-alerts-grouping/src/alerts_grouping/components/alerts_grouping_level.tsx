@@ -111,7 +111,7 @@ export const AlertsGroupingLevel = memo(
     }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
     // Create a unique, but stable (across re-renders) value
-    const uniqueValue = useMemo(() => `SuperUniqueValue-${uuidv4()}`, []);
+    const uniqueValue = useMemo(() => `alerts-grouping-level-${uuidv4()}`, []);
 
     const queryGroups = useMemo(() => {
       return getAlertsGroupingQuery({
