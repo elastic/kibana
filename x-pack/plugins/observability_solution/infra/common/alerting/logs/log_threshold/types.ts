@@ -406,8 +406,3 @@ export interface ExecutionTimeRange {
   gte?: number;
   lte: number;
 }
-
-export interface Group {
-  field: string;
-  value: string;
-}

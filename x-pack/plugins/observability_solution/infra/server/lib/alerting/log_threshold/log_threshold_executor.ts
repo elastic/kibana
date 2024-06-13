@@ -54,7 +54,6 @@ import {
   UngroupedSearchQueryResponseRT,
   ExecutionTimeRange,
   Criterion,
-  Group,
 } from '../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
@@ -78,6 +77,7 @@ import {
   LogThresholdRuleTypeParams,
   positiveComparators,
 } from '../../../../common/alerting/logs/log_threshold/query_helpers';
+import { Group } from '../../../../common/alerting/types';
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
 export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
