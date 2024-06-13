@@ -155,6 +155,7 @@ export const usePollApi = ({
 };
 
 export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {
+  canceled: 'canceled',
   failed: 'failed',
   running: 'running',
   succeeded: 'succeeded',

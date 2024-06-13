@@ -36,6 +36,7 @@ export const getMockUseAttackDiscoveriesWithCachedAttackDiscoveries = (
     },
   ],
   fetchAttackDiscoveries,
+  onCancel: jest.fn(),
   attackDiscoveries: [
     {
       timestamp: new Date('2024-04-15T15:11:24.906Z').toISOString(),
@@ -182,6 +183,7 @@ export const getMockUseAttackDiscoveriesWithNoAttackDiscoveriesLoading = (
   alertsContextCount: null,
   approximateFutureTime: new Date('2024-04-15T17:13:29.470Z'), // <-- estimated generation completion time
   fetchAttackDiscoveries,
+  onCancel: jest.fn(),
   generationIntervals: undefined,
   attackDiscoveries: [],
   failureReason: null,
