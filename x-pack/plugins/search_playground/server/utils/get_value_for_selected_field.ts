@@ -7,6 +7,17 @@
 
 import { get } from 'lodash';
 
-export const getValueForSelectedField = (source: unknown, path: string): string => {
-  return get(source, path, '');
+export const getValueForSelectedField = (hit: any, path: string): string => {
+  if (!hit) {
+    return '';
+  }
+
+  // for semantic_text matches
+  if (!!hit.inner_hits[`${path}.inference.chunks`]) {
+    return hit.inner_hits[`${path}.inference.chunks`].hits.hits
+      .map((innerHit: any) => innerHit._source.text)
+      .join('\n --- \n');
+  }
+
+  return get(hit._source, path, '');
 };

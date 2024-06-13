@@ -185,7 +185,7 @@ export const parseFieldsCapabilities = (
           inferenceId: mappingProperties[field]?.inference_id,
           embeddingType:
             // @ts-ignore
-            mappingProperties[field].model_settings.task_type === 'sparse_embedding'
+            mappingProperties[field]?.model_settings?.task_type === 'sparse_embedding'
               ? 'sparse_vector'
               : 'dense_vector',
         };

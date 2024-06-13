@@ -17,6 +17,7 @@ interface SemanticField {
   field: string;
   inferenceId: string;
   embeddingType: 'sparse_vector' | 'dense_vector';
+  indices: string[];
 }
 
 export interface QuerySourceFields {
