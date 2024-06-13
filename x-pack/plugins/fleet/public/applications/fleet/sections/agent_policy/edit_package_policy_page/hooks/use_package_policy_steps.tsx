@@ -13,6 +13,7 @@ import type { EuiStepProps } from '@elastic/eui';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services';
 
 import type { AgentPolicy, NewAgentPolicy, NewPackagePolicy } from '../../../../../../../common';
+import { FLEET_ELASTIC_AGENT_PACKAGE, FLEET_SYSTEM_PACKAGE } from '../../../../../../../common';
 
 import { SelectedPolicyTab, StepSelectHosts } from '../../create_package_policy_page/components';
 import type { PackageInfo } from '../../../../types';
@@ -22,6 +23,8 @@ import {
   useSetupTechnology,
 } from '../../create_package_policy_page/single_page_layout/hooks';
 import { agentPolicyFormValidation } from '../../components';
+import { sendBulkInstallPackages } from '../../../../hooks';
+import { createAgentPolicy } from '../../create_package_policy_page/single_page_layout/hooks/form';
 
 interface Params {
   configureStep: React.ReactNode;
@@ -201,8 +204,37 @@ export function usePackagePolicySteps({
     packagePolicyId,
   });
 
+  const createAgentPolicyIfNeeded = async (): Promise<string | undefined> => {
+    if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+      if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
+        const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
+        // skip preinstall of input package, to be able to rollback when package policy creation fails
+        if (packageInfo && packageInfo.type !== 'input') {
+          packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
+        }
+        if (withSysMonitoring) {
+          packagesToPreinstall.push(FLEET_SYSTEM_PACKAGE);
+        }
+        if (newAgentPolicy.monitoring_enabled?.length ?? 0 > 0) {
+          packagesToPreinstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
+        }
+
+        if (packagesToPreinstall.length > 0) {
+          await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
+        }
+      }
+      const createdPolicy = await createAgentPolicy({
+        newAgentPolicy,
+        packagePolicy,
+        withSysMonitoring,
+      });
+      return createdPolicy.id;
+    }
+  };
+
   return {
     steps,
     devToolsProps,
+    createAgentPolicyIfNeeded,
   };
 }

@@ -221,9 +221,26 @@ export const EditPackagePolicyForm = memo<{
       setFormState('CONFIRM');
       return;
     }
-    // TODO create new agent policy if selectedPolicyTab === SelectedPolicyTab.NEW
 
-    const { error } = await savePackagePolicy();
+    let newPolicyId;
+    try {
+      setFormState('LOADING');
+      newPolicyId = await createAgentPolicyIfNeeded();
+    } catch (e) {
+      setFormState('VALID');
+      notifications.toasts.addError(e, {
+        title: i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+          defaultMessage: 'Unable to create agent policy',
+        }),
+      });
+      return;
+    }
+
+    const { error } = await savePackagePolicy({
+      policy_ids: newPolicyId
+        ? [...packagePolicy.policy_ids, newPolicyId]
+        : packagePolicy.policy_ids,
+    });
     if (!error) {
       setIsEdited(false);
       application.navigateToUrl(successRedirectPath);
@@ -411,6 +428,7 @@ export const EditPackagePolicyForm = memo<{
   const {
     steps,
     devToolsProps: { devtoolRequest, devtoolRequestDescription, showDevtoolsRequest },
+    createAgentPolicyIfNeeded,
   } = usePackagePolicySteps({
     configureStep: replaceConfigurePackage || configurePackage,
     packageInfo,

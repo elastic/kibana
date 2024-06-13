@@ -49,7 +49,7 @@ import {
 
 import { useAgentless } from './setup_technology';
 
-async function createAgentPolicy({
+export async function createAgentPolicy({
   packagePolicy,
   newAgentPolicy,
   withSysMonitoring,

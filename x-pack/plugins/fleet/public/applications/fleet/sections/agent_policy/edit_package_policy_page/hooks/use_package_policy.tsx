@@ -94,11 +94,14 @@ export function usePackagePolicyWithRelatedData(
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const savePackagePolicy = async () => {
+  const savePackagePolicy = async (packagePolicyOverride?: Partial<PackagePolicy>) => {
     setFormState('LOADING');
     const {
       policy: { elasticsearch, ...restPackagePolicy },
-    } = await prepareInputPackagePolicyDataset(packagePolicy);
+    } = await prepareInputPackagePolicyDataset({
+      ...packagePolicy,
+      ...(packagePolicyOverride ?? {}),
+    });
     const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
 
     setFormState('SUBMITTED');
