@@ -6,7 +6,7 @@ describe('calculateAverageMetrics', () => {
       {
         agentName: 'nodejs',
         dataStreams: ['foo', 'bar'],
-        environments: ['env-service-1', 'env-service-2'],
+        environments: [],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: [
           {
@@ -29,7 +29,7 @@ describe('calculateAverageMetrics', () => {
       {
         agentName: 'java',
         dataStreams: ['baz'],
-        environments: ['env-service-3', 'env-service-4'],
+        environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: [
           {
@@ -57,7 +57,7 @@ describe('calculateAverageMetrics', () => {
       {
         agentName: 'nodejs',
         dataStreams: ['foo', 'bar'],
-        environments: ['env-service-1', 'env-service-2'],
+        environments: [],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: {
           failedTransactionRate: 7.5,
@@ -71,7 +71,7 @@ describe('calculateAverageMetrics', () => {
       {
         agentName: 'java',
         dataStreams: ['baz'],
-        environments: ['env-service-3', 'env-service-4'],
+        environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: {
           failedTransactionRate: 10,
@@ -121,7 +121,7 @@ describe('calculateAverageMetrics', () => {
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: {
           failedTransactionRate: 7.5,
-          latency: null,
+          latency: 0,
           logErrorRate: 7.5,
           logRatePerMinute: 7.5,
           throughput: 7.5,

@@ -41,6 +41,7 @@ export async function getServiceEntities({
         size: MAX_NUMBER_OF_SERVICES,
       });
 
+      console.log(entities);
       return calculateAvgMetrics(mergeEntities({ entities }));
     } catch (error) {
       // If the index does not exist, handle it gracefully

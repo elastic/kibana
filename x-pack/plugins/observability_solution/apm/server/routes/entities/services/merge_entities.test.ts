@@ -23,7 +23,7 @@ describe('mergeEntities', () => {
             failedTransactionRate: 0.3333333333333333,
             latency: 10,
           },
-          identity: { service: { name: 'service-1', environment: 'test' } },
+          identityFields: { service: { name: 'service-1', environment: 'test' } },
           id: 'service-1:test',
         },
       },
@@ -65,7 +65,7 @@ describe('mergeEntities', () => {
             latency: 10,
           },
 
-          identity: { service: { name: 'apm-only-1', environment: 'env-service-1' } },
+          identityFields: { service: { name: 'apm-only-1', environment: 'env-service-1' } },
           id: 'service-1:env-service-1',
         },
       },
@@ -82,8 +82,7 @@ describe('mergeEntities', () => {
             failedTransactionRate: 10,
             latency: 10,
           },
-
-          identity: { service: { name: 'service-1', environment: 'env-service-2' } },
+          identityFields: { service: { name: 'service-1', environment: 'env-service-2' } },
           id: 'apm-only-1:synthtrace-env-2',
         },
       },
@@ -100,8 +99,7 @@ describe('mergeEntities', () => {
             failedTransactionRate: 15,
             latency: 15,
           },
-
-          identity: { service: { name: 'service-2', environment: 'env-service-3' } },
+          identityFields: { service: { name: 'service-2', environment: 'env-service-3' } },
           id: 'service-2:env-service-3',
         },
       },
@@ -118,8 +116,7 @@ describe('mergeEntities', () => {
             failedTransactionRate: 5,
             latency: 5,
           },
-
-          identity: { service: { name: 'service-2', environment: 'env-service-4' } },
+          identityFields: { service: { name: 'service-2', environment: 'env-service-4' } },
           id: 'service-2:env-service-3',
         },
       },
@@ -175,92 +172,299 @@ describe('mergeEntities', () => {
       },
     ]);
   });
-});
-it('handles duplicate environments and data streams', () => {
-  const entities = [
-    {
-      serviceName: 'service-1',
-      agentName: 'nodejs',
-      dataStreams: ['metrics', 'logs'],
-      entity: {
-        latestTimestamp: '2024-06-05T10:34:40.810Z',
-        metrics: {
-          logRatePerMinute: 5,
-          logErrorRate: 5,
-          throughput: 5,
-          failedTransactionRate: 5,
-          latency: 5,
+  it('handles duplicate environments and data streams', () => {
+    const entities = [
+      {
+        serviceName: 'service-1',
+        agentName: 'nodejs',
+        dataStreams: ['metrics', 'logs'],
+        entity: {
+          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          metrics: {
+            logRatePerMinute: 5,
+            logErrorRate: 5,
+            throughput: 5,
+            failedTransactionRate: 5,
+            latency: 5,
+          },
+          identityFields: { service: { name: 'service-1', environment: 'test' } },
+          id: 'service-1:test',
         },
-        identity: { service: { name: 'service-1', environment: 'test' } },
-        id: 'service-1:test',
       },
-    },
-    {
-      serviceName: 'service-1',
-      agentName: 'nodejs',
-      dataStreams: ['metrics', 'logs'],
-      entity: {
-        latestTimestamp: '2024-06-05T10:34:40.810Z',
-        metrics: {
-          logRatePerMinute: 10,
-          logErrorRate: 10,
-          throughput: 10,
-          failedTransactionRate: 0.3333333333333333,
-          latency: 10,
+      {
+        serviceName: 'service-1',
+        agentName: 'nodejs',
+        dataStreams: ['metrics', 'logs'],
+        entity: {
+          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          metrics: {
+            logRatePerMinute: 10,
+            logErrorRate: 10,
+            throughput: 10,
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+          },
+          identityFields: { service: { name: 'service-1', environment: 'test' } },
+          id: 'service-1:test',
         },
-        identity: { service: { name: 'service-1', environment: 'test' } },
-        id: 'service-1:test',
       },
-    },
-    {
-      serviceName: 'service-1',
-      agentName: 'nodejs',
-      dataStreams: ['foo'],
-      entity: {
+      {
+        serviceName: 'service-1',
+        agentName: 'nodejs',
+        dataStreams: ['foo'],
+        entity: {
+          latestTimestamp: '2024-23-05T10:34:40.810Z',
+          metrics: {
+            logRatePerMinute: 0.333,
+            logErrorRate: 0.333,
+            throughput: 0.333,
+            failedTransactionRate: 0.333,
+            latency: 0.333,
+          },
+          identityFields: { service: { name: 'service-1', environment: 'prod' } },
+          id: 'service-1:prod',
+        },
+      },
+    ];
+    const result = mergeEntities({ entities });
+    expect(result).toEqual([
+      {
+        agentName: 'nodejs',
+        dataStreams: ['metrics', 'logs', 'foo'],
+        environments: ['test', 'prod'],
         latestTimestamp: '2024-23-05T10:34:40.810Z',
-        metrics: {
-          logRatePerMinute: 0.333,
-          logErrorRate: 0.333,
-          throughput: 0.333,
-          failedTransactionRate: 0.333,
-          latency: 0.333,
-        },
-        identity: { service: { name: 'service-1', environment: 'prod' } },
-        id: 'service-1:prod',
+        metrics: [
+          {
+            failedTransactionRate: 5,
+            latency: 5,
+            logErrorRate: 5,
+            logRatePerMinute: 5,
+            throughput: 5,
+          },
+          {
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+            logErrorRate: 10,
+            logRatePerMinute: 10,
+            throughput: 10,
+          },
+          {
+            failedTransactionRate: 0.333,
+            latency: 0.333,
+            logErrorRate: 0.333,
+            logRatePerMinute: 0.333,
+            throughput: 0.333,
+          },
+        ],
+        serviceName: 'service-1',
       },
-    },
-  ];
-  const result = mergeEntities({ entities });
-  expect(result).toEqual([
-    {
-      agentName: 'nodejs',
-      dataStreams: ['metrics', 'logs', 'foo'],
-      environments: ['test', 'prod'],
-      latestTimestamp: '2024-23-05T10:34:40.810Z',
-      metrics: [
-        {
-          failedTransactionRate: 5,
-          latency: 5,
-          logErrorRate: 5,
-          logRatePerMinute: 5,
-          throughput: 5,
+    ]);
+  });
+  it('handles null environment', () => {
+    const entity = [
+      {
+        serviceName: 'service-1',
+        agentName: 'nodejs',
+        dataStreams: [],
+        entity: {
+          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          metrics: {
+            logRatePerMinute: 1,
+            logErrorRate: null,
+            throughput: 0,
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+          },
+          identityFields: { service: { name: 'service-1', environment: null } },
+          id: 'service-1:test',
         },
-        {
-          failedTransactionRate: 0.3333333333333333,
-          latency: 10,
-          logErrorRate: 10,
-          logRatePerMinute: 10,
-          throughput: 10,
+      },
+    ];
+    const entityResult = mergeEntities({ entities: entity });
+    expect(entityResult).toEqual([
+      {
+        agentName: 'nodejs',
+        dataStreams: [],
+        environments: [],
+        latestTimestamp: '2024-06-05T10:34:40.810Z',
+        metrics: [
+          {
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+            logErrorRate: null,
+            logRatePerMinute: 1,
+            throughput: 0,
+          },
+        ],
+        serviceName: 'service-1',
+      },
+    ]);
+
+    const entities = [
+      {
+        serviceName: 'service-1',
+        agentName: 'nodejs',
+        dataStreams: [],
+        entity: {
+          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          metrics: {
+            logRatePerMinute: 1,
+            logErrorRate: null,
+            throughput: 0,
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+          },
+          identityFields: { service: { name: 'service-1', environment: null } },
+          id: 'service-1:test',
         },
-        {
-          failedTransactionRate: 0.333,
-          latency: 0.333,
-          logErrorRate: 0.333,
-          logRatePerMinute: 0.333,
-          throughput: 0.333,
+      },
+      {
+        serviceName: 'service-1',
+        agentName: 'nodejs',
+        dataStreams: [],
+        entity: {
+          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          metrics: {
+            logRatePerMinute: 1,
+            logErrorRate: null,
+            throughput: 0,
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+          },
+          identityFields: { service: { name: 'service-1', environment: null } },
+          id: 'service-1:test',
         },
-      ],
-      serviceName: 'service-1',
-    },
-  ]);
+      },
+    ];
+    const result = mergeEntities({ entities });
+    expect(result).toEqual([
+      {
+        agentName: 'nodejs',
+        dataStreams: [],
+        environments: [],
+        latestTimestamp: '2024-06-05T10:34:40.810Z',
+        metrics: [
+          {
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+            logErrorRate: null,
+            logRatePerMinute: 1,
+            throughput: 0,
+          },
+          {
+            logRatePerMinute: 1,
+            logErrorRate: null,
+            throughput: 0,
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+          },
+        ],
+        serviceName: 'service-1',
+      },
+    ]);
+  });
+
+  it('handles undefined environment', () => {
+    const entity = [
+      {
+        serviceName: 'service-1',
+        agentName: 'nodejs',
+        dataStreams: [],
+        entity: {
+          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          metrics: {
+            logRatePerMinute: 1,
+            logErrorRate: null,
+            throughput: 0,
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+          },
+          identityFields: { service: { name: 'service-1' } },
+          id: 'service-1:test',
+        },
+      },
+    ];
+    const entityResult = mergeEntities({ entities: entity });
+    expect(entityResult).toEqual([
+      {
+        agentName: 'nodejs',
+        dataStreams: [],
+        environments: [],
+        latestTimestamp: '2024-06-05T10:34:40.810Z',
+        metrics: [
+          {
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+            logErrorRate: null,
+            logRatePerMinute: 1,
+            throughput: 0,
+          },
+        ],
+        serviceName: 'service-1',
+      },
+    ]);
+
+    const entities = [
+      {
+        serviceName: 'service-1',
+        agentName: 'nodejs',
+        dataStreams: [],
+        entity: {
+          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          metrics: {
+            logRatePerMinute: 1,
+            logErrorRate: null,
+            throughput: 0,
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+          },
+          identityFields: { service: { name: 'service-1' } },
+          id: 'service-1:test',
+        },
+      },
+      {
+        serviceName: 'service-1',
+        agentName: 'nodejs',
+        dataStreams: [],
+        entity: {
+          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          metrics: {
+            logRatePerMinute: 1,
+            logErrorRate: null,
+            throughput: 0,
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+          },
+          identityFields: { service: { name: 'service-1' } },
+          id: 'service-1:test',
+        },
+      },
+    ];
+    const result = mergeEntities({ entities });
+    expect(result).toEqual([
+      {
+        agentName: 'nodejs',
+        dataStreams: [],
+        environments: [],
+        latestTimestamp: '2024-06-05T10:34:40.810Z',
+        metrics: [
+          {
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+            logErrorRate: null,
+            logRatePerMinute: 1,
+            throughput: 0,
+          },
+          {
+            logRatePerMinute: 1,
+            logErrorRate: null,
+            throughput: 0,
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+          },
+        ],
+        serviceName: 'service-1',
+      },
+    ]);
+  });
 });

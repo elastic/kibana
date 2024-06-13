@@ -38,7 +38,7 @@ interface Entity {
   identityFields: {
     service: {
       name: string;
-      environment?: string;
+      environment?: string | null;
     };
   };
   metrics: EntityMetrics;
