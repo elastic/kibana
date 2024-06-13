@@ -71,12 +71,12 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return servicesWithIconsAndNames;
     },
 
-    async clickOverviewLinkToAlerts() {
-      return testSubjects.click('infraAssetDetailsAlertsShowAllButton');
+    async overviewLinkToAlertsExist() {
+      return testSubjects.existOrFail('infraAssetDetailsAlertsTabAlertsShowAllButton');
     },
 
-    async clickOverviewOpenAlertsFlyout() {
-      return testSubjects.click('infraAssetDetailsCreateAlertsRuleButton');
+    async overviewOpenAlertsFlyoutExist() {
+      return testSubjects.existOrFail('infraAssetDetailsAlertsTabCreateAlertsRuleButton');
     },
 
     async clickShowAllMetadataOverviewTab() {
