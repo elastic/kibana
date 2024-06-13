@@ -32,6 +32,10 @@ export const esqlToKibanaType = (elasticsearchType: string) => {
     return 'date';
   }
 
+  if (elasticsearchType === 'bool') {
+    return 'boolean';
+  }
+
   if (elasticsearchType === 'date_period') {
     return 'time_literal'; // TODO - consider aligning with Elasticsearch
   }

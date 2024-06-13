@@ -1962,7 +1962,8 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval trim(23::string)', []);
       testErrorsAndWarnings('from a_index | eval 1 + "2"::long', []);
       testErrorsAndWarnings('from a_index | eval 1 + "2"', [
-        'Argument of [+] must be [number], found value ["2"] type [string]', // just a counter-case to make sure the previous test is meaningful
+        // just a counter-case to make sure the previous test is meaningful
+        'Argument of [+] must be [number], found value ["2"] type [string]',
       ]);
       testErrorsAndWarnings(
         'from a_index | eval trim(to_double("23")::string::double::long::string::double)',
@@ -1971,7 +1972,7 @@ describe('validation logic', () => {
         ]
       );
 
-      // accepts elasticsearch subtypes like int and keyword
+      // accepts elasticsearch subtypes and type aliases like int and keyword
       // (once https://github.com/elastic/kibana/issues/174710 is done this won't be a special case anymore)
       testErrorsAndWarnings('from a_index | eval CEIL(23::long)', []);
       testErrorsAndWarnings('from a_index | eval CEIL(23::unsigned_long)', []);
@@ -1982,6 +1983,13 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval TRIM(23::string)', []);
       testErrorsAndWarnings('from a_index | eval TRIM(23::text)', []);
       testErrorsAndWarnings('from a_index | eval TRIM(23::keyword)', []);
+
+      testErrorsAndWarnings('from a_index | eval true AND "false"::boolean', []);
+      testErrorsAndWarnings('from a_index | eval true AND "false"::bool', []);
+      testErrorsAndWarnings('from a_index | eval true AND "false"', [
+        // just a counter-case to make sure the previous tests are meaningful
+        'Argument of [and] must be [boolean], found value ["false"] type [string]',
+      ]);
 
       // enforces strings for cartesian_point conversion
       // testErrorsAndWarnings('from a_index | eval 23::cartesian_point', ['wrong type!']);

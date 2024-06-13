@@ -8973,13 +8973,15 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval 1 + \"2\"",
+      "query": "from a_index | eval 1 + \"2\"::long",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval 1 + \"2\"::long",
-      "error": [],
+      "query": "from a_index | eval 1 + \"2\"",
+      "error": [
+        "Argument of [+] must be [number], found value [\"2\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -9027,6 +9029,23 @@
     {
       "query": "from a_index | eval TRIM(23::keyword)",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval true AND \"false\"::boolean",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval true AND \"false\"::bool",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval true AND \"false\"",
+      "error": [
+        "Argument of [and] must be [boolean], found value [\"false\"] type [string]"
+      ],
       "warning": []
     },
     {
