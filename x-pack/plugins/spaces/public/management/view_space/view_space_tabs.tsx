@@ -61,7 +61,7 @@ export const getTabs = (space: Space, features: KibanaFeature[], roles: Role[]):
           {roles.length}
         </EuiNotificationBadge>
       ),
-      content: <ViewSpaceAssignedRoles space={space} roles={roles} />,
+      content: <ViewSpaceAssignedRoles space={space} roles={roles} features={features} />,
     },
   ];
 };

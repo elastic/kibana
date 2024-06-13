@@ -5,35 +5,60 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
+  EuiComboBox,
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
   EuiText,
   EuiTitle,
+} from '@elastic/eui';
+import type {
+  EuiBasicTableColumn,
+  EuiComboBoxOptionOption,
+  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
 
+import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Role } from '@kbn/security-plugin-types-common';
 
 import type { Space } from '../../../common';
+import { FeatureTable } from '../edit_space/enabled_features/feature_table';
 
 interface Props {
   space: Space;
   roles: Role[];
+  features: KibanaFeature[];
 }
 
-export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles }) => {
+const filterRolesAssignedToSpace = (roles: Role[], space: Space) => {
+  return roles.filter((role) =>
+    role.kibana.reduce((acc, cur) => {
+      return (
+        (cur.spaces.includes(space.name) || cur.spaces.includes('*')) &&
+        Boolean(cur.base.length) &&
+        acc
+      );
+    }, true)
+  );
+};
+
+export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features }) => {
   const [showRolesPrivilegeEditor, setShowRolesPrivilegeEditor] = useState(false);
   const getRowProps = (item: Role) => {
     const { name } = item;
@@ -89,12 +114,7 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles }) => {
     },
   ];
 
-  const rolesInUse = roles.filter((role) => {
-    const privilegesSum = role.kibana.reduce((sum, privilege) => {
-      return sum + privilege.base.length;
-    }, 0);
-    return privilegesSum > 0;
-  });
+  const rolesInUse = filterRolesAssignedToSpace(roles, space);
 
   if (!rolesInUse) {
     return null;
@@ -104,6 +124,7 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles }) => {
     <>
       {showRolesPrivilegeEditor && (
         <PrivilegesRolesForm
+          features={features}
           space={space}
           roles={roles}
           closeFlyout={() => {
@@ -143,7 +164,6 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles }) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiBasicTable
-            tableCaption="Demo of EuiBasicTable"
             rowHeader="firstName"
             columns={columns}
             items={rolesInUse}
@@ -156,18 +176,103 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles }) => {
   );
 };
 
-interface PrivilegesRolesFormProps {
-  space: Space;
-  roles: Role[];
+interface PrivilegesRolesFormProps extends Props {
   closeFlyout: () => void;
   onSaveClick: () => void;
 }
 
 export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
-  const { space, roles, onSaveClick, closeFlyout } = props;
+  const { space, roles, onSaveClick, closeFlyout, features } = props;
+
+  const [selectedRoles, setSelectedRoles] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [spacePrivilege, setSpacePrivilege] = useState<'all' | 'read' | 'custom'>('all');
 
   const getForm = () => {
-    return <textarea>{JSON.stringify(roles)}</textarea>;
+    return (
+      <EuiForm component="form" fullWidth>
+        <EuiFormRow label="Select a role(s)">
+          <EuiComboBox
+            aria-label={i18n.translate('xpack.spaces.management.spaceDetails.roles.selectRoles', {
+              defaultMessage: 'Select role to assign to the {spaceName} space',
+              values: { spaceName: space.name },
+            })}
+            placeholder="Select roles"
+            options={roles.map((role) => ({
+              label: role.name,
+            }))}
+            selectedOptions={selectedRoles}
+            onChange={(value) => {
+              setSelectedRoles(value);
+            }}
+            isClearable={true}
+            data-test-subj="roleSelectionComboBox"
+            autoFocus
+            fullWidth
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          helpText={i18n.translate(
+            'xpack.spaces.management.spaceDetails.roles.assign.privilegesHelpText',
+            {
+              defaultMessage:
+                'Assign the privilege you wish to grant to all present and future features across this space',
+            }
+          )}
+        >
+          <EuiFilterGroup fullWidth>
+            <EuiFilterButton
+              hasActiveFilters={spacePrivilege === 'all'}
+              onClick={() => setSpacePrivilege('all')}
+            >
+              <FormattedMessage
+                id="xpack.spaces.management.spaceDetails.roles.assign.privileges.all"
+                defaultMessage="All"
+              />
+            </EuiFilterButton>
+            <EuiFilterButton
+              hasActiveFilters={spacePrivilege === 'read'}
+              onClick={() => setSpacePrivilege('read')}
+            >
+              <FormattedMessage
+                id="xpack.spaces.management.spaceDetails.roles.assign.privileges.read"
+                defaultMessage="Read"
+              />
+            </EuiFilterButton>
+            <EuiFilterButton
+              hasActiveFilters={spacePrivilege === 'custom'}
+              onClick={() => setSpacePrivilege('custom')}
+            >
+              <FormattedMessage
+                id="xpack.spaces.management.spaceDetails.roles.assign.privileges.customize"
+                defaultMessage="Customize"
+              />
+            </EuiFilterButton>
+          </EuiFilterGroup>
+        </EuiFormRow>
+        {spacePrivilege === 'custom' && (
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.spaces.management.spaceDetails.roles.assign.privileges.customizeLabelText',
+              { defaultMessage: 'Customize by feature' }
+            )}
+          >
+            <>
+              <EuiText size="xs">
+                <p>
+                  <FormattedMessage
+                    id="xpack.spaces.management.spaceDetails.roles.assign.privileges.customizeDescriptionText"
+                    defaultMessage="Increase privilege levels per feature basis. Some features might be hidden by the
+                  space or affected by a global space privilege"
+                  />
+                </p>
+              </EuiText>
+              <EuiSpacer />
+              <FeatureTable space={space} features={features} />
+            </>
+          </EuiFormRow>
+        )}
+      </EuiForm>
+    );
   };
 
   const getSaveButton = () => {
@@ -186,9 +291,8 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         <EuiTitle size="m">
           <h2>Assign role to {space.name}</h2>
         </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiText>
+        <EuiSpacer size="s" />
+        <EuiText size="s">
           <p>
             <FormattedMessage
               id="xpack.spaces.management.spaceDetails.privilegeForm.heading"
@@ -196,8 +300,8 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             />
           </p>
         </EuiText>
-        {getForm()}
-      </EuiFlyoutBody>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>{getForm()}</EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
