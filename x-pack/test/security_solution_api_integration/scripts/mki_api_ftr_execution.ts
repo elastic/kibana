@@ -71,9 +71,8 @@ async function parseProductTypes(log: ToolingLog): Promise<ProductType[] | undef
 
   const apiConfigs = JSON.parse(await fs.promises.readFile('./scripts/api_configs.json', 'utf8'));
   try {
-    const productTypes: ProductType[] = apiConfigs[process.env.TARGET_SCRIPT][
-      'productTypes'
-    ] as ProductType[];
+    const productTypes: ProductType[] = apiConfigs[process.env.TARGET_SCRIPT]
+      .productTypes as ProductType[];
     return productTypes && productTypes.length > 0 ? productTypes : undefined;
   } catch (err) {
     // If the configuration for the script is not needed, it can be omitted from the json file.
