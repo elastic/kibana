@@ -59,7 +59,7 @@ export const registerSyntheticsStatusCheckRule = (
 ) => {
   if (!alerting) {
     throw new Error(
-      'Cannot register the transaction error rate rule type. The alerting plugin need to be enabled.'
+      'Cannot register the synthetics monitor status rule type. The alerting plugin needs to be enabled.'
     );
   }
 
@@ -141,6 +141,7 @@ export const registerSyntheticsStatusCheckRule = (
 
         const context = {
           ...monitorSummary,
+          idWithLocation,
           errorStartedAt,
           linkMessage: monitorSummary.stateId
             ? getFullViewInAppMessage(basePath, spaceId, relativeViewInAppUrl)
