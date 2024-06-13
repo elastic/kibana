@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './src/alerts_grouping';
+export { AlertsGrouping } from './src/components/alerts_grouping';
+export { type AlertsGroupingProps } from './src/types';
+export { useAlertsGroupingState } from './src/contexts/alerts_grouping_context';
