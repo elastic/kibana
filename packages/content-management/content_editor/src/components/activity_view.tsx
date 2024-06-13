@@ -29,7 +29,11 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 
 import { Item } from '../types';
 
-export const ActivityView = ({ item }: { item: Item }) => {
+export interface ActivityViewProps {
+  item: Pick<Item, 'createdBy' | 'createdAt' | 'updatedBy' | 'updatedAt' | 'managed'>;
+}
+
+export const ActivityView = ({ item }: ActivityViewProps) => {
   const showLastUpdated = Boolean(item.updatedAt && item.updatedAt !== item.createdAt);
 
   const UnknownUserLabel = (
@@ -70,6 +74,7 @@ export const ActivityView = ({ item }: { item: Item }) => {
         </>
       }
       fullWidth
+      data-test-subj={'activityView'}
     >
       <>
         <EuiFlexGroup gutterSize={'s'}>
@@ -91,6 +96,7 @@ export const ActivityView = ({ item }: { item: Item }) => {
                 )
               }
               when={item.createdAt}
+              data-test-subj={'createdByCard'}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={1} css={{ flexBasis: '50%', minWidth: 0 }}>
@@ -113,6 +119,7 @@ export const ActivityView = ({ item }: { item: Item }) => {
                   )
                 }
                 when={item.updatedAt}
+                data-test-subj={'updatedByCard'}
               />
             )}
           </EuiFlexItem>
@@ -131,13 +138,15 @@ const ActivityCard = ({
   what,
   when,
   who,
+  'data-test-subj': dataTestSubj,
 }: {
   what: string;
   who: React.ReactNode;
   when?: string;
+  'data-test-subj'?: string;
 }) => {
   return (
-    <EuiPanel hasBorder paddingSize={'s'}>
+    <EuiPanel hasBorder paddingSize={'s'} data-test-subj={dataTestSubj}>
       <EuiText size={'s'}>
         <b>{what}</b>
       </EuiText>
