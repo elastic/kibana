@@ -34,9 +34,7 @@ export function getKibanaContext({
   >;
 }) {
   return getKibanaContextFn(async () => {
-    const [, , { get }] = await getStartServices();
-    return {
-      getSavedSearch: (id) => get(id, false),
-    };
+    const [, , { get: getSavedSearch }] = await getStartServices();
+    return { getSavedSearch };
   });
 }

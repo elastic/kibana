@@ -42,10 +42,10 @@ export type VisContextUnmapped =
 /** @internal **/
 export interface SavedSearchAttributes {
   id?: string;
-  title: string; // duplicate title??? verify this
+  title: string;
   sort: SortOrder[];
   columns: string[];
-  description: string; // duplicate description??? verify this
+  description: string;
   grid: DiscoverGridSettings;
   hideChart: boolean;
   isTextBasedQuery: boolean;
@@ -53,12 +53,11 @@ export interface SavedSearchAttributes {
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;
   };
-  viewMode?: VIEW_MODE; // do we need this?
+  viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
   headerRowHeight?: number;
 
-  // duplicate time range stuff maybe???
   timeRestore?: boolean;
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
   refreshInterval?: RefreshInterval;

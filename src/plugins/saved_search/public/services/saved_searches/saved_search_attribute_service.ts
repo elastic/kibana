@@ -51,7 +51,7 @@ export const toSavedSearch = async (
   );
 };
 
-export const splitReferences = (attributes: SavedSearchByValueAttributes) => {
+const splitReferences = (attributes: SavedSearchByValueAttributes) => {
   const { references, ...attrs } = attributes;
 
   return {

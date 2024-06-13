@@ -260,7 +260,6 @@ export const getSearchEmbeddableFactory = ({
           //   };
           // },
           hasTimeRange: () => {
-            /** TODO: Move this into the action rather than exporting it in the API */
             const fetchContext = fetchContext$.getValue();
             return fetchContext?.timeslice !== undefined || fetchContext?.timeRange !== undefined;
           },

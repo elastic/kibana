@@ -92,9 +92,7 @@ describe('GetCsvReportPanelAction', () => {
     context = {
       embeddable: {
         type: 'search',
-        getSavedSearch: () => {
-          return { searchSource: mockSearchSource };
-        },
+        savedSearch$: new BehaviorSubject({ searchSource: mockSearchSource }),
         getTitle: () => `The Dude`,
         getInspectorAdapters: () => null,
         getInput: () => ({

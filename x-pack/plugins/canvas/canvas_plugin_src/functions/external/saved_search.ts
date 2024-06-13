@@ -6,7 +6,7 @@
  */
 
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { SearchInput } from '@kbn/discover-plugin/public';
+import type { SearchEmbeddableSerializedState } from '@kbn/discover-plugin/public';
 import { SavedObjectReference } from '@kbn/core/types';
 import {
   EmbeddableTypes,
@@ -22,7 +22,7 @@ interface Arguments {
   id: string;
 }
 
-type Output = EmbeddableExpression<Partial<SearchInput> & { id: SearchInput['id'] }>;
+type Output = EmbeddableExpression<Partial<SearchEmbeddableSerializedState> & { id: string }>;
 
 export function savedSearch(): ExpressionFunctionDefinition<
   'savedSearch',

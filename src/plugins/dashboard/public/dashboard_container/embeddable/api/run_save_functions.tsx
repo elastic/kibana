@@ -14,12 +14,12 @@ import {
   isReferenceOrValueEmbeddable,
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import {
   DashboardContainerInput,
   DashboardPanelMap,

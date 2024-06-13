@@ -66,7 +66,7 @@ describe('search inject extract', () => {
         id: 'id',
         attributes: {
           references: [{ name: 'name', type: 'type', id: '1' }],
-        } as unknown as SavedSearchByValueAttributes,
+        } as SavedSearchByValueAttributes,
       };
       expect(extract(state)).toEqual({
         state,

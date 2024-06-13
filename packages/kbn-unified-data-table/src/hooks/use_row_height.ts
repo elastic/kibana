@@ -50,6 +50,7 @@ export const useRowHeight = ({
     } else {
       currentRowLines = configRowHeight;
     }
+
     return currentRowLines;
   }, [configRowHeight, consumer, key, rowHeightState, storage]);
 

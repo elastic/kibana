@@ -54,7 +54,7 @@ export function getKibanaContext(
           };
         };
 
-        return getSavedSearch(id, { searchSourceCreate, getSavedSrch }, false);
+        return getSavedSearch(id, { searchSourceCreate, getSavedSrch });
       },
     };
   });

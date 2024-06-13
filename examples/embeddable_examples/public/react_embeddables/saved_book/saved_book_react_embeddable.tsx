@@ -107,6 +107,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             );
             return { rawState: bookByReferenceState };
           },
+
           // in place library transforms
           libraryId$: savedBookId$,
           saveToLibrary: async (newTitle: string) => {

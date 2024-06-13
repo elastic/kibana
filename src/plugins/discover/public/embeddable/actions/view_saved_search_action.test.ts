@@ -22,7 +22,9 @@ const services = discoverServiceMock;
 
 const compatibleEmbeddableApi: SearchEmbeddableApi = {
   type: SEARCH_EMBEDDABLE_TYPE,
-  savedSearch$: new BehaviorSubject({} as unknown as SavedSearch),
+  savedSearch$: new BehaviorSubject({
+    searchSource: { getField: jest.fn() },
+  } as unknown as SavedSearch),
   parentApi: {
     viewMode: new BehaviorSubject('view'),
   },
