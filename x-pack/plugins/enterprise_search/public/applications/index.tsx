@@ -19,7 +19,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { AuthenticatedUser } from '@kbn/security-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
@@ -99,19 +98,6 @@ export const renderApp = (
 
   resetContext({ createStore: true });
   const store = getContext().store;
-  let user: AuthenticatedUser | null = null;
-  try {
-    security?.authc
-      .getCurrentUser()
-      .then((newUser) => {
-        user = newUser;
-      })
-      .catch(() => {
-        user = null;
-      });
-  } catch {
-    user = null;
-  }
   const indexMappingComponent = indexManagementPlugin?.getIndexMappingComponent({ history });
 
   const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
@@ -124,6 +110,7 @@ export const renderApp = (
     config,
     connectorTypes,
     console: plugins.console,
+    coreSecurity: core.security,
     data: plugins.data,
     esConfig,
     getChromeStyle$: chrome.getChromeStyle$,
@@ -148,7 +135,6 @@ export const renderApp = (
     share,
     uiSettings,
     updateSideNavDefinition,
-    user,
   });
   const unmountLicensingLogic = mountLicensingLogic({
     canManageLicense: core.application.capabilities.management?.stack?.license_management,
@@ -160,7 +146,6 @@ export const renderApp = (
     readOnlyMode,
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
-
   ReactDOM.render(
     <I18nProvider>
       <KibanaThemeProvider theme={{ theme$: params.theme$ }}>

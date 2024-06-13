@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export {
-  useLogRateAnalysisStateContext,
-  LogRateAnalysisStateProvider,
-} from './log_rate_analysis_state_provider';
-export type { GroupTableItem, GroupTableItemGroup, TableItemAction } from './types';
+import { EcsFlat } from '@elastic/ecs';
+import { EcsFieldMetadata } from './types';
+
+export const EcsFlatTyped = EcsFlat as unknown as Record<string, EcsFieldMetadata>;
+export type EcsFlatTyped = typeof EcsFlatTyped;

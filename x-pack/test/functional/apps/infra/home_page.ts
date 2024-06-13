@@ -316,6 +316,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               expect(containers.length).to.equal(chartsCount);
             });
           });
+
+          it('should show alerts', async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            await pageObjects.assetDetails.overviewAlertsTitleExists();
+            await pageObjects.assetDetails.overviewLinkToAlertsExist();
+            await pageObjects.assetDetails.overviewOpenAlertsFlyoutExist();
+          });
         });
 
         describe('Metadata Tab', () => {
