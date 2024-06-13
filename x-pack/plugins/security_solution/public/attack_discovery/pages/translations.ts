@@ -14,6 +14,13 @@ export const ERROR_GENERATING_ATTACK_DISCOVERIES = i18n.translate(
   }
 );
 
+export const ERROR_CANCELING_ATTACK_DISCOVERIES = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.errorCancelingAttackDiscoveriesToastTitle',
+  {
+    defaultMessage: 'Error canceling attack discoveries',
+  }
+);
+
 export const CONNECTOR_ERROR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.errorConnector',
   {

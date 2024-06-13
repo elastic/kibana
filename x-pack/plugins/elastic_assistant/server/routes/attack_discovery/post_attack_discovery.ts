@@ -20,8 +20,7 @@ import { ATTACK_DISCOVERY } from '../../../common/constants';
 import {
   getAssistantTool,
   getAssistantToolParams,
-  handleToolError,
-  updateAttackDiscoveries,
+  invokeAttackDiscoveryTool,
   updateAttackDiscoveryStatusToRunning,
 } from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
@@ -145,35 +144,18 @@ export const postAttackDiscoveryRoute = (
             apiConfig
           );
 
-          toolInstance
-            ?.invoke('')
-            .then((rawAttackDiscoveries) =>
-              updateAttackDiscoveries({
-                apiConfig,
-                attackDiscoveryId,
-                authenticatedUser,
-                currentAd,
-                dataClient,
-                latestReplacements,
-                rawAttackDiscoveries,
-                size,
-                startTime,
-                telemetry,
-              })
-            )
-            .catch((err) =>
-              handleToolError({
-                apiConfig,
-                attackDiscoveryId,
-                authenticatedUser,
-                backingIndex: currentAd.backingIndex,
-                dataClient,
-                err,
-                latestReplacements,
-                logger,
-                telemetry,
-              })
-            );
+          invokeAttackDiscoveryTool({
+            apiConfig,
+            attackDiscoveryId,
+            authenticatedUser,
+            dataClient,
+            latestReplacements,
+            logger,
+            size,
+            startTime,
+            telemetry,
+            toolInstance,
+          });
 
           return response.ok({
             body: currentAd,

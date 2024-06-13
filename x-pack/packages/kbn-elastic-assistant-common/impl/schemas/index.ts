@@ -25,6 +25,7 @@ export * from './common_attributes.gen';
 export * from './attack_discovery/common_attributes.gen';
 export * from './attack_discovery/get_attack_discovery_route.gen';
 export * from './attack_discovery/post_attack_discovery_route.gen';
+export * from './attack_discovery/cancel_attack_discovery_route.gen';
 
 // Evaluation Schemas
 export * from './evaluation/post_evaluate_route.gen';

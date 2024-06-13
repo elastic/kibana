@@ -6,7 +6,6 @@
  */
 import { AuthenticatedUser } from '@kbn/core-security-common';
 import moment from 'moment';
-import { waitFor } from '@testing-library/react';
 import {
   REQUIRED_FOR_ATTACK_DISCOVERY,
   addGenerationInterval,
@@ -28,6 +27,8 @@ import {
   ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
 import { coreMock } from '@kbn/core/server/mocks';
+import { transformESSearchToAttackDiscovery } from '../../ai_assistant_data_clients/attack_discovery/transforms';
+import { getAttackDiscoverySearchEsMock } from '../../__mocks__/attack_discovery_schema.mock';
 
 jest.mock('lodash/fp', () => ({
   uniq: jest.fn((arr) => Array.from(new Set(arr))),
@@ -48,14 +49,17 @@ jest.mock('../utils', () => ({
 const findAttackDiscoveryByConnectorId = jest.fn();
 const updateAttackDiscovery = jest.fn();
 const createAttackDiscovery = jest.fn();
+const getAttackDiscovery = jest.fn();
 const mockDataClient = {
   findAttackDiscoveryByConnectorId,
   updateAttackDiscovery,
   createAttackDiscovery,
+  getAttackDiscovery,
 } as unknown as AttackDiscoveryDataClient;
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();
 const mockTelemetry = coreMock.createSetup().analytics;
+const mockError = new Error('Test error');
 const mockAuthenticatedUser = {
   username: 'user',
   profile_uid: '1234',
@@ -70,9 +74,21 @@ const mockApiConfig = {
   model: 'model',
   provider: OpenAiProviderType.OpenAi,
 };
+const mockCurrentAd = transformESSearchToAttackDiscovery(getAttackDiscoverySearchEsMock())[0];
 describe('helpers', () => {
+  const date = '2024-03-28T22:27:28.000Z';
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.setSystemTime(new Date(date));
+    getAttackDiscovery.mockResolvedValue(mockCurrentAd);
+    updateAttackDiscovery.mockResolvedValue({});
   });
   describe('getAssistantToolParams', () => {
     const mockParams = {
@@ -193,76 +209,29 @@ describe('helpers', () => {
 
   describe('updateAttackDiscoveries', () => {
     const mockAttackDiscoveryId = 'attack-discovery-id';
-    const mockCurrentAd = {
-      id: 'existing-id',
-      backingIndex: 'attack-discovery-index',
-      timestamp: '2024-06-07T18:56:17.357Z',
-      createdAt: '2024-06-07T18:56:17.357Z',
-      users: [
-        {
-          id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-          name: 'elastic',
-        },
-      ],
-      apiConfig: mockApiConfig,
-      updatedAt: '2024-06-07T21:19:08.090Z',
-      replacements: {
-        'f19e1a0a-de3b-496c-8ace-dd91229e1084': 'root',
-      },
-      namespace: 'default',
-      attackDiscoveries: [],
-      status: attackDiscoveryStatus.running,
-      generationIntervals: [
-        {
-          date: '2024-06-07T21:19:08.089Z',
-          durationMs: 110906,
-        },
-        {
-          date: '2024-06-07T20:04:35.715Z',
-          durationMs: 104593,
-        },
-        {
-          date: '2024-06-07T18:58:27.880Z',
-          durationMs: 130526,
-        },
-      ],
-      alertsContextCount: 20,
-      averageIntervalMs: 115341,
-    };
     const mockLatestReplacements = {};
     const mockRawAttackDiscoveries = JSON.stringify({
       alertsContextCount: 5,
       attackDiscoveries: [{ alertIds: ['alert-1', 'alert-2'] }, { alertIds: ['alert-3'] }],
     });
     const mockSize = 10;
-    const date = '2024-03-28T22:27:28.000Z';
     const mockStartTime = moment('2024-03-28T22:25:28.000Z');
-    beforeAll(() => {
-      jest.useFakeTimers();
-    });
 
-    beforeEach(() => {
-      jest.setSystemTime(new Date(date));
-      updateAttackDiscovery.mockResolvedValue({});
-    });
-
-    afterAll(() => {
-      jest.useRealTimers();
-    });
+    const mockArgs = {
+      apiConfig: mockApiConfig,
+      attackDiscoveryId: mockAttackDiscoveryId,
+      authenticatedUser: mockAuthenticatedUser,
+      dataClient: mockDataClient,
+      latestReplacements: mockLatestReplacements,
+      logger: mockLogger,
+      rawAttackDiscoveries: mockRawAttackDiscoveries,
+      size: mockSize,
+      startTime: mockStartTime,
+      telemetry: mockTelemetry,
+    };
 
     it('should update attack discoveries and report success telemetry', async () => {
-      updateAttackDiscoveries({
-        apiConfig: mockApiConfig,
-        attackDiscoveryId: mockAttackDiscoveryId,
-        authenticatedUser: mockAuthenticatedUser,
-        currentAd: mockCurrentAd,
-        dataClient: mockDataClient,
-        latestReplacements: mockLatestReplacements,
-        rawAttackDiscoveries: mockRawAttackDiscoveries,
-        size: mockSize,
-        startTime: mockStartTime,
-        telemetry: mockTelemetry,
-      });
+      await updateAttackDiscoveries(mockArgs);
 
       expect(updateAttackDiscovery).toHaveBeenCalledWith({
         attackDiscoveryUpdateProps: {
@@ -276,17 +245,16 @@ describe('helpers', () => {
         },
         authenticatedUser: mockAuthenticatedUser,
       });
-      await waitFor(() => {
-        expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
-          actionTypeId: mockApiConfig.actionTypeId,
-          alertsContextCount: 5,
-          alertsCount: 3,
-          configuredAlertsCount: mockSize,
-          discoveriesGenerated: 2,
-          durationMs: 120000,
-          model: mockApiConfig.model,
-          provider: mockApiConfig.provider,
-        });
+
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
+        actionTypeId: mockApiConfig.actionTypeId,
+        alertsContextCount: 5,
+        alertsCount: 3,
+        configuredAlertsCount: mockSize,
+        discoveriesGenerated: 2,
+        durationMs: 120000,
+        model: mockApiConfig.model,
+        provider: mockApiConfig.provider,
       });
     });
 
@@ -296,17 +264,9 @@ describe('helpers', () => {
         attackDiscoveries: [],
       });
 
-      updateAttackDiscoveries({
-        apiConfig: mockApiConfig,
-        attackDiscoveryId: mockAttackDiscoveryId,
-        authenticatedUser: mockAuthenticatedUser,
-        currentAd: mockCurrentAd,
-        dataClient: mockDataClient,
-        latestReplacements: mockLatestReplacements,
+      await updateAttackDiscoveries({
+        ...mockArgs,
         rawAttackDiscoveries: noDiscoveriesRaw,
-        size: mockSize,
-        startTime: mockStartTime,
-        telemetry: mockTelemetry,
       });
 
       expect(updateAttackDiscovery).toHaveBeenCalledWith({
@@ -321,49 +281,60 @@ describe('helpers', () => {
         authenticatedUser: mockAuthenticatedUser,
       });
 
-      await waitFor(() => {
-        expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
-          actionTypeId: mockApiConfig.actionTypeId,
-          alertsContextCount: 0,
-          alertsCount: 0,
-          configuredAlertsCount: mockSize,
-          discoveriesGenerated: 0,
-          durationMs: 120000,
-          model: mockApiConfig.model,
-          provider: mockApiConfig.provider,
-        });
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
+        actionTypeId: mockApiConfig.actionTypeId,
+        alertsContextCount: 0,
+        alertsCount: 0,
+        configuredAlertsCount: mockSize,
+        discoveriesGenerated: 0,
+        durationMs: 120000,
+        model: mockApiConfig.model,
+        provider: mockApiConfig.provider,
       });
     });
 
-    it('should throw an error if raw attack discoveries is null', async () => {
-      await expect(
-        new Promise((resolve, reject) => {
-          try {
-            updateAttackDiscoveries({
-              apiConfig: mockApiConfig,
-              attackDiscoveryId: mockAttackDiscoveryId,
-              authenticatedUser: mockAuthenticatedUser,
-              currentAd: mockCurrentAd,
-              dataClient: mockDataClient,
-              latestReplacements: mockLatestReplacements,
-              rawAttackDiscoveries: null,
-              size: mockSize,
-              startTime: mockStartTime,
-              telemetry: mockTelemetry,
-            });
-            resolve(true);
-          } catch (error) {
-            reject(error);
-          }
-        })
-      ).rejects.toThrow('tool returned no attack discoveries');
+    it('should catch and log an error if raw attack discoveries is null', async () => {
+      await updateAttackDiscoveries({
+        ...mockArgs,
+        rawAttackDiscoveries: null,
+      });
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
+        actionTypeId: mockArgs.apiConfig.actionTypeId,
+        errorMessage: 'tool returned no attack discoveries',
+        model: mockArgs.apiConfig.model,
+        provider: mockArgs.apiConfig.provider,
+      });
+    });
+
+    it('should return and not call updateAttackDiscovery when getAttackDiscovery returns a canceled response', async () => {
+      getAttackDiscovery.mockResolvedValue({
+        ...mockCurrentAd,
+        status: attackDiscoveryStatus.canceled,
+      });
+      await updateAttackDiscoveries(mockArgs);
+
+      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(updateAttackDiscovery).not.toHaveBeenCalled();
+    });
+
+    it('should log the error and report telemetry when getAttackDiscovery rejects', async () => {
+      getAttackDiscovery.mockRejectedValue(mockError);
+      await updateAttackDiscoveries(mockArgs);
+
+      expect(mockLogger.error).toHaveBeenCalledWith(mockError);
+      expect(updateAttackDiscovery).not.toHaveBeenCalled();
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
+        actionTypeId: mockArgs.apiConfig.actionTypeId,
+        errorMessage: mockError.message,
+        model: mockArgs.apiConfig.model,
+        provider: mockArgs.apiConfig.provider,
+      });
     });
   });
 
   describe('handleToolError', () => {
-    const mockError = new Error('Test error');
-
-    const params = {
+    const mockArgs = {
       apiConfig: mockApiConfig,
       attackDiscoveryId: 'discovery-id',
       authenticatedUser: mockAuthenticatedUser,
@@ -376,25 +347,74 @@ describe('helpers', () => {
     };
 
     it('should log the error and update attack discovery status to failed', async () => {
-      await handleToolError(params);
+      await handleToolError(mockArgs);
 
       expect(mockLogger.error).toHaveBeenCalledWith(mockError);
       expect(updateAttackDiscovery).toHaveBeenCalledWith({
         attackDiscoveryUpdateProps: {
           status: attackDiscoveryStatus.failed,
           attackDiscoveries: [],
-          backingIndex: 'backing-index',
+          backingIndex: 'foo',
           failureReason: 'Test error',
           id: 'discovery-id',
           replacements: {},
         },
-        authenticatedUser: params.authenticatedUser,
+        authenticatedUser: mockArgs.authenticatedUser,
       });
       expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
-        actionTypeId: params.apiConfig.actionTypeId,
+        actionTypeId: mockArgs.apiConfig.actionTypeId,
         errorMessage: mockError.message,
-        model: params.apiConfig.model,
-        provider: params.apiConfig.provider,
+        model: mockArgs.apiConfig.model,
+        provider: mockArgs.apiConfig.provider,
+      });
+    });
+
+    it('should log the error and report telemetry when updateAttackDiscovery rejects', async () => {
+      updateAttackDiscovery.mockRejectedValue(mockError);
+      await handleToolError(mockArgs);
+
+      expect(mockLogger.error).toHaveBeenCalledWith(mockError);
+      expect(updateAttackDiscovery).toHaveBeenCalledWith({
+        attackDiscoveryUpdateProps: {
+          status: attackDiscoveryStatus.failed,
+          attackDiscoveries: [],
+          backingIndex: 'foo',
+          failureReason: 'Test error',
+          id: 'discovery-id',
+          replacements: {},
+        },
+        authenticatedUser: mockArgs.authenticatedUser,
+      });
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
+        actionTypeId: mockArgs.apiConfig.actionTypeId,
+        errorMessage: mockError.message,
+        model: mockArgs.apiConfig.model,
+        provider: mockArgs.apiConfig.provider,
+      });
+    });
+
+    it('should return and not call updateAttackDiscovery when getAttackDiscovery returns a canceled response', async () => {
+      getAttackDiscovery.mockResolvedValue({
+        ...mockCurrentAd,
+        status: attackDiscoveryStatus.canceled,
+      });
+      await handleToolError(mockArgs);
+
+      expect(mockTelemetry.reportEvent).not.toHaveBeenCalled();
+      expect(updateAttackDiscovery).not.toHaveBeenCalled();
+    });
+
+    it('should log the error and report telemetry when getAttackDiscovery rejects', async () => {
+      getAttackDiscovery.mockRejectedValue(mockError);
+      await handleToolError(mockArgs);
+
+      expect(mockLogger.error).toHaveBeenCalledWith(mockError);
+      expect(updateAttackDiscovery).not.toHaveBeenCalled();
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
+        actionTypeId: mockArgs.apiConfig.actionTypeId,
+        errorMessage: mockError.message,
+        model: mockArgs.apiConfig.model,
+        provider: mockArgs.apiConfig.provider,
       });
     });
   });

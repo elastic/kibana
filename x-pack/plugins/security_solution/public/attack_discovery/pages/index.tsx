@@ -74,6 +74,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     failureReason,
     fetchAttackDiscoveries,
     generationIntervals,
+    onCancel,
     isLoading,
     lastUpdated,
     replacements,
@@ -166,6 +167,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
             isLoading={isLoading}
             onConnectorIdSelected={onConnectorIdSelected}
             onGenerate={onGenerate}
+            onCancel={onCancel}
           />
           <EuiSpacer size="m" />
         </HeaderPage>

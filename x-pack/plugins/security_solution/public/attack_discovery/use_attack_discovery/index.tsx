@@ -33,6 +33,7 @@ export interface UseAttackDiscovery {
   generationIntervals: GenerationInterval[] | undefined;
   isLoading: boolean;
   lastUpdated: Date | null;
+  onCancel: () => Promise<void>;
   replacements: Replacements;
 }
 
@@ -55,9 +56,10 @@ export const useAttackDiscovery = ({
   // generation can take a long time, so we calculate an approximate future time:
   const [approximateFutureTime, setApproximateFutureTime] = useState<Date | null>(null);
   const {
-    status: pollStatus,
-    pollApi,
+    cancelAttackDiscovery,
     data: pollData,
+    pollApi,
+    status: pollStatus,
   } = usePollApi({ http, setApproximateFutureTime, toasts, connectorId });
 
   // loading boilerplate:
@@ -102,22 +104,33 @@ export const useAttackDiscovery = ({
   useEffect(() => {
     if (connectorId != null && connectorId !== '') {
       pollApi();
+      setLoadingConnectorId?.(connectorId);
       setAlertsContextCount(null);
+      setFailureReason(null);
       setLastUpdated(null);
       setReplacements({});
       setAttackDiscoveries([]);
       setGenerationIntervals([]);
     }
-  }, [pollApi, connectorId]);
+  }, [pollApi, connectorId, setLoadingConnectorId]);
 
   useEffect(() => {
-    setIsLoading(pollStatus === 'running');
-  }, [pollStatus]);
+    if (pollStatus === 'running') {
+      setIsLoading(true);
+      setLoadingConnectorId?.(connectorId ?? null);
+    } else {
+      setIsLoading(false);
+      setLoadingConnectorId?.(null);
+    }
+  }, [pollStatus, connectorId, setLoadingConnectorId]);
 
   useEffect(() => {
     if (pollData !== null && pollData.connectorId === connectorId) {
       if (pollData.alertsContextCount != null) setAlertsContextCount(pollData.alertsContextCount);
-      if (pollData.updatedAt) setLastUpdated(new Date(pollData.updatedAt));
+      if (pollData.attackDiscoveries.length) {
+        // get last updated from timestamp, not from updatedAt since this can indicate the last time the status was updated
+        setLastUpdated(new Date(pollData.attackDiscoveries[0].timestamp));
+      }
       if (pollData.replacements) setReplacements(pollData.replacements);
       if (pollData.status === 'failed' && pollData.failureReason) {
         setFailureReason(pollData.failureReason);
@@ -152,7 +165,7 @@ export const useAttackDiscovery = ({
       }
 
       if (parsedResponse.data.status === 'running') {
-        await pollApi();
+        pollApi();
       }
     } catch (error) {
       setIsLoading(false);
@@ -167,11 +180,12 @@ export const useAttackDiscovery = ({
     alertsContextCount,
     approximateFutureTime,
     attackDiscoveries,
-    fetchAttackDiscoveries,
     failureReason,
+    fetchAttackDiscoveries,
     generationIntervals,
     isLoading,
     lastUpdated,
+    onCancel: cancelAttackDiscovery,
     replacements,
   };
 };

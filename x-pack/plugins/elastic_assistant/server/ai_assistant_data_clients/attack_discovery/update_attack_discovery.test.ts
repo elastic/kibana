@@ -94,17 +94,44 @@ const existingAttackDiscovery: AttackDiscoveryResponse = {
 const mockGetDiscovery = getAttackDiscovery as jest.Mock;
 
 describe('updateAttackDiscovery', () => {
+  const date = '2024-03-28T22:27:28.000Z';
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
   beforeEach(() => {
+    jest.setSystemTime(new Date(date));
     jest.clearAllMocks();
     mockGetDiscovery.mockResolvedValue(existingAttackDiscovery);
   });
 
   it('should update attack discovery successfully', async () => {
     const response = await updateAttackDiscovery(mockRequest);
-
     expect(response).not.toBeNull();
     expect(response!.id).toEqual('existing-id');
     expect(mockEsClient.update).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.update).toHaveBeenCalledWith({
+      refresh: 'wait_for',
+      index: 'attack-discovery-index',
+      id: 'existing-id',
+      doc: {
+        attack_discoveries: [
+          {
+            id: 'existing-id',
+            alert_ids: ['alert-1'],
+            title: 'Updated Title',
+            details_markdown: '# Updated Details',
+            entity_summary_markdown: '# Updated Summary',
+            mitre_attack_tactics: ['T1234'],
+            summary_markdown: '# Updated Summary',
+            timestamp: date,
+          },
+        ],
+        id: 'existing-id',
+        status: 'succeeded',
+        updated_at: date,
+      },
+    });
     expect(mockGetDiscovery).toHaveBeenCalledTimes(1);
     const { attackDiscoveryUpdateProps, ...rest } = mockRequest;
     expect(mockGetDiscovery).toHaveBeenCalledWith({
@@ -112,6 +139,35 @@ describe('updateAttackDiscovery', () => {
       id: attackDiscoveryUpdateProps.id,
     });
   });
+
+  it('should not update attack_discoveries if none are present', async () => {
+    const { attackDiscoveries, ...rest } = mockRequest.attackDiscoveryUpdateProps;
+    const response = await updateAttackDiscovery({
+      ...mockRequest,
+      attackDiscoveryUpdateProps: rest,
+    });
+
+    expect(response).not.toBeNull();
+    expect(response!.id).toEqual('existing-id');
+    expect(mockEsClient.update).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.update).toHaveBeenCalledWith({
+      refresh: 'wait_for',
+      index: 'attack-discovery-index',
+      id: 'existing-id',
+      doc: {
+        id: 'existing-id',
+        status: 'succeeded',
+        updated_at: date,
+      },
+    });
+    expect(mockGetDiscovery).toHaveBeenCalledTimes(1);
+    const { attackDiscoveryUpdateProps, ...rest2 } = mockRequest;
+    expect(mockGetDiscovery).toHaveBeenCalledWith({
+      ...rest2,
+      id: attackDiscoveryUpdateProps.id,
+    });
+  });
+
   it('should throw error on elasticsearch update failure', async () => {
     const error = new Error('Elasticsearch update error');
     mockEsClient.update.mockRejectedValueOnce(error);

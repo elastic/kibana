@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { EuiButtonProps } from '@elastic/eui';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { noop } from 'lodash/fp';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import * as i18n from './translations';
@@ -19,6 +20,7 @@ interface Props {
   connectorsAreConfigured: boolean;
   isLoading: boolean;
   onGenerate: () => void;
+  onCancel: () => void;
   onConnectorIdSelected: (connectorId: string) => void;
 }
 
@@ -28,11 +30,30 @@ const HeaderComponent: React.FC<Props> = ({
   isLoading,
   onGenerate,
   onConnectorIdSelected,
+  onCancel,
 }) => {
   const isFlyoutMode = false; // always false for attack discovery
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const { euiTheme } = useEuiTheme();
-  const disabled = !hasAssistantPrivilege || isLoading || connectorId == null;
+  const disabled = !hasAssistantPrivilege || connectorId == null;
+
+  const buttonProps = useMemo(
+    () =>
+      isLoading
+        ? {
+            dataTestSubj: 'cancel',
+            color: 'danger' as EuiButtonProps['color'],
+            onClick: onCancel,
+            text: i18n.CANCEL,
+          }
+        : {
+            dataTestSubj: 'generate',
+            color: 'primary' as EuiButtonProps['color'],
+            onClick: onGenerate,
+            text: i18n.GENERATE,
+          },
+    [isLoading, onCancel, onGenerate]
+  );
 
   return (
     <EuiFlexGroup
@@ -61,13 +82,13 @@ const HeaderComponent: React.FC<Props> = ({
           data-test-subj="generateTooltip"
         >
           <EuiButton
-            data-test-subj="generate"
+            data-test-subj={buttonProps.dataTestSubj}
             size="s"
             disabled={disabled}
-            isLoading={isLoading}
-            onClick={onGenerate}
+            color={buttonProps.color}
+            onClick={buttonProps.onClick}
           >
-            {isLoading ? i18n.LOADING : i18n.GENERATE}
+            {buttonProps.text}
           </EuiButton>
         </EuiToolTip>
       </EuiFlexItem>

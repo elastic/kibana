@@ -21,7 +21,7 @@ import { getAttackDiscovery } from './get_attack_discovery';
 export interface UpdateAttackDiscoverySchema {
   id: UUID;
   '@timestamp'?: string;
-  attack_discoveries: Array<{
+  attack_discoveries?: Array<{
     alert_ids: string[];
     title: string;
     timestamp: string;
@@ -31,7 +31,7 @@ export interface UpdateAttackDiscoverySchema {
     summary_markdown: string;
     id?: string;
   }>;
-  api_config: {
+  api_config?: {
     action_type_id?: string;
     connector_id?: string;
     default_system_prompt_id?: string;
@@ -115,24 +115,31 @@ export const transformToUpdateScheme = (
       : {};
   return {
     alerts_context_count: alertsContextCount,
-    api_config: {
-      action_type_id: apiConfig?.actionTypeId,
-      connector_id: apiConfig?.connectorId,
-      default_system_prompt_id: apiConfig?.defaultSystemPromptId,
-      model: apiConfig?.model,
-      provider: apiConfig?.provider,
-    },
-    attack_discoveries:
-      attackDiscoveries?.map((attackDiscovery) => ({
-        id: attackDiscovery.id ?? uuid.v4(),
-        alert_ids: attackDiscovery.alertIds,
-        title: attackDiscovery.title,
-        details_markdown: attackDiscovery.detailsMarkdown,
-        entity_summary_markdown: attackDiscovery.entitySummaryMarkdown,
-        mitre_attack_tactics: attackDiscovery.mitreAttackTactics,
-        summary_markdown: attackDiscovery.summaryMarkdown,
-        timestamp: updatedAt,
-      })) ?? [],
+    ...(apiConfig
+      ? {
+          api_config: {
+            action_type_id: apiConfig.actionTypeId,
+            connector_id: apiConfig.connectorId,
+            default_system_prompt_id: apiConfig.defaultSystemPromptId,
+            model: apiConfig.model,
+            provider: apiConfig.provider,
+          },
+        }
+      : {}),
+    ...(attackDiscoveries
+      ? {
+          attack_discoveries: attackDiscoveries.map((attackDiscovery) => ({
+            id: attackDiscovery.id ?? uuid.v4(),
+            alert_ids: attackDiscovery.alertIds,
+            title: attackDiscovery.title,
+            details_markdown: attackDiscovery.detailsMarkdown,
+            entity_summary_markdown: attackDiscovery.entitySummaryMarkdown,
+            mitre_attack_tactics: attackDiscovery.mitreAttackTactics,
+            summary_markdown: attackDiscovery.summaryMarkdown,
+            timestamp: updatedAt,
+          })),
+        }
+      : {}),
     failure_reason: failureReason,
     id,
     replacements: replacements

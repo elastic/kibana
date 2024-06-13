@@ -21,10 +21,12 @@ import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/s
 import { v4 as uuidv4 } from 'uuid';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 
-import moment, { Moment } from 'moment';
-import { uniq } from 'lodash/fp';
+import { Moment } from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
+import moment from 'moment/moment';
+import { uniq } from 'lodash/fp';
 import { getLangSmithTracer } from '../evaluate/utils';
 import { getLlmType } from '../utils';
 import type { GetRegisteredTools } from '../../services/app_context';
@@ -160,6 +162,7 @@ const formatAssistantToolParams = ({
 });
 
 export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {
+  canceled: 'canceled',
   failed: 'failed',
   running: 'running',
   succeeded: 'succeeded',
@@ -222,18 +225,100 @@ export const updateAttackDiscoveryStatusToRunning = async (
     currentAd,
   };
 };
+
+export const updateAttackDiscoveryStatusToCanceled = async (
+  dataClient: AttackDiscoveryDataClient,
+  authenticatedUser: AuthenticatedUser,
+  connectorId: string
+): Promise<AttackDiscoveryResponse> => {
+  const foundAttackDiscovery = await dataClient?.findAttackDiscoveryByConnectorId({
+    connectorId,
+    authenticatedUser,
+  });
+  if (foundAttackDiscovery == null) {
+    throw new Error(`Could not find attack discovery for connector id ${connectorId}`);
+  }
+  const updatedAttackDiscovery = await dataClient?.updateAttackDiscovery({
+    attackDiscoveryUpdateProps: {
+      backingIndex: foundAttackDiscovery.backingIndex,
+      id: foundAttackDiscovery.id,
+      status: attackDiscoveryStatus.canceled,
+    },
+    authenticatedUser,
+  });
+
+  if (!updatedAttackDiscovery) {
+    throw new Error(`Could not update attack discovery for connectorId: ${connectorId}`);
+  }
+
+  return updatedAttackDiscovery;
+};
+
 const getDataFromJSON = (adStringified: string) => {
   const { alertsContextCount, attackDiscoveries } = JSON.parse(adStringified);
   return { alertsContextCount, attackDiscoveries };
 };
 
-export const updateAttackDiscoveries = ({
+export const invokeAttackDiscoveryTool = ({
   apiConfig,
   attackDiscoveryId,
   authenticatedUser,
-  currentAd,
   dataClient,
   latestReplacements,
+  logger,
+  size,
+  startTime,
+  telemetry,
+  toolInstance,
+}: {
+  apiConfig: ApiConfig;
+  attackDiscoveryId: string;
+  authenticatedUser: AuthenticatedUser;
+  dataClient: AttackDiscoveryDataClient;
+  latestReplacements: Replacements;
+  logger: Logger;
+  size: number;
+  startTime: Moment;
+  toolInstance: Tool | DynamicStructuredTool | null;
+  telemetry: AnalyticsServiceSetup;
+}) => {
+  toolInstance
+    ?.invoke('')
+    .then((rawAttackDiscoveries: string) =>
+      updateAttackDiscoveries({
+        apiConfig,
+        attackDiscoveryId,
+        authenticatedUser,
+        dataClient,
+        latestReplacements,
+        logger,
+        rawAttackDiscoveries,
+        size,
+        startTime,
+        telemetry,
+      })
+    )
+    .catch((err) =>
+      handleToolError({
+        apiConfig,
+        attackDiscoveryId,
+        authenticatedUser,
+        dataClient,
+        err,
+        latestReplacements,
+        logger,
+        telemetry,
+      })
+    );
+};
+
+export const updateAttackDiscoveries = async ({
+  apiConfig,
+  attackDiscoveryId,
+  authenticatedUser,
+  dataClient,
+  latestReplacements,
+  logger,
   rawAttackDiscoveries,
   size,
   startTime,
@@ -242,75 +327,79 @@ export const updateAttackDiscoveries = ({
   apiConfig: ApiConfig;
   attackDiscoveryId: string;
   authenticatedUser: AuthenticatedUser;
-  currentAd: AttackDiscoveryResponse;
   dataClient: AttackDiscoveryDataClient;
   latestReplacements: Replacements;
+  logger: Logger;
   rawAttackDiscoveries: string | null;
   size: number;
   startTime: Moment;
   telemetry: AnalyticsServiceSetup;
 }) => {
-  const endTime = moment();
-  const durationMs = endTime.diff(startTime);
-
-  if (rawAttackDiscoveries == null) {
-    throw new Error('tool returned no attack discoveries');
-  }
-  const { alertsContextCount, attackDiscoveries } = getDataFromJSON(rawAttackDiscoveries);
-  const updateProps = {
-    alertsContextCount,
-    attackDiscoveries,
-    status: attackDiscoveryStatus.succeeded,
-    ...(alertsContextCount === 0 || attackDiscoveries === 0
-      ? {}
-      : {
-          generationIntervals: addGenerationInterval(currentAd.generationIntervals, {
-            durationMs,
-            date: new Date().toISOString(),
+  try {
+    if (rawAttackDiscoveries == null) {
+      throw new Error('tool returned no attack discoveries');
+    }
+    const currentAd = await dataClient.getAttackDiscovery({
+      id: attackDiscoveryId,
+      authenticatedUser,
+    });
+    if (currentAd === null || currentAd?.status === 'canceled') {
+      return;
+    }
+    const endTime = moment();
+    const durationMs = endTime.diff(startTime);
+    const { alertsContextCount, attackDiscoveries } = getDataFromJSON(rawAttackDiscoveries);
+    const updateProps = {
+      alertsContextCount,
+      attackDiscoveries,
+      status: attackDiscoveryStatus.succeeded,
+      ...(alertsContextCount === 0 || attackDiscoveries === 0
+        ? {}
+        : {
+            generationIntervals: addGenerationInterval(currentAd.generationIntervals, {
+              durationMs,
+              date: new Date().toISOString(),
+            }),
           }),
-        }),
-    id: attackDiscoveryId,
-    replacements: latestReplacements,
-    backingIndex: currentAd.backingIndex,
-  };
+      id: attackDiscoveryId,
+      replacements: latestReplacements,
+      backingIndex: currentAd.backingIndex,
+    };
 
-  dataClient
-    .updateAttackDiscovery({
+    await dataClient.updateAttackDiscovery({
       attackDiscoveryUpdateProps: updateProps,
       authenticatedUser,
-    })
-    .then(() => {
-      telemetry.reportEvent(ATTACK_DISCOVERY_SUCCESS_EVENT.eventType, {
-        actionTypeId: apiConfig.actionTypeId,
-        alertsContextCount: updateProps.alertsContextCount,
-        alertsCount: uniq(
-          updateProps.attackDiscoveries.flatMap(
-            (attackDiscovery: AttackDiscovery) => attackDiscovery.alertIds
-          )
-        ).length,
-        configuredAlertsCount: size,
-        discoveriesGenerated: updateProps.attackDiscoveries.length,
-        durationMs,
-        model: apiConfig.model,
-        provider: apiConfig.provider,
-      });
-    })
-    .catch((updateErr) => {
-      const updateError = transformError(updateErr);
-      telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
-        actionTypeId: apiConfig.actionTypeId,
-        errorMessage: updateError.message,
-        model: apiConfig.model,
-        provider: apiConfig.provider,
-      });
     });
+    telemetry.reportEvent(ATTACK_DISCOVERY_SUCCESS_EVENT.eventType, {
+      actionTypeId: apiConfig.actionTypeId,
+      alertsContextCount: updateProps.alertsContextCount,
+      alertsCount: uniq(
+        updateProps.attackDiscoveries.flatMap(
+          (attackDiscovery: AttackDiscovery) => attackDiscovery.alertIds
+        )
+      ).length,
+      configuredAlertsCount: size,
+      discoveriesGenerated: updateProps.attackDiscoveries.length,
+      durationMs,
+      model: apiConfig.model,
+      provider: apiConfig.provider,
+    });
+  } catch (updateErr) {
+    logger.error(updateErr);
+    const updateError = transformError(updateErr);
+    telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
+      actionTypeId: apiConfig.actionTypeId,
+      errorMessage: updateError.message,
+      model: apiConfig.model,
+      provider: apiConfig.provider,
+    });
+  }
 };
 
-export const handleToolError = ({
+export const handleToolError = async ({
   apiConfig,
   attackDiscoveryId,
   authenticatedUser,
-  backingIndex,
   dataClient,
   err,
   latestReplacements,
@@ -320,45 +409,49 @@ export const handleToolError = ({
   apiConfig: ApiConfig;
   attackDiscoveryId: string;
   authenticatedUser: AuthenticatedUser;
-  backingIndex: string;
   dataClient: AttackDiscoveryDataClient;
   err: Error;
   latestReplacements: Replacements;
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
 }) => {
-  logger.error(err);
-  const error = transformError(err);
+  try {
+    logger.error(err);
+    const error = transformError(err);
+    const currentAd = await dataClient.getAttackDiscovery({
+      id: attackDiscoveryId,
+      authenticatedUser,
+    });
 
-  dataClient
-    .updateAttackDiscovery({
+    if (currentAd === null || currentAd?.status === 'canceled') {
+      return;
+    }
+    await dataClient.updateAttackDiscovery({
       attackDiscoveryUpdateProps: {
         attackDiscoveries: [],
         status: attackDiscoveryStatus.failed,
         id: attackDiscoveryId,
         replacements: latestReplacements,
-        backingIndex,
+        backingIndex: currentAd.backingIndex,
         failureReason: error.message,
       },
       authenticatedUser,
-    })
-    .then(() => {
-      telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
-        actionTypeId: apiConfig.actionTypeId,
-        errorMessage: error.message,
-        model: apiConfig.model,
-        provider: apiConfig.provider,
-      });
-    })
-    .catch((updateErr) => {
-      const updateError = transformError(updateErr);
-      telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
-        actionTypeId: apiConfig.actionTypeId,
-        errorMessage: updateError.message,
-        model: apiConfig.model,
-        provider: apiConfig.provider,
-      });
     });
+    telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
+      actionTypeId: apiConfig.actionTypeId,
+      errorMessage: error.message,
+      model: apiConfig.model,
+      provider: apiConfig.provider,
+    });
+  } catch (updateErr) {
+    const updateError = transformError(updateErr);
+    telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
+      actionTypeId: apiConfig.actionTypeId,
+      errorMessage: updateError.message,
+      model: apiConfig.model,
+      provider: apiConfig.provider,
+    });
+  }
 };
 
 export const getAssistantTool = (getRegisteredTools: GetRegisteredTools, pluginName: string) => {
