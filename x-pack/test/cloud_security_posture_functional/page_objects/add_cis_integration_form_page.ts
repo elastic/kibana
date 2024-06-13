@@ -187,6 +187,13 @@ export function AddCisIntegrationFormPageProvider({
     return await optionToBeClicked;
   };
 
+  const clickAccordianButton = async (text: string) => {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    const advancedAccordian = await testSubjects.find(text);
+    await advancedAccordian.scrollIntoView();
+    await advancedAccordian.click();
+  };
+
   const clickOptionButton = async (text: string) => {
     const optionToBeClicked = await findOptionInPage(text);
     await optionToBeClicked.scrollIntoView();
@@ -279,6 +286,7 @@ export function AddCisIntegrationFormPageProvider({
     clickOptionButton,
     clickSaveButton,
     clickSaveIntegrationButton,
+    clickAccordianButton,
     getPostInstallModal,
     fillInTextField,
     chooseDropDown,
