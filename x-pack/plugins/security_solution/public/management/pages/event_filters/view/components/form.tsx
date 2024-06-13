@@ -458,10 +458,20 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       const descendantsTooltip = (
         <EuiToolTip
           content={
-            <FormattedMessage
-              id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltip"
-              defaultMessage="Filtering the descendants of a process means that events from the matched process are ingested, but events from its descendant processes are omitted."
-            />
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltip"
+                  defaultMessage="Filtering the descendants of a process means that events from the matched process are ingested, but events from its descendant processes are omitted."
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltipVersionInfo"
+                  defaultMessage="Process descendant filtering works only with Agents v8.15 and newer."
+                />
+              </p>
+            </EuiText>
           }
           data-test-subj={getTestId('filterProcessDescendants-tooltipText')}
         >
