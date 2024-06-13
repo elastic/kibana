@@ -45,7 +45,6 @@ import {
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
-import { ID } from '@kbn/monaco/src/painless/constants';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -219,7 +218,7 @@ export const getControlGroupEmbeddableFactory = (services: {
             <EuiFlexGroup className={'controlGroup'} alignItems="center" gutterSize="s" wrap={true}>
               {controlsInOrder.map(({ id, type }) => (
                 <ControlRenderer
-                  key={ID}
+                  key={id}
                   maybeId={id}
                   type={type}
                   getParentApi={() => api}
