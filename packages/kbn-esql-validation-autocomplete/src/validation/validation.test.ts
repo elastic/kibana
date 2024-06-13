@@ -1960,13 +1960,27 @@ describe('validation logic', () => {
         'Argument of [trim] must be [string], found value ["23"::double] type [double]',
       ]);
       testErrorsAndWarnings('from a_index | eval trim(23::string)', []);
-      testErrorsAndWarnings('from a_index | eval CEIL(23::long)', []);
       testErrorsAndWarnings(
         'from a_index | eval trim(to_double("23")::string::double::long::string::double)',
         [
           'Argument of [trim] must be [string], found value [to_double("23")::string::double::long::string::double] type [double]',
         ]
       );
+
+      // accepts elasticsearch subtypes like int and keyword
+      // (once https://github.com/elastic/kibana/issues/174710 is done this won't be a special case anymore)
+      testErrorsAndWarnings('from a_index | eval CEIL(23::long)', []);
+      testErrorsAndWarnings('from a_index | eval CEIL(23::unsigned_long)', []);
+      testErrorsAndWarnings('from a_index | eval CEIL(23::int)', []);
+      testErrorsAndWarnings('from a_index | eval CEIL(23::integer)', []);
+      testErrorsAndWarnings('from a_index | eval CEIL(23::double)', []);
+
+      testErrorsAndWarnings('from a_index | eval TRIM(23::string)', []);
+      testErrorsAndWarnings('from a_index | eval TRIM(23::text)', []);
+      testErrorsAndWarnings('from a_index | eval TRIM(23::keyword)', []);
+
+      // enforces strings for cartesian_point conversion
+      // testErrorsAndWarnings('from a_index | eval 23::cartesian_point', ['wrong type!']);
 
       // still validates nested functions when they are casted
       testErrorsAndWarnings('from a_index | eval to_lower(trim(numberField)::string)', [

@@ -8973,15 +8973,50 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval trim(to_double(\"23\")::string::double::long::string::double)",
+      "error": [
+        "Argument of [trim] must be [string], found value [to_double(\"23\")::string::double::long::string::double] type [double]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval CEIL(23::long)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval trim(to_double(\"23\")::string::double::long::string::double)",
-      "error": [
-        "Argument of [trim] must be [string], found value [to_double(\"23\")::string::double::long::string::double] type [double]"
-      ],
+      "query": "from a_index | eval CEIL(23::unsigned_long)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::int)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::integer)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::double)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval TRIM(23::string)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval TRIM(23::text)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval TRIM(23::keyword)",
+      "error": [],
       "warning": []
     },
     {
