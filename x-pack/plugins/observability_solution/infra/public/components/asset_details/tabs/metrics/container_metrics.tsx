@@ -12,18 +12,8 @@ import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
 import { MetricsTemplate } from './metrics_template';
 import { DockerCharts, KubernetesContainerCharts } from '../../charts';
-import { HostMetricTypes } from '../../charts/types';
-import { INTEGRATIONS } from '../../constants';
+import { DOCKER_METRIC_TYPES, INTEGRATIONS, KUBERNETES_METRIC_TYPES } from '../../constants';
 import { useIntegrationCheck } from '../../hooks/use_integration_check';
-
-const DOCKER_METRIC_TYPES: Array<Exclude<HostMetricTypes, 'kpi' | 'log'>> = [
-  'cpu',
-  'memory',
-  'network',
-  'disk',
-];
-
-const KUBERNETES_METRIC_TYPES: Array<'cpu' | 'memory'> = ['cpu', 'memory'];
 
 export const ContainerMetrics = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -42,10 +32,10 @@ export const ContainerMetrics = () => {
     return null;
   }
 
-  if (isDockerContainer) {
-    return (
-      <MetricsTemplate ref={ref}>
-        {DOCKER_METRIC_TYPES.map((metric) => (
+  return (
+    <MetricsTemplate ref={ref}>
+      {isDockerContainer &&
+        DOCKER_METRIC_TYPES.map((metric) => (
           <DockerCharts
             key={metric}
             assetId={asset.id}
@@ -54,21 +44,17 @@ export const ContainerMetrics = () => {
             metric={metric}
           />
         ))}
-      </MetricsTemplate>
-    );
-  }
-
-  return isKubernetesContainer ? (
-    <MetricsTemplate ref={ref}>
-      {KUBERNETES_METRIC_TYPES.map((metric) => (
-        <KubernetesContainerCharts
-          key={metric}
-          assetId={asset.id}
-          dataView={metrics.dataView}
-          dateRange={state.dateRange}
-          metric={metric}
-        />
-      ))}
+      {!isDockerContainer &&
+        isKubernetesContainer &&
+        KUBERNETES_METRIC_TYPES.map((metric) => (
+          <KubernetesContainerCharts
+            key={metric}
+            assetId={asset.id}
+            dataView={metrics.dataView}
+            dateRange={state.dateRange}
+            metric={metric}
+          />
+        ))}
     </MetricsTemplate>
-  ) : null;
+  );
 };

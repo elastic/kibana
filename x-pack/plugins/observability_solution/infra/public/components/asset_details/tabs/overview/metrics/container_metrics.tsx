@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexGrid } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DockerCharts } from '../../../charts/docker_charts';
-import { INTEGRATIONS } from '../../../constants';
+import { DOCKER_METRIC_TYPES, INTEGRATIONS, KUBERNETES_METRIC_TYPES } from '../../../constants';
 import { useIntegrationCheck } from '../../../hooks/use_integration_check';
 import { KubernetesContainerCharts } from '../../../charts/kubernetes_charts';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
@@ -39,20 +39,20 @@ export const ContainerMetrics = (props: Props) => {
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <EuiFlexGrid columns={2} gutterSize="s">
-        {isDockerContainer && (
-          <>
-            <DockerCharts {...props} metric="cpu" onShowAll={onClick} />
-            <DockerCharts {...props} metric="memory" onShowAll={onClick} />
-            <DockerCharts {...props} metric="network" onShowAll={onClick} />
-            <DockerCharts {...props} metric="disk" onShowAll={onClick} />
-          </>
-        )}
-        {!isDockerContainer && isKubernetesContainer && (
-          <>
-            <KubernetesContainerCharts {...props} metric="cpu" onShowAll={onClick} />
-            <KubernetesContainerCharts {...props} metric="memory" onShowAll={onClick} />
-          </>
-        )}
+        {isDockerContainer &&
+          DOCKER_METRIC_TYPES.map((metric) => (
+            <DockerCharts key={metric} {...props} metric={metric} onShowAll={onClick} />
+          ))}
+        {!isDockerContainer &&
+          isKubernetesContainer &&
+          KUBERNETES_METRIC_TYPES.map((metric) => (
+            <KubernetesContainerCharts
+              key={metric}
+              {...props}
+              metric={metric}
+              onShowAll={onClick}
+            />
+          ))}
       </EuiFlexGrid>
     </EuiFlexGroup>
   );

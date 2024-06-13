@@ -19,7 +19,7 @@ import { Chart } from './chart';
 import { useIntegrationCheck } from '../hooks/use_integration_check';
 import { useK8sContainerPageViewMetricsCharts } from '../hooks/use_container_metrics_charts';
 import { CONTAINER_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
-import { ContainerMetricTypes, MetricsChartsFields } from './types';
+import { KubernetesContainerMetrics, MetricsChartsFields } from './types';
 
 const FRAGMENT_BASE = 'key-metrics';
 
@@ -79,7 +79,7 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChar
 
 export const KubernetesContainerCharts = React.forwardRef<
   HTMLDivElement,
-  MetricsChartsFields & { metric: ContainerMetricTypes }
+  MetricsChartsFields & { metric: KubernetesContainerMetrics }
 >(({ assetId, dataView, dateRange, metric, onShowAll }, ref) => {
   const { charts } = useK8sContainerPageViewMetricsCharts({
     metric,
