@@ -50,6 +50,7 @@ export const getFilterableKbnTypeNames = (): string[] =>
   registeredKbnTypes.filter((type) => type.filterable).map((type) => type.name);
 
 function categorize(type: string) {
+  // We can have  'counter_integer', 'counter_long', 'counter_double'...
   if (type.includes('counter')) {
     return 'counter';
   }
