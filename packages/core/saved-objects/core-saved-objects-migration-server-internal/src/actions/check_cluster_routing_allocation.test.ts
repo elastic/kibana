@@ -14,7 +14,7 @@ import { checkClusterRoutingAllocationEnabled } from './check_cluster_routing_al
 
 jest.mock('./catch_retryable_es_client_errors');
 
-describe('initAction', () => {
+describe('checkClusterRoutingAllocationEnabled', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
