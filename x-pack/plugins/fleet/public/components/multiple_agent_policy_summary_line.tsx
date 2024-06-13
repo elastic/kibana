@@ -8,7 +8,6 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiBadge,
   EuiPopover,
   EuiPopoverTitle,
@@ -36,14 +35,27 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
 
   // as default, show only the first policy
   const policy = policies[0];
-  const { name, id, is_managed: isManaged } = policy;
+  const { name, id } = policy;
 
   const listItems: EuiListGroupItemProps[] = useMemo(() => {
     return policies.map((p) => {
       return {
+        'data-test-subj': `policy-${p.id}`,
         label: p.name || p.id,
         href: getHref('policy_details', { policyId: p.id }),
         iconType: 'dot',
+        extraAction: {
+          color: 'text',
+          iconType: p.is_managed ? 'lock' : '',
+          alwaysShow: !!p.is_managed,
+          iconSize: 's',
+          'aria-label': 'Hosted agent policy',
+        },
+        showToolTip: !!p.is_managed,
+        toolTipText: i18n.translate('xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip', {
+          defaultMessage:
+            'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
+        }),
       };
     });
   }, [getHref, policies]);
@@ -92,30 +104,13 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
                     </div>
                     <EuiPopoverFooter>
                       {/* TODO: implement missing onClick function */}
-                      <EuiButton fullWidth size="s">
+                      <EuiButton fullWidth size="s" data-test-subj="agentPoliciesPopoverButton">
                         {i18n.translate('xpack.fleet.agentPolicySummaryLine.popover.button', {
                           defaultMessage: 'Manage agent policies',
                         })}
                       </EuiButton>
                     </EuiPopoverFooter>
                   </EuiPopover>
-                </EuiFlexItem>
-              )}
-              {isManaged && (
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    title="Hosted agent policy"
-                    content={i18n.translate(
-                      'xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip',
-                      {
-                        defaultMessage:
-                          'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
-                      }
-                    )}
-                    type="lock"
-                    size="m"
-                    color="subdued"
-                  />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
