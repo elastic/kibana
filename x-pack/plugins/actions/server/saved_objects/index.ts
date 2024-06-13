@@ -13,7 +13,7 @@ import type {
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getOldestIdleActionTask } from '@kbn/task-manager-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { actionTaskParamsModelVersions } from './model_versions/action_task_params_model_versions';
+import { actionTaskParamsModelVersions } from './model_versions';
 import { actionMappings, actionTaskParamsMappings, connectorTokenMappings } from './mappings';
 import { getActionsMigrations } from './actions_migrations';
 import { getActionTaskParamsMigrations } from './action_task_params_migrations';
