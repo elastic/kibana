@@ -49,19 +49,25 @@ export const castEsToKbnFieldTypeName = (esType: ES_FIELD_TYPES | string): KBN_F
 export const getFilterableKbnTypeNames = (): string[] =>
   registeredKbnTypes.filter((type) => type.filterable).map((type) => type.name);
 
+function categorize(type: string) {
+  if (type.includes('counter')) {
+    return 'counter';
+  }
+  return type;
+}
+
 export function esFieldTypeToKibanaFieldType(type: string) {
-  switch (type) {
+  const fieldTypeCategory = categorize(type);
+  switch (fieldTypeCategory) {
     case ES_FIELD_TYPES._INDEX:
       return KBN_FIELD_TYPES.STRING;
     case '_version':
       return KBN_FIELD_TYPES.NUMBER;
-    case 'counter_integer':
-    case 'counter_long':
-    case 'counter_double':
+    case 'counter':
       return KBN_FIELD_TYPES.COUNTER;
     case 'datetime':
       return KBN_FIELD_TYPES.DATE;
     default:
-      return castEsToKbnFieldTypeName(type);
+      return castEsToKbnFieldTypeName(fieldTypeCategory);
   }
 }
