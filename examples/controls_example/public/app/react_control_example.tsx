@@ -35,6 +35,8 @@ import useAsync from 'react-use/lib/useAsync';
 import useMount from 'react-use/lib/useMount';
 import { BehaviorSubject } from 'rxjs';
 import { ControlGroupApi } from '../react_controls/control_group/types';
+import { RANGE_SLIDER_CONTROL_TYPE } from '../react_controls/data_controls/range_slider/types';
+import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
 
 const toggleViewButtons = [
   {
@@ -48,6 +50,40 @@ const toggleViewButtons = [
     label: 'View mode',
   },
 ];
+
+const searchControlId = 'searchControl1';
+const rangeSliderControlId = 'rangeSliderControl1';
+const controlGroupPanels = {
+  [searchControlId]: {
+    type: SEARCH_CONTROL_TYPE,
+    order: 0,
+    grow: true,
+    width: 'medium',
+    explicitInput: {
+      id: searchControlId,
+      fieldName: 'message',
+      title: 'Message',
+      grow: true,
+      width: 'medium',
+      searchString: 'this',
+      enhancements: {},
+    },
+  },
+  [rangeSliderControlId]: {
+    type: RANGE_SLIDER_CONTROL_TYPE,
+    order: 0,
+    grow: true,
+    width: 'medium',
+    explicitInput: {
+      id: rangeSliderControlId,
+      fieldName: 'bytes',
+      title: 'Bytes',
+      grow: true,
+      width: 'medium',
+      enhancements: {},
+    },
+  }
+};
 
 /**
  * I am mocking the dashboard API so that the data table embeddble responds to changes to the
@@ -194,14 +230,18 @@ export const ReactControlExample = ({
               controlStyle: 'oneLine',
               chainingSystem: 'HIERARCHICAL',
               showApplySelections: false,
-              panelsJSON:
-                '{"a957862f-beae-4f0c-8a3a-a6ea4c235651":{"type":"searchControl","order":0,"grow":true,"width":"medium","explicitInput":{"id":"a957862f-beae-4f0c-8a3a-a6ea4c235651","fieldName":"message","title":"Message","grow":true,"width":"medium","searchString": "this","enhancements":{}}}}',
+              panelsJSON: JSON.stringify(controlGroupPanels),
               ignoreParentSettingsJSON:
                 '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
             } as object,
             references: [
               {
-                name: 'controlGroup_a957862f-beae-4f0c-8a3a-a6ea4c235651:searchControlDataView',
+                name: `controlGroup_${searchControlId}:${SEARCH_CONTROL_TYPE}DataView`,
+                type: 'index-pattern',
+                id: dataViews?.[0].id!,
+              },
+              {
+                name: `controlGroup_${rangeSliderControlId}:${RANGE_SLIDER_CONTROL_TYPE}DataView`,
                 type: 'index-pattern',
                 id: dataViews?.[0].id!,
               },
