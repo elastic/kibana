@@ -151,7 +151,7 @@ const ActivityCard = ({
           <EuiText title={when} color={'subdued'} size={'s'}>
             <FormattedMessage
               id="contentManagement.contentEditor.activity.lastUpdatedByDateTime"
-              defaultMessage={'on {dateTime}'}
+              defaultMessage="on {dateTime}"
               values={{
                 dateTime: dateFormatter.format(new Date(when)),
               }}
