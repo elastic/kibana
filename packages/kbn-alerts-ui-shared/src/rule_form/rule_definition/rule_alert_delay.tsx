@@ -8,15 +8,14 @@
 
 import React, { useCallback } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import type { SanitizedRule, RuleTypeParams } from '@kbn/alerting-types';
 import { ALERT_DELAY_TITLE_PREFIX, ALERT_DELAY_TITLE_SUFFIX } from '../translations';
-import { RuleFormErrors } from '../types';
+import { RuleFormErrors, Rule, RuleTypeParams } from '../../common';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
 
 export interface RuleAlertDelayProps {
-  alertDelay?: SanitizedRule<RuleTypeParams>['alertDelay'] | null;
+  alertDelay?: Rule<RuleTypeParams>['alertDelay'] | null;
   errors?: RuleFormErrors;
   onChange: (property: string, value: unknown) => void;
 }

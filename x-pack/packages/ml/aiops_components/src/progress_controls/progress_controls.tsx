@@ -30,12 +30,12 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
  * Props for ProgressControlProps
  */
 interface ProgressControlProps {
-  isBrushCleared: boolean;
   progress: number;
   progressMessage: string;
   onRefresh: () => void;
   onCancel: () => void;
   onReset: () => void;
+  isBrushCleared: boolean;
   isRunning: boolean;
   shouldRerunAnalysis: boolean;
   runAnalysisDisabled?: boolean;
@@ -43,7 +43,7 @@ interface ProgressControlProps {
 
 /**
  * ProgressControls React Component
- * Component with ability to Run & cancel analysis
+ * Component with ability to run & cancel analysis
  * by default uses `Baseline` and `Deviation` for the badge name
  *
  * @param props ProgressControls component props
@@ -52,12 +52,12 @@ interface ProgressControlProps {
 export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (props) => {
   const {
     children,
-    isBrushCleared,
     progress,
     progressMessage,
     onRefresh,
     onCancel,
     onReset,
+    isBrushCleared,
     isRunning,
     shouldRerunAnalysis,
     runAnalysisDisabled = false,
@@ -66,6 +66,7 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
   const progressOutput = Math.round(progress * 100);
 
   const { euiTheme } = useEuiTheme();
+
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
   const analysisCompleteStyle = { display: 'none' };
 

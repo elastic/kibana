@@ -5880,6 +5880,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-feature-flag-service@link:packages/response-ops/feature_flag_service":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-stream-plugin@link:examples/response_stream":
   version "0.0.0"
   uid ""
@@ -15082,10 +15086,10 @@ d3-collection@^1.0.7:
   resolved "https://registry.yarnpkg.com/d3-collection/-/d3-collection-1.0.7.tgz#349bd2aa9977db071091c13144d5e4f16b5b310e"
   integrity sha512-ii0/r5f4sjKNTfh84Di+DpztYwqKhEyUlKoPrzUFfeSkWxjW49xU2QzO9qrPrNkpdI0XJkfzvmTu8V2Zylln6A==
 
-"d3-color@1 - 2", "d3-color@npm:@elastic/d3-color@2.0.1":
+"d3-color@1 - 2", "d3-color@npm:@elastic/kibana-d3-color@2.0.1":
   version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/d3-color/-/d3-color-2.0.1.tgz#afb7f58ace7e5ebcdbeddeb06d5e0b16aad5e7c0"
-  integrity sha512-XIZ+7nbjdjwpdBQLFEE+THVyDAlBGxjvNt8CDGos1f/apkdRHzOiZNgp/LtLdpfG+z3zYApDP9enWCaWCVvHSQ==
+  resolved "https://registry.yarnpkg.com/@elastic/kibana-d3-color/-/kibana-d3-color-2.0.1.tgz#f83b9c2fea09273a918659de04d5e8098c82f65c"
+  integrity sha512-YZ8hV2bWNyYi833Yj3UWczmTxdHzmo/Xc2IVkNXr/ZqtkrTDlTLysCyJm7SfAt9iBy6EVRGWTn8cPz8QOY6Ixw==
 
 "d3-color@1 - 3", d3-color@^3.1.0:
   version "3.1.0"
