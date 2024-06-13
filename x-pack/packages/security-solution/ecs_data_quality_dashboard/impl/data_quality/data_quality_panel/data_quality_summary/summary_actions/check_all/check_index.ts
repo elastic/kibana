@@ -12,9 +12,10 @@ import {
   getSortedPartitionedFieldMetadata,
 } from '../../../index_properties/helpers';
 import * as i18n from './translations';
-import type { EcsMetadata, OnCheckCompleted, PartitionedFieldMetadata } from '../../../../types';
+import type { OnCheckCompleted, PartitionedFieldMetadata } from '../../../../types';
 import { fetchMappings } from '../../../../use_mappings/helpers';
 import { fetchUnallowedValues, getUnallowedValues } from '../../../../use_unallowed_values/helpers';
+import { EcsFlatTyped } from '../../../../constants';
 
 export const EMPTY_PARTITIONED_FIELD_METADATA: PartitionedFieldMetadata = {
   all: [],
@@ -41,7 +42,7 @@ export async function checkIndex({
   abortController: AbortController;
   batchId: string;
   checkAllStartTime: number;
-  ecsMetadata: Record<string, EcsMetadata> | null;
+  ecsMetadata: EcsFlatTyped;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   httpFetch: HttpHandler;
