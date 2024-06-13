@@ -289,10 +289,8 @@ export const invokeAttackDiscoveryTool = ({
 }) => {
   toolInstance
     ?.invoke('')
-    .then((rawAttackDiscoveries: string) => {
-      console.log('invokeAttackDiscoveryTool then ', rawAttackDiscoveries);
-      console.log('updateAttackDiscoveries', updateAttackDiscoveries);
-      return updateAttackDiscoveries({
+    .then((rawAttackDiscoveries: string) =>
+      updateAttackDiscoveries({
         apiConfig,
         attackDiscoveryId,
         authenticatedUser,
@@ -303,8 +301,8 @@ export const invokeAttackDiscoveryTool = ({
         size,
         startTime,
         telemetry,
-      });
-    })
+      })
+    )
     .catch((err) =>
       handleToolError({
         apiConfig,
