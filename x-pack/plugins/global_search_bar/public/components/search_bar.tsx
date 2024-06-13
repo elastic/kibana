@@ -135,7 +135,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         if (searchValue.length !== 0) {
           reportEvent.searchRequest();
         }
-
         const rawParams = parseSearchParams(searchValue.toLowerCase());
         let tagIds: string[] | undefined;
         if (taggingApi && rawParams.filters.tags) {
