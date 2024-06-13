@@ -24,9 +24,6 @@ import React, { useMemo, Fragment } from 'react';
 import styled from 'styled-components';
 
 import { useLocation } from 'react-router-dom';
-import type { CodeEditorProps } from '@kbn/code-editor/code_editor';
-import { CodeEditor } from '@kbn/code-editor/code_editor';
-import { XJsonLang } from '@kbn/monaco';
 import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
@@ -60,30 +57,21 @@ interface Response {
   aggregations: Record<string, unknown>;
 }
 
-const monacoEditorOptions: CodeEditorProps['options'] = {
-  readOnly: true,
-  lineNumbers: 'on',
-  fontSize: 12,
-  minimap: {
-    enabled: false,
-  },
-  folding: true,
-  scrollBeyondLastLine: false,
-  wordWrap: 'on',
-  wrappingIndent: 'indent',
-  automaticLayout: false,
-};
-
 const MyEuiModal = styled(EuiModal)`
   width: min(768px, calc(100vw - 16px));
   height: 41vh;
+
   .euiModal__flex {
     width: 60vw;
   }
 
-  .monaco-editor {
+  [role='tabpanel'] {
     /*
-    * height of the codeblock is calculated according to the Modal height of 41vh
+    * Current tabpanel height is based on the content inside it and since we are using virtualized codeblock,
+    * which needs to have a fixed height of parent to render the codeblock properly, we will set tabpanel height
+    * to take up any remaining space after header, footer and tabs in the Modal.
+    *
+    * height of the tabPanel is calculated according to the Modal height of 41vh
     * and then subtracting the height of the header, footer and the space between the tabs and the codeblock
     *
     * headerHeight + footerHeight + tabsHeight + paddingAroundCodeBlock = 208px
@@ -220,12 +208,12 @@ export const ModalInspectQuery = ({
     [adHocDataViews, inspectRequests, inspectResponses, isSourcererPattern]
   );
 
-  const tabs = useMemo(() => {
-    return [
+  const tabs = useMemo(
+    () => [
       {
         id: 'statistics',
-        'data-test-subj': 'modal-inspect-statistics-tab',
         name: 'Statistics',
+        'data-test-subj': 'modal-inspect-statistics-tab',
         content: (
           <>
             <EuiSpacer />
@@ -245,11 +233,18 @@ export const ModalInspectQuery = ({
           inspectRequests.length > 0 ? (
             inspectRequests.map((inspectRequest, index) => (
               <Fragment key={index}>
-                <CodeEditor
-                  languageId={XJsonLang.ID}
-                  value={manageStringify(inspectRequest.body)}
-                  options={monacoEditorOptions}
-                />
+                <EuiCodeBlock
+                  language="json"
+                  fontSize="m"
+                  paddingSize="m"
+                  color="dark"
+                  overflowHeight="100%"
+                  isCopyable
+                  isVirtualized
+                  lineNumbers
+                >
+                  {manageStringify(inspectRequest.body)}
+                </EuiCodeBlock>
               </Fragment>
             ))
           ) : (
@@ -264,27 +259,30 @@ export const ModalInspectQuery = ({
           inspectResponses.length > 0 ? (
             responses.map((responseText, index) => (
               <Fragment key={index}>
-                <CodeEditor
-                  languageId={XJsonLang.ID}
-                  value={responseText}
-                  options={monacoEditorOptions}
-                />
+                <EuiCodeBlock
+                  language="json"
+                  fontSize="m"
+                  paddingSize="m"
+                  color="dark"
+                  overflowHeight="100%"
+                  isCopyable
+                  isVirtualized
+                  lineNumbers
+                >
+                  {responseText}
+                </EuiCodeBlock>
               </Fragment>
             ))
           ) : (
             <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
           ),
       },
-    ];
-  }, [inspectRequests, inspectResponses, responses, statistics]);
+    ],
+    [inspectRequests, inspectResponses, responses, statistics]
+  );
 
   return (
-    <MyEuiModal
-      id="security-solution__inspect-modal"
-      className="security-solution__inspect-modal"
-      onClose={closeModal}
-      data-test-subj="modal-inspect-euiModal"
-    >
+    <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.INSPECT} {title}

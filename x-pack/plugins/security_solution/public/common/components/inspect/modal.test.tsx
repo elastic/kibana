@@ -13,7 +13,6 @@ import type { ModalInspectProps } from './modal';
 import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
 import { InputsModelId } from '../../store/inputs/constants';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { CodeEditor } from '@kbn/code-editor/code_editor';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -55,13 +54,7 @@ const renderModal = (props: ModalInspectProps = defaultProps) => {
   );
 };
 
-const CodeEditorMock = ({ value }: { value: string }) => {
-  return <div>{value}</div>;
-};
-
 describe('Modal Inspect', () => {
-  (CodeEditor as jest.Mock).mockImplementation(CodeEditorMock);
-
   describe('functionality from tab statistics', () => {
     test('should show statistics tab correctly', () => {
       renderModal();
