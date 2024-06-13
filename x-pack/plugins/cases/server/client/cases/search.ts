@@ -15,12 +15,13 @@ import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_typ
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
-import { constructQueryOptions, constructSearch } from '../utils';
+import { constructQueryOptions } from '../utils';
 import { Operations } from '../../authorization';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesSearchParams } from '../types';
 import { validateSearchCasesCustomFields } from './validators';
+import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -114,18 +115,22 @@ export const search = async (
       ...options,
       customFieldsConfiguration,
       authorizationFilter,
+      searchTerm: paramArgs.search,
+      searchFields: asArray(paramArgs.searchFields),
+      spaceId,
+      savedObjectsSerializer,
     });
 
-    const caseSearch = constructSearch(paramArgs.search, spaceId, savedObjectsSerializer);
+    const caseOptions: SavedObjectFindOptionsKueryNode = {
+      ...paramArgs,
+      ...caseQueryOptions,
+      search: undefined,
+      searchFields: undefined,
+    };
 
     const [cases, statusStats] = await Promise.all([
       caseService.findCasesGroupedByID({
-        caseOptions: {
-          ...paramArgs,
-          ...caseQueryOptions,
-          ...caseSearch,
-          searchFields: asArray(paramArgs.searchFields),
-        },
+        caseOptions,
       }),
       caseService.getCaseStatusStats({
         searchOptions: statusStatsOptions,

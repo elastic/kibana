@@ -54,7 +54,11 @@ import {
   assertUnreachable,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
-import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
+import type {
+  AttachmentRequest,
+  CasesFindRequestSortFields,
+  CasesFindRequestSearchFields,
+} from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
 
@@ -424,8 +428,16 @@ export const constructQueryOptions = ({
   category,
   customFields,
   customFieldsConfiguration,
+  searchTerm,
+  searchFields,
+  spaceId,
+  savedObjectsSerializer,
 }: CasesSearchParams & {
   customFieldsConfiguration?: CustomFieldsConfiguration;
+  searchTerm?: string;
+  searchFields?: CasesFindRequestSearchFields[];
+  spaceId?: string;
+  savedObjectsSerializer?: ISavedObjectsSerializer;
 }): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
@@ -437,6 +449,12 @@ export const constructQueryOptions = ({
   const assigneesFilter = buildAssigneesFilter({ assignees });
   const categoryFilter = buildCategoryFilter(category);
   const customFieldsFilter = buildCustomFieldsFilter({ customFields, customFieldsConfiguration });
+  const searchFilter = buildSearchFilter({
+    searchTerm,
+    searchFields,
+    spaceId,
+    savedObjectsSerializer,
+  });
 
   const filters = combineFilters([
     statusFilter,
@@ -448,6 +466,7 @@ export const constructQueryOptions = ({
     assigneesFilter,
     categoryFilter,
     customFieldsFilter,
+    searchFilter,
   ]);
 
   return {
@@ -580,27 +599,40 @@ export const convertSortField = (
   }
 };
 
-export const constructSearch = (
-  search: string | undefined,
-  spaceId: string,
-  savedObjectsSerializer: ISavedObjectsSerializer
-): { search: string; rootSearchFields?: string[] } | undefined => {
-  if (!search) {
-    return undefined;
-  }
+const buildSearchFilter = ({
+  searchTerm,
+  searchFields,
+  spaceId,
+  savedObjectsSerializer,
+}: {
+  searchTerm?: string;
+  searchFields?: CasesFindRequestSearchFields[];
+  spaceId?: string;
+  savedObjectsSerializer?: ISavedObjectsSerializer;
+}) => {
+  if (!searchTerm || !searchFields) return;
 
-  if (uuidValidate(search)) {
+  // search for title and description
+  const searchFieldsFilters = searchFields.map((field) => {
+    return fromKueryExpression(`${CASE_SAVED_OBJECT}.attributes.${field}:${searchTerm}`);
+  });
+
+  // search inside custom fields
+  const searchCustomFieldsFilter = fromKueryExpression(
+    `${CASE_SAVED_OBJECT}.attributes.customFields:{value.string:${searchTerm}}`
+  );
+
+  // search for _id field if the search term is a uuid
+  let searchIdFilter: KueryNode[] = [];
+  if (uuidValidate(searchTerm) && savedObjectsSerializer && spaceId) {
     const rawId = savedObjectsSerializer.generateRawId(
       spaceIdToNamespace(spaceId),
       CASE_SAVED_OBJECT,
-      search
+      searchTerm
     );
 
-    return {
-      search: `"${search}" "${rawId}"`,
-      rootSearchFields: ['_id'],
-    };
+    searchIdFilter = [fromKueryExpression(`${CASE_SAVED_OBJECT}.id: "${rawId}"`)];
   }
 
-  return { search };
+  return nodeBuilder.or([...searchFieldsFilters, searchCustomFieldsFilter, ...searchIdFilter]);
 };

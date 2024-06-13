@@ -514,3 +514,4 @@ export type CaseRequestCustomFields = rt.TypeOf<typeof CaseRequestCustomFieldsRt
 export type CaseRequestCustomField = rt.TypeOf<typeof CustomFieldRt>;
 export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;
+export type CasesFindRequestSearchFields = rt.TypeOf<typeof CasesFindRequestSearchFieldsRt>;
