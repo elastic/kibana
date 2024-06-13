@@ -6,7 +6,7 @@
  */
 
 import { RunnableConfig } from '@langchain/core/runnables';
-import { END, START, StateGraph } from '@langchain/langgraph';
+import { END, START, StateGraph, StateGraphArgs } from '@langchain/langgraph';
 import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
 import { StructuredTool } from '@langchain/core/tools';
@@ -48,7 +48,6 @@ export const getDefaultAssistantGraph = ({
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
-    // @ts-expect-error remove after bump to TS@5
     const graphState: StateGraphArgs<AgentState>['channels'] = {
       input: {
         value: (x: string, y?: string) => y ?? x,
@@ -98,7 +97,6 @@ export const getDefaultAssistantGraph = ({
     const shouldContinueEdge = (state: AgentState) => shouldContinue({ ...nodeParams, state });
 
     // Put together a new graph using the nodes and default state from above
-    // @ts-expect-error remove after bump to TS@5
     const graph = new StateGraph<AgentState, Partial<AgentState>, '__start__' | 'agent' | 'tools'>({
       channels: graphState,
     });

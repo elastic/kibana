@@ -927,7 +927,7 @@
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
     "@langchain/community": "^0.2.4",
     "@langchain/core": "0.2.3",
-    "@langchain/langgraph": "^0.0.22",
+    "@langchain/langgraph": "^0.0.23",
     "@langchain/openai": "^0.0.34",
     "@langtrase/trace-attributes": "^3.0.8",
     "@langtrase/typescript-sdk": "^2.2.1",
