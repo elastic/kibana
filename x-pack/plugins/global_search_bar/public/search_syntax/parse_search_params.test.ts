@@ -85,14 +85,4 @@ describe('parseSearchParams', () => {
       },
     });
   });
-
-  it('handles plural strings identical to singular', () => {
-    const searchParams1 = parseSearchParams('reports');
-    const searchParams2 = parseSearchParams('report');
-    expect(searchParams1).toEqual(searchParams2);
-    // trimming the s from the end of the term should not affect the result
-    const searchParams3 = parseSearchParams('canvas');
-    const searchParams4 = parseSearchParams('canva');
-    expect(searchParams3).toEqual(searchParams4);
-  });
 });

@@ -20,7 +20,7 @@ export const parseSearchParams = (term: string): ParsedSearchParams => {
   let query: Query;
 
   try {
-    query = Query.parse(term.replace(/s$/, ''));
+    query = Query.parse(term);
   } catch (e) {
     // if the query fails to parse, we just perform the search against the raw search term.
     return {
