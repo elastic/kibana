@@ -3,6 +3,14 @@
   border-bottom-left-radius: 6px;
 }
 
+.TextBasedLangEditor .monaco-editor .monaco-hover {
+  display: none !important;
+}
+
+.TextBasedLangEditor--expanded .monaco-editor .monaco-hover {
+  display: block !important;
+}
+
 .TextBasedLangEditor .monaco-editor .margin {
   border-top-left-radius: 6px;
   border-bottom-left-radius: 6px;
