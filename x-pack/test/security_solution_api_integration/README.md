@@ -53,7 +53,7 @@ The default project type configuration in Serverless is complete. If for the nee
 
 There are already configurations in the `./scripts/api_configs.json` which you can follow in order to add yours when it is needed. The currently supported configuration, allows **ONLY** the PLIs to be configured. Thus, experimental feature flags **are not yet supported** and the test should be skipped until further notice. 
 
-**NOTE**: If a target script living in `package.json` file, does not require any further configuration, then the entry in `./scripts/api_configs.json` file, **can be ommitted!**
+**NOTE**: If a target script living in `package.json` file, does not require any further configuration, then the entry in `./scripts/api_configs.json` file, **can be omitted!**
 
 # Testing locally 
 

@@ -34,7 +34,6 @@ function executeCommand(
   workDir?: string
 ): Promise<number> {
   return new Promise((resolve, reject) => {
-    // const childProcess = exec(command, { env: envVars, cwd: workDir }, (error, stdout, stderr) => {
     const childProcess = exec(command, { env: envVars }, (error, stdout, stderr) => {
       if (error) {
         log.error(`exec error: ${error}`);
@@ -70,7 +69,7 @@ async function parseProductTypes(log: ToolingLog): Promise<ProductType[] | undef
     return process.exit(1);
   }
 
-  const apiConfigs = JSON.parse(fs.readFileSync('./scripts/api_configs.json', 'utf8'));
+  const apiConfigs = JSON.parse(await fs.promises.readFile('./scripts/api_configs.json', 'utf8'));
   try {
     const productTypes: ProductType[] = apiConfigs[process.env.TARGET_SCRIPT][
       'productTypes'
