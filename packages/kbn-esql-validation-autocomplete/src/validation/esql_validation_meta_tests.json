@@ -8973,6 +8973,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval 1 + \"2\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 + \"2\"::long",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval trim(to_double(\"23\")::string::double::long::string::double)",
       "error": [
         "Argument of [trim] must be [string], found value [to_double(\"23\")::string::double::long::string::double] type [double]"

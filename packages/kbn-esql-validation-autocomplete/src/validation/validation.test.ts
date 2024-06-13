@@ -1960,6 +1960,10 @@ describe('validation logic', () => {
         'Argument of [trim] must be [string], found value ["23"::double] type [double]',
       ]);
       testErrorsAndWarnings('from a_index | eval trim(23::string)', []);
+      testErrorsAndWarnings('from a_index | eval 1 + "2"::long', []);
+      testErrorsAndWarnings('from a_index | eval 1 + "2"', [
+        'Argument of [+] must be [number], found value ["2"] type [string]', // just a counter-case to make sure the previous test is meaningful
+      ]);
       testErrorsAndWarnings(
         'from a_index | eval trim(to_double("23")::string::double::long::string::double)',
         [
