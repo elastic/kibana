@@ -176,14 +176,14 @@ export const getRangesliderControlFactory = (
         const fieldName = dataControlStateManager.fieldName.value;
         const dataViewField =
           dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-        const min = parseFloat(value?.[0] ?? '');
-        const max = parseFloat(value?.[1] ?? '');
+        const gte = parseFloat(value?.[0] ?? '');
+        const lte = parseFloat(value?.[1] ?? '');
 
         let rangeFilter: Filter | undefined;
-        if (value && dataView && dataViewField && !isNaN(min) && !isNaN(max)) {
+        if (value && dataView && dataViewField && !isNaN(gte) && !isNaN(lte)) {
           const params = {
-            gte: min,
-            lte: max,
+            gte,
+            lte,
           } as RangeFilterParams;
 
           rangeFilter = buildRangeFilter(dataViewField, params, dataView);
