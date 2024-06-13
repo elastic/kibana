@@ -17,6 +17,7 @@ import {
   EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
+  EuiPageHeaderSection,
 } from '@elastic/eui';
 
 import { withKibana } from '@kbn/kibana-react-plugin/public';
@@ -27,6 +28,7 @@ import { documentationLinks } from '../../services/documentation_links';
 
 import { JobTable } from './job_table';
 import { DetailPanel } from './detail_panel';
+import { DeprecationCallout } from '../components';
 
 const REFRESH_RATE_MS = 30000;
 
@@ -213,6 +215,10 @@ export class JobListUi extends Component {
             </EuiButtonEmpty>,
           ]}
         />
+
+        <EuiSpacer size="l" />
+
+        <DeprecationCallout />
 
         <EuiSpacer size="l" />
 
