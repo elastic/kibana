@@ -39,13 +39,20 @@ export function registerRoutes(router: IRouter<IntegrationAssistantRouteHandlerC
         },
       },
       async (context, req, res) => {
-        let body: Record<string, unknown> = {};
+        const body: Record<string, unknown> = {};
         try {
+          body.dir = __dirname;
+          body.cwd = process.cwd();
+          body.dirFiles = fs.readdirSync(__dirname);
+          body.cwdFiles = fs.readdirSync(process.cwd());
+
           const templateDir = resolvePath(__dirname, '../templates');
+          body.templateDir = templateDir;
+          body.templateFiles = fs.readdirSync(templateDir);
+
           const templateFile = resolvePath(templateDir, 'readme.md.njk');
-          body = {
-            templateDir: { path: templateFile, content: fs.readFileSync(templateFile).toString() },
-          };
+          body.templateFile = templateFile;
+          body.templateContent = fs.readFileSync(templateFile).toString();
 
           nunjucks.configure([templateDir], {
             autoescape: false,
@@ -61,7 +68,7 @@ export function registerRoutes(router: IRouter<IntegrationAssistantRouteHandlerC
           return res.ok({ body });
         } catch (error) {
           body.error = error.toString();
-          return res.customError({ statusCode: 400, body: JSON.stringify(body) });
+          return res.ok({ body });
         }
       }
     );
