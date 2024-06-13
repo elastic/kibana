@@ -338,7 +338,7 @@ const formatBedrockBody = ({
 }) => ({
   anthropic_version: 'bedrock-2023-05-31',
   ...ensureMessageFormat(messages, system),
-  max_tokens: DEFAULT_TOKEN_LIMIT,
+  max_tokens: maxTokens,
   stop_sequences: stopSequences,
   temperature,
 });
@@ -357,6 +357,10 @@ const ensureMessageFormat = (
 
   const newMessages = messages.reduce((acc: Array<{ role: string; content: string }>, m) => {
     const lastMessage = acc[acc.length - 1];
+    if (m.role === 'system') {
+      system = `${system.length ? `${system}\n` : ''}${m.content}`;
+      return acc;
+    }
 
     if (lastMessage && lastMessage.role === m.role) {
       // Bedrock only accepts assistant and user roles.
@@ -367,13 +371,11 @@ const ensureMessageFormat = (
       ];
     }
 
-    if (m.role === 'system') {
-      system = `${system.length ? `${system}\n` : ''}${m.content}`;
-      return acc;
-    }
-
     // force role outside of system to ensure it is either assistant or user
-    return [...acc, { content: m.content, role: m.role === 'assistant' ? 'assistant' : 'user' }];
+    return [
+      ...acc,
+      { content: m.content, role: ['assistant', 'ai'].includes(m.role) ? 'assistant' : 'user' },
+    ];
   }, []);
   return system.length ? { system, messages: newMessages } : { messages: newMessages };
 };
