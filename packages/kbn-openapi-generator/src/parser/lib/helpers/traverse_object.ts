@@ -11,15 +11,13 @@
  *
  * @param obj The object to traverse
  * @param onVisit A function that will be called for each traversed node in the object
- *                Optionally it can return an object to be used for further traversal
- *                as a child node. It helps to "expand" OpenAPI references.
  */
-export function traverseObject(obj: unknown, onVisit: (element: object) => object | void) {
+export function traverseObject(obj: unknown, onVisit: (element: object) => void) {
   function search(element: unknown) {
     if (typeof element === 'object' && element !== null) {
-      const nextNode = onVisit(element);
+      onVisit(element);
 
-      Object.values(nextNode ?? element).forEach((value) => {
+      Object.values(element).forEach((value) => {
         if (Array.isArray(value)) {
           value.forEach(search);
         } else {
