@@ -13,7 +13,7 @@ import {
   Plugin,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
+import { NavigationSection } from '@kbn/observability-shared-plugin/public';
 import type { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
 import { OBLT_PROFILING_APP_ID } from '@kbn/deeplinks-observability';
@@ -25,8 +25,19 @@ import { ProfilingEmbeddablesDependencies } from './embeddables/profiling_embedd
 export type ProfilingPluginSetup = void;
 export type ProfilingPluginStart = void;
 
-export class ProfilingPlugin implements Plugin {
-  public setup(coreSetup: CoreSetup, pluginsSetup: ProfilingPluginPublicSetupDeps) {
+export class ProfilingPlugin
+  implements
+    Plugin<
+      ProfilingPluginSetup,
+      ProfilingPluginStart,
+      ProfilingPluginPublicSetupDeps,
+      ProfilingPluginPublicStartDeps
+    >
+{
+  public setup(
+    coreSetup: CoreSetup<ProfilingPluginPublicStartDeps>,
+    pluginsSetup: ProfilingPluginPublicSetupDeps
+  ) {
     // Register an application into the side navigation menu
     const links = [
       {
@@ -93,11 +104,7 @@ export class ProfilingPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: links,
       async mount({ element, history, theme$, setHeaderActionMenu }: AppMountParameters) {
-        const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
-          CoreStart,
-          ProfilingPluginPublicStartDeps,
-          unknown
-        ];
+        const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
         const { renderApp } = await import('./app');
 
@@ -133,11 +140,7 @@ export class ProfilingPlugin implements Plugin {
 
     const getProfilingEmbeddableDependencies =
       async (): Promise<ProfilingEmbeddablesDependencies> => {
-        const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
-          CoreStart,
-          ProfilingPluginPublicStartDeps,
-          unknown
-        ];
+        const [coreStart, pluginsStart] = await coreSetup.getStartServices();
         return {
           coreStart,
           coreSetup,
@@ -147,7 +150,9 @@ export class ProfilingPlugin implements Plugin {
         };
       };
 
-    registerEmbeddables(pluginsSetup.embeddable, getProfilingEmbeddableDependencies);
+    getProfilingEmbeddableDependencies().then((deps) => {
+      registerEmbeddables(deps);
+    });
 
     return {};
   }
