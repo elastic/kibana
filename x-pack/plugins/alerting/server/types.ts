@@ -28,6 +28,7 @@ import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
 import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import { AlertsHealth } from '@kbn/alerting-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -50,7 +51,6 @@ import {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertsHealth,
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
