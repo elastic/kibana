@@ -43,7 +43,6 @@ import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 import {
-  SelectedPolicyTab,
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
@@ -64,12 +63,12 @@ import {
 
 import { RootPrivilegesCallout } from '../create_package_policy_page/single_page_layout/root_callout';
 
-import { useDevToolsRequest } from '../create_package_policy_page/single_page_layout/hooks';
+import { StepsWithLessPadding } from '../create_package_policy_page/single_page_layout';
 
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
-import { PackagePolicySteps } from './components/package_policy_steps';
+import { usePackagePolicySteps } from './hooks';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -146,12 +145,6 @@ export const EditPackagePolicyForm = memo<{
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
-  );
-
-  const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-
-  const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
-    SelectedPolicyTab.EXISTING
   );
 
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
@@ -415,14 +408,6 @@ export const EditPackagePolicyForm = memo<{
     </ExtensionWrapper>
   );
 
-  const { devtoolRequest, devtoolRequestDescription, showDevtoolsRequest } = useDevToolsRequest({
-    newAgentPolicy,
-    packagePolicy,
-    selectedPolicyTab,
-    withSysMonitoring,
-    packageInfo,
-    packagePolicyId,
-  });
   const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
 
   const agentPolicyBreadcrumb = useMemo(() => {
@@ -430,6 +415,24 @@ export const EditPackagePolicyForm = memo<{
       ? existingAgentPolicies.find((policy) => policy.id === policyId) ?? existingAgentPolicies[0]
       : { name: '', id: '' };
   }, [existingAgentPolicies, policyId]);
+
+  const {
+    steps,
+    devToolsProps: { devtoolRequest, devtoolRequestDescription, showDevtoolsRequest },
+  } = usePackagePolicySteps({
+    configureStep: replaceConfigurePackage || configurePackage,
+    packageInfo,
+    existingAgentPolicies,
+    newAgentPolicy,
+    setNewAgentPolicy,
+    setHasAgentPolicyError,
+    updatePackagePolicy,
+    agentPolicies,
+    setAgentPolicies,
+    isLoadingData,
+    packagePolicy,
+    packagePolicyId,
+  });
 
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="editPackagePolicy">
@@ -482,22 +485,7 @@ export const EditPackagePolicyForm = memo<{
               </>
             )}
             {enableReusableIntegrationPolicies ? (
-              <PackagePolicySteps
-                configureStep={replaceConfigurePackage || configurePackage}
-                packageInfo={packageInfo}
-                existingAgentPolicies={existingAgentPolicies}
-                newAgentPolicy={newAgentPolicy}
-                setNewAgentPolicy={setNewAgentPolicy}
-                setHasAgentPolicyError={setHasAgentPolicyError}
-                updatePackagePolicy={updatePackagePolicy}
-                agentPolicies={agentPolicies}
-                setAgentPolicies={setAgentPolicies}
-                isLoadingData={isLoadingData}
-                withSysMonitoring={withSysMonitoring}
-                setWithSysMonitoring={setWithSysMonitoring}
-                selectedPolicyTab={selectedPolicyTab}
-                setSelectedPolicyTab={setSelectedPolicyTab}
-              />
+              <StepsWithLessPadding steps={steps} />
             ) : (
               replaceConfigurePackage || configurePackage
             )}

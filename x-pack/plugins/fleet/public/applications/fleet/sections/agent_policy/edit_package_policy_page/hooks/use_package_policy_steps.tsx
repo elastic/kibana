@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui';
 
-import type { AgentPolicy, NewAgentPolicy } from '../../../../../../../common';
+import type { AgentPolicy, NewAgentPolicy, NewPackagePolicy } from '../../../../../../../common';
 
 import { SelectedPolicyTab, StepSelectHosts } from '../../create_package_policy_page/components';
-import { StepsWithLessPadding } from '../../create_package_policy_page/single_page_layout';
 import type { PackageInfo } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
-import { useSetupTechnology } from '../../create_package_policy_page/single_page_layout/hooks';
+import {
+  useDevToolsRequest,
+  useSetupTechnology,
+} from '../../create_package_policy_page/single_page_layout/hooks';
 import { agentPolicyFormValidation } from '../../components';
 
-interface Props {
+interface Params {
   configureStep: React.ReactNode;
   packageInfo?: PackageInfo;
   existingAgentPolicies: AgentPolicy[];
@@ -30,13 +32,11 @@ interface Props {
   agentPolicies: AgentPolicy[];
   setAgentPolicies: (agentPolicies: AgentPolicy[]) => void;
   isLoadingData: boolean;
-  withSysMonitoring: boolean;
-  setWithSysMonitoring: (value: boolean) => void;
-  selectedPolicyTab: SelectedPolicyTab;
-  setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
+  packagePolicy: NewPackagePolicy;
+  packagePolicyId: string;
 }
 
-export const PackagePolicySteps: React.FC<Props> = ({
+export function usePackagePolicySteps({
   configureStep,
   packageInfo,
   existingAgentPolicies,
@@ -47,11 +47,14 @@ export const PackagePolicySteps: React.FC<Props> = ({
   agentPolicies,
   setAgentPolicies,
   isLoadingData,
-  withSysMonitoring,
-  setWithSysMonitoring,
-  selectedPolicyTab,
-  setSelectedPolicyTab,
-}) => {
+  packagePolicy,
+  packagePolicyId,
+}: Params) {
+  const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
+
+  const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
+    SelectedPolicyTab.EXISTING
+  );
   const validation = agentPolicyFormValidation(newAgentPolicy);
 
   const setPolicyValidation = useCallback(
@@ -188,5 +191,17 @@ export const PackagePolicySteps: React.FC<Props> = ({
     });
   }
 
-  return <StepsWithLessPadding steps={steps} />;
-};
+  const devToolsProps = useDevToolsRequest({
+    newAgentPolicy,
+    packagePolicy,
+    selectedPolicyTab,
+    withSysMonitoring,
+    packageInfo,
+    packagePolicyId,
+  });
+
+  return {
+    steps,
+    devToolsProps,
+  };
+}
