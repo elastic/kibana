@@ -9,6 +9,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
+import { isEqual } from 'lodash';
+
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -85,6 +87,7 @@ const DEFAULT_PACKAGE_POLICY = {
   description: '',
   namespace: '',
   policy_id: '',
+  policy_ids: [''],
   enabled: true,
   inputs: [],
 };
@@ -120,7 +123,7 @@ export function useOnSubmit({
   // Used to initialize the package policy once
   const isInitializedRef = useRef(false);
 
-  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
+  const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   // New package policy state
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     ...DEFAULT_PACKAGE_POLICY,
@@ -135,22 +138,25 @@ export function useOnSubmit({
     useAgentless();
 
   // Update agent policy method
-  const updateAgentPolicy = useCallback(
-    (updatedAgentPolicy: AgentPolicy | undefined) => {
-      if (updatedAgentPolicy) {
-        setAgentPolicy(updatedAgentPolicy);
+  const updateAgentPolicies = useCallback(
+    (updatedAgentPolicies: AgentPolicy[]) => {
+      if (isEqual(updatedAgentPolicies, agentPolicies)) {
+        return;
+      }
+      if (updatedAgentPolicies.length > 0) {
+        setAgentPolicies(updatedAgentPolicies);
         if (packageInfo) {
           setHasAgentPolicyError(false);
         }
       } else {
         setHasAgentPolicyError(true);
-        setAgentPolicy(undefined);
+        setAgentPolicies([]);
       }
 
       // eslint-disable-next-line no-console
-      console.debug('Agent policy updated', updatedAgentPolicy);
+      console.debug('Agent policy updated', updatedAgentPolicies);
     },
-    [packageInfo, setAgentPolicy]
+    [packageInfo, agentPolicies]
   );
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
@@ -186,7 +192,8 @@ export function useOnSubmit({
       const hasValidationErrors = newValidationResults
         ? validationHasErrors(newValidationResults)
         : false;
-      const hasAgentPolicy = newPackagePolicy.policy_id && newPackagePolicy.policy_id !== '';
+      const hasAgentPolicy =
+        newPackagePolicy.policy_ids.length > 0 && newPackagePolicy.policy_ids[0] !== '';
       if (
         hasPackage &&
         (hasAgentPolicy || selectedPolicyTab === SelectedPolicyTab.NEW) &&
@@ -219,7 +226,7 @@ export function useOnSubmit({
       updatePackagePolicy(
         packageToPackagePolicy(
           packageInfo,
-          agentPolicy?.id || '',
+          agentPolicies.map((policy) => policy.id),
           '',
           DEFAULT_PACKAGE_POLICY.name || incrementedName,
           DEFAULT_PACKAGE_POLICY.description,
@@ -229,15 +236,21 @@ export function useOnSubmit({
       setIsInitialized(true);
     }
     init();
-  }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable, isInitialized]);
+  }, [packageInfo, agentPolicies, updatePackagePolicy, integrationToEnable, isInitialized]);
 
   useEffect(() => {
-    if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
+    if (
+      agentPolicies.length > 0 &&
+      !isEqual(
+        agentPolicies.map((policy) => policy.id),
+        packagePolicy.policy_ids
+      )
+    ) {
       updatePackagePolicy({
-        policy_id: agentPolicy.id,
+        policy_ids: agentPolicies.map((policy) => policy.id),
       });
     }
-  }, [packagePolicy, agentPolicy, updatePackagePolicy]);
+  }, [packagePolicy, agentPolicies, updatePackagePolicy]);
 
   const onSaveNavigate = useOnSaveNavigate({
     packagePolicy,
@@ -293,8 +306,8 @@ export function useOnSubmit({
             packagePolicy,
             withSysMonitoring,
           });
-          setAgentPolicy(createdPolicy);
-          updatePackagePolicy({ policy_id: createdPolicy.id });
+          setAgentPolicies([createdPolicy]);
+          updatePackagePolicy({ policy_ids: [createdPolicy.id] });
         } catch (e) {
           setFormState('VALID');
           notifications.toasts.addError(e, {
@@ -306,7 +319,9 @@ export function useOnSubmit({
         }
       }
 
-      const agentPolicyIdToSave = createdPolicy?.id ?? packagePolicy.policy_id;
+      const agentPolicyIdToSave = createdPolicy?.id
+        ? [createdPolicy?.id]
+        : packagePolicy.policy_ids;
 
       const shouldForceInstallOnAgentless =
         isAgentlessAgentPolicy(createdPolicy) ||
@@ -319,7 +334,7 @@ export function useOnSubmit({
       // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
       const { error, data } = await savePackagePolicy({
         ...packagePolicy,
-        policy_id: agentPolicyIdToSave,
+        policy_ids: agentPolicyIdToSave,
         force: forceInstall,
       });
 
@@ -357,7 +372,7 @@ export function useOnSubmit({
         setSavedPackagePolicy(data!.item);
 
         const promptForAgentEnrollment =
-          !(agentCount && agentPolicy) && hasFleetAddAgentsPrivileges;
+          !(agentCount && agentPolicies.length > 0) && hasFleetAddAgentsPrivileges;
         if (promptForAgentEnrollment && hasAzureArmTemplate) {
           setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
           return;
@@ -378,16 +393,16 @@ export function useOnSubmit({
 
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
-            defaultMessage: `'{packagePolicyName}' integration added.`,
+            defaultMessage: `''{packagePolicyName}'' integration added.`,
             values: {
               packagePolicyName: packagePolicy.name,
             },
           }),
           text: promptForAgentEnrollment
             ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the ''{agentPolicyName}'' policy.`,
+                defaultMessage: `Fleet will deploy updates to all agents that use the ''{agentPolicyNames}'' policies.`,
                 values: {
-                  agentPolicyName: agentPolicy!.name,
+                  agentPolicyNames: agentPolicies.map((policy) => policy.name).join(', '),
                 },
               })
             : undefined,
@@ -427,15 +442,15 @@ export function useOnSubmit({
       newAgentPolicy,
       updatePackagePolicy,
       notifications.toasts,
-      agentPolicy,
+      agentPolicies,
       onSaveNavigate,
       confirmForceInstall,
     ]
   );
 
   return {
-    agentPolicy,
-    updateAgentPolicy,
+    agentPolicies,
+    updateAgentPolicies,
     packagePolicy,
     updatePackagePolicy,
     savedPackagePolicy,

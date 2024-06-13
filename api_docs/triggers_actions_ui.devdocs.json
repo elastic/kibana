@@ -8056,7 +8056,7 @@
             "EuiDataGridCellPopoverElementProps",
             " & { alert: ",
             "EcsFieldsResponse",
-            "; }) => React.ReactNode | JSX.Element) | undefined; } & Omit<Partial<",
+            "; }) => React.ReactNode | JSX.Element) | undefined; emptyStateHeight?: \"short\" | \"tall\" | undefined; } & Omit<Partial<",
             "EuiDataGridProps",
             ">, \"renderCellPopover\"> & ",
             "LazyLoadProps",
@@ -8114,7 +8114,7 @@
                 "EuiDataGridCellPopoverElementProps",
                 " & { alert: ",
                 "EcsFieldsResponse",
-                "; }) => React.ReactNode | JSX.Element) | undefined; } & Omit<Partial<",
+                "; }) => React.ReactNode | JSX.Element) | undefined; emptyStateHeight?: \"short\" | \"tall\" | undefined; } & Omit<Partial<",
                 "EuiDataGridProps",
                 ">, \"renderCellPopover\"> & ",
                 "LazyLoadProps"
