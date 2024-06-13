@@ -19,7 +19,7 @@ const INTEGER_REGEX = /^[1-9][0-9]*$/;
 const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
 
 export const RuleAlertDelay = () => {
-  const { formData, errors = {} } = useRuleFormState();
+  const { formData, baseErrors } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
@@ -57,8 +57,8 @@ export const RuleAlertDelay = () => {
     <EuiFormRow
       fullWidth
       label={ALERT_DELAY_TITLE}
-      isInvalid={errors.alertDelay?.length > 0}
-      error={errors.alertDelay}
+      isInvalid={!!baseErrors?.alertDelay?.length}
+      error={baseErrors?.alertDelay}
       data-test-subj="alertDelay"
       display="rowCompressed"
     >
@@ -69,7 +69,7 @@ export const RuleAlertDelay = () => {
         name="alertDelay"
         data-test-subj="alertDelayInput"
         prepend={[ALERT_DELAY_TITLE_PREFIX]}
-        isInvalid={errors.alertDelay?.length > 0}
+        isInvalid={!!baseErrors?.alertDelay?.length}
         append={ALERT_DELAY_TITLE_SUFFIX}
         onChange={onAlertDelayChange}
         onKeyDown={onKeyDown}

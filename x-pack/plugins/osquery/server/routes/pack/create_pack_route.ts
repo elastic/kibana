@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 import { set } from '@kbn/safer-lodash-set';
-import { has, unset, find, some, mapKeys } from 'lodash';
+import { has, unset, some, mapKeys } from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
@@ -137,7 +137,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         if (enabled && policiesList.length) {
           await Promise.all(
             policiesList.map((agentPolicyId) => {
-              const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
+              const packagePolicy = packagePolicies.find((policy) =>
+                policy.policy_ids.includes(agentPolicyId)
+              );
               if (packagePolicy) {
                 return packagePolicyService?.update(
                   internalSavedObjectsClient,
@@ -150,8 +152,8 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     }
 
                     set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                      shard: policyShards[packagePolicy.policy_id]
-                        ? policyShards[packagePolicy.policy_id]
+                      shard: policyShards[packagePolicy.policy_ids[0]] // TODO
+                        ? policyShards[packagePolicy.policy_ids[0]]
                         : 100,
                       queries: convertSOQueriesToPackConfig(queries),
                     });

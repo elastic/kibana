@@ -99,7 +99,6 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
 
   return (
     <EuiFlyout
-      ownFocus={false}
       onClose={onClose}
       data-test-subj={TEST_SUBJECTS.CSP_RULES_FLYOUT_CONTAINER}
       outsideClickCloses

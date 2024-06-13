@@ -27,7 +27,7 @@ import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 export const RulePageNameInput = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  const { formData, errors = {} } = useRuleFormState();
+  const { formData, baseErrors } = useRuleFormState();
 
   const { name } = formData;
 
@@ -35,9 +35,9 @@ export const RulePageNameInput = () => {
 
   const { euiTheme } = useEuiTheme();
 
-  const isInvalid = useMemo(() => {
-    return errors.name?.length > 0;
-  }, [errors]);
+  const isNameInvalid = useMemo(() => {
+    return !!baseErrors?.name?.length;
+  }, [baseErrors]);
 
   const inputStyles: React.CSSProperties = useMemo(() => {
     return {
@@ -71,29 +71,29 @@ export const RulePageNameInput = () => {
   }, []);
 
   const onCancelEdit = useCallback(() => {
-    if (isInvalid) {
+    if (isNameInvalid) {
       return;
     }
     setIsEditing(false);
-  }, [isInvalid]);
+  }, [isNameInvalid]);
 
   const onkeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (isInvalid) {
+      if (isNameInvalid) {
         return;
       }
       if (e.key === 'Enter' || e.key === 'Escape') {
         setIsEditing(false);
       }
     },
-    [isInvalid]
+    [isNameInvalid]
   );
 
   if (isEditing) {
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={10}>
-          <EuiFormRow fullWidth isInvalid={errors.name?.length > 0} error={errors?.name ?? ''}>
+          <EuiFormRow fullWidth isInvalid={isNameInvalid} error={baseErrors?.name}>
             <EuiTitle size="l">
               <h1>
                 <EuiFieldText
@@ -103,7 +103,7 @@ export const RulePageNameInput = () => {
                   placeholder={RULE_NAME_INPUT_TITLE}
                   style={inputStyles}
                   value={name}
-                  isInvalid={errors.name?.length > 0}
+                  isInvalid={isNameInvalid}
                   onChange={onInputChange}
                   onBlur={onCancelEdit}
                   onKeyDown={onkeyDown}

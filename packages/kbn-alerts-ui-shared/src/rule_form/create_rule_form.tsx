@@ -85,7 +85,21 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
 
   const onSave = useCallback(
     (newFormData: RuleFormData) => {
-      mutate({ formData: newFormData });
+      mutate({
+        formData: {
+          name: newFormData.name,
+          ruleTypeId: newFormData.ruleTypeId!,
+          enabled: true,
+          consumer: newFormData.consumer,
+          tags: newFormData.tags,
+          params: newFormData.params,
+          schedule: newFormData.schedule,
+          // TODO: Will add actions in the actions PR
+          actions: [],
+          notifyWhen: newFormData.notifyWhen,
+          alertDelay: newFormData.alertDelay,
+        },
+      });
     },
     [mutate]
   );

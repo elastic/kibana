@@ -16,8 +16,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { RuleDefinition } from './rule_definition';
-import { RuleTypeModel } from '../types';
 import { RuleType } from '@kbn/alerting-types';
+import { RuleTypeModel } from '../../common/types';
 
 jest.mock('../hooks', () => ({
   useRuleFormState: jest.fn(),
@@ -218,7 +218,7 @@ describe('Rule Definition', () => {
       },
     });
     expect(mockOnChange).toHaveBeenCalledWith({
-      type: 'setSchedule', 
+      type: 'setSchedule',
       payload: {
         interval: '10m',
       },

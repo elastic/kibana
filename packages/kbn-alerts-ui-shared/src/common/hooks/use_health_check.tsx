@@ -8,10 +8,9 @@
 
 import { useMemo } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { HealthStatus } from '../types';
-import { healthCheckErrors, HealthCheckErrors } from '../types';
 import { useLoadAlertingFrameworkHealth } from './use_load_alerting_framework_health';
 import { useLoadUiHealth } from './use_load_ui_health';
+import { healthCheckErrors, HealthCheckErrors } from '../apis';
 
 export interface UseHealthCheckProps {
   http: HttpStart;
@@ -20,6 +19,12 @@ export interface UseHealthCheckProps {
 export interface UseHealthCheckResult {
   isLoading: boolean;
   healthCheckError: HealthCheckErrors | null;
+}
+
+export interface HealthStatus {
+  isRulesAvailable: boolean;
+  isSufficientlySecure: boolean;
+  hasPermanentEncryptionKey: boolean;
 }
 
 export const useHealthCheck = (props: UseHealthCheckProps) => {

@@ -7,9 +7,17 @@
  */
 
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { RuleTypeWithDescription } from '../../common/types';
+import {
+  RuleTypeModel,
+  RuleTypeRegistryContract,
+  RuleTypeWithDescription,
+} from '../../common/types';
 import { ALERTING_FEATURE_ID, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
-import { RuleTypeItems, RuleTypeModel, RuleTypeRegistryContract } from '../types';
+
+export type RuleTypeItems = Array<{
+  ruleTypeModel: RuleTypeModel;
+  ruleType: RuleTypeWithDescription;
+}>;
 
 const hasAllPrivilege = (consumer: string, ruleType: RuleTypeWithDescription): boolean => {
   return ruleType.authorizedConsumers[consumer]?.all ?? false;

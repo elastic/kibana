@@ -8,19 +8,18 @@
 
 import { useMutation } from '@tanstack/react-query';
 import type { HttpStart, IHttpFetchError } from '@kbn/core-http-browser';
-import { RuleFormData } from '../../rule_form';
-import { updateRule } from '../apis';
+import { updateRule, UpdateRuleBody } from '../apis/update_rule';
 
 export interface UseUpdateRuleProps {
   http: HttpStart;
-  onSuccess?: (formData: RuleFormData) => void;
+  onSuccess?: (formData: UpdateRuleBody) => void;
   onError?: (error: IHttpFetchError<{ message: string }>) => void;
 }
 
 export const useUpdateRule = (props: UseUpdateRuleProps) => {
   const { http, onSuccess, onError } = props;
 
-  const mutationFn = ({ id, formData }: { id: string; formData: RuleFormData }) => {
+  const mutationFn = ({ id, formData }: { id: string; formData: UpdateRuleBody }) => {
     return updateRule({
       id,
       http,
@@ -29,8 +28,8 @@ export const useUpdateRule = (props: UseUpdateRuleProps) => {
   };
 
   return useMutation({
-    mutationFn,
     mutationKey: ['useUpdateRule'],
+    mutationFn,
     onSuccess,
     onError,
   });

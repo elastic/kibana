@@ -21,3 +21,13 @@ export interface BackfillStats {
 }
 
 export type BackfillRow = Backfill & BackfillStats;
+
+export interface TimeRange {
+  startDate: moment.Moment;
+  endDate: moment.Moment;
+}
+
+export interface ScheduleBackfillProps {
+  ruleIds: string[];
+  timeRange: TimeRange;
+}

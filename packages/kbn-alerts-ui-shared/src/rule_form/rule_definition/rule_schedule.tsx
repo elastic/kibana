@@ -15,13 +15,13 @@ import {
   getDurationNumberInItsUnit,
 } from '../utils/parse_duration';
 import { getTimeOptions } from '../utils/get_time_options';
-import { MinimumScheduleInterval } from '../types';
 import {
   SCHEDULE_TITLE_PREFIX,
   INTERVAL_MINIMUM_TEXT,
   INTERVAL_WARNING_TEXT,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
+import { MinimumScheduleInterval } from '../../common';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
@@ -49,7 +49,7 @@ const getHelpTextForInterval = (
 };
 
 export const RuleSchedule = () => {
-  const { formData, errors = {}, minimumScheduleInterval } = useRuleFormState();
+  const { formData, baseErrors, minimumScheduleInterval } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
@@ -58,8 +58,8 @@ export const RuleSchedule = () => {
   } = formData;
 
   const hasIntervalError = useMemo(() => {
-    return errors.interval?.length > 0;
-  }, [errors]);
+    return !!baseErrors?.interval?.length;
+  }, [baseErrors]);
 
   const intervalNumber = useMemo(() => {
     return getDurationNumberInItsUnit(interval ?? 1);
@@ -120,15 +120,15 @@ export const RuleSchedule = () => {
       data-test-subj="ruleSchedule"
       display="rowCompressed"
       helpText={helpText}
-      isInvalid={errors.interval?.length > 0}
-      error={errors.interval}
+      isInvalid={hasIntervalError}
+      error={baseErrors?.interval}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={2}>
           <EuiFieldNumber
             fullWidth
             prepend={[SCHEDULE_TITLE_PREFIX]}
-            isInvalid={errors.interval?.length > 0}
+            isInvalid={hasIntervalError}
             value={intervalNumber}
             name="interval"
             data-test-subj="ruleScheduleNumberInput"

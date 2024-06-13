@@ -8,7 +8,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { fetchAlertingFrameworkHealth } from '../apis';
+import { fetchAlertingFrameworkHealth } from '../apis/fetch_alerting_framework_health';
 
 export interface UseLoadAlertingFrameworkHealthProps {
   http: HttpStart;
@@ -21,7 +21,7 @@ export const useLoadAlertingFrameworkHealth = (props: UseLoadAlertingFrameworkHe
     return fetchAlertingFrameworkHealth({ http });
   };
 
-  const { data, isSuccess, isFetching, isLoading, isError, error } = useQuery({
+  const { data, isSuccess, isFetching, isLoading, isInitialLoading, isError, error } = useQuery({
     queryKey: ['useLoadAlertingFrameworkHealth'],
     queryFn,
     refetchOnWindowFocus: false,
@@ -30,6 +30,7 @@ export const useLoadAlertingFrameworkHealth = (props: UseLoadAlertingFrameworkHe
   return {
     data,
     isLoading: isLoading || isFetching,
+    isInitialLoading,
     isSuccess,
     isError,
     error,

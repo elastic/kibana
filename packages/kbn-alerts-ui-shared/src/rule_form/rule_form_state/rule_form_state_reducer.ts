@@ -81,16 +81,14 @@ const getUpdateWithValidation =
     return {
       ...ruleFormState,
       formData,
-      errors: {
-        ...validateRuleBase({
-          formData: formDataWithMultiConsumer,
-          minimumScheduleInterval,
-        }),
-        ...validateRuleParams({
-          formData: formDataWithMultiConsumer,
-          ruleTypeModel: selectedRuleTypeModel,
-        }),
-      },
+      baseErrors: validateRuleBase({
+        formData: formDataWithMultiConsumer,
+        minimumScheduleInterval,
+      }),
+      paramsErrors: validateRuleParams({
+        formData: formDataWithMultiConsumer,
+        ruleTypeModel: selectedRuleTypeModel,
+      }),
     };
   };
 

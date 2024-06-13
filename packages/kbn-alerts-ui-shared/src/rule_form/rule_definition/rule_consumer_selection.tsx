@@ -35,11 +35,9 @@ type ComboBoxOption = EuiComboBoxOptionOption<RuleCreationValidConsumer>;
 export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
   const { validConsumers } = props;
 
-  const { multiConsumerSelection, errors = {} } = useRuleFormState();
+  const { multiConsumerSelection, baseErrors } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
-
-  const isInvalid = (errors.consumer?.length || 0) > 0;
 
   const validatedSelectedConsumer = useMemo(() => {
     return getValidatedMultiConsumer({
@@ -101,8 +99,8 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
     <EuiFormRow
       fullWidth
       label={CONSUMER_SELECT_TITLE}
-      isInvalid={isInvalid}
-      error={errors?.consumer ?? ''}
+      isInvalid={!!baseErrors?.consumer?.length}
+      error={baseErrors?.consumer}
       data-test-subj="ruleConsumerSelection"
     >
       <EuiComboBox

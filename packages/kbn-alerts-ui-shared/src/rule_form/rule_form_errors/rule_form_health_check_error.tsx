@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { healthCheckErrors, HealthCheckErrors } from '../../common/types';
+import { HealthCheckErrors, healthCheckErrors } from '../../common/apis';
 
 import {
   HEALTH_CHECK_ALERTS_ERROR_TITLE,

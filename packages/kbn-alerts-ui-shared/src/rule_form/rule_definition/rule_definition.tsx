@@ -51,7 +51,7 @@ interface RuleDefinitionProps {
 export const RuleDefinition = (props: RuleDefinitionProps) => {
   const { canShowConsumerSelection = false, validConsumers } = props;
 
-  const { formData, plugins, errors, metadata, id, selectedRuleType, selectedRuleTypeModel } =
+  const { formData, plugins, paramsErrors, metadata, id, selectedRuleType, selectedRuleTypeModel } =
     useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
@@ -179,7 +179,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
                     ruleInterval={schedule.interval}
                     ruleThrottle={''}
                     alertNotifyWhen={notifyWhen || 'onActionGroupChange'}
-                    errors={errors || {}}
+                    errors={paramsErrors || {}}
                     setRuleParams={onSetRuleParams}
                     setRuleProperty={onSetRuleProperty}
                     defaultActionGroupId={selectedRuleType.defaultActionGroupId}

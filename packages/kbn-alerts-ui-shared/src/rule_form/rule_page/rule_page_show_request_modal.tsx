@@ -23,9 +23,11 @@ import {
 import { BASE_ALERTING_API_PATH } from '../../common/constants';
 import { RuleFormData } from '../types';
 import {
-  rewriteCreateBodyRequest,
-  rewriteUpdateBodyRequest,
+  CreateRuleBody,
   UPDATE_FIELDS,
+  UpdateRuleBody,
+  transformCreateRuleBody,
+  transformUpdateRuleBody,
 } from '../../common/apis';
 import { useRuleFormState } from '../hooks';
 
@@ -38,8 +40,8 @@ const stringifyBodyRequest = ({
 }): string => {
   try {
     const request = isEdit
-      ? rewriteUpdateBodyRequest(pick(formData, UPDATE_FIELDS))
-      : rewriteCreateBodyRequest(omit(formData, 'id'));
+      ? transformUpdateRuleBody(pick(formData, UPDATE_FIELDS) as UpdateRuleBody)
+      : transformCreateRuleBody(omit(formData, 'id') as CreateRuleBody);
     return JSON.stringify(request, null, 2);
   } catch {
     return SHOW_REQUEST_MODAL_ERROR;

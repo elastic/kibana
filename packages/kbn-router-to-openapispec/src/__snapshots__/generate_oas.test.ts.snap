@@ -26,6 +26,7 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
+        "description": undefined,
         "operationId": "/foo/{id}#0",
         "parameters": Array [
           Object {
@@ -85,7 +86,6 @@ Object {
                 },
               },
             },
-            "description": "No description",
           },
         },
         "summary": "",
@@ -133,6 +133,7 @@ Object {
   "paths": Object {
     "/bar": Object {
       "get": Object {
+        "description": undefined,
         "operationId": "/bar#0",
         "parameters": Array [
           Object {
@@ -221,6 +222,7 @@ Object {
     },
     "/foo/{id}/{path*}": Object {
       "get": Object {
+        "description": "route description",
         "operationId": "/foo/{id}/{path*}#0",
         "parameters": Array [
           Object {
@@ -357,15 +359,15 @@ Object {
                 },
               },
             },
-            "description": "route",
           },
         },
-        "summary": "route",
+        "summary": "route summary",
         "tags": Array [
           "bar",
         ],
       },
       "post": Object {
+        "description": "route description",
         "operationId": "/foo/{id}/{path*}#1",
         "parameters": Array [
           Object {
@@ -502,10 +504,9 @@ Object {
                 },
               },
             },
-            "description": "route",
           },
         },
-        "summary": "route",
+        "summary": "route summary",
         "tags": Array [
           "bar",
         ],
@@ -576,6 +577,7 @@ Object {
   "paths": Object {
     "/recursive": Object {
       "get": Object {
+        "description": undefined,
         "operationId": "/recursive#0",
         "parameters": Array [
           Object {
@@ -611,7 +613,6 @@ Object {
                 },
               },
             },
-            "description": "No description",
           },
         },
         "summary": "",
@@ -659,6 +660,7 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
+        "description": undefined,
         "operationId": "/foo/{id}#0",
         "parameters": Array [
           Object {
@@ -688,7 +690,6 @@ Object {
                 "schema": Object {},
               },
             },
-            "description": "No description",
           },
         },
         "summary": "",
@@ -697,6 +698,7 @@ Object {
     },
     "/test": Object {
       "get": Object {
+        "description": undefined,
         "operationId": "/test#0",
         "parameters": Array [
           Object {

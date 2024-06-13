@@ -25,7 +25,7 @@ import {
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 
 export const RuleDetails = () => {
-  const { formData, errors = {} } = useRuleFormState();
+  const { formData, baseErrors } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
@@ -88,8 +88,8 @@ export const RuleDetails = () => {
       <EuiFormRow
         fullWidth
         label={RULE_NAME_INPUT_TITLE}
-        isInvalid={errors.name?.length > 0}
-        error={errors.name}
+        isInvalid={!!baseErrors?.name?.length}
+        error={baseErrors?.name}
       >
         <EuiFieldText
           fullWidth
@@ -102,8 +102,8 @@ export const RuleDetails = () => {
       <EuiFormRow
         fullWidth
         label={RULE_TAG_INPUT_TITLE}
-        isInvalid={errors.tags?.length > 0}
-        error={errors.tags}
+        isInvalid={!!baseErrors?.tags?.length}
+        error={baseErrors?.tags}
       >
         <EuiComboBox
           fullWidth

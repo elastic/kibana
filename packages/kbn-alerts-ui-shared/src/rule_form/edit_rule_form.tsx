@@ -62,7 +62,16 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     (newFormData: RuleFormData) => {
       mutate({
         id,
-        formData: newFormData,
+        formData: {
+          name: newFormData.name,
+          tags: newFormData.tags,
+          schedule: newFormData.schedule,
+          params: newFormData.params,
+          // TODO: Will add actions in the actions PR
+          actions: [],
+          notifyWhen: newFormData.notifyWhen,
+          alertDelay: newFormData.alertDelay,
+        },
       });
     },
     [id, mutate]

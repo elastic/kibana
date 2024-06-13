@@ -8,19 +8,18 @@
 
 import { useMutation } from '@tanstack/react-query';
 import type { HttpStart, IHttpFetchError } from '@kbn/core-http-browser';
-import { RuleFormData } from '../../rule_form';
-import { createRule } from '../apis';
+import { createRule, CreateRuleBody } from '../apis/create_rule';
 
 export interface UseCreateRuleProps {
   http: HttpStart;
-  onSuccess?: (formData: RuleFormData) => void;
+  onSuccess?: (formData: CreateRuleBody) => void;
   onError?: (error: IHttpFetchError<{ message: string }>) => void;
 }
 
 export const useCreateRule = (props: UseCreateRuleProps) => {
   const { http, onSuccess, onError } = props;
 
-  const mutationFn = ({ formData }: { formData: RuleFormData }) => {
+  const mutationFn = ({ formData }: { formData: CreateRuleBody }) => {
     return createRule({
       http,
       rule: formData,
@@ -28,8 +27,8 @@ export const useCreateRule = (props: UseCreateRuleProps) => {
   };
 
   return useMutation({
+    mutationKey: ['useUpdateRule'],
     mutationFn,
-    mutationKey: ['useCreateRule'],
     onSuccess,
     onError,
   });

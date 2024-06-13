@@ -8,7 +8,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { fetchUiConfig } from '../apis';
+import { fetchUiConfig } from '../apis/fetch_ui_config';
 
 export interface UseLoadUiConfigProps {
   http: HttpStart;
@@ -21,7 +21,7 @@ export const useLoadUiConfig = (props: UseLoadUiConfigProps) => {
     return fetchUiConfig({ http });
   };
 
-  const { data, isSuccess, isFetching, isLoading, isError, error } = useQuery({
+  const { data, isSuccess, isLoading, isFetching, isInitialLoading, isError, error } = useQuery({
     queryKey: ['useLoadUiConfig'],
     queryFn,
     refetchOnWindowFocus: false,
@@ -30,6 +30,7 @@ export const useLoadUiConfig = (props: UseLoadUiConfigProps) => {
   return {
     data,
     isLoading: isLoading || isFetching,
+    isInitialLoading,
     isSuccess,
     isError,
     error,

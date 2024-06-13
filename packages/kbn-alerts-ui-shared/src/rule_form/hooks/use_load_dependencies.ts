@@ -16,8 +16,8 @@ import {
   useLoadUiConfig,
   useResolveRule,
 } from '../../common/hooks';
-import { RuleTypeRegistryContract } from '../types';
 import { getAvailableRuleTypes } from '../utils';
+import { RuleTypeRegistryContract } from '../../common';
 
 export interface UseLoadDependencies {
   http: HttpStart;

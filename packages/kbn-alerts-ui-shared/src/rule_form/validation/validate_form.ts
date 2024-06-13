@@ -7,7 +7,7 @@
  */
 
 import { isObject } from 'lodash';
-import { RuleTypeModel, RuleFormErrors, MinimumScheduleInterval, RuleFormData } from '../types';
+import { RuleFormData } from '../types';
 import { parseDuration, formatDuration } from '../utils';
 import {
   NAME_REQUIRED_TEXT,
@@ -17,6 +17,12 @@ import {
   INTERVAL_MINIMUM_TEXT,
   RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT,
 } from '../translations';
+import {
+  MinimumScheduleInterval,
+  RuleFormBaseErrors,
+  RuleFormParamsErrors,
+  RuleTypeModel,
+} from '../../common';
 
 export function validateRuleBase({
   formData,
@@ -24,7 +30,7 @@ export function validateRuleBase({
 }: {
   formData: RuleFormData;
   minimumScheduleInterval?: MinimumScheduleInterval;
-}): RuleFormErrors {
+}): RuleFormBaseErrors {
   const errors = {
     name: new Array<string>(),
     interval: new Array<string>(),
@@ -32,6 +38,7 @@ export function validateRuleBase({
     ruleTypeId: new Array<string>(),
     actionConnectors: new Array<string>(),
     alertDelay: new Array<string>(),
+    tags: new Array<string>(),
   };
 
   if (!formData.name) {
@@ -73,19 +80,36 @@ export const validateRuleParams = ({
   formData: RuleFormData;
   ruleTypeModel: RuleTypeModel;
   isServerless?: boolean;
-}): RuleFormErrors => {
+}): RuleFormParamsErrors => {
   return ruleTypeModel.validate(formData.params, isServerless).errors;
 };
 
-export const hasObjectErrors: (errors: RuleFormErrors) => boolean = (errors) =>
-  !!Object.values(errors).find((errorList) => {
-    if (isObject(errorList)) return hasObjectErrors(errorList as RuleFormErrors);
-    return errorList.length >= 1;
-  });
+const hasBaseErrors = (errors: RuleFormBaseErrors) => {
+  return Object.values(errors).some((error: string[]) => error.length > 0);
+};
 
-export function isValidRule(
-  formData: RuleFormData,
-  errors: RuleFormErrors
-): formData is RuleFormData {
-  return !hasObjectErrors(errors);
-}
+const hasParamsErrors = (errors: RuleFormParamsErrors): boolean => {
+  const values = Object.values(errors);
+  for (const value of values) {
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    if (typeof value === 'string') {
+      return !!value.trim();
+    }
+    if (isObject(value)) {
+      return hasParamsErrors(value);
+    }
+  }
+  return false;
+};
+
+export const isValidRule = ({
+  baseErrors,
+  paramsErrors,
+}: {
+  baseErrors: RuleFormBaseErrors;
+  paramsErrors: RuleFormParamsErrors;
+}): boolean => {
+  return hasBaseErrors(baseErrors) || hasParamsErrors(paramsErrors);
+};

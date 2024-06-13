@@ -7,12 +7,11 @@
  */
 
 import {
-  InitialRule,
   RuleTypeModel,
-  RuleFormErrors,
   ValidationResult,
   MinimumScheduleInterval,
-} from '../types';
+  RuleFormParamsErrors,
+} from '../../common';
 import { parseDuration, formatDuration } from './parse_duration';
 import {
   NAME_REQUIRED_TEXT,
@@ -22,6 +21,7 @@ import {
   INTERVAL_MINIMUM_TEXT,
   RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT,
 } from '../translations';
+import { InitialRule } from '../types';
 
 export function validateBaseProperties({
   rule,
@@ -85,19 +85,19 @@ export function getRuleErrors({
   minimumScheduleInterval?: MinimumScheduleInterval;
   isServerless?: boolean;
 }) {
-  const ruleParamsErrors: RuleFormErrors = ruleTypeModel
+  const ruleParamsErrors: RuleFormParamsErrors = ruleTypeModel
     ? ruleTypeModel.validate(rule.params, isServerless).errors
     : {};
 
   const ruleBaseErrors = validateBaseProperties({
     rule,
     minimumScheduleInterval,
-  }).errors as RuleFormErrors;
+  }).errors as RuleFormParamsErrors;
 
   const ruleErrors = {
     ...ruleParamsErrors,
     ...ruleBaseErrors,
-  } as RuleFormErrors;
+  } as RuleFormParamsErrors;
 
   return {
     ruleParamsErrors,

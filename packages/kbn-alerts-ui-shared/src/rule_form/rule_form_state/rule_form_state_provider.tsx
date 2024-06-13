@@ -26,16 +26,14 @@ export const RuleFormStateProvider: React.FC<RuleFormStateProviderProps> = (prop
 
   const [ruleFormState, dispatch] = useReducer(ruleFormStateReducer, {
     ...initialRuleFormState,
-    errors: {
-      ...validateRuleBase({
-        formData,
-        minimumScheduleInterval,
-      }),
-      ...validateRuleParams({
-        formData,
-        ruleTypeModel,
-      }),
-    },
+    baseErrors: validateRuleBase({
+      formData,
+      minimumScheduleInterval,
+    }),
+    paramsErrors: validateRuleParams({
+      formData,
+      ruleTypeModel,
+    }),
   });
   return (
     <RuleFormStateContext.Provider value={ruleFormState}>

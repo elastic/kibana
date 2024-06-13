@@ -6,6 +6,7 @@
  */
 
 import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
+import type { RoleCredentials } from '../../../../../../shared/services';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { navigateToCasesApp } from '../../../../../../shared/lib/cases';
 
@@ -16,18 +17,22 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const svlCommonScreenshots = getService('svlCommonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'observability_cases'];
   const testSubjects = getService('testSubjects');
+  const svlUserManager = getService('svlUserManager');
   const owner = OBSERVABILITY_OWNER;
   let caseIdMonitoring: string;
 
   describe('list view', function () {
+    let roleAuthc: RoleCredentials;
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       await svlCases.api.createCase(
         svlCases.api.getPostCaseRequest(owner, {
           title: 'Metrics inventory',
           tags: ['IBM resilient'],
           description: 'Test.',
           owner,
-        })
+        }),
+        roleAuthc
       );
 
       await svlCases.api.createCase(
@@ -36,7 +41,8 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
           tags: ['jira'],
           description: 'Test.',
           owner,
-        })
+        }),
+        roleAuthc
       );
 
       const caseMonitoring = await svlCases.api.createCase(
@@ -45,7 +51,8 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
           tags: ['swimlane'],
           description: 'Test.',
           owner,
-        })
+        }),
+        roleAuthc
       );
       caseIdMonitoring = caseMonitoring.id;
     });
@@ -56,7 +63,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
     });
 
     beforeEach(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('admin');
     });
 
     it('cases list screenshot', async () => {

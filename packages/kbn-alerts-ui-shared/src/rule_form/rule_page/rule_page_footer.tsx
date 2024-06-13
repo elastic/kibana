@@ -32,11 +32,14 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
 
   const { isEdit = false, isSaving = false, onCancel, onSave } = props;
 
-  const { formData, errors } = useRuleFormState();
+  const { baseErrors, paramsErrors } = useRuleFormState();
 
   const hasErrors = useMemo(() => {
-    return !!(errors && !isValidRule(formData, errors));
-  }, [formData, errors]);
+    return !isValidRule({
+      baseErrors: baseErrors || {},
+      paramsErrors: paramsErrors || {},
+    });
+  }, [baseErrors, paramsErrors]);
 
   const saveButtonText = useMemo(() => {
     if (isEdit) {
