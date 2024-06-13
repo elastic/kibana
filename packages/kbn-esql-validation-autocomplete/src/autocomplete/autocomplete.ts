@@ -19,7 +19,7 @@ import { partition } from 'lodash';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
   columnExists,
-  getColumnHit,
+  lookupColumn,
   getCommandDefinition,
   getCommandOption,
   getFunctionDefinition,
@@ -86,7 +86,7 @@ import {
   getQueryForFields,
   isAggFunctionUsedAlready,
 } from './helper';
-import { FunctionArgSignature } from '../definitions/types';
+import { FunctionParameter } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetFieldsByTypeFn = (
@@ -321,7 +321,9 @@ function workoutBuiltinOptions(
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): { skipAssign: boolean } {
   // skip assign operator if it's a function or an existing field to avoid promoting shadowing
-  return { skipAssign: Boolean(!isColumnItem(nodeArg) || getColumnHit(nodeArg.name, references)) };
+  return {
+    skipAssign: Boolean(!isColumnItem(nodeArg) || lookupColumn(nodeArg.name, references)),
+  };
 }
 
 function areCurrentArgsValid(
@@ -388,7 +390,7 @@ function extractFinalTypeFromArg(
       return arg.literalType;
     }
     if (isColumnItem(arg)) {
-      const hit = getColumnHit(arg.name, references);
+      const hit = lookupColumn(arg.name, references);
       if (hit) {
         return hit.type;
       }
@@ -1206,7 +1208,7 @@ async function getFunctionArgsSuggestions(
       (paramDef) => paramDef.constantOnly || /_literal$/.test(paramDef.type)
     );
 
-    const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) => {
+    const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
       return Array.from(new Set(paramDefs.map(({ type }) => type)));
     };
 
