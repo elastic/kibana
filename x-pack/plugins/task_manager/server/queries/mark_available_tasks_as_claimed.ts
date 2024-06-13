@@ -163,3 +163,17 @@ export const updateFieldsAndMarkAsFailed = ({
     },
   };
 };
+
+export const OneOfTaskTypes = (field: string, types: string[]): MustCondition => {
+  return {
+    bool: {
+      must: [
+        {
+          terms: {
+            [field]: types,
+          },
+        },
+      ],
+    },
+  };
+};
