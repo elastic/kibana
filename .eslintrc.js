@@ -908,10 +908,6 @@ module.exports = {
           },
         ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': [
-          'error',
-          { additionalHooks: '^(useFetcher|useProgressiveFetcher|useBreadcrumb)$' },
-        ],
       },
     },
     {
@@ -927,6 +923,18 @@ module.exports = {
           {
             namedComponents: 'function-declaration',
             unnamedComponents: 'arrow-function',
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/plugins/observability_solution/**/*.{ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': [
+          'error',
+          {
+            additionalHooks:
+              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$',
           },
         ],
       },
@@ -961,17 +969,6 @@ module.exports = {
           {
             allowTypedFunctionExpressions: false,
           },
-        ],
-      },
-    },
-    // Profiling
-    {
-      files: ['x-pack/plugins/observability_solution/profiling/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': [
-          'error',
-          { additionalHooks: '^(useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$' },
         ],
       },
     },

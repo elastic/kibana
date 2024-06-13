@@ -12506,7 +12506,14 @@
               "\nDefines intended request origin of the route:\n- public. The route is public, declared stable and intended for external access.\n          In the future, may require an incomming request to contain a specified header.\n- internal. The route is internal and intended for internal access only.\n\nDefaults to 'internal' If not declared,"
             ],
             "signature": [
-              "\"internal\" | \"public\" | undefined"
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteAccess",
+                "text": "RouteAccess"
+              },
+              " | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
@@ -12570,12 +12577,28 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteConfigOptions.summary",
+            "type": "string",
+            "tags": [],
+            "label": "summary",
+            "description": [
+              "\nShort summary of this route. Required for all routes used in OAS documentation.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.RouteConfigOptions.description",
             "type": "string",
             "tags": [],
             "label": "description",
             "description": [
-              "A short, human-friendly description of this endpoint"
+              "\nOptional API description, which supports [CommonMark](https://spec.commonmark.org) markdown formatting\n"
             ],
             "signature": [
               "string | undefined"
@@ -14875,7 +14898,15 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+                  "<Method>, \"description\" | \"access\"> | undefined; access: ",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteAccess",
+                    "text": "RouteAccess"
+                  },
+                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -15158,7 +15189,15 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+                  "<Method>, \"description\" | \"access\"> | undefined; access: ",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteAccess",
+                    "text": "RouteAccess"
+                  },
+                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -16169,7 +16208,15 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+                  "<Method>, \"description\" | \"access\"> | undefined; access: ",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteAccess",
+                    "text": "RouteAccess"
+                  },
+                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -16296,7 +16343,15 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+                  "<Method>, \"description\" | \"access\"> | undefined; access: ",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteAccess",
+                    "text": "RouteAccess"
+                  },
+                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -16555,7 +16610,15 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+                  "<Method>, \"description\" | \"access\"> | undefined; access: ",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteAccess",
+                    "text": "RouteAccess"
+                  },
+                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -18693,6 +18756,23 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.RouteAccess",
+        "type": "Type",
+        "tags": [],
+        "label": "RouteAccess",
+        "description": [
+          "\nRoute access level.\n\nPublic routes are stable and intended for external access and are subject to\nstricter change management and have long term maintenance windows.\n"
+        ],
+        "signature": [
+          "\"internal\" | \"public\""
+        ],
+        "path": "packages/core/http/core-http-server/src/router/route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.RouteContentType",
         "type": "Type",
         "tags": [],
@@ -19233,7 +19313,15 @@
             "section": "def-common.RouteConfigOptions",
             "text": "RouteConfigOptions"
           },
-          "<Method>, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+          "<Method>, \"description\" | \"access\"> | undefined; access: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteAccess",
+            "text": "RouteAccess"
+          },
+          "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; }"
         ],
         "path": "packages/core/http/core-http-server/src/versioning/types.ts",
         "deprecated": false,
@@ -19301,7 +19389,15 @@
                 "section": "def-common.RouteConfigOptions",
                 "text": "RouteConfigOptions"
               },
-              "<Method>, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+              "<Method>, \"description\" | \"access\"> | undefined; access: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteAccess",
+                "text": "RouteAccess"
+              },
+              "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; }"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,

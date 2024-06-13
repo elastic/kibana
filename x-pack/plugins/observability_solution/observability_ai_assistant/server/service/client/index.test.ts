@@ -112,7 +112,7 @@ describe('Observability AI Assistant client', () => {
 
   const knowledgeBaseServiceMock: DeeplyMockedKeys<KnowledgeBaseService> = {
     recall: jest.fn(),
-    getInstructions: jest.fn(),
+    getUserInstructions: jest.fn(),
   } as any;
 
   let loggerMock: DeeplyMockedKeys<Logger> = {} as any;
@@ -171,7 +171,7 @@ describe('Observability AI Assistant client', () => {
       fields: [],
     } as any);
 
-    knowledgeBaseServiceMock.getInstructions.mockResolvedValue([]);
+    knowledgeBaseServiceMock.getUserInstructions.mockResolvedValue([]);
 
     functionClientMock.getInstructions.mockReturnValue(['system']);
 
@@ -1232,7 +1232,6 @@ describe('Observability AI Assistant client', () => {
             role: MessageRole.Assistant,
             function_call: {
               name: CONTEXT_FUNCTION_NAME,
-              arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },
           },
@@ -1456,7 +1455,6 @@ describe('Observability AI Assistant client', () => {
             role: MessageRole.Assistant,
             function_call: {
               name: CONTEXT_FUNCTION_NAME,
-              arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },
           },

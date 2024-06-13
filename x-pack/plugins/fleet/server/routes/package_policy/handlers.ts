@@ -205,7 +205,7 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
     );
     usedPackages.forEach(({ attributes: { name } }) => {
       packagePoliciesByPackage[name].forEach((packagePolicy) => {
-        if (!agentPoliciesById[packagePolicy.policy_id]) {
+        if (packagePolicy.policy_ids.every((policyId) => !agentPoliciesById[policyId])) {
           orphanedPackagePolicies.push(packagePolicy);
         }
       });
@@ -242,6 +242,10 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   }
   const spaceId = fleetContext.spaceId;
   try {
+    if (!newPolicy.policy_id && (!newPolicy.policy_ids || newPolicy.policy_ids.length === 0)) {
+      throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
+    }
+
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {
