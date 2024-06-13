@@ -6,11 +6,10 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiStepProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiBottomBar,
@@ -40,14 +39,13 @@ import {
   EuiButtonWithTooltip,
   DevtoolsRequestFlyoutButton,
 } from '../../../components';
-import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../components';
+import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 import {
   SelectedPolicyTab,
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
-  StepSelectHosts,
 } from '../create_package_policy_page/components';
 
 import { AGENTLESS_POLICY_ID } from '../../../../../../common/constants';
@@ -56,7 +54,6 @@ import type {
   NewAgentPolicy,
   PackagePolicyEditExtensionComponentProps,
 } from '../../../types';
-import { SetupTechnology } from '../../../types';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 
 import {
@@ -67,16 +64,12 @@ import {
 
 import { RootPrivilegesCallout } from '../create_package_policy_page/single_page_layout/root_callout';
 
-import {
-  useDevToolsRequest,
-  useSetupTechnology,
-} from '../create_package_policy_page/single_page_layout/hooks';
-
-import { StepsWithLessPadding } from '../create_package_policy_page/single_page_layout';
+import { useDevToolsRequest } from '../create_package_policy_page/single_page_layout/hooks';
 
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
+import { PackagePolicySteps } from './components/package_policy_steps';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -156,7 +149,6 @@ export const EditPackagePolicyForm = memo<{
   );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-  const validation = agentPolicyFormValidation(newAgentPolicy);
 
   const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
     SelectedPolicyTab.EXISTING
@@ -433,132 +425,6 @@ export const EditPackagePolicyForm = memo<{
   });
   const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
 
-  const setPolicyValidation = useCallback(
-    (currentTab: SelectedPolicyTab, updatedAgentPolicy: NewAgentPolicy) => {
-      if (currentTab === SelectedPolicyTab.NEW) {
-        if (
-          !updatedAgentPolicy.name ||
-          updatedAgentPolicy.name.trim() === '' ||
-          !updatedAgentPolicy.namespace ||
-          updatedAgentPolicy.namespace.trim() === ''
-        ) {
-          setHasAgentPolicyError(true);
-        } else {
-          setHasAgentPolicyError(false);
-        }
-      }
-    },
-    [setHasAgentPolicyError]
-  );
-
-  const updateSelectedPolicyTab = useCallback(
-    (currentTab) => {
-      setSelectedPolicyTab(currentTab);
-      setPolicyValidation(currentTab, newAgentPolicy);
-    },
-    [setSelectedPolicyTab, setPolicyValidation, newAgentPolicy]
-  );
-
-  // Update agent policy method
-  const updateAgentPolicies = useCallback(
-    (updatedAgentPolicies: AgentPolicy[]) => {
-      if (!isLoadingData && isEqual(updatedAgentPolicies, agentPolicies)) {
-        return;
-      }
-      if (updatedAgentPolicies.length > 0) {
-        setAgentPolicies(updatedAgentPolicies);
-        updatePackagePolicy({
-          policy_ids: updatedAgentPolicies.map((policy) => policy.id),
-        });
-        if (packageInfo) {
-          setHasAgentPolicyError(false);
-        }
-      } else {
-        setHasAgentPolicyError(true);
-        setAgentPolicies([]);
-        updatePackagePolicy({
-          policy_ids: [],
-        });
-      }
-
-      // eslint-disable-next-line no-console
-      console.debug('Agent policy updated', updatedAgentPolicies);
-    },
-    [packageInfo, agentPolicies, isLoadingData, updatePackagePolicy]
-  );
-
-  const updateNewAgentPolicy = useCallback(
-    (updatedFields: Partial<NewAgentPolicy>) => {
-      const updatedAgentPolicy = {
-        ...newAgentPolicy,
-        ...updatedFields,
-      };
-      setNewAgentPolicy(updatedAgentPolicy);
-      setPolicyValidation(selectedPolicyTab, updatedAgentPolicy);
-    },
-    [setNewAgentPolicy, setPolicyValidation, newAgentPolicy, selectedPolicyTab]
-  );
-
-  const { selectedSetupTechnology } = useSetupTechnology({
-    newAgentPolicy,
-    updateNewAgentPolicy,
-    updateAgentPolicies,
-    setSelectedPolicyTab,
-    packageInfo,
-  });
-
-  const stepSelectAgentPolicy = useMemo(
-    () => (
-      <StepSelectHosts
-        agentPolicies={agentPolicies}
-        updateAgentPolicies={updateAgentPolicies}
-        newAgentPolicy={newAgentPolicy}
-        updateNewAgentPolicy={updateNewAgentPolicy}
-        withSysMonitoring={withSysMonitoring}
-        updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
-        validation={validation}
-        packageInfo={packageInfo}
-        setHasAgentPolicyError={setHasAgentPolicyError}
-        updateSelectedTab={updateSelectedPolicyTab}
-        selectedAgentPolicyIds={existingAgentPolicies.map((policy) => policy.id)}
-        initialSelectedTabIndex={1}
-      />
-    ),
-    [
-      packageInfo,
-      agentPolicies,
-      updateAgentPolicies,
-      newAgentPolicy,
-      updateNewAgentPolicy,
-      validation,
-      withSysMonitoring,
-      updateSelectedPolicyTab,
-      setHasAgentPolicyError,
-      existingAgentPolicies,
-    ]
-  );
-
-  const steps: EuiStepProps[] = [
-    {
-      title: i18n.translate('xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle', {
-        defaultMessage: 'Configure integration',
-      }),
-      'data-test-subj': 'dataCollectionSetupStep',
-      children: replaceConfigurePackage || configurePackage,
-      headingElement: 'h2',
-    },
-  ];
-
-  if (selectedSetupTechnology !== SetupTechnology.AGENTLESS) {
-    steps.push({
-      title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
-        defaultMessage: 'Where to add this integration?',
-      }),
-      children: stepSelectAgentPolicy,
-      headingElement: 'h2',
-    });
-  }
-
   const agentPolicyBreadcrumb = useMemo(() => {
     return existingAgentPolicies.length > 0
       ? existingAgentPolicies.find((policy) => policy.id === policyId) ?? existingAgentPolicies[0]
@@ -616,7 +482,22 @@ export const EditPackagePolicyForm = memo<{
               </>
             )}
             {enableReusableIntegrationPolicies ? (
-              <StepsWithLessPadding steps={steps} />
+              <PackagePolicySteps
+                configureStep={replaceConfigurePackage || configurePackage}
+                packageInfo={packageInfo}
+                existingAgentPolicies={existingAgentPolicies}
+                newAgentPolicy={newAgentPolicy}
+                setNewAgentPolicy={setNewAgentPolicy}
+                setHasAgentPolicyError={setHasAgentPolicyError}
+                updatePackagePolicy={updatePackagePolicy}
+                agentPolicies={agentPolicies}
+                setAgentPolicies={setAgentPolicies}
+                isLoadingData={isLoadingData}
+                withSysMonitoring={withSysMonitoring}
+                setWithSysMonitoring={setWithSysMonitoring}
+                selectedPolicyTab={selectedPolicyTab}
+                setSelectedPolicyTab={setSelectedPolicyTab}
+              />
             ) : (
               replaceConfigurePackage || configurePackage
             )}
