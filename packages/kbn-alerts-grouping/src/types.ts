@@ -33,7 +33,7 @@ export interface AlertsGroupingState {
 
 type NumberOrNull = number | null;
 
-export interface AlertsGroupingProps<T = {}> {
+export interface AlertsGroupingProps<T extends Record<string, unknown> = {}> {
   /**
    * The leaf component that will be rendered in the grouping panels
    */
