@@ -7,7 +7,6 @@
  */
 
 import type { Filter, Query } from '@kbn/es-query';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
@@ -92,7 +91,6 @@ export interface AlertsGroupingProps<T extends Record<string, unknown> = {}> {
    * Services required for the grouping component
    */
   services: {
-    storage: Storage;
     notifications: NotificationsStart;
     dataViews: DataViewsServicePublic;
     http: HttpSetup;

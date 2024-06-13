@@ -55,9 +55,5 @@ export const mockGroupingProps: Omit<AlertsGroupingProps, 'children'> = {
         addDanger: jest.fn(),
       },
     } as unknown as AlertsGroupingProps['services']['notifications'],
-    storage: {
-      get: jest.fn(),
-      set: jest.fn(),
-    } as unknown as AlertsGroupingProps['services']['storage'],
   },
 };
