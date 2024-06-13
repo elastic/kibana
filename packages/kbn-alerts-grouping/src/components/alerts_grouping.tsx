@@ -6,19 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  Dispatch,
+  memo,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { Filter } from '@kbn/es-query';
 import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEqual } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useAlertDataView } from '@kbn/alerts-ui-shared';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { AlertsGroupingLevel, AlertsGroupingLevelProps } from './alerts_grouping_level';
 import { AlertsGroupingProps } from '../types';
 import {
   AlertsGroupingContextProvider,
   useAlertsGroupingState,
 } from '../contexts/alerts_grouping_context';
-import { useGroupingPersistence } from '../hooks/use_grouping_persistence';
 import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE, MAX_GROUPING_LEVELS } from '../constants';
 
 /**
@@ -60,7 +69,7 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
     getGroupStats,
     children,
   } = props;
-  const { storage, dataViews, notifications, http } = services;
+  const { dataViews, notifications, http } = services;
   const { grouping, updateGrouping } = useAlertsGroupingState(groupingId);
 
   const { dataViews: alertDataViews } = useAlertDataView({
@@ -70,7 +79,10 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
     toasts: notifications.toasts,
   });
   const dataView = useMemo(() => alertDataViews?.[0], [alertDataViews]);
-  const { getStoragePageSize, setStoragePageSize } = useGroupingPersistence(storage, groupingId);
+  const [pageSize, setPageSize] = useLocalStorage<number[]>(
+    `grouping-table-${groupingId}`,
+    Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_SIZE)
+  ) as [number[], Dispatch<SetStateAction<number[]>>, () => void];
 
   const onOptionsChange = useCallback(
     (options) => {
@@ -121,7 +133,6 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
   const [pageIndex, setPageIndex] = useState<number[]>(
     Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_INDEX)
   );
-  const [pageSize, setPageSize] = useState<number[]>(getStoragePageSize);
 
   const resetAllPagination = useCallback(() => {
     setPageIndex((curr) => curr.map(() => DEFAULT_PAGE_INDEX));
@@ -141,7 +152,6 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
         setPageSize((currentIndex) => {
           const newArr = [...currentIndex];
           newArr[groupingLevel] = newNumber;
-          setStoragePageSize(newArr);
           return newArr;
         });
         // set page index to 0 when page size is changed
@@ -152,7 +162,7 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
         });
       }
     },
-    [setStoragePageSize]
+    [setPageSize]
   );
 
   const paginationResetTriggers = useRef({
@@ -227,12 +237,9 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
  * @example Basic grouping
  * ```ts
  * const {
- *   uiSettings,
- *   storage,
  *   notifications,
  *   dataViews,
  *   http,
- *   data,
  * } = useKibana().services;
  *
  *
@@ -249,10 +256,9 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
  *     renderGroupPanel={renderGroupPanel}
  *     getGroupStats={getStats}
  *     services={{
- *       storage,
  *       notifications,
+ *       dataViews,
  *       http,
- *       data,
  *     }}
  *   >
  *     {(groupingFilters) => {
