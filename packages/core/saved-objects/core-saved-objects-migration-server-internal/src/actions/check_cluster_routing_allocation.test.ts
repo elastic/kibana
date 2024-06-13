@@ -10,19 +10,13 @@ import * as Either from 'fp-ts/lib/Either';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { initAction, type InitActionParams } from './initialize_action';
+import { checkClusterRoutingAllocationEnabled } from './check_cluster_routing_allocation';
 
 jest.mock('./catch_retryable_es_client_errors');
 
 describe('initAction', () => {
-  let initActionParams: Omit<InitActionParams, 'client'>;
-
   beforeEach(() => {
     jest.clearAllMocks();
-
-    initActionParams = {
-      indices: ['.kibana', '.kibana_8.8.0'],
-    };
   });
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
     const retryableError = new EsErrors.ResponseError(
@@ -34,7 +28,7 @@ describe('initAction', () => {
     const client = elasticsearchClientMock.createInternalClient(
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
-    const task = initAction({ ...initActionParams, client });
+    const task = checkClusterRoutingAllocationEnabled(client);
     try {
       await task();
     } catch (e) {
@@ -62,7 +56,7 @@ describe('initAction', () => {
     const client = elasticsearchClientMock.createInternalClient(
       Promise.resolve(clusterSettingsResponse)
     );
-    const task = initAction({ ...initActionParams, client });
+    const task = checkClusterRoutingAllocationEnabled(client);
     const result = await task();
     expect(Either.isLeft(result)).toEqual(true);
   });
@@ -107,7 +101,7 @@ describe('initAction', () => {
     const client = elasticsearchClientMock.createInternalClient(
       Promise.resolve(clusterSettingsResponse)
     );
-    const task = initAction({ ...initActionParams, client });
+    const task = checkClusterRoutingAllocationEnabled(client);
     const result = await task();
     expect(Either.isRight(result)).toEqual(true);
   });

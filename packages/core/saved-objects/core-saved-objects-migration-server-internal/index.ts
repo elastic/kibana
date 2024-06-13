@@ -24,7 +24,6 @@ export {
   calculateExcludeFilters,
   checkForUnknownDocs,
   waitForIndexStatus,
-  initAction,
   cloneIndex,
   waitForTask,
   updateAndPickupMappings,
