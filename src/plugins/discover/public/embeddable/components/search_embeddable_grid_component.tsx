@@ -65,6 +65,7 @@ export function SearchEmbeddableGridComponent({
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
   const [
+    loading,
     searchSource,
     dataViews,
     rows,
@@ -79,6 +80,7 @@ export function SearchEmbeddableGridComponent({
     savedSearchId,
     interceptedWarnings,
   ] = useBatchedPublishingSubjects(
+    api.dataLoading,
     api.searchSource$,
     api.dataViews,
     api.rows$,
@@ -180,7 +182,7 @@ export function SearchEmbeddableGridComponent({
       ...savedSearchProps,
       dataView,
       services: discoverServices,
-      isLoading: false,
+      isLoading: loading ?? false,
       rows,
       onFilter: onAddFilter,
       totalHitCount,
@@ -189,7 +191,7 @@ export function SearchEmbeddableGridComponent({
       ariaLabelledBy: 'documentsAriaLabel',
       cellActionsTriggerId: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
     };
-  }, [savedSearchProps, rows, totalHitCount, onAddFilter, discoverServices]);
+  }, [savedSearchProps, rows, totalHitCount, onAddFilter, discoverServices, loading]);
 
   const fetchedSampleSize = useMemo(() => {
     return getAllowedSampleSize(savedSearchProps.sampleSizeState, discoverServices.uiSettings);

@@ -64,9 +64,10 @@ export function initializeFetch({
     api.searchSource$,
     api.dataViews,
     api.sort$,
+    api.sampleSize$,
   ])
     .pipe(
-      switchMap(async ([fetchContext, searchSource, dataViews, sort]) => {
+      switchMap(async ([fetchContext, searchSource, dataViews, sort, sampleSize]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
         api.blockingError.next(undefined);
         if (!dataView || !searchSource) {
@@ -77,7 +78,6 @@ export function initializeFetch({
         abortController = new AbortController();
 
         const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
-        const sampleSize = api.sampleSize$.getValue();
         updateSearchSource(
           discoverServices,
           searchSource,
