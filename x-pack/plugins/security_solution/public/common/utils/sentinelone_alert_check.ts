@@ -22,7 +22,9 @@ export const isTimelineEventItemAnAlert = (
 
 export const SENTINEL_ONE_AGENT_ID_FIELD = 'observer.serial_number';
 
-export const getSentinelOneAgentId = (data: TimelineEventsDetailsItem[] | null) =>
+export const getSentinelOneAgentId = (
+  data: TimelineEventsDetailsItem[] | null
+): string | undefined =>
   getFieldValue({ category: 'observer', field: SENTINEL_ONE_AGENT_ID_FIELD }, data) || undefined;
 
 /**

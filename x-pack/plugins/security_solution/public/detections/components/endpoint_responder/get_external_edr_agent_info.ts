@@ -46,16 +46,12 @@ export const getExternalEdrAgentInfo = (
           type: agentType,
         },
         host: {
-          name: getFieldValue(
-            { category: 'crowdstrike', field: 'crowdstrike.event.HostName' },
-            eventData
-          ),
+          name: getFieldValue({ category: 'host', field: 'host.name' }, eventData),
           os: {
             name: '',
-            family: getFieldValue(
-              { category: 'crowdstrike', field: 'crowdstrike.event.Platform' },
-              eventData
-            ),
+            family:
+              getFieldValue({ category: 'host', field: 'host.os.type' }, eventData) ||
+              getFieldValue({ category: 'host', field: 'host.os.platform' }, eventData),
             version: '',
           },
         },

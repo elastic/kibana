@@ -140,7 +140,7 @@ describe('<HighlightedFieldsCell />', () => {
     }
   );
   it.each(Object.keys(hooksToMock))(
-    'should render Crowdstrike agent status cell if field is agent.status and `originalField` is `crowdstrike.event.DeviceId` with %s hook',
+    'should render Crowdstrike agent status cell if field is agent.status and `originalField` is `device.id` with %s hook',
     (hookName) => {
       const hook = hooksToMock[hookName];
       useAgentStatusHookMock.mockImplementation(() => hook);
@@ -155,7 +155,7 @@ describe('<HighlightedFieldsCell />', () => {
           <HighlightedFieldsCell
             values={['value']}
             field={'agent.status'}
-            originalField="crowdstrike.event.DeviceId"
+            originalField="device.id"
           />
         </TestProviders>
       );

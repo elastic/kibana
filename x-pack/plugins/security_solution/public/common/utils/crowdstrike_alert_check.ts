@@ -20,15 +20,12 @@ export const isTimelineEventItemAnAlert = (
   return some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, timelineEventItem);
 };
 
-export const CROWDSTRIKE_AGENT_ID_FIELD = 'crowdstrike.event.DeviceId';
+export const CROWDSTRIKE_AGENT_ID_FIELD = 'device.id';
 
 export const getCrowdstrikeAgentId = (
   data: TimelineEventsDetailsItem[] | null
-): string | undefined => {
-  return (
-    getFieldValue({ category: 'crowdstrike', field: CROWDSTRIKE_AGENT_ID_FIELD }, data) || undefined
-  );
-};
+): string | undefined =>
+  getFieldValue({ category: 'device', field: CROWDSTRIKE_AGENT_ID_FIELD }, data) || undefined;
 
 /**
  * Checks to see if the given set of Timeline event detail items includes data that indicates its
@@ -64,6 +61,7 @@ export const isAlertFromCrowdstrikeAlert = ({
 
   const eventModules = getOr([], 'kibana.alert.original_event.module', ecsData);
   const kinds = getOr([], 'kibana.alert.original_event.dataset', ecsData);
-
-  return eventModules.includes('crowdstrike') && kinds.includes('alert');
+  return (
+    eventModules.includes('crowdstrike') && (kinds.includes('alert') || kinds.includes('signal'))
+  );
 };

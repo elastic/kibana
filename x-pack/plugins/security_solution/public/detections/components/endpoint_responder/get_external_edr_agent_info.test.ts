@@ -51,14 +51,14 @@ describe('getExternalEdrAgentInfo', () => {
       isObjectArray: false,
     },
     {
-      category: 'crowdstrike',
-      field: 'crowdstrike.event.HostName',
+      category: 'host',
+      field: 'host.name',
       values: ['test-crowdstrike-host'],
       isObjectArray: false,
     },
     {
-      category: 'crowdstrike',
-      field: 'crowdstrike.event.Platform',
+      category: 'host',
+      field: 'host.os.type',
       values: ['linux'],
       isObjectArray: false,
     },

@@ -40,8 +40,8 @@ describe('HostIsolationPanel', () => {
       isObjectArray: false,
     },
     {
-      category: 'crowdstrike',
-      field: 'crowdstrike.event.DeviceId',
+      category: 'device',
+      field: 'device.id',
       values: ['expectedCrowdstrikeAgentId'],
       originalValue: ['expectedCrowdstrikeAgentId'],
       isObjectArray: false,

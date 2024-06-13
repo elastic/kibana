@@ -7,8 +7,14 @@
 
 import React, { useMemo } from 'react';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
-import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
-import { getCrowdstrikeAgentId } from '../../../common/utils/crowdstrike_alert_check';
+import {
+  getSentinelOneAgentId,
+  isAlertFromSentinelOneEvent,
+} from '../../../common/utils/sentinelone_alert_check';
+import {
+  getCrowdstrikeAgentId,
+  isAlertFromCrowdstrikeEvent,
+} from '../../../common/utils/crowdstrike_alert_check';
 import { useCasesFromAlerts } from '../../containers/detection_engine/alerts/use_cases_from_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { getFieldValue } from './helpers';
@@ -33,7 +39,15 @@ export const HostIsolationPanel = React.memo(
     );
 
     const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(details), [details]);
+    const isSentinelOneEvent = useMemo(
+      () => details != null && isAlertFromSentinelOneEvent({ data: details }),
+      [details]
+    );
     const crowdstrikeAgentId = useMemo(() => getCrowdstrikeAgentId(details), [details]);
+    const isCrowdstrikeEvent = useMemo(
+      () => details != null && isAlertFromCrowdstrikeEvent({ data: details }),
+      [details]
+    );
 
     const alertId = useMemo(
       () => getFieldValue({ category: '_id', field: '_id' }, details),
@@ -43,31 +57,33 @@ export const HostIsolationPanel = React.memo(
     const { casesInfo } = useCasesFromAlerts({ alertId });
 
     const agentType: ResponseActionAgentType = useMemo(() => {
-      if (sentinelOneAgentId) {
+      if (isSentinelOneEvent) {
         return 'sentinel_one';
-      } else if (crowdstrikeAgentId) {
+      } else if (isCrowdstrikeEvent) {
         return 'crowdstrike';
       } else {
         return 'endpoint';
       }
-    }, [sentinelOneAgentId, crowdstrikeAgentId]);
+    }, [isSentinelOneEvent, isCrowdstrikeEvent]);
 
     const endpointId = useMemo(
-      () => sentinelOneAgentId ?? crowdstrikeAgentId ?? elasticAgentId,
-      [elasticAgentId, sentinelOneAgentId, crowdstrikeAgentId]
+      () =>
+        (isSentinelOneEvent && sentinelOneAgentId) ||
+        (isCrowdstrikeEvent && crowdstrikeAgentId) ||
+        elasticAgentId,
+      [
+        isSentinelOneEvent,
+        sentinelOneAgentId,
+        isCrowdstrikeEvent,
+        crowdstrikeAgentId,
+        elasticAgentId,
+      ]
     );
 
-    const hostName = useMemo(() => {
-      switch (agentType) {
-        case 'crowdstrike':
-          return getFieldValue(
-            { category: 'crowdstrike', field: 'crowdstrike.event.HostName' },
-            details
-          );
-        default:
-          return getFieldValue({ category: 'host', field: 'host.name' }, details);
-      }
-    }, [agentType, details]);
+    const hostName = useMemo(
+      () => getFieldValue({ category: 'host', field: 'host.name' }, details),
+      [details]
+    );
 
     return isolateAction === 'isolateHost' ? (
       <IsolateHost

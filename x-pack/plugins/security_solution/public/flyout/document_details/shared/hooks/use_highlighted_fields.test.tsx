@@ -124,13 +124,13 @@ describe('useHighlightedFields', () => {
     const hookResult = renderHook(() =>
       useHighlightedFields({
         dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat({
-          category: 'crowdstrike',
-          field: 'crowdstrike.event.DeviceId',
+          category: 'device',
+          field: 'device.id',
           values: ['expectedCrowdstrikeAgentId'],
           originalValue: ['expectedCrowdstrikeAgentId'],
           isObjectArray: false,
         }),
-        investigationFields: ['agent.status', 'crowdstrike.event.DeviceId'],
+        investigationFields: ['agent.status', 'device.id'],
       })
     );
 
@@ -186,14 +186,14 @@ describe('useHighlightedFields', () => {
             isObjectArray: false,
           },
           {
-            category: 'crowdstrike',
-            field: 'crowdstrike.event.DeviceId',
+            category: 'device',
+            field: 'device.id',
             values: ['expectedCrowdstrikeAgentId'],
             originalValue: ['expectedCrowdstrikeAgentId'],
             isObjectArray: false,
           },
         ]),
-        investigationFields: ['agent.status', 'crowdstrike.event.DeviceId'],
+        investigationFields: ['agent.status', 'device.id'],
       })
     );
 
@@ -201,7 +201,7 @@ describe('useHighlightedFields', () => {
       'kibana.alert.rule.type': {
         values: ['query'],
       },
-      'crowdstrike.event.DeviceId': {
+      'device.id': {
         values: ['expectedCrowdstrikeAgentId'],
       },
     });

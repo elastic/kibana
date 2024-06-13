@@ -181,8 +181,8 @@ describe('#useResponderActionData', () => {
     const createEventDataMock = (): TimelineEventsDetailsItem[] => {
       return [
         {
-          category: 'crowdstrike',
-          field: 'crowdstrike.event.DeviceId',
+          category: 'device',
+          field: 'device.id',
           values: ['mockedAgentId'],
           originalValue: ['mockedAgentId'],
           isObjectArray: false,
@@ -214,7 +214,7 @@ describe('#useResponderActionData', () => {
       );
       expect(result.current.isDisabled).toEqual(true);
       expect(result.current.tooltip).toEqual(
-        'Event data missing Crowdstrike agent identifier (crowdstrike.event.DeviceId)'
+        'Event data missing Crowdstrike agent identifier (device.id)'
       );
     });
 
