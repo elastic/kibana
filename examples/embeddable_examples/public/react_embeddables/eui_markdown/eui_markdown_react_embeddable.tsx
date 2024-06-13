@@ -23,6 +23,7 @@ import { MarkdownEditorSerializedState, MarkdownEditorApi } from './types';
 
 export const markdownEmbeddableFactory: ReactEmbeddableFactory<
   MarkdownEditorSerializedState,
+  MarkdownEditorSerializedState,
   MarkdownEditorApi
 > = {
   type: EUI_MARKDOWN_ID,

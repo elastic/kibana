@@ -24,7 +24,7 @@ import { getCount } from './get_count';
 import { SearchApi, Services, SearchSerializedState } from './types';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
-  const factory: ReactEmbeddableFactory<SearchSerializedState, SearchApi> = {
+  const factory: ReactEmbeddableFactory<SearchSerializedState, SearchSerializedState, SearchApi> = {
     type: SEARCH_EMBEDDABLE_ID,
     deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {

@@ -31,7 +31,7 @@ import { DataTableApi, DataTableSerializedState } from './types';
 export const getDataTableFactory = (
   core: CoreStart,
   services: StartDeps
-): ReactEmbeddableFactory<DataTableSerializedState, DataTableApi> => ({
+): ReactEmbeddableFactory<DataTableSerializedState, DataTableSerializedState, DataTableApi> => ({
   type: DATA_TABLE_ID,
   deserializeState: (state) => {
     return state.rawState as DataTableSerializedState;

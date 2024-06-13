@@ -46,6 +46,7 @@ export const getFieldListFactory = (
 ) => {
   const fieldListEmbeddableFactory: ReactEmbeddableFactory<
     FieldListSerializedStateState,
+    FieldListSerializedStateState,
     FieldListApi
   > = {
     type: FIELD_LIST_ID,
