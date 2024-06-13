@@ -23,8 +23,6 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('@kbn/code-editor/code_editor');
-
 const getRequest = (
   indices: string[] = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*']
 ) =>
