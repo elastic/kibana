@@ -15,7 +15,7 @@ import { isNoneGroup } from '@kbn/grouping';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import { useFindAlertsQuery } from '@kbn/alerts-ui-shared';
-import { AlertsGroupingAggregation, AlertsGroupingProps } from '../types';
+import { AlertsGroupingProps } from '../types';
 
 interface AlertsGroupingQueryParams {
   additionalFilters: Array<{
@@ -54,9 +54,10 @@ export const getAlertsGroupingQuery = ({
     to,
   });
 
-export interface AlertsGroupingLevelProps extends AlertsGroupingProps {
+export interface AlertsGroupingLevelProps<T extends Record<string, unknown> = {}>
+  extends AlertsGroupingProps<T> {
   getGrouping: (
-    props: Omit<DynamicGroupingProps<AlertsGroupingAggregation>, 'groupSelector' | 'pagination'>
+    props: Omit<DynamicGroupingProps<T>, 'groupSelector' | 'pagination'>
   ) => ReactElement;
   groupingLevel?: number;
   onGroupClose: () => void;
@@ -74,7 +75,7 @@ const DEFAULT_FILTERS: Filter[] = [];
  * Renders an alerts grouping level
  */
 export const AlertsGroupingLevel = memo(
-  ({
+  <T extends Record<string, unknown> = {}>({
     featureIds,
     defaultFilters = DEFAULT_FILTERS,
     from,
@@ -95,7 +96,7 @@ export const AlertsGroupingLevel = memo(
     takeActionItems,
     getAggregationsByGroupingField,
     services: { http, notifications },
-  }: AlertsGroupingLevelProps) => {
+  }: AlertsGroupingLevelProps<T>) => {
     const additionalFilters = useMemo(() => {
       try {
         return [
@@ -136,7 +137,7 @@ export const AlertsGroupingLevel = memo(
     ]);
 
     const { data: alertGroupsData, isLoading: isLoadingGroups } = useFindAlertsQuery<
-      GroupingAggregation<AlertsGroupingAggregation>
+      GroupingAggregation<T>
     >({
       http,
       toasts: notifications.toasts,
