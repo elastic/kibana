@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { join as joinPath } from 'path';
-import { tmpdir } from 'os';
-import nunjucks from 'nunjucks';
 import AdmZip from 'adm-zip';
-import type { Integration, DataStream } from '../../common';
-import { createPackageSystemTests } from './dev_folders';
-import { createDatastream } from './data_stream';
+import nunjucks from 'nunjucks';
+import { tmpdir } from 'os';
+import { join as joinPath } from 'path';
+import type { DataStream, Integration } from '../../common';
+import { copySync, createSync, ensureDirSync, generateUniqueId } from '../util';
 import { createAgentInput } from './agent';
+import { createDatastream } from './data_stream';
 import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
-import { generateUniqueId, ensureDirSync, copySync, createSync } from '../util';
 
 export async function buildPackage(integration: Integration): Promise<Buffer> {
   const templateDir = joinPath(__dirname, '../templates');
@@ -59,7 +58,8 @@ function createPackage(packageDir: string, integration: Integration): void {
   createChangelog(packageDir);
   createBuildFile(packageDir);
   createPackageManifest(packageDir, integration);
-  createPackageSystemTests(packageDir, integration);
+  //  Skipping creation of system tests temporarily for custom package generation
+  //  createPackageSystemTests(packageDir, integration);
   createLogo(packageDir, integration);
 }
 
