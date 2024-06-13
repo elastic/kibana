@@ -579,15 +579,10 @@ export function trainedModelsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
-          const body = await mlClient.startTrainedModelDeployment(
-            {
-              model_id: modelId,
-              ...(request.query ? request.query : {}),
-            },
-            {
-              maxRetries: 0,
-            }
-          );
+          const body = await mlClient.startTrainedModelDeployment({
+            model_id: modelId,
+            ...(request.query ? request.query : {}),
+          });
           return response.ok({
             body,
           });
