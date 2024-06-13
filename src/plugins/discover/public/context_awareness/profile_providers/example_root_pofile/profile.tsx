@@ -18,6 +18,7 @@ export const exampleRootProfileProvider: RootProfileProvider = {
       ...prev(),
       '@timestamp': (props) => {
         const timestamp = getFieldValue(props.row, '@timestamp');
+
         return (
           <EuiBadge color="hollow" title={timestamp} data-test-subj="exampleRootProfileTimestamp">
             {timestamp}
@@ -26,7 +27,11 @@ export const exampleRootProfileProvider: RootProfileProvider = {
       },
     }),
   },
-  resolve: () => {
+  resolve: (params) => {
+    if (params.solutionNavId != null) {
+      return { isMatch: false };
+    }
+
     return { isMatch: true, context: { solutionType: SolutionType.Default } };
   },
 };

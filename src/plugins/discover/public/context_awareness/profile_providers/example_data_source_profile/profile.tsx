@@ -23,16 +23,23 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
       ...prev(),
       'log.level': (props) => {
         const level = getFieldValue(props.row, 'log.level');
+
         if (!level) {
           return <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
         }
+
         const levelMap: Record<string, string> = {
           info: 'primary',
           debug: 'default',
           error: 'danger',
         };
+
         return (
-          <EuiBadge color={levelMap[level]} title={level}>
+          <EuiBadge
+            color={levelMap[level]}
+            title={level}
+            data-test-subj="exampleDataSourceProfileLogLevel"
+          >
             {capitalize(level)}
           </EuiBadge>
         );
@@ -40,19 +47,19 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
     }),
   },
   resolve: (params) => {
-    let indices: string[] = [];
+    let indexPattern: string | undefined;
 
     if (isDataSourceType(params.dataSource, DataSourceType.Esql)) {
       if (!isOfAggregateQueryType(params.query)) {
         return { isMatch: false };
       }
 
-      indices = getIndexPatternFromESQLQuery(params.query.esql).split(',');
+      indexPattern = getIndexPatternFromESQLQuery(params.query.esql);
     } else if (isDataSourceType(params.dataSource, DataSourceType.DataView) && params.dataView) {
-      indices = params.dataView.getIndexPattern().split(',');
+      indexPattern = params.dataView.getIndexPattern();
     }
 
-    if (!indices.every((index) => index.startsWith('logs-'))) {
+    if (indexPattern !== 'my-example-logs') {
       return { isMatch: false };
     }
 

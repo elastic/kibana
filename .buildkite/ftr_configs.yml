@@ -125,6 +125,7 @@ enabled:
   - test/functional/apps/discover/group6/config.ts
   - test/functional/apps/discover/group7/config.ts
   - test/functional/apps/discover/group8/config.ts
+  - test/functional/apps/discover/context_awareness/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
   - test/functional/apps/kibana_overview/config.ts
@@ -421,6 +422,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.saved_objects_management.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.context_awareness.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group3.ts
@@ -433,6 +435,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/search/config.saved_objects_management.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.context_awareness.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group3.ts
@@ -443,6 +446,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
   - x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group3.ts
@@ -571,4 +575,3 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations_feature_flag.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations_feature_flag.config.ts
-
