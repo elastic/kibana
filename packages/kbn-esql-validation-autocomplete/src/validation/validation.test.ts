@@ -1956,11 +1956,15 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval 1::string::long::double', []);
 
       // takes into account casting in function arguments
-      testErrorsAndWarnings('from a_index | eval trim("23"::double)', ['wrong type']);
-      testErrorsAndWarnings('from a_index | eval trim(to_double("23")::string)', []);
+      testErrorsAndWarnings('from a_index | eval trim("23"::double)', [
+        'Argument of [trim] must be [string], found value ["23"::double] type [double]',
+      ]);
+      testErrorsAndWarnings('from a_index | eval trim(23::string)', []);
       testErrorsAndWarnings(
         'from a_index | eval trim(to_double("23")::string::double::long::string::double)',
-        ['wrong type']
+        [
+          'Argument of [trim] must be [string], found value [to_double("23")::string::double::long::string::double] type [double]',
+        ]
       );
 
       // still validates nested functions when they are casted

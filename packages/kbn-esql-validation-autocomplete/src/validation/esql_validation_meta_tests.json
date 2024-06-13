@@ -8963,19 +8963,19 @@
     {
       "query": "from a_index | eval trim(\"23\"::double)",
       "error": [
-        "wrong type"
+        "Argument of [trim] must be [string], found value [\"23\"::double] type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval trim(to_double(\"23\")::string)",
+      "query": "from a_index | eval trim(23::string)",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval trim(to_double(\"23\")::string::double::long::string::double)",
       "error": [
-        "wrong type"
+        "Argument of [trim] must be [string], found value [to_double(\"23\")::string::double::long::string::double] type [double]"
       ],
       "warning": []
     },

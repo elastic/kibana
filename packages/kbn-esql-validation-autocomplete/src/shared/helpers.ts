@@ -432,6 +432,9 @@ export function checkFunctionArgMatchesDefinition(
     // if final type is of type any make it pass for now
     return wrappedTypes.some((ct) => ['any', 'null'].includes(ct) || argType === ct);
   }
+  if (arg.type === 'inlineCast') {
+    return argType === arg.castType;
+  }
 }
 
 function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {

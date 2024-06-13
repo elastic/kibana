@@ -51,6 +51,7 @@ import {
   isVariable,
   isValidLiteralOption,
   getQuotedColumnName,
+  isInlineCastItem,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import { getMessageFromId } from './errors';
@@ -146,6 +147,35 @@ function validateFunctionLiteralArg(
     }
   }
   return messages;
+}
+
+function validateInlineCastArg(
+  astFunction: ESQLFunction,
+  arg: ESQLAstItem,
+  parameterDefinition: FunctionParameter,
+  references: ReferenceMaps,
+  parentCommand: string
+) {
+  if (!isInlineCastItem(arg)) {
+    return [];
+  }
+
+  if (!checkFunctionArgMatchesDefinition(arg, parameterDefinition, references, parentCommand)) {
+    return [
+      getMessageFromId({
+        messageId: 'wrongArgumentType',
+        values: {
+          name: astFunction.name,
+          argType: parameterDefinition.type,
+          value: arg.text,
+          givenType: arg.castType,
+        },
+        locations: arg.location,
+      }),
+    ];
+  }
+
+  return [];
 }
 
 function validateNestedFunctionArg(
@@ -476,6 +506,7 @@ function validateFunction(
           validateFunctionLiteralArg,
           validateNestedFunctionArg,
           validateFunctionColumnArg,
+          validateInlineCastArg,
         ].flatMap((validateFn) => {
           return validateFn(
             astFunction,
