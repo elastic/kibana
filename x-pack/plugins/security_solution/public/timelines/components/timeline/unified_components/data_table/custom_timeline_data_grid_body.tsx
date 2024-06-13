@@ -182,10 +182,8 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
 }))`
   display: flex;
   align-items: center;
-  height: 36px;
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
-    height: 100%;
     .unifiedDataTable__rowControl {
       margin-top: 0;
     }
@@ -319,13 +317,6 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
               );
             })}
           </CustomGridRowCellWrapper>
-          {/* Timeline Event Detail Row Renderer */}
-          {canShowRowRenderer ? (
-            <Cell
-              colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
-              visibleRowIndex={rowIndex}
-            />
-          ) : null}
           {renderNotesContainer && (
             <NoteCards
               ariaRowindex={rowIndex}

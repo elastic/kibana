@@ -252,6 +252,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   const setAppState = useCallback(
     (newState: { columns: string[]; sort?: string[][] }) => {
       const { columns: newColumns, sort: newSort } = newState;
+      console.log({ newState });
       if (newSort) {
         const isSortUnchanged =
           newSort.length === sortingColumns.length && isEqual(newSort, sortingColumns);
@@ -341,17 +342,9 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
 
   const onRemoveFieldFromWorkspace = useCallback(
     (field: DataViewField) => {
-      if (columns.some(({ id }) => id === field.name)) {
-        dispatch(
-          timelineActions.removeColumn({
-            columnId: field.name,
-            id: timelineId,
-          })
-        );
-      }
       onRemoveColumn(field.name);
     },
-    [columns, dispatch, onRemoveColumn, timelineId]
+    [onRemoveColumn]
   );
 
   const onFieldEdited = useCallback(() => {

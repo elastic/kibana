@@ -7,6 +7,8 @@
  */
 
 import type { MutableRefObject } from 'react';
+import { useEffect } from 'react';
+import { useState } from 'react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import type { EuiDataGridRefProps } from '@elastic/eui';
 import { EuiLoadingSpinner, type EuiDataGridColumnCellAction } from '@elastic/eui';
@@ -60,6 +62,8 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
   dataGridRef,
   disabledActionTypes = [],
 }) => {
+  const [cellActions, setCellActions] = useState<EuiDataGridColumnCellAction[][]>(emptyActions);
+
   const bulkContexts: CellActionCompatibilityContext[] | undefined = useMemo(() => {
     if (!triggerId || !fields?.length) {
       return undefined;
@@ -75,35 +79,37 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
     disabledActionTypes,
   });
 
-  const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
+  useEffect(() => {
     if (loading) {
-      return fields?.length ? fields.map(() => loadingColumnActions) : emptyActions;
+      return;
     }
     if (!triggerId || !columnsActions?.length || !fields?.length) {
-      return emptyActions;
+      return;
     }
 
     // Check for a temporary inconsistency because `useBulkLoadActions` takes one render loop before setting `loading` to true.
     // It will eventually update to a consistent state
     if (columnsActions.length !== fields.length) {
-      return emptyActions;
+      return;
     }
 
-    return columnsActions.map((actions, columnIndex) =>
-      actions.map((action) =>
-        createColumnCellAction({
-          action,
-          field: fields[columnIndex],
-          getCellValue,
-          metadata,
-          triggerId,
-          dataGridRef,
-        })
+    setCellActions(
+      columnsActions.map((actions, columnIndex) =>
+        actions.map((action) =>
+          createColumnCellAction({
+            action,
+            field: fields[columnIndex],
+            getCellValue,
+            metadata,
+            triggerId,
+            dataGridRef,
+          })
+        )
       )
     );
   }, [columnsActions, fields, getCellValue, loading, metadata, triggerId, dataGridRef]);
 
-  return columnsCellActions;
+  return cellActions;
 };
 
 interface CreateColumnCellActionParams

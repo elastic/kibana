@@ -45,13 +45,20 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     data,
     fieldName: header.id,
   });
-  const styledContentClassName = isDetails
-    ? 'eui-textBreakWord'
-    : 'eui-displayInlineBlock eui-textTruncate';
-  return (
-    <StyledContent className={styledContentClassName} $isDetails={isDetails}>
-      {getColumnRenderer(header.id, columnRenderers, data, context).renderColumn({
-        asPlainText: asPlainText ?? asPlainTextDefault, // we want to render value with links as plain text but keep other formatters like badge. Except rule name for non preview tables
+  const styledContentClassName = useMemo(
+    () => (isDetails ? 'eui-textBreakWord' : 'eui-displayInlineBlock eui-textTruncate'),
+    [isDetails]
+  );
+
+  const cellRenderer = useMemo(
+    () => getColumnRenderer(header.id, columnRenderers, data, context).renderColumn,
+    [header.id, data, context]
+  );
+
+  const Cell = useMemo(
+    () =>
+      cellRenderer({
+        asPlainText: asPlainText ?? asPlainTextDefault,
         columnName: header.id,
         ecsData,
         eventId,
@@ -64,7 +71,28 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
         truncate,
         values,
         context,
-      })}
+      }),
+    [
+      asPlainText,
+      header,
+      ecsData,
+      eventId,
+      isDetails,
+      asPlainTextDefault,
+      values,
+      context,
+      isDraggable,
+      linkValues,
+      rowRenderers,
+      scopeId,
+      truncate,
+      cellRenderer,
+    ]
+  );
+
+  return (
+    <StyledContent className={styledContentClassName} $isDetails={isDetails}>
+      {Cell}
     </StyledContent>
   );
 };
