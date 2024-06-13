@@ -7,6 +7,7 @@
  */
 
 import { Stream } from 'stream';
+import { z } from 'zod';
 import { ValidationError, schema, isConfigSchema } from '@kbn/config-schema';
 import type {
   RouteValidationSpec,
@@ -17,6 +18,10 @@ import type {
   RouteValidatorOptions,
 } from '@kbn/core-http-server';
 import { RouteValidationError } from '@kbn/core-http-server';
+
+function isZod<T>(rule: RouteValidationSpec<T>): rule is z.ZodType<T> {
+  return Boolean('_def' in rule && 'typeName' in (rule as { _def: unknown }));
+}
 
 /**
  * Route validator class to define the validation logic for each new route.
@@ -119,6 +124,8 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
   ): T {
     if (isConfigSchema(validationRule)) {
       return validationRule.validate(data, {}, namespace);
+    } else if (isZod(validationRule)) {
+      return validationRule.parse(data);
     } else if (typeof validationRule === 'function') {
       return this.validateFunction(validationRule, data, namespace);
     } else {
