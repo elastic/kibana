@@ -30,7 +30,6 @@ import './_index.scss';
 const containerPadding = 10;
 const minElemAndChartDiff = 20;
 const RESIZE_THROTTLE_TIME_MS = 500;
-const chartPanelPercentageHeight = 0.85;
 interface AppStateZoom {
   from?: string;
   to?: string;
@@ -225,11 +224,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                   selectedJobId === selectedJob?.job_id && (
                     <TimeSeriesExplorerEmbeddableChart
                       chartWidth={chartDimensions.width - containerPadding}
-                      chartHeight={
-                        chartDimensions.height > 0
-                          ? Math.round(chartDimensions.height * chartPanelPercentageHeight)
-                          : undefined
-                      }
+                      chartHeight={chartDimensions.height - containerPadding}
                       dataViewsService={pluginStart.data.dataViews}
                       toastNotificationService={toastNotificationService}
                       appStateHandler={appStateHandler}

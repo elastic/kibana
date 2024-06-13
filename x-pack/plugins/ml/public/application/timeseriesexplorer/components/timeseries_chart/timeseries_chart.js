@@ -324,7 +324,9 @@ class TimeseriesChartIntl extends Component {
     const focusYAxis = this.focusYAxis;
     const focusYScale = this.focusYScale;
 
-    const svgHeight = incomingSvgHeight ?? getSvgHeight(showAnnotations);
+    const svgHeight =
+      (incomingSvgHeight && incomingSvgHeight + (showAnnotations ? annotationHeight : 0)) ??
+      getSvgHeight(showAnnotations);
 
     // Clear any existing elements from the visualization,
     // then build the svg elements for the bubble chart.
