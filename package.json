@@ -70,14 +70,14 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
-    "**/@elastic/charts/**/d3-color": "npm:@elastic/d3-color@1.4.2",
+    "**/@elastic/charts/**/d3-color": "npm:@elastic/kibana-d3-color@1.4.2",
     "**/@types/node": "20.10.6",
     "**/@types/react": "^16.14.25",
     "**/@types/react-dom": "^16.9.8",
     "**/@typescript-eslint/utils": "5.62.0",
     "**/axios": "1.6.3",
     "**/chokidar": "^3.4.3",
-    "**/d3-scale/**/d3-color": "npm:@elastic/d3-color@1.4.2",
+    "**/d3-scale/**/d3-color": "npm:@elastic/kibana-d3-color@1.4.2",
     "**/globule/minimatch": "^3.1.2",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/html-minifier/uglify-js": "^3.14.3",
