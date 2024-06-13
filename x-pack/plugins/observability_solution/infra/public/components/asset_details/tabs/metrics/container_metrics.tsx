@@ -58,19 +58,17 @@ export const ContainerMetrics = () => {
     );
   }
 
-  return (
-    isKubernetesContainer && (
-      <MetricsTemplate ref={ref}>
-        {KUBERNETES_METRIC_TYPES.map((metric) => (
-          <KubernetesContainerCharts
-            key={metric}
-            assetId={asset.id}
-            dataView={metrics.dataView}
-            dateRange={state.dateRange}
-            metric={metric}
-          />
-        ))}
-      </MetricsTemplate>
-    )
-  );
+  return isKubernetesContainer ? (
+    <MetricsTemplate ref={ref}>
+      {KUBERNETES_METRIC_TYPES.map((metric) => (
+        <KubernetesContainerCharts
+          key={metric}
+          assetId={asset.id}
+          dataView={metrics.dataView}
+          dateRange={state.dateRange}
+          metric={metric}
+        />
+      ))}
+    </MetricsTemplate>
+  ) : null;
 };
