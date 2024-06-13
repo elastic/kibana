@@ -97,8 +97,6 @@ export const groupingSearchResponse = {
       value: 32,
     },
     groupByFields: {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 0,
       buckets: [
         {
           key: ['critical hosts [Duplicate]'],
@@ -121,16 +119,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          // description: {
-          //   doc_count_error_upper_bound: 0,
-          //   sum_other_doc_count: 0,
-          //   buckets: [
-          //     {
-          //       key: 'f',
-          //       doc_count: 1,
-          //     },
-          //   ],
-          // },
           unitsCount: {
             value: 300,
           },
