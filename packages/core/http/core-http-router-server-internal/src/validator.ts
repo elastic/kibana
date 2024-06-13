@@ -19,8 +19,8 @@ import type {
 } from '@kbn/core-http-server';
 import { RouteValidationError } from '@kbn/core-http-server';
 
-function isZod<T>(rule: RouteValidationSpec<T>): rule is z.ZodType<T> {
-  return Boolean('_def' in rule && 'typeName' in (rule as { _def: unknown }));
+export function isZod<T>(rule: RouteValidationSpec<T>): rule is z.ZodType<T> {
+  return Boolean('_def' in rule && 'typeName' in (rule as { _def: {} })._def);
 }
 
 /**
