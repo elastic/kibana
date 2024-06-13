@@ -110,6 +110,9 @@ describe('TaskManagerMetricsCollector', () => {
       logger,
       pollInterval,
       store: mockTaskStore,
+      taskTypes: new Set(['taskType1', 'taskType2', 'taskType3', 'taskType4']),
+      removedTypes: new Set(['taskType5']),
+      excludedTypes: new Set(['taskType4', 'taskType5']),
     });
     const handler = jest.fn();
     taskManagerMetricsCollector.events.subscribe(handler);
@@ -182,6 +185,20 @@ describe('TaskManagerMetricsCollector', () => {
                           },
                         },
                         { range: { 'task.retryAt': { lte: 'now' } } },
+                      ],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+                must: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          terms: {
+                            'task.taskType': ['taskType1', 'taskType2', 'taskType3'],
+                          },
+                        },
                       ],
                     },
                   },
@@ -299,10 +316,14 @@ describe('TaskManagerMetricsCollector', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
+    const taskTypes = new Set([]);
     const taskManagerMetricsCollector = new TaskManagerMetricsCollector({
       logger,
       pollInterval,
       store: mockTaskStore,
+      taskTypes,
+      removedTypes: taskTypes,
+      excludedTypes: taskTypes,
     });
     const handler = jest.fn();
     taskManagerMetricsCollector.events.subscribe(handler);
@@ -365,10 +386,14 @@ describe('TaskManagerMetricsCollector', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
+    const taskTypes = new Set([]);
     const taskManagerMetricsCollector = new TaskManagerMetricsCollector({
       logger,
       pollInterval,
       store: mockTaskStore,
+      taskTypes,
+      removedTypes: taskTypes,
+      excludedTypes: taskTypes,
     });
     const handler = jest.fn();
     taskManagerMetricsCollector.events.subscribe(handler);
