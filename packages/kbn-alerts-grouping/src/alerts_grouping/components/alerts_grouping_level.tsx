@@ -62,7 +62,7 @@ export interface AlertsGroupingLevelProps extends AlertsGroupingProps {
   onGroupClose: () => void;
   pageIndex: number;
   pageSize: number;
-  parentGroupingFilter?: string;
+  parentGroupingFilter?: Filter[];
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
   setPageSize: (newSize: number) => void;
@@ -102,7 +102,7 @@ export const AlertsGroupingLevel = memo(
           buildEsQuery(undefined, globalQuery != null ? [globalQuery] : [], [
             ...(globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
             ...(defaultFilters ?? []),
-            ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
+            ...(parentGroupingFilter ?? []),
           ]),
         ];
       } catch (e) {

@@ -12,7 +12,7 @@ import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEqual } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useAlertDataView } from '@kbn/alerts-ui-shared';
-import { AlertsGroupingLevel } from './alerts_grouping_level';
+import { AlertsGroupingLevel, AlertsGroupingLevelProps } from './alerts_grouping_level';
 import { AlertsGroupingProps } from '../types';
 import {
   AlertsGroupingContextProvider,
@@ -20,6 +20,32 @@ import {
 } from '../contexts/alerts_grouping_context';
 import { useGroupingPersistence } from '../hooks/use_grouping_persistence';
 import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE, MAX_GROUPING_LEVELS } from '../constants';
+
+/**
+ * Handles recursive rendering of grouping levels
+ */
+const NextLevel = ({
+  level,
+  selectedGroups,
+  children,
+  parentGroupingFilter,
+  groupingFilters,
+  getLevel,
+}: Pick<AlertsGroupingLevelProps, 'children' | 'parentGroupingFilter'> & {
+  level: number;
+  selectedGroups: string[];
+  groupingFilters: Filter[];
+  getLevel: (level: number, selectedGroup: string, parentGroupingFilter?: Filter[]) => JSX.Element;
+}): JSX.Element => {
+  const nextGroupingFilters = useMemo(
+    () => [...groupingFilters, ...(parentGroupingFilter ?? [])],
+    [groupingFilters, parentGroupingFilter]
+  );
+  if (level < selectedGroups.length - 1) {
+    return getLevel(level + 1, selectedGroups[level + 1], nextGroupingFilters)!;
+  }
+  return children(nextGroupingFilters)!;
+};
 
 const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
   const {
@@ -150,7 +176,7 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
   }, [defaultFilters, globalFilters, globalQuery, resetAllPagination, selectedGroups]);
 
   const getLevel = useCallback(
-    (level: number, selectedGroup: string, parentGroupingFilter?: string) => {
+    (level: number, selectedGroup: string, parentGroupingFilter?: Filter[]) => {
       const resetGroupChildrenPagination = (parentLevel: number) => {
         setPageIndex((allPages) => {
           const resetPages = allPages.splice(parentLevel + 1, allPages.length);
@@ -171,24 +197,17 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
           setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
         >
-          {level < selectedGroups.length - 1
-            ? (groupingFilters: Filter[]) => {
-                return getLevel(
-                  level + 1,
-                  selectedGroups[level + 1],
-                  // stringify because if the filter is passed as an object, it will cause unnecessary re-rendering
-                  JSON.stringify([
-                    ...groupingFilters,
-                    ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
-                  ])
-                )!;
-              }
-            : (groupingFilters: Filter[]) => {
-                return children([
-                  ...groupingFilters,
-                  ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
-                ])!;
-              }}
+          {(groupingFilters) => (
+            <NextLevel
+              selectedGroups={selectedGroups}
+              groupingFilters={groupingFilters}
+              getLevel={getLevel}
+              parentGroupingFilter={parentGroupingFilter}
+              level={level}
+            >
+              {children}
+            </NextLevel>
+          )}
         </AlertsGroupingLevel>
       );
     },
