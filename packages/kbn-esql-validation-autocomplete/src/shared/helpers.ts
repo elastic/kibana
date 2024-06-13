@@ -522,6 +522,9 @@ export const getUnquotedColumnName = (column: ESQLColumn) => column.name;
 export const getQuotedColumnName = (column: ESQLColumn) =>
   column.quoted ? column.text : column.name;
 
+/**
+ * TODO - consider calling lookupColumn under the hood of this function. Seems like they should really do the same thing.
+ */
 export function getColumnExists(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
