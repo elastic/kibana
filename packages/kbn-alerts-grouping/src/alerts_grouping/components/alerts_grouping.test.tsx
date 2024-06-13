@@ -13,15 +13,20 @@ import React from 'react';
 import { fireEvent, render, within } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 
-import { AlertsGroupingProps } from '../types';
 import { AlertsGrouping } from './alerts_grouping';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { useFindAlertsQuery } from '@kbn/alerts-ui-shared';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 import { getQuery, groupingSearchResponse } from '../mocks/grouping_query.mock';
 import { useAlertsGroupingState } from '../contexts/alerts_grouping_context';
 import { I18nProvider } from '@kbn/i18n-react';
+import {
+  mockFeatureIds,
+  mockDate,
+  mockGroupingProps,
+  mockGroupingId,
+  mockOptions,
+} from '../mocks/grouping_props.mock';
 
 const localStorageMock = () => {
   let store: Record<string, unknown> = {};
@@ -70,67 +75,15 @@ jest.mock('uuid', () => ({
 
 const mockUseFindAlertsQuery = useFindAlertsQuery as jest.Mock;
 
-const mockOptions = [
-  { label: 'ruleName', key: 'kibana.alert.rule.name' },
-  { label: 'userName', key: 'user.name' },
-  { label: 'hostName', key: 'host.name' },
-  { label: 'sourceIP', key: 'source.ip' },
-];
-
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
-
-const groupingId = 'test';
-
-const featureIds = [AlertConsumers.STACK_ALERTS];
-
-const mockDate = {
-  from: '2020-07-07T08:20:18.966Z',
-  to: '2020-07-08T08:20:18.966Z',
-};
-
-const testProps: Omit<AlertsGroupingProps, 'children'> = {
-  ...mockDate,
-  defaultGroupingOptions: mockOptions,
-  featureIds,
-  getAggregationsByGroupingField: () => [],
-  getGroupStats: () => [{ title: 'Stat', component: <span /> }],
-  renderGroupPanel: () => <span />,
-  takeActionItems: undefined,
-  defaultFilters: [],
-  globalFilters: [],
-  globalQuery: {
-    query: 'query',
-    language: 'language',
-  },
-  loading: false,
-  groupingId,
-  services: {
-    dataViews: {
-      clearInstanceCache: jest.fn(),
-      create: jest.fn(),
-    } as unknown as AlertsGroupingProps['services']['dataViews'],
-    http: {
-      get: jest.fn(),
-    } as unknown as AlertsGroupingProps['services']['http'],
-    notifications: {
-      toasts: {
-        addDanger: jest.fn(),
-      },
-    } as unknown as AlertsGroupingProps['services']['notifications'],
-    storage: {
-      get: jest.fn(),
-      set: jest.fn(),
-    } as unknown as AlertsGroupingProps['services']['storage'],
-  },
-};
+const renderChildComponent = (_groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
 
 const getMockStorageState = (groups: string[] = ['none']) =>
   JSON.stringify({
-    [groupingId]: {
+    [mockGroupingId]: {
       activeGroups: groups,
       options: mockOptions,
     },
@@ -177,7 +130,7 @@ describe('AlertsGrouping', () => {
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <AlertsGrouping {...testProps}>{renderChildComponent}</AlertsGrouping>
+        <AlertsGrouping {...mockGroupingProps}>{renderChildComponent}</AlertsGrouping>
       </TestProviders>
     );
     expect(queryByTestId('alerts-table')).not.toBeInTheDocument();
@@ -187,7 +140,7 @@ describe('AlertsGrouping', () => {
   it('renders grouping table in first accordion level when single group is selected', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsGrouping {...testProps}>{renderChildComponent}</AlertsGrouping>
+        <AlertsGrouping {...mockGroupingProps}>{renderChildComponent}</AlertsGrouping>
       </TestProviders>
     );
 
@@ -198,16 +151,16 @@ describe('AlertsGrouping', () => {
   it('Query gets passed correctly', () => {
     render(
       <TestProviders>
-        <AlertsGrouping {...testProps}>{renderChildComponent}</AlertsGrouping>
+        <AlertsGrouping {...mockGroupingProps}>{renderChildComponent}</AlertsGrouping>
       </TestProviders>
     );
     expect(mockUseFindAlertsQuery).toHaveBeenLastCalledWith(
       expect.objectContaining({
         params: getQuery({
           selectedGroup: 'kibana.alert.rule.name',
-          uniqueValue: 'SuperUniqueValue-test-uuid',
+          uniqueValue: 'alerts-grouping-level-test-uuid',
           timeRange: mockDate,
-          featureIds,
+          featureIds: mockFeatureIds,
         }),
       })
     );
@@ -223,7 +176,7 @@ describe('AlertsGrouping', () => {
     });
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsGrouping {...testProps}>{renderChildComponent}</AlertsGrouping>
+        <AlertsGrouping {...mockGroupingProps}>{renderChildComponent}</AlertsGrouping>
       </TestProviders>
     );
     fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
@@ -244,7 +197,7 @@ describe('AlertsGrouping', () => {
     });
     const { getByTestId, getAllByTestId } = render(
       <TestProviders>
-        <AlertsGrouping {...testProps}>{renderChildComponent}</AlertsGrouping>
+        <AlertsGrouping {...mockGroupingProps}>{renderChildComponent}</AlertsGrouping>
       </TestProviders>
     );
 
@@ -297,7 +250,7 @@ describe('AlertsGrouping', () => {
 
     const { getByTestId, rerender } = render(
       <TestProviders>
-        <AlertsGrouping {...testProps}>{renderChildComponent}</AlertsGrouping>
+        <AlertsGrouping {...mockGroupingProps}>{renderChildComponent}</AlertsGrouping>
       </TestProviders>
     );
 
@@ -310,7 +263,7 @@ describe('AlertsGrouping', () => {
     rerender(
       <TestProviders>
         <AlertsGrouping
-          {...{ ...testProps, globalQuery: { query: 'updated', language: 'language' } }}
+          {...{ ...mockGroupingProps, globalQuery: { query: 'updated', language: 'language' } }}
         >
           {renderChildComponent}
         </AlertsGrouping>
@@ -342,7 +295,7 @@ describe('AlertsGrouping', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsGrouping {...testProps}>{renderChildComponent}</AlertsGrouping>
+        <AlertsGrouping {...mockGroupingProps}>{renderChildComponent}</AlertsGrouping>
       </TestProviders>
     );
 
@@ -398,7 +351,7 @@ describe('AlertsGrouping', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsGrouping {...testProps}>{renderChildComponent}</AlertsGrouping>
+        <AlertsGrouping {...mockGroupingProps}>{renderChildComponent}</AlertsGrouping>
       </TestProviders>
     );
 
@@ -444,7 +397,7 @@ describe('AlertsGrouping', () => {
 
     const { getByTestId, getAllByTestId } = render(
       <TestProviders>
-        <AlertsGrouping {...testProps}>{renderChildComponent}</AlertsGrouping>
+        <AlertsGrouping {...mockGroupingProps}>{renderChildComponent}</AlertsGrouping>
       </TestProviders>
     );
 
