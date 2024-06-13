@@ -1356,6 +1356,8 @@
       "@kbn/resizable-layout-examples-plugin/*": ["examples/resizable_layout_examples/*"],
       "@kbn/resolver-test-plugin": ["x-pack/test/plugin_functional/plugins/resolver_test"],
       "@kbn/resolver-test-plugin/*": ["x-pack/test/plugin_functional/plugins/resolver_test/*"],
+      "@kbn/response-ops-feature-flag-service": ["packages/response-ops/feature_flag_service"],
+      "@kbn/response-ops-feature-flag-service/*": ["packages/response-ops/feature_flag_service/*"],
       "@kbn/response-stream-plugin": ["examples/response_stream"],
       "@kbn/response-stream-plugin/*": ["examples/response_stream/*"],
       "@kbn/rison": ["packages/kbn-rison"],
