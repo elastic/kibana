@@ -7,6 +7,7 @@
  */
 
 import { getAstAndSyntaxErrors as parse } from '../ast_parser';
+import { ESQLInlineCast, ESQLSingleAstItem } from '../types';
 
 describe('Inline cast (::)', () => {
   describe('correctly formatted', () => {
@@ -106,6 +107,23 @@ describe('Inline cast (::)', () => {
           "type": "command",
         }
       `);
+    });
+
+    it('can be nested', () => {
+      const text = 'FROM kibana_ecommerce_data | EVAL field::long::string::datetime';
+      const { ast, errors } = parse(text);
+
+      expect(errors.length).toBe(0);
+      let currentNode = ast[1].args[0];
+      let depth = 0;
+
+      while (depth < 3) {
+        expect((currentNode as ESQLSingleAstItem).type).toBe('inlineCast');
+        currentNode = (currentNode as ESQLInlineCast).value;
+        depth++;
+      }
+
+      expect((currentNode as ESQLSingleAstItem).name).toBe('field');
     });
   });
 });
