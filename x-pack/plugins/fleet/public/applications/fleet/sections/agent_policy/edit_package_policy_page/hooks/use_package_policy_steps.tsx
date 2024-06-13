@@ -10,6 +10,8 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui';
 
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services';
+
 import type { AgentPolicy, NewAgentPolicy, NewPackagePolicy } from '../../../../../../../common';
 
 import { SelectedPolicyTab, StepSelectHosts } from '../../create_package_policy_page/components';
@@ -25,8 +27,6 @@ interface Params {
   configureStep: React.ReactNode;
   packageInfo?: PackageInfo;
   existingAgentPolicies: AgentPolicy[];
-  newAgentPolicy: NewAgentPolicy;
-  setNewAgentPolicy: (newAgentPolicy: NewAgentPolicy) => void;
   setHasAgentPolicyError: (hasError: boolean) => void;
   updatePackagePolicy: (data: { policy_ids: string[] }) => void;
   agentPolicies: AgentPolicy[];
@@ -40,8 +40,6 @@ export function usePackagePolicySteps({
   configureStep,
   packageInfo,
   existingAgentPolicies,
-  newAgentPolicy,
-  setNewAgentPolicy,
   setHasAgentPolicyError,
   updatePackagePolicy,
   agentPolicies,
@@ -50,6 +48,9 @@ export function usePackagePolicySteps({
   packagePolicy,
   packagePolicyId,
 }: Params) {
+  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
+    generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
+  );
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
 
   const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(

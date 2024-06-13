@@ -363,7 +363,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       ) : packageInfo ? (
         <>
           <StepDefinePackagePolicy
-            agentPolicies={agentPolicies}
+            namespacePlaceholder={agentPolicies?.[0]?.namespace}
             packageInfo={packageInfo}
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}

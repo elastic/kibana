@@ -48,15 +48,10 @@ import {
 } from '../create_package_policy_page/components';
 
 import { AGENTLESS_POLICY_ID } from '../../../../../../common/constants';
-import type {
-  AgentPolicy,
-  NewAgentPolicy,
-  PackagePolicyEditExtensionComponentProps,
-} from '../../../types';
+import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 
 import {
-  generateNewAgentPolicyWithDefaults,
   getRootPrivilegedDataStreams,
   isRootPrivilegesRequired,
 } from '../../../../../../common/services';
@@ -143,9 +138,6 @@ export const EditPackagePolicyForm = memo<{
 
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
-  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
-    generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
-  );
 
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
 
@@ -154,8 +146,8 @@ export const EditPackagePolicyForm = memo<{
   useEffect(() => {
     const getAgentCount = async () => {
       let count = 0;
-      for (const policy of agentPolicies) {
-        const { data } = await sendGetAgentStatus({ policyId: policy.id });
+      for (const id of packagePolicy.policy_ids) {
+        const { data } = await sendGetAgentStatus({ policyId: id });
         if (data?.results.total) {
           count += data.results.total;
         }
@@ -163,10 +155,10 @@ export const EditPackagePolicyForm = memo<{
       setAgentCount(count);
     };
 
-    if (isFleetEnabled && agentPolicies.length > 0) {
+    if (isFleetEnabled && packagePolicy.policy_ids.length > 0) {
       getAgentCount();
     }
-  }, [agentPolicies, isFleetEnabled]);
+  }, [packagePolicy.policy_ids, isFleetEnabled]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
@@ -223,7 +215,7 @@ export const EditPackagePolicyForm = memo<{
     }
     if (
       agentCount !== 0 &&
-      !agentPolicies.map((policy) => policy.id).includes(AGENTLESS_POLICY_ID) &&
+      !packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID) &&
       formState !== 'CONFIRM'
     ) {
       setFormState('CONFIRM');
@@ -335,7 +327,7 @@ export const EditPackagePolicyForm = memo<{
         <>
           {selectedTab === 0 && (
             <StepDefinePackagePolicy
-              agentPolicies={agentPolicies}
+              namespacePlaceholder={agentPolicies?.[0]?.namespace}
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
@@ -423,8 +415,6 @@ export const EditPackagePolicyForm = memo<{
     configureStep: replaceConfigurePackage || configurePackage,
     packageInfo,
     existingAgentPolicies,
-    newAgentPolicy,
-    setNewAgentPolicy,
     setHasAgentPolicyError,
     updatePackagePolicy,
     agentPolicies,
