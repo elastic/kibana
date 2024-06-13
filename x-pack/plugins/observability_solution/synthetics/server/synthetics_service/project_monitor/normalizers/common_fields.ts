@@ -359,14 +359,27 @@ export const getValueInSeconds = (value: string) => {
 };
 
 /**
+ * Accounts for url values in a string or list
+ *
+ * @param {Array | string} [value]
+ * @returns {array} Returns an array
+ */
+export const getUrlsField = (value?: string[] | string): string[] => {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+};
+
+/**
  * Accounts for array values that are optionally defined as a comma seperated list
  *
  * @param {Array | string} [value]
  * @returns {array} Returns an array
  */
 export const getOptionalListField = (value?: string[] | string): string[] => {
-  if (!value) return [];
-  return Array.isArray(value) ? value : [value];
+  if (Array.isArray(value)) {
+    return value;
+  }
+  return value ? value.split(',') : [];
 };
 
 /**

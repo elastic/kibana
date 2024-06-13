@@ -8,19 +8,19 @@
 import {
   flattenAndFormatObject,
   getNormalizeCommonFields,
-  getOptionalListField,
+  getUrlsField,
   NormalizedProjectProps,
 } from './common_fields';
 
-describe('getOptionalListField', () => {
+describe('getUrlsField', () => {
   it('supports a string value containing a comma', () => {
-    expect(getOptionalListField('https://elastic.co?foo=bar,baz')).toEqual([
+    expect(getUrlsField('https://elastic.co?foo=bar,baz')).toEqual([
       'https://elastic.co?foo=bar,baz',
     ]);
   });
 
   it('supports lists containing exactly one entry, even with commas', () => {
-    expect(getOptionalListField(['https://elastic.co?foo=bar,baz'])).toEqual([
+    expect(getUrlsField(['https://elastic.co?foo=bar,baz'])).toEqual([
       'https://elastic.co?foo=bar,baz',
     ]);
   });
