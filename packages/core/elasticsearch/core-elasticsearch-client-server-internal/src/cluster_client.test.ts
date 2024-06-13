@@ -42,7 +42,7 @@ const createConfig = (
     requestHeadersWhitelist: ['authorization'],
     customHeaders: {},
     hosts: ['http://localhost'],
-    dnsCacheTtlInSeconds: 0,
+    dnsCacheTtl: duration(0, 'seconds'),
     ...parts,
   };
 };
