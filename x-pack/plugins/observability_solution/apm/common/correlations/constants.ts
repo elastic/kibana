@@ -67,8 +67,6 @@ export const FIELD_PREFIX_TO_ADD_AS_CANDIDATE = ['cloud.', 'labels.', 'user_agen
 /**
  * Other constants
  */
-export const POPULATED_DOC_COUNT_SAMPLE_SIZE = 1000;
-
 export const PERCENTILES_STEP = 2;
 export const TERMS_SIZE = 20;
 export const SIGNIFICANT_FRACTION = 3;

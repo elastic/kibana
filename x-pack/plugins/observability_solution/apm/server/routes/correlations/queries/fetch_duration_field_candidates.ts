@@ -8,15 +8,13 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import {
   FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,
   FIELDS_TO_ADD_AS_CANDIDATE,
   FIELDS_TO_EXCLUDE_AS_CANDIDATE,
-  POPULATED_DOC_COUNT_SAMPLE_SIZE,
 } from '../../../../common/correlations/constants';
-import { hasPrefixToInclude } from '../../../../common/correlations/utils';
-import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const SUPPORTED_ES_FIELD_TYPES = [
@@ -50,58 +48,28 @@ export async function fetchDurationFieldCandidates({
   eventType: ProcessorEvent.transaction | ProcessorEvent.span;
 }): Promise<DurationFieldCandidatesResponse> {
   // Get all supported fields
-  const [respMapping, respRandomDoc] = await Promise.all([
-    apmEventClient.fieldCaps('get_field_caps', {
-      apm: {
-        events: [eventType],
-      },
-      fields: '*',
-    }),
-    apmEventClient.search('get_random_doc_for_field_candidate', {
-      apm: {
-        events: [eventType],
-      },
-      body: {
-        track_total_hits: false,
-        fields: ['*'],
-        _source: false,
-        query: getCommonCorrelationsQuery({
-          start,
-          end,
-          environment,
-          kuery,
-          query,
-        }),
-        size: POPULATED_DOC_COUNT_SAMPLE_SIZE,
-      },
-    }),
-  ]);
+  const respMapping = await apmEventClient.fieldCaps('get_field_caps', {
+    apm: {
+      events: [eventType],
+    },
+    fields: '*',
+    filters: '-metadata',
+    include_empty_fields: false,
+    index_filter: rangeQuery(start, end)[0],
+    types: SUPPORTED_ES_FIELD_TYPES,
+  });
 
   const finalFieldCandidates = new Set(FIELDS_TO_ADD_AS_CANDIDATE);
-  const acceptableFields: Set<string> = new Set();
 
+  // There seems to be an issue with the `types` query parameter in the
+  // field caps API. It will return fields of type `object` even if that's not
+  // part of the given types. So here we need to filter out these fields manually.
   Object.entries(respMapping.fields).forEach(([key, value]) => {
     const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
     const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
-    // Definitely include if field name matches any of the wild card
-    if (hasPrefixToInclude(key) && isSupportedType) {
-      finalFieldCandidates.add(key);
-    }
 
-    // Check if fieldName is something we can aggregate on
     if (isSupportedType) {
-      acceptableFields.add(key);
-    }
-  });
-
-  const sampledDocs = respRandomDoc.hits.hits.map((d) => d.fields ?? {});
-
-  // Get all field names for each returned doc and flatten it
-  // to a list of unique field names used across all docs
-  // and filter by list of acceptable fields and some APM specific unique fields.
-  [...new Set(sampledDocs.map(Object.keys).flat(1))].forEach((field) => {
-    if (acceptableFields.has(field) && !shouldBeExcluded(field)) {
-      finalFieldCandidates.add(field);
+      finalFieldCandidates.add(key);
     }
   });
 
