@@ -11,6 +11,7 @@ import {
   CROWDSTRIKE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { v4 as uuidv4 } from 'uuid';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
@@ -36,7 +37,6 @@ import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
-import { ELASTIC_RESPONSE_ACTION_MESSAGE } from '../../utils';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -218,20 +218,16 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
-      const actionCommentMessage = ELASTIC_RESPONSE_ACTION_MESSAGE(
-        this.options.username,
-        reqIndexOptions.actionId
-      );
 
       if (!error) {
+        if (!reqIndexOptions.actionId) {
+          reqIndexOptions.actionId = uuidv4();
+        }
+
         try {
           await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
             ids: actionRequest.endpoint_ids,
-            actionParameters: {
-              comment: reqIndexOptions.comment
-                ? `${actionCommentMessage}: ${reqIndexOptions.comment}`
-                : actionCommentMessage,
-            },
+            actionParameters: { comment: this.buildExternalComment(reqIndexOptions) },
             command: 'contain',
           });
         } catch (err) {
@@ -277,18 +273,13 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
-      const actionCommentMessage = ELASTIC_RESPONSE_ACTION_MESSAGE(
-        this.options.username,
-        reqIndexOptions.actionId
-      );
+
       if (!error) {
         try {
           await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
             ids: actionRequest.endpoint_ids,
             command: 'lift_containment',
-            comment: reqIndexOptions.comment
-              ? `${actionCommentMessage}: ${reqIndexOptions.comment}`
-              : actionCommentMessage,
+            comment: this.buildExternalComment(reqIndexOptions),
           });
         } catch (err) {
           error = err;

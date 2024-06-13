@@ -80,6 +80,16 @@ import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
 import { EMPTY_COMMENT } from '../../../../utils/translations';
 
+const ELASTIC_RESPONSE_ACTION_MESSAGE = (
+  username: string = 'system',
+  command: ResponseActionsApiCommandNames,
+  responseActionId: string
+): string =>
+  i18n.translate('xpack.securitySolution.responseActions.comment.message', {
+    values: { username, command, responseActionId },
+    defaultMessage: `Action triggered from Elastic Security by user {username} for action {command} (action id: {responseActionId})`,
+  });
+
 const ENTERPRISE_LICENSE_REQUIRED_MSG = i18n.translate(
   'xpack.securitySolution.responseActionsList.error.licenseTooLow',
   {
@@ -561,6 +571,25 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     usageService.notifyUsage(featureKey);
   }
 
+  /**
+   * Builds a comment for use in response action requests sent to external EDR systems
+   * @protected
+   */
+  protected buildExternalComment(
+    actionRequestIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): string {
+    const { actionId = uuidv4(), comment, command } = actionRequestIndexOptions;
+
+    // If the action request index options does not yet have an actionId assigned to it, then do it now.
+    // Need to ensure we have an action id for cross-reference.
+    if (!actionRequestIndexOptions.actionId) {
+      actionRequestIndexOptions.actionId = actionId;
+    }
+
+    return ELASTIC_RESPONSE_ACTION_MESSAGE(this.options.username, command, actionId) + comment
+      ? `: ${comment}`
+      : '';
+  }
   protected async ensureValidActionId(actionId: string): Promise<void> {
     return validateActionId(this.options.esClient, actionId, this.agentType);
   }
