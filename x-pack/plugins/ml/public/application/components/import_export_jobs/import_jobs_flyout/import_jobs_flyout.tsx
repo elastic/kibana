@@ -45,10 +45,10 @@ import { useEnabledFeatures } from '../../../contexts/ml';
 
 export interface Props {
   isDisabled: boolean;
-  refreshJobs: (() => void) | null;
+  onImportComplete: (() => void) | null;
 }
 
-export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
+export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) => {
   const {
     services: {
       data: {
@@ -205,8 +205,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, refreshJobs }) => {
 
     setImporting(false);
     setShowFlyout(false);
-    if (typeof refreshJobs === 'function') {
-      refreshJobs();
+    if (typeof onImportComplete === 'function') {
+      onImportComplete();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobType, jobIdObjects, adJobs, dfaJobs]);

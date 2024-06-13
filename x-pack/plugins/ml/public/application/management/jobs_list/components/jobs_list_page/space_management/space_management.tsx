@@ -34,11 +34,11 @@ import { getFilters } from './filters';
 
 interface Props {
   spacesApi?: SpacesPluginStart;
-  setCurrentTab: (tabId: MlSavedObjectType) => void;
-  setRefreshJobs: React.Dispatch<React.SetStateAction<(() => void) | null>>;
+  onTabChange: (tabId: MlSavedObjectType) => void;
+  onReload: React.Dispatch<React.SetStateAction<(() => void) | null>>;
 }
 
-export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab, setRefreshJobs }) => {
+export const SpaceManagement: FC<Props> = ({ spacesApi, onTabChange, onReload }) => {
   const { getList } = useManagementApiService();
 
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType | null>(null);
@@ -103,18 +103,18 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab, setRefres
   );
 
   useEffect(() => {
-    setRefreshJobs(() => () => refresh(currentTabId));
+    onReload(() => () => refresh(currentTabId));
     return () => {
-      setRefreshJobs(null);
+      onReload(null);
     };
-  }, [currentTabId, refresh, setRefreshJobs]);
+  }, [currentTabId, refresh, onReload]);
 
   useEffect(
     function refreshOnTabChange() {
       setItems(undefined);
       if (currentTabId !== null) {
         setColumns(createColumns());
-        setCurrentTab(currentTabId);
+        onTabChange(currentTabId);
         refresh(currentTabId);
         setPageIndex(0);
       }

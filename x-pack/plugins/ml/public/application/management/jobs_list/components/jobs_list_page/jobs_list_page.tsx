@@ -205,13 +205,13 @@ export const JobsListPage: FC<Props> = ({
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <ImportJobsFlyout isDisabled={false} refreshJobs={refreshJobs} />
+                        <ImportJobsFlyout isDisabled={false} onImportComplete={refreshJobs} />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <SpaceManagement
                       spacesApi={spacesApi}
-                      setCurrentTab={setCurrentTabId}
-                      setRefreshJobs={setRefreshJobs}
+                      onTabChange={setCurrentTabId}
+                      onReload={setRefreshJobs}
                     />
                   </EuiPageTemplate.Section>
                 </Router>
