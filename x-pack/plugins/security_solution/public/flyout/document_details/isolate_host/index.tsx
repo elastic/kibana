@@ -12,8 +12,6 @@ import type { DocumentDetailsIsolateHostPanelKey } from '../shared/constants/pan
 import { PanelContent } from './content';
 import { PanelHeader } from './header';
 
-// FIXME:PT Ensure our team owns this directory
-
 export interface IsolateHostPanelProps extends FlyoutPanelProps {
   key: typeof DocumentDetailsIsolateHostPanelKey;
   params?: {
