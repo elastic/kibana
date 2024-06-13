@@ -59,11 +59,6 @@ export const generateConfig = async ({
     junit: {
       reportName: junitReportName,
     },
-    suiteTags: {
-      ...baseConfig.get('suiteTags'),
-      include: [...baseConfig.get('suiteTags.include'), ...SUITE_TAGS[target].include],
-      exclude: [...baseConfig.get('suiteTags.exclude'), ...SUITE_TAGS[target].exclude],
-    },
     services,
     apps: {
       ...xpackFunctionalConfig.get('apps'),
@@ -95,6 +90,13 @@ export const generateConfig = async ({
     },
     layout: {
       fixedHeaderHeight: 200,
+    },
+    mochaOpts: {
+      ...baseConfig.get('mochaOpts'),
+      grep:
+        target === 'serverless'
+          ? '/^(?!.*@(skipInServerless|brokenInServerless)).*@serverless/'
+          : '/^(?!.*@skipInEss).*@ess.*/',
     },
   };
 };

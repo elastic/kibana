@@ -48,7 +48,7 @@ const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
 `;
 
 export const StepDefinePackagePolicy: React.FunctionComponent<{
-  agentPolicy?: AgentPolicy;
+  agentPolicies?: AgentPolicy[];
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
@@ -58,7 +58,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   noAdvancedToggle?: boolean;
 }> = memo(
   ({
-    agentPolicy,
+    agentPolicies,
     packageInfo,
     packagePolicy,
     updatePackagePolicy,
@@ -283,8 +283,9 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       }
                     >
                       <EuiComboBox
+                        data-test-subj="packagePolicyNamespaceInput"
                         noSuggestions
-                        placeholder={agentPolicy?.namespace}
+                        placeholder={agentPolicies?.[0]?.namespace}
                         isDisabled={isEditPage && packageInfo.type === 'input'}
                         singleSelection={true}
                         selectedOptions={

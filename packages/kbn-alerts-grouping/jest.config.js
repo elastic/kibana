@@ -7,7 +7,8 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/test',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-alerts-grouping'],
+  setupFilesAfterEnv: ['<rootDir>/packages/kbn-alerts-grouping/setup_tests.ts'],
 };

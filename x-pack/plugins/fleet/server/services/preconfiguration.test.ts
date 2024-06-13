@@ -426,6 +426,7 @@ describe('policy preconfiguration', () => {
                 namespace: 'default',
                 description: 'test',
                 package: { name: 'test_package' },
+                policy_ids: ['test-id'],
                 inputs: {
                   'test_template-foo': {
                     vars: {
@@ -1398,6 +1399,7 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
         created_by: 'system',
         inputs: [],
         policy_id: 'abc123',
+        policy_ids: ['abc123'],
       },
     ],
     is_protected: false,

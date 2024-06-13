@@ -15154,6 +15154,406 @@
                         "trackAdoption": false
                       }
                     ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "use_document_level_security",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.default_value",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TOGGLE"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".BOOLEAN"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.use_document_level_security.value",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "include_inherited_users_and_groups",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.default_value",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "{ field: string; value: true; }[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TOGGLE"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".BOOLEAN"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.configuration.include_inherited_users_and_groups.value",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   }
                 ]
               },
@@ -15168,6 +15568,33 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.features.FeatureName.DOCUMENT_LEVEL_SECURITY",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "[FeatureName.DOCUMENT_LEVEL_SECURITY]",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.features.FeatureName.DOCUMENT_LEVEL_SECURITY.enabled",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "enabled",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
                   {
                     "parentPluginId": "@kbn/search-connectors",
                     "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.dropbox.features.FeatureName.SYNC_RULES",

@@ -556,6 +556,7 @@ export interface DocLinks {
   }>;
   readonly ecs: {
     readonly guide: string;
+    readonly dataStreams: string;
   };
   readonly clients: {
     readonly guide: string;

@@ -7,7 +7,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
+import {
+  addIdToItem,
+  removeIdFromItem,
+  validateHasWildcardWithWrongOperator,
+} from '@kbn/securitysolution-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   CreateExceptionListItemSchema,
@@ -1020,4 +1024,20 @@ export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInf
     });
   }
   return conflicts;
+};
+
+/**
+ * Given an exceptions list, determine if any entries have an "IS" operator with a wildcard value
+ */
+export const hasWrongOperatorWithWildcard = (
+  items: ExceptionsBuilderReturnExceptionItem[]
+): boolean => {
+  return items[0]?.entries.some((e) => {
+    if (e.type !== 'list' && 'value' in e) {
+      return validateHasWildcardWithWrongOperator({
+        operator: e.type,
+        value: e.value,
+      });
+    }
+  });
 };

@@ -1,12 +1,12 @@
-# Dataset Quality
+# Data Set Quality
 
-In order to make ongoing maintenance of log collection easy we want to introduce the concept of dataset quality, where users can easily get an overview on the datasets they have with information such as integration, size, last activity, among others.
+In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others.
 
 ## Development
 
 ### Unit Tests
 
-Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. The following command runs all Dataset quality unit tests:
+Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. The following command runs all Data Set Quality unit tests:
 
 ```
 yarn jest --config x-pack/plugins/observability_solution/dataset_quality/jest.config.js

@@ -34,15 +34,18 @@ export const Overview = () => {
     error: fetchMetadataError,
   } = useMetadataStateContext();
   const { metrics } = useDataViewsContext();
-
   const isFullPageView = renderMode.mode === 'page';
 
   const state = useIntersectingState(ref, { dateRange });
 
   const metadataSummarySection = isFullPageView ? (
-    <MetadataSummaryList metadata={metadata} loading={metadataLoading} />
+    <MetadataSummaryList metadata={metadata} loading={metadataLoading} assetType={asset.type} />
   ) : (
-    <MetadataSummaryListCompact metadata={metadata} loading={metadataLoading} />
+    <MetadataSummaryListCompact
+      metadata={metadata}
+      loading={metadataLoading}
+      assetType={asset.type}
+    />
   );
 
   return (
@@ -61,7 +64,7 @@ export const Overview = () => {
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
       </EuiFlexItem>
-      {asset.type === 'host' ? (
+      {asset.type === 'host' || asset.type === 'container' ? (
         <EuiFlexItem grow={false}>
           <AlertsSummaryContent
             assetId={asset.id}

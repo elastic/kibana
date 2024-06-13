@@ -58,7 +58,7 @@ export async function fetchSurroundingDocs(
   rows: DataTableRecord[];
   interceptedWarnings: SearchResponseWarning[] | undefined;
 }> {
-  if (typeof anchor !== 'object' || anchor === null || !size) {
+  if (typeof anchor !== 'object' || anchor === null || !anchor.raw._id || !size) {
     return {
       rows: [],
       interceptedWarnings: undefined,

@@ -34,6 +34,7 @@ describe('Group stats', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
   it('renders each stat item', () => {
     const { getByTestId, queryByTestId } = render(<GroupStats {...testProps} />);
     expect(getByTestId('group-stats')).toBeInTheDocument();
@@ -47,6 +48,7 @@ describe('Group stats', () => {
       }
     });
   });
+
   it('when onTakeActionsOpen is defined, call onTakeActionsOpen on popover click', () => {
     const { getByTestId, queryByTestId } = render(<GroupStats {...testProps} />);
     fireEvent.click(getByTestId('take-action-button'));
@@ -55,11 +57,24 @@ describe('Group stats', () => {
       expect(queryByTestId(actionItem)).not.toBeInTheDocument();
     });
   });
+
   it('when onTakeActionsOpen is undefined, render take actions dropdown on popover click', () => {
     const { getByTestId } = render(<GroupStats {...testProps} onTakeActionsOpen={undefined} />);
     fireEvent.click(getByTestId('take-action-button'));
     ['takeActionItem-1', 'takeActionItem-2'].forEach((actionItem) => {
       expect(getByTestId(actionItem)).toBeInTheDocument();
     });
+  });
+
+  it('shows the Take Actions menu when action items are provided', () => {
+    const { queryByTestId } = render(
+      <GroupStats {...testProps} takeActionItems={() => [<span />]} />
+    );
+    expect(queryByTestId('take-action-button')).toBeInTheDocument();
+  });
+
+  it('hides the Take Actions menu when no action item is provided', () => {
+    const { queryByTestId } = render(<GroupStats {...testProps} takeActionItems={() => []} />);
+    expect(queryByTestId('take-action-button')).not.toBeInTheDocument();
   });
 });

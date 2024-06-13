@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('data view creation with exclusion', async () => {
       const fieldCount = await PageObjects.settings.getFieldsTabCount();
       // five metafields plus keyword and text version of 'user' field
-      expect(parseInt(fieldCount, 10)).to.be(6);
+      expect(parseInt(fieldCount, 10)).to.be(7);
     });
 
     after(async () => {

@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         const cols = await PageObjects.datasetQuality.parseDatasetTable();
 
-        const datasetNameCol = cols['Dataset Name'];
+        const datasetNameCol = cols['Data Set Name'];
         const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
 
         const testDatasetRowIndex = datasetNameColCellTexts.findIndex(

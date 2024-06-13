@@ -7,7 +7,6 @@
 /* Error Rate */
 
 import React from 'react';
-import chroma from 'chroma-js';
 import {
   EuiFlexItem,
   EuiPanel,
@@ -16,13 +15,11 @@ import {
   EuiIconTip,
   RecursivePartial,
   useEuiTheme,
-  transparentize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BoolQuery } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { Theme } from '@elastic/charts';
-import { AlertActiveTimeRangeAnnotation, AlertAnnotation } from '@kbn/observability-alert-details';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DEFAULT_DATE_FORMAT } from './constants';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -36,6 +33,7 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { ViewInAPMButton } from './view_in_apm_button';
+import { getAlertStartAnnotation } from './get_alert_start_annotation';
 
 type ErrorRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
@@ -75,12 +73,12 @@ function FailedTransactionChart({
   environment: string;
   start: string;
   end: string;
+  alertStart?: number;
+  alertEnd?: number;
   comparisonChartTheme: RecursivePartial<Theme>;
   timeZone: string;
   kuery?: string;
   filters?: BoolQuery;
-  alertStart?: number;
-  alertEnd?: number;
 }) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -151,25 +149,14 @@ function FailedTransactionChart({
   const showTransactionTypeSelect = setTransactionType && transactionTypes;
   const getFailedTransactionChartAdditionalData = () => {
     if (alertStart) {
-      return [
-        <AlertActiveTimeRangeAnnotation
-          alertStart={alertStart}
-          alertEnd={alertEnd}
-          color={chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase()}
-          id={'alertActiveRect'}
-          key={'alertActiveRect'}
-        />,
-        <AlertAnnotation
-          key={'alertAnnotationStart'}
-          id={'alertAnnotationStart'}
-          alertStart={alertStart}
-          color={euiTheme.colors.danger}
-          dateFormat={
-            (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT
-          }
-        />,
-      ];
+      return getAlertStartAnnotation({
+        alertStart,
+        alertEnd,
+        color: euiTheme.colors.danger,
+        dateFormat: (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT,
+      });
     }
+    return [];
   };
   return (
     <EuiFlexItem>

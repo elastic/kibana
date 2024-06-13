@@ -97,7 +97,10 @@ export function DocumentsTable({
               >
                 {loading && <EuiProgress size="xs" color="accent" />}
                 <UnifiedDataTable
-                  rows={buildDataTableRecordList((data?.hits?.hits ?? []) as any, dataView)}
+                  rows={buildDataTableRecordList({
+                    records: (data?.hits?.hits ?? []) as any,
+                    dataView,
+                  })}
                   showColumnTokens
                   dataView={dataView}
                   onFilter={(fieldK, val, mode) => {

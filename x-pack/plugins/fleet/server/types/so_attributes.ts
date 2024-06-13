@@ -119,7 +119,8 @@ export interface PackagePolicySOAttributes {
   created_at: string;
   created_by: string;
   inputs: PackagePolicyInput[];
-  policy_id: string;
+  policy_id?: string;
+  policy_ids: string[];
   updated_at: string;
   updated_by: string;
   description?: string;

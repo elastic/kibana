@@ -374,6 +374,20 @@
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-common.ElasticsearchClientConfig.dnsCacheTtl",
+            "type": "Object",
+            "tags": [],
+            "label": "dnsCacheTtl",
+            "description": [],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2755,6 +2769,22 @@
                 "text": "ElasticsearchApiToRedactInLogs"
               },
               "[]"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-common.IElasticsearchConfig.dnsCacheTtl",
+            "type": "Object",
+            "tags": [],
+            "label": "dnsCacheTtl",
+            "description": [
+              "\nThe maximum time to retain the DNS lookup resolutions.\nSet to 0 to disable the cache (default Node.js behavior)"
+            ],
+            "signature": [
+              "moment.Duration"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
             "deprecated": false,

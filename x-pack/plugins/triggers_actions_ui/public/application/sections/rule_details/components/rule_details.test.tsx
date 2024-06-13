@@ -23,8 +23,8 @@ import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
-jest.mock('../../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config', () => ({
+  fetchUiConfig: jest
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));

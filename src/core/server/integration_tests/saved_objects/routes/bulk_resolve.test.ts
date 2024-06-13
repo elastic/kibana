@@ -59,7 +59,9 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
     const config = setupConfig();
-    registerBulkResolveRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+
+    registerBulkResolveRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

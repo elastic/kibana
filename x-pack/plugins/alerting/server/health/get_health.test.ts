@@ -6,8 +6,9 @@
  */
 
 import { savedObjectsRepositoryMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { HealthStatus } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { RuleExecutionStatusErrorReasons, HealthStatus } from '../types';
+import { RuleExecutionStatusErrorReasons } from '../types';
 import { getAlertingHealthStatus, getHealth } from './get_health';
 
 const savedObjectsRepository = savedObjectsRepositoryMock.create();

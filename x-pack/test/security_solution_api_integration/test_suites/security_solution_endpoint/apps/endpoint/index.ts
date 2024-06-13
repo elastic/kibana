@@ -16,7 +16,8 @@ import {
 export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService, getPageObjects } = providerContext;
 
-  describe('endpoint', function () {
+  // Flaky: https://github.com/elastic/kibana/issues/186089
+  describe('@skipInServerless endpoint', function () {
     const ingestManager = getService('ingestManager');
     const log = getService('log');
     const endpointTestResources = getService('endpointTestResources');

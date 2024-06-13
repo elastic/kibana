@@ -46,7 +46,7 @@
     },
     {
       "groupName": "LaunchDarkly",
-      "matchDepNames": ["launchdarkly-js-client-sdk", "launchdarkly-node-server-sdk"],
+      "matchDepNames": ["launchdarkly-js-client-sdk", "@launchdarkly/node-server-sdk"],
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Security", "Team:Core", "backport:prev-minor"],

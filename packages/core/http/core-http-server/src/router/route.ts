@@ -101,6 +101,16 @@ export interface RouteConfigOptionsBody {
 }
 
 /**
+ * Route access level.
+ *
+ * Public routes are stable and intended for external access and are subject to
+ * stricter change management and have long term maintenance windows.
+ *
+ * @remark On serverless access to internal routes is restricted.
+ */
+export type RouteAccess = 'public' | 'internal';
+
+/**
  * Additional route options.
  * @public
  */
@@ -133,7 +143,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *
    * Defaults to 'internal' If not declared,
    */
-  access?: 'public' | 'internal';
+  access?: RouteAccess;
 
   /**
    * Additional metadata tag strings to attach to the route.

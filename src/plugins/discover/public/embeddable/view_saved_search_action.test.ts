@@ -13,6 +13,7 @@ import { createStartContractMock } from '../__mocks__/start_contract';
 import { discoverServiceMock } from '../__mocks__/services';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
+import { BehaviorSubject } from 'rxjs';
 
 const applicationMock = createStartContractMock();
 const services = discoverServiceMock;
@@ -33,6 +34,10 @@ const embeddableConfig = {
   services,
   executeTriggerActions,
 };
+
+jest
+  .spyOn(services.core.chrome, 'getActiveSolutionNavId$')
+  .mockReturnValue(new BehaviorSubject('test'));
 
 describe('view saved search action', () => {
   it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {

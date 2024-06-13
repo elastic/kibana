@@ -24,6 +24,7 @@
     "@kbn/config",
     "@kbn/user-profile-components",
     "@kbn/cloud-experiments-plugin",
+    "@kbn/spaces-plugin",
   ],
   "exclude": [
     "target/**/*",

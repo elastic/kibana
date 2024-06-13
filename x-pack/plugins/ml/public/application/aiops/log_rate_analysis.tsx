@@ -33,8 +33,6 @@ export const LogRateAnalysisPage: FC = () => {
       </MlPageHeader>
       {dataView && (
         <LogRateAnalysis
-          // Default to false for now, until page restructure work to enable smooth sticky histogram is done
-          stickyHistogram={false}
           dataView={dataView}
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}

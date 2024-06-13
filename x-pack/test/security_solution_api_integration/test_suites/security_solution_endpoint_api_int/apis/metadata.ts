@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
             `Default ${uuidv4()}`,
             '1.1.1'
           );
-          const policyId = policy.integrationPolicies[0].policy_id;
+          const policyId = policy.integrationPolicies[0].policy_ids[0];
           agent1Timestamp = new Date().getTime();
           agent2Timestamp = agent1Timestamp + 33;
           metadataTimestamp = agent1Timestamp + 666;

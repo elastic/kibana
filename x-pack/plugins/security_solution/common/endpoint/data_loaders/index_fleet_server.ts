@@ -92,7 +92,7 @@ const getOrCreateFleetServerAgentPolicy = async (
       .request<GetOneAgentPolicyResponse>({
         headers: { 'elastic-api-version': '2023-10-31' },
         method: 'GET',
-        path: agentPolicyRouteService.getInfoPath(packagePolicies.data.items[0].policy_id),
+        path: agentPolicyRouteService.getInfoPath(packagePolicies.data.items[0].policy_ids[0]),
       })
       .catch(catchAxiosErrorFormatAndThrow)
       .then((response) => {

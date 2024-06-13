@@ -18,7 +18,10 @@ interface FieldsByCategory {
 export const getAllFields = (metadata: InfraMetadata | null) => {
   if (!metadata?.info) return [];
 
-  const mapNestedProperties = (category: 'cloud' | 'host' | 'agent', property: string) => {
+  const mapNestedProperties = (
+    category: 'cloud' | 'host' | 'agent' | 'container',
+    property: string
+  ) => {
     const fieldsByCategory: FieldsByCategory = metadata?.info?.[`${category}`] ?? {};
     if (fieldsByCategory.hasOwnProperty(property)) {
       const value = fieldsByCategory[property];
@@ -54,8 +57,11 @@ export const getAllFields = (metadata: InfraMetadata | null) => {
   const host = Object.keys(metadata?.info?.host ?? {}).flatMap((prop) =>
     mapNestedProperties('host', prop)
   );
+  const container = Object.keys(metadata?.info?.container ?? {}).flatMap((prop) =>
+    mapNestedProperties('container', prop)
+  );
 
-  return prune([...host, ...agent, ...cloud]);
+  return prune([...host, ...container, ...agent, ...cloud]);
 };
 
 const prune = (fields: Field[]) => fields.filter((f) => !!f?.value);

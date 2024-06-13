@@ -102,6 +102,7 @@
     "@kbn/alerting-comparators",
     "@kbn/search-types",
     "@kbn/reporting-server",
-    "@kbn/features-plugin"
+    "@kbn/config-schema",
+    "@kbn/features-plugin",
   ]
 }

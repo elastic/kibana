@@ -16,6 +16,8 @@ servers:
 paths:
   /internal/risk_score/engine/disable:
     post:
+      x-labels: [ess, serverless]
+      x-internal: true
       summary: Disable the Risk Engine
       requestBody:
         content:

@@ -222,6 +222,7 @@ function getServiceNowActionParams({ defaultActionMessage }: Translations): Serv
         externalId: null,
         correlation_id: null,
         correlation_display: null,
+        additional_fields: null,
       },
       comments: [],
     },

@@ -13,7 +13,7 @@ export type GetDataStreamsStatsQuery = GetDataStreamsStatsParams['query'];
 export type GetDataStreamsStatsResponse =
   APIReturnType<`GET /internal/dataset_quality/data_streams/stats`>;
 export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0];
-export type DataStreamStatServiceResponse = DataStreamStatType[];
+export type DataStreamStatServiceResponse = GetDataStreamsStatsResponse;
 
 export type GetIntegrationsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/integrations`>['params'];

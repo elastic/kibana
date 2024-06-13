@@ -60,13 +60,18 @@ jest.mock('../../../../hooks', () => {
         },
       },
     }),
+    sendBulkGetAgentPolicies: jest.fn().mockImplementation((ids) =>
+      Promise.resolve({
+        data: { items: ids.map((id: string) => ({ id, package_policies: [] })) },
+      })
+    ),
     useGetPackageInfoByKeyQuery: jest.fn(),
     sendGetSettings: jest.fn().mockResolvedValue({
       data: { item: {} },
     }),
-    sendCreatePackagePolicy: jest
-      .fn()
-      .mockResolvedValue({ data: { item: { id: 'policy-1', inputs: [] } } }),
+    sendCreatePackagePolicy: jest.fn().mockResolvedValue({
+      data: { item: { id: 'policy-1', inputs: [], policy_ids: ['agent-policy-1'] } },
+    }),
     sendCreateAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { id: 'agent-policy-2', name: 'Agent policy 2', namespace: 'default' } },
     }),
@@ -308,7 +313,7 @@ describe('When on the package policy create page', () => {
         title: 'Nginx',
         version: '1.3.0',
       },
-      policy_id: 'agent-policy-1',
+      policy_ids: ['agent-policy-1'],
       vars: undefined,
     };
 
@@ -370,6 +375,7 @@ describe('When on the package policy create page', () => {
       expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
         ...newPackagePolicy,
         policy_id: 'agent-policy-1',
+        policy_ids: ['agent-policy-1'],
         force: false,
       });
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
@@ -497,6 +503,9 @@ describe('When on the package policy create page', () => {
 
         (sendCreateAgentPolicy as jest.MockedFunction<any>).mockClear();
         (sendCreatePackagePolicy as jest.MockedFunction<any>).mockClear();
+        (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValue({
+          data: { results: { total: 0 } },
+        });
       });
 
       test('should create agent policy before creating package policy on submit when new hosts is selected', async () => {
@@ -521,7 +530,7 @@ describe('When on the package policy create page', () => {
         );
         expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
           ...newPackagePolicy,
-          policy_id: 'agent-policy-2',
+          policy_ids: ['agent-policy-2'],
           force: false,
         });
 
@@ -544,7 +553,7 @@ describe('When on the package policy create page', () => {
       });
 
       test('should show modal if agent policy has agents', async () => {
-        (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
+        (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValue({
           data: { results: { total: 1 } },
         });
 
@@ -584,7 +593,7 @@ describe('When on the package policy create page', () => {
           expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
           expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
             ...newPackagePolicy,
-            policy_id: 'agent-policy-1',
+            policy_ids: ['agent-policy-1'],
             force: false,
           });
 
@@ -714,7 +723,7 @@ describe('When on the package policy create page', () => {
         expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
           ...newPackagePolicy,
           force: false,
-          policy_id: AGENTLESS_POLICY_ID,
+          policy_ids: [AGENTLESS_POLICY_ID],
         });
 
         await waitFor(() => {
@@ -735,7 +744,7 @@ describe('When on the package policy create page', () => {
         expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
           ...newPackagePolicy,
           force: true,
-          policy_id: AGENTLESS_POLICY_ID,
+          policy_ids: [AGENTLESS_POLICY_ID],
         });
 
         await waitFor(() => {

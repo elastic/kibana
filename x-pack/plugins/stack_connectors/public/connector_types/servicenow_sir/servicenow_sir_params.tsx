@@ -29,6 +29,7 @@ import { ServiceNowSIRActionParams } from './types';
 import { Fields, Choice } from '../lib/servicenow/types';
 import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from '../lib/servicenow/helpers';
 import { DeprecatedCallout } from '../lib/servicenow/deprecated_callout';
+import { AdditionalFields } from '../lib/servicenow/additional_fields';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -147,6 +148,11 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionParams]);
+
+  const additionalFieldsOnChange = useCallback(
+    (value) => editSubActionProperty('additional_fields', value),
+    [editSubActionProperty]
+  );
 
   return (
     <>
@@ -288,6 +294,14 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         label={i18n.COMMENTS_LABEL}
       />
       <EuiSpacer size="m" />
+      {!isDeprecatedActionConnector && (
+        <AdditionalFields
+          value={actionParams.subActionParams?.incident.additional_fields}
+          messageVariables={messageVariables}
+          errors={errors['subActionParams.incident.additional_fields'] as string[]}
+          onChange={additionalFieldsOnChange}
+        />
+      )}
     </>
   );
 };

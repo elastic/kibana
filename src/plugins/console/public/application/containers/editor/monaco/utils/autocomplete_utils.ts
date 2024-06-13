@@ -22,7 +22,15 @@ import {
 import { populateContext } from '../../../../../lib/autocomplete/engine';
 import type { EditorRequest } from '../types';
 import { parseBody, parseLine, parseUrl } from './tokens_utils';
-import { END_OF_URL_TOKEN, i18nTexts, newLineRegex } from './constants';
+import {
+  END_OF_URL_TOKEN,
+  i18nTexts,
+  methodWhitespaceRegex,
+  methodWithUrlRegex,
+  newLineRegex,
+  propertyNameRegex,
+  propertyValueRegex,
+} from './constants';
 
 /*
  * This function initializes the autocomplete context for the request
@@ -50,6 +58,11 @@ export const getDocumentationLinkFromAutocomplete = (
   }
   return null;
 };
+/*
+ * Helper function that filters out suggestions without a name.
+ */
+const filterTermsWithoutName = (terms: ResultTerm[]): ResultTerm[] =>
+  terms.filter((term) => term.name !== undefined);
 
 /*
  * This function returns an array of completion items for the request method
@@ -132,9 +145,7 @@ export const getUrlPathCompletionItems = (
   };
   if (autoCompleteSet && autoCompleteSet.length > 0) {
     return (
-      autoCompleteSet
-        // filter autocomplete items without a name
-        .filter(({ name }) => Boolean(name))
+      filterTermsWithoutName(autoCompleteSet)
         // map autocomplete items to completion items
         .map((item) => {
           return {
@@ -194,9 +205,7 @@ export const getUrlParamsCompletionItems = (
       endColumn: position.column,
     };
     return (
-      context.autoCompleteSet
-        // filter autocomplete items without a name
-        .filter(({ name }) => Boolean(name))
+      filterTermsWithoutName(context.autoCompleteSet)
         // map autocomplete items to completion items
         .map((item) => {
           return {
@@ -238,9 +247,9 @@ export const getBodyCompletionItems = async (
     endLineNumber: lineNumber,
     endColumn: column,
   };
-  const bodyContent = model.getValueInRange(bodyRange);
+  const bodyContentBeforePosition = model.getValueInRange(bodyRange);
 
-  const bodyTokens = parseBody(bodyContent);
+  const bodyTokens = parseBody(bodyContentBeforePosition);
   // needed for scope linking + global term resolving
   context.endpointComponentResolver = getEndpointBodyCompleteComponents;
   context.globalComponentResolver = getGlobalAutocompleteComponents;
@@ -256,12 +265,18 @@ export const getBodyCompletionItems = async (
   if (!context) {
     return [];
   }
+  // loading async suggestions
   if (context.asyncResultsState?.isLoading && context.asyncResultsState) {
     const results = await context.asyncResultsState.results;
-    return getSuggestions(model, position, results, context, bodyContent);
+    return getSuggestions(model, position, results, context, bodyContentBeforePosition);
   }
-
-  return getSuggestions(model, position, context.autoCompleteSet ?? [], context, bodyContent);
+  return getSuggestions(
+    model,
+    position,
+    context.autoCompleteSet ?? [],
+    context,
+    bodyContentBeforePosition
+  );
 };
 
 const getSuggestions = (
@@ -269,18 +284,23 @@ const getSuggestions = (
   position: monaco.Position,
   autocompleteSet: ResultTerm[],
   context: AutoCompleteContext,
-  bodyContent: string
+  bodyContentBeforePosition: string
 ) => {
   const wordUntilPosition = model.getWordUntilPosition(position);
-  // if there is " after the cursor, replace it
-  let endColumn = position.column;
-  const charAfterPosition = model.getValueInRange({
+  const lineContentAfterPosition = model.getValueInRange({
     startLineNumber: position.lineNumber,
     startColumn: position.column,
     endLineNumber: position.lineNumber,
-    endColumn: position.column + 1,
+    endColumn: model.getLineMaxColumn(position.lineNumber),
   });
-  if (charAfterPosition === '"') {
+  // if the rest of the line is empty or there is only "
+  // then template can be inserted, otherwise only name
+  context.addTemplate = isEmptyOrDoubleQuote(lineContentAfterPosition);
+
+  // if there is " after the cursor, include it in the insert range
+  let endColumn = position.column;
+
+  if (lineContentAfterPosition.startsWith('"')) {
     endColumn = endColumn + 1;
   }
   const range = {
@@ -291,15 +311,13 @@ const getSuggestions = (
     endColumn,
   };
   return (
-    autocompleteSet
-      // filter out items that don't have name
-      .filter(({ name }) => name !== undefined)
+    filterTermsWithoutName(autocompleteSet)
       // map autocomplete items to completion items
       .map((item) => {
         const suggestion = {
           // convert name to a string
           label: item.name + '',
-          insertText: getInsertText(item, bodyContent, context),
+          insertText: getInsertText(item, bodyContentBeforePosition, context),
           detail: i18nTexts.api,
           // the kind is only used to configure the icon
           kind: monaco.languages.CompletionItemKind.Constant,
@@ -335,7 +353,7 @@ const getInsertText = (
   if (conditionalTemplate) {
     template = conditionalTemplate;
   }
-  if (template !== undefined) {
+  if (template !== undefined && context.addTemplate) {
     let templateLines;
     const { __raw, value: templateValue } = template;
     if (__raw && templateValue) {
@@ -387,4 +405,26 @@ const getConditionalTemplate = (
   if (matchedRule && matchedRule.__template) {
     return matchedRule.__template;
   }
+};
+
+/*
+ * This function checks the content of the line before the cursor and decides if the autocomplete
+ * suggestions should be triggered
+ */
+export const shouldTriggerSuggestions = (lineContent: string): boolean => {
+  return (
+    methodWhitespaceRegex.test(lineContent) ||
+    methodWithUrlRegex.test(lineContent) ||
+    propertyNameRegex.test(lineContent) ||
+    propertyValueRegex.test(lineContent)
+  );
+};
+
+/*
+ * This function checks if the content of the line after the cursor is either empty
+ * or it only has a double quote.
+ */
+export const isEmptyOrDoubleQuote = (lineContent: string): boolean => {
+  lineContent = lineContent.trim();
+  return !lineContent || lineContent === '"';
 };

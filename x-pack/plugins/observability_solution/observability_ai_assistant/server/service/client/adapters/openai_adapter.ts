@@ -6,7 +6,7 @@
  */
 
 import { encode } from 'gpt-tokenizer';
-import { compact, isEmpty, merge, omit, pick } from 'lodash';
+import { compact, merge, pick } from 'lodash';
 import OpenAI from 'openai';
 import { identity } from 'rxjs';
 import { CompatibleJSONSchema } from '../../../../common/functions/types';
@@ -68,9 +68,12 @@ function messagesToOpenAI(messages: Message[]): OpenAI.ChatCompletionMessagePara
         return {
           role,
           content: message.message.content,
-          function_call: isEmpty(message.message.function_call?.name)
-            ? undefined
-            : omit(message.message.function_call, 'trigger'),
+          function_call: message.message.function_call?.name
+            ? {
+                name: message.message.function_call.name,
+                arguments: message.message.function_call?.arguments || '{}',
+              }
+            : undefined,
           name: message.message.name,
         } as OpenAI.ChatCompletionMessageParam;
       })

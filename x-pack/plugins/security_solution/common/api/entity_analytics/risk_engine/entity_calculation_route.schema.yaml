@@ -15,8 +15,9 @@ servers:
 
 paths:
   /api/risk_scores/calculation/entity:
-    x-internal: true
     post:
+      x-labels: [ess, serverless]
+      x-internal: true
       summary: Trigger calculation of Risk Scores for an entity
       description: Calculates and persists Risk Scores for an entity, returning the calculated risk score.
       requestBody:

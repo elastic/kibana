@@ -187,10 +187,10 @@ const getOrCreateFleetServerAgentPolicyId = async (
         )}`
       );
       log.info(
-        `Using existing Fleet Server agent policy id: ${existingFleetServerIntegrationPolicy.policy_id}`
+        `Using existing Fleet Server agent policy id: ${existingFleetServerIntegrationPolicy.policy_ids[0]}`
       );
 
-      return existingFleetServerIntegrationPolicy.policy_id;
+      return existingFleetServerIntegrationPolicy.policy_ids[0];
     }
 
     log.info(`Creating new Fleet Server policy`);

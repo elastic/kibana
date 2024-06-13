@@ -2690,6 +2690,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort coalesce(numberField)', []);
         testErrorsAndWarnings('from a_index | eval coalesce(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval coalesce(nullVar)', []);
+        testErrorsAndWarnings('from a_index | sort coalesce(booleanField)', []);
       });
 
       describe('concat', () => {

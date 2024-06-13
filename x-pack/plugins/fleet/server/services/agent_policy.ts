@@ -689,7 +689,7 @@ class AgentPolicyService {
         esClient,
         newPackagePolicies.map((newPackagePolicy) => ({
           ...newPackagePolicy,
-          policy_id: newAgentPolicy.id,
+          policy_ids: [newAgentPolicy.id],
         })),
         {
           ...options,

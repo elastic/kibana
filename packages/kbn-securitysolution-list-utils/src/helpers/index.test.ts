@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getMappingConflictsInfo, fieldSupportsMatches } from '.';
+import { getMappingConflictsInfo, fieldSupportsMatches, hasWrongOperatorWithWildcard } from '.';
 
 describe('Helpers', () => {
   describe('getMappingConflictsInfo', () => {
@@ -178,6 +178,45 @@ describe('Helpers', () => {
     test('it returns false if none of the esTypes map to kibana type string', () => {
       expect(
         fieldSupportsMatches({ name: 'field', type: 'conflict', esTypes: ['bool', 'unmapped'] })
+      ).toBeFalsy();
+    });
+  });
+  describe('hasWrongOperatorWithWildcard', () => {
+    test('it returns true if there is at least one exception entry with a wildcard and the wrong operator', () => {
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'withwildcard*', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBeTruthy();
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'withwildcard?', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBeTruthy();
+    });
+    test('it returns false if there are no exception entries with a wildcard and the wrong operator', () => {
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              { type: 'match', value: 'nowildcard', field: '', operator: 'excluded' },
+              { type: 'wildcard', value: 'withwildcard*?', field: '', operator: 'included' },
+            ],
+          },
+        ])
       ).toBeFalsy();
     });
   });

@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Reporting APIs CSV Generation from Saved Search ID export from non-timebased data view query stored in the saved search csv file matches 1`] = `
-"_id,_index,_score,eon,epoch,era,period
-tvJJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic, Pliocene,Cenozoic,Neogene
-t_JJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic, Holocene,Cenozoic,Quaternary
-uPJJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic,-,Mesozoic,Cretaceous
-ufJJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic,-,Mesozoic,Jurassic
-uvJJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic,-,Paleozoic,Cambrian
-u_JJX4UBvD7uFsw9L2x4,timeless-test,1,Proterozoic,-,Paleozoic,Permian
+"_id,_ignored,_index,_score,eon,epoch,era,period
+tvJJX4UBvD7uFsw9L2x4,-,timeless-test,1,Phanerozoic, Pliocene,Cenozoic,Neogene
+t_JJX4UBvD7uFsw9L2x4,-,timeless-test,1,Phanerozoic, Holocene,Cenozoic,Quaternary
+uPJJX4UBvD7uFsw9L2x4,-,timeless-test,1,Phanerozoic,-,Mesozoic,Cretaceous
+ufJJX4UBvD7uFsw9L2x4,-,timeless-test,1,Phanerozoic,-,Mesozoic,Jurassic
+uvJJX4UBvD7uFsw9L2x4,-,timeless-test,1,Phanerozoic,-,Paleozoic,Cambrian
+u_JJX4UBvD7uFsw9L2x4,-,timeless-test,1,Proterozoic,-,Paleozoic,Permian
 "
 `;
 

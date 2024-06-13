@@ -49,7 +49,7 @@ describe(
       });
 
       it('should display upselling section for protections', () => {
-        navigateToFleetAgentPolicySettings(policy.policy_id);
+        navigateToFleetAgentPolicySettings(policy.policy_ids[0]);
         checkForAgentTamperProtectionAvailability();
       });
     });

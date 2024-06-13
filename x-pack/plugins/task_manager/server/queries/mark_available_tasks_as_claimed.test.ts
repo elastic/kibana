@@ -14,6 +14,7 @@ import {
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
   EnabledTask,
+  OneOfTaskTypes,
 } from './mark_available_tasks_as_claimed';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -192,5 +193,24 @@ if (doc['task.runAt'].size()!=0) {
         }).source
       ).toMatch(/ctx.op = "noop"/);
     });
+  });
+
+  test('generates OneOfTaskTypes clause as expected', () => {
+    expect(OneOfTaskTypes('field-name', ['type-a', 'type-b'])).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "must": Array [
+            Object {
+              "terms": Object {
+                "field-name": Array [
+                  "type-a",
+                  "type-b",
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
   });
 });

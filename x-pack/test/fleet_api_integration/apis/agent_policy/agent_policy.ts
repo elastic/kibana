@@ -1483,6 +1483,7 @@ export default function (providerContext: FtrProviderContext) {
               inputs,
               id: ppId,
               policy_id: ppPolicyId,
+              policy_ids: ppPolicyIds,
               created_at: ppcreatedAt,
               updated_at: ppupdatedAt,
               version,

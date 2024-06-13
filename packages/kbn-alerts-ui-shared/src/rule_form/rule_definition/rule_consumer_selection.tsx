@@ -10,7 +10,7 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { FEATURE_NAME_MAP, CONSUMER_SELECT_COMBO_BOX_TITLE } from '../translations';
-import { RuleFormErrors } from '../types';
+import { RuleFormErrors } from '../../common';
 
 export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
   AlertConsumers.LOGS,

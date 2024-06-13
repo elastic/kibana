@@ -14,7 +14,7 @@ const packagePolicy = {
   name: 'apm-1',
   description: '',
   namespace: 'default',
-  policy_id: '7a87c160-c961-11eb-81e2-f7327d61c92a',
+  policy_ids: ['7a87c160-c961-11eb-81e2-f7327d61c92a'],
   enabled: true,
   inputs: [
     {

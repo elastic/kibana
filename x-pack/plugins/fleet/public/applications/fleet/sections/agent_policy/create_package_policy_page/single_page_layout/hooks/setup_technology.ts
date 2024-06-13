@@ -51,7 +51,7 @@ export const useAgentless = () => {
 
   // TODO: remove this check when CSPM implements the above flag and rely only on `isAgentlessIntegration`
   const isAgentlessPackagePolicy = (packagePolicy: NewPackagePolicy) => {
-    return isAgentlessEnabled && packagePolicy.policy_id === AGENTLESS_POLICY_ID;
+    return isAgentlessEnabled && packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID);
   };
   return {
     isAgentlessEnabled,
@@ -64,13 +64,13 @@ export const useAgentless = () => {
 export function useSetupTechnology({
   updateNewAgentPolicy,
   newAgentPolicy,
-  updateAgentPolicy,
+  updateAgentPolicies,
   setSelectedPolicyTab,
   packageInfo,
 }: {
   updateNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
-  updateAgentPolicy: (policy: AgentPolicy | undefined) => void;
+  updateAgentPolicies: (policies: AgentPolicy[]) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   packageInfo?: PackageInfo;
 }) {
@@ -109,13 +109,13 @@ export function useSetupTechnology({
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
         if (agentlessPolicy) {
-          updateAgentPolicy(agentlessPolicy);
+          updateAgentPolicies([agentlessPolicy]);
           setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
         }
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         updateNewAgentPolicy(newAgentPolicy);
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
-        updateAgentPolicy(undefined);
+        updateAgentPolicies([]);
       }
       setSelectedSetupTechnology(setupTechnology);
     },
@@ -123,7 +123,7 @@ export function useSetupTechnology({
       isAgentlessEnabled,
       selectedSetupTechnology,
       agentlessPolicy,
-      updateAgentPolicy,
+      updateAgentPolicies,
       setSelectedPolicyTab,
       updateNewAgentPolicy,
       newAgentPolicy,

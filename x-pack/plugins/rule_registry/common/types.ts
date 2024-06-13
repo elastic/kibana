@@ -203,7 +203,11 @@ const bucketAggsTempsSchemas: t.Type<BucketAggsSchemas> = t.exact(
         sort: sortSchema,
         from: t.number,
         size: t.number,
-        gap_policy: t.string,
+        gap_policy: t.union([
+          t.literal('skip'),
+          t.literal('insert_zeros'),
+          t.literal('keep_values'),
+        ]),
       })
     ),
     value_count: t.exact(
