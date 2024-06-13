@@ -1322,53 +1322,34 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       (isTypeof(res.left, 'documents_transform_failed') && stateP.discardCorruptObjects)
     ) {
       // we might have some transformation errors, but user has chosen to discard them
-      if (
-        (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) ||
-        stateP.discardCorruptObjects
-      ) {
-        const documents = Either.isRight(res) ? res.right.processedDocs : res.left.processedDocs;
+      const documents = Either.isRight(res) ? res.right.processedDocs : res.left.processedDocs;
 
-        let corruptDocumentIds = stateP.corruptDocumentIds;
-        let transformErrors = stateP.transformErrors;
-
-        if (Either.isLeft(res)) {
-          corruptDocumentIds = [...stateP.corruptDocumentIds, ...res.left.corruptDocumentIds];
-          transformErrors = [...stateP.transformErrors, ...res.left.transformErrors];
-        }
-
-        const batches = createBatches({
-          documents,
-          corruptDocumentIds,
-          transformErrors,
-          maxBatchSizeBytes: stateP.maxBatchSizeBytes,
-        });
-        if (Either.isRight(batches)) {
-          return {
-            ...stateP,
-            controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-            bulkOperationBatches: batches.right,
-            currentBatch: 0,
-            hasTransformedDocs: true,
-            progress,
-          };
-        } else {
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
-              _id: batches.left.documentId,
-              docSizeBytes: batches.left.docSizeBytes,
-              maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
-            }),
-          };
-        }
-      } else {
-        // We have seen corrupt documents and/or transformation errors
-        // skip indexing and go straight to reading and transforming more docs
+      const batches = createBatches({
+        documents,
+        ...(Either.isLeft(res) && {
+          corruptDocumentIds: res.left.corruptDocumentIds,
+          transformErrors: res.left.transformErrors,
+        }),
+        maxBatchSizeBytes: stateP.maxBatchSizeBytes,
+      });
+      if (Either.isRight(batches)) {
         return {
           ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+          controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
+          bulkOperationBatches: batches.right,
+          currentBatch: 0,
+          hasTransformedDocs: true,
           progress,
+        };
+      } else {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
+            _id: batches.left.documentId,
+            docSizeBytes: batches.left.docSizeBytes,
+            maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
+          }),
         };
       }
     } else {
