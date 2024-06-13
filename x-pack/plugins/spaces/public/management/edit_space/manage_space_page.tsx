@@ -29,6 +29,7 @@ import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal
 import { CustomizeSpace } from './customize_space';
 import { DeleteSpacesButton } from './delete_spaces_button';
 import { EnabledFeatures } from './enabled_features';
+import { SolutionView } from './solution_view';
 import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { getSpacesFeatureDescription } from '../../constants';
@@ -71,6 +72,8 @@ interface State {
 
 export class ManageSpacePage extends Component<Props, State> {
   private readonly validator: SpaceValidator;
+  private initialSpaceState: State['space'] | null = null;
+  private isSolutionNavEnabled = true;
 
   constructor(props: Props) {
     super(props);
@@ -160,6 +163,13 @@ export class ManageSpacePage extends Component<Props, State> {
           editingExistingSpace={this.editingExistingSpace()}
           validator={this.validator}
         />
+
+        {this.isSolutionNavEnabled && (
+          <>
+            <EuiSpacer size="l" />
+            <SolutionView space={this.state.space} onChange={this.onSpaceChange} />
+          </>
+        )}
 
         {this.props.allowFeatureVisibility && (
           <>
@@ -298,8 +308,10 @@ export class ManageSpacePage extends Component<Props, State> {
         const haveDisabledFeaturesChanged =
           space.disabledFeatures.length !== originalSpace.disabledFeatures.length ||
           difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
+        const hasSolutionViewChanged =
+          this.state.space.solution !== this.initialSpaceState?.solution;
 
-        if (editingActiveSpace && haveDisabledFeaturesChanged) {
+        if (editingActiveSpace && (haveDisabledFeaturesChanged || hasSolutionViewChanged)) {
           this.setState({
             showAlteringActiveSpaceDialog: true,
           });
@@ -326,17 +338,19 @@ export class ManageSpacePage extends Component<Props, State> {
           onLoadSpace(space);
         }
 
+        this.initialSpaceState = {
+          ...space,
+          avatarType: space.imageUrl ? 'image' : 'initials',
+          initials: space.initials || getSpaceInitials(space),
+          color: space.color || getSpaceColor(space),
+          customIdentifier: false,
+          customAvatarInitials:
+            !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
+          customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
+        };
+
         this.setState({
-          space: {
-            ...space,
-            avatarType: space.imageUrl ? 'image' : 'initials',
-            initials: space.initials || getSpaceInitials(space),
-            color: space.color || getSpaceColor(space),
-            customIdentifier: false,
-            customAvatarInitials:
-              !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
-            customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
-          },
+          space: { ...this.initialSpaceState },
           features,
           originalSpace: space,
           isLoading: false,
@@ -369,6 +383,7 @@ export class ManageSpacePage extends Component<Props, State> {
       disabledFeatures = [],
       imageUrl,
       avatarType,
+      solution,
     } = this.state.space;
 
     const params = {
@@ -379,6 +394,7 @@ export class ManageSpacePage extends Component<Props, State> {
       color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : color, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits
       disabledFeatures,
       imageUrl: avatarType === 'image' ? imageUrl : '',
+      solution,
     };
 
     let action;
