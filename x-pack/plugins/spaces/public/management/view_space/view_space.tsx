@@ -30,7 +30,7 @@ import type { Role } from '@kbn/security-plugin-types-common';
 import { TAB_ID_CONTENT, TAB_ID_FEATURES, TAB_ID_ROLES } from './constants';
 import { useTabs } from './hooks/use_tabs';
 import { ViewSpaceContextProvider } from './hooks/view_space_context_provider';
-import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
+import { getSpaceNavigationURL, type Space } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import type { SpacesManager } from '../../spaces_manager';
 
@@ -187,11 +187,6 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     }
 
     const { serverBasePath } = props;
-    const urlToSelectedSpace = addSpaceIdToPath(
-      serverBasePath,
-      space.id,
-      `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/view/${space.id}`
-    );
 
     if (userActiveSpace?.id === space.id) {
       return null;
@@ -199,7 +194,11 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
 
     // use href to force full page reload (needed in order to change spaces)
     return (
-      <EuiButton iconType="merge" href={urlToSelectedSpace} data-test-subj="spaceSwitcherButton">
+      <EuiButton
+        iconType="merge"
+        href={getSpaceNavigationURL({ serverBasePath, spaceId: space.id })}
+        data-test-subj="spaceSwitcherButton"
+      >
         <FormattedMessage
           id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"
           defaultMessage="Switch to this space"
