@@ -56,7 +56,7 @@ interface Props {
   capabilities: Capabilities;
   history: ScopedHistory;
   allowFeatureVisibility: boolean;
-  isSolutionNavEnabled$: Observable<boolean>;
+  isSolutionNavEnabled$?: Observable<boolean>;
 }
 
 interface State {
@@ -115,9 +115,11 @@ export class ManageSpacePage extends Component<Props, State> {
       });
     }
 
-    this.subscription = this.props.isSolutionNavEnabled$.subscribe((isEnabled) => {
-      this.setState({ isSolutionNavEnabled: isEnabled });
-    });
+    if (this.props.isSolutionNavEnabled$) {
+      this.subscription = this.props.isSolutionNavEnabled$.subscribe((isEnabled) => {
+        this.setState({ isSolutionNavEnabled: isEnabled });
+      });
+    }
   }
 
   public async componentDidUpdate(previousProps: Props) {
