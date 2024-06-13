@@ -15,7 +15,10 @@ export interface DashboardDuplicateTitleCheckProps {
   title: string;
   copyOnSave: boolean;
   lastSavedTitle: string;
-  onTitleDuplicate?: () => void;
+  /**
+   * invokes the onTitleDuplicate function if provided with a speculative title that should be collision free
+   */
+  onTitleDuplicate?: (speculativeSuggestion: string) => void;
   isTitleDuplicateConfirmed: boolean;
   searchLimit?: number;
 }
@@ -76,7 +79,13 @@ export async function checkForDuplicateDashboardTitle(
     return true;
   }
 
-  onTitleDuplicate?.();
+  const [largestDuplicationId] = hits
+    .map((hit) => extractTitleAndCount(hit.attributes.title)[1])
+    .sort((a, b) => (b > a ? 1 : -1));
+
+  const speculativeCollisionFreeTitle = `${baseDashboardName} (${largestDuplicationId + 1})`;
+
+  onTitleDuplicate?.(speculativeCollisionFreeTitle);
 
   return false;
 }

@@ -296,21 +296,19 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
             recentlyCreatedDashboards[0].attributes.title
           );
 
-          let copyCount = mostRecentDuplicationId + 1;
+          const copyCount = mostRecentDuplicationId + 1;
 
           newTitle = `${baseTitle} (${copyCount})`;
 
-          while (
-            !(await checkForDuplicateDashboardTitle({
-              title: newTitle,
-              lastSavedTitle: currentState.title,
-              copyOnSave: true,
-              isTitleDuplicateConfirmed: false,
-            }))
-          ) {
-            copyCount++;
-            newTitle = `${baseTitle} (${copyCount})`;
-          }
+          await checkForDuplicateDashboardTitle({
+            title: newTitle,
+            lastSavedTitle: currentState.title,
+            copyOnSave: true,
+            isTitleDuplicateConfirmed: false,
+            onTitleDuplicate(speculativeSuggestion) {
+              newTitle = speculativeSuggestion;
+            },
+          });
 
           switch (interactionMode) {
             case ViewMode.EDIT: {
