@@ -9,16 +9,16 @@ import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-pl
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { useEventDetails } from '../shared/hooks/use_event_details';
+import { useEventDetails } from './hooks/use_event_details';
 import { FlyoutError } from '../../shared/components/flyout_error';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import type { SearchHit } from '../../../../common/search_strategy';
-import type { LeftPanelProps } from '.';
-import type { GetFieldsData } from '../../../common/hooks/use_get_fields_data';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import type { DocumentDetailsProps } from './types';
+import type { GetFieldsData } from '../../../common/hooks/use_get_fields_data';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
-export interface LeftPanelContext {
+export interface DocumentDetailsContext {
   /**
    * Id of the document
    */
@@ -52,6 +52,10 @@ export interface LeftPanelContext {
    */
   investigationFields: string[];
   /**
+   * Promise to trigger a data refresh
+   */
+  refetchFlyoutData: () => Promise<void>;
+  /**
    * Retrieves searchHit values for the provided field
    */
   getFieldsData: GetFieldsData;
@@ -61,23 +65,24 @@ export interface LeftPanelContext {
   isPreview: boolean;
 }
 
-export const LeftPanelContext = createContext<LeftPanelContext | undefined>(undefined);
+export const DocumentDetailsContext = createContext<DocumentDetailsContext | undefined>(undefined);
 
-export type LeftPanelProviderProps = {
+export type DocumentDetailsProviderProps = {
   /**
    * React components to render
    */
   children: React.ReactNode;
-} & Partial<LeftPanelProps['params']>;
+} & Partial<DocumentDetailsProps['params']>;
 
-export const LeftPanelProvider = memo(
-  ({ id, indexName, scopeId, children }: LeftPanelProviderProps) => {
+export const DocumentDetailsProvider = memo(
+  ({ id, indexName, scopeId, children }: DocumentDetailsProviderProps) => {
     const {
       browserFields,
       dataAsNestedObject,
       dataFormattedForFieldBrowser,
       getFieldsData,
       loading,
+      refetchFlyoutData,
       searchHit,
     } = useEventDetails({ eventId: id, indexName });
 
@@ -101,19 +106,21 @@ export const LeftPanelProvider = memo(
               dataFormattedForFieldBrowser,
               searchHit,
               investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
+              refetchFlyoutData,
               getFieldsData,
               isPreview: scopeId === TableId.rulePreview,
             }
           : undefined,
       [
         id,
+        maybeRule,
         indexName,
         scopeId,
         browserFields,
         dataAsNestedObject,
         dataFormattedForFieldBrowser,
         searchHit,
-        maybeRule?.investigation_fields,
+        refetchFlyoutData,
         getFieldsData,
       ]
     );
@@ -126,17 +133,23 @@ export const LeftPanelProvider = memo(
       return <FlyoutError />;
     }
 
-    return <LeftPanelContext.Provider value={contextValue}>{children}</LeftPanelContext.Provider>;
+    return (
+      <DocumentDetailsContext.Provider value={contextValue}>
+        {children}
+      </DocumentDetailsContext.Provider>
+    );
   }
 );
 
-LeftPanelProvider.displayName = 'LeftPanelProvider';
+DocumentDetailsProvider.displayName = 'DocumentDetailsProvider';
 
-export const useLeftPanelContext = () => {
-  const contextValue = useContext(LeftPanelContext);
+export const useDocumentDetailsContext = (): DocumentDetailsContext => {
+  const contextValue = useContext(DocumentDetailsContext);
 
   if (!contextValue) {
-    throw new Error('LeftPanelContext can only be used within LeftPanelContext provider');
+    throw new Error(
+      'DocumentDetailsContext can only be used within DocumentDetailsContext provider'
+    );
   }
 
   return contextValue;
