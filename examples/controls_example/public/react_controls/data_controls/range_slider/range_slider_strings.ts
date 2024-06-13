@@ -11,7 +11,9 @@ import { i18n } from '@kbn/i18n';
 export const RangeSliderStrings = {
   control: {
     getDisplayName: () =>
-      i18n.translate('controlsExamples.rangeSliderControl.displayName', { defaultMessage: 'Range slider' }),
+      i18n.translate('controlsExamples.rangeSliderControl.displayName', {
+        defaultMessage: 'Range slider',
+      }),
     getInvalidSelectionWarningLabel: () =>
       i18n.translate('controlsExamples.rangeSlider.control.invalidSelectionWarningLabel', {
         defaultMessage: 'Selected range returns no results.',

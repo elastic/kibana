@@ -82,7 +82,7 @@ const controlGroupPanels = {
       width: 'medium',
       enhancements: {},
     },
-  }
+  },
 };
 
 /**

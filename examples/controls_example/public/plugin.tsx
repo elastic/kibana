@@ -50,15 +50,15 @@ export class ControlsExamplePlugin
     });
 
     registerControlFactory(RANGE_SLIDER_CONTROL_TYPE, async () => {
-      const [{ getRangesliderControlFactory }, [coreStart, depsStart]] =
-        await Promise.all([
-          import('./react_controls/data_controls/range_slider/get_range_slider_control_factory'),
-          core.getStartServices(),
-        ]);
+      const [{ getRangesliderControlFactory }, [coreStart, depsStart]] = await Promise.all([
+        import('./react_controls/data_controls/range_slider/get_range_slider_control_factory'),
+        core.getStartServices(),
+      ]);
 
       return getRangesliderControlFactory({
         core: coreStart,
-        dataViewsService: depsStart.data.dataViews,
+        data: depsStart.data,
+        dataViews: depsStart.data.dataViews,
       });
     });
 

@@ -10,7 +10,7 @@ import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_
 import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { Filter } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
@@ -22,6 +22,7 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import { Observable } from 'rxjs';
 import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
 
 /** The control display settings published by the control group are the "default" */
@@ -41,6 +42,12 @@ export type ControlGroupUnsavedChanges = Omit<
 
 export type ControlPanelState = DefaultControlState & { type: string; order: number };
 
+export interface DataControlFetchContext {
+  filters?: Filter[] | undefined;
+  query?: Query | AggregateQuery | undefined;
+  timeRange?: TimeRange | undefined;
+}
+
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState> &
   PublishesFilters &
@@ -50,7 +57,9 @@ export type ControlGroupApi = PresentationContainer &
   PublishesDataLoading &
   PublishesUnsavedChanges &
   PublishesControlGroupDisplaySettings &
-  Partial<HasParentApi<PublishesUnifiedSearch>>;
+  Partial<HasParentApi<PublishesUnifiedSearch>> & {
+    dataControlFetch$: Observable<DataControlFetchContext>;
+  };
 
 export interface ControlGroupRuntimeState {
   chainingSystem: ControlGroupChainingSystem;

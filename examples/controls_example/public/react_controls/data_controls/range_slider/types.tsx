@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { CoreStart } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataControlApi, DefaultDataControlState } from '../types';
 
 export const RANGE_SLIDER_CONTROL_TYPE = 'rangeSlider';
@@ -18,3 +21,9 @@ export interface RangesliderControlState extends DefaultDataControlState {
 }
 
 export type RangesliderControlApi = DataControlApi;
+
+export interface Services {
+  core: CoreStart;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+}
