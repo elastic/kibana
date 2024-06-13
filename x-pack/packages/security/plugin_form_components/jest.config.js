@@ -11,6 +11,6 @@ module.exports = {
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: ['<rootDir>/x-pack/packages/security/plugin_form_components/**/*.{ts,tsx}'],
   preset: '@kbn/test',
-  rootDir: '../../..',
+  rootDir: '../../../..',
   roots: ['<rootDir>/x-pack/packages/security/plugin_form_components'],
 };
