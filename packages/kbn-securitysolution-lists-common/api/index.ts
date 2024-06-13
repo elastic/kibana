@@ -15,6 +15,7 @@ export * from './delete_list_item/delete_list_item.gen';
 export * from './delete_list/delete_list.gen';
 export * from './find_list_item/find_list_item.gen';
 export * from './find_list/find_list.gen';
+export * from './export_list_item/export_list_item.gen';
 export * from './import_list_item/import_list_item.gen';
 export * from './patch_list_item/patch_list_item.gen';
 export * from './patch_list/patch_list.gen';

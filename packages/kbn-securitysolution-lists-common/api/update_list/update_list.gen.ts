@@ -25,9 +25,9 @@ export const UpdateListRequestBody = z.object({
   id: ListId,
   name: ListName,
   description: ListDescription,
-  meta: ListMetadata,
-  version: z.number().int().min(1),
-  _version: z.string(),
+  meta: ListMetadata.optional(),
+  version: z.number().int().min(1).optional(),
+  _version: z.string().optional(),
 });
 export type UpdateListRequestBodyInput = z.input<typeof UpdateListRequestBody>;
 

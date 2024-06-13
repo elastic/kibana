@@ -38,4 +38,4 @@ export const GetListItemRequestQuery = z.object({
 export type GetListItemRequestQueryInput = z.input<typeof GetListItemRequestQuery>;
 
 export type GetListItemResponse = z.infer<typeof GetListItemResponse>;
-export const GetListItemResponse = z.array(ListItem);
+export const GetListItemResponse = z.union([ListItem, z.array(ListItem)]);

@@ -25,6 +25,7 @@ export const PatchListItemRequestBody = z.object({
   id: ListItemId,
   value: ListItemValue.optional(),
   meta: ListItemMetadata.optional(),
+  _version: z.string().optional(),
   /**
    * Determines when changes made by the request are made visible to search
    */

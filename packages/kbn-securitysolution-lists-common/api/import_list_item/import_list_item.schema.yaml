@@ -59,8 +59,8 @@ paths:
           required: false
           description: Determines when changes made by the request are made visible to search
           schema:
-            type: boolean
-            default: false
+            type: string
+            enum: ['true', 'false', 'wait_for']
       responses:
         200:
           description: Successful response

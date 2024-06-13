@@ -16,7 +16,6 @@
  */
 
 import { z } from 'zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { ListId, ListType } from '../model/list_common.gen';
 import { ListItem } from '../model/list_schemas.gen';
@@ -42,7 +41,7 @@ Required when importing a new list that is `list_id` is not specified.
   /**
    * Determines when changes made by the request are made visible to search
    */
-  refresh: BooleanFromString.optional().default(false),
+  refresh: z.enum(['true', 'false', 'wait_for']).optional(),
 });
 export type ImportListItemsRequestQueryInput = z.input<typeof ImportListItemsRequestQuery>;
 

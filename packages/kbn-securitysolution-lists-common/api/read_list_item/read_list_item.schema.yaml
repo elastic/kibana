@@ -36,9 +36,11 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
+                oneOf:
+                  - $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
+                  - type: array
+                    items:
+                      $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
         400:
           description: Invalid input data response
           content:

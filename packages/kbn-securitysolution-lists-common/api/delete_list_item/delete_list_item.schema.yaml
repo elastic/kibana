@@ -35,15 +35,20 @@ paths:
           required: false
           description: Determines when changes made by the request are made visible to search
           schema:
-            type: boolean
-            default: false
+            type: string
+            enum: ['true', 'false', 'wait_for']
+            default: 'false'
       responses:
         200:
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
+                oneOf:
+                  - $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
+                  - type: array
+                    items:
+                      $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
         400:
           description: Invalid input data response
           content:

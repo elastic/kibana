@@ -25,10 +25,7 @@ export const UpdateListItemRequestBody = z.object({
   id: ListItemId,
   value: ListItemValue,
   meta: ListItemMetadata.optional(),
-  /**
-   * Determines when changes made by the request are made visible to search
-   */
-  refresh: z.enum(['true', 'false', 'wait_for']).optional(),
+  _version: z.string().optional(),
 });
 export type UpdateListItemRequestBodyInput = z.input<typeof UpdateListItemRequestBody>;
 

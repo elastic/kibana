@@ -16,7 +16,6 @@
  */
 
 import { z } from 'zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { ListId } from '../model/list_common.gen';
 import { ListItem } from '../model/list_schemas.gen';
@@ -38,9 +37,9 @@ export const DeleteListItemRequestQuery = z.object({
   /**
    * Determines when changes made by the request are made visible to search
    */
-  refresh: BooleanFromString.optional().default(false),
+  refresh: z.enum(['true', 'false', 'wait_for']).optional().default('false'),
 });
 export type DeleteListItemRequestQueryInput = z.input<typeof DeleteListItemRequestQuery>;
 
 export type DeleteListItemResponse = z.infer<typeof DeleteListItemResponse>;
-export const DeleteListItemResponse = ListItem;
+export const DeleteListItemResponse = z.union([ListItem, z.array(ListItem)]);

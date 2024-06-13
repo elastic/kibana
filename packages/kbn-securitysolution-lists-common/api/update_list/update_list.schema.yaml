@@ -36,9 +36,6 @@ paths:
                 - id
                 - name
                 - description
-                - meta
-                - version
-                - _version
       responses:
         200:
           description: Successful response
