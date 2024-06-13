@@ -91,9 +91,9 @@ export const ConnectorConfiguration: React.FC = () => {
     ({ serviceType }) => serviceType === connector.service_type
   )?.docsUrl;
 
-  const isBeta =
-    !connector.service_type ||
-    Boolean(BETA_CONNECTORS.find(({ serviceType }) => serviceType === connector.service_type));
+  const isBeta = Boolean(
+    BETA_CONNECTORS.find(({ serviceType }) => serviceType === connector.service_type)
+  );
 
   return (
     <>
