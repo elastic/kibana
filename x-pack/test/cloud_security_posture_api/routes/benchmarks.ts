@@ -10,13 +10,16 @@ import {
 } from '@kbn/core-http-common';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { FtrProviderContext } from '../ftr_provider_context';
+import {
+  benchmarkRulesMockDataCSPM,
+  benchmarkRulesMockDataKSPM,
+} from './mocks/benchmark_rules_mocks';
 
 const chance = new Chance();
 
@@ -29,18 +32,6 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const log = getService('log');
-
-  const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
-    const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
-      type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-    });
-    const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
-      (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
-    );
-    expect(requestedBenchmarkRules.length).greaterThan(0);
-
-    return requestedBenchmarkRules.map((item) => item.attributes);
-  };
 
   const getMockFinding = (rule: CspBenchmarkRule, evaluation: string) => ({
     '@timestamp': '2023-06-29T02:08:44.993Z',
@@ -56,15 +47,14 @@ export default function (providerContext: FtrProviderContext) {
     result: { evaluation },
     rule: {
       name: 'Upper case rule name',
-      id: rule?.metadata.id || 'ruleMetadataIdTest',
+      id: rule.metadata.id,
       section: 'Upper case section',
       benchmark: {
-        id: rule?.metadata.benchmark.id || 'ruleMetadataBenchmarkIdTest',
-        posture_type:
-          rule?.metadata.benchmark.posture_type || ' ruleMetadataBenchmarkPostureTypeTest',
-        name: rule?.metadata.benchmark.name || 'ruleMetadataBenchmarkNameTest',
-        version: rule?.metadata.benchmark.version || 'ruleMetadataBenchmarkVersionTest',
-        rule_number: rule?.metadata.benchmark.rule_number || 'ruleMetadataBenchmarkRuleNumberTest',
+        id: rule.metadata.benchmark.id,
+        posture_type: rule.metadata.benchmark.posture_type,
+        name: rule.metadata.benchmark.name,
+        version: rule.metadata.benchmark.version,
+        rule_number: rule.metadata.benchmark.rule_number,
       },
     },
     orchestrator: {
@@ -157,10 +147,9 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Verify cspm benchmark score is updated when muting rules', async () => {
         const benchmark = 'cis_aws';
-        const benchmarkRules = await getCspBenchmarkRules(benchmark);
 
-        const cspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
-        const cspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
+        const cspmFinding1 = getMockFinding(benchmarkRulesMockDataCSPM[0], 'passed');
+        const cspmFinding2 = getMockFinding(benchmarkRulesMockDataCSPM[1], 'failed');
 
         await index.addFindings([cspmFinding1, cspmFinding2]);
 
@@ -211,10 +200,9 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Verify kspm benchmark score is updated when muting rules', async () => {
         const benchmark = 'cis_k8s';
-        const benchmarkRules = await getCspBenchmarkRules(benchmark);
 
-        const kspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
-        const kspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
+        const kspmFinding1 = getMockFinding(benchmarkRulesMockDataKSPM[0], 'passed');
+        const kspmFinding2 = getMockFinding(benchmarkRulesMockDataKSPM[1], 'failed');
 
         await index.addFindings([kspmFinding1, kspmFinding2]);
         const { body: benchmarksBeforeMute } = await supertest
