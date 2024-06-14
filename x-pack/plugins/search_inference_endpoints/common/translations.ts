@@ -94,3 +94,14 @@ export const FORBIDDEN_TO_ACCESS_TRAINED_MODELS = i18n.translate(
     defaultMessage: 'Forbidden to access trained models',
   }
 );
+
+export const COPY_ID_ACTION_LABEL = i18n.translate('xpack.searchInferenceEndpoints.copyID', {
+  defaultMessage: 'Copy endpoint ID',
+});
+
+export const COPY_ID_ACTION_SUCCESS = i18n.translate(
+  'xpack.searchInferenceEndpoints.copyIDSuccess',
+  {
+    defaultMessage: 'Inference endpoint ID copied!',
+  }
+);

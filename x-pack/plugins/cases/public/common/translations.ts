@@ -150,7 +150,7 @@ export const SOLUTION = i18n.translate('xpack.cases.caseView.solution', {
 });
 
 export const ACTIONS = i18n.translate('xpack.cases.allCases.actions', {
-  defaultMessage: 'Actions2',
+  defaultMessage: 'Actions',
 });
 
 export const NO_TAGS_AVAILABLE = i18n.translate('xpack.cases.allCases.noTagsAvailable', {
