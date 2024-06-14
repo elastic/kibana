@@ -16,6 +16,9 @@ export const useInferenceToast = () => {
       showSuccessToast: (title: string) => {
         toasts.success({ title });
       },
+      showErrorToast: (title: string) => {
+        toasts.warning({ title });
+      },
     }),
     [toasts]
   );

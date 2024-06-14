@@ -10,11 +10,7 @@ import { EuiIcon, EuiTextColor } from '@elastic/eui';
 import { InferenceEndpointUI } from '../../types';
 import * as i18n from '../../../../../common/translations';
 import { useInferenceToast } from '../../../../hooks/use_inference_toast';
-interface UseActionProps {
-  onActionSuccess: () => void;
-}
-
-type UseCopyIDActionProps = Pick<UseActionProps, 'onActionSuccess'>;
+import { UseCopyIDActionProps } from '../types';
 
 export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {
   const { showSuccessToast } = useInferenceToast();
