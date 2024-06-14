@@ -13,7 +13,7 @@ import type {
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { InferenceEndpointUI } from './types';
-import { useCopyIDAction } from './actions/use_copy_id_action';
+import { useCopyIDAction } from './actions/copy_id/use_copy_id_action';
 
 const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }> = ({
   interfaceEndpoint,

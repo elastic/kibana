@@ -7,23 +7,25 @@
 
 import React from 'react';
 import { EuiIcon, EuiTextColor } from '@elastic/eui';
-import { InferenceEndpointUI } from '../types';
-
+import { InferenceEndpointUI } from '../../types';
+import * as i18n from '../../../../../common/translations';
+import { useInferenceToast } from '../../../../hooks/use_inference_toast';
 interface UseActionProps {
-  onAction: () => void;
   onActionSuccess: () => void;
-  isDisabled: boolean;
 }
 
 type UseCopyIDActionProps = Pick<UseActionProps, 'onActionSuccess'>;
 
 export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {
+  const { showSuccessToast } = useInferenceToast();
+
   const getAction = (inferenceEndpoint: InferenceEndpointUI) => {
     return {
-      name: <EuiTextColor>{'Copy Inference ID'}</EuiTextColor>,
+      name: <EuiTextColor>{i18n.COPY_ID_ACTION_LABEL}</EuiTextColor>,
       onClick: () => {
         navigator.clipboard.writeText(inferenceEndpoint.endpoint).then(() => {
           onActionSuccess();
+          showSuccessToast(i18n.COPY_ID_ACTION_SUCCESS);
         });
       },
       icon: <EuiIcon type="copyClipboard" size="m" />,
