@@ -6,43 +6,42 @@
  */
 
 import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Filter, EsQueryConfig, DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { Filter, EsQueryConfig } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import { queryToFields } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/server';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type {
   IndexPatternArray,
   RuleQuery,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 
-export const getQueryFilter = ({
-  query,
-  language,
-  filters,
-  index,
-  exceptionFilter,
-  fields,
-}:
-  | {
-      query: RuleQuery;
-      language: Language;
-      filters: unknown;
-      index: IndexPatternArray;
-      exceptionFilter: Filter | undefined;
-      fields?: DataViewFieldBase[];
-    }
-  | {
-      index: undefined;
-      query: RuleQuery;
-      language: 'esql';
-      filters: unknown;
-      exceptionFilter: Filter | undefined;
-      fields?: DataViewFieldBase[];
-    }): ESBoolQuery => {
-  const indexPattern: DataViewBase = {
-    fields: fields ?? [],
-    title: (index ?? []).join(),
-  };
-
+export async function getQueryFilter(
+  {
+    query,
+    language,
+    filters,
+    index,
+    exceptionFilter,
+  }:
+    | {
+        query: RuleQuery;
+        language: Language;
+        filters: unknown;
+        index: IndexPatternArray;
+        exceptionFilter: Filter | undefined;
+      }
+    | {
+        index: undefined;
+        query: RuleQuery;
+        language: 'esql';
+        filters: unknown;
+        exceptionFilter: Filter | undefined;
+      },
+  dataViewsService: DataViewsContract
+): Promise<ESBoolQuery> {
   const config: EsQueryConfig = {
     allowLeadingWildcards: true,
     queryStringOptions: { analyze_wildcard: true },
@@ -53,8 +52,24 @@ export const getQueryFilter = ({
   const initialQuery = { query, language };
   const allFilters = getAllFilters(filters as Filter[], exceptionFilter);
 
+  const title = (index ?? []).join();
+  const dataViewLazy = await dataViewsService.createDataViewLazy({ title });
+
+  const fields = await queryToFields({
+    dataView: dataViewLazy,
+    request: { query: [initialQuery], filters: allFilters },
+  });
+
+  const indexPattern = new DataView({
+    spec: { title },
+    fieldFormats: {} as unknown as FieldFormatsStartCommon,
+    shortDotsEnable: false,
+    metaFields: [],
+  });
+
+  indexPattern.fields.replaceAll(Object.values(fields).map((fld) => fld.toSpec()));
   return buildEsQuery(indexPattern, initialQuery, allFilters, config);
-};
+}
 
 export const getAllFilters = (filters: Filter[], exceptionFilter: Filter | undefined): Filter[] => {
   if (exceptionFilter != null) {

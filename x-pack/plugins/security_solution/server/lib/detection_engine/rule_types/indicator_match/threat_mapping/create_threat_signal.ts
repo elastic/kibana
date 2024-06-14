@@ -50,7 +50,6 @@ export const createThreatSignal = async ({
   threatQuery,
   reassignThreatPitId,
   allowedFieldsForTermsQuery,
-  inputIndexFields,
   threatIndexFields,
   sortOrder = 'desc',
   isAlertSuppressionActive,
@@ -80,7 +79,6 @@ export const createThreatSignal = async ({
       services,
       index: inputIndex,
       exceptionFilter,
-      fields: inputIndexFields,
     });
 
     ruleExecutionLogger.debug(

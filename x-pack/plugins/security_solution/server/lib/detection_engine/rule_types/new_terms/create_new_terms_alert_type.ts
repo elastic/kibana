@@ -109,7 +109,6 @@ export const createNewTermsAlertType = (
           unprocessedExceptions,
           alertTimestampOverride,
           publicBaseUrl,
-          inputIndexFields,
           alertWithSuppression,
         },
         services,
@@ -134,7 +133,6 @@ export const createNewTermsAlertType = (
         type: params.type,
         query: params.query,
         exceptionFilter,
-        fields: inputIndexFields,
       };
       const esFilter = await getFilter(filterArgs);
 

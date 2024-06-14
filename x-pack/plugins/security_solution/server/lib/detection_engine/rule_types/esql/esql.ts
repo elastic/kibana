@@ -87,7 +87,7 @@ export const esqlExecutor = async ({
       result.createdSignalsCount <= tuple.maxSignals &&
       size <= ESQL_PAGE_SIZE_CIRCUIT_BREAKER
     ) {
-      const esqlRequest = buildEsqlSearchRequest({
+      const esqlRequest = await buildEsqlSearchRequest({
         query: ruleParams.query,
         from: tuple.from.toISOString(),
         to: tuple.to.toISOString(),
@@ -96,6 +96,7 @@ export const esqlExecutor = async ({
         primaryTimestamp,
         secondaryTimestamp,
         exceptionFilter,
+        dataViews: services.dataViews,
       });
 
       ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);

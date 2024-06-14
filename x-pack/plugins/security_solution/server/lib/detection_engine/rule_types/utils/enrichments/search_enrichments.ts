@@ -15,13 +15,16 @@ export const searchEnrichments: SearchEnrichments = async ({ index, services, qu
       body: {
         _source: '',
         fields,
-        query: getQueryFilter({
-          query: '',
-          language: 'kuery',
-          filters: [query],
-          index,
-          exceptionFilter: undefined,
-        }),
+        query: await getQueryFilter(
+          {
+            query: '',
+            language: 'kuery',
+            filters: [query],
+            index,
+            exceptionFilter: undefined,
+          },
+          services.dataViews
+        ),
       },
       track_total_hits: false,
     });

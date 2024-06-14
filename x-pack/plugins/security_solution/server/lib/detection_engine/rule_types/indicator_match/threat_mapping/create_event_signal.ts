@@ -55,7 +55,6 @@ export const createEventSignal = async ({
   unprocessedExceptions,
   allowedFieldsForTermsQuery,
   threatMatchedFields,
-  inputIndexFields,
   threatIndexFields,
   completeRule,
   sortOrder = 'desc',
@@ -94,6 +93,7 @@ export const createEventSignal = async ({
       listClient,
       exceptionFilter,
       indexFields: threatIndexFields,
+      dataViews: services.dataViews,
     };
 
     let signalsQueryMap;
@@ -143,7 +143,6 @@ export const createEventSignal = async ({
       services,
       index: inputIndex,
       exceptionFilter,
-      fields: inputIndexFields,
     });
 
     ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
