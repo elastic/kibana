@@ -12,7 +12,7 @@ import { useActions } from './use_actions';
 import { ServiceProvider } from './service_provider';
 
 export const useTableColumns = () => {
-  const { actions } = useActions({ disableActions: false });
+  const { actions } = useActions();
 
   const TABLE_COLUMNS = [
     {

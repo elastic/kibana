@@ -6,16 +6,17 @@
  */
 
 import type {
+  EuiTableComputedColumnType,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { InferenceEndpointUI } from './types';
 import { useCopyIDAction } from './actions/use_copy_id_action';
 
-const ActionColumnComponent: React.FC<{ id: 2; disableActions: boolean }> = ({
-  id,
-  disableActions,
+const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }> = ({
+  interfaceEndpoint,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
@@ -31,25 +32,25 @@ const ActionColumnComponent: React.FC<{ id: 2; disableActions: boolean }> = ({
       { id: 0, items: mainPanelItems, title: 'Actions' },
     ];
 
-    mainPanelItems.push(copyIDAction.getAction(2));
+    mainPanelItems.push(copyIDAction.getAction(interfaceEndpoint));
 
     return panelsToBuild;
-  }, [copyIDAction]);
+  }, [copyIDAction, interfaceEndpoint]);
 
   return (
     <>
       <EuiPopover
-        id={`case-action-popover-${id}`}
-        key={`case-action-popover-${id}`}
-        data-test-subj={`case-action-popover-${id}`}
+        id={`inference-action-popover-${interfaceEndpoint.endpoint}`}
+        key={`inference-action-popover-${interfaceEndpoint.endpoint}`}
+        data-test-subj={`inference-action-popover-${interfaceEndpoint.endpoint}`}
         button={
           <EuiButtonIcon
             onClick={tooglePopover}
             iconType="boxesHorizontal"
             aria-label={'Actions'}
             color="text"
-            key={`case-action-popover-button-${id}`}
-            data-test-subj={`case-action-popover-button-${id}`}
+            key={`inference-action-popover-button-${interfaceEndpoint.endpoint}`}
+            data-test-subj={`inference-action-popover-button-${interfaceEndpoint.endpoint}`}
             disabled={false}
           />
         }
@@ -61,8 +62,8 @@ const ActionColumnComponent: React.FC<{ id: 2; disableActions: boolean }> = ({
         <EuiContextMenu
           initialPanelId={0}
           panels={panels}
-          key={`case-action-menu-${id}`}
-          data-test-subj={`case-action-menu-${id}`}
+          key={`inference-action-menu-${interfaceEndpoint.endpoint}`}
+          data-test-subj={`inference-action-menu-${interfaceEndpoint.endpoint}`}
         />
       </EuiPopover>
     </>
@@ -74,20 +75,18 @@ ActionColumnComponent.displayName = 'ActionColumnComponent';
 const ActionColumn = React.memo(ActionColumnComponent);
 
 interface UseBulkActionsReturnValue {
-  actions: any | null;
+  actions: EuiTableComputedColumnType<InferenceEndpointUI>;
 }
 
-interface UseBulkActionsProps {
-  disableActions: boolean;
-}
-
-export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
+export const useActions = (): UseBulkActionsReturnValue => {
   return {
     actions: {
       name: 'Actions',
       align: 'right',
-      render: () => {
-        return <ActionColumn id={2} key={2} disableActions={disableActions} />;
+      render: (interfaceEndpoint: InferenceEndpointUI) => {
+        return (
+          <ActionColumn interfaceEndpoint={interfaceEndpoint} key={interfaceEndpoint.endpoint} />
+        );
       },
       width: '100px',
     },

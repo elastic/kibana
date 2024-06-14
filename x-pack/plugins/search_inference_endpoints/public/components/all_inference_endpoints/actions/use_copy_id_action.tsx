@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiIcon, EuiTextColor } from '@elastic/eui';
+import { InferenceEndpointUI } from '../types';
 
 interface UseActionProps {
   onAction: () => void;
@@ -17,17 +18,16 @@ interface UseActionProps {
 type UseCopyIDActionProps = Pick<UseActionProps, 'onActionSuccess'>;
 
 export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {
-  const getAction = (id: any) => {
+  const getAction = (inferenceEndpoint: InferenceEndpointUI) => {
     return {
       name: <EuiTextColor>{'Copy Inference ID'}</EuiTextColor>,
       onClick: () => {
-        navigator.clipboard.writeText(id).then(() => {
+        navigator.clipboard.writeText(inferenceEndpoint.endpoint).then(() => {
           onActionSuccess();
         });
       },
-      'data-test-subj': 'cases-action-copy-id',
       icon: <EuiIcon type="copyClipboard" size="m" />,
-      key: 'cases-action-copy-id',
+      key: 'inference-endpoints-action-copy-id',
     };
   };
 
