@@ -361,7 +361,8 @@ describe('split .kibana index into multiple system indices', () => {
       expect(logs).toContainLogEntries(
         [
           '[.kibana] INIT -> WAIT_FOR_YELLOW_SOURCE.',
-          '[.kibana] WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS.',
+          '[.kibana] WAIT_FOR_YELLOW_SOURCE -> CHECK_CLUSTER_ROUTING_ALLOCATION.',
+          '[.kibana] CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.',
           '[.kibana] CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.',
           '[.kibana] SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS.',
           '[.kibana] CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP.',

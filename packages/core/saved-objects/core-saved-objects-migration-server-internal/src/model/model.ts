@@ -1321,35 +1321,56 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       Either.isRight(res) ||
       (isTypeof(res.left, 'documents_transform_failed') && stateP.discardCorruptObjects)
     ) {
-      // we might have some transformation errors, but user has chosen to discard them
-      const documents = Either.isRight(res) ? res.right.processedDocs : res.left.processedDocs;
+      if (
+        (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) ||
+        stateP.discardCorruptObjects
+      ) {
+        // we might have some transformation errors from previous iterations, but user has chosen to discard them
+        const documents = Either.isRight(res) ? res.right.processedDocs : res.left.processedDocs;
 
-      const batches = createBatches({
-        documents,
-        ...(Either.isLeft(res) && {
-          corruptDocumentIds: res.left.corruptDocumentIds,
-          transformErrors: res.left.transformErrors,
-        }),
-        maxBatchSizeBytes: stateP.maxBatchSizeBytes,
-      });
-      if (Either.isRight(batches)) {
-        return {
-          ...stateP,
-          controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-          bulkOperationBatches: batches.right,
-          currentBatch: 0,
-          hasTransformedDocs: true,
-          progress,
-        };
+        let corruptDocumentIds = stateP.corruptDocumentIds;
+        let transformErrors = stateP.transformErrors;
+
+        if (Either.isLeft(res)) {
+          corruptDocumentIds = [...stateP.corruptDocumentIds, ...res.left.corruptDocumentIds];
+          transformErrors = [...stateP.transformErrors, ...res.left.transformErrors];
+        }
+
+        const batches = createBatches({
+          documents,
+          corruptDocumentIds,
+          transformErrors,
+          maxBatchSizeBytes: stateP.maxBatchSizeBytes,
+        });
+        if (Either.isRight(batches)) {
+          return {
+            ...stateP,
+            controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
+            bulkOperationBatches: batches.right,
+            currentBatch: 0,
+            hasTransformedDocs: true,
+            progress,
+          };
+        } else {
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
+              _id: batches.left.documentId,
+              docSizeBytes: batches.left.docSizeBytes,
+              maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
+            }),
+          };
+        }
       } else {
+        // At this point, there are some corrupt documents and/or transformation errors
+        // from previous iterations and we're not discarding them.
+        // Also, the current batch of SEARCH_READ documents has been transformed successfully
+        // so there is no need to append them to the lists of corruptDocumentIds, transformErrors.
         return {
           ...stateP,
-          controlState: 'FATAL',
-          reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
-            _id: batches.left.documentId,
-            docSizeBytes: batches.left.docSizeBytes,
-            maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
-          }),
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+          progress,
         };
       }
     } else {
