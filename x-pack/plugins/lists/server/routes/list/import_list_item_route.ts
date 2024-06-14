@@ -8,7 +8,6 @@
 import { extname } from 'path';
 
 import { schema } from '@kbn/config-schema';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
@@ -19,7 +18,6 @@ import {
 
 import type { ListsPluginRouter } from '../../types';
 import { ConfigType } from '../../config';
-import { importListItemResponse } from '../../../common/api';
 import { buildSiemResponse } from '../utils';
 import { createStreamFromBuffer } from '../utils/create_stream_from_buffer';
 import { getListClient } from '..';
@@ -124,12 +122,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
               version: 1,
             });
 
-            const [validated, errors] = validate(list, importListItemResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
+            return response.ok({ body: ImportListItemsResponse.parse(list) });
           } else if (type != null) {
             const importedList = await lists.importListItemsToStream({
               deserializer,
