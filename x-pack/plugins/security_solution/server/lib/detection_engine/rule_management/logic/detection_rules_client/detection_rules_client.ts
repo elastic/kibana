@@ -8,7 +8,6 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
-import type { RuleAlertType } from '../../../rule_schema';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type {
   IDetectionRulesClient,
@@ -71,7 +70,7 @@ export const createDetectionRulesClient = (
     });
   },
 
-  async importRule(args: ImportRuleArgs): Promise<RuleAlertType> {
+  async importRule(args: ImportRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.importRule', async () => {
       return importRule(rulesClient, args, mlAuthz);
     });

@@ -13,7 +13,6 @@ import type {
   RuleToImport,
   RuleResponse,
 } from '../../../../../../common/api/detection_engine';
-import type { RuleAlertType } from '../../../rule_schema';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 
 export interface IDetectionRulesClient {
@@ -23,7 +22,7 @@ export interface IDetectionRulesClient {
   patchRule: (args: PatchRuleArgs) => Promise<RuleResponse>;
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
-  importRule: (args: ImportRuleArgs) => Promise<RuleAlertType>;
+  importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
 }
 
 export interface CreateCustomRuleArgs {
