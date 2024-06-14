@@ -16,7 +16,6 @@ export { Header } from './header';
 export { NewEnrollmentTokenModal } from './new_enrollment_key_modal';
 export { AgentPolicyPackageBadge } from './agent_policy_package_badge';
 export { AgentPolicyPackageBadges } from './agent_policy_package_badges';
-export { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 export { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 export { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 export { AddAgentHelpPopover } from './add_agent_help_popover';
