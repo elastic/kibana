@@ -305,7 +305,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const onUpdateRowHeight = useCallback(
       (newRowHeight: number) => {
-        console.log("NEW ROW HEIGHT!!!: ", newRowHeight);
         if (newRowHeight !== rowHeight) {
           dispatch(timelineActions.updateRowHeight({ id: timelineId, rowHeight: newRowHeight }));
         }
