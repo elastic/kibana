@@ -6,16 +6,24 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
-import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
+import type { RuleParams } from '../../../../rule_schema';
 import type { UpgradePrebuiltRuleArgs } from '../detection_rules_client_interface';
 import {
   convertPatchAPIToInternalSchema,
   convertCreateAPIToInternalSchema,
 } from '../../../normalization/rule_converters';
 import { transformAlertToRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
+import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import { transform } from '../../../utils/utils';
 
-import { validateMlAuth, ClientError } from '../utils';
+import {
+  validateMlAuth,
+  ClientError,
+  RuleResponseValidationError,
+  toggleRuleEnabledOnUpdate,
+} from '../utils';
 
 import { readRules } from '../read_rules';
 
@@ -23,7 +31,7 @@ export const upgradePrebuiltRule = async (
   rulesClient: RulesClient,
   upgradePrebuiltRulePayload: UpgradePrebuiltRuleArgs,
   mlAuthz: MlAuthz
-): Promise<RuleAlertType> => {
+): Promise<RuleResponse> => {
   const { ruleAsset } = upgradePrebuiltRulePayload;
 
   await validateMlAuth(mlAuthz, ruleAsset.type);
@@ -56,19 +64,37 @@ export const upgradePrebuiltRule = async (
       { immutable: true, defaultEnabled: existingRule.enabled }
     );
 
-    return rulesClient.create<RuleParams>({
+    const createdRule = await rulesClient.create<RuleParams>({
       data: internalRule,
       options: { id: existingRule.id },
     });
+
+    /* Trying to convert the rule to a RuleResponse object */
+    const parseResult = RuleResponse.safeParse(transform(createdRule));
+
+    if (!parseResult.success) {
+      throw new RuleResponseValidationError({
+        message: stringifyZodError(parseResult.error),
+        ruleId: createdRule.params.ruleId,
+      });
+    }
+
+    return parseResult.data;
   }
 
   // Else, simply patch it.
   const patchedRule = convertPatchAPIToInternalSchema(ruleAsset, existingRule);
 
-  await rulesClient.update({
+  const patchedInternalRule = await rulesClient.update({
     id: existingRule.id,
     data: patchedRule,
   });
+
+  const { enabled } = await toggleRuleEnabledOnUpdate(
+    rulesClient,
+    existingRule,
+    patchedInternalRule.enabled
+  );
 
   const updatedRule = await readRules({
     rulesClient,
@@ -80,5 +106,15 @@ export const upgradePrebuiltRule = async (
     throw new ClientError(`Rule ${ruleAsset.rule_id} not found after upgrade`, 500);
   }
 
-  return updatedRule;
+  /* Trying to convert the internal rule to a RuleResponse object */
+  const parseResult = RuleResponse.safeParse(transform({ ...patchedInternalRule, enabled }));
+
+  if (!parseResult.success) {
+    throw new RuleResponseValidationError({
+      message: stringifyZodError(parseResult.error),
+      ruleId: patchedInternalRule.params.ruleId,
+    });
+  }
+
+  return parseResult.data;
 };

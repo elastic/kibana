@@ -65,7 +65,7 @@ export const createDetectionRulesClient = (
     });
   },
 
-  async upgradePrebuiltRule(args: UpgradePrebuiltRuleArgs): Promise<RuleAlertType> {
+  async upgradePrebuiltRule(args: UpgradePrebuiltRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.upgradePrebuiltRule', async () => {
       return upgradePrebuiltRule(rulesClient, args, mlAuthz);
     });
