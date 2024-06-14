@@ -12,18 +12,22 @@ import { forOwn, get } from 'lodash';
 import { JsonOutputParser, StringOutputParser } from '@langchain/core/output_parsers';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import type { StateGraphArgs } from '@langchain/langgraph';
+import { StateGraph } from '@langchain/langgraph';
 import { APP_UI_ID } from '../../../../common';
 
 export const ECS_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
-    `As an expert user of Elastic Security, please generate an accurate and valid ESQL query to detect the use case below. Your response should be formatted to be able to use immediately in an Elastic Security timeline or detection rule. Take your time with the answer, check your knowledge really well on all the functions I am asking for. For ES|QL answers specifically, you should only ever answer with what's available in your private knowledge. I cannot afford for queries to be inaccurate. Assume I am using the Elastic Common Schema and Elastic Agent..
+    `As an expert user of Elastic Security, please generate an accurate and valid ESQL query to detect the use case below. Your response should be formatted to be able to use immediately in an Elastic Security timeline or detection rule. Take your time with the answer, check your knowledge really well on all the functions I am asking for. For ES|QL answers specifically, you should only ever answer with what's available in your private knowledge. I cannot afford for queries to be inaccurate. Assume I am using the Elastic Common Schema and Elastic Agent. Under any circumstances wrap index in quotes.
+
+    If multiple indices are matched please try to use wildcard to match all indices. If you are unsure about the index name, please refer to the context provided below.
 
 Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
 <context>
-<indicesMapping>
-{indicesMapping}
-</indicesMapping>
+<availableIndices>
+{availableIndices}
+</availableIndices>
 </context>`,
   ],
   [
@@ -51,6 +55,146 @@ const toolDetails = {
   id: 'esql-knowledge-base-tool',
   name: 'ESQLKnowledgeBaseTool',
 };
+
+export interface CategorizationState {
+  rawSamples: string[];
+  samples: string[];
+  formattedSamples: string;
+  ecsTypes: string;
+  ecsCategories: string;
+  exAnswer: string;
+  lastExecutedChain: string;
+  packageName: string;
+  dataStreamName: string;
+  errors: object;
+  pipelineResults: object[];
+  finalized: boolean;
+  reviewed: boolean;
+  currentPipeline: object;
+  currentProcessors: object[];
+  invalidCategorization: object;
+  initialPipeline: object;
+  result: object;
+}
+
+const graphState: StateGraphArgs<CategorizationState>['channels'] = {
+  lastExecutedChain: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  rawSamples: {
+    value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  samples: {
+    value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  formattedSamples: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  ecsTypes: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  ecsCategories: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  exAnswer: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  packageName: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  dataStreamName: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  finalized: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
+  },
+  reviewed: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
+  },
+  errors: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => ({}),
+  },
+  pipelineResults: {
+    value: (x: object[], y?: object[]) => y ?? x,
+    default: () => [{}],
+  },
+  currentPipeline: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => ({}),
+  },
+  currentProcessors: {
+    value: (x: object[], y?: object[]) => y ?? x,
+    default: () => [],
+  },
+  invalidCategorization: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => ({}),
+  },
+  initialPipeline: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => ({}),
+  },
+  result: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => ({}),
+  },
+};
+
+function modelInput(state: CategorizationState): Partial<CategorizationState> {
+  // const samples = modifySamples(state);
+  // const formattedSamples = formatSamples(samples);
+  // const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
+  return {
+    // exAnswer: JSON.stringify(CATEGORIZATION_EXAMPLE_ANSWER, null, 2),
+    // ecsCategories: JSON.stringify(ECS_CATEGORIES, null, 2),
+    // ecsTypes: JSON.stringify(ECS_TYPES, null, 2),
+    // samples,
+    // formattedSamples,
+    // initialPipeline,
+    finalized: false,
+    reviewed: false,
+    lastExecutedChain: 'modelInput',
+  };
+}
+
+function modelOutput(state: CategorizationState): Partial<CategorizationState> {
+  return {
+    finalized: true,
+    lastExecutedChain: 'modelOutput',
+    result: {
+      query: state.query,
+      rows: state.pipelineResults,
+      columns: state.currentPipeline,
+    },
+  };
+}
+
+const handleGenerateQuery = (state: CategorizationState, model) => {};
+
+const getEsqlGraph = (client, model) => {
+  const workflow = new StateGraph({
+    channels: graphState,
+  })
+    .addNode('modelInput', modelInput)
+    .addNode('modelOutput', modelOutput)
+    .addNode('handleGenerateQuery', (state: CategorizationState) =>
+      handleGenerateQuery(state, model)
+    )
+    .addNode('handleClassifyEsql', (state: CategorizationState) => {});
+};
+
 export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
@@ -75,7 +219,14 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
         question: z.string().describe(`The user's exact question about ESQL`),
       }),
       func: async (input, _, cbManager) => {
-        const response = await esClient.indices.get({ index: '*' });
+        let response;
+        try {
+          response = await esClient.indices.getDataStream();
+        } catch (e) {
+          console.error('e', e);
+        }
+
+        console.error('response', JSON.stringify(response, null, 2));
 
         function transformInputToOutput(input2: Record<string, any>) {
           const output: Record<string, any> = {};
@@ -113,13 +264,17 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           return result;
         }
 
-        const indices = transformInputToOutput(response);
+        // const indices = transformInputToOutput(response);
 
         const graph = ECS_MAIN_PROMPT.pipe(llm).pipe(new StringOutputParser());
 
         const result = await graph.invoke({
           input: input.question,
-          indicesMapping: JSON.stringify(Object.keys(indices), null, 2),
+          availableIndices: JSON.stringify(
+            response?.data_streams.map((item) => item.name),
+            null,
+            2
+          ),
         });
 
         console.error('result', JSON.stringify(result, null, 2));
@@ -128,6 +283,7 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           ?.match(/(?<=```esql)[\s\S]*?(?=```)/g)
           .join('')
           .replace('\n', '')
+          .replaceAll('"', '')
           .trim();
 
         console.error('esqlQuery', esqlQuery);
@@ -139,7 +295,9 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           console.error('e', e);
         }
 
-        return result;
+        console.error('trimee', result.replaceAll('"', '').trim());
+
+        return result.replaceAll('"', '').trim();
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
     });

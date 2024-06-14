@@ -44,7 +44,6 @@ export const StreamComment = ({
   regenerateMessage,
   setIsStreaming,
   transformMessage,
-  esqlInlineEditRef,
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     refetchCurrentConversation,
@@ -109,14 +108,7 @@ export const StreamComment = ({
 
   return (
     <MessagePanel
-      body={
-        <MessageText
-          content={message}
-          index={index}
-          loading={isAnythingLoading}
-          esqlInlineEditRef={esqlInlineEditRef}
-        />
-      }
+      body={<MessageText content={message} index={index} loading={isAnythingLoading} />}
       error={error ? new Error(error) : undefined}
       controls={controls}
     />

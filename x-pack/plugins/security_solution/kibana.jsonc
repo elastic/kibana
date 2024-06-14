@@ -25,6 +25,7 @@
       "ecsDataQualityDashboard",
       "elasticAssistant",
       "embeddable",
+      "esqlDataGrid",
       "eventLog",
       "features",
       "fieldFormats",
@@ -53,8 +54,7 @@
       "notifications",
       "savedSearch",
       "unifiedDocViewer",
-      "charts",
-      "observabilityAIAssistantApp"
+      "charts"
     ],
     "optionalPlugins": [
       "cloudExperiments",

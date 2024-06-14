@@ -116,7 +116,6 @@ export function VisualizeESQL({
   preferredChartType,
   ObservabilityAIAssistantMultipaneFlyoutContext,
   errorMessages,
-  esqlInlineEditRef,
 }: VisualizeESQLProps) {
   // fetch the pattern from the query
   const indexPattern = getIndexPatternFromESQLQuery(query);
@@ -242,19 +241,10 @@ export function VisualizeESQL({
             ReactDOM.unmountComponentAtNode(chatFlyoutSecondSlotHandler.container);
           }
         },
-        container: esqlInlineEditRef ?? chatFlyoutSecondSlotHandler?.container,
+        container: chatFlyoutSecondSlotHandler?.container,
       };
     }
-  }, [
-    chatFlyoutSecondSlotHandler,
-    esqlInlineEditRef,
-    lensInput,
-    lensLoadEvent,
-    onActionClick,
-    query,
-  ]);
-
-  console.error('triggerOptions', triggerOptions);
+  }, [chatFlyoutSecondSlotHandler, lensInput, lensLoadEvent, onActionClick, query]);
 
   if (!lensHelpersAsync.value || !dataViewAsync.value || !lensInput) {
     return <EuiLoadingSpinner />;

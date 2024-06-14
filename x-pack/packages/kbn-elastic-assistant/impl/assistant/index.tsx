@@ -219,7 +219,6 @@ const AssistantComponent: React.FC<Props> = ({
     [conversations, currentConversation?.id, getConversation]
   );
 
-  const esqlInlineEditRef = useRef();
   useEffect(() => {
     if (conversationsLoaded && Object.keys(conversations).length > 0) {
       setCurrentConversation((prev) => {
@@ -593,7 +592,6 @@ const AssistantComponent: React.FC<Props> = ({
             setIsStreaming,
             currentUserAvatar,
             isFlyoutMode,
-            esqlInlineEditRef,
           })}
           {...(!isFlyoutMode
             ? {
@@ -1091,14 +1089,6 @@ const AssistantComponent: React.FC<Props> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </CommentContainer>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            overflow: auto;
-          `}
-        >
-          <div ref={esqlInlineEditRef} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

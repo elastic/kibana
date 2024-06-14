@@ -99,7 +99,7 @@ const loadingCursorPlugin = () => {
   };
 };
 
-const getPluginDependencies = ({ esqlInlineEditRef }) => {
+const getPluginDependencies = () => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
   const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
@@ -112,7 +112,7 @@ const getPluginDependencies = ({ esqlInlineEditRef }) => {
     esql: (props) => {
       return (
         <>
-          <EsqlCodeBlock {...props} esqlInlineEditRef={esqlInlineEditRef} />
+          <EsqlCodeBlock {...props} />
           <EuiSpacer size="m" />
         </>
       );
@@ -152,12 +152,12 @@ const getPluginDependencies = ({ esqlInlineEditRef }) => {
   };
 };
 
-export function MessageText({ loading, content, index, esqlInlineEditRef }: Props) {
+export function MessageText({ loading, content, index }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
 
-  const { parsingPluginList, processingPluginList } = getPluginDependencies({ esqlInlineEditRef });
+  const { parsingPluginList, processingPluginList } = getPluginDependencies();
 
   return (
     <EuiText className={containerClassName}>
