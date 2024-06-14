@@ -39,6 +39,7 @@ export {
   fetchIndices,
   waitForReindexTask,
   waitForPickupUpdatedMappingsTask,
+  checkClusterRoutingAllocationEnabled,
 } from './src/actions';
 export type {
   OpenPitResponse,

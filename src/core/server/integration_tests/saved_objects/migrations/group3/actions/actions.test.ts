@@ -44,8 +44,8 @@ import {
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,
   createBulkIndexOperationTuple,
+  checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
-import { checkClusterRoutingAllocationEnabled } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
