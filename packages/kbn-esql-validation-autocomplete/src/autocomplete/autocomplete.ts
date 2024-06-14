@@ -18,7 +18,6 @@ import type {
 import { partition } from 'lodash';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
-  columnExists,
   lookupColumn,
   getCommandDefinition,
   getCommandOption,
@@ -42,6 +41,7 @@ import {
   getAllFunctions,
   isSingleItem,
   nonNullable,
+  getColumnExists,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -322,7 +322,7 @@ function workoutBuiltinOptions(
 ): { skipAssign: boolean } {
   // skip assign operator if it's a function or an existing field to avoid promoting shadowing
   return {
-    skipAssign: Boolean(!isColumnItem(nodeArg) || lookupColumn(nodeArg.name, references)),
+    skipAssign: Boolean(!isColumnItem(nodeArg) || lookupColumn(nodeArg, references)),
   };
 }
 
@@ -390,7 +390,7 @@ function extractFinalTypeFromArg(
       return arg.literalType;
     }
     if (isColumnItem(arg)) {
-      const hit = lookupColumn(arg.name, references);
+      const hit = lookupColumn(arg, references);
       if (hit) {
         return hit.type;
       }
@@ -1131,10 +1131,10 @@ async function getFunctionArgsSuggestions(
   const isUnknownColumn =
     arg &&
     isColumnItem(arg) &&
-    !columnExists(arg, {
+    !getColumnExists(arg, {
       fields: fieldsMap,
       variables: variablesExcludingCurrentCommandOnes,
-    }).hit;
+    });
   if (noArgDefined || isUnknownColumn) {
     // ... | EVAL fn( <suggest>)
     // ... | EVAL fn( field, <suggest>)
@@ -1482,7 +1482,10 @@ async function getOptionArgsSuggestions(
   }
 
   if (command.name === 'dissect') {
-    if (option.args.length < 1 && optionDef) {
+    if (
+      option.args.filter((arg) => !(isSingleItem(arg) && arg.type === 'unknown')).length < 1 &&
+      optionDef
+    ) {
       suggestions.push(colonCompleteItem, semiColonCompleteItem);
     }
   }
