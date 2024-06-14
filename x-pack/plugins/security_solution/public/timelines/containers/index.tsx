@@ -285,9 +285,11 @@ export const useTimelineEventsHandler = ({
 
         if (request.language === 'eql') {
           prevTimelineRequest.current = activeTimeline.getEqlRequest();
+          // @ts-expect-error upgrade typescript v5.1.6
           refetch.current = asyncSearch.bind(null, activeTimeline.getEqlRequest());
         } else {
           prevTimelineRequest.current = activeTimeline.getRequest();
+          // @ts-expect-error upgrade typescript v5.1.6
           refetch.current = asyncSearch.bind(null, activeTimeline.getRequest());
         }
 

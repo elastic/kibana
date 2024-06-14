@@ -147,6 +147,7 @@ export const RelevanceTuningLogic = kea<
     }),
     setPrecision: (precision) => ({ precision }),
   }),
+  // @ts-expect-error upgrade typescript v5.1.6
   reducers: () => ({
     searchSettings: [
       {
@@ -156,9 +157,13 @@ export const RelevanceTuningLogic = kea<
         precision_enabled: false,
       },
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeRelevanceTuning: (_, { searchSettings }) => searchSettings,
+        // @ts-expect-error upgrade typescript v5.1.6
         setSearchSettings: (_, { searchSettings }) => searchSettings,
+        // @ts-expect-error upgrade typescript v5.1.6
         setSearchSettingsResponse: (_, { searchSettings }) => searchSettings,
+        // @ts-expect-error upgrade typescript v5.1.6
         setPrecision: (currentSearchSettings, { precision }) => ({
           ...currentSearchSettings,
           precision,
@@ -168,24 +173,28 @@ export const RelevanceTuningLogic = kea<
     schema: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeRelevanceTuning: (_, { schema }) => schema,
       },
     ],
     schemaConflicts: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeRelevanceTuning: (_, { schemaConflicts }) => schemaConflicts || {},
       },
     ],
     filterInputValue: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setFilterValue: (_, filterInputValue) => filterInputValue,
       },
     ],
     query: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setSearchQuery: (_, query) => query,
       },
     ],
@@ -209,12 +218,14 @@ export const RelevanceTuningLogic = kea<
       null,
       {
         clearSearchResults: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         setSearchResults: (_, searchResults) => searchResults,
       },
     ],
     resultsLoading: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setResultsLoading: (_, resultsLoading) => resultsLoading,
         setSearchResults: () => false,
       },

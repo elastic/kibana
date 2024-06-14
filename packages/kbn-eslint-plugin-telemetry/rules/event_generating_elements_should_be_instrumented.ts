@@ -53,6 +53,7 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         }
 
         const hasDataTestSubjProp = checkNodeForExistingDataTestSubjProp(parent, () =>
+          // @ts-expect-error upgrade typescript v5.1.6
           sourceCode.getScope(node as TSNode)
         );
 
@@ -69,6 +70,7 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         const appName = getAppName(fileName, cwd);
 
         // 2. Component name
+        // @ts-expect-error upgrade typescript v5.1.6
         const functionDeclaration = sourceCode.getScope(node as TSNode)
           .block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);

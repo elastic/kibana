@@ -196,7 +196,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       ? (d, g) => {
           return g.specId === 'document_count' &&
             documentCountStats?.changePoint &&
+            // @ts-expect-error upgrade typescript v5.1.6
             d.x > documentCountStats.changePoint.startTs &&
+            // @ts-expect-error upgrade typescript v5.1.6
             d.x < documentCountStats.changePoint.endTs
             ? barStyle
             : null;

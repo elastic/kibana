@@ -319,6 +319,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
                   bucketSpanValidationError !== '' ||
                   outerFormComplete === false
                 }
+                // @ts-expect-error upgrade typescript v5.1.6
                 onClick={createJob.bind(null, layerIndex)}
                 size="s"
                 data-test-subj={`mlLensLayerCreateJobButton_${layerIndex}`}
@@ -332,6 +333,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                // @ts-expect-error upgrade typescript v5.1.6
                 onClick={createADJobInWizard.bind(null, layerIndex)}
                 size="s"
                 iconType="popout"

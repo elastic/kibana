@@ -264,8 +264,8 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   return (
     <EuiSelectable
       data-test-subj={props['data-test-subj']}
+      // @ts-expect-error upgrade typescript v5.1.6
       options={displayedOptions}
-      // @ts-expect-error: Type of `nextOptions` in EuiSelectable does not match what's actually being passed back so need to manually override it
       onChange={(
         nextOptions: Array<EuiSelectableOption<{ data: Partial<UserProfileWithAvatar> }>>
       ) => {
@@ -331,26 +331,33 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
       emptyMessage={emptyMessage}
       errorMessage={errorMessage}
       renderOption={(option, searchValue) => {
+        // @ts-expect-error upgrade typescript v5.1.6
         if (option.user) {
+          // @ts-expect-error upgrade typescript v5.1.6
           const displayName = getUserDisplayName(option.user);
           return (
             <>
               <div className="eui-textTruncate">
                 <EuiHighlight search={searchValue}>{displayName}</EuiHighlight>
               </div>
-              {option.user.email && option.user.email !== displayName ? (
-                <EuiText
-                  size={'xs'}
-                  color={option.disabled ? 'disabled' : 'subdued'}
-                  className="eui-textTruncate"
-                >
-                  {searchValue ? (
-                    <EuiHighlight search={searchValue}>{option.user.email}</EuiHighlight>
-                  ) : (
-                    option.user.email
-                  )}
-                </EuiText>
-              ) : undefined}
+              {
+                /* @ts-expect-error upgrade typescript v5.1.6 */
+                option.user.email && option.user.email !== displayName ? (
+                  <EuiText
+                    size={'xs'}
+                    color={option.disabled ? 'disabled' : 'subdued'}
+                    className="eui-textTruncate"
+                  >
+                    {searchValue ? (
+                      /* @ts-expect-error upgrade typescript v5.1.6 */
+                      <EuiHighlight search={searchValue}>{option.user.email}</EuiHighlight>
+                    ) : (
+                      /* @ts-expect-error upgrade typescript v5.1.6 */
+                      option.user.email
+                    )}
+                  </EuiText>
+                ) : undefined
+              }
             </>
           );
         }

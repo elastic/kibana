@@ -15,6 +15,7 @@ import { ChatForm, ChatFormFields } from '../../types';
 export const ViewQueryAction: React.FC = () => {
   const [showFlyout, setShowFlyout] = useState(false);
   const { watch } = useFormContext<ChatForm>();
+  // @ts-expect-error upgrade typescript v5.1.6
   const selectedIndices: string[] = watch(ChatFormFields.indices);
 
   return (

@@ -30,6 +30,7 @@ interface State {
 
 const convertToEui = (toast: ToastWithRichTitle): EuiToast => ({
   ...toast,
+  // @ts-expect-error upgrade typescript v5.1.6
   title: toast.title instanceof Function ? <MountWrapper mount={toast.title} /> : toast.title,
   text: toast.text instanceof Function ? <MountWrapper mount={toast.text} /> : toast.text,
 });

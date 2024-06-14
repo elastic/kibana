@@ -52,6 +52,7 @@ export const textClassificationModel: TrainedModelConfigResponse = {
       tokenization: {
         roberta: {
           add_prefix_space: false,
+          // @ts-expect-error upgrade typescript v5.1.6
           do_lower_case: false,
           max_sequence_length: 512,
           span: -1,

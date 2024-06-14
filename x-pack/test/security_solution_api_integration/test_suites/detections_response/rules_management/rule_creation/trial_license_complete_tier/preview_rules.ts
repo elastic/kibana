@@ -91,6 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
             )
           );
 
+          // @ts-expect-error upgrade typescript v5.1.6
           expect(responses.filter((r) => r.body.statusCode === 429).length).to.eql(5);
         });
       });

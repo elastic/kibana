@@ -524,6 +524,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
             version: '3.0.33',
           },
           temp_file_path: 'C:/temp/fake_malware.exe',
+          // @ts-expect-error upgrade typescript v5.1.6
           quarantine_result: true,
           quarantine_message: 'fake quarantine message',
         },
@@ -891,6 +892,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           user: 'SYSTEM',
           token: {
             integrity_level_name: 'high',
+            // @ts-expect-error upgrade typescript v5.1.6
             elevation_level: 'full',
           },
         },
@@ -1618,7 +1620,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       path: '/package/endpoint/0.5.0',
       icons: [
         {
-          // @ts-expect-error upgrade typescript v4.9.5
           path: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
           src: '/img/logo-endpoint-64-color.svg',
           size: '16x16',
@@ -1703,7 +1704,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       assets: {} as AssetsGroupedByServiceByType,
       icons: [
         {
-          // @ts-expect-error upgrade typescript v4.9.5
           path: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
           src: '/img/logo-endpoint-64-color.svg',
           size: '16x16',

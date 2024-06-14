@@ -22,9 +22,12 @@ export const flattenObject = (
         const childKey = isArrayWithSingleValue ? '' : key;
         const currentKey = compact([parentKey, childKey]).join('.');
         // item[key] can be a primitive (string, number, boolean, null, undefined) or Object or Array
+        // @ts-expect-error upgrade typescript v5.1.6
         if (isObject(item[key])) {
+          // @ts-expect-error upgrade typescript v5.1.6
           flattenObject(item[key], acc, currentKey);
         } else {
+          // @ts-expect-error upgrade typescript v5.1.6
           acc[currentKey] = item[key];
         }
 

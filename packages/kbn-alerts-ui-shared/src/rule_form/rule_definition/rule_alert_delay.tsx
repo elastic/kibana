@@ -46,6 +46,7 @@ export const RuleAlertDelay = (props: RuleAlertDelayProps) => {
   return (
     <EuiFormRow
       fullWidth
+      // @ts-expect-error upgrade typescript v5.1.6
       isInvalid={errors.alertDelay?.length > 0}
       error={errors.alertDelay}
       data-test-subj="alertDelay"
@@ -58,6 +59,7 @@ export const RuleAlertDelay = (props: RuleAlertDelayProps) => {
         name="alertDelay"
         data-test-subj="alertDelayInput"
         prepend={[ALERT_DELAY_TITLE_PREFIX]}
+        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.alertDelay?.length > 0}
         append={ALERT_DELAY_TITLE_SUFFIX}
         onChange={onAlertDelayChange}

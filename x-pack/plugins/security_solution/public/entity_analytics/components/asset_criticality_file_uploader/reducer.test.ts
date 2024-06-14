@@ -118,6 +118,7 @@ describe('reducer', () => {
     const action: ReducerAction = { type: 'fileError', payload: { message } };
     const nextState = reducer(
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         step: 9999,
         isLoading: true,
         validatedFile: {
@@ -139,6 +140,7 @@ describe('reducer', () => {
 
   it('should handle "resetState" action', () => {
     const action: ReducerAction = { type: 'resetState' };
+    // @ts-expect-error upgrade typescript v5.1.6
     const nextState = reducer({ step: 9999, isLoading: true, validatedFile }, action);
 
     expect(nextState).toEqual(initialState);

@@ -23,7 +23,7 @@ export interface MlDatafeedsStatsResponse {
   count: number;
 }
 
-interface Results {
+export interface Results {
   [id: string]: {
     started?: estypes.MlStartDatafeedResponse['started'];
     stopped?: estypes.MlStopDatafeedResponse['stopped'];

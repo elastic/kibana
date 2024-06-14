@@ -799,7 +799,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 connector: {
                   id: 'jira',
                   name: 'Jira',
-                  // @ts-expect-error
                   type: ConnectorTypes.jira,
                   // @ts-expect-error
                   fields: { unsupported: 'value' },

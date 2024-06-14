@@ -13,10 +13,15 @@ export const mockXMLHttpRequest = (): {
   XMLHttpRequest: typeof window.XMLHttpRequest;
 } => {
   class MockXMLHttpRequest implements XMLHttpRequest {
+    // @ts-expect-error upgrade typescript v5.1.6
     DONE = 0;
+    // @ts-expect-error upgrade typescript v5.1.6
     HEADERS_RECEIVED = 0;
+    // @ts-expect-error upgrade typescript v5.1.6
     LOADING = 0;
+    // @ts-expect-error upgrade typescript v5.1.6
     OPENED = 0;
+    // @ts-expect-error upgrade typescript v5.1.6
     UNSENT = 0;
     abort = jest.fn();
     addEventListener = jest.fn();
@@ -52,6 +57,7 @@ export const mockXMLHttpRequest = (): {
   const xhr = new MockXMLHttpRequest();
 
   return {
+    // @ts-expect-error upgrade typescript v5.1.6
     xhr,
     XMLHttpRequest: class {
       constructor() {

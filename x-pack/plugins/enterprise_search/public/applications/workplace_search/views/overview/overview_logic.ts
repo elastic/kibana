@@ -42,48 +42,56 @@ export const OverviewLogic = kea<MakeLogicType<OverviewValues, OverviewActions>>
     hasUsers: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerData: (_, { hasUsers }) => hasUsers,
       },
     ],
     hasOrgSources: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerData: (_, { hasOrgSources }) => hasOrgSources,
       },
     ],
     isOldAccount: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerData: (_, { isOldAccount }) => isOldAccount,
       },
     ],
     sourcesCount: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerData: (_, { sourcesCount }) => sourcesCount,
       },
     ],
     pendingInvitationsCount: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerData: (_, { pendingInvitationsCount }) => pendingInvitationsCount,
       },
     ],
     accountsCount: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerData: (_, { accountsCount }) => accountsCount,
       },
     ],
     privateSourcesCount: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerData: (_, { privateSourcesCount }) => privateSourcesCount,
       },
     ],
     activityFeed: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerData: (_, { activityFeed }) => activityFeed,
       },
     ],

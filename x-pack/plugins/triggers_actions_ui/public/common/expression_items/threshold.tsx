@@ -104,6 +104,7 @@ export const ThresholdExpression = ({
           display={display === 'inline' ? 'inline' : 'columns'}
           isInvalid={
             (errors.threshold0 && errors.threshold0.length) ||
+            // @ts-expect-error upgrade typescript v5.1.6
             (errors.threshold1 && errors.threshold1.length) > 0
               ? true
               : false
@@ -150,14 +151,20 @@ export const ThresholdExpression = ({
                 ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiFormRow
-                    isInvalid={errors[`threshold${i}`]?.length > 0 || isNil(threshold[i])}
+                    isInvalid={
+                      // @ts-expect-error upgrade typescript v5.1.6
+                      errors[`threshold${i}`]?.length > 0 || isNil(threshold[i])
+                    }
                     error={errors[`threshold${i}`]}
                   >
                     <EuiFieldNumber
                       data-test-subj="alertThresholdInput"
                       min={0}
                       value={!threshold || threshold[i] === undefined ? '' : threshold[i]}
-                      isInvalid={errors[`threshold${i}`]?.length > 0 || isNil(threshold[i])}
+                      isInvalid={
+                        // @ts-expect-error upgrade typescript v5.1.6
+                        errors[`threshold${i}`]?.length > 0 || isNil(threshold[i])
+                      }
                       onChange={(e) => {
                         const { value } = e.target;
                         const thresholdVal = value !== '' ? parseFloat(value) : undefined;

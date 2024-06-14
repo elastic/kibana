@@ -29,6 +29,7 @@ export const ServerLogParamsFields: React.FunctionComponent<
     <EuiFormRow
       fullWidth
       error={errors.message as string[]}
+      // @ts-expect-error upgrade typescript v5.1.6
       isInvalid={errors.message.length > 0 && message !== undefined}
       label={i18n.translate(
         'xpack.stackConnectors.components.systemLogExample.logMessageFieldLabel',
@@ -39,6 +40,7 @@ export const ServerLogParamsFields: React.FunctionComponent<
     >
       <EuiTextArea
         fullWidth
+        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.message.length > 0 && message !== undefined}
         name={'message'}
         value={message || ''}

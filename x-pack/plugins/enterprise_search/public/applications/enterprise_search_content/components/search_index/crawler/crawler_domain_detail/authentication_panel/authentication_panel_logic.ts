@@ -57,11 +57,13 @@ export const AuthenticationPanelLogic = kea<
     headerContent: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         enableEditing: (_, { currentCrawlerAuth }) =>
           currentCrawlerAuth !== undefined && isRawCrawlerAuth(currentCrawlerAuth)
             ? currentCrawlerAuth.header
             : '',
         receiveDomainData: () => '',
+        // @ts-expect-error upgrade typescript v5.1.6
         setHeaderContent: (_, { headerContent }) => headerContent,
       },
     ],
@@ -77,36 +79,43 @@ export const AuthenticationPanelLogic = kea<
       false,
       {
         receiveDomainData: () => false,
+        // @ts-expect-error upgrade typescript v5.1.6
         setIsModalVisible: (_, { isModalVisible }) => isModalVisible,
       },
     ],
     password: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         enableEditing: (_, { currentCrawlerAuth }) =>
           currentCrawlerAuth !== undefined && isBasicCrawlerAuth(currentCrawlerAuth)
             ? currentCrawlerAuth.password
             : '',
         receiveDomainData: () => '',
+        // @ts-expect-error upgrade typescript v5.1.6
         setPassword: (_, { password }) => password,
       },
     ],
     selectedAuthOption: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         enableEditing: (_, { currentCrawlerAuth }) => currentCrawlerAuth?.type ?? 'basic',
         receiveDomainData: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         selectAuthOption: (_, { authType }) => authType,
       },
     ],
     username: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         enableEditing: (_, { currentCrawlerAuth }) =>
           currentCrawlerAuth !== undefined && isBasicCrawlerAuth(currentCrawlerAuth)
             ? currentCrawlerAuth.username
             : '',
         receiveDomainData: () => '',
+        // @ts-expect-error upgrade typescript v5.1.6
         setUsername: (_, { username }) => username,
       },
     ],

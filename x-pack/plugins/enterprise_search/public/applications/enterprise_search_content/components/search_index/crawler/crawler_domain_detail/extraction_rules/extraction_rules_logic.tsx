@@ -236,6 +236,7 @@ export const ExtractionRulesLogic = kea<
       {
         deleteExtractionRuleSuccess: () => null,
         hideDeleteModal: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         showDeleteModal: (_, { extractionRule }) => extractionRule,
       },
     ],
@@ -244,6 +245,7 @@ export const ExtractionRulesLogic = kea<
       {
         addSuccess: () => null,
         cancelEditExtractionRule: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         editExtractionRule: (_, { extractionRule }) => extractionRule,
         updateSuccess: () => null,
         updateExtractionRuleSuccess: () => null,
@@ -271,6 +273,7 @@ export const ExtractionRulesLogic = kea<
       {},
       {
         hideDeleteFieldModal: () => ({}),
+        // @ts-expect-error upgrade typescript v5.1.6
         showDeleteFieldModal: (_, { extractionRuleId, fieldRuleIndex }) => ({
           extractionRuleId,
           fieldRuleIndex,
@@ -282,6 +285,7 @@ export const ExtractionRulesLogic = kea<
       null,
       {
         closeEditRuleFlyout: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         openEditRuleFlyout: (_, { fieldRule }) => fieldRule ?? null,
       },
     ],
@@ -289,15 +293,19 @@ export const ExtractionRulesLogic = kea<
       true,
       {
         closeEditRuleFlyout: () => true,
+        // @ts-expect-error upgrade typescript v5.1.6
         openEditRuleFlyout: (_, { isNewRule }) => isNewRule,
       },
     ],
     updatedExtractionRules: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         addExtractionRuleSuccess: (_, { extraction_rules: extractionRules }) => extractionRules,
+        // @ts-expect-error upgrade typescript v5.1.6
         deleteExtractionRuleSuccess: (_, { extraction_rules: extractionRules }) => extractionRules,
         receiveDomainData: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         updateExtractionRuleSuccess: (_, { extraction_rules: extractionRules }) => extractionRules,
       },
     ],
