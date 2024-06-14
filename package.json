@@ -1020,7 +1020,7 @@
     "deepmerge": "^4.2.2",
     "del": "^6.1.0",
     "diff": "^5.1.0",
-    "elastic-apm-node": "^4.6.0",
+    "elastic-apm-node": "^4.7.0",
     "email-addresses": "^5.0.0",
     "eventsource-parser": "^1.1.1",
     "execa": "^5.1.1",
