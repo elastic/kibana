@@ -37,7 +37,6 @@ import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { AnnotationResourceInstaller } from './lib/annotations/resource_installer';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId } from '../common';
 import {
@@ -216,21 +215,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     core.uiSettings.register(uiSettings);
 
     if (config.annotations.enabled) {
-      core
-        .getStartServices()
-        .then(async ([coreStart]) => {
-          const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
-          const annotationResourceInstaller = new AnnotationResourceInstaller(
-            esInternalClient,
-            config.annotations.index,
-            this.logger
-          );
-          await annotationResourceInstaller.install();
-        })
-        .catch((error) => {
-          this.logger.error(`Failed to install the default Annotation resources: ${error}`);
-        });
-
       annotationsApiPromise = bootstrapAnnotations({
         core,
         index: config.annotations.index,
