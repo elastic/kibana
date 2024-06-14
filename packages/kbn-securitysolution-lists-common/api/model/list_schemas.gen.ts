@@ -25,7 +25,6 @@ import {
   ListMetadata,
   ListItemId,
   ListItemValue,
-  ListItemDescription,
   ListItemMetadata,
 } from './list_common.gen';
 
@@ -55,12 +54,10 @@ export const ListItem = z.object({
   type: ListType,
   list_id: ListId,
   value: ListItemValue.optional(),
-  description: ListItemDescription,
   serializer: z.string().optional(),
   deserializer: z.string().optional(),
   meta: ListItemMetadata.optional(),
   '@timestamp': z.string().datetime().optional(),
-  version: z.number().int().min(1),
   _version: z.string().optional(),
   tie_breaker_id: z.string(),
   created_at: z.string().datetime(),

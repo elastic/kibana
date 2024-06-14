@@ -67,7 +67,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
+                $ref: '../model/list_schemas.schema.yaml#/components/schemas/List'
         400:
           description: Invalid input data response
           content:
@@ -88,6 +88,12 @@ paths:
             application/json:
               schema:
                 $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        409:
+          description: List with specified list_id does not exist response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         500:
           description: Internal server error response
           content:

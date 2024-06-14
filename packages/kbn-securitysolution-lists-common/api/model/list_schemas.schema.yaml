@@ -68,8 +68,6 @@ components:
           $ref: './list_common.schema.yaml#/components/schemas/ListId'
         value:
           $ref: './list_common.schema.yaml#/components/schemas/ListItemValue'
-        description:
-          $ref: './list_common.schema.yaml#/components/schemas/ListItemDescription'
         serializer:
           type: string
         deserializer:
@@ -79,9 +77,6 @@ components:
         '@timestamp':
           type: string
           format: date-time
-        version:
-          type: integer
-          minimum: 1
         _version:
           type: string
         tie_breaker_id:
@@ -100,8 +95,6 @@ components:
         - id
         - type
         - list_id
-        - description
-        - version
         - tie_breaker_id
         - created_at
         - created_by

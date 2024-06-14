@@ -18,7 +18,7 @@
 import { z } from 'zod';
 
 import { ListId, ListType } from '../model/list_common.gen';
-import { ListItem } from '../model/list_schemas.gen';
+import { List } from '../model/list_schemas.gen';
 
 export type ImportListItemsRequestQuery = z.infer<typeof ImportListItemsRequestQuery>;
 export const ImportListItemsRequestQuery = z.object({
@@ -46,4 +46,4 @@ Required when importing a new list that is `list_id` is not specified.
 export type ImportListItemsRequestQueryInput = z.input<typeof ImportListItemsRequestQuery>;
 
 export type ImportListItemsResponse = z.infer<typeof ImportListItemsResponse>;
-export const ImportListItemsResponse = ListItem;
+export const ImportListItemsResponse = List;
