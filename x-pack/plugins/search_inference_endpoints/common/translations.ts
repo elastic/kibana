@@ -14,6 +14,10 @@ export const INFERENCE_ENDPOINT_LABEL = i18n.translate(
   }
 );
 
+export const CANCEL = i18n.translate('xpack.searchInferenceEndpoints.cancel', {
+  defaultMessage: 'Cancel',
+});
+
 export const MANAGE_INFERENCE_ENDPOINTS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.allInferenceEndpoints.description',
   {
@@ -95,13 +99,23 @@ export const FORBIDDEN_TO_ACCESS_TRAINED_MODELS = i18n.translate(
   }
 );
 
-export const COPY_ID_ACTION_LABEL = i18n.translate('xpack.searchInferenceEndpoints.copyID', {
-  defaultMessage: 'Copy endpoint ID',
-});
+export const COPY_ID_ACTION_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.copyID',
+  {
+    defaultMessage: 'Copy endpoint ID',
+  }
+);
 
 export const COPY_ID_ACTION_SUCCESS = i18n.translate(
-  'xpack.searchInferenceEndpoints.copyIDSuccess',
+  'xpack.searchInferenceEndpoints.actions.copyIDSuccess',
   {
     defaultMessage: 'Inference endpoint ID copied!',
+  }
+);
+
+export const DELETE_ACTION_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.deleteSingleEndpoint',
+  {
+    defaultMessage: 'Delete endpoint',
   }
 );

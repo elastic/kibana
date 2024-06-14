@@ -14,6 +14,8 @@ import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { InferenceEndpointUI } from './types';
 import { useCopyIDAction } from './actions/copy_id/use_copy_id_action';
+import { useDeleteAction } from './actions/delete/use_delete_action';
+import { ConfirmDeleteEndpointModal } from './confirm_delete_endpoint';
 
 const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }> = ({
   interfaceEndpoint,
@@ -21,9 +23,15 @@ const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const refreshCases = () => {};
 
   const copyIDAction = useCopyIDAction({
     onActionSuccess: closePopover,
+  });
+
+  const deleteAction = useDeleteAction({
+    onAction: closePopover,
+    onActionSuccess: refreshCases,
   });
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
@@ -33,9 +41,10 @@ const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }
     ];
 
     mainPanelItems.push(copyIDAction.getAction(interfaceEndpoint));
+    mainPanelItems.push(deleteAction.getAction(interfaceEndpoint));
 
     return panelsToBuild;
-  }, [copyIDAction, interfaceEndpoint]);
+  }, [copyIDAction, deleteAction, interfaceEndpoint]);
 
   return (
     <>
@@ -66,6 +75,12 @@ const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }
           data-test-subj={`inference-action-menu-${interfaceEndpoint.endpoint}`}
         />
       </EuiPopover>
+      {deleteAction.isModalVisible ? (
+        <ConfirmDeleteEndpointModal
+          onCancel={deleteAction.onCloseModal}
+          onConfirm={deleteAction.onConfirmDeletion}
+        />
+      ) : null}
     </>
   );
 };
