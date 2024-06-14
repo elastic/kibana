@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { PlainObject } from './plain_object';
 import { isPlainObjectType } from './is_plain_object_type';
 
 /**
@@ -19,9 +20,9 @@ import { isPlainObjectType } from './is_plain_object_type';
  *
  * @param document a document containing node to resolve by using the pointer
  * @param pointer a JSON Pointer
- * @returns resolved document node
+ * @returns resolved document node (it's always a JS object)
  */
-export function extractByJsonPointer(document: unknown, pointer: string): Record<string, unknown> {
+export function extractByJsonPointer(document: unknown, pointer: string): PlainObject {
   if (!pointer.startsWith('/')) {
     throw new Error('$ref pointer must start with a leading slash');
   }

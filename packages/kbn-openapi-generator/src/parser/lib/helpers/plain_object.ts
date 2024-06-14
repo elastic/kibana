@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { isPlainObject } from 'lodash';
-import type { PlainObject } from './plain_object';
-
-export function isPlainObjectType(maybeObj: unknown): maybeObj is PlainObject {
-  return isPlainObject(maybeObj);
-}
+export type PlainObject = Record<string, unknown>;
