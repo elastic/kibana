@@ -6,8 +6,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { Annotation } from '../../../common/annotations';
-import { useKibana } from '../../utils/kibana_react';
+import type { Annotation } from '../../../../common/annotations';
+import { useKibana } from '../../../utils/kibana_react';
 
 export function useFetchAnnotations({
   start,
@@ -25,18 +25,14 @@ export function useFetchAnnotations({
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
     queryKey: ['fetchAnnotationList', start, end, sloId, sloInstanceId],
     queryFn: async ({}) => {
-      try {
-        return await http.get<Annotation[]>('/api/observability/annotations/find', {
-          query: {
-            start,
-            end,
-            sloId,
-            sloInstanceId,
-          },
-        });
-      } catch (error) {
-        // ignore error
-      }
+      return await http.get<Annotation[]>('/api/observability/annotations/find', {
+        query: {
+          start,
+          end,
+          sloId,
+          sloInstanceId,
+        },
+      });
     },
     refetchOnWindowFocus: false,
     keepPreviousData: true,

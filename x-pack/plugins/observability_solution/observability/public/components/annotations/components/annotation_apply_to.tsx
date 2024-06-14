@@ -12,15 +12,15 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { SloSelector } from './slo_selector';
 import { Annotation } from '../../../../common/annotations';
 
-export function AnnotationMeta({ editAnnotation }: { editAnnotation?: Annotation | null }) {
+export function AnnotationApplyTo({ editAnnotation }: { editAnnotation?: Annotation | null }) {
   const { control } = useFormContext<Annotation>();
 
   return (
     <>
       <EuiTitle size="xxs">
         <h3>
-          {i18n.translate('xpack.observability.annotationForm.euiFormRow.meta', {
-            defaultMessage: 'Meta',
+          {i18n.translate('xpack.observability.annotationForm.euiFormRow.applyTo', {
+            defaultMessage: 'Apply to',
           })}
         </h3>
       </EuiTitle>

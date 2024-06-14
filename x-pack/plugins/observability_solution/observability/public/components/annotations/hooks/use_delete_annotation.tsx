@@ -12,8 +12,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { Annotation } from '../../../common/annotations';
-import { useKibana } from '../../utils/kibana_react';
+import { Annotation } from '../../../../common/annotations';
+import { useKibana } from '../../../utils/kibana_react';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 

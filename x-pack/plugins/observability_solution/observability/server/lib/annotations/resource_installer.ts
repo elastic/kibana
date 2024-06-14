@@ -36,7 +36,7 @@ export class AnnotationResourceInstaller {
 
       await this.ensureCommonResourcesInstalled();
     } catch (error) {
-      this.logger.error('Failed to install SLO common resources');
+      this.logger.error('Failed to install Annotation common resources');
     } finally {
       this.isInstalling = false;
       clearTimeout(installTimeout);

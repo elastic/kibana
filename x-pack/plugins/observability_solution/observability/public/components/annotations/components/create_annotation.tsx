@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -20,10 +20,7 @@ import {
 } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { Moment } from 'moment';
-import { useDeleteAnnotation } from '../use_delete_annotation';
-import { useUpdateAnnotation } from '../hooks/use_update_annotation';
 import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
-import { useCreateAnnotation } from '../use_create_annotation';
 import { AnnotationForm } from '../annotation_form';
 
 export type CreateAnnotationForm = Omit<CreateAnnotationParams, '@timestamp' | '@timestampEnd'> & {
@@ -32,48 +29,52 @@ export type CreateAnnotationForm = Omit<CreateAnnotationParams, '@timestamp' | '
 };
 
 export interface CreateAnnotationProps {
-  onCancel: () => void;
+  isLoading: boolean;
   onSave: () => void;
+  onCancel: () => void;
   isCreateAnnotationsOpen: boolean;
   editAnnotation?: Annotation | null;
+  updateAnnotation: (data: { annotation: Annotation }) => void;
+  createAnnotation: (data: { annotation: CreateAnnotationParams }) => void;
+  deleteAnnotation: (data: { annotations: Annotation[] }) => void;
 }
 
 export function CreateAnnotation({
   onSave,
   onCancel,
-  isCreateAnnotationsOpen,
+  isLoading,
   editAnnotation,
+  createAnnotation,
+  deleteAnnotation,
+  updateAnnotation,
+  isCreateAnnotationsOpen,
 }: CreateAnnotationProps) {
   const { trigger, getValues } = useFormContext<CreateAnnotationForm>();
-  const { mutateAsync: createAnnotation, isLoading: isSaving } = useCreateAnnotation();
-  const { mutateAsync: updateAnnotation, isLoading: isUpdating } = useUpdateAnnotation();
-  const { mutateAsync: deleteAnnotation, isLoading: isDeleting } = useDeleteAnnotation();
 
-  const isLoading = isSaving || isUpdating || isDeleting;
-
-  const onSubmit = async () => {
+  const onSubmit = useCallback(async () => {
     const isValid = await trigger();
     if (!isValid) return;
     const values = getValues();
     if (editAnnotation?.id) {
-      updateAnnotation({
+      await updateAnnotation({
         annotation: {
           ...values,
           id: editAnnotation.id,
           '@timestamp': values['@timestamp']?.toISOString()!,
           '@timestampEnd': values['@timestampEnd']?.toISOString(),
         },
-      }).then(() => onSave());
+      });
     } else {
-      createAnnotation({
+      await createAnnotation({
         annotation: {
           ...values,
           '@timestamp': values['@timestamp']?.toISOString()!,
           '@timestampEnd': values['@timestampEnd']?.toISOString(),
         },
-      }).then(() => onSave());
+      });
     }
-  };
+    onSave();
+  }, [trigger, getValues, editAnnotation?.id, onSave, updateAnnotation, createAnnotation]);
 
   const onDelete = async () => {
     if (editAnnotation?.id) {

@@ -9,12 +9,23 @@ import { EuiFormRow, EuiFormControlLayout, EuiFormLabel, EuiDatePicker } from '@
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import React from 'react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { CreateAnnotationForm } from './create_annotation';
+
+const getHelpfulDateFormat = (dateFormat: string) => {
+  if (dateFormat.endsWith('HH:mm:ss.SSS')) {
+    // we don't want microseconds in the date picker
+    return dateFormat.replace(':ss.SSS', ':ss');
+  }
+  return dateFormat;
+};
 
 export function AnnotationRange() {
   const { control, watch } = useFormContext<CreateAnnotationForm>();
 
   const timestampEnd = watch('@timestampEnd');
+  const dateFormatDefault = useUiSetting<string>('dateFormat');
+  const dateFormat = getHelpfulDateFormat(dateFormatDefault);
 
   if (timestampEnd) {
     return (
@@ -50,7 +61,7 @@ export function AnnotationRange() {
                     showTimeSelect
                     selected={field.value}
                     compressed
-                    dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+                    dateFormat={dateFormat}
                     {...rest}
                   />
                 );
@@ -83,7 +94,7 @@ export function AnnotationRange() {
                     showTimeSelect
                     selected={field.value}
                     compressed
-                    dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+                    dateFormat={dateFormat}
                     {...rest}
                   />
                 );
@@ -114,7 +125,7 @@ export function AnnotationRange() {
               showTimeSelect
               selected={field.value}
               compressed
-              dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+              dateFormat={dateFormat}
               {...rest}
             />
           );

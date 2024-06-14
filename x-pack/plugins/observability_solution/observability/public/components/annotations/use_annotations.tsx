@@ -10,11 +10,12 @@ import { FormProvider, useForm } from 'react-hook-form';
 import moment from 'moment';
 import useKey from 'react-use/lib/useKey';
 import { clone } from 'lodash';
+import { useEditAnnotationHelper } from './hooks/use_edit_annotation_helper';
 import type { CreateAnnotationForm } from './components/create_annotation';
 import { ObservabilityAnnotations, CreateAnnotation } from './components';
-import { useEditAnnotation } from './hooks/use_edit_annotation';
-import { useFetchAnnotations } from './use_fetch_annotations';
+import { useFetchAnnotations } from './hooks/use_fetch_annotations';
 import type { Annotation } from '../../../common/annotations';
+import { useAnnotationCRUDS } from './hooks/use_annotation_cruds';
 
 export const useAnnotations = ({
   domain,
@@ -53,7 +54,7 @@ export const useAnnotations = ({
     }
   );
 
-  useEditAnnotation({
+  useEditAnnotationHelper({
     reset,
     editAnnotation,
     setIsCreateOpen,
@@ -65,6 +66,7 @@ export const useAnnotations = ({
     setIsCreateOpen(false);
   }, [setValue]);
 
+  const { createAnnotation, updateAnnotation, deleteAnnotation, isLoading } = useAnnotationCRUDS();
   const AddAnnotationButton = useMemo(() => {
     if (!isCreateOpen) return () => null;
 
@@ -77,9 +79,23 @@ export const useAnnotations = ({
         onCancel={onCancel}
         editAnnotation={editAnnotation ?? selectedEditAnnotation}
         isCreateAnnotationsOpen={isCreateOpen}
+        createAnnotation={createAnnotation}
+        updateAnnotation={updateAnnotation}
+        deleteAnnotation={deleteAnnotation}
+        isLoading={isLoading}
       />
     );
-  }, [editAnnotation, isCreateOpen, onCancel, refetch, selectedEditAnnotation]);
+  }, [
+    createAnnotation,
+    deleteAnnotation,
+    editAnnotation,
+    isCreateOpen,
+    isLoading,
+    onCancel,
+    refetch,
+    selectedEditAnnotation,
+    updateAnnotation,
+  ]);
 
   return {
     annotations: data,

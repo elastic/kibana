@@ -13,18 +13,18 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { Annotation } from '../../../common/annotations';
-import { useKibana } from '../../utils/kibana_react';
+import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
+import { useKibana } from '../../../utils/kibana_react';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-interface EditAnnotationResponse {
+interface CreateAnnotationResponse {
   _id: string;
   _index: string;
   _source: Annotation;
 }
 
-export function useEditAnnotation() {
+export function useCreateAnnotation() {
   const {
     i18n: i18nStart,
     theme,
@@ -34,17 +34,15 @@ export function useEditAnnotation() {
   const services = useKibana().services;
 
   return useMutation<
-    EditAnnotationResponse,
+    CreateAnnotationResponse,
     ServerError,
-    { annotation: Annotation },
+    { annotation: CreateAnnotationParams },
     { previousData?: FindSLOResponse; queryKey?: QueryKey }
   >(
     ['createAnnotation'],
     ({ annotation }) => {
       const body = JSON.stringify(annotation);
-      return http.put<EditAnnotationResponse>(`/api/observability/annotation/${annotation.id}`, {
-        body,
-      });
+      return http.post<CreateAnnotationResponse>(`/api/observability/annotation`, { body });
     },
     {
       onSuccess: (data, { annotation }) => {
@@ -53,8 +51,8 @@ export function useEditAnnotation() {
             title: toMountPoint(
               <RedirectAppLinks coreStart={services} data-test-subj="observabilityMainContainer">
                 <FormattedMessage
-                  id="xpack.observability.annotation.edit.successNotification"
-                  defaultMessage="Successfully edit annotation {name}"
+                  id="xpack.observability.annotation.create.successNotification"
+                  defaultMessage="Successfully created annotation {name}"
                   values={{
                     name: annotation.message,
                   }}
@@ -73,8 +71,8 @@ export function useEditAnnotation() {
       },
       onError: (error, { annotation }, context) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate('xpack.observability.edit.annotation', {
-            defaultMessage: 'Something went wrong while editing annotation {message}',
+          title: i18n.translate('xpack.observability.create.annotation', {
+            defaultMessage: 'Something went wrong while creating annotation {message}',
             values: { message: annotation.message },
           }),
         });

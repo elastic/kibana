@@ -11,7 +11,7 @@ import { UseFormReset } from 'react-hook-form';
 import { Annotation } from '../../../../common/annotations';
 import { CreateAnnotationForm } from '../components/create_annotation';
 
-export const useEditAnnotation = ({
+export const useEditAnnotationHelper = ({
   reset,
   editAnnotation,
   setIsCreateOpen,

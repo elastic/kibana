@@ -19,10 +19,10 @@ import {
 } from '@elastic/eui';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { DatePicker } from './date_picker';
-import { useDeleteAnnotation } from '../../components/annotations/use_delete_annotation';
+import { useDeleteAnnotation } from '../../components/annotations/hooks/use_delete_annotation';
 import { AnnotationsListChart } from './annotations_list_chart';
 import { Annotation } from '../../../common/annotations';
-import { useFetchAnnotations } from '../../components/annotations/use_fetch_annotations';
+import { useFetchAnnotations } from '../../components/annotations/hooks/use_fetch_annotations';
 
 export function AnnotationsList() {
   const [selection, setSelection] = useState<Annotation[]>([]);
@@ -86,7 +86,7 @@ export function AnnotationsList() {
   };
   const pagination = {
     initialPageSize: 5,
-    pageSizeOptions: [3, 5, 8],
+    pageSizeOptions: [5, 10, 25, 50],
   };
   const selectionValue: EuiTableSelectionType<Annotation> = {
     selectable: (annot) => true,
@@ -123,7 +123,7 @@ export function AnnotationsList() {
       render: (tags: string[]) => <TagsList tags={tags} />,
     },
     {
-      name: META_LABEL,
+      name: APPLY_TO_LABEL,
       render: (annotation: Annotation) => {
         return (
           <EuiText size="s">
@@ -163,7 +163,9 @@ export function AnnotationsList() {
             setIsEditing={setIsEditing}
           />
         }
-        tableCaption="Demo of EuiInMemoryTable with uncontrolled selection"
+        tableCaption={i18n.translate('xpack.observability.annotationsTableCaption', {
+          defaultMessage: 'List of annotations for the selected time range.',
+        })}
         items={data ?? []}
         itemId="id"
         loading={isLoading}
@@ -179,7 +181,9 @@ export function AnnotationsList() {
 }
 
 const NAME_LABEL = i18n.translate('xpack.observability.nameLabel', { defaultMessage: 'Name' });
-const META_LABEL = i18n.translate('xpack.observability.metaLabel', { defaultMessage: 'Meta' });
+const APPLY_TO_LABEL = i18n.translate('xpack.observability.applyTo', {
+  defaultMessage: 'Apply to',
+});
 const EDIT_LABEL = i18n.translate('xpack.observability.editAnnotation', { defaultMessage: 'Edit' });
 
 const TAGS_LABEL = i18n.translate('xpack.observability.tagsAnnotations', {

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { CreateAnnotationForm } from './components/create_annotation';
-import { AnnotationMeta } from './components/annotation_meta';
+import { AnnotationApplyTo } from './components/annotation_apply_to';
 import { Annotation } from '../../../common/annotations';
 import { ComboBox, FieldText, Switch, TextArea } from './components/forward_refs';
 import { AnnotationRange } from './components/annotation_range';
@@ -116,7 +116,7 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
       <EuiHorizontalRule margin="s" />
       <AnnotationAppearance />
       <EuiHorizontalRule margin="s" />
-      <AnnotationMeta editAnnotation={editAnnotation} />
+      <AnnotationApplyTo editAnnotation={editAnnotation} />
     </EuiForm>
   );
 }
