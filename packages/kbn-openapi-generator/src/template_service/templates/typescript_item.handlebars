@@ -49,6 +49,7 @@ unknown
 {{~/inline~}}
 
 {{~#*inline "type_object"~}}
+  {{~#if (eq x-modify "required")}} Required< {{/if~}}
   {{~#if (eq x-modify "partial")}} Partial< {{/if~}}
   {
     {{#each properties}}
@@ -72,6 +73,7 @@ unknown
     {{~/if~}}
   }
   {{~#if (eq x-modify "partial")}} > {{/if~}}
+  {{~#if (eq x-modify "required")}} > {{/if~}}
 {{~/inline~}}
 
 {{~#*inline "type_string"~}}
