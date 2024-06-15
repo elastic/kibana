@@ -14,6 +14,7 @@ import React, { memo } from 'react';
 import type { AgentPolicy, Agent } from '../../common/types';
 import { useLink } from '../hooks';
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
+const MAX_WIDTH: CSSProperties = { maxWidth: "100%" };
 const NO_WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'nowrap' };
 
 export const AgentPolicySummaryLine = memo<{
@@ -28,7 +29,7 @@ export const AgentPolicySummaryLine = memo<{
   const revision = agent ? agent.policy_revision : policy.revision;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <EuiFlexGroup direction="column" gutterSize="xs" style={MAX_WIDTH}>
       <EuiFlexItem>
         <EuiFlexGroup
           direction={direction}
