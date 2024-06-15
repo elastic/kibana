@@ -33,6 +33,7 @@
     "optionalPlugins": [
       "cloud",
       "customIntegrations",
+      "embeddableEnhanced",
       "home",
       "savedObjectsTagging",
       "charts",
