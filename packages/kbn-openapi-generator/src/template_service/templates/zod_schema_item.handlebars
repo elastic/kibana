@@ -91,11 +91,8 @@ z.unknown()
       * {{{description}}} 
       */
       {{/if}}
-      {{#if (startsWithSpecialChar @key)}}
-        '{{@key}}': {{> zod_schema_item requiredBool=(includes ../required @key)}},
-      {{else}}
-        {{@key}}: {{> zod_schema_item requiredBool=(includes ../required @key)}},
-      {{/if}}
+      {{#if (startsWithSpecialChar @key)}}'{{@key}}'{{else}}{{@key}}{{/if}}:
+      {{~> zod_schema_item requiredBool=(includes ../required @key)~}},
     {{/each}}
   })
   {{~#if (eq additionalProperties false)}}.strict(){{/if~}}

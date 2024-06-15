@@ -58,11 +58,8 @@ unknown
       * {{{description}}} 
       */
       {{/if}}
-      {{#if (startsWithSpecialChar @key)}}
-        '{{@key}}'{{#unless (includes ../required @key)}}?{{/unless}}: {{> typescript_item }};
-      {{else}}
-        {{@key}}{{#unless (includes ../required @key)}}?{{/unless}}: {{> typescript_item }};
-      {{/if}}
+      {{#if (startsWithSpecialChar @key)}}'{{@key}}'{{else}}{{@key}}{{/if}}
+      {{~#unless (or (includes ../required @key) (defined default))}}?{{/unless~}}: {{> typescript_item }};
     {{/each}}
     {{~#if additionalProperties}}
       {{~#if (eq additionalProperties true)~}}
