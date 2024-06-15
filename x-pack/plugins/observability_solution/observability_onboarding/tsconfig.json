@@ -39,7 +39,9 @@
     "@kbn/analytics-client",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
-    "@kbn/discover-plugin"
+    "@kbn/discover-plugin",
+    "@kbn/utility-types",
+    "@kbn/spaces-plugin"
   ],
   "exclude": ["target/**/*"]
 }
