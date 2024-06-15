@@ -17,28 +17,28 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiButtonEmpty,
   EuiImage,
   EuiSkeletonRectangle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  SingleDatasetLocatorParams,
+  type SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from './progress_indicator';
 import { AccordionWithIcon } from './accordion_with_icon';
-import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import { type ObservabilityOnboardingContextValue } from '../../../plugin';
 import { EmptyPrompt } from './empty_prompt';
 import { isRegistryIntegration, isCustomIntegration } from './get_installed_integrations';
 import { CopyToClipboardButton } from './copy_to_clipboard_button';
+import { LocatorButtonEmpty } from './locator_button_empty';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   const {
-    services: { share, http },
+    services: { http },
   } = useKibana<ObservabilityOnboardingContextValue>();
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const command = data ? getAutoDetectCommand(data) : undefined;
@@ -50,9 +50,6 @@ export const AutoDetectPanel: FunctionComponent = () => {
 
   const registryIntegrations = installedIntegrations.filter(isRegistryIntegration);
   const customIntegrations = installedIntegrations.filter(isCustomIntegration);
-
-  const singleDatasetLocator =
-    share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
@@ -172,25 +169,18 @@ export const AutoDetectPanel: FunctionComponent = () => {
                           </EuiFlexItem>
                           <EuiFlexItem>
                             <div>
-                              <EuiButtonEmpty
-                                data-test-subj="observabilityOnboardingAutoDetectPanelExploreLogsButton"
-                                onClick={() => {
-                                  singleDatasetLocator?.navigate({
-                                    dataset: integration.pkgName,
-                                  });
+                              <LocatorButtonEmpty<SingleDatasetLocatorParams>
+                                locatorId={SINGLE_DATASET_LOCATOR_ID}
+                                params={{
+                                  integration: integration.pkgName,
+                                  dataset: `${integration.pkgName}.${integration.pkgName}`,
                                 }}
+                                target="_blank"
                                 isDisabled={status !== 'dataReceived'}
                                 flush="both"
-                                size="s"
                               >
-                                {i18n.translate(
-                                  'xpack.observability_onboarding.autoDetectPanel.exploreLogsButtonEmptyLabel',
-                                  {
-                                    defaultMessage: 'Explore {pkgName} logs',
-                                    values: { pkgName: integration.pkgName },
-                                  }
-                                )}
-                              </EuiButtonEmpty>
+                                {integration.pkgName}
+                              </LocatorButtonEmpty>
                             </div>
                           </EuiFlexItem>
                         </EuiFlexGroup>
@@ -210,20 +200,20 @@ export const AutoDetectPanel: FunctionComponent = () => {
                         <ul>
                           {customIntegrations.map((integration) => (
                             <li key={integration.pkgName}>
-                              <EuiButtonEmpty
-                                data-test-subj="observabilityOnboardingAutoDetectPanelButton"
-                                iconType="document"
-                                onClick={() => {
-                                  singleDatasetLocator?.navigate({
-                                    dataset: integration.pkgName,
-                                  });
+                              <LocatorButtonEmpty<SingleDatasetLocatorParams>
+                                locatorId={SINGLE_DATASET_LOCATOR_ID}
+                                params={{
+                                  integration: integration.pkgName,
+                                  dataset: integration.pkgName,
                                 }}
+                                target="_blank"
+                                iconType="document"
                                 isDisabled={status !== 'dataReceived'}
                                 flush="both"
                                 size="s"
                               >
-                                {integration?.logFilePaths?.[0] ?? integration.pkgName}
-                              </EuiButtonEmpty>
+                                {integration.pkgName}
+                              </LocatorButtonEmpty>
                             </li>
                           ))}
                         </ul>

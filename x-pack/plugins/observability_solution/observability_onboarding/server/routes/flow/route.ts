@@ -219,6 +219,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
     }
 
     const fleetPluginStart = await plugins.fleet.start();
+    const securityPluginStart = await plugins.security.start();
 
     const [onboardingFlow, ingestApiKey, installApiKey, elasticAgentVersion] = await Promise.all([
       saveObservabilityOnboardingFlow({
@@ -230,9 +231,13 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
         },
       }),
       createShipperApiKey(client.asCurrentUser, name),
-      createInstallApiKey(client.asCurrentUser, name),
+      securityPluginStart.authc.apiKeys.create(request, createInstallApiKey(name)),
       getAgentVersion(fleetPluginStart, kibanaVersion),
     ]);
+
+    if (!installApiKey) {
+      throw Boom.notFound('License does not allow API key creation.');
+    }
 
     const kibanaUrl = getKibanaUrl(core.setup, plugins.cloud?.setup);
     const scriptDownloadUrl = new URL(
