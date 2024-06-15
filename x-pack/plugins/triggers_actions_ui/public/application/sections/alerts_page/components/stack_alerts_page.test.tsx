@@ -12,6 +12,9 @@ import { StackAlertsPage } from './stack_alerts_page';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { ruleTypesIndex } from '../../../mock/rule_types_index';
+import { useEffect } from 'react';
+import { UrlSyncedAlertsSearchBarProps } from '../../alerts_search_bar/url_synced_alerts_search_bar';
+import { BoolQuery } from '@kbn/es-query';
 
 jest.mock('../../../../common/get_experimental_features');
 jest.mock('../../../../common/lib/kibana');
@@ -20,10 +23,16 @@ jest.mock('../../../hooks/use_load_rule_types_query', () => ({
   useLoadRuleTypesQuery: jest.fn(),
 }));
 
+const UrlSyncedAlertsSearchBar = ({ onEsQueryChange }: Partial<UrlSyncedAlertsSearchBarProps>) => {
+  useEffect(() => {
+    // Simulate the initial query change
+    onEsQueryChange!({ bool: {} } as { bool: BoolQuery });
+  }, [onEsQueryChange]);
+  return <div data-test-subj="urlSyncedAlertsSearchBar">{'UrlSyncedAlertsSearchBar'}</div>;
+};
+
 jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => ({
-  UrlSyncedAlertsSearchBar: () => (
-    <div data-test-subj="urlSyncedAlertsSearchBar">{'UrlSyncedAlertsSearchBar'}</div>
-  ),
+  UrlSyncedAlertsSearchBar,
 }));
 
 const mockAlertsTable = jest.fn(() => <div data-test-subj="alertsTable">{'Alerts table'}</div>);
@@ -50,9 +59,11 @@ describe('StackAlertsPage', () => {
 
     await waitFor(() => {
       expect(getByTestId('stackAlertsPageContent')).toBeInTheDocument();
-      expect(getByTestId('alertsTable')).toBeInTheDocument();
       expect(getByTestId('urlSyncedAlertsSearchBar')).toBeInTheDocument();
     });
+
+    // The table appears only after the query is populated by the KQL bar and filter controls
+    await waitFor(() => expect(getByTestId('alertsTable')).toBeInTheDocument());
   });
 
   it('shows the missing permission prompt if the user is not allowed to read any rules', async () => {

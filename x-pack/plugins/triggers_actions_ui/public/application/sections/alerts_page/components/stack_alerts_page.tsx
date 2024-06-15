@@ -75,7 +75,7 @@ const PageContent = () => {
     setBreadcrumbs,
     alertsTableConfigurationRegistry,
   } = useKibana().services;
-  const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
+  const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
   const [activeFeatureFilters, setActiveFeatureFilters] = useState<AlertConsumers[]>([]);
 
   const ruleStats = useRuleStats();
@@ -190,20 +190,24 @@ const PageContent = () => {
             onActiveFeatureFiltersChange={setActiveFeatureFilters}
             onEsQueryChange={setEsQuery}
           />
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <AlertsTable
-              // Here we force a rerender when switching feature ids to prevent the data grid
-              // columns alignment from breaking after a change in the number of columns
-              key={featureIds.join()}
-              id="stack-alerts-page-table"
-              configurationId={tableConfigurationId}
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              featureIds={featureIds}
-              query={esQuery}
-              showAlertStatusWithFlapping
-              pageSize={20}
-            />
-          </Suspense>
+          {esQuery ? (
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <AlertsTable
+                // Here we force a rerender when switching feature ids to prevent the data grid
+                // columns alignment from breaking after a change in the number of columns
+                key={featureIds.join()}
+                id="stack-alerts-page-table"
+                configurationId={tableConfigurationId}
+                alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+                featureIds={featureIds}
+                query={esQuery}
+                showAlertStatusWithFlapping
+                pageSize={20}
+              />
+            </Suspense>
+          ) : (
+            <EuiLoadingSpinner />
+          )}
         </EuiFlexGroup>
       )}
     </>
