@@ -388,13 +388,12 @@ export function InvestigateSloDetail({
 
   useEffect(() => {
     if (!slo) {
-      blocks.publish([]);
       return;
     }
 
     const queryForSlo = getQueryAndFiltersFromSlo(slo);
 
-    blocks.publish([
+    return blocks.publish([
       ...(queryForSlo
         ? [
             {
