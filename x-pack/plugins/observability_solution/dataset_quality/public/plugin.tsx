@@ -6,7 +6,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { callDatasetQualityApi, createCallDatasetQualityApi } from '../common/rest';
 import { createDatasetQuality } from './components/dataset_quality';
 import { createDatasetQualityControllerLazyFactory } from './controller/lazy_create_controller';
 import { DataStreamsStatsService } from './services/data_streams_stats';
@@ -36,8 +35,6 @@ export class DatasetQualityPlugin
       http: core.http,
     }).client;
 
-    createCallDatasetQualityApi(core);
-
     const DatasetQuality = createDatasetQuality({
       core,
       plugins,
@@ -50,10 +47,6 @@ export class DatasetQualityPlugin
       dataStreamDetailsClient,
     });
 
-    return {
-      DatasetQuality,
-      createDatasetQualityController,
-      datasetQualityAPIClient: callDatasetQualityApi,
-    };
+    return { DatasetQuality, createDatasetQualityController };
   }
 }

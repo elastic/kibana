@@ -34,8 +34,7 @@
       "usageCollection",
       "taskManager",
       "serverless",
-      "noDataPage",
-      "observabilityAIAssistant"
+      "noDataPage"
     ],
     "requiredBundles": [
       "kibanaReact",

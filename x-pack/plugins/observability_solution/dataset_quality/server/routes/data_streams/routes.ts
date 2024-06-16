@@ -28,7 +28,7 @@ import { getDegradedFields } from './get_degraded_fields';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
-  params: t.partial({
+  params: t.type({
     query: t.intersection([
       typeRt,
       t.partial({
@@ -52,7 +52,7 @@ const statsRoute = createDatasetQualityServerRoute({
 
     const { items, datasetUserPrivileges } = await getDataStreams({
       esClient,
-      ...(params?.query || {}),
+      ...params.query,
       uncategorisedOnly: false,
     });
 

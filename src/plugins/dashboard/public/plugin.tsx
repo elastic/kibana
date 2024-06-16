@@ -52,10 +52,6 @@ import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import type {
-  ObservabilityAIAssistantPublicSetup,
-  ObservabilityAIAssistantPublicStart,
-} from '@kbn/observability-ai-assistant-plugin/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -92,7 +88,6 @@ export interface DashboardSetupDependencies {
   uiActions: UiActionsSetup;
   urlForwarding: UrlForwardingSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
 
 export interface DashboardStartDependencies {
@@ -116,7 +111,6 @@ export interface DashboardStartDependencies {
   customBranding: CustomBrandingStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 export interface DashboardSetup {

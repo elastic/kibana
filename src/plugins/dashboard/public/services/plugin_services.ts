@@ -47,7 +47,6 @@ import { serverlessServiceFactory } from './serverless/serverless_service';
 import { noDataPageServiceFactory } from './no_data_page/no_data_page_service';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions_service';
 import { userProfileServiceFactory } from './user_profile/user_profile_service';
-import { observabilityAIAssistantServiceFactory } from './observability_ai_assistant/observability_ai_assistant_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
@@ -95,7 +94,6 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
   uiActions: new PluginServiceProvider(uiActionsServiceFactory),
   userProfile: new PluginServiceProvider(userProfileServiceFactory),
-  observabilityAIAssistant: new PluginServiceProvider(observabilityAIAssistantServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();

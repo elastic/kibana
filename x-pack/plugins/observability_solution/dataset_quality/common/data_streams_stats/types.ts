@@ -4,17 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UnionToIntersection } from '@kbn/utility-types';
+
 import { APIClientRequestParamsOf, APIReturnType } from '../rest';
 
 export type GetDataStreamsStatsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/stats`>['params'];
-export type GetDataStreamsStatsQuery = Exclude<GetDataStreamsStatsParams, undefined> extends {
-  query?: infer TQuery;
-}
-  ? UnionToIntersection<TQuery | {}>
-  : never;
-
+export type GetDataStreamsStatsQuery = GetDataStreamsStatsParams['query'];
 export type GetDataStreamsStatsResponse =
   APIReturnType<`GET /internal/dataset_quality/data_streams/stats`>;
 export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0];
