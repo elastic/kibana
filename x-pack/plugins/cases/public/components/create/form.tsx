@@ -6,15 +6,13 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSteps,
-  useEuiTheme,
-  logicalCSS,
+  EuiFormRow,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -58,15 +56,6 @@ import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_
 import { getConfigurationByOwner } from '../../containers/configure/utils';
 import { CustomFields } from '../case_form_fields/custom_fields';
 import type { CreateCaseFormSchema } from './schema';
-
-const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>
-  big
-    ? css`
-        ${logicalCSS('margin-top', euiTheme.size.xl)};
-      `
-    : css`
-        ${logicalCSS('margin-top', euiTheme.size.base)};
-      `;
 
 export interface CreateCaseFormFieldsProps {
   configurations: CasesConfigurationUI[];
@@ -142,7 +131,6 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
 
     const { reset, updateFieldValues, isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
-    const { euiTheme } = useEuiTheme();
     const availableOwners = useAvailableCasesOwners();
     const canShowCaseSolutionSelection = !owner.length && availableOwners.length > 1;
 
@@ -159,13 +147,11 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       () => ({
         title: i18n.STEP_ONE_TITLE,
         children: (
-          <div>
-            <TemplateSelector
-              isLoading={isSubmitting || isLoading}
-              templates={configuration.templates}
-              onTemplateChange={onTemplateChange}
-            />
-          </div>
+          <TemplateSelector
+            isLoading={isSubmitting || isLoading}
+            templates={configuration.templates}
+            onTemplateChange={onTemplateChange}
+          />
         ),
       }),
       [configuration.templates, isLoading, isSubmitting, onTemplateChange]
@@ -177,45 +163,27 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         children: (
           <>
             <Title isLoading={isSubmitting} autoFocus={true} />
-            {caseAssignmentAuthorized ? (
-              <div css={containerCss(euiTheme)}>
-                <Assignees isLoading={isSubmitting} />
-              </div>
-            ) : null}
-            <div css={containerCss(euiTheme)}>
-              <Tags isLoading={isSubmitting} />
-            </div>
-            <div css={containerCss(euiTheme)}>
-              <Category isLoading={isSubmitting} />
-            </div>
-            <div css={containerCss(euiTheme)}>
-              <Severity isLoading={isSubmitting} />
-            </div>
+            {caseAssignmentAuthorized ? <Assignees isLoading={isSubmitting} /> : null}
+            <Tags isLoading={isSubmitting} />
+            <Category isLoading={isSubmitting} />
+            <Severity isLoading={isSubmitting} />
             {canShowCaseSolutionSelection && (
-              <div css={containerCss(euiTheme, true)}>
-                <CreateCaseOwnerSelector
-                  availableOwners={availableOwners}
-                  isLoading={isSubmitting || isLoading}
-                />
-              </div>
-            )}
-            <div css={containerCss(euiTheme, true)}>
-              <Description isLoading={isSubmitting} draftStorageKey={draftStorageKey} />
-            </div>
-            <div css={containerCss(euiTheme)}>
-              <CustomFields
+              <CreateCaseOwnerSelector
+                availableOwners={availableOwners}
                 isLoading={isSubmitting || isLoading}
-                configurationCustomFields={configuration.customFields}
               />
-            </div>
-            <div css={containerCss(euiTheme)} />
+            )}
+            <Description isLoading={isSubmitting} draftStorageKey={draftStorageKey} />
+            <CustomFields
+              isLoading={isSubmitting || isLoading}
+              configurationCustomFields={configuration.customFields}
+            />
           </>
         ),
       }),
       [
         isSubmitting,
         caseAssignmentAuthorized,
-        euiTheme,
         canShowCaseSolutionSelection,
         availableOwners,
         isLoading,
@@ -227,11 +195,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     const thirdStep = useMemo(
       () => ({
         title: i18n.STEP_THREE_TITLE,
-        children: (
-          <div>
-            <SyncAlertsToggle isLoading={isSubmitting} />
-          </div>
-        ),
+        children: <SyncAlertsToggle isLoading={isSubmitting} />,
       }),
       [isSubmitting]
     );
@@ -240,22 +204,33 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       () => ({
         title: i18n.STEP_FOUR_TITLE,
         children: (
-          <div>
-            <Connector
-              connectors={connectors}
-              isLoadingConnectors={isLoading}
-              isLoading={isSubmitting}
-              configurationConnector={configuration.connector}
-            />
-          </div>
+          <Connector
+            connectors={connectors}
+            isLoadingConnectors={isLoading}
+            isLoading={isSubmitting}
+            configurationConnector={configuration.connector}
+          />
         ),
       }),
       [configuration.connector, connectors, isLoading, isSubmitting]
     );
 
     const allSteps = useMemo(
-      () => [firstStep, secondStep, ...(isSyncAlertsEnabled ? [thirdStep] : []), fourthStep],
-      [firstStep, isSyncAlertsEnabled, secondStep, thirdStep, fourthStep]
+      () => [
+        ...(canShowCaseSolutionSelection ? [firstStep] : []),
+        firstStep,
+        secondStep,
+        ...(isSyncAlertsEnabled ? [thirdStep] : []),
+        fourthStep,
+      ],
+      [
+        canShowCaseSolutionSelection,
+        firstStep,
+        secondStep,
+        isSyncAlertsEnabled,
+        thirdStep,
+        fourthStep,
+      ]
     );
 
     return (
@@ -280,7 +255,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           />
         ) : (
           <>
-            {firstStep.children}
+            {!canShowCaseSolutionSelection ? firstStep.children : null}
             {secondStep.children}
             {isSyncAlertsEnabled && thirdStep.children}
             {fourthStep.children}
@@ -347,7 +322,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
             draftStorageKey={draftStorageKey}
             configurations={configurations}
           />
-          <div>
+          <EuiFormRow fullWidth>
             <EuiFlexGroup
               alignItems="center"
               justifyContent="flexEnd"
@@ -375,7 +350,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
                 <SubmitCaseButton />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </div>
+          </EuiFormRow>
           <InsertTimeline fieldName={descriptionFieldName} />
         </FormContext>
       </CasesTimelineIntegrationProvider>

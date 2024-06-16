@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiFormRow } from '@elastic/eui';
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
@@ -68,26 +68,28 @@ const ConnectorComponent: React.FC<Props> = ({
   }
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <UseField
-          path="connectorId"
-          config={connectorIdConfig}
-          component={ConnectorSelector}
-          defaultValue={defaultConnectorId}
-          componentProps={{
-            connectors,
-            dataTestSubj: 'caseConnectors',
-            disabled: isLoading || isLoadingConnectors,
-            idAria: 'caseConnectors',
-            isLoading: isLoading || isLoadingConnectors,
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ConnectorFieldsForm connector={connector} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFormRow fullWidth>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UseField
+            path="connectorId"
+            config={connectorIdConfig}
+            component={ConnectorSelector}
+            defaultValue={defaultConnectorId}
+            componentProps={{
+              connectors,
+              dataTestSubj: 'caseConnectors',
+              disabled: isLoading || isLoadingConnectors,
+              idAria: 'caseConnectors',
+              isLoading: isLoading || isLoadingConnectors,
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ConnectorFieldsForm connector={connector} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
   );
 };
 

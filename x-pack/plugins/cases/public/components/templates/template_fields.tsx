@@ -16,7 +16,7 @@ const TemplateFieldsComponent: React.FC<{
   isLoading: boolean;
   configurationTemplateTags: string[];
 }> = ({ isLoading = false, configurationTemplateTags }) => (
-  <EuiFlexGroup data-test-subj="template-fields" direction="column">
+  <EuiFlexGroup data-test-subj="template-fields" direction="column" gutterSize="none">
     <UseField
       path="name"
       component={TextField}

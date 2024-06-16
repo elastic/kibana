@@ -31,7 +31,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
   const { caseAssignmentAuthorized } = useCasesFeatures();
 
   return (
-    <EuiFlexGroup data-test-subj="case-form-fields" direction="column">
+    <EuiFlexGroup data-test-subj="case-form-fields" direction="column" gutterSize="none">
       <Title isLoading={isLoading} />
       {caseAssignmentAuthorized ? <Assignees isLoading={isLoading} /> : null}
       <Tags isLoading={isLoading} />

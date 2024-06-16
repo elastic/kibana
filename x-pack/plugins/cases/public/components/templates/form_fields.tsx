@@ -74,14 +74,12 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
     () => ({
       title: i18n.CONNECTOR_FIELDS,
       children: (
-        <div>
-          <Connector
-            connectors={connectors}
-            isLoading={isSubmitting}
-            isLoadingConnectors={false}
-            configurationConnector={connector}
-          />
-        </div>
+        <Connector
+          connectors={connectors}
+          isLoading={isSubmitting}
+          isLoadingConnectors={false}
+          configurationConnector={connector}
+        />
       ),
     }),
     [connectors, isSubmitting, connector]

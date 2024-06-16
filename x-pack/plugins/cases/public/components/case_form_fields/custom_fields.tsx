@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { sortBy } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiFormRow } from '@elastic/eui';
 
 import type { CasesConfigurationUI } from '../../../common/ui';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
@@ -52,13 +52,15 @@ const CustomFieldsComponent: React.FC<Props> = ({
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiText size="m">
-        <h3>{i18n.ADDITIONAL_FIELDS}</h3>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <EuiFlexItem data-test-subj="caseCustomFields">{customFieldsComponents}</EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFormRow fullWidth>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiText size="m">
+          <h3>{i18n.ADDITIONAL_FIELDS}</h3>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiFlexItem data-test-subj="caseCustomFields">{customFieldsComponents}</EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
   );
 };
 
