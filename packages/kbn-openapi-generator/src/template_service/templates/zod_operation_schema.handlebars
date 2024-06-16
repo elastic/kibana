@@ -7,8 +7,9 @@
 
  {{> disclaimer}}
 
-import { z } from "zod";
-import { requiredOptional, isValidDateMath, ArrayFromString, BooleanFromString } from "@kbn/zod-helpers"
+import type { ZodTypeDef } from 'zod';
+import { z } from 'zod';
+import { requiredOptional, isValidDateMath, ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 {{#each imports}}
 import { 
@@ -26,8 +27,9 @@ import {
   */
 {{/if}}
 {{#if (isCircularSchema @key)}}
-export type {{@key}} = {{> typescript_item}};
-export const {{@key}}: z.ZodType<{{@key}}> = {{> zod_schema_item }};
+export type {{@key}} = {{> ts_type}};
+export type {{@key}}Input = {{> ts_input_type }};
+export const {{@key}}: z.ZodType<{{@key}}, ZodTypeDef, {{@key}}Input> = {{> zod_schema_item }};
 {{else}}
 export type {{@key}} = z.infer<typeof {{@key}}>;
 export const {{@key}} = {{> zod_schema_item}};

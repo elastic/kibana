@@ -3,27 +3,27 @@
 {{~/if~}}
 
 {{~#if $ref~}}
-  {{referenceName}}
+  {{referenceName}}Input
   {{~#if nullable}} | null {{/if~}}
 {{~/if~}}
 
 {{~#if allOf~}}
   {{~#each allOf~}}
-    {{~> typescript_item ~}}
+    {{~> ts_input_type ~}}
     {{~#unless @last~}}&{{~/unless~}} 
   {{~/each~}}
 {{~/if~}}
 
 {{~#if anyOf~}}
   {{~#each anyOf~}}
-    {{~> typescript_item ~}}
+    {{~> ts_input_type ~}}
     {{~#unless @last~}}|{{~/unless~}} 
   {{~/each~}}
 {{~/if~}}
 
 {{~#if oneOf~}}
   {{~#each oneOf~}}
-    {{~> typescript_item ~}}
+    {{~> ts_input_type ~}}
     {{~#unless @last~}}|{{~/unless~}} 
   {{~/each~}}
 {{~/if~}}
@@ -33,7 +33,7 @@ unknown
 {{/if}}
 
 {{~#*inline "type_array"~}}
-  ({{~> typescript_item items ~}})[]
+  ({{~> ts_input_type items ~}})[]
 {{~/inline~}}
 
 {{~#*inline "type_boolean"~}}
@@ -59,13 +59,13 @@ unknown
       */
       {{/if}}
       {{#if (startsWithSpecialChar @key)}}'{{@key}}'{{else}}{{@key}}{{/if}}
-      {{~#unless (or (includes ../required @key) (defined default))}}?{{/unless~}}: {{> typescript_item }};
+      {{~#unless (includes ../required @key)}}?{{/unless~}}: {{> ts_input_type }};
     {{/each}}
     {{~#if additionalProperties}}
       {{~#if (eq additionalProperties true)~}}
         [key: string]: unknown;
       {{~else~}}
-        [key: string]: {{> typescript_item additionalProperties}};
+        [key: string]: {{> ts_input_type additionalProperties}};
       {{~/if~}}
     {{~/if~}}
   }
