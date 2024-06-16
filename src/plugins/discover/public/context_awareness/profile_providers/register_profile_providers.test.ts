@@ -19,7 +19,7 @@ import {
 describe('registerEnabledProfileProviders', () => {
   it('should register enabled profile providers', async () => {
     const { rootProfileServiceMock, rootProfileProviderMock } = createContextAwarenessMocks({
-      registerProviders: false,
+      shouldRegisterProviders: false,
     });
     registerEnabledProfileProviders({
       profileService: rootProfileServiceMock,
@@ -32,7 +32,7 @@ describe('registerEnabledProfileProviders', () => {
 
   it('should not register disabled profile providers', async () => {
     const { rootProfileServiceMock, rootProfileProviderMock } = createContextAwarenessMocks({
-      registerProviders: false,
+      shouldRegisterProviders: false,
     });
     registerEnabledProfileProviders({
       profileService: rootProfileServiceMock,
@@ -48,7 +48,7 @@ describe('registerProfileProviders', () => {
   it('should register enabled profile providers', async () => {
     const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
       createContextAwarenessMocks({
-        registerProviders: false,
+        shouldRegisterProviders: false,
       });
     registerProfileProviders({
       rootProfileService: rootProfileServiceMock,
@@ -84,7 +84,7 @@ describe('registerProfileProviders', () => {
   it('should not register disabled profile providers', async () => {
     const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
       createContextAwarenessMocks({
-        registerProviders: false,
+        shouldRegisterProviders: false,
       });
     registerProfileProviders({
       rootProfileService: rootProfileServiceMock,

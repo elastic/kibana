@@ -22,8 +22,8 @@ import {
 import { ProfilesManager } from '../profiles_manager';
 
 export const createContextAwarenessMocks = ({
-  registerProviders = true,
-}: { registerProviders?: boolean } = {}) => {
+  shouldRegisterProviders = true,
+}: { shouldRegisterProviders?: boolean } = {}) => {
   const rootProfileProviderMock: RootProfileProvider = {
     profileId: 'root-profile',
     profile: {
@@ -79,7 +79,7 @@ export const createContextAwarenessMocks = ({
   const dataSourceProfileServiceMock = new DataSourceProfileService();
   const documentProfileServiceMock = new DocumentProfileService();
 
-  if (registerProviders) {
+  if (shouldRegisterProviders) {
     rootProfileServiceMock.registerProvider(rootProfileProviderMock);
     dataSourceProfileServiceMock.registerProvider(dataSourceProfileProviderMock);
     documentProfileServiceMock.registerProvider(documentProfileProviderMock);
