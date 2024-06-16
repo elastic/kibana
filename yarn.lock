@@ -1431,11 +1431,6 @@
   resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-1.2.1.tgz#f8b1fbbe79726a4eafa9772ddde147b57f85d177"
   integrity sha512-cwwGvLGqvoaOZmoP5+i4v/rbW+rHkguvTehuZyM2p/xpmaNSdT2h3B7kHw33aiffv35t1XrYHIkdJSEkSEMJuA==
 
-"@butchmayhew/playwright-json-summary-reporter@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@butchmayhew/playwright-json-summary-reporter/-/playwright-json-summary-reporter-1.1.1.tgz#4052c1c33ef132e343a3c36b0de0c86bc80a4395"
-  integrity sha512-qEvbXJ0735Uk6A32pIiD4KPRTHymgKwK2dd44kHH3R0u7W42VekyOHqOORbHc3U0ifyDAv7V6H/93cnr4GU35A==
-
 "@cbor-extract/cbor-extract-darwin-arm64@2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@cbor-extract/cbor-extract-darwin-arm64/-/cbor-extract-darwin-arm64-2.0.0.tgz#cf0667e4c22111c9d45e16c29964892b12460a76"
@@ -14990,11 +14985,6 @@ cypress-data-session@^2.8.0:
     debug "^4.3.2"
     simple-sha256 "^1.1.0"
 
-cypress-each@^1.14.0:
-  version "1.14.0"
-  resolved "https://registry.yarnpkg.com/cypress-each/-/cypress-each-1.14.0.tgz#dcaf569b74ac93374c1f55f4672eb5185c38f22a"
-  integrity sha512-mUpF5KSSBy0kQaxYPLFswHceYoUMpXWRAJJ2LrcuHu1Vp5lgMw96lLtpDsNGID13FQhBfPSW6FmYBBCQqdJRBg==
-
 cypress-file-upload@^5.0.8:
   version "5.0.8"
   resolved "https://registry.yarnpkg.com/cypress-file-upload/-/cypress-file-upload-5.0.8.tgz#d8824cbeaab798e44be8009769f9a6c9daa1b4a1"
@@ -20672,11 +20662,6 @@ jake@^10.8.5:
     chalk "^4.0.2"
     filelist "^1.0.1"
     minimatch "^3.0.4"
-
-javascript-stringify@^2.0.1:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/javascript-stringify/-/javascript-stringify-2.1.0.tgz#27c76539be14d8bd128219a2d731b09337904e79"
-  integrity sha512-JVAfqNPTvNq3sB/VHQJAFxN/sPgKnsKrCwyRt15zwNCdrMMJDdcEOdubuy+DuJYYdm0ox1J4uzEuYKkN+9yhVg==
 
 jest-canvas-mock@^2.5.2:
   version "2.5.2"
