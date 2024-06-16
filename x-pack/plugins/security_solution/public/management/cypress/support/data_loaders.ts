@@ -145,7 +145,7 @@ export const dataLoaders = (
   // Env. variable is set by `cypress_serverless.config.ts`
   const isServerless = config.env.IS_SERVERLESS;
   const isCloudServerless = Boolean(config.env.CLOUD_SERVERLESS);
-  const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
+  const stackServicesPromise = setupStackServicesUsingCypressConfig(config.env);
   const roleAndUserLoaderPromise: Promise<TestRoleAndUserLoader> = stackServicesPromise.then(
     ({ kbnClient, log }) => {
       return new TestRoleAndUserLoader(kbnClient, log, isServerless);
@@ -306,7 +306,7 @@ export const dataLoadersForRealEndpoints = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
-  const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
+  const stackServicesPromise = setupStackServicesUsingCypressConfig(config.env);
   const isServerless = Boolean(config.env.IS_SERVERLESS);
   const isCloudServerless = Boolean(config.env.CLOUD_SERVERLESS);
 

@@ -8,6 +8,8 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 import { samlAuthentication } from './support/saml_auth';
+import { getVideosForFailedSpecs } from './support/filter_videos';
+import { aiAssistantDataLoaders } from './tasks/ai_assistant/data_loaders';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -32,7 +34,7 @@ export default defineCypressConfig({
   },
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
-  video: false,
+  video: true,
   videosFolder: '../../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 1200,
   viewportWidth: 1920,
@@ -42,7 +44,6 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
-      esArchiver(on, config);
       on('before:browser:launch', (browser, launchOptions) => {
         if (browser.name === 'chrome' && browser.isHeadless) {
           launchOptions.args.push('--window-size=1920,1200');
@@ -55,10 +56,19 @@ export default defineCypressConfig({
         }
         return launchOptions;
       });
+
+      esArchiver(on, config);
+
+      aiAssistantDataLoaders(on, config);
+
       samlAuthentication(on, config);
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
+
+      on('after:spec', (_, results) => {
+        getVideosForFailedSpecs(results);
+      });
       return config;
     },
   },
