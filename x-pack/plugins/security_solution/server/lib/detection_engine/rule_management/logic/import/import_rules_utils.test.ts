@@ -7,6 +7,7 @@
 
 import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
+import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 
 import { requestContextMock } from '../../../routes/__mocks__';
 import { getRuleMock, getEmptyFindResult } from '../../../routes/__mocks__/request_responses';
@@ -21,7 +22,10 @@ describe('importRules', () => {
   beforeEach(() => {
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
     clients.rulesClient.update.mockResolvedValue(importedRule);
-    clients.detectionRulesClient.importRule.mockResolvedValue(importedRule);
+    clients.detectionRulesClient.importRule.mockResolvedValue({
+      ...getRulesSchemaMock(),
+      rule_id: importedRule.params.ruleId,
+    });
     clients.actionsClient.getAll.mockResolvedValue([]);
 
     jest.clearAllMocks();
