@@ -1,0 +1,13 @@
+service: {{package_name}}-{{data_stream_name}}-logfile
+input: logfile
+data_stream:
+  vars:
+    preserve_original_event: true
+    paths:
+      - '{% raw %}{{SERVICE_LOGS_DIR}}{% endraw %}/{{package_name}}-{{data_stream_name}}.log'
+numeric_keyword_fields:
+  - log.file.device_id
+  - log.file.inode
+  - log.file.idxhi
+  - log.file.idxlo
+  - log.file.vol
