@@ -756,7 +756,7 @@
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/functions/context.ts"
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/utils/recall/recall_and_score.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",

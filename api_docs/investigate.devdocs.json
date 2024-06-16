@@ -942,7 +942,13 @@
           "description": [],
           "signature": [
             "<TSchema extends ",
-            "CompatibleJSONSchema",
+            {
+              "pluginId": "observabilityAIAssistant",
+              "scope": "common",
+              "docId": "kibObservabilityAIAssistantPluginApi",
+              "section": "def-common.CompatibleJSONSchema",
+              "text": "CompatibleJSONSchema"
+            },
             ", TData extends Record<string, any>>(definition: Omit<RegisterWidgetOptions, \"schema\"> & { schema: TSchema; }, generateCallback: GenerateCallback<TSchema, TData>, renderCallback: (options: WidgetRenderOptions<",
             {
               "pluginId": "investigate",
@@ -981,7 +987,13 @@
               "description": [],
               "signature": [
                 "(options: { parameters: (TSchema extends ",
-                "CompatibleJSONSchema",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "common",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-common.CompatibleJSONSchema",
+                  "text": "CompatibleJSONSchema"
+                },
                 " ? ",
                 "node_modules/ts-algebra/lib/meta-types/resolve",
                 "$Resolve<",
@@ -8350,7 +8362,13 @@
                   "description": [],
                   "signature": [
                     "{ parameters: (TSchema extends ",
-                    "CompatibleJSONSchema",
+                    {
+                      "pluginId": "observabilityAIAssistant",
+                      "scope": "common",
+                      "docId": "kibObservabilityAIAssistantPluginApi",
+                      "section": "def-common.CompatibleJSONSchema",
+                      "text": "CompatibleJSONSchema"
+                    },
                     " ? any : {}) & ",
                     "GlobalWidgetParameters",
                     "; signal: AbortSignal; }"

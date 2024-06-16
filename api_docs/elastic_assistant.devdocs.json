@@ -1471,6 +1471,21 @@
           },
           {
             "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.kbDataClient",
+            "type": "Object",
+            "tags": [],
+            "label": "kbDataClient",
+            "description": [],
+            "signature": [
+              "AIAssistantKnowledgeBaseDataClient",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.langChainTimeout",
             "type": "number",
             "tags": [],
@@ -1497,6 +1512,26 @@
               " | ",
               "ActionsClientSimpleChatModel",
               " | undefined"
+            ],
+            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
