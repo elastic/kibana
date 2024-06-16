@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { Position } from '@elastic/charts';
+import { Filter, buildEsQuery } from '@kbn/es-query';
 import { ErrorRateChart } from '../../components/slo/error_rate_chart';
 import { useBurnRateOptions } from '../../pages/slo_details/hooks/use_burn_rate_options';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
@@ -258,24 +259,108 @@ export function InvestigateSloDetailLoaded({
   );
 }
 
-function getQueryAndFiltersFromSlo(slo: SLOWithSummaryResponse) {
+function getBadQueryFromSlo(slo: SLOWithSummaryResponse):
+  | {
+      esql?: string;
+      kql?: string;
+      filters?: Filter[];
+    }
+  | undefined {
+  function getCommonApmFilters({
+    service,
+    environment,
+    transactionName,
+    transactionType,
+  }: {
+    service: string;
+    environment?: string;
+    transactionName?: string;
+    transactionType?: string;
+  }) {
+    return `service.name == "${service}"
+      ${environment ? `AND service.environment == "${environment}"` : ''}
+      ${transactionName ? `AND transaction.name == "${transactionName}"` : ''}  
+      ${transactionType ? `AND transaction.type == "${transactionType}"` : ''}
+    `;
+  }
+  switch (slo.indicator.type) {
+    case 'sli.apm.transactionDuration':
+      return {
+        esql: `WHERE ${getCommonApmFilters(slo.indicator.params)}
+        AND transaction.duration.us >= ${slo.indicator.params.threshold}`,
+      };
+
+    case 'sli.apm.transactionErrorRate':
+      return {
+        esql: `WHERE ${getCommonApmFilters(slo.indicator.params)}
+        AND event.outcome == "failure"`,
+      };
+
+    case 'sli.kql.custom':
+      return {
+        kql:
+          typeof slo.indicator.params.total === 'string'
+            ? slo.indicator.params.total
+            : slo.indicator.params.total.kqlQuery,
+        filters: (typeof slo.indicator.params.total === 'string'
+          ? []
+          : slo.indicator.params.total.filters
+        ).concat({
+          query: buildEsQuery(
+            undefined,
+            {
+              language: 'kuery',
+              query:
+                typeof slo.indicator.params.good === 'string'
+                  ? slo.indicator.params.good
+                  : slo.indicator.params.good.kqlQuery,
+            },
+            typeof slo.indicator.params.good === 'string' ? [] : slo.indicator.params.good.filters
+          ),
+          meta: {
+            alias: i18n.translate('xpack.slo.investigateSloDetail.badEventsFilterLabel', {
+              defaultMessage: 'Bad events',
+            }),
+            negate: true,
+          },
+        }),
+      };
+    case 'sli.metric.custom':
+    case 'sli.metric.timeslice':
+    case 'sli.synthetics.availability':
+    case 'sli.histogram.custom':
+      return undefined;
+  }
+}
+
+function getQueryAndFiltersFromSlo(
+  slo: SLOWithSummaryResponse
+): (Partial<GlobalWidgetParameters> & { esql: string }) | undefined {
   const { filter } = slo.indicator.params;
 
-  if (!filter) {
-    return {};
-  }
+  const kqlQuery = typeof filter === 'string' ? filter : filter?.kqlQuery;
+  const filters: Filter[] = (typeof filter === 'string' ? [] : filter?.filters) ?? [];
 
-  if (typeof filter === 'string') {
-    return {
-      query: { query: filter, language: 'kuery' as const },
-    };
-  }
+  const badQuery = getBadQueryFromSlo(slo);
 
-  const kuery = filter.kqlQuery;
+  if (!badQuery) {
+    return undefined;
+  }
 
   return {
-    ...(kuery ? { query: { query: kuery, language: 'kuery' as const } } : {}),
-    filters: filter.filters,
+    esql: `FROM ${slo.indicator.params.index}${badQuery.esql ? `| WHERE ${badQuery.esql}` : ''}`,
+    ...(kqlQuery || badQuery.kql
+      ? {
+          query: {
+            language: 'kuery',
+            query: [kqlQuery, badQuery.kql]
+              .filter(Boolean)
+              .map((group) => `(${group})`)
+              .join(' AND '),
+          },
+        }
+      : {}),
+    filters: filters.concat(badQuery.filters ?? []),
   };
 }
 
@@ -307,32 +392,41 @@ export function InvestigateSloDetail({
       return;
     }
 
-    const predefined = getQueryAndFiltersFromSlo(slo);
+    const queryForSlo = getQueryAndFiltersFromSlo(slo);
 
     blocks.publish([
-      {
-        id: 'view_slo_events',
-        loading: false,
-        content: i18n.translate('xpack.slo.investigateSloDetail.viewGoodAndBadEvents', {
-          defaultMessage: 'View good and bad events',
-        }),
-        onClick: () => {
-          onWidgetAddRef.current(
-            createEsqlWidget({
-              title: i18n.translate('xpack.slo.investigateSloDetail.goodAndBadEventsWidgetTitle', {
-                defaultMessage: `Good and bad events for {sloName}`,
-                values: {
-                  sloName: slo.name,
-                },
+      ...(queryForSlo
+        ? [
+            {
+              id: 'view_slo_events',
+              loading: false,
+              content: i18n.translate('xpack.slo.investigateSloDetail.viewBadEvents', {
+                defaultMessage: 'View bad events',
               }),
-              parameters: {
-                esql: `FROM ${slo.indicator.params.index}`,
-                predefined,
+              onClick: () => {
+                onWidgetAddRef.current(
+                  createEsqlWidget({
+                    title: i18n.translate(
+                      'xpack.slo.investigateSloDetail.goodAndBadEventsWidgetTitle',
+                      {
+                        defaultMessage: `Bad events for {sloName}`,
+                        values: {
+                          sloName: slo.name,
+                        },
+                      }
+                    ),
+                    locked: true,
+                    parameters: {
+                      esql: queryForSlo.esql,
+                      filters: queryForSlo.filters,
+                      query: queryForSlo.query,
+                    },
+                  })
+                );
               },
-            })
-          );
-        },
-      },
+            },
+          ]
+        : []),
     ]);
   }, [blocks, slo]);
 

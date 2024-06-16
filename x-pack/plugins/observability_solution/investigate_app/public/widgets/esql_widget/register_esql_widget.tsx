@@ -24,6 +24,8 @@ import { useKibana } from '../../hooks/use_kibana';
 import { getLensAttrsForSuggestion } from '../../utils/get_lens_attrs_for_suggestion';
 import { getDatatableFromEsqlResponse } from '../../utils/get_data_table_from_esql_response';
 import { getEsFilterFromOverrides } from '../../utils/get_es_filter_from_overrides';
+import { ErrorMessage } from '../../components/error_message';
+import { getDateHistogramResults } from './get_date_histogram_results';
 
 const lensClassName = css`
   height: 100%;
@@ -171,22 +173,25 @@ export function EsqlWidget({
   );
 
   if (input.attributes.visualizationType === 'lnsDatatable') {
+    let innerElement: React.ReactElement;
+    if (previewInput.error) {
+      innerElement = <ErrorMessage error={previewInput.error} />;
+    } else if (previewInput.value) {
+      innerElement = <lens.EmbeddableComponent {...previewInput.value} />;
+    } else {
+      innerElement = <EuiLoadingSpinner size="s" />;
+    }
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem
           grow={false}
           className={css`
-            height: 128px;
             > div {
-              height: 100%;
+              height: 128px;
             }
           `}
         >
-          {previewInput.value ? (
-            <lens.EmbeddableComponent {...previewInput.value} />
-          ) : (
-            <EuiLoadingSpinner size="s" />
-          )}
+          {innerElement}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ESQLDataGrid
@@ -234,7 +239,6 @@ export function registerEsqlWidget({
         filters,
         timeRange,
         suggestion: suggestionFromParameters,
-        predefined,
       } = parameters as EsqlWidgetParameters & GlobalWidgetParameters;
 
       const esql = await services.esql;
@@ -245,14 +249,6 @@ export function registerEsqlWidget({
           filters,
           timeRange,
         }),
-        ...(predefined
-          ? [
-              getEsFilterFromOverrides({
-                filters: predefined.filters,
-                query: predefined.query,
-              }),
-            ]
-          : []),
       ];
 
       const getFilter = () => ({
@@ -269,18 +265,15 @@ export function registerEsqlWidget({
 
       const suggestion = suggestionFromParameters || mainResponse.meta.suggestions[0];
 
-      const groupingExpression = `BUCKET(@timestamp, 50, "${timeRange.from}", "${timeRange.to}")`;
-      const dateHistoQuery = `${esqlQuery} | STATS count = COUNT(*) BY ${groupingExpression}`;
-
-      const dateHistoResponse =
-        suggestion.visualizationId === 'lnsDatatable' &&
-        mainResponse.query.columns.find((column) => column.name === '@timestamp')
-          ? await esql.queryWithMeta({
-              query: dateHistoQuery,
-              signal,
-              filter: getFilter(),
-            })
-          : undefined;
+      const dateHistoResponse = await getDateHistogramResults({
+        query: esqlQuery,
+        columns: mainResponse.query.columns,
+        esql,
+        filter: getFilter(),
+        signal,
+        suggestion,
+        timeRange,
+      });
 
       return {
         main: {
@@ -289,14 +282,7 @@ export function registerEsqlWidget({
           suggestion,
           dataView: mainResponse.meta.dataView,
         },
-        dateHistogram: dateHistoResponse
-          ? {
-              columns: dateHistoResponse.query.columns,
-              values: dateHistoResponse.query.values,
-              query: dateHistoQuery,
-              groupingExpression,
-            }
-          : undefined,
+        dateHistogram: dateHistoResponse,
       };
     },
     ({ widget, blocks }) => {

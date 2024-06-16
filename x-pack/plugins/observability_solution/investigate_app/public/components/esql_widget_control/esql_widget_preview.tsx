@@ -28,6 +28,7 @@ import { getEsFilterFromOverrides } from '../../utils/get_es_filter_from_overrid
 import { EsqlWidget } from '../../widgets/esql_widget/register_esql_widget';
 import { SuggestVisualizationList } from '../suggest_visualization_list';
 import { ErrorMessage } from '../error_message';
+import { getDateHistogramResults } from '../../widgets/esql_widget/get_date_histogram_results';
 
 function getWidgetFromSuggestion({
   query,
@@ -110,6 +111,24 @@ export function EsqlWidgetPreview({
       });
     },
     [esqlQuery, filter, esql]
+  );
+
+  const dateHistoResponse = useAbortableAsync(
+    ({ signal }) => {
+      if (!queryResult.value || queryResult.loading || !selectedSuggestion) {
+        return undefined;
+      }
+      return getDateHistogramResults({
+        columns: queryResult.value.query.columns,
+        esql,
+        filter,
+        query: esqlQuery,
+        signal,
+        suggestion: selectedSuggestion,
+        timeRange,
+      });
+    },
+    [queryResult, esql, filter, esqlQuery, selectedSuggestion, timeRange]
   );
 
   const fakeRenderApi = useMemo(() => {
@@ -198,8 +217,7 @@ export function EsqlWidgetPreview({
             values={displayedProps.value.values}
             dataView={displayedProps.value.dataView}
             esqlQuery={esqlQuery}
-            start={timeRange.from}
-            end={timeRange.to}
+            dateHistogramResults={dateHistoResponse.value}
           />
         </PreviewContainer>
       </EuiFlexItem>
