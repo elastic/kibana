@@ -67,6 +67,7 @@ export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataView
     queryFn: queryIndexNameFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
+    staleTime: 60 * 1000, // To prevent duplicated requests
     enabled: featureIds.length > 0 && !hasSecurityAndO11yFeatureIds,
   });
 
@@ -80,6 +81,7 @@ export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataView
     queryFn: queryAlertFieldsFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
+    staleTime: 60 * 1000,
     enabled: hasNoSecuritySolution,
   });
 
