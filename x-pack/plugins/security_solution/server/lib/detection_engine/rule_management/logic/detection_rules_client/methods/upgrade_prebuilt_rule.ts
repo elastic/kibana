@@ -18,12 +18,7 @@ import { transformAlertToRuleAction } from '../../../../../../../common/detectio
 import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import { transform } from '../../../utils/utils';
 
-import {
-  validateMlAuth,
-  ClientError,
-  RuleResponseValidationError,
-  toggleRuleEnabledOnUpdate,
-} from '../utils';
+import { validateMlAuth, ClientError, RuleResponseValidationError } from '../utils';
 
 import { readRules } from '../read_rules';
 
@@ -90,12 +85,6 @@ export const upgradePrebuiltRule = async (
     data: patchedRule,
   });
 
-  const { enabled } = await toggleRuleEnabledOnUpdate(
-    rulesClient,
-    existingRule,
-    patchedInternalRule.enabled
-  );
-
   const updatedRule = await readRules({
     rulesClient,
     ruleId: ruleAsset.rule_id,
@@ -107,7 +96,7 @@ export const upgradePrebuiltRule = async (
   }
 
   /* Trying to convert the internal rule to a RuleResponse object */
-  const parseResult = RuleResponse.safeParse(transform({ ...patchedInternalRule, enabled }));
+  const parseResult = RuleResponse.safeParse(transform(patchedInternalRule));
 
   if (!parseResult.success) {
     throw new RuleResponseValidationError({
