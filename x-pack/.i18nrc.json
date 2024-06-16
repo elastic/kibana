@@ -116,6 +116,7 @@
     "xpack.screenshotting": "plugins/screenshotting",
     "xpack.searchNotebooks": "plugins/search_notebooks",
     "xpack.searchPlayground": "plugins/search_playground",
+    "xpack.searchInferenceEndpoints": "plugins/search_inference_endpoints",
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": "plugins/security",
     "xpack.server": "legacy/server",
