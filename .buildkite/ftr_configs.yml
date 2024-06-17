@@ -405,6 +405,7 @@ enabled:
   - x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_trial.ts
   - x-pack/test/spaces_api_integration/spaces_only/config.ts
+  - x-pack/test/task_manager_claimer_mget/config.ts
   - x-pack/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.js
@@ -441,7 +442,8 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group6.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.basic.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.essentials.ts
   - x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group2.ts
