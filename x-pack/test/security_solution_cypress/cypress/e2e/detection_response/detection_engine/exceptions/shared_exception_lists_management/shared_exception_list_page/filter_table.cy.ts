@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';
 import { getExceptionList } from '../../../../../../objects/exception';
 import { getNewRule } from '../../../../../../objects/rule';
 import {
   EXCEPTIONS_TABLE_SHOWING_LISTS,
   EXCEPTIONS_TABLE_LIST_NAME,
 } from '../../../../../../screens/exceptions';
-import { createExceptionList } from '../../../../../../tasks/api_calls/exceptions';
+import {
+  createExceptionList,
+  deleteEndpointExceptionList,
+  deleteExceptionLists,
+} from '../../../../../../tasks/api_calls/exceptions';
 import { createRule } from '../../../../../../tasks/api_calls/rules';
 import {
   waitForExceptionsTableToBeLoaded,
@@ -40,6 +45,9 @@ const getExceptionList2 = () => ({
 describe('Filter Lists', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
+    deleteAlertsAndRules();
+    deleteExceptionLists();
+    deleteEndpointExceptionList();
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
@@ -58,8 +66,13 @@ describe('Filter Lists', { tags: ['@ess', '@serverless'] }, () => {
 
     // Create exception list not used by any rules
     createExceptionList(getExceptionList1(), getExceptionList1().list_id);
-    login();
     visit(EXCEPTIONS_URL);
+  });
+
+  after(() => {
+    deleteAlertsAndRules();
+    deleteExceptionLists();
+    deleteEndpointExceptionList();
   });
 
   it('Filters exception lists on search', () => {
