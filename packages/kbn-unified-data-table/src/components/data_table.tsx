@@ -712,13 +712,17 @@ export const UnifiedDataTable = ({
     [dataView, cellActionsMetadata]
   );
 
-  const columnsCellActions = useDataGridColumnsCellActions({
+  const { columnsCellActions, loading } = useDataGridColumnsCellActions({
     fields: cellActionsFields,
     getCellValue,
     triggerId: cellActionsTriggerId,
     dataGridRef,
     metadata: allCellActionsMetadata,
   });
+
+  useEffect(() => {
+    console.log('Changed columnsCellActions', { columnsCellActions });
+  }, [columnsCellActions]);
 
   const {
     rowHeight: headerRowHeight,

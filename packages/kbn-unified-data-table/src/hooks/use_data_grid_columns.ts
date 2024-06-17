@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { Capabilities } from '@kbn/core/public';
@@ -35,23 +35,47 @@ export const useColumns = ({
   defaultOrder = 'desc',
 }: UseColumnsProps) => {
   const [usedColumns, setUsedColumns] = useState(getColumns(columns, useNewFieldsApi));
+
+  const [localSort, setLocalSort] = useState<string[][]>(sort || []);
+
   useEffect(() => {
-    const nextColumns = getColumns(columns, useNewFieldsApi);
-    if (isEqual(usedColumns, nextColumns)) {
-      return;
-    }
-    setUsedColumns(nextColumns);
+    setUsedColumns((prev) => {
+      const nextColumns = getColumns(columns, useNewFieldsApi);
+      if (isEqual(prev, nextColumns)) {
+        return prev;
+      }
+      return nextColumns;
+    });
   }, [columns, useNewFieldsApi, usedColumns]);
+
+  useEffect(() => {
+    setLocalSort((prev) => {
+      if (isEqual(sort, prev)) {
+        return prev;
+      }
+      return sort || [];
+    });
+  }, [sort]);
+
+  const localSetAppState: (state: { columns: string[]; sort?: string[][] }) => void = useCallback(
+    ({ columns: newCols, sort: newSort }) => {
+      setUsedColumns(newCols);
+      setLocalSort(newSort ?? []);
+      setAppState({ columns: newCols, sort: newSort });
+    },
+    [setAppState]
+  );
+
   const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
     () =>
       getStateColumnActions({
         capabilities,
         dataView,
         dataViews,
-        setAppState,
+        setAppState: localSetAppState,
         useNewFieldsApi,
         columns: usedColumns,
-        sort,
+        sort: localSort,
         defaultOrder,
       }),
     [
@@ -59,8 +83,8 @@ export const useColumns = ({
       dataView,
       dataViews,
       defaultOrder,
-      setAppState,
-      sort,
+      localSetAppState,
+      localSort,
       useNewFieldsApi,
       usedColumns,
     ]

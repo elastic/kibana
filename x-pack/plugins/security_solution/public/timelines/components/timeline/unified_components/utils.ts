@@ -34,11 +34,20 @@ export function transformTimelineItemToUnifiedRows(
       data,
       ecs,
       raw: hit,
-      flattened: flattenHit(hit, dataView, {
-        includeIgnoredValues: true,
-      }),
+      get flattened() {
+        return flattenHit(hit, dataView, {
+          includeIgnoredValues: true,
+        });
+      },
     };
   });
 
   return unifiedDataTableRows;
 }
+
+export const UNIFIED_TIMELINE_CONFIG = {
+  IS_CUSTOM_TIMELINE_DATA_GRID_ROW_LAZY_LOADING_ENABLED: false,
+  DEFAULT_TIMELINE_ROW_HEIGHT: 32,
+  DEFAULT_TIMELINE_ROW_HEIGHT_WITH_EVENT_DETAIL_ROW: 48,
+  DEFAULT_PRELOADED_ROWS: 10,
+};

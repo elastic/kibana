@@ -10,7 +10,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { FC } from 'react';
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
@@ -22,11 +22,13 @@ import { NoteCards } from '../../../notes/note_cards';
 import type { TimelineResultNote } from '../../../open_timeline/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
+import { UNIFIED_TIMELINE_CONFIG } from '../utils';
 import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname';
 
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
   enabledRowRenderers: RowRenderer[];
+  rowHeight?: number;
   events: TimelineItem[];
   eventIdToNoteIds?: Record<string, string[]> | null;
   eventIdsAddingNotes?: Set<string>;
@@ -100,6 +102,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
               visibleColumns={visibleColumns}
               Cell={Cell}
               enabledRowRenderers={enabledRowRenderers}
+              rowHeight={props.rowHeight}
               notes={notes}
               eventIdsAddingNotes={eventIdsAddingNotes}
               eventId={eventId}
@@ -121,10 +124,12 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
 const CustomGridRow = styled.div.attrs<{
   className?: string;
 }>((props) => ({
-  className: `euiDataGridRow ${props.className ?? ''}`,
+  className: `unifiedTimeline__dataGridRow euiDataGridRow ${props.className ?? ''}`,
   role: 'row',
-}))`
-  width: fit-content;
+}))<{
+  isRowLoading$: boolean;
+}>`
+  ${(props) => (props.isRowLoading$ ? 'width: 100%;' : 'width: fit-content;')}
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
   . euiDataGridRowCell--controlColumn {
     height: 40px;
@@ -151,19 +156,34 @@ const CustomGridRow = styled.div.attrs<{
   }
 `;
 
-/* below styles as per : https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer */
+const CustomLazyRowPlaceholder = styled.div.attrs({
+  className: 'customlazyGridRowPlaceholder',
+})<{
+  rowHeight: number;
+}>`
+  width: 100%;
+  ${(props) =>
+    props.rowHeight === -1
+      ? `height: ${UNIFIED_TIMELINE_CONFIG.DEFAULT_TIMELINE_ROW_HEIGHT_WITH_EVENT_DETAIL_ROW};`
+      : `height: ${
+          UNIFIED_TIMELINE_CONFIG.DEFAULT_TIMELINE_ROW_HEIGHT_WITH_EVENT_DETAIL_ROW +
+          props.rowHeight * UNIFIED_TIMELINE_CONFIG.DEFAULT_TIMELINE_ROW_HEIGHT
+        }px;`};
+`;
+
+/**
+ *
+ * A Simple Wrapper component for displaying a custom data grid `cell`
+ */
 const CustomGridRowCellWrapper = styled.div.attrs<{
   className?: string;
 }>((props) => ({
   className: `rowCellWrapper ${props.className ?? ''}`,
-  role: 'row',
 }))`
   display: flex;
   align-items: center;
-  height: 36px;
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
-    height: 100%;
     .unifiedDataTable__rowControl {
       margin-top: 0;
     }
@@ -176,6 +196,7 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
 type CustomTimelineDataGridSingleRowProps = {
   rowData: DataTableRecord & TimelineItem;
   rowIndex: number;
+  rowHeight?: number;
   notes?: TimelineResultNote[] | null;
   eventId?: string;
   eventIdsAddingNotes?: Set<string>;
@@ -204,29 +225,53 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     eventId = '',
     onToggleShowNotes,
     refetch,
+    rowHeight = -1,
   } = props;
+  const [intersectionEntry, setIntersectionEntry] = useState<IntersectionObserverEntry>({
+    isIntersecting: rowIndex < UNIFIED_TIMELINE_CONFIG.DEFAULT_PRELOADED_ROWS + 1 ? true : false,
+    intersectionRatio: rowIndex < UNIFIED_TIMELINE_CONFIG.DEFAULT_PRELOADED_ROWS + 1 ? 1 : 0,
+  } as IntersectionObserverEntry);
+
+  const intersectionRef = useRef<HTMLDivElement | null>(null);
+
+  const observer = useRef<IntersectionObserver | null>(null);
+
   const dispatch = useDispatch();
   const { canShowRowRenderer } = useStatefulRowRenderer({
     data: rowData.ecs,
     rowRenderers: enabledRowRenderers,
   });
 
-  /**
-   * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
-   * which renders the row-renderer, notes and notes editor
-   *
-   */
-  const cellCustomStyle = useMemo(
-    () =>
-      canShowRowRenderer
-        ? {
-            borderBottom: 'none',
-          }
-        : {},
-    [canShowRowRenderer]
-  );
+  const onIntersectionChange = useCallback((entries: IntersectionObserverEntry[]) => {
+    entries.forEach((entry) => {
+      setIntersectionEntry(entry);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (intersectionRef.current && !observer.current) {
+      observer.current = new IntersectionObserver(onIntersectionChange, {
+        rootMargin: '250px',
+      });
+
+      observer.current.observe(intersectionRef.current);
+    }
+
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+    };
+  }, [onIntersectionChange]);
+
   const eventTypeRowClassName = useGetEventTypeRowClassName(rowData.ecs);
 
+  const isRowIntersecting =
+    intersectionEntry.isIntersecting && intersectionEntry.intersectionRatio > 0;
+
+  const isRowLoading =
+    UNIFIED_TIMELINE_CONFIG.IS_CUSTOM_TIMELINE_DATA_GRID_ROW_LAZY_LOADING_ENABLED &&
+    !isRowIntersecting;
   const associateNote = useCallback(
     (noteId: string) => {
       dispatch(
@@ -249,45 +294,43 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
 
   return (
     <CustomGridRow
-      className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
+      className={`${rowIndex % 2 === 0 && !isRowLoading ? 'euiDataGridRow--striped' : ''}`}
+      isRowLoading$={isRowLoading}
       key={rowIndex}
+      ref={intersectionRef}
     >
-      <CustomGridRowCellWrapper className={eventTypeRowClassName}>
-        {visibleColumns.map((column, colIndex) => {
-          // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
-          if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
-            return (
-              <Cell
-                style={cellCustomStyle}
-                colIndex={colIndex}
-                visibleRowIndex={rowIndex}
-                key={`${rowIndex},${colIndex}`}
-              />
-            );
-          }
-          return null;
-        })}
-      </CustomGridRowCellWrapper>
-      {renderNotesContainer && (
-        <NoteCards
-          ariaRowindex={rowIndex}
-          associateNote={associateNote}
-          className="udt--customRow"
-          data-test-subj="note-cards"
-          notes={notes ?? []}
-          showAddNote={eventIdsAddingNotes?.has(eventId) ?? false}
-          toggleShowAddNote={onToggleShowNotes}
-          eventId={eventId}
-        />
+      {isRowLoading ? (
+        <CustomLazyRowPlaceholder rowHeight={rowHeight} />
+      ) : (
+        <>
+          <CustomGridRowCellWrapper className={eventTypeRowClassName}>
+            {visibleColumns.map((column, colIndex) => {
+              return (
+                <React.Fragment key={`${rowIndex}-${colIndex}`}>
+                  {
+                    // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
+                    column.id !== TIMELINE_EVENT_DETAIL_ROW_ID ? (
+                      <Cell colIndex={colIndex} visibleRowIndex={rowIndex} />
+                    ) : null
+                  }
+                </React.Fragment>
+              );
+            })}
+          </CustomGridRowCellWrapper>
+          {renderNotesContainer && (
+            <NoteCards
+              ariaRowindex={rowIndex}
+              associateNote={associateNote}
+              className="udt--customRow"
+              data-test-subj="note-cards"
+              notes={notes ?? []}
+              showAddNote={eventIdsAddingNotes?.has(eventId) ?? false}
+              toggleShowAddNote={onToggleShowNotes}
+              eventId={eventId}
+            />
+          )}
+        </>
       )}
-
-      {/* Timeline Expanded Row */}
-      {canShowRowRenderer ? (
-        <Cell
-          colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
-          visibleRowIndex={rowIndex}
-        />
-      ) : null}
     </CustomGridRow>
   );
 });

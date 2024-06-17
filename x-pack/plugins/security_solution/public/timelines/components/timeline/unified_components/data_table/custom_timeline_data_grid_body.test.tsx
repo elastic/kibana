@@ -89,12 +89,26 @@ const renderTestComponents = (props?: CustomTimelineDataGridBodyProps) => {
   );
 };
 
+const mockIntersectionObserverReturnValue = {
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+};
+
 describe('CustomTimelineDataGridBody', () => {
   beforeEach(() => {
     const now = new Date();
     (useStatefulRowRenderer as jest.Mock).mockReturnValue({
       canShowRowRenderer: true,
     });
+
+    const mockIntersectionObserver = jest.fn((cb) => {
+      cb([{ isIntersecting: true, intersectionRatio: 1 }]);
+      return mockIntersectionObserverReturnValue;
+    });
+
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    window.IntersectionObserver = mockIntersectionObserver as unknown as any;
     (useDeepEqualSelector as jest.Mock).mockReturnValue({
       noteId1: {
         created: now,
@@ -132,14 +146,35 @@ describe('CustomTimelineDataGridBody', () => {
     expect(container).toMatchSnapshot();
   });
 
-  it('should render the additional Row when row Renderer is available', () => {
-    // No additional row for first result
-    (useStatefulRowRenderer as jest.Mock).mockReturnValueOnce({
-      canShowRowRenderer: false,
+  it('should render lazy rows placeholder when rows are not intersecting', () => {
+    const mockLocalIntersectionObserver = jest.fn((cb) => {
+      cb([{ isIntersecting: false, intersectionRatio: 0 }]);
+      return mockIntersectionObserverReturnValue;
     });
-    // Additional row for second result
-    (useStatefulRowRenderer as jest.Mock).mockReturnValueOnce({
-      canShowRowRenderer: true,
+
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    window.IntersectionObserver = mockLocalIntersectionObserver as unknown as any;
+
+    const { container, queryByText } = renderTestComponents();
+
+    expect(queryByText('Cell-0-0')).toBeFalsy();
+    expect(queryByText('Cell-1-0')).toBeFalsy();
+
+    expect(container.querySelectorAll('.customlazyGridRowPlaceholder')).toHaveLength(2);
+  });
+
+  it('should render the additional Row when row Renderer is available', () => {
+    (useStatefulRowRenderer as jest.Mock).mockImplementation(({ data }: { data: TimelineItem }) => {
+      if (data._id === '1') {
+        return {
+          // No row renderer for first result
+          canShowRowRenderer: false,
+        };
+      }
+
+      return {
+        canShowRowRenderer: true,
+      };
     });
     const { getByText, queryByText } = renderTestComponents();
     expect(queryByText('Cell-0-3')).toBeFalsy();
