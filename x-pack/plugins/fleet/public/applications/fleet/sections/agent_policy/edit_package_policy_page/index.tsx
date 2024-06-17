@@ -52,6 +52,7 @@ import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../.
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 
 import {
+  getInheritedNamespace,
   getRootPrivilegedDataStreams,
   isRootPrivilegesRequired,
 } from '../../../../../../common/services';
@@ -344,7 +345,7 @@ export const EditPackagePolicyForm = memo<{
         <>
           {selectedTab === 0 && (
             <StepDefinePackagePolicy
-              namespacePlaceholder={agentPolicies?.[0]?.namespace}
+              namespacePlaceholder={getInheritedNamespace(agentPolicies)}
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}

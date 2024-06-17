@@ -8,6 +8,8 @@
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
+import { getInheritedNamespace } from '../../../../../../../../common/services';
+
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { AgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../../types';
@@ -92,7 +94,7 @@ describe('StepDefinePackagePolicy', () => {
   const render = () =>
     (renderResult = testRenderer.render(
       <StepDefinePackagePolicy
-        namespacePlaceholder={agentPolicies[0].namespace}
+        namespacePlaceholder={getInheritedNamespace(agentPolicies)}
         packageInfo={packageInfo}
         packagePolicy={packagePolicy}
         updatePackagePolicy={mockUpdatePackagePolicy}

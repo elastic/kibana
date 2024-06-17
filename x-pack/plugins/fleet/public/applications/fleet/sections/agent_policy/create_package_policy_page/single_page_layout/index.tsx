@@ -35,6 +35,7 @@ import {
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import {
+  getInheritedNamespace,
   getRootPrivilegedDataStreams,
   isRootPrivilegesRequired,
   splitPkgKey,
@@ -363,7 +364,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       ) : packageInfo ? (
         <>
           <StepDefinePackagePolicy
-            namespacePlaceholder={agentPolicies?.[0]?.namespace}
+            namespacePlaceholder={getInheritedNamespace(agentPolicies)}
             packageInfo={packageInfo}
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
