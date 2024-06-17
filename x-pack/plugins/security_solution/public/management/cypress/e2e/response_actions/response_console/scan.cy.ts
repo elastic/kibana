@@ -10,7 +10,6 @@ import {
   inputConsoleCommand,
   openResponseConsoleFromEndpointList,
   submitCommand,
-  // waitForCommandToBeExecuted,
   waitForEndpointListPageToBeLoaded,
 } from '../../../tasks/response_console';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
@@ -88,7 +87,6 @@ describe(
           content: fileContent,
         });
 
-        // initiate get file action and wait for the API to complete
         cy.intercept('api/endpoint/action/scan').as('scanAction');
         openResponseConsoleFromEndpointList();
         inputConsoleCommand(`scan --path ${homeFilePath}`);
@@ -96,6 +94,20 @@ describe(
         cy.wait('@scanAction', { timeout: 60000 });
 
         cy.contains('Scan complete').click();
+      });
+
+      it('"scan --path" - should scan a folder and report errors', () => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+
+        cy.intercept('api/endpoint/action/scan').as('scanAction');
+        openResponseConsoleFromEndpointList();
+        inputConsoleCommand(`scan --path ${homeFilePath}/non_existent_folder`);
+        submitCommand();
+        cy.wait('@scanAction', { timeout: 60000 });
+
+        cy.getByTestSubj('scan-actionFailure')
+          .should('exist')
+          .contains('File path or folder was not found (404)');
       });
     });
   }
