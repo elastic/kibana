@@ -204,6 +204,15 @@ export type InferenceServiceSettings =
       };
     }
   | {
+      service: 'cohere';
+      service_settings: {
+        similarity: string;
+        dimensions: string;
+        model_id: string;
+        embedding_type: string;
+      };
+    }
+  | {
       service: 'hugging_face';
       service_settings: {
         api_key: string;

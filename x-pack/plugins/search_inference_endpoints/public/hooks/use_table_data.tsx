@@ -31,7 +31,7 @@ export const useTableData = (
 ): UseTableDataReturn => {
   const tableData: InferenceEndpointUI[] = useMemo(() => {
     return inferenceEndpoints.map((endpoint) => ({
-      endpoint: endpoint.model_id,
+      endpoint,
       provider: endpoint.service,
       type: endpoint.task_type,
     }));
@@ -43,9 +43,9 @@ export const useTableData = (
       const bValue = b[queryParams.sortField];
 
       if (queryParams.sortOrder === SortOrder.asc) {
-        return aValue.localeCompare(bValue);
+        return aValue.model_id.localeCompare(bValue.model_id);
       } else {
-        return bValue.localeCompare(aValue);
+        return bValue.model_id.localeCompare(aValue.model_id);
       }
     });
   }, [tableData, queryParams]);

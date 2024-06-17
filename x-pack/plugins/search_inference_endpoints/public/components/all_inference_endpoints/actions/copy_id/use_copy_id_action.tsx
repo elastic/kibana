@@ -19,7 +19,7 @@ export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {
     return {
       name: <EuiTextColor>{i18n.COPY_ID_ACTION_LABEL}</EuiTextColor>,
       onClick: () => {
-        navigator.clipboard.writeText(inferenceEndpoint.endpoint).then(() => {
+        navigator.clipboard.writeText(inferenceEndpoint.endpoint.model_id).then(() => {
           onActionSuccess();
           showSuccessToast(i18n.COPY_ID_ACTION_SUCCESS);
         });
