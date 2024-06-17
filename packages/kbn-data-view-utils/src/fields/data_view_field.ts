@@ -16,7 +16,7 @@ import {
   isDataViewFieldSubtypeNested,
   getDataViewFieldSubtypeMulti,
   getDataViewFieldSubtypeNested,
-} from '../utils/utils';
+} from '../utils';
 
 /**
  * Optional format getter when serializing a field
