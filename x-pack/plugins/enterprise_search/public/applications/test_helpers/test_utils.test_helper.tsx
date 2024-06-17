@@ -51,6 +51,7 @@ export const mockKibanaProps: KibanaLogicProps = {
     },
   },
   connectorTypes: [],
+  coreSecurity: undefined,
   data: dataPluginMock.createStartContract(),
   esConfig: {
     elasticsearch_host: 'https://your_deployment_url',
@@ -91,7 +92,6 @@ export const mockKibanaProps: KibanaLogicProps = {
   share: sharePluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   updateSideNavDefinition: jest.fn(),
-  user: null,
 };
 
 type LogicFile = LogicWrapper<any>;
