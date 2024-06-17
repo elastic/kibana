@@ -54,14 +54,10 @@ export default defineCypressConfig({
       });
 
       esArchiver(on, config);
-      aiAssistantDataLoaders(on, config);
       samlAuthentication(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
 
-      on('after:spec', (_, results) => {
-        getVideosForFailedSpecs(results);
-      });
       return config;
     },
   },

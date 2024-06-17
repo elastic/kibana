@@ -57,16 +57,11 @@ export default defineCypressConfig({
 
       esArchiver(on, config);
 
-      aiAssistantDataLoaders(on, config);
-
       samlAuthentication(on, config);
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
 
-      on('after:spec', (_, results) => {
-        getVideosForFailedSpecs(results);
-      });
       return config;
     },
   },
