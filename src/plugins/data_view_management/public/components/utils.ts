@@ -25,7 +25,7 @@ const defaultIndexPatternListName = i18n.translate(
 const rollupIndexPatternListName = i18n.translate(
   'indexPatternManagement.editIndexPattern.list.rollupIndexPatternListName',
   {
-    defaultMessage: 'Rollup',
+    defaultMessage: 'Rollup (deprecated)',
   }
 );
 

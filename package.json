@@ -694,6 +694,7 @@
     "@kbn/resolver-test-plugin": "link:x-pack/test/plugin_functional/plugins/resolver_test",
     "@kbn/response-stream-plugin": "link:examples/response_stream",
     "@kbn/rison": "link:packages/kbn-rison",
+    "@kbn/rollup-deprecation-tooltip": "link:packages/kbn-rollup-deprecation-tooltip",
     "@kbn/rollup-plugin": "link:x-pack/plugins/rollup",
     "@kbn/router-to-openapispec": "link:packages/kbn-router-to-openapispec",
     "@kbn/router-utils": "link:packages/kbn-router-utils",

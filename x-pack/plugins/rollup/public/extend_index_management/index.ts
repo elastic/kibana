@@ -23,8 +23,8 @@ export const rollupBadgeExtension = {
     return Boolean(index.isRollupIndex);
   },
   label: i18n.translate('xpack.rollupJobs.indexMgmtBadge.rollupLabel', {
-    defaultMessage: 'Rollup',
+    defaultMessage: 'Rollup (deprecated)',
   }),
-  color: 'success',
+  color: 'warning',
   filterExpression: 'isRollupIndex:true',
 };

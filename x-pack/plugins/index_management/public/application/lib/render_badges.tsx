@@ -8,7 +8,10 @@
 import React, { Fragment, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, Query } from '@elastic/eui';
+import { isEqual } from 'lodash';
 
+import { rollupBadgeExtension } from '@kbn/rollup-plugin/public';
+import { RollupDeprecationTooltip } from '@kbn/rollup-deprecation-tooltip';
 import { ExtensionsService } from '../../services';
 import { Index } from '../..';
 
@@ -18,7 +21,8 @@ export const renderBadges = (
   onFilterChange?: (query: Query) => void
 ) => {
   const badgeLabels: ReactNode[] = [];
-  extensionsService.badges.forEach(({ matchIndex, label, color, filterExpression }) => {
+  extensionsService.badges.forEach((indexBadge) => {
+    const { matchIndex, label, color, filterExpression } = indexBadge;
     if (matchIndex(index)) {
       const clickHandler = () => {
         if (onFilterChange && filterExpression) {
@@ -37,7 +41,14 @@ export const renderBadges = (
         ) : (
           <EuiBadge color={color}>{label}</EuiBadge>
         );
-      badgeLabels.push(<Fragment key={label}> {badge}</Fragment>);
+      const badgeItem =
+        // If the badge is for Rollups, add a tooltip with deprecation information
+        isEqual(indexBadge, rollupBadgeExtension) ? (
+          <RollupDeprecationTooltip>{badge}</RollupDeprecationTooltip>
+        ) : (
+          badge
+        );
+      badgeLabels.push(<Fragment key={label}> {badgeItem}</Fragment>);
     }
   });
   return <Fragment>{badgeLabels}</Fragment>;

@@ -5888,6 +5888,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/rollup-deprecation-tooltip@link:packages/kbn-rollup-deprecation-tooltip":
+  version "0.0.0"
+  uid ""
+
 "@kbn/rollup-plugin@link:x-pack/plugins/rollup":
   version "0.0.0"
   uid ""
