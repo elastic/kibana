@@ -95,11 +95,13 @@ export function InvestigateDetail({
   revision,
   isAtLatestRevision,
   isAtEarliestRevision,
+  hasUnsavedChanges,
 }: {
   investigation: Pick<Investigation, 'title'>;
   revision: Pick<InvestigationRevision, 'items'>;
   isAtLatestRevision: boolean;
   isAtEarliestRevision: boolean;
+  hasUnsavedChanges: boolean;
 }) {
   const anyItems = revision.items.length > 0;
 

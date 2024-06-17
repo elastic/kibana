@@ -69,12 +69,10 @@ export function InvestigationHistory({
   investigations,
   loading,
   error,
-  onNewInvestigationClick,
 }: {
   investigations?: Array<Pick<Investigation, 'id' | 'title'>>;
   loading: boolean;
   error?: Error;
-  onNewInvestigationClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }) {
   const router = useInvestigateRouter();
 
@@ -86,14 +84,8 @@ export function InvestigationHistory({
         grow={false}
         className={classNames(investigationItemClassName, newInvestigationItemClassName)}
       >
-        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-        <EuiLink
-          data-test-subj="investigateAppInvestigationHistoryLink"
-          href={router.link('/new')}
-          onClick={(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-            onNewInvestigationClick?.(event);
-          }}
-        >
+        {}
+        <EuiLink data-test-subj="investigateAppInvestigationHistoryLink" href={router.link('/new')}>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type="newChat" size="s" color={theme.colors.text} />

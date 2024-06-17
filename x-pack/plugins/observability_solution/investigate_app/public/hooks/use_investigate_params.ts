@@ -7,7 +7,7 @@
 import { type PathsOf, type TypeOf, useParams } from '@kbn/typed-react-router-config';
 import type { InvestigateRoutes } from '../routes/config';
 
-export function useObservabilityAIAssistantParams<TPath extends PathsOf<InvestigateRoutes>>(
+export function useInvestigateParams<TPath extends PathsOf<InvestigateRoutes>>(
   path: TPath
 ): TypeOf<InvestigateRoutes, TPath> {
   return useParams(path)! as TypeOf<InvestigateRoutes, TPath>;

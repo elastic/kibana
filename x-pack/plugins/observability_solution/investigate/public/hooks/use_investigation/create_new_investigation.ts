@@ -12,9 +12,11 @@ import type { Investigation, InvestigationRevision } from '../../../common';
 import { GlobalWidgetParameters } from '../../../common/types';
 
 export function createNewInvestigation({
+  id,
   user,
   globalWidgetParameters,
 }: {
+  id?: string;
   user: AuthenticatedUser;
   globalWidgetParameters: GlobalWidgetParameters;
 }): Investigation {
@@ -29,7 +31,7 @@ export function createNewInvestigation({
   return {
     '@timestamp': new Date().getTime(),
     user,
-    id: v4(),
+    id: id ?? v4(),
     title: i18n.translate('xpack.investigate.newInvestigationTitle', {
       defaultMessage: 'New investigation',
     }),

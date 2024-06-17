@@ -82,7 +82,7 @@ export const InvestigateWidgetGridStory: ComponentStoryObj<typeof Component> = {
         element: (
           <TimelineUserPrompt
             prompt="I asked for something"
-            user={{ name: 'me' }}
+            user={{ username: 'me' }}
             onDelete={() => {}}
           />
         ),

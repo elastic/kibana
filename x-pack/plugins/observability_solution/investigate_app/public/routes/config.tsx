@@ -25,12 +25,24 @@ const investigateRoutes = {
     children: {
       '/new': {
         element: <InvestigateView />,
+        params: t.partial({
+          query: t.partial({
+            revision: t.string,
+          }),
+        }),
       },
       '/{id}': {
         element: <InvestigateView />,
-        params: t.type({
-          path: t.type({ id: t.string }),
-        }),
+        params: t.intersection([
+          t.type({
+            path: t.type({ id: t.string }),
+          }),
+          t.partial({
+            query: t.partial({
+              revision: t.string,
+            }),
+          }),
+        ]),
       },
       '/': {
         element: <Redirect to="/new" />,

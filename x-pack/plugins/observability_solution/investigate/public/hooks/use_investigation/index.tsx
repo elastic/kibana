@@ -53,7 +53,7 @@ type StatefulInvestigationRevision = Omit<InvestigationRevision, 'items'> & {
 };
 
 export interface UseInvestigationApi {
-  startNewInvestigation: () => void;
+  startNewInvestigation: (id: string) => void;
   loadInvestigation: (id: string) => void;
   investigation: Omit<StatefulInvestigation, 'revisions'>;
   revision: RenderableInvestigationRevision;
@@ -76,6 +76,8 @@ export interface UseInvestigationApi {
   ) => Promise<void>;
   setGlobalParameters: (parameters: GlobalWidgetParameters) => Promise<void>;
   blocks: WorkflowBlock[];
+  setRevision: (revisionId: string) => void;
+  isNewInvestigation: boolean;
 }
 
 async function regenerateItem({
@@ -158,13 +160,11 @@ function useInvestigationWithoutContext({
     return investigation.revisions.find((revision) => revision.id === investigation.revision)!;
   }, [investigation.revision, investigation.revisions]);
 
-  const isAtEarliestRevision = useMemo(() => {
-    return investigation.revisions[0].id === currentRevision.id;
-  }, [currentRevision, investigation.revisions]);
+  const isAtEarliestRevision = investigation.revisions[0].id === currentRevision.id;
 
-  const isAtLatestRevision = useMemo(() => {
-    return last(investigation.revisions)?.id === currentRevision.id;
-  }, [currentRevision, investigation.revisions]);
+  const isAtLatestRevision = last(investigation.revisions)?.id === currentRevision.id;
+
+  const isNewInvestigation = investigation.revisions.length === 1 && !investigation.persisted;
 
   const hasUnsavedChanges = !!investigation.persisted;
 
@@ -182,11 +182,14 @@ function useInvestigationWithoutContext({
           id: v4(),
         };
 
-        return {
+        const nextInvestigation = {
           ...prevInvestigation,
+          persisted: false,
           revisions: prevInvestigation.revisions.concat(nextRevision),
           revision: nextRevision.id,
         };
+
+        return nextInvestigation;
       });
     },
     []
@@ -357,23 +360,27 @@ function useInvestigationWithoutContext({
     };
   }, [currentRevision]);
 
-  const startNewInvestigation = useCallback(() => {
-    setInvestigation((prevInvestigation) => {
-      const lastRevision = last(prevInvestigation.revisions)!;
+  const startNewInvestigation = useCallback(
+    (id: string) => {
+      setInvestigation((prevInvestigation) => {
+        const lastRevision = last(prevInvestigation.revisions)!;
 
-      const createdInvestigation = createNewInvestigation({
-        user,
-        globalWidgetParameters: lastRevision.parameters,
+        const createdInvestigation = createNewInvestigation({
+          id,
+          user,
+          globalWidgetParameters: lastRevision.parameters,
+        });
+
+        setBlocksById({});
+
+        return {
+          ...createdInvestigation,
+          persisted: false,
+        } as StatefulInvestigation;
       });
-
-      setBlocksById({});
-
-      return {
-        ...createdInvestigation,
-        persisted: false,
-      } as StatefulInvestigation;
-    });
-  }, [user]);
+    },
+    [user]
+  );
 
   const loadInvestigation = useCallback((id: string) => {}, []);
 
@@ -503,6 +510,24 @@ function useInvestigationWithoutContext({
     [updateInvestigation, user, widgetDefinitions]
   );
 
+  const setRevision = useCallback((revisionId: string) => {
+    setInvestigation((prevInvestigation) => {
+      const revision = prevInvestigation.revisions.find(
+        (revisionAtIndex) => revisionAtIndex.id === revisionId
+      );
+
+      if (!revision) {
+        throw new Error('Could not locate revision for ' + revisionId);
+      }
+
+      return {
+        ...prevInvestigation,
+        revision: revisionId,
+        persisted: false,
+      };
+    });
+  }, []);
+
   const lastItemId = last(currentRevision.items)?.id;
 
   const blocks = useMemo(() => {
@@ -528,6 +553,8 @@ function useInvestigationWithoutContext({
     setItemParameters,
     setGlobalParameters,
     updateItem: updateItemForApi,
+    setRevision,
+    isNewInvestigation,
   };
 }
 

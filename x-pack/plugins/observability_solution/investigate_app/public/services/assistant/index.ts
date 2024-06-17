@@ -72,7 +72,8 @@ export function createAssistantService({
           getChatClient(signal),
           security.authc.getCurrentUser().then((retrievedUser) => {
             return {
-              name: retrievedUser.username,
+              username: retrievedUser.username,
+              full_name: retrievedUser.full_name,
             };
           }),
         ]);

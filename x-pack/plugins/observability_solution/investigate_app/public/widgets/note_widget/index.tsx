@@ -25,11 +25,14 @@ export function registerNoteWidget(options: RegisterWidgetOptions) {
           user: {
             type: 'object',
             properties: {
-              name: {
+              username: {
+                type: 'string',
+              },
+              full_name: {
                 type: 'string',
               },
             },
-            required: ['name'],
+            required: ['username'],
           },
         },
         required: ['note', 'user'],

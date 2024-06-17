@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiAvatar } from '@elastic/eui';
-
+import { AuthenticatedUser } from '@kbn/core/public';
 import React from 'react';
 import { useTheme } from '../../hooks/use_theme';
 import { TimelineMessage } from '../timeline_message';
@@ -15,9 +15,7 @@ export function NoteWidget({
   note,
   onDelete,
 }: {
-  user: {
-    name: string;
-  };
+  user: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   note: string;
   onChange: (note: string) => void;
   onDelete: () => void;
@@ -25,7 +23,7 @@ export function NoteWidget({
   const theme = useTheme();
   return (
     <TimelineMessage
-      icon={<EuiAvatar name={user.name} size="s" />}
+      icon={<EuiAvatar name={user.username} size="s" />}
       color={theme.colors.emptyShade}
       content={note}
       onDelete={onDelete}

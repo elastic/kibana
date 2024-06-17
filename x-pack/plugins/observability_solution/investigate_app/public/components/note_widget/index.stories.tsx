@@ -30,7 +30,8 @@ const defaultStory: Story = {
   args: {
     props: {
       user: {
-        name: 'John Doe',
+        username: 'johndoe',
+        full_name: 'John Doe',
       },
       note: 'A short note',
     },

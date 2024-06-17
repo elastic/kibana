@@ -15,6 +15,7 @@ import {
 import { css } from '@emotion/css';
 import React from 'react';
 import { AssistantAvatar } from '@kbn/observability-ai-assistant-plugin/public';
+import { AuthenticatedUser } from '@kbn/core/public';
 import { shade } from 'polished';
 import { useTheme } from '../../hooks/use_theme';
 import { InvestigateTextButton } from '../investigate_text_button';
@@ -84,7 +85,7 @@ export function TimelineUserPrompt({
   prompt,
   onDelete,
 }: {
-  user: { name: string };
+  user: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   prompt: string;
   onDelete: () => void;
 }) {
@@ -93,7 +94,7 @@ export function TimelineUserPrompt({
     <TimelineMessage
       color={theme.colors.lightestShade}
       content={prompt}
-      icon={<EuiAvatar name={user.name} size="m" />}
+      icon={<EuiAvatar name={user.full_name || user.username} size="m" />}
       onDelete={onDelete}
     />
   );

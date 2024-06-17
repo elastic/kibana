@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { AuthenticatedUser } from '@kbn/core/public';
+
 export interface UserPromptWidgetParameters {
-  user: {
-    name: string;
-  };
+  user: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   prompt: string;
 }

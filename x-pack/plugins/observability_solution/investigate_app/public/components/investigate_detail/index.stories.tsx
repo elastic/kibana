@@ -37,6 +37,7 @@ const defaultStory: Story = {
       },
       isAtLatestRevision: true,
       isAtEarliestRevision: true,
+      hasUnsavedChanges: false,
     },
   },
   render: function Render(args) {

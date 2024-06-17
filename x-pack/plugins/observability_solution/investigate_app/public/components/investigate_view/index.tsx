@@ -17,6 +17,7 @@ import { rgba } from 'polished';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { v4 } from 'uuid';
 import { useDateRange } from '../../hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { MiniMapContextProvider } from '../../hooks/use_mini_map';
@@ -30,6 +31,8 @@ import { InvestigateSearchBar } from '../investigate_search_bar';
 import { InvestigateWidgetGrid } from '../investigate_widget_grid';
 import { InvestigationHistory } from '../investigation_history';
 import { MiniTimeline } from '../mini_timeline';
+import { useInvestigateParams } from '../../hooks/use_investigate_params';
+import { useInvestigateRouter } from '../../hooks/use_investigate_router';
 
 const containerClassName = css`
   overflow: auto;
@@ -63,6 +66,13 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
       start: { investigate },
     },
   } = useKibana();
+
+  const { path, query } = useInvestigateParams('/*');
+
+  const investigateRouter = useInvestigateRouter();
+
+  const investigationIdFromPath = path && 'id' in path ? path.id : undefined;
+  const revisionIdFromPath = query && 'revision' in query ? query.revision : undefined;
 
   const [kuery, setKuery] = useState('');
 
@@ -131,6 +141,8 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     unlockItem,
     revision,
     updateItem,
+    setRevision,
+    isNewInvestigation,
   } = investigate.useInvestigation({
     user,
     from: range.start.toISOString(),
@@ -139,9 +151,12 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
 
   const [editingItem, setEditingItem] = useState<InvestigateWidget | undefined>(undefined);
 
+  const addItemRef = useRef(addItem);
+  addItemRef.current = addItem;
+
   const createWidget = (widgetCreate: InvestigateWidgetCreate) => {
     stickToBottom();
-    return addItem(widgetCreate);
+    return addItemRef.current(widgetCreate);
   };
 
   const createWidgetRef = useRef(createWidget);
@@ -192,6 +207,47 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   useEffect(() => {
     setGlobalParameters(globalWidgetParameters);
   }, [globalWidgetParameters, setGlobalParameters]);
+
+  useEffect(() => {
+    if (investigationIdFromPath && investigation.id === investigationIdFromPath) {
+      return;
+    }
+
+    if (investigationIdFromPath) {
+      loadInvestigation(investigationIdFromPath);
+    } else if (!investigationIdFromPath && !isNewInvestigation) {
+      const id = v4();
+      // startNewInvestigation(id);
+    }
+  }, [
+    investigationIdFromPath,
+    loadInvestigation,
+    startNewInvestigation,
+    investigateRouter,
+    investigation.id,
+    isNewInvestigation,
+  ]);
+
+  useEffect(() => {
+    if (revisionIdFromPath) {
+      setRevision(revisionIdFromPath);
+    }
+  }, [revisionIdFromPath, setRevision, startNewInvestigation]);
+
+  useEffect(() => {
+    if (isNewInvestigation) {
+      return;
+    }
+
+    // investigateRouter.push('/{id}', {
+    //   path: {
+    //     id: investigation.id,
+    //   },
+    //   query: {
+    //     revision: !isAtLatestRevision ? revision.id : undefined,
+    //   },
+    // });
+  }, [investigation.id, revision.id, investigateRouter, isAtLatestRevision, isNewInvestigation]);
 
   return (
     <MiniMapContextProvider container={scrollableContainer}>
@@ -296,6 +352,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                 revision={revision}
                 isAtEarliestRevision={isAtEarliestRevision}
                 isAtLatestRevision={isAtLatestRevision}
+                hasUnsavedChanges={hasUnsavedChanges}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

@@ -25,11 +25,14 @@ export function registerUserPromptWidget(options: RegisterWidgetOptions) {
           user: {
             type: 'object',
             properties: {
-              name: {
+              username: {
+                type: 'string',
+              },
+              full_name: {
                 type: 'string',
               },
             },
-            required: ['name'],
+            required: ['username'],
           },
         },
         required: ['prompt', 'user'],
