@@ -43,9 +43,9 @@ export function uninstallBuiltinEntityDefinitionsRoute<T extends RequestHandlerC
         const soClient = server.core.savedObjects.getScopedClient(fakeRequest);
         const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
 
-        await uninstallBuiltInEntityDefinitions({ soClient, esClient, logger });
+        const definitions = await uninstallBuiltInEntityDefinitions({ soClient, esClient, logger });
 
-        return res.ok({ body: { success: true } });
+        return res.ok({ body: { success: true, definitions } });
       } catch (e) {
         logger.error(e);
         return res.customError({ body: e, statusCode: 500 });

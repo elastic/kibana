@@ -43,7 +43,7 @@ export async function uninstallBuiltInEntityDefinitions({
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   logger: Logger;
-}) {
+}): Promise<EntityDefinition[]> {
   const definitions = await findEntityDefinitions({
     soClient,
     esClient,
@@ -55,4 +55,6 @@ export async function uninstallBuiltInEntityDefinitions({
       await uninstallEntityDefinition({ definition, esClient, soClient, logger });
     })
   );
+
+  return definitions;
 }
