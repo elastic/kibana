@@ -8,8 +8,6 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 import { samlAuthentication } from './support/saml_auth';
-import { getVideosForFailedSpecs } from './support/filter_videos';
-import { aiAssistantDataLoaders } from './tasks/ai_assistant/data_loaders';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
