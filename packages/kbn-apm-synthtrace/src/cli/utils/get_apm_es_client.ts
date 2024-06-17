@@ -10,6 +10,7 @@ import { Client } from '@elastic/elasticsearch';
 import { ApmSynthtraceEsClient } from '../../..';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
+import { getEsClientTlsSettings } from './ssl';
 
 export function getApmEsClient({
   target,
@@ -23,6 +24,7 @@ export function getApmEsClient({
 }) {
   const client = new Client({
     node: target,
+    tls: getEsClientTlsSettings(target),
   });
 
   const apmEsClient = new ApmSynthtraceEsClient({
