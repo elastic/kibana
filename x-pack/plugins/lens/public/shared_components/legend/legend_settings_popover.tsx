@@ -360,6 +360,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
               aria-label={i18n.translate('xpack.lens.shared.legendStatistics', {
                 defaultMessage: 'Statistics',
               })}
+              data-test-subj="lnsLegendStatisticsSelect"
               placeholder={i18n.translate('xpack.lens.shared.legendStatisticsPlaceholder', {
                 defaultMessage: 'Select one or more statistics to show',
               })}

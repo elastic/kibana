@@ -183,10 +183,10 @@ const xyLegendValues: Array<{
   },
   {
     value: LegendValue.LastNonNullValue,
-    label: i18n.translate('xpack.lens.shared.legendValues.lastNonNullValue', {
+    label: i18n.translate('xpack.lens.shared.legendValues.lastValue', {
       defaultMessage: 'Last non-null value',
     }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastNonNullValueDesc', {
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastValueDesc', {
       defaultMessage: 'Last non-null value in the series.',
     }),
   },
@@ -229,7 +229,7 @@ const xyLegendValues: Array<{
   {
     value: LegendValue.Total,
     label: i18n.translate('xpack.lens.shared.legendValues.total', {
-      defaultMessage: 'Total',
+      defaultMessage: 'Sum',
     }),
     toolTipContent: i18n.translate('xpack.lens.shared.legendValues.totalDesc', {
       defaultMessage: 'The sum of all values in the series.',
@@ -530,7 +530,7 @@ export const XyToolbar = memo(function XyToolbar(
               });
             }}
             titlePlaceholder={
-              frame.activeData?.[dataLayers[0].layerId]?.columns.find(
+              frame.activeData?.[dataLayers[0].layerId].columns.find(
                 (col) => col.id === dataLayers[0].splitAccessor
               )?.name ?? defaultLegendTitle
             }
@@ -547,18 +547,35 @@ export const XyToolbar = memo(function XyToolbar(
             }}
             isTitleVisible={state?.legend.isTitleVisible}
             onDisplayChange={(optionId) => {
-              const newMode = legendOptions.find(({ id }) => id === optionId);
-              if (!newMode) {
-                return;
+              const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
+              if (newMode === 'auto') {
+                setState({
+                  ...state,
+                  legend: {
+                    ...state.legend,
+                    isVisible: true,
+                    showSingleSeries: false,
+                  },
+                });
+              } else if (newMode === 'show') {
+                setState({
+                  ...state,
+                  legend: {
+                    ...state.legend,
+                    isVisible: true,
+                    showSingleSeries: true,
+                  },
+                });
+              } else if (newMode === 'hide') {
+                setState({
+                  ...state,
+                  legend: {
+                    ...state.legend,
+                    isVisible: false,
+                    showSingleSeries: false,
+                  },
+                });
               }
-              setState({
-                ...state,
-                legend: {
-                  ...state.legend,
-                  isVisible: newMode.id !== 'hide',
-                  showSingleSeries: newMode.id === 'show',
-                },
-              });
             }}
             position={state?.legend.position}
             horizontalAlignment={state?.legend.horizontalAlignment}

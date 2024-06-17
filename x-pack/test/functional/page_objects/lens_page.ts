@@ -120,10 +120,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async selectOptionFromComboBox(testTargetId: string, name: string) {
+    async selectOptionFromComboBox(testTargetId: string, name: string | string[]) {
       const target = await testSubjects.find(testTargetId, 1000);
       await comboBox.openOptionsList(target);
-      await comboBox.setElement(target, name);
+      if (typeof name === 'string') {
+        await comboBox.setElement(target, name);
+      } else {
+        for (const option of name) {
+          await comboBox.setElement(target, option);
+        }
+      }
     },
 
     async configureQueryAnnotation(opts: {
