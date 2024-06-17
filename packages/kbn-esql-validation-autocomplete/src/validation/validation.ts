@@ -907,17 +907,6 @@ const validateMetricsCommand = (
     }
   }
 
-  const hasGroupingButDoesNotHaveAggregates =
-    grouping && grouping.length && (!aggregates || !aggregates.length);
-  if (hasGroupingButDoesNotHaveAggregates) {
-    messages.push(
-      errors.unexpected(
-        command.location,
-        'Grouping fields are not allowed without aggregate functions.'
-      )
-    );
-  }
-
   return messages;
 };
 
