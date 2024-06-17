@@ -53,7 +53,7 @@ export const snapshotListSchema = schema.object({
 });
 
 export const policySchema = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   snapshotName: schema.string(),
   schedule: schema.string(),
   repository: schema.string(),
