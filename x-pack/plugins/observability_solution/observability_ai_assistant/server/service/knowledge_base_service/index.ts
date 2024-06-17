@@ -303,19 +303,20 @@ export class KnowledgeBaseService {
     user,
     modelId,
   }: {
-    queries: string[];
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
     namespace: string;
     user?: { name: string };
     modelId: string;
   }): Promise<RecalledEntry[]> {
-    const query = {
+    const esQuery = {
       bool: {
-        should: queries.map((text) => ({
+        should: queries.map(({ text, boost = 1 }) => ({
           text_expansion: {
             'ml.tokens': {
               model_text: text,
               model_id: modelId,
+              boost,
             },
           },
         })),
@@ -333,7 +334,7 @@ export class KnowledgeBaseService {
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
     >({
       index: [this.dependencies.resources.aliases.kb],
-      query,
+      query: esQuery,
       size: 20,
       _source: {
         includes: ['text', 'is_correction', 'labels'],
@@ -385,7 +386,7 @@ export class KnowledgeBaseService {
     uiSettingsClient,
     modelId,
   }: {
-    queries: string[];
+    queries: Array<{ text: string; boost?: number }>;
     asCurrentUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
     modelId: string;
@@ -414,15 +415,16 @@ export class KnowledgeBaseService {
       const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
       const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
 
-      return queries.map((query) => {
+      return queries.map(({ text, boost = 1 }) => {
         return {
           bool: {
             should: [
               {
                 text_expansion: {
                   [vectorField]: {
-                    model_text: query,
+                    model_text: text,
                     model_id: modelId,
+                    boost,
                   },
                 },
               },
@@ -470,7 +472,7 @@ export class KnowledgeBaseService {
     asCurrentUser,
     uiSettingsClient,
   }: {
-    queries: string[];
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
     user?: { name: string };
     namespace: string;
@@ -479,7 +481,9 @@ export class KnowledgeBaseService {
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
-    this.dependencies.logger.debug(`Recalling entries from KB for queries: "${queries}"`);
+    this.dependencies.logger.debug(
+      `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
+    );
     const modelId = await this.dependencies.getModelId();
 
     const [documentsFromKb, documentsFromConnectors] = await Promise.all([
@@ -537,7 +541,7 @@ export class KnowledgeBaseService {
     };
   };
 
-  getInstructions = async (
+  getUserInstructions = async (
     namespace: string,
     user?: { name: string }
   ): Promise<UserInstruction[]> => {

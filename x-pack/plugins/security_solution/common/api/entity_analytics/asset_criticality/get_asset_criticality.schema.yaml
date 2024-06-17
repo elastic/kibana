@@ -12,6 +12,8 @@ servers:
 paths:
   /internal/asset_criticality:
     get:
+      x-labels: [ess, serverless]
+      x-internal: true
       operationId: AssetCriticalityGetRecord
       summary: Get Criticality Record
       parameters:

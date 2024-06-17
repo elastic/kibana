@@ -22,6 +22,7 @@ import {
 import { buildApmAvailabilityIndicator } from '../../data/slo/indicator';
 import { buildSlo } from '../../data/slo/slo';
 import { ActiveAlerts } from '../../hooks/active_alerts';
+import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
 import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
 import { useFetchActiveAlerts } from '../../hooks/use_fetch_active_alerts';
@@ -46,6 +47,7 @@ jest.mock('../../hooks/use_fetch_active_alerts');
 jest.mock('../../hooks/use_fetch_slo_details');
 jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_delete_slo');
+jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/use_delete_slo_instance');
 
 const useKibanaMock = useKibana as jest.Mock;
@@ -56,6 +58,7 @@ const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
+const useCreateDataViewsMock = useCreateDataView as jest.Mock;
 const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
 TagsListMock.mockReturnValue(<div>Tags list</div>);
@@ -134,6 +137,9 @@ describe('SLO Details Page', () => {
     usePermissionsMock.mockReturnValue({
       isLoading: false,
       data: { hasAllReadRequested: true, hasAllWriteRequested: true },
+    });
+    useCreateDataViewsMock.mockReturnValue({
+      dataView: { getName: () => 'dataview', getIndexPattern: () => '.dataview-index' },
     });
     useFetchHistoricalSummaryMock.mockReturnValue({
       isLoading: false,
