@@ -59,7 +59,7 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
           const config = ctx.securitySolution.getConfig();
           const soClient = ctx.core.savedObjects.client;
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
           const exceptionsListClient = ctx.securitySolution.getExceptionListClient();
@@ -110,7 +110,7 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
           }
 
           const { results: installedRules, errors: installationErrors } = await createPrebuiltRules(
-            rulesManagementClient,
+            detectionRulesClient,
             installableRules
           );
           const ruleErrors = [...fetchErrors, ...installationErrors];

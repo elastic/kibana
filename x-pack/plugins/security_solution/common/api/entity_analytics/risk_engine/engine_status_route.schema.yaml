@@ -12,8 +12,10 @@ servers:
         default: '5601'
 
 paths:
-  /engine/status:
+  /internal/risk_score/engine/status:
     get:
+      x-labels: [ess, serverless]
+      x-internal: true
       summary: Get the status of the Risk Engine
       description: Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
       responses:

@@ -2,11 +2,21 @@ openapi: 3.0.0
 info:
   title: APM UI
   version: 1.0.0
+tags:
+  - name: APM agent keys
+    description: >
+      Configure APM agent keys to authorize requests from APM agents to the APM Server.
+  - name: APM annotations
+    description: >
+      Annotate visualizations in the APM app with significant events.
+      Annotations enable you to easily see how events are impacting the performance of your applications.
 paths:
   /api/apm/agent_keys:
     post:
       summary: Create an APM agent key
       description: Create a new agent key for APM.
+      tags:
+        - APM agent keys
       requestBody:
         required: true
         content:
@@ -46,6 +56,8 @@ paths:
     get:
       summary: Search for annotations
       description: Search for annotations related to a specific service.
+      tags:
+        - APM annotations
       parameters:
         - name: serviceName
           in: path
@@ -98,6 +110,8 @@ paths:
     post:
       summary: Create a service annotation
       description: Create a new annotation for a specific service.
+      tags:
+        - APM annotations
       parameters:
         - name: serviceName
           in: path

@@ -28,6 +28,7 @@ import type {
   InstallablePackage,
   Installation,
   RegistryPackage,
+  TemplateAgentPolicyInput,
 } from '../../types';
 
 import type { FleetAuthzRouteConfig } from '../security/types';
@@ -42,11 +43,18 @@ import { appContextService } from '..';
 import type { CustomPackageDatasetConfiguration } from './packages/install';
 
 import type { FetchFindLatestPackageOptions } from './registry';
+import { getPackageFieldsMetadata } from './registry';
 import * as Registry from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
-import { ensureInstalledPackage, getInstallation, getPackages, installPackage } from './packages';
+import {
+  ensureInstalledPackage,
+  getInstallation,
+  getPackages,
+  installPackage,
+  getTemplateInputs,
+} from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getEsPackage } from './archive/storage';
 
@@ -93,14 +101,27 @@ export interface PackageClient {
 
   getPackage(
     packageName: string,
-    packageVersion: string
-  ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
+    packageVersion: string,
+    options?: Parameters<typeof getPackage>['2']
+  ): ReturnType<typeof getPackage>;
+
+  getPackageFieldsMetadata(
+    params: Parameters<typeof getPackageFieldsMetadata>['0'],
+    options?: Parameters<typeof getPackageFieldsMetadata>['1']
+  ): ReturnType<typeof getPackageFieldsMetadata>;
 
   getPackages(params?: {
     excludeInstallStatus?: false;
     category?: CategoryId;
     prerelease?: false;
   }): Promise<PackageList>;
+
+  getAgentPolicyInputs(
+    pkgName: string,
+    pkgVersion?: string,
+    prerelease?: false,
+    ignoreUnverified?: boolean
+  ): Promise<TemplateAgentPolicyInput[]>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -263,6 +284,32 @@ class PackageClientImpl implements PackageClient {
     return generatePackageInfoFromArchiveBuffer(archiveBuffer, 'application/zip');
   }
 
+  public async getAgentPolicyInputs(
+    pkgName: string,
+    pkgVersion?: string,
+    prerelease?: false,
+    ignoreUnverified?: boolean
+  ) {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+
+    // If pkgVersion isn't specified, find the latest package version
+    if (!pkgVersion) {
+      const pkg = await Registry.fetchFindLatestPackageOrThrow(pkgName, { prerelease });
+      pkgVersion = pkg.version;
+    }
+
+    const { inputs } = await getTemplateInputs(
+      this.internalSoClient,
+      pkgName,
+      pkgVersion,
+      'json',
+      prerelease,
+      ignoreUnverified
+    );
+
+    return inputs;
+  }
+
   public async getPackage(
     packageName: string,
     packageVersion: string,
@@ -270,6 +317,14 @@ class PackageClientImpl implements PackageClient {
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getPackage(packageName, packageVersion, options);
+  }
+
+  public async getPackageFieldsMetadata(
+    params: Parameters<typeof getPackageFieldsMetadata>['0'],
+    options?: Parameters<typeof getPackageFieldsMetadata>['1']
+  ) {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+    return getPackageFieldsMetadata(params, options);
   }
 
   public async getPackages(params?: {

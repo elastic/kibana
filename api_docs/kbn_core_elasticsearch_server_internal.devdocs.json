@@ -3114,7 +3114,7 @@
         "label": "ElasticsearchConfigType",
         "description": [],
         "signature": [
-          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; startupDelay: moment.Duration; }>; readonly hosts: string | string[]; readonly apiVersion: string; readonly customHeaders: Record<string, string>; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly idleSocketTimeout: moment.Duration; readonly compression: boolean; readonly requestHeadersWhitelist: string | string[]; readonly shardTimeout: moment.Duration; readonly requestTimeout: moment.Duration; readonly pingTimeout: moment.Duration; readonly logQueries: boolean; readonly ignoreVersionMismatch: boolean; readonly skipStartupConnectionCheck: boolean; readonly apisToRedactInLogs: Readonly<{ method?: string | undefined; } & { path: string; }>[]; }"
+          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; startupDelay: moment.Duration; }>; readonly hosts: string | string[]; readonly apiVersion: string; readonly customHeaders: Record<string, string>; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly idleSocketTimeout: moment.Duration; readonly compression: boolean; readonly requestHeadersWhitelist: string | string[]; readonly shardTimeout: moment.Duration; readonly requestTimeout: moment.Duration; readonly pingTimeout: moment.Duration; readonly logQueries: boolean; readonly ignoreVersionMismatch: boolean; readonly skipStartupConnectionCheck: boolean; readonly apisToRedactInLogs: Readonly<{ method?: string | undefined; } & { path: string; }>[]; readonly dnsCacheTtl: moment.Duration; }"
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_config.ts",
         "deprecated": false,
@@ -3436,7 +3436,15 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ method?: string | undefined; } & { path: string; }>[]>; }>"
+          "<Readonly<{ method?: string | undefined; } & { path: string; }>[]>; dnsCacheTtl: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<moment.Duration>; }>"
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_config.ts",
         "deprecated": false,

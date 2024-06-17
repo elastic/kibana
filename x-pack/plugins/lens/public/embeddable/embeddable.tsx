@@ -106,7 +106,6 @@ import {
   IndexPatternRef,
   FramePublicAPI,
   AddUserMessages,
-  isMessageRemovable,
   UserMessagesGetter,
   UserMessagesDisplayLocationId,
 } from '../types';
@@ -1000,9 +999,7 @@ export class Embeddable
 
     this.removeActiveDataWarningMessages();
     const searchWarningMessages = this.getSearchWarningMessages(adapters);
-    this.removeActiveDataWarningMessages = this.addUserMessages(
-      searchWarningMessages.filter(isMessageRemovable)
-    );
+    this.removeActiveDataWarningMessages = this.addUserMessages(searchWarningMessages);
 
     this.activeData = newActiveData;
 

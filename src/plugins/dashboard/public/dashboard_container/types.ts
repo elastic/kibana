@@ -54,6 +54,11 @@ export interface DashboardPublicState {
   focusedPanelId?: string;
 }
 
+export type DashboardLoadType =
+  | 'sessionFirstLoad'
+  | 'dashboardFirstLoad'
+  | 'dashboardSubsequentLoad';
+
 export interface DashboardRenderPerformanceStats {
   lastTimeToData: number;
   panelsRenderDoneTime: number;

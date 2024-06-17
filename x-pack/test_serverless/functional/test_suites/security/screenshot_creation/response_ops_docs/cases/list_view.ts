@@ -7,6 +7,7 @@
 
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
+import type { RoleCredentials } from '../../../../../../shared/services';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { navigateToCasesApp } from '../../../../../../shared/lib/cases';
 
@@ -17,11 +18,14 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const svlCommonScreenshots = getService('svlCommonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'security_cases'];
   const testSubjects = getService('testSubjects');
+  const svlUserManager = getService('svlUserManager');
   const owner = SECURITY_SOLUTION_OWNER;
   let caseIdSuspiciousEmail: string;
 
   describe('list view', function () {
+    let roleAuthc: RoleCredentials;
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       await svlCases.api.createCase(
         svlCases.api.getPostCaseRequest(owner, {
           title: 'Unusual processes identified',
@@ -29,7 +33,8 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
           description: 'Test.',
           owner,
           severity: CaseSeverity.HIGH,
-        })
+        }),
+        roleAuthc
       );
 
       const caseSuspiciousEmail = await svlCases.api.createCase(
@@ -38,7 +43,8 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
           tags: ['email', 'phishing'],
           description: 'Several employees have received suspicious emails from an unknown address.',
           owner,
-        })
+        }),
+        roleAuthc
       );
       caseIdSuspiciousEmail = caseSuspiciousEmail.id;
 
@@ -49,7 +55,8 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
           description: 'Test.',
           owner,
           severity: CaseSeverity.MEDIUM,
-        })
+        }),
+        roleAuthc
       );
     });
 

@@ -15,8 +15,9 @@ import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 const contentSource = { id: 'source123' };
+
 jest.mock('../../source_logic', () => ({
-  SourceLogic: { values: { contentSource } },
+  SourceLogic: { values: { contentSource: { id: 'source123' } } },
 }));
 
 jest.mock('../../../../app_logic', () => ({

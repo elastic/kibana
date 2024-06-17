@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  updateLoadingStateAction,
+  updateLoadingState,
   setZeroDocsFallback,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
@@ -43,7 +43,7 @@ export const indexInfoHandlerFactory =
     if (!requestBody.overrides?.remainingFieldCandidates) {
       logDebugMessage('Fetch index information.');
       responseStream.push(
-        updateLoadingStateAction({
+        updateLoadingState({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
           loadingState: i18n.translate(
@@ -85,7 +85,7 @@ export const indexInfoHandlerFactory =
       responseStream.pushPingWithTimeout();
 
       responseStream.push(
-        updateLoadingStateAction({
+        updateLoadingState({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
           loadingState: i18n.translate(

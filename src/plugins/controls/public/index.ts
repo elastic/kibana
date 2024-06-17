@@ -15,6 +15,7 @@ export type {
   ControlEditorProps,
   CommonControlOutput,
   IEditableControlFactory,
+  CanClearSelections,
 } from './types';
 
 export type {
@@ -64,6 +65,9 @@ export {
   ControlGroupRenderer,
   type ControlGroupRendererProps,
 } from './control_group';
+
+/** TODO: Remove this once it is no longer needed in the examples plugin */
+export { CONTROL_WIDTH_OPTIONS } from './control_group/editor/editor_constants';
 
 export function plugin() {
   return new ControlsPlugin();

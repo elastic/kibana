@@ -56,7 +56,8 @@ describe('POST /api/saved_objects/_bulk_get with allowApiAccess true', () => {
     const logger = loggerMock.create();
 
     const config = setupConfig(true);
-    registerBulkGetRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+    registerBulkGetRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

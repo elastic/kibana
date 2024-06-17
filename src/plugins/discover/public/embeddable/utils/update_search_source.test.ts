@@ -53,7 +53,7 @@ describe('updateSearchSource', () => {
       true,
       defaults
     );
-    expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: 'true' }]);
+    expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: true }]);
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
     expect(searchSource.getField('size')).toEqual(customSampleSize);
   });

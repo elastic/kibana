@@ -39,3 +39,9 @@ export function isActiveFromUrl(
       : nodesBranch.some((branch) => isSamePath(branch.path, nodePath));
   }, false);
 }
+
+export const isAccordionNode = (
+  node: Pick<ChromeProjectNavigationNode, 'renderAs' | 'defaultIsCollapsed' | 'isCollapsible'>
+) =>
+  node.renderAs === 'accordion' ||
+  ['defaultIsCollapsed', 'isCollapsible'].some((prop) => node.hasOwnProperty(prop));

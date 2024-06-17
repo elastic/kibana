@@ -101,7 +101,7 @@ function extractIdentifiers(
   if (ctx instanceof MvExpandCommandContext) {
     return wrapIdentifierAsArray(ctx.qualifiedName());
   }
-  return wrapIdentifierAsArray(ctx.qualifiedNamePattern_list());
+  return wrapIdentifierAsArray(ctx.qualifiedNamePatterns().qualifiedNamePattern_list());
 }
 
 function makeColumnsOutOfIdentifiers(identifiers: ParserRuleContext[]) {

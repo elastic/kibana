@@ -153,7 +153,11 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
         )}
         actions={
           <>
-            <TokenEstimateTooltip context={inputTokens.context} total={inputTokens.total} />
+            <TokenEstimateTooltip
+              context={inputTokens.context}
+              total={inputTokens.total}
+              clipped={inputTokens.contextClipped}
+            />
             <CopyActionButton
               copyText={String(content)}
               ariaLabel={i18n.translate('xpack.searchPlayground.chat.message.assistant.copyLabel', {

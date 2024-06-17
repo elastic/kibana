@@ -11,21 +11,12 @@ import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { ROLE, login } from '../../tasks/login';
-import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/alerts';
 
 describe.skip(
   'Isolate command',
   {
-    tags: [
-      '@ess',
-      '@serverless',
-
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
-      '@brokenInServerless',
-    ],
+    tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
@@ -77,7 +68,6 @@ describe.skip(
 
     beforeEach(() => {
       login(ROLE.soc_manager);
-      disableExpandableFlyoutAdvancedSettings();
     });
 
     describe('From alerts', () => {

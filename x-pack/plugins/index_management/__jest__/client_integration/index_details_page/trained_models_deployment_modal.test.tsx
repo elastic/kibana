@@ -18,10 +18,10 @@ describe('When semantic_text is enabled', () => {
   describe('When there is no error in the model deployment', () => {
     const setup = registerTestBed(TrainedModelsDeploymentModal, {
       defaultProps: {
-        isSemanticTextEnabled: true,
-        pendingDeployments: ['.elser-test-3'],
         setIsModalVisible,
         refreshModal,
+        pendingDeployments: ['.elser-test-3'],
+        errorsInTrainedModelDeployment: [],
       },
       memoryRouter: { wrapComponent: false },
     });
@@ -48,17 +48,16 @@ describe('When semantic_text is enabled', () => {
       await act(async () => {
         find('confirmModalCancelButton').simulate('click');
       });
-      expect(setIsModalVisible.mock.calls).toHaveLength(1);
+      expect(setIsModalVisible).toHaveBeenLastCalledWith(false);
     });
   });
 
   describe('When there is error in the model deployment', () => {
     const setup = registerTestBed(TrainedModelsDeploymentModal, {
       defaultProps: {
-        isSemanticTextEnabled: true,
-        pendingDeployments: ['.elser-test-3'],
         setIsModalVisible: setIsVisibleForErrorModal,
         refreshModal: tryAgainForErrorModal,
+        pendingDeployments: ['.elser-test-3'],
         errorsInTrainedModelDeployment: ['.elser-test-3'],
       },
       memoryRouter: { wrapComponent: false },
@@ -82,22 +81,11 @@ describe('When semantic_text is enabled', () => {
       expect(tryAgainForErrorModal.mock.calls).toHaveLength(1);
     });
 
-    it('should call setIsModalVisible method if cancel button is pressed', async () => {
+    it('should call setIsVisibleForErrorModal method if cancel button is pressed', async () => {
       await act(async () => {
         find('confirmModalCancelButton').simulate('click');
       });
-      expect(setIsVisibleForErrorModal.mock.calls).toHaveLength(1);
+      expect(setIsVisibleForErrorModal).toHaveBeenLastCalledWith(false);
     });
-  });
-});
-
-describe('When semantic_text is disabled', () => {
-  const setup = registerTestBed(TrainedModelsDeploymentModal, {
-    defaultProps: { isSemanticTextEnabled: false },
-    memoryRouter: { wrapComponent: false },
-  });
-  const { exists } = setup();
-  it('it should not display the modal', () => {
-    expect(exists('trainedModelsDeploymentModal')).toBe(false);
   });
 });

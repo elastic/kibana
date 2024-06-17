@@ -60,3 +60,5 @@ export type TourKey = keyof typeof TOUR_STORAGE_KEYS;
 export type TOUR_STORAGE_CONFIG = {
   [k in TourKey]: TourConfig;
 };
+
+export const MAX_FLYOUT_WIDTH = 800;

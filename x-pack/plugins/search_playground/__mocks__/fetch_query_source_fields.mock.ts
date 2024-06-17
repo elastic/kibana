@@ -7,6 +7,64 @@
 
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
+export const DENSE_SPARSE_SAME_FIELD_NAME_CAPS = {
+  indices: ['cohere-embeddings', 'elser_index'],
+  fields: {
+    text_embedding: {
+      sparse_vector: {
+        type: 'sparse_vector',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+        indices: ['elser_index'],
+      },
+      dense_vector: {
+        type: 'dense_vector',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+        indices: ['cohere-embeddings'],
+      },
+    },
+    model_id: {
+      text: { type: 'text', metadata_field: false, searchable: true, aggregatable: false },
+    },
+    text: { text: { type: 'text', metadata_field: false, searchable: true, aggregatable: false } },
+    'model_id.keyword': {
+      keyword: { type: 'keyword', metadata_field: false, searchable: true, aggregatable: true },
+    },
+  },
+};
+
+export const DENSE_SPARSE_SAME_FIELD_NAME_DOCS = [
+  {
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: { total: { value: 1, relation: 'eq' }, max_score: null, hits: [] },
+    aggregations: {
+      model_id: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
+        buckets: [{ key: 'cohere_embeddings', doc_count: 1 }],
+      },
+    },
+  } as SearchResponse<any>,
+  {
+    took: 0,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: { total: { value: 1, relation: 'eq' }, max_score: null, hits: [] },
+    aggregations: {
+      model_id: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
+        buckets: [{ key: 'my-elser-model', doc_count: 1 }],
+      },
+    },
+  } as SearchResponse<any>,
+];
+
 export const ELSER_PASSAGE_CHUNKED_TWO_INDICES_DOCS = [
   {
     took: 0,

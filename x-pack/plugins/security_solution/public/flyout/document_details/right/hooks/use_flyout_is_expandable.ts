@@ -12,7 +12,6 @@ import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data
 import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { isEcsAllowedValue } from '../utils/event_utils';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { EventKind } from '../../shared/constants/event_kinds';
 
 export interface UseShowEventOverviewParams {
@@ -45,18 +44,10 @@ export const useFlyoutIsExpandable = ({
     isEcsAllowedValue('event.category', category)
   );
 
-  const expandableEventFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'expandableEventFlyoutEnabled'
-  );
-
   return useMemo(() => {
     // alert document: always show overview
     if (eventKind === EventKind.signal) {
       return true;
-    }
-    // do not show overview for non-alert if feature flag is disabled
-    if (!expandableEventFlyoutEnabled) {
-      return false;
     }
     // event document: show overview when event category is ecs compliant or event renderer is available
     if (eventKind === EventKind.event) {
@@ -64,5 +55,5 @@ export const useFlyoutIsExpandable = ({
     }
     // non-event document: show overview when event kind is ecs compliant or event renderer is available
     return eventKindInECS || renderer != null;
-  }, [expandableEventFlyoutEnabled, eventKind, eventCategoryInECS, eventKindInECS, renderer]);
+  }, [eventKind, eventCategoryInECS, eventKindInECS, renderer]);
 };

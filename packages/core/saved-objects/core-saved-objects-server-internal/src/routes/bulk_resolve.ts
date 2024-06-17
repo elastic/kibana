@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { RouteAccess } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -21,16 +22,21 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
 }
 
 export const registerBulkResolveRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/_bulk_resolve',
+      options: {
+        access,
+        description: `Resolve saved objects`,
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({

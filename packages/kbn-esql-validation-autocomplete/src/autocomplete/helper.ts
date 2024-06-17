@@ -55,3 +55,11 @@ export function getParamAtPosition(
 ) {
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
+
+export function getQueryForFields(queryString: string, commands: ESQLCommand[]) {
+  // If there is only one source command and it does not require fields, do not
+  // fetch fields, hence return an empty string.
+  return commands.length === 1 && ['from', 'row', 'show'].includes(commands[0].name)
+    ? ''
+    : queryString;
+}

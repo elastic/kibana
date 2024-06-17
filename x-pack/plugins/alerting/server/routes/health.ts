@@ -42,7 +42,7 @@ export const healthRoute = (
       path: `${BASE_ALERTING_API_PATH}/_health`,
       options: {
         access: 'public',
-        description: `Get the health of the alerting framework`,
+        summary: `Get the health of the alerting framework`,
       },
       validate: false,
     },

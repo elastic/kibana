@@ -12,7 +12,7 @@ import { useLensAttributes } from '../../use_lens_attributes';
 
 import { kpiUniqueIpsSourceMetricLensAttributes } from './kpi_unique_ips_source_metric';
 
-jest.mock('../../../../containers/sourcerer', () => ({
+jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',

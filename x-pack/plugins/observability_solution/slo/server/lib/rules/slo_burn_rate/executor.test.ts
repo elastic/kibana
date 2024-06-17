@@ -173,7 +173,11 @@ describe('BurnRateRuleExecutor', () => {
     loggerMock = loggingSystemMock.createLogger();
     servicesMock = {
       savedObjectsClient: soClientMock,
-      scopedClusterClient: { asCurrentUser: esClientMock, asInternalUser: esClientMock },
+      scopedClusterClient: {
+        asCurrentUser: esClientMock,
+        asInternalUser: esClientMock,
+        asSecondaryAuthUser: esClientMock,
+      },
       alertsClient: publicAlertsClientMock.create(),
       alertFactory: {
         create: jest.fn(),

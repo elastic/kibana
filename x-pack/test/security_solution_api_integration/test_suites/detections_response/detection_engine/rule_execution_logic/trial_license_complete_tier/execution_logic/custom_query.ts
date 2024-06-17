@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import {
   ALERT_RISK_SCORE,
   ALERT_RULE_PARAMETERS,
@@ -46,7 +46,6 @@ import {
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import moment from 'moment';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import {
   createExceptionList,
@@ -127,8 +126,8 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
-      expect(alerts.hits.hits.length).greaterThan(0);
-      expect(alerts.hits.hits[0]._source?.['kibana.alert.ancestors'][0].id).eql(ID);
+      expect(alerts.hits.hits.length).toBeGreaterThan(0);
+      expect(alerts.hits.hits[0]._source?.['kibana.alert.ancestors'][0].id).toEqual(ID);
     });
 
     it('generates max alerts warning when circuit breaker is hit', async () => {
@@ -136,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
         ...getRuleForAlertTesting(['auditbeat-*']),
       };
       const { logs } = await previewRule({ supertest, rule });
-      expect(logs[0].warnings).contain(getMaxAlertsWarning());
+      expect(logs[0].warnings).toContain(getMaxAlertsWarning());
     });
 
     it("doesn't generate max alerts warning when circuit breaker is met but not exceeded", async () => {
@@ -146,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
         max_signals: 10,
       };
       const { logs } = await previewRule({ supertest, rule });
-      expect(logs[0].warnings).not.contain(getMaxAlertsWarning());
+      expect(logs[0].warnings).not.toContain(getMaxAlertsWarning());
     });
 
     it('should abide by max_signals > 100', async () => {
@@ -158,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       // Search for 2x max_signals to make sure we aren't making more than max_signals
       const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxAlerts * 2 });
-      expect(previewAlerts.length).equal(maxAlerts);
+      expect(previewAlerts.length).toEqual(maxAlerts);
     });
 
     it('should have recorded the rule_id within the alert', async () => {
@@ -168,7 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts[0]._source?.[ALERT_RULE_RULE_ID]).eql(getSimpleRule().rule_id);
+      expect(previewAlerts[0]._source?.[ALERT_RULE_RULE_ID]).toEqual(getSimpleRule().rule_id);
     });
 
     it('should query and get back expected alert structure using a basic KQL query', async () => {
@@ -180,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
       const previewAlerts = await getPreviewAlerts({ es, previewId });
       const alert = previewAlerts[0]._source;
 
-      expect(alert).eql({
+      expect(alert).toEqual({
         ...alert,
         [ALERT_ANCESTORS]: [
           {
@@ -202,8 +201,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177101
-    it.skip('should query and get back expected alert structure when it is a alert on a alert', async () => {
+    it('should query and get back expected alert structure when it is a alert on a alert', async () => {
       const alertId = 'eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1';
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting([`.alerts-security.alerts-default*`]),
@@ -214,19 +212,18 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(previewAlerts.length).to.eql(1);
+      expect(previewAlerts.length).toEqual(1);
 
       const alert = previewAlerts[0]._source;
 
       if (!alert) {
-        return expect(alert).to.be.ok();
+        return expect(alert).toBeTruthy();
       }
-      const date = moment();
-      const formattedDate = date.format('YYYY.MM.DD');
       const alertAncestorIndex = isServerless
-        ? `.ds-.alerts-security.alerts-default-${formattedDate}-000001`
+        ? /^\.ds-\.alerts-security\.alerts-default-[0-9\.]*-000001$/
         : '.internal.alerts-security.alerts-default-000001';
-      expect(alert[ALERT_ANCESTORS]).eql([
+
+      expect(alert[ALERT_ANCESTORS]).toEqual([
         {
           id: 'vT9cwocBh3b8EMpD8lsi',
           type: 'event',
@@ -237,18 +234,19 @@ export default ({ getService }: FtrProviderContext) => {
           rule: '7015a3e2-e4ea-11ed-8c11-49608884878f',
           id: alertId,
           type: 'signal',
-          index: alertAncestorIndex,
+          index: expect.any(String),
           depth: 1,
         },
       ]);
-      expect(alert[ALERT_WORKFLOW_STATUS]).eql('open');
-      expect(alert[ALERT_DEPTH]).eql(2);
+      expect(alert[ALERT_ANCESTORS][1].index).toMatch(alertAncestorIndex);
+      expect(alert[ALERT_WORKFLOW_STATUS]).toEqual('open');
+      expect(alert[ALERT_DEPTH]).toEqual(2);
 
-      expect(alert[ALERT_ORIGINAL_TIME]).eql('2023-04-27T11:03:57.906Z');
-      expect(alert[`${ALERT_ORIGINAL_EVENT}.agent_id_status`]).eql('auth_metadata_missing');
-      expect(alert[`${ALERT_ORIGINAL_EVENT}.ingested`]).eql('2023-04-27T10:58:03Z');
-      expect(alert[`${ALERT_ORIGINAL_EVENT}.dataset`]).eql('endpoint');
-      expect(alert[`${ALERT_ORIGINAL_EVENT}.ingested`]).eql('2023-04-27T10:58:03Z');
+      expect(alert[ALERT_ORIGINAL_TIME]).toEqual('2023-04-27T11:03:57.906Z');
+      expect(alert[`${ALERT_ORIGINAL_EVENT}.agent_id_status`]).toEqual('auth_metadata_missing');
+      expect(alert[`${ALERT_ORIGINAL_EVENT}.ingested`]).toEqual('2023-04-27T10:58:03Z');
+      expect(alert[`${ALERT_ORIGINAL_EVENT}.dataset`]).toEqual('endpoint');
+      expect(alert[`${ALERT_ORIGINAL_EVENT}.ingested`]).toEqual('2023-04-27T10:58:03Z');
     });
 
     it('should not have risk score fields without risk indices', async () => {
@@ -258,8 +256,8 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts[0]?._source?.host?.risk).to.eql(undefined);
-      expect(previewAlerts[0]?._source?.user?.risk).to.eql(undefined);
+      expect(previewAlerts[0]?._source?.host?.risk).toEqual(undefined);
+      expect(previewAlerts[0]?._source?.user?.risk).toEqual(undefined);
     });
 
     describe('with host and user risk indices', () => {
@@ -279,10 +277,10 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Critical');
-        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).to.eql('Low');
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).to.eql(11);
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Critical');
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(96);
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).toEqual('Low');
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
 
       it('should have host and user risk score fields when suppression enabled on interval', async () => {
@@ -300,10 +298,10 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Critical');
-        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).to.eql('Low');
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).to.eql(11);
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Critical');
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(96);
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).toEqual('Low');
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
 
       it('should have host and user risk score fields when suppression enabled on rule execution only', async () => {
@@ -317,10 +315,10 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Critical');
-        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).to.eql('Low');
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).to.eql(11);
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Critical');
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(96);
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).toEqual('Low');
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
     });
 
@@ -343,8 +341,8 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts[0]?._source?.['host.asset.criticality']).to.eql('high_impact');
-        expect(previewAlerts[0]?._source?.['user.asset.criticality']).to.eql('extreme_impact');
+        expect(previewAlerts[0]?._source?.['host.asset.criticality']).toEqual('high_impact');
+        expect(previewAlerts[0]?._source?.['user.asset.criticality']).toEqual('extreme_impact');
       });
 
       it('should be enriched alert with criticality_level when suppression enabled', async () => {
@@ -361,8 +359,8 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts[0]?._source?.['host.asset.criticality']).to.eql('high_impact');
-        expect(previewAlerts[0]?._source?.['user.asset.criticality']).to.eql('extreme_impact');
+        expect(previewAlerts[0]?._source?.['host.asset.criticality']).toEqual('high_impact');
+        expect(previewAlerts[0]?._source?.['user.asset.criticality']).toEqual('extreme_impact');
       });
     });
 
@@ -381,13 +379,13 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(previewAlerts.length).equal(4);
+      expect(previewAlerts.length).toEqual(4);
       previewAlerts.forEach((alert) => {
-        expect(alert._source?.[ALERT_SEVERITY]).equal('medium');
-        expect(alert._source?.[ALERT_RULE_PARAMETERS].severity_mapping).eql([]);
+        expect(alert._source?.[ALERT_SEVERITY]).toEqual('medium');
+        expect(alert._source?.[ALERT_RULE_PARAMETERS].severity_mapping).toEqual([]);
 
-        expect(alert._source?.[ALERT_RISK_SCORE]).equal(75);
-        expect(alert._source?.[ALERT_RULE_PARAMETERS].risk_score_mapping).eql([]);
+        expect(alert._source?.[ALERT_RISK_SCORE]).toEqual(75);
+        expect(alert._source?.[ALERT_RULE_PARAMETERS].risk_score_mapping).toEqual([]);
       });
     });
 
@@ -410,8 +408,8 @@ export default ({ getService }: FtrProviderContext) => {
         value: alert._source?.[ALERT_SEVERITY],
       }));
 
-      expect(alertsOrderedByParentId.length).equal(4);
-      expect(severities).eql([
+      expect(alertsOrderedByParentId.length).toEqual(4);
+      expect(severities).toEqual([
         { id: '1', value: 'high' },
         { id: '2', value: 'critical' },
         { id: '3', value: 'critical' },
@@ -419,9 +417,9 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
 
       alertsOrderedByParentId.forEach((alert) => {
-        expect(alert._source?.[ALERT_RISK_SCORE]).equal(75);
-        expect(alert._source?.[ALERT_RULE_PARAMETERS].risk_score_mapping).eql([]);
-        expect(alert._source?.[ALERT_RULE_PARAMETERS].severity_mapping).eql([
+        expect(alert._source?.[ALERT_RISK_SCORE]).toEqual(75);
+        expect(alert._source?.[ALERT_RULE_PARAMETERS].risk_score_mapping).toEqual([]);
+        expect(alert._source?.[ALERT_RULE_PARAMETERS].severity_mapping).toEqual([
           { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
           { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
         ]);
@@ -446,8 +444,8 @@ export default ({ getService }: FtrProviderContext) => {
         value: alert._source?.[ALERT_RISK_SCORE],
       }));
 
-      expect(alertsOrderedByParentId.length).equal(4);
-      expect(riskScores).eql([
+      expect(alertsOrderedByParentId.length).toEqual(4);
+      expect(riskScores).toEqual([
         { id: '1', value: 31.14 },
         { id: '2', value: 32.14 },
         { id: '3', value: 33.14 },
@@ -455,9 +453,9 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
 
       alertsOrderedByParentId.forEach((alert) => {
-        expect(alert._source?.[ALERT_SEVERITY]).equal('medium');
-        expect(alert._source?.[ALERT_RULE_PARAMETERS].severity_mapping).eql([]);
-        expect(alert._source?.[ALERT_RULE_PARAMETERS].risk_score_mapping).eql([
+        expect(alert._source?.[ALERT_SEVERITY]).toEqual('medium');
+        expect(alert._source?.[ALERT_RULE_PARAMETERS].severity_mapping).toEqual([]);
+        expect(alert._source?.[ALERT_RULE_PARAMETERS].risk_score_mapping).toEqual([
           { field: 'my_risk', operator: 'equals', value: '' },
         ]);
       });
@@ -486,8 +484,8 @@ export default ({ getService }: FtrProviderContext) => {
         risk: alert._source?.[ALERT_RISK_SCORE],
       }));
 
-      expect(alertsOrderedByParentId.length).equal(4);
-      expect(values).eql([
+      expect(alertsOrderedByParentId.length).toEqual(4);
+      expect(values).toEqual([
         { id: '1', severity: 'high', risk: 31.14 },
         { id: '2', severity: 'critical', risk: 32.14 },
         { id: '3', severity: 'critical', risk: 33.14 },
@@ -495,11 +493,11 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
 
       alertsOrderedByParentId.forEach((alert) => {
-        expect(alert._source?.[ALERT_RULE_PARAMETERS].severity_mapping).eql([
+        expect(alert._source?.[ALERT_RULE_PARAMETERS].severity_mapping).toEqual([
           { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
           { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
         ]);
-        expect(alert._source?.[ALERT_RULE_PARAMETERS].risk_score_mapping).eql([
+        expect(alert._source?.[ALERT_RULE_PARAMETERS].risk_score_mapping).toEqual([
           { field: 'my_risk', operator: 'equals', value: '' },
         ]);
       });
@@ -516,10 +514,10 @@ export default ({ getService }: FtrProviderContext) => {
       const previewAlerts = await getPreviewAlerts({ es, previewId });
       const fullAlert = previewAlerts[0];
       if (!fullAlert) {
-        return expect(fullAlert).to.be.ok();
+        return expect(fullAlert).toBeTruthy();
       }
 
-      expect(previewAlerts[0]._source?.['kibana.alert.rule.name']).to.eql('boot');
+      expect(previewAlerts[0]._source?.['kibana.alert.rule.name']).toEqual('boot');
     });
 
     it('should not generate duplicate alerts', async () => {
@@ -530,7 +528,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { previewId } = await previewRule({ supertest, rule, invocationCount: 2 });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).to.eql(1);
+      expect(previewAlerts.length).toEqual(1);
     });
 
     describe('with suppression enabled', async () => {
@@ -559,8 +557,8 @@ export default ({ getService }: FtrProviderContext) => {
           timeframeEnd: new Date('2020-10-28T05:30:00.000Z'),
         });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).to.eql(1);
-        expect(previewAlerts[0]._source).to.eql({
+        expect(previewAlerts.length).toEqual(1);
+        expect(previewAlerts[0]._source).toEqual({
           ...previewAlerts[0]._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
@@ -592,15 +590,15 @@ export default ({ getService }: FtrProviderContext) => {
           timeframeEnd: new Date('2020-10-28T05:30:00.000Z'),
         });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 1000 });
-        expect(previewAlerts.length).to.eql(3);
+        expect(previewAlerts.length).toEqual(3);
 
         previewAlerts.sort((a, b) =>
           (a._source?.host?.name ?? '0') > (b._source?.host?.name ?? '0') ? 1 : -1
         );
 
         const hostNames = previewAlerts.map((alert) => alert._source?.host?.name);
-        expect(hostNames).to.eql(['host-0', 'host-1', 'host-2']);
-        expect(previewAlerts[0]._source).to.eql({
+        expect(hostNames).toEqual(['host-0', 'host-1', 'host-2']);
+        expect(previewAlerts[0]._source).toEqual({
           ...previewAlerts[0]._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
@@ -637,9 +635,9 @@ export default ({ getService }: FtrProviderContext) => {
           size: 1000,
           sort: ['host.name', 'source.ip'],
         });
-        expect(previewAlerts.length).to.eql(6);
+        expect(previewAlerts.length).toEqual(6);
 
-        expect(previewAlerts[0]._source).to.eql({
+        expect(previewAlerts[0]._source).toEqual({
           ...previewAlerts[0]._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
@@ -684,9 +682,9 @@ export default ({ getService }: FtrProviderContext) => {
           size: 1000,
           sort: ['host.name', 'source.ip', ALERT_ORIGINAL_TIME],
         });
-        expect(previewAlerts.length).to.eql(12);
+        expect(previewAlerts.length).toEqual(12);
 
-        expect(previewAlerts[0]._source).to.eql({
+        expect(previewAlerts[0]._source).toEqual({
           ...previewAlerts[0]._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
@@ -704,7 +702,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
         });
 
-        expect(previewAlerts[1]._source).to.eql({
+        expect(previewAlerts[1]._source).toEqual({
           ...previewAlerts[1]._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
@@ -748,9 +746,9 @@ export default ({ getService }: FtrProviderContext) => {
           size: 1000,
           sort: ['destination.ip'],
         });
-        expect(previewAlerts.length).to.eql(3);
+        expect(previewAlerts.length).toEqual(3);
 
-        expect(previewAlerts[0]._source).to.eql({
+        expect(previewAlerts[0]._source).toEqual({
           ...previewAlerts[0]._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
@@ -765,7 +763,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // We also expect to have a separate group for documents that don't populate the groupBy field
-        expect(previewAlerts[2]._source).to.eql({
+        expect(previewAlerts[2]._source).toEqual({
           ...previewAlerts[2]._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
@@ -806,10 +804,10 @@ export default ({ getService }: FtrProviderContext) => {
           size: 1000,
           sort: ['destination.ip'],
         });
-        expect(previewAlerts.length).to.eql(3);
+        expect(previewAlerts.length).toEqual(3);
 
         // We also expect to have a separate group for documents that don't populate the groupBy field
-        expect(previewAlerts[2]._source).to.eql({
+        expect(previewAlerts[2]._source).toEqual({
           ...previewAlerts[2]._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
@@ -869,8 +867,8 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const createdRule = await createRule(supertest, log, rule);
           const alerts = await getAlerts(supertest, log, es, createdRule);
-          expect(alerts.hits.hits.length).eql(1);
-          expect(alerts.hits.hits[0]._source).to.eql({
+          expect(alerts.hits.hits.length).toEqual(1);
+          expect(alerts.hits.hits[0]._source).toEqual({
             ...alerts.hits.hits[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -907,8 +905,8 @@ export default ({ getService }: FtrProviderContext) => {
             undefined,
             afterTimestamp
           );
-          expect(secondAlerts.hits.hits.length).eql(1);
-          expect(secondAlerts.hits.hits[0]._source).to.eql({
+          expect(secondAlerts.hits.hits.length).toEqual(1);
+          expect(secondAlerts.hits.hits[0]._source).toEqual({
             ...secondAlerts.hits.hits[0]._source,
             [TIMESTAMP]: secondAlerts.hits.hits[0]._source?.[TIMESTAMP],
             [ALERT_SUPPRESSION_TERMS]: [
@@ -983,8 +981,8 @@ export default ({ getService }: FtrProviderContext) => {
             undefined,
             afterTimestamp
           );
-          expect(secondAlerts.hits.hits.length).eql(2);
-          expect(secondAlerts.hits.hits[0]._source).to.eql({
+          expect(secondAlerts.hits.hits.length).toEqual(2);
+          expect(secondAlerts.hits.hits[0]._source).toEqual({
             ...secondAlerts.hits.hits[0]._source,
             [TIMESTAMP]: secondAlerts.hits.hits[0]._source?.[TIMESTAMP],
             [ALERT_SUPPRESSION_TERMS]: [
@@ -999,7 +997,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_END]: firstTimestamp,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
           });
-          expect(secondAlerts.hits.hits[1]._source).to.eql({
+          expect(secondAlerts.hits.hits[1]._source).toEqual({
             ...secondAlerts.hits.hits[1]._source,
             [TIMESTAMP]: secondAlerts.hits.hits[1]._source?.[TIMESTAMP],
             [ALERT_SUPPRESSION_TERMS]: [
@@ -1042,8 +1040,8 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: [ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).to.eql(2);
-          expect(previewAlerts[0]._source).to.eql({
+          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1058,7 +1056,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
             [ALERT_SUPPRESSION_DOCS_COUNT]: 5,
           });
-          expect(previewAlerts[1]._source).to.eql({
+          expect(previewAlerts[1]._source).toEqual({
             ...previewAlerts[1]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1101,8 +1099,8 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: [ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).to.eql(1);
-          expect(previewAlerts[0]._source).to.eql({
+          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1145,8 +1143,8 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['host.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).to.eql(3);
-          expect(previewAlerts[0]._source).to.eql({
+          expect(previewAlerts.length).toEqual(3);
+          expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1161,7 +1159,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
             [ALERT_SUPPRESSION_DOCS_COUNT]: 11,
           });
-          expect(previewAlerts[1]._source).to.eql({
+          expect(previewAlerts[1]._source).toEqual({
             ...previewAlerts[1]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1176,7 +1174,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
             [ALERT_SUPPRESSION_DOCS_COUNT]: 11,
           });
-          expect(previewAlerts[2]._source).to.eql({
+          expect(previewAlerts[2]._source).toEqual({
             ...previewAlerts[2]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1219,8 +1217,8 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['destination.ip', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).to.eql(3);
-          expect(previewAlerts[2]._source).to.eql({
+          expect(previewAlerts.length).toEqual(3);
+          expect(previewAlerts[2]._source).toEqual({
             ...previewAlerts[2]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1285,8 +1283,8 @@ export default ({ getService }: FtrProviderContext) => {
             previewId,
             sort: ['agent.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).to.eql(1);
-          expect(previewAlerts[0]._source).to.eql({
+          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1349,8 +1347,8 @@ export default ({ getService }: FtrProviderContext) => {
             size: 1000,
             sort: ['agent.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).to.eql(150);
-          expect(previewAlerts[0]._source).to.eql({
+          expect(previewAlerts.length).toEqual(150);
+          expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1363,7 +1361,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_END]: laterTimestamp,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
           });
-          expect(previewAlerts[149]._source).to.eql({
+          expect(previewAlerts[149]._source).toEqual({
             ...previewAlerts[149]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1436,8 +1434,8 @@ export default ({ getService }: FtrProviderContext) => {
             size: 10,
             sort: ['agent.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).to.eql(2);
-          expect(previewAlerts[0]._source).to.eql({
+          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1450,7 +1448,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_END]: laterTimestamp,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
           });
-          expect(previewAlerts[1]._source).to.eql({
+          expect(previewAlerts[1]._source).toEqual({
             ...previewAlerts[1]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1464,7 +1462,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
           });
           for (const logEntry of logs) {
-            expect(logEntry.errors.length).to.eql(0);
+            expect(logEntry.errors.length).toEqual(0);
           }
         });
 
@@ -1503,8 +1501,8 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
               sort: [ALERT_ORIGINAL_TIME],
             });
-            expect(previewAlerts.length).to.eql(1);
-            expect(previewAlerts[0]._source).to.eql({
+            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts[0]._source).toEqual({
               ...previewAlerts[0]._source,
               [ALERT_SUPPRESSION_TERMS]: [
                 {
@@ -1519,8 +1517,8 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
               [ALERT_SUPPRESSION_DOCS_COUNT]: 5,
             });
-            expect(previewAlerts[0]._source?.host?.risk?.calculated_level).to.eql('Low');
-            expect(previewAlerts[0]._source?.host?.risk?.calculated_score_norm).to.eql(1);
+            expect(previewAlerts[0]._source?.host?.risk?.calculated_level).toEqual('Low');
+            expect(previewAlerts[0]._source?.host?.risk?.calculated_score_norm).toEqual(1);
           });
         });
       });
@@ -1591,9 +1589,9 @@ export default ({ getService }: FtrProviderContext) => {
             size: 10,
             sort: ['agent.name'],
           });
-          expect(previewAlerts.length).to.eql(4);
+          expect(previewAlerts.length).toEqual(4);
           // first alert should be suppressed
-          expect(previewAlerts[0]._source).to.eql({
+          expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1608,20 +1606,20 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           // alert is not suppressed and do not have suppress properties
-          expect(previewAlerts[1]._source).to.have.property('id', id);
-          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
-          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_END);
-          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
-          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+          expect(previewAlerts[1]._source).toHaveProperty('id', id);
+          expect(previewAlerts[1]._source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+          expect(previewAlerts[1]._source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+          expect(previewAlerts[1]._source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+          expect(previewAlerts[1]._source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
 
           // rest of alerts are not suppressed and do not have suppress properties
           previewAlerts.slice(2).forEach((previewAlert) => {
             const source = previewAlert._source;
-            expect(source).to.have.property('id', id);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_END);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).toHaveProperty('id', id);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
           });
         });
 
@@ -1662,23 +1660,23 @@ export default ({ getService }: FtrProviderContext) => {
             size: 10,
             sort: ['agent.name'],
           });
-          expect(previewAlerts.length).to.eql(4);
+          expect(previewAlerts.length).toEqual(4);
 
           // alert is not suppressed and do not have suppress properties
-          expect(previewAlerts[1]._source).to.have.property('id', id);
-          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
-          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_END);
-          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
-          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+          expect(previewAlerts[1]._source).toHaveProperty('id', id);
+          expect(previewAlerts[1]._source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+          expect(previewAlerts[1]._source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+          expect(previewAlerts[1]._source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+          expect(previewAlerts[1]._source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
 
           // rest of alerts are not suppressed and do not have suppress properties
           previewAlerts.slice(2).forEach((previewAlert) => {
             const source = previewAlert._source;
-            expect(source).to.have.property('id', id);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_END);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).toHaveProperty('id', id);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
           });
         });
 
@@ -1717,9 +1715,9 @@ export default ({ getService }: FtrProviderContext) => {
             size: 10,
             sort: ['agent.name'],
           });
-          expect(previewAlerts.length).to.eql(1);
+          expect(previewAlerts.length).toEqual(1);
           // first alert should be suppressed
-          expect(previewAlerts[0]._source).to.eql({
+          expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1773,9 +1771,9 @@ export default ({ getService }: FtrProviderContext) => {
             sort: ['agent.name'],
           });
           // alerts number should be still at 100
-          expect(previewAlerts.length).to.eql(100);
+          expect(previewAlerts.length).toEqual(100);
           // first alert should be suppressed
-          expect(previewAlerts[0]._source).to.eql({
+          expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
@@ -1792,11 +1790,11 @@ export default ({ getService }: FtrProviderContext) => {
           // rest of alerts are not suppressed and do not have suppress properties
           previewAlerts.slice(1).forEach((previewAlert) => {
             const source = previewAlert._source;
-            expect(source).to.have.property('id', id);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_END);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).toHaveProperty('id', id);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
           });
         });
 
@@ -1870,9 +1868,9 @@ export default ({ getService }: FtrProviderContext) => {
             sort: ['agent.name', 'agent.version'],
           });
           // total 8 alerts = 3 suppressed alerts + 5 unsuppressed (from docs with at least one missing field)
-          expect(previewAlerts.length).to.eql(8);
+          expect(previewAlerts.length).toEqual(8);
           // first 3 alerts should be suppressed
-          expect(previewAlerts[0]._source).to.eql({
+          expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               { field: 'agent.name', value: 'agent-0' },
@@ -1881,7 +1879,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
           });
 
-          expect(previewAlerts[1]._source).to.eql({
+          expect(previewAlerts[1]._source).toEqual({
             ...previewAlerts[1]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               { field: 'agent.name', value: 'agent-0' },
@@ -1890,7 +1888,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
           });
 
-          expect(previewAlerts[2]._source).to.eql({
+          expect(previewAlerts[2]._source).toEqual({
             ...previewAlerts[2]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               { field: 'agent.name', value: 'agent-1' },
@@ -1902,11 +1900,11 @@ export default ({ getService }: FtrProviderContext) => {
           // rest of alerts are not suppressed and do not have suppress properties
           previewAlerts.slice(3).forEach((previewAlert) => {
             const source = previewAlert._source;
-            expect(source).to.have.property('id', id);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_END);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).toHaveProperty('id', id);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
           });
         });
 
@@ -1949,16 +1947,16 @@ export default ({ getService }: FtrProviderContext) => {
             sort: ['agent.name', 'agent.version'],
           });
           // total 6 alerts = 6 unsuppressed (from docs with at least one missing field)
-          expect(previewAlerts.length).to.eql(6);
+          expect(previewAlerts.length).toEqual(6);
 
           // all alerts are not suppressed and do not have suppress properties
           previewAlerts.forEach((previewAlert) => {
             const source = previewAlert._source;
-            expect(source).to.have.property('id', id);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_END);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
-            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).toHaveProperty('id', id);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
           });
         });
 
@@ -2021,9 +2019,9 @@ export default ({ getService }: FtrProviderContext) => {
               size: 10,
               sort: ['agent.name', ALERT_ORIGINAL_TIME],
             });
-            expect(previewAlerts.length).to.eql(3);
+            expect(previewAlerts.length).toEqual(3);
 
-            expect(previewAlerts[0]._source).to.eql({
+            expect(previewAlerts[0]._source).toEqual({
               ...previewAlerts[0]._source,
               [ALERT_SUPPRESSION_TERMS]: [
                 {
@@ -2033,7 +2031,7 @@ export default ({ getService }: FtrProviderContext) => {
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
             });
-            expect(previewAlerts[1]._source).to.eql({
+            expect(previewAlerts[1]._source).toEqual({
               ...previewAlerts[1]._source,
               [ALERT_SUPPRESSION_TERMS]: [
                 {
@@ -2043,7 +2041,7 @@ export default ({ getService }: FtrProviderContext) => {
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
             });
-            expect(previewAlerts[2]._source).to.eql({
+            expect(previewAlerts[2]._source).toEqual({
               ...previewAlerts[2]._source,
               [ALERT_SUPPRESSION_TERMS]: [
                 {
@@ -2055,7 +2053,7 @@ export default ({ getService }: FtrProviderContext) => {
             });
 
             for (const logEntry of logs) {
-              expect(logEntry.errors.length).to.eql(0);
+              expect(logEntry.errors.length).toEqual(0);
             }
           });
 
@@ -2087,10 +2085,10 @@ export default ({ getService }: FtrProviderContext) => {
               size: 10,
               sort: ['agent.name', ALERT_ORIGINAL_TIME],
             });
-            expect(previewAlerts.length).to.eql(5);
+            expect(previewAlerts.length).toEqual(5);
 
             // first alerts expected to be suppressed
-            expect(previewAlerts[0]._source).to.eql({
+            expect(previewAlerts[0]._source).toEqual({
               ...previewAlerts[0]._source,
               [ALERT_SUPPRESSION_TERMS]: [
                 {
@@ -2100,7 +2098,7 @@ export default ({ getService }: FtrProviderContext) => {
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
             });
-            expect(previewAlerts[1]._source).to.eql({
+            expect(previewAlerts[1]._source).toEqual({
               ...previewAlerts[1]._source,
               [ALERT_SUPPRESSION_TERMS]: [
                 {
@@ -2112,24 +2110,24 @@ export default ({ getService }: FtrProviderContext) => {
             });
 
             // third alert is not suppressed and do not have suppress properties
-            expect(previewAlerts[2]._source).to.have.property('id', id);
-            expect(previewAlerts[2]._source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
-            expect(previewAlerts[2]._source).not.to.have.property(ALERT_SUPPRESSION_END);
-            expect(previewAlerts[2]._source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
-            expect(previewAlerts[2]._source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(previewAlerts[2]._source).toHaveProperty('id', id);
+            expect(previewAlerts[2]._source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(previewAlerts[2]._source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+            expect(previewAlerts[2]._source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+            expect(previewAlerts[2]._source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
 
             // rest of alerts are not suppressed and do not have suppress properties
             previewAlerts.slice(3).forEach((previewAlert) => {
               const source = previewAlert._source;
-              expect(source).to.have.property('id', id);
-              expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
-              expect(source).not.to.have.property(ALERT_SUPPRESSION_END);
-              expect(source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
-              expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+              expect(source).toHaveProperty('id', id);
+              expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+              expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+              expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+              expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
             });
 
             for (const logEntry of logs) {
-              expect(logEntry.errors.length).to.eql(0);
+              expect(logEntry.errors.length).toEqual(0);
             }
           });
         });
@@ -2180,7 +2178,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts.length).equal(2);
+        expect(previewAlerts.length).toEqual(2);
       });
 
       it('should correctly evaluate exceptions with expiration time in the future', async () => {
@@ -2223,7 +2221,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts.length).equal(1);
+        expect(previewAlerts.length).toEqual(1);
       });
     });
 
@@ -2269,11 +2267,11 @@ export default ({ getService }: FtrProviderContext) => {
           size: 10,
           sort: ['agent.name'],
         });
-        expect(previewAlerts.length).to.eql(2);
+        expect(previewAlerts.length).toEqual(2);
 
         // both alerts should have agent.name "test-1" as per rule query
-        expect(previewAlerts[0]._source?.agent).to.have.property('name', 'test-1');
-        expect(previewAlerts[1]._source?.agent).to.have.property('name', 'test-1');
+        expect(previewAlerts[0]._source?.agent).toHaveProperty('name', 'test-1');
+        expect(previewAlerts[1]._source?.agent).toHaveProperty('name', 'test-1');
       });
 
       it('should return correct documents with negation wildcard field query', async () => {
@@ -2296,10 +2294,10 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           sort: ['agent.name'],
         });
-        expect(previewAlerts.length).to.eql(1);
+        expect(previewAlerts.length).toEqual(1);
 
         //  alert should not have agent.name "test-1" as per rule query
-        expect(previewAlerts[0]._source?.agent).to.have.property('name', 'test-2');
+        expect(previewAlerts[0]._source?.agent).toHaveProperty('name', 'test-2');
       });
 
       it('should return correct documents with wildcard field query across multiple different fields', async () => {
@@ -2327,13 +2325,13 @@ export default ({ getService }: FtrProviderContext) => {
           size: 10,
           sort: ['agent.name'],
         });
-        expect(previewAlerts.length).to.eql(2);
+        expect(previewAlerts.length).toEqual(2);
 
         // alert should have agent.name "test-1" as per rule query
-        expect(previewAlerts[0]._source?.agent).to.have.property('name', 'test-1');
+        expect(previewAlerts[0]._source?.agent).toHaveProperty('name', 'test-1');
         // alert should have agent.name "test-a"  and agent.version "test-1" as per rule query
-        expect(previewAlerts[1]._source?.agent).to.have.property('version', 'test-1');
-        expect(previewAlerts[1]._source?.agent).to.have.property('name', 'test-3');
+        expect(previewAlerts[1]._source?.agent).toHaveProperty('version', 'test-1');
+        expect(previewAlerts[1]._source?.agent).toHaveProperty('name', 'test-3');
       });
 
       it('should return correct documents with wildcard field query across multiple different fields for lucene language', async () => {
@@ -2362,13 +2360,13 @@ export default ({ getService }: FtrProviderContext) => {
           size: 10,
           sort: ['agent.name'],
         });
-        expect(previewAlerts.length).to.eql(2);
+        expect(previewAlerts.length).toEqual(2);
 
         // alert should have agent.name "test-1" as per rule query
-        expect(previewAlerts[0]._source?.agent).to.have.property('name', 'test-1');
+        expect(previewAlerts[0]._source?.agent).toHaveProperty('name', 'test-1');
         // alert should have agent.name "test-a"  and agent.version "test-1" as per rule query
-        expect(previewAlerts[1]._source?.agent).to.have.property('version', 'test-1');
-        expect(previewAlerts[1]._source?.agent).to.have.property('name', 'test-3');
+        expect(previewAlerts[1]._source?.agent).toHaveProperty('version', 'test-1');
+        expect(previewAlerts[1]._source?.agent).toHaveProperty('name', 'test-3');
       });
     });
 
@@ -2403,7 +2401,10 @@ export default ({ getService }: FtrProviderContext) => {
             hits: [{ _source: ruleSO }],
           },
         } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
-        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
+        expect(ruleSO?.alert?.params?.investigationFields).toEqual([
+          'client.address',
+          'agent.name',
+        ]);
 
         // fetch rule for format needed to pass into
         const { body: ruleBody } = await supertest
@@ -2415,7 +2416,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const alertsAfterEnable = await getAlerts(supertest, log, es, ruleBody, 'succeeded');
-        expect(alertsAfterEnable.hits.hits.length > 0).eql(true);
+        expect(alertsAfterEnable.hits.hits.length > 0).toEqual(true);
       });
     });
   });

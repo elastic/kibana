@@ -1,0 +1,39 @@
+openapi: 3.0.3
+info:
+  title: Serverless saved objects
+  description: OpenAPI schema for serverless saved object endpoints
+  version: '0.1'
+  contact:
+    name: Kibana Core Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: saved objects
+    description: Manage Kibana saved objects, including dashboards, visualizations, and more.
+servers:
+  - url: 'https://{kibana_url}'
+    variables:
+      kibana_url:
+        default: localhost:5601
+paths:
+  '/api/saved_objects/_export':
+    $ref: 'paths/api@saved_objects@_export.yaml'
+  '/api/saved_objects/_import':
+    $ref: 'paths/api@saved_objects@_import.yaml'
+  '/s/{spaceId}/api/saved_objects/_export':
+    $ref: 'paths/s@{spaceid}@api@saved_objects@_export.yaml'
+  '/s/{spaceId}/api/saved_objects/_import':
+    $ref: 'paths/s@{spaceid}@api@saved_objects@_import.yaml'
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: >
+        Serverless APIs support only key-based authentication.
+        You must create an API key and use the encoded value in the request header.
+        For example: 'Authorization: ApiKey base64AccessApiKey'.
+security:
+  - apiKeyAuth: []

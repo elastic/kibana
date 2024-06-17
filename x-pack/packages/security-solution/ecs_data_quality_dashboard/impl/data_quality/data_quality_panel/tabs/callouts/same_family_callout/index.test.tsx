@@ -21,7 +21,7 @@ describe('SameFamilyCallout', () => {
     render(
       <TestProviders>
         <SameFamilyCallout
-          enrichedFieldMetadata={mockPartitionedFieldMetadataWithSameFamily.sameFamily}
+          ecsBasedFieldMetadata={mockPartitionedFieldMetadataWithSameFamily.sameFamily}
         >
           <div data-test-subj="children">{content}</div>
         </SameFamilyCallout>

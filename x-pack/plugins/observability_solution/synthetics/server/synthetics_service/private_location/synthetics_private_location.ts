@@ -78,7 +78,7 @@ export class SyntheticsPrivateLocation {
     globalParams: Record<string, string>,
     testRunId?: string,
     runOnce?: boolean
-  ): Promise<(NewPackagePolicy & { policy_id: string }) | null> {
+  ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
     const newPolicy = cloneDeep(newPolicyTemplate);
@@ -86,6 +86,7 @@ export class SyntheticsPrivateLocation {
     try {
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.agentPolicyId;
+      newPolicy.policy_ids = [privateLocation.agentPolicyId];
       if (testRunId) {
         newPolicy.name =
           config.type === 'browser' ? BROWSER_TEST_NOW_RUN : LIGHTWEIGHT_TEST_NOW_RUN;

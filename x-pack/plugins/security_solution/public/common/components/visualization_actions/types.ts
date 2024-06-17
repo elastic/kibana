@@ -17,7 +17,7 @@ import type { Filter, Query } from '@kbn/es-query';
 
 import type { LensProps } from '@kbn/cases-plugin/public/types';
 import type { InputsModelId } from '../../store/inputs/constants';
-import type { SourcererScopeName } from '../../store/sourcerer/model';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { Status } from '../../../../common/api/detection_engine';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];

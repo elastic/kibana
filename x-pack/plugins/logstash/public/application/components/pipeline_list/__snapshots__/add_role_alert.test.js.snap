@@ -3,13 +3,12 @@
 exports[`AddRoleAlert component renders expected component 1`] = `
 <p>
   <strong>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Grant additional privileges."
       id="xpack.logstash.addRoleAlert.grantAdditionalPrivilegesTitle"
-      values={Object {}}
     />
   </strong>
-  <FormattedMessage
+  <MemoizedFormattedMessage
     defaultMessage="In Kibana Management, assign the {role} role to your Kibana user."
     id="xpack.logstash.addRoleAlert.grantAdditionalPrivilegesDescription"
     values={

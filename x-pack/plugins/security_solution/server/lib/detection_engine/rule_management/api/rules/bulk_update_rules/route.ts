@@ -24,7 +24,7 @@ import {
   buildSiemResponse,
   createBulkErrorObject,
 } from '../../../../routes/utils';
-import { readRules } from '../../../logic/rule_management/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
@@ -62,7 +62,7 @@ export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logge
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const rules = await Promise.all(
             request.body.map(async (payloadRule) => {
@@ -99,7 +99,7 @@ export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logge
                   ruleId: payloadRule.id,
                 });
 
-                const rule = await rulesManagementClient.updateRule({
+                const rule = await detectionRulesClient.updateRule({
                   ruleUpdate: payloadRule,
                 });
 

@@ -8,6 +8,7 @@
 import {
   ENTERPRISE_SEARCH_APP_ID,
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
+  ENTERPRISE_SEARCH_INFERENCE_ENDPOINTS_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
@@ -174,6 +175,22 @@ export const VECTOR_SEARCH_PLUGIN = {
   }),
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
   URL: '/app/enterprise_search/vector_search',
+};
+
+export const INFERENCE_ENDPOINTS_PLUGIN = {
+  ID: ENTERPRISE_SEARCH_INFERENCE_ENDPOINTS_APP_ID,
+  NAME: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.productName', {
+    defaultMessage: 'Inference Endpoints',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.navTitle', {
+    defaultMessage: 'Relevance',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.description', {
+    defaultMessage: 'View for managing inference endpoints.',
+  }),
+  URL: '/app/enterprise_search/relevance',
+  LOGO: 'logoEnterpriseSearch',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';

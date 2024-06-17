@@ -9,6 +9,7 @@
 export type { IndexPattern } from './src/index_pattern_rt';
 export type { NonEmptyString, NonEmptyStringBrand } from './src/non_empty_string_rt';
 
+export { arrayToStringRt } from './src/array_to_string_rt';
 export { deepExactRt } from './src/deep_exact_rt';
 export { indexPatternRt } from './src/index_pattern_rt';
 export { jsonRt } from './src/json_rt';

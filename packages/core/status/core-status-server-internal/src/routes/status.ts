@@ -88,7 +88,7 @@ export const registerStatusRoute = ({
         // ROUTE_TAG_ACCEPT_JWT from '@kbn/security-plugin/server' that cannot be imported here directly.
         tags: ['api', 'security:acceptJWT'],
         access: 'public', // needs to be public to allow access from "system" users like k8s readiness probes.
-        description: `Get Kibana's current status.`,
+        summary: `Get Kibana's current status`,
       },
       validate: {
         request: {

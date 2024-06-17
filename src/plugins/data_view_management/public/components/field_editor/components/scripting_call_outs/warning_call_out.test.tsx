@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mockManagementPlugin } from '../../../../mocks';
 import { ScriptingWarningCallOut } from './warning_call_out';
@@ -16,7 +16,7 @@ describe('ScriptingWarningCallOut', () => {
   const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
 
   it('should render normally', async () => {
-    const component = mount(<ScriptingWarningCallOut isVisible={true} />, {
+    const component = mountWithI18nProvider(<ScriptingWarningCallOut isVisible={true} />, {
       wrappingComponent: KibanaContextProvider,
       wrappingComponentProps: {
         services: mockedContext,
@@ -27,7 +27,7 @@ describe('ScriptingWarningCallOut', () => {
   });
 
   it('should render nothing if not visible', async () => {
-    const component = mount(<ScriptingWarningCallOut isVisible={false} />, {
+    const component = mountWithI18nProvider(<ScriptingWarningCallOut isVisible={false} />, {
       wrappingComponent: KibanaContextProvider,
       wrappingComponentProps: {
         services: mockedContext,

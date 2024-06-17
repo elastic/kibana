@@ -74,7 +74,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             'licensing',
           ]);
 
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const actionsClient = ctx.actions.getActionsClient();
           const actionSOClient = ctx.core.savedObjects.getClient({
             includedHiddenTypes: ['action'],
@@ -154,7 +154,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             ruleChunks: chunkParseObjects,
             rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
             overwriteRules: request.query.overwrite,
-            rulesManagementClient,
+            detectionRulesClient,
             existingLists: foundReferencedExceptionLists,
             allowMissingConnectorSecrets: !!actionConnectors.length,
           });

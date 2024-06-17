@@ -256,6 +256,95 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
+    it('deduplicates new alerts if they were previously created without suppression', async () => {
+      const id = uuidv4();
+      const firstTimestamp = new Date().toISOString();
+
+      const ruleWithoutSuppression: EsqlRuleCreateProps = {
+        ...getCreateEsqlRulesSchemaMock('rule-1', true),
+        query: getNonAggRuleQueryWithMetadata(id),
+        from: 'now-35m',
+        interval: '30m',
+      };
+      const alertSuppression = {
+        group_by: ['host.name'],
+        duration: {
+          value: 300,
+          unit: 'm' as const,
+        },
+        missing_fields_strategy: 'suppress',
+      };
+
+      const firstExecutionDocuments = [
+        {
+          host: { name: 'host-0' },
+          id,
+          '@timestamp': firstTimestamp,
+        },
+      ];
+
+      await indexListOfDocuments(firstExecutionDocuments);
+
+      const createdRule = await createRule(supertest, log, ruleWithoutSuppression);
+      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      expect(alerts.hits.hits).toHaveLength(1);
+      // alert does not have suppression properties
+      alerts.hits.hits.forEach((previewAlert) => {
+        const source = previewAlert._source;
+        expect(source).toHaveProperty('id', id);
+        expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+        expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+        expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+        expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+      });
+
+      const secondTimestamp = new Date().toISOString();
+      const secondExecutionDocument = {
+        host: { name: 'host-0' },
+        id,
+        '@timestamp': secondTimestamp,
+      };
+
+      await indexListOfDocuments([secondExecutionDocument, secondExecutionDocument]);
+
+      // update the rule to include suppression
+      await patchRule(supertest, log, {
+        id: createdRule.id,
+        alert_suppression: alertSuppression,
+        enabled: false,
+      });
+      await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+
+      const afterTimestamp = new Date();
+      const secondAlerts = await getOpenAlerts(
+        supertest,
+        log,
+        es,
+        createdRule,
+        RuleExecutionStatusEnum.succeeded,
+        undefined,
+        afterTimestamp
+      );
+
+      expect(secondAlerts.hits.hits.length).toEqual(2);
+
+      const sortedAlerts = sortBy(secondAlerts.hits.hits, ALERT_ORIGINAL_TIME);
+
+      // second alert is generated with suppression
+      expect(sortedAlerts[1]._source).toEqual(
+        expect.objectContaining({
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-0',
+            },
+          ],
+          [ALERT_ORIGINAL_TIME]: secondTimestamp,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        })
+      );
+    });
+
     it('should NOT suppress alerts when suppression period is less than rule interval', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';

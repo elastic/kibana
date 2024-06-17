@@ -78,7 +78,7 @@ export const getRuleRoute = (
     router,
     options: {
       access: 'public',
-      description: `Get rule details`,
+      summary: `Get rule details`,
     },
   });
 

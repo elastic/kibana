@@ -198,6 +198,13 @@ describe('Enter Space view routes', () => {
         },
         expectedLocation: '/mock-server-basepath/app/management/kibana/home',
       },
+      {
+        query: {
+          next: '/app/management/kibana/objects?initialQuery=type:(visualization)',
+        },
+        expectedLocation:
+          '/mock-server-basepath/app/management/kibana/objects?initialQuery=type:(visualization)',
+      },
     ]) {
       const request = httpServerMock.createKibanaRequest({
         query,

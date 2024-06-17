@@ -28,6 +28,8 @@ import {
   type WhereCommandContext,
   default as esql_parser,
   type MetaCommandContext,
+  type MetricsCommandContext,
+  IndexIdentifierContext,
 } from './antlr/esql_parser';
 import { default as ESQLParserListener } from './antlr/esql_parser_listener';
 import {
@@ -36,6 +38,8 @@ import {
   createOption,
   createLiteral,
   textExistsAndIsValid,
+  createSource,
+  createAstBaseItem,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import {
@@ -52,7 +56,7 @@ import {
   getMatchField,
   getEnrichClauses,
 } from './ast_walker';
-import type { ESQLAst } from './types';
+import type { ESQLAst, ESQLAstMetricsCommand } from './types';
 
 export class AstListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -138,6 +142,31 @@ export class AstListener implements ESQLParserListener {
       commandAst.args.push(option);
       option.args.push(...collectAllColumnIdentifiers(metadataContent));
     }
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.metricsCommand`.
+   * @param ctx the parse tree
+   */
+  exitMetricsCommand(ctx: MetricsCommandContext): void {
+    const node: ESQLAstMetricsCommand = {
+      ...createAstBaseItem('metrics', ctx),
+      type: 'command',
+      args: [],
+      indices: ctx
+        .getTypedRuleContexts(IndexIdentifierContext)
+        .map((sourceCtx) => createSource(sourceCtx)),
+    };
+    this.ast.push(node);
+    const aggregates = collectAllFieldsStatements(ctx.fields(0));
+    const grouping = collectAllFieldsStatements(ctx.fields(1));
+    if (aggregates && aggregates.length) {
+      node.aggregates = aggregates;
+    }
+    if (grouping && grouping.length) {
+      node.grouping = grouping;
+    }
+    node.args.push(...node.indices, ...aggregates, ...grouping);
   }
 
   /**

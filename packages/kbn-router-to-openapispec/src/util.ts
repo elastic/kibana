@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { OpenAPIV3 } from 'openapi-types';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { OpenAPIV3 } from 'openapi-types';
 import {
   getRequestValidation,
   type RouteConfigOptionsBody,
@@ -15,6 +16,47 @@ import {
 } from '@kbn/core-http-server';
 import { KnownParameters } from './type';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
+
+const tagPrefix = 'oas-tag:';
+const extractTag = (tag: string) => {
+  if (tag.startsWith(tagPrefix)) {
+    return tag.slice(tagPrefix.length);
+  }
+};
+/**
+ * Given an array of tags ([oas-tag:beep, oas-tag:boop]) will return a new array
+ * with the tag prefix removed.
+ */
+export const extractTags = (tags?: readonly string[]) => {
+  if (!tags) return [];
+  return tags.flatMap((tag) => {
+    const value = extractTag(tag);
+    if (value) {
+      return value;
+    }
+    return [];
+  });
+};
+
+/**
+ * Build the top-level tags entry based on the paths we extracted. We could
+ * handle this while we are iterating over the routes, but this approach allows
+ * us to keep this as a global document concern at the expense of some extra
+ * processing.
+ */
+export const buildGlobalTags = (paths: OpenAPIV3.PathsObject, additionalTags: string[] = []) => {
+  const tags = new Set<string>(additionalTags);
+  for (const path of Object.values(paths)) {
+    for (const method of Object.values(OpenAPIV3.HttpMethods)) {
+      if (path?.[method]?.tags) {
+        path[method]!.tags!.forEach((tag) => tags.add(tag));
+      }
+    }
+  }
+  return Array.from(tags)
+    .sort((a, b) => a.localeCompare(b))
+    .map<OpenAPIV3.TagObject>((name) => ({ name }));
+};
 
 export const getPathParameters = (path: string): KnownParameters => {
   return Array.from(path.matchAll(/\{(.+?)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
@@ -81,7 +123,7 @@ export const prepareRoutes = <
   });
 };
 
-export const assignToPathsObject = (
+export const assignToPaths = (
   paths: OpenAPIV3.PathsObject,
   path: string,
   pathObject: OpenAPIV3.PathItemObject

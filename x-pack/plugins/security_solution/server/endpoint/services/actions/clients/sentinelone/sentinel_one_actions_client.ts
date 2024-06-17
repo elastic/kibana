@@ -67,6 +67,7 @@ import type {
   ResponseActionsClientOptions,
   ResponseActionsClientValidateRequestResponse,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
+  ResponseActionsClientPendingAction,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -569,7 +570,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         return;
       }
 
-      const pendingActionsByType = groupBy(pendingActions, 'EndpointActions.data.command');
+      const pendingActionsByType = groupBy(pendingActions, 'action.EndpointActions.data.command');
 
       for (const [actionType, typePendingActions] of Object.entries(pendingActionsByType)) {
         if (abortSignal.aborted) {
@@ -582,7 +583,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
             {
               const isolationResponseDocs = await this.checkPendingIsolateOrReleaseActions(
                 typePendingActions as Array<
-                  LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>
+                  ResponseActionsClientPendingAction<undefined, {}, SentinelOneIsolationRequestMeta>
                 >,
                 actionType as 'isolate' | 'unisolate'
               );
@@ -596,7 +597,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
             {
               const responseDocsForGetFile = await this.checkPendingGetFileActions(
                 typePendingActions as Array<
-                  LogsEndpointAction<
+                  ResponseActionsClientPendingAction<
                     ResponseActionGetFileParameters,
                     ResponseActionGetFileOutputContent,
                     SentinelOneGetFileRequestMeta
@@ -651,7 +652,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * @private
    */
   private async checkPendingIsolateOrReleaseActions(
-    actionRequests: Array<LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>>,
+    actionRequests: Array<
+      ResponseActionsClientPendingAction<undefined, {}, SentinelOneIsolationRequestMeta>
+    >,
     command: ResponseActionsApiCommandNames & ('isolate' | 'unisolate')
   ): Promise<LogsEndpointActionResponse[]> {
     const completedResponses: LogsEndpointActionResponse[] = [];
@@ -664,44 +667,48 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     // Create the `OR` clause that filters for each agent id and an updated date of greater than the date when
     // the isolate request was created
-    const agentListQuery: QueryDslQueryContainer[] = actionRequests.reduce((acc, action) => {
-      const s1AgentId = action.meta?.agentId;
+    const agentListQuery: QueryDslQueryContainer[] = actionRequests.reduce(
+      (acc, pendingActionData) => {
+        const action = pendingActionData.action;
+        const s1AgentId = action.meta?.agentId;
 
-      if (s1AgentId) {
-        if (!actionsByAgentId[s1AgentId]) {
-          actionsByAgentId[s1AgentId] = [];
+        if (s1AgentId) {
+          if (!actionsByAgentId[s1AgentId]) {
+            actionsByAgentId[s1AgentId] = [];
+          }
+
+          actionsByAgentId[s1AgentId].push(action);
+
+          acc.push({
+            bool: {
+              filter: [
+                { term: { 'sentinel_one.activity.agent.id': s1AgentId } },
+                { range: { 'sentinel_one.activity.updated_at': { gt: action['@timestamp'] } } },
+              ],
+            },
+          });
+        } else {
+          // This is an edge case and should never happen. But just in case :-)
+          warnings.push(
+            `${command} response action ID [${action.EndpointActions.action_id}] missing SentinelOne agent ID, thus unable to check on it's status. Forcing it to complete as failure.`
+          );
+
+          completedResponses.push(
+            this.buildActionResponseEsDoc<{}, SentinelOneIsolationResponseMeta>({
+              actionId: action.EndpointActions.action_id,
+              agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
+              data: { command },
+              error: {
+                message: `Unable to very if action completed. SentinelOne agent id ('meta.agentId') missing on action request document!`,
+              },
+            })
+          );
         }
 
-        actionsByAgentId[s1AgentId].push(action);
-
-        acc.push({
-          bool: {
-            filter: [
-              { term: { 'sentinel_one.activity.agent.id': s1AgentId } },
-              { range: { 'sentinel_one.activity.updated_at': { gt: action['@timestamp'] } } },
-            ],
-          },
-        });
-      } else {
-        // This is an edge case and should never happen. But just in case :-)
-        warnings.push(
-          `${command} response action ID [${action.EndpointActions.action_id}] missing SentinelOne agent ID, thus unable to check on it's status. Forcing it to complete as failure.`
-        );
-
-        completedResponses.push(
-          this.buildActionResponseEsDoc<{}, SentinelOneIsolationResponseMeta>({
-            actionId: action.EndpointActions.action_id,
-            agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
-            data: { command },
-            error: {
-              message: `Unable to very if action completed. SentinelOne agent id ('meta.agentId') missing on action request document!`,
-            },
-          })
-        );
-      }
-
-      return acc;
-    }, [] as QueryDslQueryContainer[]);
+        return acc;
+      },
+      [] as QueryDslQueryContainer[]
+    );
 
     if (agentListQuery.length > 0) {
       const query: QueryDslQueryContainer = {
@@ -837,7 +844,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   private async checkPendingGetFileActions(
     actionRequests: Array<
-      LogsEndpointAction<
+      ResponseActionsClientPendingAction<
         ResponseActionGetFileParameters,
         ResponseActionGetFileOutputContent,
         SentinelOneGetFileRequestMeta
@@ -874,7 +881,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               },
             },
           ],
-          should: actionRequests.reduce((acc, action) => {
+          should: actionRequests.reduce((acc, { action }) => {
             const s1AgentId = action.meta?.agentId;
             const s1CommandBatchUUID = action.meta?.commandBatchUuid;
 

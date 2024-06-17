@@ -9,9 +9,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
-
-import { unique } from './core/helper';
-import { Translation } from './translation';
+import { TranslationInput } from './translation';
 
 const TRANSLATION_FILE_EXTENSION = '.json';
 
@@ -25,7 +23,7 @@ const translationsRegistry: { [key: string]: string[] } = {};
  * Internal property for caching loaded translations files.
  * Key is path to translation file, value is object with translation messages
  */
-const loadedFiles: { [key: string]: Translation } = {};
+const loadedFiles: { [key: string]: TranslationInput } = {};
 
 /**
  * Returns locale by the given translation file name
@@ -55,7 +53,7 @@ function getLocaleFromFileName(fullFileName: string) {
  * @param pathToFile
  * @returns
  */
-async function loadFile(pathToFile: string): Promise<Translation> {
+async function loadFile(pathToFile: string): Promise<TranslationInput> {
   // doing this at the moment because fs is mocked in a lot of places where this would otherwise fail
   return JSON.parse(await promisify(fs.readFile)(pathToFile, 'utf8'));
 }
@@ -87,10 +85,9 @@ export function registerTranslationFile(translationFilePath: string) {
 
   const locale = getLocaleFromFileName(translationFilePath);
 
-  translationsRegistry[locale] = unique([
-    ...(translationsRegistry[locale] || []),
-    translationFilePath,
-  ]);
+  translationsRegistry[locale] = [
+    ...new Set([...(translationsRegistry[locale] || []), translationFilePath]),
+  ];
 }
 
 /**
@@ -114,7 +111,7 @@ export function getRegisteredLocales() {
  * @param locale
  * @returns translation messages
  */
-export async function getTranslationsByLocale(locale: string): Promise<Translation> {
+export async function getTranslationsByLocale(locale: string): Promise<TranslationInput> {
   const files = translationsRegistry[locale] || [];
   const notLoadedFiles = files.filter((file) => !loadedFiles[file]);
 
@@ -123,20 +120,21 @@ export async function getTranslationsByLocale(locale: string): Promise<Translati
   }
 
   if (!files.length) {
-    return { messages: {} };
+    return { locale, messages: {} };
   }
 
-  return files.reduce(
-    (translation: Translation, file) => ({
-      locale: loadedFiles[file].locale || translation.locale,
-      formats: loadedFiles[file].formats || translation.formats,
-      messages: {
-        ...loadedFiles[file].messages,
-        ...translation.messages,
-      },
-    }),
-    { locale, messages: {} }
-  );
+  const fileTrasnlationDetails = files.map((file) => loadedFiles[file]);
+
+  const filesLocale = fileTrasnlationDetails[0].locale || locale;
+  const translationInput = fileTrasnlationDetails.reduce((acc, translation) => ({
+    locale,
+    formats: translation.formats
+      ? Object.assign(acc.formats || {}, translation.formats)
+      : undefined,
+    messages: Object.assign(acc.messages, translation.messages),
+  }));
+
+  return { ...translationInput, locale: filesLocale };
 }
 
 /**
@@ -144,14 +142,14 @@ export async function getTranslationsByLocale(locale: string): Promise<Translati
  * @returns A Promise object
  * where keys are the locale and values are objects of translation messages
  */
-export async function getAllTranslations(): Promise<{ [key: string]: Translation }> {
+export async function getAllTranslations(): Promise<{ [key: string]: TranslationInput }> {
   const locales = getRegisteredLocales();
   const translations = await Promise.all(locales.map(getTranslationsByLocale));
 
   return locales.reduce((acc, locale, index) => {
     acc[locale] = translations[index];
     return acc;
-  }, {} as { [key: string]: Translation });
+  }, {} as { [key: string]: TranslationInput });
 }
 
 /**

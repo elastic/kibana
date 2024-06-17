@@ -24,7 +24,6 @@ export const entityDefinition: SavedObjectsType = {
       filter: { type: 'keyword' },
       indexPatterns: { type: 'keyword' },
       identityFields: { type: 'object' },
-      categories: { type: 'keyword' },
       metadata: { type: 'object' },
       metrics: { type: 'object' },
       staticFields: { type: 'object' },

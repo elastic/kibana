@@ -1,5 +1,83 @@
 #!/bin/bash
 
+fail() {
+  printf "%s\n" "$@" >&2
+  exit 1
+}
+
+if [ -z "${BASH_VERSION:-}" ]; then
+  fail "Bash is requred to run this script"
+fi
+
+install_api_key_encoded=""
+ingest_api_key_encoded=""
+kibana_api_endpoint=""
+onboarding_flow_id=""
+elastic_agent_version=""
+
+help() {
+    echo "Usage: sudo ./auto-detect.sh <arguments>"
+    echo ""
+    echo "Arguments:"
+    echo "  --install-key=<value>  Base64 Encoded API key that has priviledges to install integrations."
+    echo "  --ingest-key=<value>   Base64 Encoded API key that has priviledges to ingest data."
+    echo "  --kibana-url=<value>  Kibana API endpoint."
+    echo "  --id=<value>   Onboarding flow ID."
+    echo "  --ea-version=<value>   Elastic Agent version."
+    exit 1
+}
+
+ensure_argument() {
+    if [ -z "$1" ]; then
+        echo "Error: Missing value for $2."
+        help
+    fi
+}
+
+if [ "$EUID" -ne 0 ]; then
+    echo "Error: This script must be run as root."
+    help
+fi
+
+# Parse command line arguments
+for i in "$@"; do
+    case $i in
+        --install-key=*)
+            shift
+            install_api_key_encoded="${i#*=}"
+            ;;
+        --ingest-key=*)
+            shift
+            ingest_api_key_encoded="${i#*=}"
+            ;;
+        --kibana-url=*)
+            shift
+            kibana_api_endpoint="${i#*=}"
+            ;;
+        --id=*)
+            shift
+            onboarding_flow_id="${i#*=}"
+            ;;
+        --ea-version=*)
+            shift
+            elastic_agent_version="${i#*=}"
+            ;;
+        --help)
+            help
+            ;;
+        *)
+            echo "Unknown option: $i"
+            help
+            ;;
+    esac
+done
+
+ensure_argument "$install_api_key_encoded" "--install-key"
+ensure_argument "$ingest_api_key_encoded" "--ingest-key"
+ensure_argument "$kibana_api_endpoint" "--kibana-url"
+ensure_argument "$onboarding_flow_id" "--id"
+ensure_argument "$elastic_agent_version" "--ea-version"
+
 known_integrations_list_string=""
 selected_known_integrations_array=()
 selected_known_integrations_tsv_string=""
@@ -9,24 +87,186 @@ selected_unknown_log_file_pattern_array=()
 excluded_options_string=""
 selected_unknown_log_file_pattern_tsv_string=""
 custom_log_file_path_list_tsv_string=""
-known_integrations_api_body_string=""
-custom_integrations_api_body_string=""
+install_integrations_api_body_string=""
+elastic_agent_artifact_name=""
+elastic_agent_config_path="/opt/Elastic/Agent/elastic-agent.yml"
+
+OS="$(uname)"
+ARCH="$(uname -m)"
+os=linux
+arch=x86_64
+if [ "${OS}" == "Linux" ]; then
+  if [ "${ARCH}" == "aarch64" ]; then
+    arch=arm64
+  fi
+elif [ "${OS}" == "Darwin" ]; then
+  os=darwin
+  if [ "${ARCH}" == "arm64" ]; then
+    arch=aarch64
+  fi
+  elastic_agent_config_path=/Library/Elastic/Agent/elastic-agent.yml
+else
+  fail "This script is only supported on linux and macOS"
+fi
+
+elastic_agent_artifact_name="elastic-agent-${elastic_agent_version}-${os}-${arch}"
+
+update_step_progress() {
+  local STEPNAME="$1"
+  local STATUS="$2" # "incomplete" | "complete" | "disabled" | "loading" | "warning" | "danger" | "current"
+  local MESSAGE=${3:-}
+  local PAYLOAD=${4:-}
+  local data=""
+  if [ -z "$PAYLOAD" ]; then
+    data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}"
+  else
+    data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\", \"payload\":${PAYLOAD}}"
+  fi
+  curl --request POST \
+    --url "${kibana_api_endpoint}/internal/observability_onboarding/flow/${onboarding_flow_id}/step/${STEPNAME}" \
+    --header "Authorization: ApiKey ${install_api_key_encoded}" \
+    --header "Content-Type: application/json" \
+    --header "kbn-xsrf: true" \
+    --header "x-elastic-internal-origin: Kibana" \
+    --data "$data" \
+    --output /dev/null \
+    --no-progress-meter
+}
+
+download_elastic_agent() {
+  local download_url="https://artifacts.elastic.co/downloads/beats/elastic-agent/${elastic_agent_artifact_name}.tar.gz"
+  curl -L -O $download_url --fail
+
+  if [ "$?" -eq 0 ]; then
+    update_step_progress "ea-download" "complete"
+  else
+    update_step_progress "ea-download" "danger" "Failed to download Elastic Agent, see script output for error."
+    fail "Failed to download Elastic Agent"
+  fi
+}
+
+extract_elastic_agent() {
+  tar -xzf "${elastic_agent_artifact_name}.tar.gz"
+
+  if [ "$?" -eq 0 ]; then
+    update_step_progress "ea-extract" "complete"
+  else
+    update_step_progress "ea-extract" "danger" "Failed to extract Elastic Agent, see script output for error."
+    fail "Failed to extract Elastic Agent"
+  fi
+}
+
+install_elastic_agent() {
+  "./${elastic_agent_artifact_name}/elastic-agent" install -f
+
+  if [ "$?" -eq 0 ]; then
+    update_step_progress "ea-install" "complete"
+  else
+    update_step_progress "ea-install" "danger" "Failed to install Elastic Agent, see script output for error."
+    fail "Failed to install Elastic Agent"
+  fi
+}
+
+wait_for_elastic_agent_status() {
+  local MAX_RETRIES=10
+  local i=0
+  echo -n "."
+  elastic-agent status > /dev/null 2>&1
+  local ELASTIC_AGENT_STATUS_EXIT_CODE="$?"
+  while [ "$ELASTIC_AGENT_STATUS_EXIT_CODE" -ne 0 ] && [ $i -le $MAX_RETRIES ]; do
+    sleep 1
+    echo -n "."
+    elastic-agent status > /dev/null 2>&1
+    ELASTIC_AGENT_STATUS_EXIT_CODE="$?"
+    ((i++))
+  done
+  echo ""
+
+  if [ "$ELASTIC_AGENT_STATUS_EXIT_CODE" -ne 0 ]; then
+    update_step_progress "ea-status" "warning" "Unable to determine agent status"
+  fi
+}
+
+ensure_elastic_agent_healthy() {
+  # https://www.elastic.co/guide/en/fleet/current/elastic-agent-cmd-options.html#elastic-agent-status-command
+  ELASTIC_AGENT_STATES=(STARTING CONFIGURING HEALTHY DEGRADED FAILED STOPPING UPGRADING ROLLBACK)
+  # Get elastic-agent status in json format | removing extra states in the json | finding "state":value | removing , | removing "state": | trimming the result
+  ELASTIC_AGENT_STATE="$(elastic-agent status --output json | sed -n '/components/q;p' | grep state | sed 's/\(.*\),/\1 /' | sed 's/"state": //' | sed 's/[[:space:]]//g')"
+  # Get elastic-agent status in json format | removing extra states in the json | finding "message":value | removing , | removing "message": | trimming the result | removing ""
+  ELASTIC_AGENT_MESSAGE="$(elastic-agent status --output json | sed -n '/components/q;p' | grep message | sed 's/\(.*\),/\1 /' | sed 's/"message": //' | sed 's/[[:space:]]//g' | sed 's/\"//g')"
+  # Get elastic-agent status in json format | removing extra ids in the json | finding "id":value | removing , | removing "id": | trimming the result | removing ""
+  ELASTIC_AGENT_ID="$(elastic-agent status --output json | sed -n '/components/q;p' | grep \"id\" | sed 's/\(.*\),/\1 /' | sed 's/"id": //' | sed 's/[[:space:]]//g' | sed 's/\"//g')"
+
+  if [ "${ELASTIC_AGENT_STATE}" = "2" ] && [ "${ELASTIC_AGENT_MESSAGE}" = "Running" ]; then
+    update_step_progress "ea-status" "complete" "" "{\"agentId\": \"${ELASTIC_AGENT_ID}\"}"
+  else
+    update_step_progress "ea-status" "danger" "Expected agent status HEALTHY / Running but got ${ELASTIC_AGENT_STATES[ELASTIC_AGENT_STATE]} / ${ELASTIC_AGENT_MESSAGE}"
+    fail "Elastic Agent is not healthy.\nCurrent status: ${ELASTIC_AGENT_STATES[ELASTIC_AGENT_STATE]} / ${ELASTIC_AGENT_MESSAGE}.\nFor help, please see our troubleshooting guide at https://www.elastic.co/guide/en/fleet/8.13/fleet-troubleshooting.html."
+  fi
+}
+
+backup_elastic_agent_config() {
+  if [ -f "$elastic_agent_config_path" ]; then
+    echo -e "\nExisting config file found at $elastic_agent_config_path";
+
+    printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Create backup and continue installation?" "[Y/n] (default: Yes): "
+    read confirmation_reply
+    confirmation_reply="${confirmation_reply:-Y}"
+
+    if [[ "$confirmation_reply" =~ ^[Yy](es)?$ ]]; then
+      local backup_path="${elastic_agent_config_path%.yml}.$(date +%s).yml" # e.g. /opt/Elastic/Agent/elastic-agent.1712267614.yml
+      cp $elastic_agent_config_path $backup_path
+
+      if [ "$?" -eq 0 ]; then
+        printf "\n\e[1;32m✓\e[0m \e[1m%s\e[0m\n" "Backup saved to $backup_path"
+      else
+        update_step_progress "ea-config" "warning" "Failed to backup existing configuration"
+        fail "Failed to backup existing config file - Try manually creating a backup or delete your existing config file before re-running this script"
+      fi
+    else
+      fail "Installation aborted"
+    fi
+  fi
+}
+
+download_elastic_agent_config() {
+  local decoded_ingest_api_key=$(echo "$ingest_api_key_encoded" | base64 -d)
+  local tmp_path="/tmp/elastic-agent-config-template.yml"
+
+  update_step_progress "ea-config" "loading"
+
+  curl --request POST \
+    -o $tmp_path \
+    --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install" \
+    --header "Authorization: ApiKey $install_api_key_encoded" \
+    --header "Content-Type: text/tab-separated-values" \
+    --data "$(echo -e "$install_integrations_api_body_string")" \
+    --no-progress-meter
+
+  if [ "$?" -ne 0 ]; then
+    update_step_progress "ea-config" "warning" "Failed to install integrations."
+    fail "Failed to install integrations."
+  fi
+
+  sed "s/'\${API_KEY}'/$decoded_ingest_api_key/g" $tmp_path > $elastic_agent_config_path
+}
 
 read_open_log_file_list() {
   local exclude_patterns=(
     "^\/Users\/.+?\/Library\/Application Support"
-    "^\/Users\/.+?\/Library\/Caches",
+    "^\/Users\/.+?\/Library\/Caches"
+    "^\/private"
     # Excluding all patterns that correspond to known integrations
     # that we are detecting separately
-    "^\/var\/log\/nginx",
-    "^\/var\/log\/apache2",
-    "^\/var\/log\/httpd",
-    "^\/var\/lib\/docker\/containers",
-    "^\/var\/log\/syslog",
-    "^\/var\/log\/auth.log",
-    "^\/var\/log\/system.log",
-    "^\/var\/log\/messages",
-    "^\/var\/log\/secure",
+    "^\/var\/log\/nginx"
+    "^\/var\/log\/apache2"
+    "^\/var\/log\/httpd"
+    "^\/var\/lib\/docker\/containers"
+    "^\/var\/log\/syslog"
+    "^\/var\/log\/auth.log"
+    "^\/var\/log\/system.log"
+    "^\/var\/log\/messages"
+    "^\/var\/log\/secure"
   )
 
   local list=$(lsof -Fn | grep "\.log$" | awk '/^n/ {print substr($0, 2)}' | sort | uniq)
@@ -145,12 +385,12 @@ function select_list() {
     fi
   done
 
-  echo -e "\n"
-  read -p "Do you want to ingest all of these logs? [Y/n] (default: Yes): " confirmation_reply
+  printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Ingest all detected logs?" "[Y/n] (default: Yes): "
+  read confirmation_reply
   confirmation_reply="${confirmation_reply:-Y}"
 
-  if [[ ! "$confirmation_reply" =~ ^[Yy]$ ]]; then
-    echo -e "\nExclude logs by listing their index numbers (e.g. 1, 2, 3):"
+  if [[ ! "$confirmation_reply" =~ ^[Yy](es)?$ ]]; then
+    printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Exclude logs by listing their index numbers" "(e.g. 1, 2, 3): "
     read exclude_index_list_string
 
     IFS=', ' read -r -a exclude_index_list_array <<< "$exclude_index_list_string"
@@ -170,7 +410,11 @@ function select_list() {
           selected_unknown_log_file_pattern_array+=("${options[index]}")
         fi
       else
-        excluded_options_string+="$((index + 1))) ${options[index]}\n"
+        if [[ "$index" -lt "${#known_integrations_options[@]}" ]]; then
+          excluded_options_string+="$((index + 1))) $(known_integration_title "${options[index]}")\n"
+        else
+          excluded_options_string+="$((index + 1))) ${options[index]}\n"
+        fi
       fi
     done
   else
@@ -206,17 +450,15 @@ generate_custom_integration_name() {
     echo "$name"
 }
 
-build_known_integrations_api_body_string() {
+build_install_integrations_api_body_string() {
   for item in "${selected_known_integrations_array[@]}"; do
-    known_integrations_api_body_string+="$item\tregistry\n"
+    install_integrations_api_body_string+="$item\tregistry\n"
   done
-}
 
-build_custom_integrations_api_body_string() {
   for item in "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_path_list_array[@]}"; do
     local integration_name=$(generate_custom_integration_name "$item")
 
-    custom_integrations_api_body_string+="$integration_name\tcustom\t$item\n"
+    install_integrations_api_body_string+="$integration_name\tcustom\t$item\n"
   done
 }
 
@@ -233,7 +475,8 @@ if [[ -n "$excluded_options_string" ]]; then
   echo -e "$excluded_options_string"
 fi
 
-echo -e "\nAdd paths to any custom logs we've missed (e.g. /var/log/myapp/*.log, /home/j/myapp/*.log). Press Enter to skip."
+
+printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m\n" "Add paths to any custom logs we've missed" "(e.g. /path1/*.log, /path2/*.log). Press Enter to skip."
 read custom_log_file_path_list_string
 
 IFS=', ' read -r -a custom_log_file_path_list_array <<< "$custom_log_file_path_list_string"
@@ -246,14 +489,31 @@ for item in "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_p
   printf "• %s\n" "$item"
 done
 
-echo -e "\n"
-read -p "Confirm selection [Y/n] (default: Yes): " confirmation_reply
+
+printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Continue installation with selected logs?" "[Y/n] (default: Yes): "
+read confirmation_reply
 confirmation_reply="${confirmation_reply:-Y}"
 
-if [[ ! "$confirmation_reply" =~ ^[Yy]$ ]]; then
+if [[ ! "$confirmation_reply" =~ ^[Yy](es)?$ ]]; then
   echo -e "Rerun the script again to select different logs."
   exit 1
 fi
 
-build_known_integrations_api_body_string
-build_custom_integrations_api_body_string
+build_install_integrations_api_body_string
+
+backup_elastic_agent_config
+
+echo -e "\nDownloading Elastic Agent...\n"
+download_elastic_agent
+extract_elastic_agent
+
+echo -e "\nInstalling Elastic Agent...\n"
+install_elastic_agent
+wait_for_elastic_agent_status
+ensure_elastic_agent_healthy
+
+echo -e "\nInstalling integrations...\n"
+download_elastic_agent_config
+
+update_step_progress "ea-config" "complete"
+printf "\n\e[32m%s\e[0m\n" "🎉 Elastic Agent is configured and running. You can now go back to Kibana and check for incoming logs."

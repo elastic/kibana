@@ -152,7 +152,7 @@ export function useConversation({
             throw error;
           });
       },
-      [displayedConversationId, initialTitle],
+      [displayedConversationId, initialTitle, service, setMessages],
       {
         defaultValue: () => {
           if (!displayedConversationId) {

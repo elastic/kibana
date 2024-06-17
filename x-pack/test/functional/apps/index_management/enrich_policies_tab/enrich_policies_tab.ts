@@ -20,8 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const ENRICH_INDEX_NAME = 'test-policy-1';
   const ENRICH_POLICY_NAME = 'test-policy-1';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/178962
-  describe.skip('Enrich policies tab', function () {
+  describe('Enrich policies tab', function () {
     before(async () => {
       await log.debug('Creating required index and enrich policy');
       try {
@@ -96,6 +95,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('can delete a policy', async () => {
+      // Since we disabled wait_for_completion in the server request, we dont know when
+      // a given policy will finish executing. Until that happens the policy cannot
+      // be deleted. 2s seems to be plenty enough to guarantee that, at least for this
+      // test.
+      await pageObjects.common.sleep(2000);
+
       await pageObjects.indexManagement.clickDeleteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();
 

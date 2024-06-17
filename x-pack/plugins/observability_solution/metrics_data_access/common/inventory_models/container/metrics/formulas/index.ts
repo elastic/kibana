@@ -6,11 +6,17 @@
  */
 
 import { dockerContainerCpuUsage, k8sContainerCpuUsage } from './cpu';
+import { dockerContainerDiskIORead, dockerContainerDiskIOWrite } from './disk';
 import { dockerContainerMemoryUsage, k8sContainerMemoryUsage } from './memory';
+import { dockerContainerNetworkRx, dockerContainerNetworkTx } from './network';
 
 export const formulas = {
   dockerContainerCpuUsage,
   dockerContainerMemoryUsage,
+  dockerContainerNetworkRx,
+  dockerContainerNetworkTx,
+  dockerContainerDiskIORead,
+  dockerContainerDiskIOWrite,
   k8sContainerCpuUsage,
   k8sContainerMemoryUsage,
 } as const;

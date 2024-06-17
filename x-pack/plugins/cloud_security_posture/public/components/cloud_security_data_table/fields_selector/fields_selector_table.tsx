@@ -153,13 +153,6 @@ export const FieldsSelectorTable = ({
       }),
       sortable: true,
     },
-    {
-      field: 'displayName',
-      name: i18n.translate('xpack.csp.dataTable.fieldsModalCustomLabel', {
-        defaultMessage: 'Custom Label',
-      }),
-      sortable: (field: Field) => field.displayName.toLowerCase(),
-    },
   ];
 
   const error = useMemo(() => {

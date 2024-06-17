@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { SearchTotalHitsRelation } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IndicesDataStreamsStatsResponse,
+  SearchTotalHitsRelation,
+} from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   findInventoryFields,
   InventoryItemType,
   inventoryModels,
 } from '@kbn/metrics-data-access-plugin/common';
+import { DataStreamDetails } from '../../../../common/api_types';
 
 import { getDataStreamDetails } from '.';
 const accessLogsDataStream = 'logs-nginx.access-default';
 const errorLogsDataStream = 'logs-nginx.error-default';
+const nonExistentDataStream = 'non-existent';
 
-const defaultSummaryStats = {
+const defaultSummaryStats: DataStreamDetails = {
   degradedDocsCount: 98841,
   docsCount: 617680,
   hosts: {
@@ -33,6 +38,10 @@ const defaultSummaryStats = {
     'service.name': ['synth-service-0', 'synth-service-1', 'synth-service-2'],
   },
   sizeBytes: 72596354,
+  lastActivity: 1715941303175,
+  userPrivileges: {
+    canMonitor: true,
+  },
 };
 
 const start = Number(new Date('2020-01-01T00:00:00.000Z'));
@@ -47,10 +56,11 @@ describe('getDataStreamDetails', () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     esClientMock.indices.getSettings.mockRejectedValue(MOCK_INDEX_ERROR);
     esClientMock.search.mockRejectedValue(MOCK_INDEX_ERROR);
+    esClientMock.security.hasPrivileges.mockResolvedValue(MOCK_HAS_PRIVILEGES_RESPONSE);
 
     const dataStreamDetails = await getDataStreamDetails({
       esClient: esClientMock,
-      dataStream: 'non-existent',
+      dataStream: nonExistentDataStream,
       start,
       end,
     });
@@ -61,7 +71,11 @@ describe('getDataStreamDetails', () => {
   it('returns summary of a data stream', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     esClientMock.indices.stats.mockReturnValue(Promise.resolve(MOCK_STATS_RESPONSE));
+    esClientMock.indices.dataStreamsStats.mockReturnValue(
+      Promise.resolve(MOCK_DATA_STREAM_RESPONSE as IndicesDataStreamsStatsResponse)
+    );
     esClientMock.search.mockReturnValue(Promise.resolve(MOCK_SEARCH_RESPONSE));
+    esClientMock.security.hasPrivileges.mockResolvedValue(MOCK_HAS_PRIVILEGES_RESPONSE);
 
     const dataStreamDetails = await getDataStreamDetails({
       esClient: esClientMock,
@@ -76,6 +90,10 @@ describe('getDataStreamDetails', () => {
   it('returns the correct service.name list', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     esClientMock.indices.stats.mockReturnValue(Promise.resolve(MOCK_STATS_RESPONSE));
+    esClientMock.indices.dataStreamsStats.mockReturnValue(
+      Promise.resolve(MOCK_DATA_STREAM_RESPONSE as IndicesDataStreamsStatsResponse)
+    );
+    esClientMock.security.hasPrivileges.mockResolvedValue(MOCK_HAS_PRIVILEGES_RESPONSE);
 
     const serviceName = 'service.name';
     const testServiceName = ['tst-srv-0', 'tst-srv-1'];
@@ -98,6 +116,10 @@ describe('getDataStreamDetails', () => {
   it('returns the correct host.name list', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     esClientMock.indices.stats.mockReturnValue(Promise.resolve(MOCK_STATS_RESPONSE));
+    esClientMock.security.hasPrivileges.mockResolvedValue(MOCK_HAS_PRIVILEGES_RESPONSE);
+    esClientMock.indices.dataStreamsStats.mockReturnValue(
+      Promise.resolve(MOCK_DATA_STREAM_RESPONSE as IndicesDataStreamsStatsResponse)
+    );
 
     const hostName = 'host.name';
     const testHostName = ['tst-host-0', 'tst-host-1'];
@@ -133,6 +155,10 @@ describe('getDataStreamDetails', () => {
 
   it('returns correct size in bytes', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock.security.hasPrivileges.mockResolvedValue(MOCK_HAS_PRIVILEGES_RESPONSE);
+    esClientMock.indices.dataStreamsStats.mockReturnValue(
+      Promise.resolve(MOCK_DATA_STREAM_RESPONSE as IndicesDataStreamsStatsResponse)
+    );
 
     const docsCount = 536;
     const storeDocsCount = 1220;
@@ -160,9 +186,13 @@ describe('getDataStreamDetails', () => {
   // This covers https://github.com/elastic/kibana/issues/178954
   it('returns size as NaN for when sizeStatsAvailable is false (serverless mode)', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock.security.hasPrivileges.mockResolvedValue(MOCK_HAS_PRIVILEGES_RESPONSE);
 
     esClientMock.indices.stats.mockReturnValue(Promise.resolve(MOCK_STATS_RESPONSE));
     esClientMock.search.mockReturnValue(Promise.resolve(MOCK_SEARCH_RESPONSE));
+    esClientMock.indices.dataStreamsStats.mockReturnValue(
+      Promise.resolve(MOCK_DATA_STREAM_RESPONSE as IndicesDataStreamsStatsResponse)
+    );
 
     const dataStreamDetails = await getDataStreamDetails({
       esClient: esClientMock,
@@ -172,6 +202,31 @@ describe('getDataStreamDetails', () => {
       sizeStatsAvailable: false,
     });
     expect(dataStreamDetails.sizeBytes).toBeNaN();
+  });
+
+  it('returns empty lastActivity and correct user privileges for an underprivileged user', async () => {
+    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock.security.hasPrivileges.mockResolvedValue({
+      ...MOCK_HAS_PRIVILEGES_RESPONSE,
+      index: {
+        [accessLogsDataStream]: {
+          monitor: false,
+        },
+      },
+    });
+    esClientMock.search.mockReturnValue(Promise.resolve(MOCK_SEARCH_RESPONSE));
+    esClientMock.indices.dataStreamsStats.mockReturnValue(
+      Promise.resolve(MOCK_DATA_STREAM_RESPONSE as IndicesDataStreamsStatsResponse)
+    );
+
+    const dataStreamDetails = await getDataStreamDetails({
+      esClient: esClientMock,
+      dataStream: accessLogsDataStream,
+      start,
+      end,
+    });
+
+    expect(dataStreamDetails.userPrivileges?.canMonitor ?? true).toBe(false);
   });
 });
 
@@ -332,4 +387,41 @@ const MOCK_STATS_RESPONSE = {
     },
   },
   indices: {},
+};
+
+const MOCK_DATA_STREAM_RESPONSE = {
+  data_streams: [
+    {
+      data_stream: errorLogsDataStream,
+      backing_indices: 1,
+      store_size: '19.1mb',
+      store_size_bytes: 20070975,
+      maximum_timestamp: 1715941303175,
+    },
+    {
+      data_stream: accessLogsDataStream,
+      backing_indices: 1,
+      store_size: '11.3mb',
+      store_size_bytes: 20078875,
+      maximum_timestamp: 1715941304573,
+    },
+  ],
+};
+
+const MOCK_HAS_PRIVILEGES_RESPONSE = {
+  username: 'elastic',
+  has_all_requested: true,
+  cluster: {},
+  index: {
+    [nonExistentDataStream]: {
+      monitor: false,
+    },
+    [accessLogsDataStream]: {
+      monitor: true,
+    },
+    [errorLogsDataStream]: {
+      monitor: true,
+    },
+  },
+  application: {},
 };

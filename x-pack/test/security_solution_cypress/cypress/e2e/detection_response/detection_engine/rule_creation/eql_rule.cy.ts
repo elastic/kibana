@@ -42,7 +42,7 @@ import {
   INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
+import { getDetails } from '../../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
@@ -138,7 +138,6 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
           .should('have.text', `${humanizedDuration}`);
       });
 
-      waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts);
@@ -175,7 +174,6 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
       createAndEnableRule();
       openRuleManagementPageViaBreadcrumbs();
       goToRuleDetailsOf(rule.name);
-      waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfSequenceAlerts);
@@ -203,7 +201,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
       getIndexPatternClearButton().click();
-      getRuleIndexInput().type(`no_at_timestamp_field{enter}`);
+      getRuleIndexInput().type(`auditbeat-no_at_timestamp_field{enter}`);
 
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');

@@ -65,7 +65,12 @@ import {
   getTemplateInputs,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
-import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
+import {
+  defaultFleetErrorHandler,
+  fleetErrorToResponseOptions,
+  FleetError,
+  FleetTooManyRequestsError,
+} from '../../errors';
 import { appContextService, checkAllowedPackages } from '../../services';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
@@ -80,6 +85,7 @@ import type {
 import { getDataStreams } from '../../services/epm/data_streams';
 import { NamingCollisionError } from '../../services/epm/packages/custom_integrations/validation/check_naming_collision';
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
+import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -451,7 +457,6 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
-
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const res = await installPackage({
@@ -475,6 +480,18 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } else {
+    if (res.error instanceof FleetTooManyRequestsError) {
+      return response.customError({
+        statusCode: 429,
+        body: {
+          message: res.error.message,
+        },
+        headers: {
+          // retry-after expects seconds
+          'retry-after': Math.ceil(UPLOAD_RETRY_AFTER_MS / 1000).toString(),
+        },
+      });
+    }
     return defaultFleetErrorHandler({ error: res.error, response });
   }
 };

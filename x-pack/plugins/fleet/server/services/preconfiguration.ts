@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import apm from 'elastic-apm-node';
 
@@ -100,6 +101,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     esClient,
     packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
+    skipIfInstalled: true, // force flag alone would reinstall packages that are already installed
     spaceId,
   });
 
@@ -176,7 +178,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       const namespacedSoClient = preconfiguredAgentPolicy.space_id
         ? appContextService.getInternalUserSOClientForSpaceId(preconfiguredAgentPolicy.space_id)
-        : defaultSoClient;
+        : appContextService.getInternalUserSOClientForSpaceId(DEFAULT_NAMESPACE_STRING);
 
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         namespacedSoClient,
@@ -293,7 +295,14 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             packagePolicy.name === installablePackagePolicy.packagePolicy.name
         );
       });
-      logger.debug(`Adding preconfigured package policies ${packagePoliciesToAdd}`);
+      logger.debug(
+        `Adding preconfigured package policies ${JSON.stringify(
+          packagePoliciesToAdd.map((pol) => ({
+            name: pol.packagePolicy.name,
+            package: pol.installedPackage.name,
+          }))
+        )}`
+      );
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(
         esClient,
@@ -417,6 +426,7 @@ async function addPreconfiguredPolicyPackages(
           ...(simplifiedPackagePolicy as SimplifiedPackagePolicy),
           id,
           policy_id: agentPolicy.id,
+          policy_ids: [agentPolicy.id],
           namespace: packagePolicy.namespace || agentPolicy.namespace,
         },
         packageInfo,

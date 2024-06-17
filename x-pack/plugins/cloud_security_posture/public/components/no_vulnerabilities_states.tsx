@@ -18,7 +18,7 @@ import {
   EuiImage,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
@@ -72,10 +72,10 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
       icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="" role="presentation" />}
       title={
         <h2>
-          <FormattedHTMLMessage
-            tagName="h2"
+          <FormattedMessage
             id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptTitle"
             defaultMessage="Detect vulnerabilities in your <br/> cloud assets"
+            ignoreTag
           />
         </h2>
       }

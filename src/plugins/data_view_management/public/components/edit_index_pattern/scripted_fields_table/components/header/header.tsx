@@ -31,6 +31,7 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
         <EuiText size="s">
           <p>
             <FormattedMessage
+              tagName="span"
               id="indexPatternManagement.editIndexPattern.scriptedLabel"
               defaultMessage="Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched."
             />
@@ -38,6 +39,7 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
             <EuiIcon type="warning" color="warning" style={{ marginRight: '4px' }} />
             <FormattedMessage
               id="indexPatternManagement.editIndexPattern.deprecation"
+              tagName="span"
               defaultMessage="Scripted fields are deprecated. Use {runtimeDocs} instead."
               values={{
                 runtimeDocs: (

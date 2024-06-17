@@ -46,7 +46,7 @@ export function definePutRolesRoutes({
     {
       path: '/api/security/role/{name}',
       options: {
-        description: `Create or update a role`,
+        summary: `Create or update a role`,
       },
       validate: {
         params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }),

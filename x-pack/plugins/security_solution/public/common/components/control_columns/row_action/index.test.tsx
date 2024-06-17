@@ -15,6 +15,7 @@ import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import type { RouteSpyState } from '../../../utils/route/types';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -114,18 +115,7 @@ describe('RowAction', () => {
     expect(wrapper.getAllByTestId('expand-event')).not.toBeNull();
   });
 
-  test('Uses the old flyout when the experimental feature returns false', () => {
-    const wrapper = render(
-      <TestProviders>
-        <RowAction {...defaultProps} />
-      </TestProviders>
-    );
-    fireEvent.click(wrapper.getByTestId('expand-event'));
-    expect(mockDispatch).toHaveBeenCalled();
-    expect(mockOpenFlyout).not.toHaveBeenCalled();
-  });
-
-  test('Uses the new flyout when the experimental feature returns false but the page is attackDiscovery', () => {
+  test('should always show expandable flyout if the page is attackDiscovery', () => {
     (useRouteSpy as jest.Mock).mockReturnValue([
       { ...mockRouteSpy, pageName: SecurityPageName.attackDiscovery },
     ]);
@@ -136,6 +126,15 @@ describe('RowAction', () => {
     );
     fireEvent.click(wrapper.getByTestId('expand-event'));
     expect(mockDispatch).not.toHaveBeenCalled();
-    expect(mockOpenFlyout).toHaveBeenCalled();
+    expect(mockOpenFlyout).toHaveBeenCalledWith({
+      right: {
+        id: DocumentDetailsRightPanelKey,
+        params: {
+          id: '1',
+          indexName: undefined,
+          scopeId: 'table-test',
+        },
+      },
+    });
   });
 });

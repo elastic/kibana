@@ -236,7 +236,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         const name = getConnectorName(value, item);
 
         const link = (
-          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="xs">
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiLink
                 data-test-subj={`edit${item.id}`}

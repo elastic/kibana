@@ -6,7 +6,8 @@
  */
 import React from 'react';
 
-import { render } from '@testing-library/react';
+import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
+
 import { PanelHeader } from './header';
 import { allThreeTabs } from './hooks/use_tabs';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';

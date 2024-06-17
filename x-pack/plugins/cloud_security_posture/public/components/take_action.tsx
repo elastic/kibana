@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -19,6 +20,7 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n as kbnI18n } from '@kbn/i18n';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import type { RuleResponse } from '../common/types';
 import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
@@ -33,6 +35,7 @@ interface TakeActionProps {
   enableBenchmarkRuleFn?: () => Promise<void>;
   disableBenchmarkRuleFn?: () => Promise<void>;
   isCreateDetectionRuleDisabled?: boolean;
+  isDataGridControlColumn?: boolean;
 }
 
 export const showCreateDetectionRuleSuccessToast = (
@@ -170,6 +173,7 @@ export const TakeAction = ({
   enableBenchmarkRuleFn,
   disableBenchmarkRuleFn,
   isCreateDetectionRuleDisabled = false,
+  isDataGridControlColumn: isDataTableAction = false,
 }: TakeActionProps) => {
   const queryClient = useQueryClient();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -182,7 +186,7 @@ export const TakeAction = ({
     prefix: 'smallContextMenuPopover',
   });
 
-  const button = (
+  const button = !isDataTableAction ? (
     <EuiButton
       isLoading={isLoading}
       fill
@@ -192,6 +196,16 @@ export const TakeAction = ({
     >
       <FormattedMessage id="xpack.csp.flyout.takeActionButton" defaultMessage="Take action" />
     </EuiButton>
+  ) : (
+    <EuiButtonIcon
+      aria-label={kbnI18n.translate('xpack.csp.flyout.moreActionsButton', {
+        defaultMessage: 'More actions',
+      })}
+      iconType="boxesHorizontal"
+      color="primary"
+      isLoading={isLoading}
+      onClick={() => setPopoverOpen(!isPopoverOpen)}
+    />
   );
   const actionsItems = [];
 

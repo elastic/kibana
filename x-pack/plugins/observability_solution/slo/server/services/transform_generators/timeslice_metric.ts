@@ -12,6 +12,7 @@ import {
   timesliceMetricIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { InvalidTransformError } from '../../errors';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
@@ -27,7 +28,11 @@ import { getFilterRange } from './common';
 const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 export class TimesliceMetricTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLODefinition): TransformPutTransformRequest {
+  public async getTransformParams(
+    slo: SLODefinition,
+    spaceId: string,
+    dataViewService: DataViewsService
+  ): Promise<TransformPutTransformRequest> {
     if (!timesliceMetricIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -35,7 +40,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      this.buildSource(slo, slo.indicator),
+      await this.buildSource(slo, slo.indicator, dataViewService),
       this.buildDestination(),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
@@ -48,15 +53,23 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildSource(slo: SLODefinition, indicator: TimesliceMetricIndicator) {
+  private async buildSource(
+    slo: SLODefinition,
+    indicator: TimesliceMetricIndicator,
+    dataViewService: DataViewsService
+  ) {
+    const dataView = await this.getIndicatorDataView({
+      dataViewService,
+      dataViewId: indicator.params.index,
+    });
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo),
+      runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),
       query: {
         bool: {
           filter: [
             getFilterRange(slo, indicator.params.timestampField),
-            getElasticsearchQueryOrThrow(indicator.params.filter),
+            getElasticsearchQueryOrThrow(indicator.params.filter, dataView),
           ],
         },
       },

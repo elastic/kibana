@@ -35,9 +35,7 @@ export function createRepositoryEsClient(client: ElasticsearchClient): Repositor
     Object.defineProperty(acc, key, {
       value: async (params?: unknown, options?: TransportRequestOptions) => {
         try {
-          return await retryCallCluster(() =>
-            (client[key] as Function)(params, { maxRetries: 0, ...options })
-          );
+          return await retryCallCluster(() => (client[key] as Function)(params, options ?? {}));
         } catch (e) {
           // retry failures are caught here, as are 404's that aren't ignored (e.g update calls)
           throw decorateEsError(e);

@@ -21,7 +21,7 @@ import type { ArtifactCardGridProps } from '../../../../../components/artifact_c
 import { ArtifactCardGrid } from '../../../../../components/artifact_card_grid';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
-import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
+import { isArtifactGlobal } from '../../../../../../../common/endpoint/service/artifacts';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { useGetLinkTo } from '../empty/use_policy_artifacts_empty_hooks';
 import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
@@ -135,7 +135,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
         };
         const item = artifact as ExceptionListItemSchema;
 
-        const isGlobal = isGlobalPolicyEffected(item.tags);
+        const isGlobal = isArtifactGlobal(item);
         const deleteAction = {
           icon: 'trash',
           children: labels.listRemoveActionTitle,

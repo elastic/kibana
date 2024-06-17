@@ -56,6 +56,7 @@ export type SuccessfulRunResult = {
   state: Record<string, unknown>;
   taskRunError?: DecoratedError;
   shouldValidate?: boolean;
+  shouldDeleteTask?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -87,6 +88,11 @@ export type FailedRunResult = SuccessfulRunResult & {
 };
 
 export type RunResult = FailedRunResult | SuccessfulRunResult;
+
+export const getDeleteTaskRunResult = () => ({
+  state: {},
+  shouldDeleteTask: true,
+});
 
 export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
   !!((result as FailedRunResult)?.error ?? false);
@@ -205,6 +211,7 @@ export enum TaskStatus {
   Claiming = 'claiming',
   Running = 'running',
   Failed = 'failed',
+  ShouldDelete = 'should_delete',
   Unrecognized = 'unrecognized',
   DeadLetter = 'dead_letter',
 }
@@ -419,6 +426,17 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * The random uuid of the Kibana instance which claimed ownership of the task last
    */
   ownerId: string | null;
+}
+
+export interface ConcreteTaskInstanceVersion {
+  /** The _id of the the document (not the SO id) */
+  esId: string;
+  /** The _seq_no of the document when using seq_no_primary_term on fetch */
+  seqNo?: number;
+  /** The _primary_term of the document when using seq_no_primary_term on fetch */
+  primaryTerm?: number;
+  /** The error found if trying to resolve the version info for this esId */
+  error?: string;
 }
 
 /**

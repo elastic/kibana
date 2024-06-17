@@ -9,7 +9,7 @@
 import React, { PureComponent } from 'react';
 import _ from 'lodash';
 
-import { injectI18n, InjectedIntlProps } from '@kbn/i18n-react';
+import { injectI18n, WrappedComponentProps } from '@kbn/i18n-react';
 import { EuiFieldText, EuiComboBox, EuiThemeProvider } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormRow } from './form_row';
@@ -18,7 +18,7 @@ interface ListControlUiState {
   isLoading: boolean;
 }
 
-export type ListControlUiProps = InjectedIntlProps & {
+export type ListControlUiProps = WrappedComponentProps & {
   id: string;
   label: string;
   selectedOptions: any[];

@@ -21,7 +21,7 @@ export const getCasesByAlertIdRoute = createCasesRoute({
   },
   routerOptions: {
     access: 'public',
-    description: `Get cases for an alert`,
+    summary: `Get cases for an alert`,
   },
   handler: async ({ context, request, response }) => {
     try {

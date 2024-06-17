@@ -89,12 +89,13 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
-    anonymizationFields,
     alertsIndexPattern,
-    isEnabledKnowledgeBase,
+    anonymizationFields,
     chain,
-    llm,
     esClient,
+    isEnabledKnowledgeBase,
+    llm,
+    logger,
     modelExists,
     onNewReplacements,
     replacements,

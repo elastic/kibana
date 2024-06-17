@@ -7,23 +7,8 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-
-// eslint-disable-next-line @kbn/eslint/module_migration
-import { IntlProvider } from 'react-intl';
-import { i18n } from '@kbn/i18n';
-
-const emptyMessages = {};
+import { I18nProvider } from '@kbn/i18n-react';
 
 export const I18nProviderMock: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  return (
-    <IntlProvider
-      locale={i18n.getLocale()}
-      messages={emptyMessages}
-      defaultLocale={i18n.getLocale()}
-      formats={i18n.getFormats()}
-      textComponent={React.Fragment}
-    >
-      {children}
-    </IntlProvider>
-  );
+  return <I18nProvider>{children}</I18nProvider>;
 };

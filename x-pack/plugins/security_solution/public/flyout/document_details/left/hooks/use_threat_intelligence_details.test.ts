@@ -9,7 +9,7 @@ import { useThreatIntelligenceDetails } from './use_threat_intelligence_details'
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useLeftPanelContext } from '../context';
 import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
@@ -22,7 +22,7 @@ import {
 import { mockContextValue } from '../mocks/mock_context';
 
 jest.mock('../../../../timelines/containers/details');
-jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../common/utils/route/use_route_spy');
 jest.mock('../context');
 jest.mock('../../../../common/containers/cti/event_enrichment');

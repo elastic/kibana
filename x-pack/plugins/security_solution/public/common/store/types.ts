@@ -14,7 +14,7 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { AppState } from './app/reducer';
 import type { InputsState } from './inputs/reducer';
-import type { SourcererState } from './sourcerer/reducer';
+import type { SourcererState } from '../../sourcerer/store/reducer';
 import type { HostsPluginState } from '../../explore/hosts/store';
 import type { DragAndDropState } from './drag_and_drop/reducer';
 import type { TimelinePluginState } from '../../timelines/store';

@@ -11,6 +11,7 @@
       "datasetQuality",
       "management",
       "features",
+      "share",
   ],
     "optionalPlugins": [],
     "requiredBundles": [

@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/investigate-plugin",
+  "owner": "@elastic/obs-ai-assistant",
+  "plugin": {
+    "id": "investigate",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "investigate"],
+    "requiredPlugins": [
+      "observabilityAIAssistant"
+    ],
+    "requiredBundles": [
+    ],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

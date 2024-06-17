@@ -1,0 +1,23 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "typings/**/*",
+    "public/**/*.json",
+    "server/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/es-query",
+    "@kbn/interpreter",
+  ],
+  "exclude": ["target/**/*"]
+}

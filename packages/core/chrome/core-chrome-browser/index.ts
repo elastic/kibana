@@ -57,4 +57,5 @@ export type {
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
   EuiSideNavItemTypeEnhanced,
+  RenderAs,
 } from './src';

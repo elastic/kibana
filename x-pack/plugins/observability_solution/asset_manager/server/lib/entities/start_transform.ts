@@ -8,21 +8,29 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateTransformId } from './transform/generate_transform_id';
+import { generateLatestTransformId } from './transform/generate_latest_transform_id';
+import { generateHistoryTransformId } from './transform/generate_history_transform_id';
 
 export async function startTransform(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
 ) {
-  const transformId = generateTransformId(definition);
   try {
+    const historyTransformId = generateHistoryTransformId(definition);
+    const latestTransformId = generateLatestTransformId(definition);
     await retryTransientEsErrors(
-      () => esClient.transform.startTransform({ transform_id: transformId }, { ignore: [409] }),
+      () =>
+        esClient.transform.startTransform({ transform_id: historyTransformId }, { ignore: [409] }),
+      { logger }
+    );
+    await retryTransientEsErrors(
+      () =>
+        esClient.transform.startTransform({ transform_id: latestTransformId }, { ignore: [409] }),
       { logger }
     );
   } catch (err) {
-    logger.error(`Cannot start entity transform [${transformId}]`);
+    logger.error(`Cannot start entity transforms [${definition.id}]`);
     throw err;
   }
 }

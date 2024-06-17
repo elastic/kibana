@@ -1,44 +1,52 @@
+# Elasticsearch Query Language (ES|QL)
 
-ES|QLedit
-The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform,
-and analyze data stored in Elasticsearch, and in the future in other runtimes. It is
-designed to be easy to learn and use, by end users, SRE teams, application
-developers, and administrators.
-Users can author ES|QL queries to find specific events, perform statistical
-analysis, and generate visualizations. It supports a wide range of commands and
-functions that enable users to perform various data operations, such as
-filtering, aggregation, time-series analysis, and more.
-The Elasticsearch Query Language (ES|QL) makes use of "pipes" (|) to manipulate and
-transform data in a step-by-step fashion. This approach allows users to compose
-a series of operations, where the output of one operation becomes the input for
-the next, enabling complex data transformations and analysis.
-The ES|QL Compute Engineedit
-ES|QL is more than a language: it represents a significant investment in new
-compute capabilities within Elasticsearch. To achieve both the functional and performance
-requirements for ES|QL, it was necessary to build an entirely new compute
-architecture. ES|QL search, aggregation, and transformation functions are
-directly executed within Elasticsearch itself. Query expressions are not
-transpiled to Query DSL for execution. This approach allows ES|QL to be
-extremely performant and versatile.
-The new ES|QL execution engine was designed with performance in mind — it
-operates on blocks at a time instead of per row, targets vectorization and cache
-locality, and embraces specialization and multi-threading. It is a separate
-component from the existing Elasticsearch aggregation framework with different
-performance characteristics.
-The ES|QL documentation is organized in these sections:
-Getting started
-A tutorial to help you get started with ES|QL.
-ES|QL reference
-Reference documentation for the ES|QL syntax,
-commands, and functions and
-operators. Information about working with metadata
-fields and multivalued fields. And guidance for
-data processing with DISSECT and
-GROK and data enrichment with ENRICH.
-Using ES|QL
-An overview of using the REST API, Using ES|QL in Kibana,
-Using ES|QL in Elastic Security, Using ES|QL across clusters, and Task management.
-Limitations
-The current limitations of ES|QL.
-Examples
-A few examples of what you can do with ES|QL.
+The Elasticsearch Query Language (ES|QL) is a powerful language designed to filter, transform, and analyze data stored in Elasticsearch. It is designed to be user-friendly and can be used by end users, SRE teams, application developers, and administrators.
+
+Users can author ES|QL queries to find specific events, perform statistical analysis, and generate visualizations. It supports a wide range of commands and functions that enable users to perform various data operations, such as filtering, aggregation, time-series analysis, and more.
+
+ES|QL uses "pipes" (|) to manipulate and transform data in a step-by-step fashion. This approach allows users to compose a series of operations, where the output of one operation becomes the input for the next, enabling complex data transformations and analysis.
+
+## ES|QL Compute Engine
+
+ES|QL is more than just a language. It represents a significant investment in new compute capabilities within Elasticsearch. To achieve both the functional and performance requirements for ES|QL, a new compute architecture was built. ES|QL search, aggregation, and transformation functions are directly executed within Elasticsearch itself. Query expressions are not transpiled to Query DSL for execution. This approach allows ES|QL to be extremely performant and versatile.
+
+The new ES|QL execution engine was designed with performance in mind. It operates on blocks at a time instead of per row, targets vectorization and cache locality, and embraces specialization and multi-threading. It is a separate component from the existing Elasticsearch aggregation framework with different performance characteristics.
+
+## Limitations
+
+There are some known limitations to ES|QL:
+
+- ES|QL only supports the UTC timezone.
+- Full-text search is not yet supported.
+- ES|QL does not support querying time series data streams (TSDS).
+- Date math expressions work well when the leftmost expression is a datetime, but using parentheses or putting the datetime to the right is not always supported yet.
+- ES|QL does not support configurations where the _source field is disabled.
+
+## Using ES|QL
+
+ES|QL can be used through the REST API, in Kibana, in Elastic Security, and across clusters. 
+
+### REST API
+
+You can use the REST API to execute ES|QL queries. Here's an example of how to use the REST API:
+
+```
+POST /_query
+{
+  "query": """
+    FROM library
+    | EVAL year = DATE_TRUNC(1 YEARS, release_date)
+    | STATS MAX(page_count) BY year
+    | SORT year
+    | LIMIT 5
+  """
+}
+```
+
+### Kibana
+
+In Kibana, ES|QL can be used to query and aggregate your data, create visualizations, and set up alerts. However, there are some limitations when using ES|QL in Kibana. For example, the user interface to filter data is not enabled when Discover is in ES|QL mode. To filter data, you need to write a query that uses the `WHERE` command instead.
+
+### Cross Cluster
+
+ES|QL also supports executing a single query across multiple clusters. This can be useful for querying data from different geographical locations or separate Elasticsearch clusters.

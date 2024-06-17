@@ -6,7 +6,7 @@
  */
 
 import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
-import { generateLongId } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
+import { generateLongIdWithSeed } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
 
 import url from 'url';
 import { synthtrace } from '../../../synthtrace';
@@ -71,7 +71,7 @@ describe('Error details', () => {
     });
 
     describe('when error has data', () => {
-      const errorGroupingKey = generateLongId('Error 1');
+      const errorGroupingKey = generateLongIdWithSeed('Error 1');
       const errorGroupingKeyShort = errorGroupingKey.slice(0, 5);
       const errorDetailsPageHref = url.format({
         pathname: `/app/apm/services/opbeans-java/errors/${errorGroupingKey}`,

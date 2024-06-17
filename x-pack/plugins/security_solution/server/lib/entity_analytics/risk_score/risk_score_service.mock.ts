@@ -35,6 +35,7 @@ const createRiskScoreServiceMock = (): jest.Mocked<RiskScoreService> => ({
   getConfigurationWithDefaults: jest.fn(),
   getRiskInputsIndex: jest.fn(),
   scheduleLatestTransformNow: jest.fn(),
+  refreshRiskScoreIndex: jest.fn(),
 });
 
 export const riskScoreServiceMock = {

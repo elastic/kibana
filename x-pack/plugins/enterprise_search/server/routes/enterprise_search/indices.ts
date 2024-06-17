@@ -896,7 +896,7 @@ export function registerIndexRoutes({
               'xpack.enterpriseSearch.server.routes.indices.mlInference.pipelineProcessors.pipelineIsInUseError',
               {
                 defaultMessage:
-                  "Inference pipeline is used in managed pipeline '{pipelineName}' of a different index",
+                  "Inference pipeline is used in managed pipeline ''{pipelineName}'' of a different index",
                 values: {
                   pipelineName: error.pipelineName,
                 },

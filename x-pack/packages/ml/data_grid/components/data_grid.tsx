@@ -144,7 +144,7 @@ export const DataGrid: FC<Props> = memo(
         invalidSortingColumnns.forEach((columnId) => {
           toastNotifications.addDanger(
             i18n.translate('xpack.ml.dataGrid.invalidSortingColumnError', {
-              defaultMessage: `The column '{columnId}' cannot be used for sorting.`,
+              defaultMessage: `The column ''{columnId}'' cannot be used for sorting.`,
               values: { columnId },
             })
           );

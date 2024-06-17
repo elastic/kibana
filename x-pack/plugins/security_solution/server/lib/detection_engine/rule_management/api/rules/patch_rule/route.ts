@@ -16,7 +16,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { readRules } from '../../../logic/rule_management/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
@@ -52,7 +52,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
         try {
           const params = request.body;
           const rulesClient = (await context.alerting).getRulesClient();
-          const rulesManagementClient = (await context.securitySolution).getRulesManagementClient();
+          const detectionRulesClient = (await context.securitySolution).getDetectionRulesClient();
 
           const existingRule = await readRules({
             rulesClient,
@@ -76,7 +76,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
             ruleId: params.id,
           });
 
-          const rule = await rulesManagementClient.patchRule({
+          const rule = await detectionRulesClient.patchRule({
             nextParams: params,
           });
 

@@ -69,13 +69,17 @@ export interface ParsedIndexAlias extends estypes.IndicesAliasDefinition {
 }
 
 export function parseIndexAliases(aliasInfo: estypes.IndicesGetAliasResponse): ParsedIndexAlias[] {
-  return Object.keys(aliasInfo).flatMap((indexName: string) =>
-    Object.keys(aliasInfo[indexName].aliases).map((alias: string) => ({
+  const aliasInfoKeys = aliasInfo ? Object.keys(aliasInfo) : [];
+  return aliasInfoKeys.flatMap((indexName: string) => {
+    const aliasInfoIndexNameKeys = aliasInfo[indexName].aliases
+      ? Object.keys(aliasInfo[indexName].aliases)
+      : [];
+    return aliasInfoIndexNameKeys.map((alias: string) => ({
       ...aliasInfo[indexName].aliases[alias],
       indexName,
       alias,
-    }))
-  );
+    }));
+  });
 }
 
 class EsInitializationSteps {
@@ -101,7 +105,8 @@ class EsInitializationSteps {
       this.esContext.logger.error(`error getting existing index templates - ${err.message}`);
     }
 
-    await asyncForEach(Object.keys(indexTemplates), async (indexTemplateName: string) => {
+    const indexTemplateKeys = indexTemplates ? Object.keys(indexTemplates) : [];
+    await asyncForEach(indexTemplateKeys, async (indexTemplateName: string) => {
       try {
         const hidden: string | boolean = indexTemplates[indexTemplateName]?.settings?.index?.hidden;
         // Check to see if this index template is hidden
@@ -138,7 +143,9 @@ class EsInitializationSteps {
       // should not block the rest of initialization, log the error and move on
       this.esContext.logger.error(`error getting existing indices - ${err.message}`);
     }
-    await asyncForEach(Object.keys(indices), async (indexName: string) => {
+
+    const indexKeys = indices ? Object.keys(indices) : [];
+    await asyncForEach(indexKeys, async (indexName: string) => {
       try {
         const hidden: string | boolean | undefined = indices[indexName]?.settings?.index?.hidden;
 
@@ -177,7 +184,8 @@ class EsInitializationSteps {
     // Group by index alias name
     const indexAliasData = groupBy(parsedAliasData, 'alias');
 
-    await asyncForEach(Object.keys(indexAliasData), async (aliasName: string) => {
+    const indexAliasDataKeys = indexAliasData ? Object.keys(indexAliasData) : [];
+    await asyncForEach(indexAliasDataKeys, async (aliasName: string) => {
       try {
         const aliasData = indexAliasData[aliasName];
         const isNotHidden = aliasData.some((data) => data.is_hidden !== true);

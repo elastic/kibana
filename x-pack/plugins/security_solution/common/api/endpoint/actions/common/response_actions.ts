@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { UploadActionRequestSchema } from '../..';
 import { ExecuteActionRequestSchema } from '../execute_route';
 import { EndpointActionGetFileSchema } from '../get_file_route';
+import { ScanActionRequestSchema } from '../scan_route';
 import { KillOrSuspendProcessRequestSchema, NoParametersRequestSchema } from './base';
 
 export const ResponseActionBodySchema = schema.oneOf([
@@ -17,6 +18,7 @@ export const ResponseActionBodySchema = schema.oneOf([
   KillOrSuspendProcessRequestSchema.body,
   EndpointActionGetFileSchema.body,
   ExecuteActionRequestSchema.body,
+  ScanActionRequestSchema.body,
   UploadActionRequestSchema.body,
 ]);
 

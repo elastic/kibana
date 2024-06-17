@@ -11,7 +11,7 @@ import { inputsSelectors } from '../../../../common/store';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '..';

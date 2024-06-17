@@ -149,6 +149,12 @@ export interface IElasticsearchConfig {
    * Extends the list of APIs that should be redacted in logs.
    */
   readonly apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
+
+  /**
+   * The maximum time to retain the DNS lookup resolutions.
+   * Set to 0 to disable the cache (default Node.js behavior)
+   */
+  readonly dnsCacheTtl: Duration;
 }
 
 /**

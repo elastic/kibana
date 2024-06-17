@@ -44,6 +44,9 @@ export const usePrivateLocationsAPI = () => {
       dispatch(getPrivateLocationsAction.get());
       return result;
     }
+    // FIXME: Dario thinks there is a better way to do this but
+    // he's getting tired and maybe the Synthetics folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData]);
 
   const onSubmit = (data: NewLocation) => {
@@ -62,6 +65,9 @@ export const usePrivateLocationsAPI = () => {
       dispatch(getPrivateLocationsAction.get());
       return result;
     }
+    // FIXME: Dario thinks there is a better way to do this but
+    // he's getting tired and maybe the Synthetics folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deleteId]);
 
   return {

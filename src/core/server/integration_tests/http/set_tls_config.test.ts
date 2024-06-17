@@ -74,6 +74,7 @@ describe('setTlsConfig', () => {
       name: 'kibana',
       host: '127.0.0.1',
       port: 10002,
+      protocol: 'http1',
       ssl: {
         enabled: true,
         certificate: ES_CERT_PATH,

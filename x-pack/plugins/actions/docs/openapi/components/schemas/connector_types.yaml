@@ -3,6 +3,7 @@ type: string
 description: The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.
 enum:
   - .bedrock
+  - .gemini
   - .cases-webhook
   - .d3security
   - .email

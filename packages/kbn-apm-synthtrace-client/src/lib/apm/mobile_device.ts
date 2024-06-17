@@ -11,7 +11,7 @@ import { Span } from './span';
 import { Transaction } from './transaction';
 import { Event } from './event';
 import { ApmApplicationMetricFields, ApmFields, GeoLocation, SpanParams } from './apm_fields';
-import { generateLongId } from '../utils/generate_id';
+import { generateLongIdWithSeed, generateLongId } from '../utils/generate_id';
 import { Metricset } from './metricset';
 import { ApmError } from './apm_error';
 
@@ -259,7 +259,7 @@ export class MobileDevice extends Entity<ApmFields> {
     return new ApmError({
       ...this.fields,
       'error.type': 'crash',
-      'error.id': generateLongId(message),
+      'error.id': generateLongIdWithSeed(message),
       'error.exception': [{ message, ...{ type: 'crash' } }],
       'error.grouping_name': groupingName || message,
     });

@@ -22,7 +22,7 @@ export const getAllAlertsAttachedToCaseRoute = createCasesRoute({
   },
   routerOptions: {
     access: 'public',
-    description: `Get all alerts for a case`,
+    summary: `Get all alerts for a case`,
   },
   handler: async ({ context, request, response }) => {
     try {

@@ -23,7 +23,7 @@ export const getCommentRoute = createCasesRoute({
   },
   routerOptions: {
     access: 'public',
-    description: `Get an alert or comment for a case`,
+    summary: `Get an alert or comment for a case`,
   },
   handler: async ({ context, request, response }) => {
     try {

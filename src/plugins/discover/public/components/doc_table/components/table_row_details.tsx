@@ -16,8 +16,8 @@ import { useNavigationProps } from '../../../hooks/use_navigation_props';
 interface TableRowDetailsProps {
   children: JSX.Element;
   colLength: number;
-  rowIndex: string;
-  rowId: string;
+  rowIndex: string | undefined;
+  rowId: string | undefined;
   columns: string[];
   isTimeBased: boolean;
   dataView: DataView;

@@ -21,6 +21,7 @@ import { useFetchApmSuggestions } from '../../hooks/use_fetch_apm_suggestions';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useUpdateSlo } from '../../hooks/use_update_slo';
 import { useCreateRule, useFetchDataViews } from '@kbn/observability-plugin/public';
+import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -36,6 +37,7 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_fetch_indices');
+jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/use_fetch_slo_details');
 jest.mock('../../hooks/use_create_slo');
 jest.mock('../../hooks/use_update_slo');
@@ -52,6 +54,7 @@ jest.mock('../../utils/kibana_react', () => ({
 const useKibanaMock = useKibana as jest.Mock;
 const useFetchIndicesMock = useFetchIndices as jest.Mock;
 const useFetchDataViewsMock = useFetchDataViews as jest.Mock;
+const useCreateDataViewsMock = useCreateDataView as jest.Mock;
 const useFetchSloMock = useFetchSloDetails as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
@@ -90,6 +93,8 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
       dataViews: {
         create: jest.fn().mockResolvedValue({
           getIndexPattern: jest.fn().mockReturnValue('some-index'),
+          getRuntimeMappings: jest.fn().mockReturnValue({}),
+          id: 'some-data-view-id',
         }),
       },
       docLinks: {
@@ -156,8 +161,23 @@ describe('SLO Edit Page', () => {
 
     useFetchDataViewsMock.mockReturnValue({
       isLoading: false,
-      data: [{ getName: () => 'dataview', getIndexPattern: () => '.dataview-index' }],
+      data: [
+        {
+          getName: () => 'dataview',
+          getIndexPattern: () => '.dataview-index',
+          getRuntimeMappings: jest.fn().mockReturnValue({}),
+        },
+      ],
     });
+
+    useCreateDataViewsMock.mockReturnValue({
+      dataView: {
+        getName: () => 'dataview',
+        getIndexPattern: () => '.dataview-index',
+        getRuntimeMappings: jest.fn().mockReturnValue({}),
+      },
+    });
+
     useFetchIndicesMock.mockReturnValue({
       isLoading: false,
       data: ['some-index', 'index-2'],

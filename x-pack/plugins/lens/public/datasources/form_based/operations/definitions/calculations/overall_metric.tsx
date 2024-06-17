@@ -24,7 +24,7 @@ import type {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from '../column_types';
-import { optionallHistogramBasedOperationToExpression } from './utils';
+import { optionalHistogramBasedOperationToExpression } from './utils';
 import type { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
 
@@ -79,7 +79,7 @@ function buildOverallMetricOperation<T extends OverallMetricIndexPatternColumn<s
       );
     },
     toExpression: (layer, columnId) => {
-      return optionallHistogramBasedOperationToExpression(layer, columnId, 'overall_metric', {
+      return optionalHistogramBasedOperationToExpression(layer, columnId, 'overall_metric', {
         metric: [metric],
       });
     },

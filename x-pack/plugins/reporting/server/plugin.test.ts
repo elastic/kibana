@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Logger,
+  type PackageInfo,
+} from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
 import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
@@ -18,6 +25,7 @@ import { ReportingPlugin } from './plugin';
 import { createMockPluginSetup, createMockPluginStart } from './test_helpers';
 import type { ReportingSetupDeps } from './types';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -30,6 +38,7 @@ describe('Reporting Plugin', () => {
   let pluginStart: ReportingInternalStart;
   let logger: jest.Mocked<Logger>;
   let plugin: ReportingPlugin;
+  let featuresSetup: jest.Mocked<FeaturesPluginSetupContract>;
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -38,7 +47,10 @@ describe('Reporting Plugin', () => {
     initContext = coreMock.createPluginInitializerContext(configSchema);
     coreSetup = coreMock.createSetup(configSchema);
     coreStart = coreMock.createStart();
-    pluginSetup = createMockPluginSetup({}) as unknown as ReportingSetupDeps;
+    featuresSetup = featuresPluginMock.createSetup();
+    pluginSetup = createMockPluginSetup({
+      features: featuresSetup,
+    }) as unknown as ReportingSetupDeps;
     pluginStart = await createMockPluginStart(coreStart, configSchema);
 
     logger = loggingSystemMock.createLogger();
@@ -141,6 +153,35 @@ describe('Reporting Plugin', () => {
       expect(registerSpy).not.toHaveBeenCalledWith(
         expect.objectContaining({ id: PNG_REPORT_TYPE_V2 })
       );
+    });
+  });
+
+  describe('features registration', () => {
+    it('does not register Kibana reporting feature in traditional build flavour', async () => {
+      plugin.setup(coreSetup, pluginSetup);
+      expect(featuresSetup.registerKibanaFeature).not.toHaveBeenCalled();
+      expect(featuresSetup.enableReportingUiCapabilities).toHaveBeenCalledTimes(1);
+    });
+
+    it('registers Kibana reporting feature in serverless build flavour', async () => {
+      const serverlessInitContext = coreMock.createPluginInitializerContext(configSchema);
+      // Force type-cast to convert `ReadOnly<PackageInfo>` to mutable `PackageInfo`.
+      (serverlessInitContext.env.packageInfo as PackageInfo).buildFlavor = 'serverless';
+      plugin = new ReportingPlugin(serverlessInitContext);
+
+      plugin.setup(coreSetup, pluginSetup);
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(1);
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
+        id: 'reporting',
+        name: 'Reporting',
+        category: DEFAULT_APP_CATEGORIES.management,
+        app: [],
+        privileges: {
+          all: { savedObject: { all: [], read: [] }, ui: [] },
+          read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
+        },
+      });
+      expect(featuresSetup.enableReportingUiCapabilities).toHaveBeenCalledTimes(1);
     });
   });
 });

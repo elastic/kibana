@@ -6,15 +6,16 @@
  */
 
 export const getAddSignificationItemsActions = (data: any[]) =>
-  data.filter((d) => d.type === 'add_significant_items');
+  data.filter((d) => d.type === 'logRateAnalysisResults/addSignificantItems');
 
 export const getHistogramActions = (data: any[]) =>
-  data.filter((d) => d.type === 'add_significant_items_histogram');
+  data.filter((d) => d.type === 'logRateAnalysisResults/addSignificantItemsHistogram');
 
 export const getGroupActions = (data: any[]) =>
-  data.filter((d) => d.type === 'add_significant_items_group');
+  data.filter((d) => d.type === 'logRateAnalysisResults/addSignificantItemsGroup');
 
 export const getGroupHistogramActions = (data: any[]) =>
-  data.filter((d) => d.type === 'add_significant_items_group_histogram');
+  data.filter((d) => d.type === 'logRateAnalysisResults/addSignificantItemsGroupHistogram');
 
-export const getErrorActions = (data: any[]) => data.filter((d) => d.type === 'add_error');
+export const getErrorActions = (data: any[]) =>
+  data.filter((d) => d.type === 'logRateAnalysisResults/addError');

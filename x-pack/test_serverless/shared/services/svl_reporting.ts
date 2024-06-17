@@ -9,6 +9,7 @@ import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
+import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
@@ -81,6 +82,10 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
 
           if (response.status === 503) {
             log.debug(`Report at path ${downloadReportPath} is pending`);
+
+            // add a delay before retrying
+            await new Promise((resolve) => setTimeout(resolve, 2500));
+
             return false;
           }
 
@@ -114,7 +119,9 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
 
       // ignores 409 errs and keeps retrying
       await retry.tryForTime(5000, async () => {
-        await supertest.post('/.reporting*/_delete_by_query').send({ query: { match_all: {} } });
+        await supertest
+          .post(`/${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}/_delete_by_query`)
+          .send({ query: { match_all: {} } });
       });
     },
   };

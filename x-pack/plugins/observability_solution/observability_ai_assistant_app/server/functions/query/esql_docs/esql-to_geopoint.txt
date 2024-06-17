@@ -1,12 +1,21 @@
-TO_GEOPOINT
+## TO_GEOPOINT
 
-Syntax
-Parameters
-field
-Input value. The input can be a single- or multi-valued column or an expression.
-DescriptionConverts an input value to a geo_point value. A string will only be successfully converted if it respects the WKT Point format.Supported types
-Example
+The `TO_GEOPOINT` function in ES|QL is used to convert an input value to a `geo_point` value. This function is successful in conversion only if the input string respects the WKT (Well-Known Text) Point format.
+
+### Examples
+
+Here are a couple of examples of how you can use the `TO_GEOPOINT` function in your ES|QL queries:
+
 ```esql
 ROW wkt = "POINT(42.97109630194 14.7552534413725)"
 | EVAL pt = TO_GEOPOINT(wkt)
 ```
+
+In this example, the `TO_GEOPOINT` function is used to convert the WKT representation of a point to a `geo_point` value.
+
+```esql
+ROW wkt = "POINT(34.052235 -118.243683)"
+| EVAL location = TO_GEOPOINT(wkt)
+```
+
+In this second example, the `TO_GEOPOINT` function is used to convert the WKT representation of a different point to a `geo_point` value.

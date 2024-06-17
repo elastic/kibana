@@ -110,9 +110,9 @@ export const PIN_EVENT_FOR_ROW = ({
   isEventPinned: boolean;
 }) =>
   i18n.translate('xpack.securitySolution.hoverActions.pinEventForRowAriaLabel', {
-    values: { ariaRowindex, columnValues, isEventPinned },
     defaultMessage:
-      '{isEventPinned, select, false {Pin} true {Unpin}} the event in row {ariaRowindex} to timeline, with columns {columnValues}',
+      '{isEventPinned, select, true {Unpin} other {Pin} } the event in row {ariaRowindex} to timeline, with columns {columnValues}',
+    values: { ariaRowindex, columnValues, isEventPinned },
   });
 
 export const MORE_ACTIONS_FOR_ROW = ({

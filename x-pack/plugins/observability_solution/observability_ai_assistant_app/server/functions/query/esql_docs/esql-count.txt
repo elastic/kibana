@@ -1,27 +1,35 @@
-COUNT
+## COUNT
 
-Syntax
-COUNT([expression])
-Parameters
-expression
-Expression that outputs values to be counted.
-If omitted, equivalent to COUNT(*) (the number of rows).
-DescriptionReturns the total number (count) of input values.Supported typesCan take any field type as input.Examples
+The `COUNT` function in ES|QL returns the total number (count) of input values. It can take any field type as input. If the expression is omitted, it is equivalent to `COUNT(*)` which counts the number of rows.
+
+### Examples
+
+Here are a couple of examples of how you can use the `COUNT` function in ES|QL:
+
+1. Counting a specific field:
+
 ```esql
 FROM employees
 | STATS COUNT(height)
 ```
 
-To count the number of rows, use COUNT() or COUNT(*):
+In this example, the `COUNT` function is used to count the number of `height` values in the `employees` index.
+
+2. Counting the number of rows:
+
 ```esql
 FROM employees
 | STATS count = COUNT(*) BY languages
 | SORT languages DESC
 ```
 
-The expression can use inline functions. This example splits a string into
-multiple values using the SPLIT function and counts the values:
+In this example, the `COUNT(*)` function is used to count the number of rows in the `employees` index, grouped by `languages`.
+
+3. Using inline functions with `COUNT`:
+
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"
 | STATS word_count = COUNT(SPLIT(words, ";"))
 ```
+
+In this example, the `SPLIT` function is used to split a string into multiple values, and then the `COUNT` function is used to count these values.

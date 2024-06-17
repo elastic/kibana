@@ -196,7 +196,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
           onSuccess={() => {
             services.notifications.toasts.addSuccess({
               title: i18n.translate('xpack.security.management.apiKeys.updateSuccessMessage', {
-                defaultMessage: "Updated API key '{name}'",
+                defaultMessage: "Updated API key ''{name}''",
                 values: { name: openedApiKey.name },
               }),
               'data-test-subj': 'updateApiKeySuccessToast',
@@ -338,7 +338,7 @@ export const ApiKeyCreatedCallout: FunctionComponent<ApiKeyCreatedCalloutProps> 
       color="success"
       iconType="check"
       title={i18n.translate('xpack.security.management.apiKeys.createSuccessMessage', {
-        defaultMessage: "Created API key '{name}'",
+        defaultMessage: "Created API key ''{name}''",
         values: { name: createdApiKey.name },
       })}
     >

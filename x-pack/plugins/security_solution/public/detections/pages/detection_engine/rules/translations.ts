@@ -577,6 +577,13 @@ export const DELETE_RULE = i18n.translate(
   }
 );
 
+export const MANUAL_RULE_RUN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunDescription',
+  {
+    defaultMessage: 'Manual run',
+  }
+);
+
 export const COLUMN_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.ruleTitle',
   {

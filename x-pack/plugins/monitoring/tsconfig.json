@@ -48,6 +48,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/flot-charts",
     "@kbn/ui-theme",
+    "@kbn/core-elasticsearch-server",
   ],
   "exclude": [
     "target/**/*",

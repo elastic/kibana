@@ -188,6 +188,10 @@ export const getChangePointChartEmbeddableFactory = (
         pluginStart
       );
 
+      const onLoading = (v: boolean) => dataLoading.next(v);
+      const onRenderComplete = () => dataLoading.next(false);
+      const onError = (error: Error) => blockingError.next(error);
+
       return {
         api,
         Component: () => {
@@ -242,9 +246,9 @@ export const getChangePointChartEmbeddableFactory = (
               maxSeriesToPlot={maxSeriesToPlot}
               dataViewId={dataViewId}
               partitions={partitions}
-              onLoading={(v) => dataLoading.next(v)}
-              onRenderComplete={() => dataLoading.next(false)}
-              onError={(error) => blockingError.next(error)}
+              onLoading={onLoading}
+              onRenderComplete={onRenderComplete}
+              onError={onError}
               embeddingOrigin={embeddingOrigin}
               lastReloadRequestTime={lastReloadRequestTime}
             />

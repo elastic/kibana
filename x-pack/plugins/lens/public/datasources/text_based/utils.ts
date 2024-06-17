@@ -88,9 +88,6 @@ export async function getStateFromAggregateQuery(
     const dataView = await getESQLAdHocDataview(indexPattern, dataViews);
 
     if (dataView && dataView.id) {
-      if (dataView?.fields?.getByName('@timestamp')?.type === 'date') {
-        dataView.timeFieldName = '@timestamp';
-      }
       dataViewId = dataView?.id;
       indexPatternRefs = [
         ...indexPatternRefs,

@@ -100,10 +100,10 @@ export default ({ getService }: FtrProviderContext) => {
           ...otherStats
         } = await getRiskEngineStats(supertest, log);
         const expected = {
-          unique_host_risk_score_total: 0,
-          unique_user_risk_score_total: 0,
-          unique_user_risk_score_day: 0,
-          unique_host_risk_score_day: 0,
+          unique_host_risk_score_total: 10,
+          unique_user_risk_score_total: 10,
+          unique_user_risk_score_day: 10,
+          unique_host_risk_score_day: 10,
           all_user_risk_scores_total: 10,
           all_host_risk_scores_total: 10,
           all_user_risk_scores_total_day: 10,

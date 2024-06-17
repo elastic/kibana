@@ -76,7 +76,7 @@ export const KpiCharts = () => {
       filters={afterLoadedState.filters}
       query={afterLoadedState.query}
       searchSessionId={afterLoadedState.searchSessionId}
-      options={{ getSubtitle: afterLoadedState.getSubtitle }}
+      getSubtitle={afterLoadedState.getSubtitle}
       loading={loading}
     />
   );

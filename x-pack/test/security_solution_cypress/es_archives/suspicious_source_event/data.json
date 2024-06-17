@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "_eZE7mwBOpWiDweStB_c",
-    "index": "suspicious-source-event-001",
+    "index": "auditbeat-suspicious-source-event-001",
     "source": {
       "@timestamp": "2021-02-22T21:00:49.337Z",
       "myhash": {

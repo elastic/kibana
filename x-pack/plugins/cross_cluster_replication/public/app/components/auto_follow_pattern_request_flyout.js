@@ -45,7 +45,7 @@ export class AutoFollowPatternRequestFlyout extends PureComponent {
               {name ? (
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternForm.requestFlyout.namedTitle"
-                  defaultMessage="Request for '{name}'"
+                  defaultMessage="Request for ''{name}''"
                   values={{ name }}
                 />
               ) : (

@@ -21,7 +21,7 @@ export const customThresholdAIAssistantLogCount = {
     contentTypeId: 'index-pattern',
     data: {
       fieldAttrs: '{}',
-      title: '.ds-logs-apm.*',
+      title: 'logs-apm*',
       timeFieldName: '@timestamp',
       sourceFilters: '[]',
       fields: '[]',

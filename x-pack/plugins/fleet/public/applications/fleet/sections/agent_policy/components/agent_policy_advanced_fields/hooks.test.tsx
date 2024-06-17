@@ -216,7 +216,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -243,7 +243,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -270,7 +270,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -344,7 +344,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -371,7 +371,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -398,7 +398,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -527,7 +527,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText"
                 values={
@@ -559,7 +559,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={

@@ -217,10 +217,7 @@ export const ConnectorDetailOverview: React.FC = () => {
       {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
         <>
           <EuiSpacer />
-          <SyncJobs
-            errorOnAccessSync={Boolean(connector.last_access_control_sync_error)}
-            errorOnContentSync={Boolean(connector.last_sync_error)}
-          />
+          <SyncJobs connector={connector} />
         </>
       )}
     </>

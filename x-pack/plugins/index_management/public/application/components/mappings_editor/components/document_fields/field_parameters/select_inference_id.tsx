@@ -35,28 +35,40 @@ import {
   ModelConfig,
   Service,
 } from '@kbn/inference_integration_flyout/types';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { Form, UseField, useForm } from '../../../shared_imports';
 import { useLoadInferenceModels } from '../../../../../services/api';
 import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
 import { InferenceToModelIdMap } from '../fields';
+import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
+import {
+  CustomInferenceEndpointConfig,
+  DefaultInferenceModels,
+  DeploymentState,
+} from '../../../types';
 
 const inferenceServiceTypeElasticsearchModelMap: Record<string, ElasticsearchModelDefaultOptions> =
   {
     elser: ElasticsearchModelDefaultOptions.elser,
     elasticsearch: ElasticsearchModelDefaultOptions.e5,
   };
-
+const uncheckSelectedModelOption = (options: EuiSelectableOption[]) => {
+  const checkedOption = options.find(({ checked }) => checked === 'on');
+  if (checkedOption) {
+    checkedOption.checked = undefined;
+  }
+};
 interface Props {
   onChange(value: string): void;
   'data-test-subj'?: string;
   setValue: (value: string) => void;
-  setNewInferenceEndpoint: (newInferenceEndpoint: InferenceToModelIdMap) => void;
+  setNewInferenceEndpoint: (
+    newInferenceEndpoint: InferenceToModelIdMap,
+    customInferenceEndpointConfig: CustomInferenceEndpointConfig
+  ) => void;
 }
 export const SelectInferenceId = ({
   onChange,
@@ -76,16 +88,14 @@ export const SelectInferenceId = ({
     });
   }, [ml]);
 
-  const { form } = useForm({ defaultValue: { main: 'elser_model_2' } });
+  const { form } = useForm({ defaultValue: { main: DefaultInferenceModels.elser_model_2 } });
   const { subscribe } = form;
 
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
-  const [inferenceAddError, setInferenceAddError] = useState<string | undefined>(undefined);
   const [availableTrainedModels, setAvailableTrainedModels] = useState<
     TrainedModelConfigResponse[]
   >([]);
   const onFlyoutClose = useCallback(() => {
-    setInferenceAddError(undefined);
     setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
   }, [isInferenceFlyoutVisible]);
   useEffect(() => {
@@ -111,16 +121,27 @@ export const SelectInferenceId = ({
 
   const fieldConfigModelId = getFieldConfig('inference_id');
   const defaultInferenceIds: EuiSelectableOption[] = useMemo(() => {
-    return [{ checked: 'on', label: 'elser_model_2' }, { label: 'e5' }];
+    return [
+      {
+        checked: 'on',
+        label: 'elser_model_2',
+        'data-test-subj': 'default-inference_elser_model_2',
+      },
+      {
+        label: 'e5',
+        'data-test-subj': 'default-inference_e5',
+      },
+    ];
   }, []);
 
-  const { isLoading, data: models, resendRequest } = useLoadInferenceModels();
+  const { isLoading, data: models } = useLoadInferenceModels();
 
   const [options, setOptions] = useState<EuiSelectableOption[]>([...defaultInferenceIds]);
   const inferenceIdOptionsFromModels = useMemo(() => {
     const inferenceIdOptions =
       models?.map((model: InferenceAPIConfigResponse) => ({
         label: model.model_id,
+        'data-test-subj': `custom-inference_${model.model_id}`,
       })) || [];
 
     return inferenceIdOptions;
@@ -136,40 +157,48 @@ export const SelectInferenceId = ({
     };
     setOptions(Object.values(mergedOptions));
   }, [inferenceIdOptionsFromModels, defaultInferenceIds]);
-  const [isCreateInferenceApiLoading, setIsCreateInferenceApiLoading] = useState(false);
+
+  const { showErrorToasts } = useMLModelNotificationToasts();
 
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
-      setIsCreateInferenceApiLoading(true);
+      setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
       try {
-        await ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
-          inferenceId,
-          taskType,
-          modelConfig
-        );
-        setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
-        setIsCreateInferenceApiLoading(false);
-        setInferenceAddError(undefined);
+        const isDeployable =
+          modelConfig.service === Service.elser || modelConfig.service === Service.elasticsearch;
+
+        const newOption: EuiSelectableOption[] = [
+          {
+            label: inferenceId,
+            checked: 'on',
+            'data-test-subj': `custom-inference_${inferenceId}`,
+          },
+        ];
+        // uncheck selected endpoint id
+        uncheckSelectedModelOption(options);
+
+        setOptions([...options, ...newOption]);
+
         const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
         const defaultEndpointId =
           inferenceServiceTypeElasticsearchModelMap[modelConfig.service] || '';
         const newModelId: InferenceToModelIdMap = {};
         newModelId[inferenceId] = {
           trainedModelId: defaultEndpointId,
-          isDeployable:
-            modelConfig.service === Service.elser || modelConfig.service === Service.elasticsearch,
-          isDeployed: getTrainedModelStats(trainedModelStats)[defaultEndpointId] === 'deployed',
-          defaultInferenceEndpoint: false,
+          isDeployable,
+          isDeployed:
+            getTrainedModelStats(trainedModelStats)[defaultEndpointId] === DeploymentState.DEPLOYED,
         };
-        resendRequest();
-        setNewInferenceEndpoint(newModelId);
+        const customInferenceEndpointConfig: CustomInferenceEndpointConfig = {
+          taskType,
+          modelConfig,
+        };
+        setNewInferenceEndpoint(newModelId, customInferenceEndpointConfig);
       } catch (error) {
-        const errorObj = extractErrorProperties(error);
-        setInferenceAddError(errorObj.message);
-        setIsCreateInferenceApiLoading(false);
+        showErrorToasts(error);
       }
     },
-    [isInferenceFlyoutVisible, resendRequest, ml, setNewInferenceEndpoint]
+    [isInferenceFlyoutVisible, ml, setNewInferenceEndpoint, options, showErrorToasts]
   );
   useEffect(() => {
     const subscription = subscribe((updateData) => {
@@ -182,7 +211,7 @@ export const SelectInferenceId = ({
   }, [subscribe, onChange]);
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
   useEffect(() => {
-    setValue(selectedOptionLabel ?? 'elser_model_2');
+    setValue(selectedOptionLabel ?? DefaultInferenceModels.elser_model_2);
   }, [selectedOptionLabel, setValue]);
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
   const [inferenceEndpointError, setInferenceEndpointError] = useState<string | undefined>(
@@ -304,7 +333,7 @@ export const SelectInferenceId = ({
             data-test-subj={dataTestSubj}
             searchable
             isLoading={isLoading}
-            singleSelection
+            singleSelection="always"
             searchProps={{
               compressed: true,
               placeholder: i18n.translate(
@@ -340,32 +369,6 @@ export const SelectInferenceId = ({
             <InferenceFlyoutWrapper
               elserv2documentationUrl={docLinks.links.ml.nlpElser}
               e5documentationUrl={docLinks.links.ml.nlpE5}
-              errorCallout={
-                inferenceAddError && (
-                  <EuiFlexItem grow={false}>
-                    <EuiCallOut
-                      color="danger"
-                      data-test-subj="addInferenceError"
-                      iconType="error"
-                      title={i18n.translate(
-                        'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.errorTitle',
-                        {
-                          defaultMessage: 'Error adding inference endpoint',
-                        }
-                      )}
-                    >
-                      <EuiText>
-                        <FormattedMessage
-                          id="xpack.idxMgmt.mappingsEditor.parameters.inferenceId.errorDescription"
-                          defaultMessage="Error adding inference endpoint: {errorMessage}"
-                          values={{ errorMessage: inferenceAddError }}
-                        />
-                      </EuiText>
-                    </EuiCallOut>
-                    <EuiSpacer />
-                  </EuiFlexItem>
-                )
-              }
               onInferenceEndpointChange={onInferenceEndpointChange}
               inferenceEndpointError={inferenceEndpointError}
               trainedModels={trainedModels}
@@ -374,7 +377,6 @@ export const SelectInferenceId = ({
               isInferenceFlyoutVisible={isInferenceFlyoutVisible}
               supportedNlpModels={docLinks.links.enterpriseSearch.supportedNlpModels}
               nlpImportModel={docLinks.links.ml.nlpImportModel}
-              isCreateInferenceApiLoading={isCreateInferenceApiLoading}
               setInferenceEndpointError={setInferenceEndpointError}
             />
           )}

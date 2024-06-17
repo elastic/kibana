@@ -506,7 +506,9 @@ export const getPackageUsageStats = async ({
     }
 
     for (let index = 0, total = packagePolicies.saved_objects.length; index < total; index++) {
-      agentPolicyCount.add(packagePolicies.saved_objects[index].attributes.policy_id);
+      packagePolicies.saved_objects[index].attributes.policy_ids.forEach((policyId) =>
+        agentPolicyCount.add(policyId)
+      );
     }
 
     hasMore = packagePolicies.saved_objects.length > 0;

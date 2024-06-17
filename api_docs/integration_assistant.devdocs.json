@@ -1,0 +1,1005 @@
+{
+  "id": "integrationAssistant",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "integrationAssistant",
+      "id": "def-server.IntegrationAssistantPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "IntegrationAssistantPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/integration_assistant/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "integrationAssistant",
+      "id": "def-server.IntegrationAssistantPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "IntegrationAssistantPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/integration_assistant/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.BuildIntegrationApiRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "BuildIntegrationApiRequest",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.BuildIntegrationApiRequest.integration",
+            "type": "Object",
+            "tags": [],
+            "label": "integration",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "integrationAssistant",
+                "scope": "common",
+                "docId": "kibIntegrationAssistantPluginApi",
+                "section": "def-common.Integration",
+                "text": "Integration"
+              }
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.CategorizationApiRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "CategorizationApiRequest",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.CategorizationApiRequest.packageName",
+            "type": "string",
+            "tags": [],
+            "label": "packageName",
+            "description": [],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.CategorizationApiRequest.dataStreamName",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamName",
+            "description": [],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.CategorizationApiRequest.rawSamples",
+            "type": "Array",
+            "tags": [],
+            "label": "rawSamples",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.CategorizationApiRequest.currentPipeline",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "currentPipeline",
+            "description": [],
+            "signature": [
+              "object"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.CategorizationApiResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "CategorizationApiResponse",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.CategorizationApiResponse.results",
+            "type": "Object",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              "{ pipeline: object; docs: object[]; }"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.DataStream",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataStream",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.DataStream.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.DataStream.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.DataStream.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.DataStream.inputTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "inputTypes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "integrationAssistant",
+                "scope": "common",
+                "docId": "kibIntegrationAssistantPluginApi",
+                "section": "def-common.InputTypes",
+                "text": "InputTypes"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.DataStream.rawSamples",
+            "type": "Array",
+            "tags": [],
+            "label": "rawSamples",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.DataStream.pipeline",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "pipeline",
+            "description": [],
+            "signature": [
+              "object"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.DataStream.docs",
+            "type": "Array",
+            "tags": [],
+            "label": "docs",
+            "description": [],
+            "signature": [
+              "object[]"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.EcsMappingApiRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "EcsMappingApiRequest",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.EcsMappingApiRequest.packageName",
+            "type": "string",
+            "tags": [],
+            "label": "packageName",
+            "description": [],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.EcsMappingApiRequest.dataStreamName",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamName",
+            "description": [],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.EcsMappingApiRequest.rawSamples",
+            "type": "Array",
+            "tags": [],
+            "label": "rawSamples",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.EcsMappingApiRequest.mapping",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "mapping",
+            "description": [],
+            "signature": [
+              "object | undefined"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.EcsMappingApiResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "EcsMappingApiResponse",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.EcsMappingApiResponse.results",
+            "type": "Object",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              "{ mapping: object; pipeline: object; }"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.ESProcessorItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESProcessorItem",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.ESProcessorItem.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[processorName: string]: ESProcessorOptions",
+            "description": [],
+            "signature": [
+              "[processorName: string]:  ",
+              {
+                "pluginId": "integrationAssistant",
+                "scope": "common",
+                "docId": "kibIntegrationAssistantPluginApi",
+                "section": "def-common.ESProcessorOptions",
+                "text": "ESProcessorOptions"
+              }
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.ESProcessorOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESProcessorOptions",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.ESProcessorOptions.on_failure",
+            "type": "Array",
+            "tags": [],
+            "label": "on_failure",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "integrationAssistant",
+                "scope": "common",
+                "docId": "kibIntegrationAssistantPluginApi",
+                "section": "def-common.ESProcessorItem",
+                "text": "ESProcessorItem"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.ESProcessorOptions.ignore_failure",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_failure",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.ESProcessorOptions.ignore_missing",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_missing",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.ESProcessorOptions.if",
+            "type": "string",
+            "tags": [],
+            "label": "if",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.ESProcessorOptions.tag",
+            "type": "string",
+            "tags": [],
+            "label": "tag",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.ESProcessorOptions.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: unknown",
+            "description": [],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.Integration",
+        "type": "Interface",
+        "tags": [],
+        "label": "Integration",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.Integration.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.Integration.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.Integration.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.Integration.dataStreams",
+            "type": "Array",
+            "tags": [],
+            "label": "dataStreams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "integrationAssistant",
+                "scope": "common",
+                "docId": "kibIntegrationAssistantPluginApi",
+                "section": "def-common.DataStream",
+                "text": "DataStream"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.Integration.logo",
+            "type": "string",
+            "tags": [],
+            "label": "logo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.Pipeline",
+        "type": "Interface",
+        "tags": [],
+        "label": "Pipeline",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.Pipeline.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.Pipeline.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.Pipeline.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.Pipeline.processors",
+            "type": "Array",
+            "tags": [],
+            "label": "processors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "integrationAssistant",
+                "scope": "common",
+                "docId": "kibIntegrationAssistantPluginApi",
+                "section": "def-common.ESProcessorItem",
+                "text": "ESProcessorItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.Pipeline.on_failure",
+            "type": "Array",
+            "tags": [],
+            "label": "on_failure",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "integrationAssistant",
+                "scope": "common",
+                "docId": "kibIntegrationAssistantPluginApi",
+                "section": "def-common.ESProcessorItem",
+                "text": "ESProcessorItem"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.RelatedApiRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "RelatedApiRequest",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.RelatedApiRequest.packageName",
+            "type": "string",
+            "tags": [],
+            "label": "packageName",
+            "description": [],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.RelatedApiRequest.dataStreamName",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamName",
+            "description": [],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.RelatedApiRequest.rawSamples",
+            "type": "Array",
+            "tags": [],
+            "label": "rawSamples",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.RelatedApiRequest.currentPipeline",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "currentPipeline",
+            "description": [],
+            "signature": [
+              "object"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.RelatedApiResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "RelatedApiResponse",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.RelatedApiResponse.results",
+            "type": "Object",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              "{ pipeline: object; docs: object[]; }"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.TestPipelineApiRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "TestPipelineApiRequest",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.TestPipelineApiRequest.rawSamples",
+            "type": "Array",
+            "tags": [],
+            "label": "rawSamples",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.TestPipelineApiRequest.currentPipeline",
+            "type": "Object",
+            "tags": [],
+            "label": "currentPipeline",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "integrationAssistant",
+                "scope": "common",
+                "docId": "kibIntegrationAssistantPluginApi",
+                "section": "def-common.Pipeline",
+                "text": "Pipeline"
+              }
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.TestPipelineApiResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "TestPipelineApiResponse",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.TestPipelineApiResponse.pipelineResults",
+            "type": "Array",
+            "tags": [],
+            "label": "pipelineResults",
+            "description": [],
+            "signature": [
+              "object[]"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "integrationAssistant",
+            "id": "def-common.TestPipelineApiResponse.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "object[] | undefined"
+            ],
+            "path": "x-pack/plugins/integration_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.InputTypes",
+        "type": "Enum",
+        "tags": [],
+        "label": "InputTypes",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.CATEGORIZATION_GRAPH_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "CATEGORIZATION_GRAPH_PATH",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.ECS_GRAPH_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ECS_GRAPH_PATH",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.INTEGRATION_ASSISTANT_APP_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "INTEGRATION_ASSISTANT_APP_ROUTE",
+        "description": [],
+        "signature": [
+          "\"/app/integration_assistant\""
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.INTEGRATION_ASSISTANT_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTEGRATION_ASSISTANT_BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/integration_assistant\""
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.INTEGRATION_BUILDER_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTEGRATION_BUILDER_PATH",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"integrationAssistant\""
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.RELATED_GRAPH_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "RELATED_GRAPH_PATH",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.TEST_PIPELINE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "TEST_PIPELINE_PATH",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

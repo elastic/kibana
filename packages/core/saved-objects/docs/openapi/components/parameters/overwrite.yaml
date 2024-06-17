@@ -1,0 +1,7 @@
+in: query
+name: overwrite
+schema:
+  type: boolean
+required: false
+description: |
+  Overwrites saved objects when they already exist. When used, potential conflict errors are automatically resolved by overwriting the destination object. NOTE: This option cannot be used with the `createNewCopies` option.

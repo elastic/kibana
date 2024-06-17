@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { InPortal } from 'react-reverse-portal';
-import { MonitorFields } from '../../../../../../common/runtime_types';
+import { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { MonitorInspectWrapper } from '../../common/components/monitor_inspect';
 import { InspectMonitorPortalNode } from '../portals';
 
@@ -16,7 +16,7 @@ export const InspectMonitorPortal = ({
   monitorFields,
 }: {
   isValid: boolean;
-  monitorFields: MonitorFields;
+  monitorFields: SyntheticsMonitor;
 }) => {
   return (
     <InPortal node={InspectMonitorPortalNode}>

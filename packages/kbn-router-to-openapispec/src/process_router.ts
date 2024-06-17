@@ -12,8 +12,9 @@ import { ALLOWED_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/co
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
 import {
-  assignToPathsObject,
+  assignToPaths,
   extractContentType,
+  extractTags,
   extractValidationSchemaFromRoute,
   getPathParameters,
   getVersionedContentTypeString,
@@ -58,24 +59,28 @@ export const processRouter = (
         ];
       }
 
-      const path: OpenAPIV3.PathItemObject = {
-        [route.method]: {
-          summary: route.options.description ?? '',
-          requestBody: !!validationSchemas?.body
-            ? {
-                content: {
-                  [getVersionedContentTypeString(SERVERLESS_VERSION_2023_10_31, contentType)]: {
-                    schema: converter.convert(validationSchemas.body),
-                  },
+      const operation: OpenAPIV3.OperationObject = {
+        summary: route.options.summary ?? '',
+        description: route.options.description,
+        tags: route.options.tags ? extractTags(route.options.tags) : [],
+        requestBody: !!validationSchemas?.body
+          ? {
+              content: {
+                [getVersionedContentTypeString(SERVERLESS_VERSION_2023_10_31, contentType)]: {
+                  schema: converter.convert(validationSchemas.body),
                 },
-              }
-            : undefined,
-          responses: extractResponses(route, converter),
-          parameters,
-          operationId: getOpId(route.path),
-        },
+              },
+            }
+          : undefined,
+        responses: extractResponses(route, converter),
+        parameters,
+        operationId: getOpId(route.path),
       };
-      assignToPathsObject(paths, route.path, path);
+
+      const path: OpenAPIV3.PathItemObject = {
+        [route.method]: operation,
+      };
+      assignToPaths(paths, route.path, path);
     } catch (e) {
       // Enrich the error message with a bit more context
       e.message = `Error generating OpenAPI for route '${route.path}': ${e.message}`;
@@ -99,7 +104,6 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
         const oasSchema = converter.convert(schema.body());
         acc[statusCode] = {
           ...acc[statusCode],
-          description: route.options.description ?? 'No description',
           content: {
             ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
             [getVersionedContentTypeString(

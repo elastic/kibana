@@ -80,7 +80,15 @@
                 "section": "def-common.RouteConfigOptions",
                 "text": "RouteConfigOptions"
               },
-              "<any>, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+              "<any>, \"description\" | \"access\"> | undefined; access: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteAccess",
+                "text": "RouteAccess"
+              },
+              "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; }"
             ],
             "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
             "deprecated": false,

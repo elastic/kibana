@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
@@ -30,10 +31,13 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
       observabilityShared: {
         navigation: { PageTemplate },
       },
+      share,
       docLinks,
     },
   } = useKibanaContextForPlugin();
 
+  const onboardingLocator = share.url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
+  const href = onboardingLocator?.getRedirectUrl({ category: 'infra' });
   const { source, error: sourceError, loadSource, isLoading } = useSourceContext();
   const { error: dataViewLoadError, refetch: loadDataView } = useMetricsDataViewContext();
   const { remoteClustersExist, metricIndicesExist } = source?.status ?? {};
@@ -48,6 +52,7 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
           beats: {
             title: noMetricIndicesPromptPrimaryActionTitle,
             description: noMetricIndicesPromptDescription,
+            href,
           },
         },
         docsLink: docLinks.links.observability.guide,

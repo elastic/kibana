@@ -1,12 +1,29 @@
-TO_LOWER
+## TO_LOWER
 
-Syntax
-Parameters
-str
-String expression. If null, the function returns null.
-DescriptionReturns a new string representing the input string converted to lower case.Supported types
-Example
+The `TO_LOWER` function in ES|QL is used to convert an input string to lower case.
+
+### Syntax
+
+`TO_LOWER(str)`
+
+#### Parameters
+
+- `str`: String expression. If null, the function returns null.
+
+### Examples
+
+Here are a couple of examples of how you can use the `TO_LOWER` function in ES|QL queries:
+
 ```esql
-ROW message = "Some Text"
-| EVAL message_lower = TO_LOWER(message)
+ROW message = "HELLO WORLD"
+| EVAL lower_message = TO_LOWER(message)
 ```
+
+In this example, the `TO_LOWER` function is used to convert the string "HELLO WORLD" to lower case. The result would be "hello world".
+
+```esql
+ROW name = "John Doe"
+| EVAL lower_name = TO_LOWER(name)
+```
+
+In this example, the `TO_LOWER` function is used to convert the string "John Doe" to lower case. The result would be "john doe".

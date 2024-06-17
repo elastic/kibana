@@ -4,7 +4,7 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
 <EuiText
   size="s"
 >
-  <FormattedMessage
+  <MemoizedFormattedMessage
     defaultMessage="Run any of the Machine Learning jobs below to prepare for creating detection rules that produce alerts for detected anomalies, and to view anomalous events throughout the Security application. We’ve provided a collection of common detection jobs to get you started. If you wish to add your own custom ML jobs, create and add them to the “Security” group from the {machineLearning} application."
     id="xpack.securitySolution.components.mlPopup.anomalyDetectionDescription"
     values={
@@ -13,10 +13,9 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
           href="/test/base/path/app/ml"
           target="_blank"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Machine Learning"
             id="xpack.securitySolution.components.mlPopup.machineLearningLink"
-            values={Object {}}
           />
         </EuiLink>,
       }

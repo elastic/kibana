@@ -164,7 +164,7 @@ describe('benchmarks API', () => {
 
         const packagePolicy1 = createPackagePolicyMock();
         const packagePolicy2 = createPackagePolicyMock();
-        packagePolicy2.policy_id = 'AnotherId';
+        packagePolicy2.policy_ids = ['AnotherId'];
         const packagePolicies = [packagePolicy1, packagePolicy2];
 
         await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);

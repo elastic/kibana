@@ -459,6 +459,22 @@
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "textBasedLanguages",
+            "id": "def-public.TextBasedLanguagesEditorProps.hideHeaderWhenExpanded",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideHeaderWhenExpanded",
+            "description": [
+              "hide header buttons when editor is expanded"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

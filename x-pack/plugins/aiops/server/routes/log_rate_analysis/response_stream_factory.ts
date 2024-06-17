@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Headers, KibanaRequestEvents } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 
-import { type AiopsLogRateAnalysisApiAction } from '@kbn/aiops-log-rate-analysis/api/actions';
+import { type AiopsLogRateAnalysisApiAction } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 
 import type {
   AiopsLogRateAnalysisSchema,

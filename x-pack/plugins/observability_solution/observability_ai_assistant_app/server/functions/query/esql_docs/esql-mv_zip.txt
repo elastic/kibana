@@ -1,17 +1,33 @@
-MV_ZIP
+## MV_ZIP
 
-Syntax
-Parameters
-string1
-Multivalue expression.
-string2
-Multivalue expression.
-delim
-Delimiter. Optional; if omitted, , is used as a default delimiter.
-DescriptionCombines the values from two multivalued fields with a delimiter that joins them together.Supported types
-Example
+The `MV_ZIP` function in ES|QL combines the values from two multivalued fields with a delimiter that joins them together.
+
+### Syntax
+
+`MV_ZIP(string1, string2, delim)`
+
+#### Parameters
+
+- `string1`: Multivalue expression.
+- `string2`: Multivalue expression.
+- `delim`: Delimiter. Optional; if omitted, `,` is used as a default delimiter.
+
+### Examples
+
+Here are a couple of examples of how you can use the `MV_ZIP` function in your ES|QL queries:
+
 ```esql
 ROW a = ["x", "y", "z"], b = ["1", "2"]
-| EVAL c = mv_zip(a, b, "-")
+| EVAL c = MV_ZIP(a, b, "-")
 | KEEP a, b, c
 ```
+
+In this example, the `MV_ZIP` function is used to combine the values from the `a` and `b` fields with a `-` delimiter. The result is stored in the `c` field.
+
+```esql
+ROW a = ["apple", "banana", "cherry"], b = ["red", "yellow", "red"]
+| EVAL fruit_color = MV_ZIP(a, b, " is ")
+| KEEP a, b, fruit_color
+```
+
+In this second example, the `MV_ZIP` function is used to combine the values from the `a` and `b` fields with ` is ` as the delimiter. The result is stored in the `fruit_color` field.

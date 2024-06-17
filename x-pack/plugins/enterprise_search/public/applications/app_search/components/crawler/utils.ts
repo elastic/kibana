@@ -232,7 +232,7 @@ export const getDeleteDomainSuccessMessage = (domainUrl: string) => {
   return i18n.translate(
     'xpack.enterpriseSearch.appSearch.crawler.action.deleteDomain.successMessage',
     {
-      defaultMessage: "Domain '{domainUrl}' was deleted",
+      defaultMessage: "Domain ''{domainUrl}'' was deleted",
       values: {
         domainUrl,
       },

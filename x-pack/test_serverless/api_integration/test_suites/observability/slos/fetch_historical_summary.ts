@@ -13,22 +13,26 @@ import {
 
 import { ALL_VALUE } from '@kbn/slo-schema';
 import moment from 'moment';
+import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const sloApi = getService('sloApi');
+  const svlUserManager = getService('svlUserManager');
 
   const SLO_ID = 'slo-fake-1';
-  // Failing: See https://github.com/elastic/kibana/issues/183748
-  describe.skip('fetch historical summary', () => {
+  describe('fetch historical summary', () => {
+    let roleAuthc: RoleCredentials;
+
     before(async () => {
       const now = moment().startOf('minute');
       const curr = now.clone().subtract(30, 'days');
       const end = now.clone().add(5, 'minutes');
 
       const batchOperations = [];
+
       while (curr.isSameOrBefore(end)) {
         batchOperations.push([
           { index: { _index: SLO_DESTINATION_INDEX_NAME } },
@@ -55,31 +59,36 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await esClient.indices.refresh({ index: SLO_DESTINATION_INDEX_NAME });
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
     after(async () => {
       await esDeleteAllIndices(SLO_DESTINATION_INDEX_PATTERN);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('computes the historical summary for a rolling occurrences SLO', async () => {
-      const response = await sloApi.fetchHistoricalSummary({
-        list: [
-          {
-            sloId: SLO_ID,
-            instanceId: ALL_VALUE,
-            timeWindow: {
-              duration: '7d',
-              type: 'rolling',
+      const response = await sloApi.fetchHistoricalSummary(
+        {
+          list: [
+            {
+              sloId: SLO_ID,
+              instanceId: ALL_VALUE,
+              timeWindow: {
+                duration: '7d',
+                type: 'rolling',
+              },
+              budgetingMethod: 'occurrences',
+              objective: {
+                target: 0.9,
+              },
+              groupBy: ALL_VALUE,
+              revision: 1,
             },
-            budgetingMethod: 'occurrences',
-            objective: {
-              target: 0.9,
-            },
-            groupBy: ALL_VALUE,
-            revision: 1,
-          },
-        ],
-      });
+          ],
+        },
+        roleAuthc
+      );
       expect(response[0].sloId).to.eql(SLO_ID);
       expect(response[0].instanceId).to.eql(ALL_VALUE);
       const numberOfBuckets = response[0].data.length;
@@ -96,26 +105,29 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('computes the historical summary for a rolling timeslices SLO', async () => {
-      const response = await sloApi.fetchHistoricalSummary({
-        list: [
-          {
-            sloId: SLO_ID,
-            instanceId: ALL_VALUE,
-            timeWindow: {
-              duration: '7d',
-              type: 'rolling',
+      const response = await sloApi.fetchHistoricalSummary(
+        {
+          list: [
+            {
+              sloId: SLO_ID,
+              instanceId: ALL_VALUE,
+              timeWindow: {
+                duration: '7d',
+                type: 'rolling',
+              },
+              budgetingMethod: 'timeslices',
+              objective: {
+                target: 0.9,
+                timesliceTarget: 0.8,
+                timesliceWindow: '1m',
+              },
+              groupBy: ALL_VALUE,
+              revision: 1,
             },
-            budgetingMethod: 'timeslices',
-            objective: {
-              target: 0.9,
-              timesliceTarget: 0.8,
-              timesliceWindow: '1m',
-            },
-            groupBy: ALL_VALUE,
-            revision: 1,
-          },
-        ],
-      });
+          ],
+        },
+        roleAuthc
+      );
       expect(response[0].sloId).to.eql(SLO_ID);
       expect(response[0].instanceId).to.eql(ALL_VALUE);
       const numberOfBuckets = response[0].data.length;

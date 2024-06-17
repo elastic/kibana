@@ -886,8 +886,56 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          i18n.translate('searchConnectors.nativeConnectors.dropbox.tooltipName', {
+            defaultMessage: 'Dropbox',
+          })
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      include_inherited_users_and_groups: {
+        default_value: null,
+        depends_on: [{ field: 'use_document_level_security', value: true }],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.dropbox.includeInheritedUsersAndGroups.label',
+          {
+            defaultMessage: 'Include groups and inherited users',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.dropbox.includeInheritedUsersAndGroups.tooltip',
+          {
+            defaultMessage:
+              'Include groups and inherited users when indexing permissions. Enabling this configurable field will cause a significant performance degradation.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
     },
     features: {
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },

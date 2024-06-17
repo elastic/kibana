@@ -1076,7 +1076,7 @@ class OutputService {
           { preset },
           { fromPreconfiguration: true }
         );
-        await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
+        await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id);
       },
       {
         concurrency: 5,

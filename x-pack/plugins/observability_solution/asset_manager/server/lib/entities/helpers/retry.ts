@@ -8,6 +8,7 @@
 import { setTimeout } from 'timers/promises';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
+import { EntitySecurityException } from '../errors/entity_security_exception';
 
 const MAX_ATTEMPTS = 5;
 
@@ -46,6 +47,10 @@ export const retryTransientEsErrors = async <T>(
 
       await setTimeout(retryDelaySec * 1000);
       return retryTransientEsErrors(esCall, { logger, attempt: retryCount });
+    }
+
+    if (e.meta?.body?.error?.type === 'security_exception') {
+      throw new EntitySecurityException(e.meta.body.error.reason);
     }
 
     throw e;

@@ -10,26 +10,28 @@ import { merge } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type {
-  ActionDetails,
-  EndpointActivityLogAction,
-  EndpointActivityLogActionResponse,
-  EndpointPendingActions,
-  LogsEndpointAction,
-  LogsEndpointActionResponse,
-  ProcessesEntry,
-  EndpointActionDataParameterTypes,
-  ActionResponseOutput,
-  ResponseActionGetFileOutputContent,
-  ResponseActionGetFileParameters,
-  ResponseActionsExecuteParameters,
-  ResponseActionExecuteOutputContent,
-  ResponseActionUploadOutputContent,
-  ResponseActionUploadParameters,
-  EndpointActionResponseDataOutput,
-  WithAllKeys,
+import {
+  type ActionDetails,
+  type ActionResponseOutput,
+  ActivityLogItemTypes,
+  type EndpointActionDataParameterTypes,
+  type EndpointActionResponseDataOutput,
+  type EndpointActivityLogAction,
+  type EndpointActivityLogActionResponse,
+  type EndpointPendingActions,
+  type LogsEndpointAction,
+  type LogsEndpointActionResponse,
+  type ProcessesEntry,
+  type ResponseActionExecuteOutputContent,
+  type ResponseActionGetFileOutputContent,
+  type ResponseActionGetFileParameters,
+  type ResponseActionScanOutputContent,
+  type ResponseActionsExecuteParameters,
+  type ResponseActionsScanParameters,
+  type ResponseActionUploadOutputContent,
+  type ResponseActionUploadParameters,
+  type WithAllKeys,
 } from '../types';
-import { ActivityLogItemTypes } from '../types';
 import {
   DEFAULT_EXECUTE_ACTION_TIMEOUT,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
@@ -102,9 +104,13 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
     const command = overrides?.EndpointActions?.data?.command ?? this.randomResponseActionCommand();
     let output: ActionResponseOutput<
-      ResponseActionGetFileOutputContent | ResponseActionExecuteOutputContent
+      | ResponseActionGetFileOutputContent
+      | ResponseActionExecuteOutputContent
+      | ResponseActionScanOutputContent
     > = overrides?.EndpointActions?.data?.output as unknown as ActionResponseOutput<
-      ResponseActionGetFileOutputContent | ResponseActionExecuteOutputContent
+      | ResponseActionGetFileOutputContent
+      | ResponseActionExecuteOutputContent
+      | ResponseActionScanOutputContent
     >;
 
     if (command === 'get-file') {
@@ -123,6 +129,17 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                 sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
               },
             ],
+          },
+        };
+      }
+    }
+
+    if (command === 'scan') {
+      if (!output) {
+        output = {
+          type: 'json',
+          content: {
+            code: 'ra_scan_success_done',
           },
         };
       }
@@ -269,6 +286,35 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
     }
 
+    if (command === 'scan') {
+      if (!details.parameters) {
+        (
+          details as unknown as ActionDetails<
+            ResponseActionScanOutputContent,
+            ResponseActionsScanParameters
+          >
+        ).parameters = {
+          path: '/some/folder/to/scan',
+        };
+      }
+
+      if (!details.outputs || Object.keys(details.outputs).length === 0) {
+        (
+          details as unknown as ActionDetails<
+            ResponseActionScanOutputContent,
+            ResponseActionsScanParameters
+          >
+        ).outputs = {
+          [details.agents[0]]: {
+            type: 'json',
+            content: {
+              code: 'ra_scan_success_done',
+            },
+          },
+        };
+      }
+    }
+
     if (command === 'execute') {
       if (!details.parameters) {
         (
@@ -344,6 +390,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       'ra_get-file_error_upload-api-unreachable',
       'ra_get-file_error_upload-timeout',
       'ra_get-file_error_queue-timeout',
+    ]);
+  }
+
+  randomScanFailureCode(): string {
+    return this.randomChoice([
+      'ra_scan_error_scan-invalid-input',
+      'ra_scan_error_not-found',
+      'ra_scan_error_scan-queue-quota',
     ]);
   }
 

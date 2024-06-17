@@ -1,0 +1,153 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { StructuredTool } from '@langchain/core/tools';
+import { RetrievalQAChain } from 'langchain/chains';
+import {
+  getDefaultArguments,
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
+import { createOpenAIFunctionsAgent, createStructuredChatAgent } from 'langchain/agents';
+import { AssistantToolParams } from '../../../../types';
+import { AgentExecutor } from '../../executors/types';
+import { openAIFunctionAgentPrompt, structuredChatAgentPrompt } from './prompts';
+import { APMTracer } from '../../tracers/apm_tracer';
+import { getDefaultAssistantGraph } from './graph';
+import { invokeGraph, streamGraph } from './helpers';
+
+/**
+ * Drop in replacement for the existing `callAgentExecutor` that uses LangGraph
+ */
+export const callAssistantGraph: AgentExecutor<true | false> = async ({
+  abortSignal,
+  actions,
+  alertsIndexPattern,
+  anonymizationFields,
+  isEnabledKnowledgeBase,
+  assistantTools = [],
+  connectorId,
+  conversationId,
+  dataClients,
+  esClient,
+  esStore,
+  langChainMessages,
+  llmType,
+  logger: parentLogger,
+  isStream = false,
+  onLlmResponse,
+  onNewReplacements,
+  replacements,
+  request,
+  size,
+  traceOptions,
+}) => {
+  const logger = parentLogger.get('defaultAssistantGraph');
+  const isOpenAI = llmType === 'openai';
+  const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+
+  const llm = new llmClass({
+    actions,
+    connectorId,
+    request,
+    llmType,
+    logger,
+    // possible client model override,
+    // let this be undefined otherwise so the connector handles the model
+    model: request.body.model,
+    // ensure this is defined because we default to it in the language_models
+    // This is where the LangSmith logs (Metadata > Invocation Params) are set
+    temperature: getDefaultArguments(llmType).temperature,
+    signal: abortSignal,
+    streaming: isStream,
+    // prevents the agent from retrying on failure
+    // failure could be due to bad connector, we should deliver that result to the client asap
+    maxRetries: 0,
+  });
+  const model = llm;
+
+  const messages = langChainMessages.slice(0, -1); // all but the last message
+  const latestMessage = langChainMessages.slice(-1); // the last message
+
+  const modelExists = await esStore.isModelInstalled();
+
+  // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
+  const chain = RetrievalQAChain.fromLLM(model, esStore.asRetriever(10));
+
+  // Fetch any applicable tools that the source plugin may have registered
+  const assistantToolParams: AssistantToolParams = {
+    alertsIndexPattern,
+    anonymizationFields,
+    chain,
+    esClient,
+    isEnabledKnowledgeBase,
+    kbDataClient: dataClients?.kbDataClient,
+    llm: model,
+    logger,
+    modelExists,
+    onNewReplacements,
+    replacements,
+    request,
+    size,
+  };
+
+  const tools: StructuredTool[] = assistantTools.flatMap(
+    (tool) => tool.getTool(assistantToolParams) ?? []
+  );
+
+  const agentRunnable = isOpenAI
+    ? await createOpenAIFunctionsAgent({
+        llm,
+        tools,
+        prompt: openAIFunctionAgentPrompt,
+        streamRunnable: isStream,
+      })
+    : await createStructuredChatAgent({
+        llm,
+        tools,
+        prompt: structuredChatAgentPrompt,
+        streamRunnable: isStream,
+      });
+
+  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
+
+  const assistantGraph = getDefaultAssistantGraph({
+    agentRunnable,
+    conversationId,
+    dataClients,
+    llm,
+    logger,
+    messages,
+    tools,
+  });
+  const inputs = { input: latestMessage[0].content as string };
+
+  if (isStream) {
+    return streamGraph({ apmTracer, assistantGraph, inputs, logger, onLlmResponse, request });
+  }
+
+  const graphResponse = await invokeGraph({
+    apmTracer,
+    assistantGraph,
+    inputs,
+    onLlmResponse,
+    traceOptions,
+  });
+
+  return {
+    body: {
+      connector_id: connectorId,
+      data: graphResponse.output,
+      trace_data: graphResponse.traceData,
+      replacements,
+      status: 'ok',
+    },
+    headers: {
+      'content-type': 'application/json',
+    },
+  };
+};

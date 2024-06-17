@@ -135,10 +135,7 @@ export const SearchIndexOverview: React.FC = () => {
       {isConnectorIndex(indexData) && (
         <>
           <EuiSpacer />
-          <SyncJobs
-            errorOnAccessSync={Boolean(indexData.connector.last_access_control_sync_error)}
-            errorOnContentSync={Boolean(indexData.connector.last_sync_error)}
-          />
+          <SyncJobs connector={indexData.connector} />
         </>
       )}
     </>

@@ -22,7 +22,7 @@ export const findUserActionsRoute = createCasesRoute({
   },
   routerOptions: {
     access: 'public',
-    description: `Get user activity for a case`,
+    summary: `Get user activity for a case`,
   },
   handler: async ({ context, request, response }) => {
     try {

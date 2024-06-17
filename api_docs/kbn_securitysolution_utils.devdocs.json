@@ -528,7 +528,7 @@
         "label": "validateHasWildcardWithWrongOperator",
         "description": [],
         "signature": [
-          "({ operator, value, }: { operator: \"wildcard\" | \"match\" | \"nested\" | \"exists\" | \"match_any\"; value: string; }) => boolean"
+          "({ operator, value, }: { operator: \"wildcard\" | \"match\" | \"nested\" | \"exists\" | \"match_any\"; value: string | string[]; }) => boolean"
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
@@ -562,10 +562,13 @@
               {
                 "parentPluginId": "@kbn/securitysolution-utils",
                 "id": "def-common.validateHasWildcardWithWrongOperator.$1.value",
-                "type": "string",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "value",
                 "description": [],
+                "signature": [
+                  "string | string[]"
+                ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -671,7 +674,7 @@
         "label": "validateWildcardInput",
         "description": [],
         "signature": [
-          "(value?: string | undefined) => string | undefined"
+          "(value: string | string[]) => string | undefined"
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
@@ -680,17 +683,17 @@
           {
             "parentPluginId": "@kbn/securitysolution-utils",
             "id": "def-common.validateWildcardInput.$1",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "value",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | string[]"
             ],
             "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           }
         ],
         "returnComment": [],

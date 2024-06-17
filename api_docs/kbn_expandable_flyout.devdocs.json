@@ -574,6 +574,22 @@
             "path": "packages/kbn-expandable-flyout/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.ExpandableFlyoutProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [
+              "\nCallback function to let application's code the flyout is closed"
+            ],
+            "signature": [
+              "((event: MouseEvent | KeyboardEvent | TouchEvent) => void) | undefined"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

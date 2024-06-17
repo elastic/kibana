@@ -47,9 +47,11 @@ describe(
     beforeEach(() => {
       login();
       // Create and enroll a new Endpoint host
-      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_id).then((host) => {
-        createdHost = host as CreateAndEnrollEndpointHostResponse;
-      });
+      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_ids[0]).then(
+        (host) => {
+          createdHost = host as CreateAndEnrollEndpointHostResponse;
+        }
+      );
     });
 
     after(() => {
@@ -78,7 +80,7 @@ describe(
         isAgentAndEndpointUninstalledFromHost(createdHost.hostname).then(
           (isUninstalledWithoutUninstallToken) => {
             expect(isUninstalledWithoutUninstallToken).to.eql(false);
-            getUninstallToken(policyWithAgentTamperProtectionEnabled.policy_id).then(
+            getUninstallToken(policyWithAgentTamperProtectionEnabled.policy_ids[0]).then(
               (uninstallToken) => {
                 uninstallAgentFromHost(createdHost.hostname, uninstallToken.body.item.token).then(
                   (withUninstallTokenResponse) => {

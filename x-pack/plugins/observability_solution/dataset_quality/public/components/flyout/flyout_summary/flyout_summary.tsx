@@ -50,7 +50,7 @@ const nonAggregatableWarningDescription = (dataset: string) => (
             howToFixIt: (
               <FormattedMessage
                 id="xpack.datasetQuality.flyout.nonAggregatable.howToFixIt"
-                defaultMessage="Manually {rolloverLink} this dataset to prevent future delays."
+                defaultMessage="Manually {rolloverLink} this data set to prevent future delays."
                 values={{
                   rolloverLink: (
                     <EuiLink

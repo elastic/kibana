@@ -267,7 +267,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         after(async () => {
           await retry.try(async () => {
-            await pageObjects.infraHostsView.clickCloseFlyoutButton();
+            await pageObjects.infraHome.clickCloseFlyoutButton();
           });
         });
 
@@ -842,7 +842,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         after(async () => {
           await retry.try(async () => {
-            await pageObjects.infraHostsView.clickCloseFlyoutButton();
+            await pageObjects.infraHome.clickCloseFlyoutButton();
           });
           await logoutAndDeleteReadOnlyUser();
         });

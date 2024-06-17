@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -47,7 +47,7 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
 }) => {
-  return ({
+  return function UnifiedDataTableRenderCellValue({
     rowIndex,
     columnId,
     isDetails,
@@ -55,7 +55,7 @@ export const getRenderCellValueFn = ({
     colIndex,
     isExpandable,
     isExpanded,
-  }: EuiDataGridCellValueElementProps) => {
+  }: EuiDataGridCellValueElementProps) {
     const row = rows ? rows[rowIndex] : undefined;
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);

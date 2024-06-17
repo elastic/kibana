@@ -8,6 +8,7 @@
 
 import { Agent as HttpAgent, type AgentOptions } from 'http';
 import { Agent as HttpsAgent } from 'https';
+import CacheableLookup from 'cacheable-lookup';
 import type { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
@@ -20,6 +21,14 @@ export type AgentFactory = (connectionOpts: ConnectionOptions) => NetworkAgent;
 
 export interface AgentFactoryProvider {
   getAgentFactory(agentOptions?: HttpAgentOptions): AgentFactory;
+}
+
+export interface AgentManagerOptions {
+  /**
+   * The maximum number of seconds to retain the DNS lookup resolutions.
+   * Set to 0 to disable the cache (default Node.js behavior)
+   */
+  dnsCacheTtlInSeconds: number;
 }
 
 /**
@@ -45,9 +54,19 @@ export interface AgentStatsProvider {
  **/
 export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
   private readonly agents: Set<HttpAgent>;
+  private readonly cacheableLookup?: CacheableLookup;
 
-  constructor(private readonly logger: Logger) {
+  constructor(private readonly logger: Logger, options: AgentManagerOptions) {
     this.agents = new Set();
+    // Use DNS caching to avoid too many repetitive (and CPU-blocking) dns.lookup calls
+    if (options.dnsCacheTtlInSeconds > 0) {
+      this.logger.info(
+        `Caching ES host DNS resolutions for up to ${options.dnsCacheTtlInSeconds}s. If this causes problems, change the setting "elasticsearch.dnsCacheTtl: ${options.dnsCacheTtlInSeconds}s".`
+      );
+      this.cacheableLookup = new CacheableLookup({
+        maxTtl: options.dnsCacheTtlInSeconds,
+      });
+    }
   }
 
   public getAgentFactory(agentOptions?: AgentOptions): AgentFactory {
@@ -63,6 +82,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
           httpsAgent = new HttpsAgent(config);
           this.agents.add(httpsAgent);
           dereferenceOnDestroy(this.agents, httpsAgent);
+          this.cacheableLookup?.install(httpsAgent);
         }
 
         return httpsAgent;
@@ -72,6 +92,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
         httpAgent = new HttpAgent(agentOptions);
         this.agents.add(httpAgent);
         dereferenceOnDestroy(this.agents, httpAgent);
+        this.cacheableLookup?.install(httpAgent);
       }
 
       return httpAgent;

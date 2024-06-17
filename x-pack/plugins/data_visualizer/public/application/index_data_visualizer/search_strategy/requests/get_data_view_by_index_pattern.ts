@@ -6,6 +6,7 @@
  */
 
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 
 /**
  * Get a saved data view that matches the index pattern (as close as possible)
@@ -34,14 +35,7 @@ export async function getOrCreateDataViewByIndexPattern(
     indexPatternFromQuery &&
     (currentDataView?.isPersisted() || indexPatternFromQuery !== currentDataView?.getIndexPattern())
   ) {
-    const dataViewObj = await dataViews.create({
-      title: indexPatternFromQuery,
-    });
-
-    if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-      dataViewObj.timeFieldName = '@timestamp';
-    }
-    return dataViewObj;
+    return await getESQLAdHocDataview(indexPatternFromQuery, dataViews);
   }
   return currentDataView;
 }

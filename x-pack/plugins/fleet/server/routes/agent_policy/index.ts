@@ -47,6 +47,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         //  Allow to retrieve agent policies metadata (no full) for user with only read agents permissions
         return authz.fleet.readAgentPolicies || authz.fleet.readAgents;
       },
+      description: `Get agent policies`,
     })
     .addVersion(
       {
@@ -80,6 +81,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         //  Allow to retrieve agent policies metadata (no full) for user with only read agents permissions
         return authz.fleet.readAgentPolicies || authz.fleet.readAgents;
       },
+      description: `Get an agent policy by ID`,
     })
     .addVersion(
       {
@@ -96,6 +98,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allAgentPolicies: true },
       },
+      description: `Create an agent policy`,
     })
     .addVersion(
       {
@@ -112,6 +115,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allAgentPolicies: true },
       },
+      description: `Update an agent policy by ID`,
     })
     .addVersion(
       {
@@ -128,6 +132,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allAgentPolicies: true },
       },
+      description: `Copy an agent policy by ID`,
     })
     .addVersion(
       {
@@ -160,6 +165,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readAgentPolicies: true },
       },
+      description: `Get a full agent policy by ID`,
     })
     .addVersion(
       {
@@ -177,6 +183,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         fleet: { readAgentPolicies: true },
       },
       enableQueryVersion: true,
+      description: `Download an agent policy by ID`,
     })
     .addVersion(
       {
@@ -193,6 +200,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readAgentPolicies: true },
       },
+      description: `Get full K8s agent manifest`,
     })
     .addVersion(
       {

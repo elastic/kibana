@@ -10,17 +10,18 @@ import React, { type FC } from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 
 import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
+import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 import { i18n } from '@kbn/i18n';
 
 interface LogRateAnalysisTypeCallOutProps {
   analysisType: LogRateAnalysisType;
-  zeroDocsFallback: boolean;
 }
 
 export const LogRateAnalysisTypeCallOut: FC<LogRateAnalysisTypeCallOutProps> = ({
   analysisType,
-  zeroDocsFallback,
 }) => {
+  const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
+
   let callOutTitle: string;
   let callOutText: string;
 

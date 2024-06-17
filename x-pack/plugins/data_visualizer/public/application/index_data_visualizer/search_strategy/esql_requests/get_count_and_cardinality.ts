@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import pLimit from 'p-limit';
 import { chunk } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { ESQLSearchReponse } from '@kbn/es-types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { appendToESQLQuery } from '@kbn/esql-utils';
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -50,8 +50,7 @@ const getESQLOverallStatsInChunk = async ({
     let startIndex = 0;
     /** Example query:
      * from {indexPattern} | LIMIT {limitSize}
-     * | EVAL  `ne_{aggregableField}` = MV_MIN({aggregableField}),
-     * | STATs `{aggregableField}_count` = COUNT(`ne_{aggregableField}`),
+     * | STATs `{aggregableField}_count` = COUNT(MV_MIN(`{aggregableField}`)),
      * `{aggregableField}_cardinality` = COUNT_DISTINCT({aggregableField}),
      * `{nonAggregableField}_count` = COUNT({nonAggregableField})
      */
@@ -66,15 +65,11 @@ const getESQLOverallStatsInChunk = async ({
             // Ex: for 2 docs, count(fieldName) might return 5
             // So we need to do count(EVAL(MV_MIN(fieldName))) instead
             // to get accurate % of rows where field value exists
-            evalQuery: `${getSafeESQLName(`ne_${field.name}`)} = MV_MIN(${getSafeESQLName(
-              `${field.name}`
-            )})`,
-            query: `${getSafeESQLName(`${field.name}_count`)} = COUNT(${getSafeESQLName(
-              `ne_${field.name}`
-            )}),
-        ${getSafeESQLName(`${field.name}_cardinality`)} = COUNT_DISTINCT(${getSafeESQLName(
+            query: `${getSafeESQLName(`${field.name}_count`)} = COUNT(MV_MIN(${getSafeESQLName(
               field.name
-            )})`,
+            )})), ${getSafeESQLName(
+              `${field.name}_cardinality`
+            )} = COUNT_DISTINCT(${getSafeESQLName(field.name)})`,
           };
           // +2 for count, and count_dictinct
           startIndex += 2;
@@ -93,17 +88,9 @@ const getESQLOverallStatsInChunk = async ({
         }
       });
 
-    const evalQuery = fieldsToFetch
-      .map((field) => field.evalQuery)
-      .filter(isDefined)
-      .join(',');
-
     let countQuery = fieldsToFetch.length > 0 ? '| STATS ' : '';
     countQuery += fieldsToFetch.map((field) => field.query).join(',');
-    const query = appendToESQLQuery(
-      esqlBaseQueryWithLimit,
-      (evalQuery ? ' | EVAL ' + evalQuery : '') + countQuery
-    );
+    const query = appendToESQLQuery(esqlBaseQueryWithLimit, countQuery);
 
     const request = {
       params: {
@@ -113,7 +100,7 @@ const getESQLOverallStatsInChunk = async ({
     };
 
     try {
-      const esqlResults = await runRequest(request, { strategy: ESQL_SEARCH_STRATEGY });
+      const esqlResults = await runRequest(request, { strategy: ESQL_ASYNC_SEARCH_STRATEGY });
       const stats = {
         aggregatableExistsFields: [] as AggregatableField[],
         aggregatableNotExistsFields: [] as AggregatableField[],
@@ -124,7 +111,7 @@ const getESQLOverallStatsInChunk = async ({
       if (!esqlResults) {
         return;
       }
-      const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchReponse;
+      const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchResponse;
 
       const sampleCount = !isDefined(limitSize) ? totalCount : limitSize;
       fieldsToFetch.forEach((field, idx) => {

@@ -19,7 +19,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
           }
         }
       >
-        <InjectIntl(ListControlUi)
+        <injectIntl(ListControlUi)
           controlIndex={0}
           fetchOptions={[Function]}
           formatOptionLabel={[Function]}
@@ -49,10 +49,9 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
           fill={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Apply changes"
             id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -64,10 +63,9 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
           disabled={false}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel changes"
             id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -79,10 +77,9 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
           disabled={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Clear form"
             id="inputControl.vis.inputControlVis.clearFormButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -110,7 +107,7 @@ exports[`Clear btns enabled when there are values 1`] = `
           }
         }
       >
-        <InjectIntl(ListControlUi)
+        <injectIntl(ListControlUi)
           controlIndex={0}
           fetchOptions={[Function]}
           formatOptionLabel={[Function]}
@@ -140,10 +137,9 @@ exports[`Clear btns enabled when there are values 1`] = `
           fill={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Apply changes"
             id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -155,10 +151,9 @@ exports[`Clear btns enabled when there are values 1`] = `
           disabled={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel changes"
             id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -170,10 +165,9 @@ exports[`Clear btns enabled when there are values 1`] = `
           disabled={false}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Clear form"
             id="inputControl.vis.inputControlVis.clearFormButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -201,7 +195,7 @@ exports[`Renders list control 1`] = `
           }
         }
       >
-        <InjectIntl(ListControlUi)
+        <injectIntl(ListControlUi)
           controlIndex={0}
           fetchOptions={[Function]}
           formatOptionLabel={[Function]}
@@ -231,10 +225,9 @@ exports[`Renders list control 1`] = `
           fill={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Apply changes"
             id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -246,10 +239,9 @@ exports[`Renders list control 1`] = `
           disabled={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel changes"
             id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -261,10 +253,9 @@ exports[`Renders list control 1`] = `
           disabled={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Clear form"
             id="inputControl.vis.inputControlVis.clearFormButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -329,10 +320,9 @@ exports[`Renders range control 1`] = `
           fill={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Apply changes"
             id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -344,10 +334,9 @@ exports[`Renders range control 1`] = `
           disabled={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel changes"
             id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -359,10 +348,9 @@ exports[`Renders range control 1`] = `
           disabled={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Clear form"
             id="inputControl.vis.inputControlVis.clearFormButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>

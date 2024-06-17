@@ -23,7 +23,7 @@ import { JSONCodeEditorCommonMemoized } from '../json_code_editor';
 
 interface SourceViewerProps {
   id: string;
-  index: string;
+  index: string | undefined;
   dataView: DataView;
   textBasedHits?: DataTableRecord[];
   hasLineNumbers: boolean;

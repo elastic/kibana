@@ -21,6 +21,8 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     describe('it gets files from registry', () => {
       it('fetches a .png screenshot image', async function () {
+        // wait 10s before uploading again to avoid getting 429 just in case a previous test was hitting the same endpoint
+        await new Promise((resolve) => setTimeout(resolve, 10000));
         const res = await supertest
           .get('/api/fleet/epm/packages/filetest/0.1.0/img/screenshots/metricbeat_dashboard.png')
           .set('kbn-xsrf', 'xxx')

@@ -27,6 +27,7 @@ export {
   apiIsPresentationContainer,
   getContainerParentFromAPI,
   listenForCompatibleApi,
+  combineCompatibleChildrenApis,
   type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';
@@ -40,4 +41,5 @@ export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlay
 export {
   canTrackContentfulRender,
   type TrackContentfulRender,
-} from './interfaces/track_contentful_render';
+  type TracksQueryPerformance,
+} from './interfaces/performance_trackers';

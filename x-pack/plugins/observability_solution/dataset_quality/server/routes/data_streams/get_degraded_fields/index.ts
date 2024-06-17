@@ -11,6 +11,7 @@ import { DegradedFieldResponse } from '../../../../common/api_types';
 import { MAX_DEGRADED_FIELDS } from '../../../../common/constants';
 import { createDatasetQualityESClient } from '../../../utils';
 import { _IGNORED, TIMESTAMP } from '../../../../common/es_fields';
+import { getFieldIntervalInSeconds } from './get_interval';
 
 export async function getDegradedFields({
   esClient,
@@ -23,6 +24,7 @@ export async function getDegradedFields({
   end: number;
   dataStream: string;
 }): Promise<DegradedFieldResponse> {
+  const fieldInterval = getFieldIntervalInSeconds({ start, end });
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
   const filterQuery = [...rangeQuery(start, end)];
@@ -39,6 +41,17 @@ export async function getDegradedFields({
         lastOccurrence: {
           max: {
             field: TIMESTAMP,
+          },
+        },
+        timeSeries: {
+          date_histogram: {
+            field: TIMESTAMP,
+            fixed_interval: `${fieldInterval}s`,
+            min_doc_count: 0,
+            extended_bounds: {
+              min: start,
+              max: end,
+            },
           },
         },
       },
@@ -63,6 +76,10 @@ export async function getDegradedFields({
         name: bucket.key as string,
         count: bucket.doc_count,
         lastOccurrence: bucket.lastOccurrence.value,
+        timeSeries: bucket.timeSeries.buckets.map((timeSeriesBucket) => ({
+          x: timeSeriesBucket.key,
+          y: timeSeriesBucket.doc_count,
+        })),
       })) ?? [],
   };
 }

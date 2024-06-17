@@ -6,6 +6,7 @@
  */
 
 import { SearchResponse, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { IndicesQuerySourceFields } from '../types';
 
@@ -127,6 +128,17 @@ const isFieldNested = (field: string, fieldCapsResponse: FieldCapsResponse) => {
   return false;
 };
 
+const isFieldInIndex = (
+  field: Record<string, FieldCapsFieldCapability>,
+  fieldKey: string,
+  index: string
+) => {
+  return (
+    fieldKey in field &&
+    ('indices' in field[fieldKey] ? field[fieldKey]?.indices?.includes(index) : true)
+  );
+};
+
 export const parseFieldsCapabilities = (
   fieldCapsResponse: FieldCapsResponse,
   aggDocs: Array<{ index: string; doc: SearchResponse }>
@@ -178,9 +190,13 @@ export const parseFieldsCapabilities = (
           (indexModelIdField) => indexModelIdField.index === index
         )!.fields;
 
-        if ('rank_features' in field || 'sparse_vector' in field) {
+        if (
+          isFieldInIndex(field, 'rank_features', index) ||
+          isFieldInIndex(field, 'sparse_vector', index)
+        ) {
           const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
           const modelId = getModelField(fieldKey, modelIdFields);
+          const fieldCapabilities = field.rank_features || field.sparse_vector;
 
           // Check if the sparse vector field has a model_id associated with it
           // skip this field if has no model associated with it
@@ -190,15 +206,16 @@ export const parseFieldsCapabilities = (
               field: fieldKey,
               model_id: modelId,
               nested: !!isFieldNested(fieldKey, fieldCapsResponse),
-              indices: indicesPresentIn,
+              indices: (fieldCapabilities.indices as string[]) || indicesPresentIn,
             };
             acc[index].elser_query_fields.push(elserModelField);
           } else {
             acc[index].skipped_fields++;
           }
-        } else if ('dense_vector' in field) {
+        } else if (isFieldInIndex(field, 'dense_vector', index)) {
           const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
           const modelId = getModelField(fieldKey, modelIdFields);
+          const fieldCapabilities = field.dense_vector;
 
           // Check if the dense vector field has a model_id associated with it
           // skip this field if has no model associated with it
@@ -208,7 +225,7 @@ export const parseFieldsCapabilities = (
               field: fieldKey,
               model_id: modelId,
               nested: !!nestedField,
-              indices: indicesPresentIn,
+              indices: (fieldCapabilities.indices as string[]) || indicesPresentIn,
             };
             acc[index].dense_vector_query_fields.push(denseVectorField);
           } else {

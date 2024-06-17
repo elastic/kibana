@@ -20,6 +20,7 @@ import {
   NoParametersRequestSchema,
 } from '../../api/endpoint/actions/common/base';
 import { ExecuteActionRequestSchema } from '../../api/endpoint/actions/execute_route';
+import { ScanActionRequestSchema } from '../../api/endpoint/actions/scan_route';
 
 // NOTE: Even though schemas are kept in common/api/endpoint - we keep tests here, because common/api should import from outside
 describe('actions schemas', () => {
@@ -757,6 +758,35 @@ describe('actions schemas', () => {
           file: {},
         });
       }).toThrow('[file]: expected value of type [Stream] but got [Object]');
+    });
+  });
+
+  describe('ScanActionRequestSchema', () => {
+    it('should not accept empty string as path', () => {
+      expect(() => {
+        ScanActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: { path: ' ' },
+        });
+      }).toThrowError('path cannot be an empty string');
+    });
+
+    it('should not accept when payload does not match', () => {
+      expect(() => {
+        ScanActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          path: 'some/path',
+        });
+      }).toThrowError('[parameters.path]: expected value of type [string] but got [undefined]');
+    });
+
+    it('should accept path in payload if not empty', () => {
+      expect(() => {
+        ScanActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: { path: 'some/path' },
+        });
+      }).not.toThrow();
     });
   });
 });

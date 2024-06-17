@@ -7,11 +7,14 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Markdown } from '@kbn/shared-ux-markdown';
+import { Markdown as SharedUXMarkdown } from '@kbn/shared-ux-markdown';
+
+const Markdown = (props: Parameters<typeof SharedUXMarkdown>[0]) => (
+  <SharedUXMarkdown {...props} readOnly enableSoftLineBreaks />
+);
 
 export const initialSection = (
   <Markdown
-    readOnly
     markdownContent={i18n.translate(
       'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.markdown',
       {
@@ -54,7 +57,6 @@ export const sourceCommands = {
       ),
       description: (
         <Markdown
-          readOnly
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from.markdown',
@@ -123,7 +125,6 @@ FROM employees [METADATA _index, _id]
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.row.markdown',
             {
@@ -162,7 +163,6 @@ ROW a = ROUND(1.23, 0)
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.show.markdown',
             {
@@ -172,6 +172,7 @@ The \`SHOW <item>\` source command returns information about the deployment and 
 * Use \`SHOW INFO\` to return the deployment's version, build date and hash.
 * Use \`SHOW FUNCTIONS\` to return a list of all supported functions and a synopsis of each function.
             `,
+              ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
@@ -202,7 +203,6 @@ export const processingCommands = {
       ),
       description: (
         <Markdown
-          readOnly
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dissect.markdown',
@@ -214,9 +214,9 @@ Refer to the [dissect processor documentation](https://www.elastic.co/guide/en/e
 
 \`\`\`
 ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
-| DISSECT a "%\\{Y\\}-%\\{M\\}-%\\{D\\}T%\\{h\\}:%\\{m\\}:%\\{s\\}Z - %\\{msg\\} - %\\{ip\\}"
-\`\`\`
-            `,
+| DISSECT a "%'\{Y\}-%\{M\}-%\{D\}T%\{h\}:%\{m\}:%\{s\}Z - %\{msg\} - %\{ip\}'"
+\`\`\`            `,
+              ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
@@ -233,7 +233,6 @@ ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.drop.markdown',
             {
@@ -268,7 +267,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.enrich.markdown',
@@ -308,6 +306,7 @@ By default (if no \`WITH\` is defined), \`ENRICH\` will add all the enrich field
 
 In case of name collisions, the newly created fields will override the existing fields.
             `,
+              ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
@@ -324,7 +323,6 @@ In case of name collisions, the newly created fields will override the existing 
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eval.markdown',
             {
@@ -364,7 +362,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.grok.markdown',
@@ -376,7 +373,7 @@ Refer to the [grok processor documentation](https://www.elastic.co/guide/en/elas
 
 \`\`\`
 ROW a = "12 15.5 15.6 true"
-| GROK a "%\\{NUMBER:b:int\\} %\\{NUMBER:c:float\\} %\\{NUMBER:d:double\\} %\\{WORD:e:boolean\\}"
+| GROK a "%'{NUMBER:b:int}' %'{NUMBER:c:float}' %'{NUMBER:d:double}' %'{WORD:e:boolean}'"
 \`\`\`
             `,
               description:
@@ -395,7 +392,6 @@ ROW a = "12 15.5 15.6 true"
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.keep.markdown',
             {
@@ -439,7 +435,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.limit.markdown',
             {
@@ -467,7 +462,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvExpand.markdown',
             {
@@ -494,7 +488,6 @@ ROW a=[1,2,3], b="b", j=["a","b"]
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rename.markdown',
             {
@@ -523,6 +516,7 @@ FROM employees
 | RENAME first_name AS fn, last_name AS ln
 \`\`\`
             `,
+              ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
@@ -539,7 +533,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sort.markdown',
             {
@@ -593,7 +586,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.statsby.markdown',
             {
@@ -684,7 +676,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.where.markdown',
             {
@@ -714,6 +705,8 @@ Refer to **Operators** for an overview of the supported operators.
   ],
 };
 
+// DO NOT RENAME!
+// managed by scripts/generate_esql_docs.ts
 export const functions = {
   label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.functions', {
     defaultMessage: 'Functions',
@@ -725,2482 +718,3032 @@ export const functions = {
     }
   ),
   items: [
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.abs',
         {
           defaultMessage: 'ABS',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.abs.markdown',
             {
-              defaultMessage: `### ABS
-Returns the absolute value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-FROM employees
-| KEEP first_name, last_name, height
-| EVAL abs_height = ABS(0.0 - height)
-\`\`\`
-              `,
+  ### ABS
+  Returns the absolute value.
+
+  \`\`\`
+  ROW number = -1.0 
+  | EVAL abs_number = ABS(number)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.acosFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.acos',
         {
           defaultMessage: 'ACOS',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.acosFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.acos.markdown',
             {
-              defaultMessage: `### ACOS
-Inverse cosine trigonometric function.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=.9
-| EVAL acos=ACOS(a)
-\`\`\`
-              `,
+  ### ACOS
+  Returns the arccosine of \`n\` as an angle, expressed in radians.
+
+  \`\`\`
+  ROW a=.9
+  | EVAL acos=ACOS(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.asinFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.asin',
         {
           defaultMessage: 'ASIN',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.asinFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.asin.markdown',
             {
-              defaultMessage: `### ASIN
-Inverse sine trigonometric function.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=.9
-| EVAL asin=ASIN(a)
-\`\`\`
-              `,
+  ### ASIN
+  Returns the arcsine of the input
+  numeric expression as an angle, expressed in radians.
+
+  \`\`\`
+  ROW a=.9
+  | EVAL asin=ASIN(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atanFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan',
         {
           defaultMessage: 'ATAN',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atanFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan.markdown',
             {
-              defaultMessage: `### ATAN
-Inverse tangent trigonometric function.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=12.9
-| EVAL atan=ATAN(a)
-\`\`\`
-              `,
+  ### ATAN
+  Returns the arctangent of the input
+  numeric expression as an angle, expressed in radians.
+
+  \`\`\`
+  ROW a=12.9
+  | EVAL atan=ATAN(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan2Function',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan2',
         {
           defaultMessage: 'ATAN2',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan2Function.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan2.markdown',
             {
-              defaultMessage: `### ATAN2
-The angle between the positive x-axis and the ray from the origin to the point (x , y) in the Cartesian plane.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW y=12.9, x=.6
-| EVAL atan2=ATAN2(y, x)
-\`\`\`
-              `,
+  ### ATAN2
+  The angle between the positive x-axis and the ray from the
+  origin to the point (x , y) in the Cartesian plane, expressed in radians.
+
+  \`\`\`
+  ROW y=12.9, x=.6
+  | EVAL atan2=ATAN2(y, x)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.caseFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.bucket',
+        {
+          defaultMessage: 'BUCKET',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.bucket.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### BUCKET
+  Creates groups of values - buckets - out of a datetime or numeric input.
+  The size of the buckets can either be provided directly, or chosen based on a recommended count and values range.
+
+  \`\`\`
+  FROM employees
+  | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+  | STATS hire_date = MV_SORT(VALUES(hire_date)) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+  | SORT hire_date
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.case',
         {
           defaultMessage: 'CASE',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.caseFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.case.markdown',
             {
-              defaultMessage: `### CASE
-Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to \`true\`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-FROM employees
-| EVAL type = CASE(
-    languages <= 1, "monolingual",
-    languages <= 2, "bilingual",
-     "polyglot")
-| KEEP first_name, last_name, type
-\`\`\`
-              `,
+  ### CASE
+  Accepts pairs of conditions and values. The function returns the value that
+  belongs to the first condition that evaluates to \`true\`.
+
+  If the number of arguments is odd, the last argument is the default value which
+  is returned when no condition matches. If the number of arguments is even, and
+  no condition matches, the function returns \`null\`.
+
+  \`\`\`
+  FROM employees
+  | EVAL type = CASE(
+      languages <= 1, "monolingual",
+      languages <= 2, "bilingual",
+       "polyglot")
+  | KEEP emp_no, languages, type
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ceilFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cbrt',
+        {
+          defaultMessage: 'CBRT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cbrt.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### CBRT
+  Returns the cube root of a number. The input can be any numeric value, the return value is always a double.
+  Cube roots of infinities are null.
+
+  \`\`\`
+  ROW d = 1000.0
+  | EVAL c = cbrt(d)
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ceil',
         {
           defaultMessage: 'CEIL',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ceilFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ceil.markdown',
             {
-              defaultMessage: `### CEIL
-Round a number up to the nearest integer.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=1.8
-| EVAL a=CEIL(a)
-\`\`\`
+  ### CEIL
+  Round a number up to the nearest integer.
 
-Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to Java's \`Math.ceil\`.
-              `,
+  \`\`\`
+  ROW a=1.8
+  | EVAL a=CEIL(a)
+  \`\`\`
+  Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to Math.ceil.
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cidrMatchFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cidr_match',
         {
           defaultMessage: 'CIDR_MATCH',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cidrMatchFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cidr_match.markdown',
             {
-              defaultMessage: `### CIDR_MATCH
-Returns \`true\` if the provided IP is contained in one of the provided CIDR blocks. 
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`CIDR_MATCH\` accepts two or more arguments. The first argument is the IP address of type \`ip\` (both IPv4 and IPv6 are supported). Subsequent arguments are the CIDR blocks to test the IP against.
+  ### CIDR_MATCH
+  Returns true if the provided IP is contained in one of the provided CIDR blocks.
 
-\`\`\`
-FROM hosts
-| WHERE CIDR_MATCH(ip, "127.0.0.2/32", "127.0.0.3/32")
-\`\`\`
-              `,
+  \`\`\`
+  FROM hosts 
+  | WHERE CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32") 
+  | KEEP card, host, ip0, ip1
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coalesceFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coalesce',
         {
           defaultMessage: 'COALESCE',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coalesceFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coalesce.markdown',
             {
-              defaultMessage: `### COALESCE
-Returns the first non-null value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=null, b="b"
-| EVAL COALESCE(a, b)
-\`\`\`
-              `,
+  ### COALESCE
+  Returns the first of its arguments that is not null. If all arguments are null, it returns \`null\`.
+
+  \`\`\`
+  ROW a=null, b="b"
+  | EVAL COALESCE(a, b)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.concatFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.concat',
         {
           defaultMessage: 'CONCAT',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.concatFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.concat.markdown',
             {
-              defaultMessage: `### CONCAT
-Concatenates two or more strings.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-FROM employees
-| KEEP first_name, last_name, height
-| EVAL fullname = CONCAT(first_name, " ", last_name)
-\`\`\`
-              `,
+  ### CONCAT
+  Concatenates two or more strings.
+
+  \`\`\`
+  FROM employees
+  | KEEP first_name, last_name
+  | EVAL fullname = CONCAT(first_name, " ", last_name)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cosFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cos',
         {
           defaultMessage: 'COS',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cosFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cos.markdown',
             {
-              defaultMessage: `### COS
-Cosine trigonometric function.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=1.8
-| EVAL cos=COS(a)
-\`\`\`
-              `,
+  ### COS
+  Returns the cosine of an angle.
+
+  \`\`\`
+  ROW a=1.8 
+  | EVAL cos=COS(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coshFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cosh',
         {
           defaultMessage: 'COSH',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coshFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cosh.markdown',
             {
-              defaultMessage: `### COSH
-Cosine hyperbolic function.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=1.8
-| EVAL cosh=COSH(a)
-\`\`\`
-              `,
+  ### COSH
+  Returns the hyperbolic cosine of an angle.
+
+  \`\`\`
+  ROW a=1.8 
+  | EVAL cosh=COSH(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateDiffFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_diff',
         {
           defaultMessage: 'DATE_DIFF',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateDiffFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_diff.markdown',
             {
-              defaultMessage: `### DATE_DIFF
-Subtracts the \`startTimestamp\` from the \`endTimestamp\` and returns the difference in multiples of unit. If \`startTimestamp\` is later than the \`endTimestamp\`, negative values are returned.
-  
-\`\`\`
-ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
-| EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)
-\`\`\`
-            `,
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### DATE_DIFF
+  Subtracts the \`startTimestamp\` from the \`endTimestamp\` and returns the difference in multiples of \`unit\`.
+  If \`startTimestamp\` is later than the \`endTimestamp\`, negative values are returned.
+
+  \`\`\`
+  ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
+  | EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateExtractFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_extract',
         {
           defaultMessage: 'DATE_EXTRACT',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateExtractFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_extract.markdown',
             {
-              defaultMessage: `### DATE_EXTRACT
-Extracts parts of a date, like year, month, day, hour. The supported field types are those provided by Java's \`java.time.temporal.ChronoField\`.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06")
-| EVAL year = DATE_EXTRACT("year", date)
-\`\`\`
+  ### DATE_EXTRACT
+  Extracts parts of a date, like year, month, day, hour.
 
-For example, to find all events that occurred outside of business hours (before 9 AM or after 5 PM), on any given date:
-
-\`\`\`
-FROM sample_data
-| WHERE DATE_EXTRACT("hour_of_day", @timestamp) < 9 AND DATE_EXTRACT("hour_of_day", @timestamp) >= 17
-\`\`\`
-              `,
+  \`\`\`
+  ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06")
+  | EVAL year = DATE_EXTRACT("year", date)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateFormatFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_format',
         {
           defaultMessage: 'DATE_FORMAT',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateFormatFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_format.markdown',
             {
-              defaultMessage: `### DATE_FORMAT
-Returns a string representation of a date in the provided format. If no format is specified, the \`yyyy-MM-dd'T'HH:mm:ss.SSSZ\` format is used.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-FROM employees
-| KEEP first_name, last_name, hire_date
-| EVAL hired = DATE_FORMAT("YYYY-MM-dd", hire_date)
-\`\`\`
-              `,
+  ### DATE_FORMAT
+  Returns a string representation of a date, in the provided format.
+
+  \`\`\`
+  FROM employees
+  | KEEP first_name, last_name, hire_date
+  | EVAL hired = DATE_FORMAT("YYYY-MM-dd", hire_date)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateParseFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_parse',
         {
           defaultMessage: 'DATE_PARSE',
         }
       ),
       description: (
         <Markdown
-          readOnly
-          openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateParseFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_parse.markdown',
             {
-              defaultMessage: `### DATE_PARSE
-Returns a date by parsing the second argument using the format specified in the first argument. If no format is specified, the \`yyyy-MM-dd'T'HH:mm:ss.SSSZ\` format is used.
-Refer to [\`DateTimeFormatter\` documentation](https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/time/format/DateTimeFormatter.html) for syntax.
-\`\`\`
-ROW date_string = "2022-05-06"
-| EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
-\`\`\`
-              `,
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### DATE_PARSE
+  Returns a date by parsing the second argument using the format specified in the first argument.
+
+  \`\`\`
+  ROW date_string = "2022-05-06"
+  | EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateTruncFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_trunc',
         {
           defaultMessage: 'DATE_TRUNC',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateTruncFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_trunc.markdown',
             {
-              defaultMessage: `### DATE_TRUNC
-Rounds down a date to the closest interval.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-FROM employees
-| EVAL year_hired = DATE_TRUNC(1 year, hire_date)
-| STATS count(emp_no) BY year_hired
-| SORT year_hired
-\`\`\`
+  ### DATE_TRUNC
+  Rounds down a date to the closest interval.
 
-Intervals can be expressed using the timespan literal syntax. Timespan literals are a combination of a number and a qualifier. These qualifiers are supported:
-
-* \`millisecond\`/milliseconds
-* \`second\`/\`seconds\`
-* \`minute\`/\`minutes\`
-* \`hour\`/\`hours\`
-* \`day\`/\`days\`
-* \`week\`/\`weeks\`
-* \`month\`/\`months\`
-* \`year\`/\`years\`
-
-Timespan literals are not whitespace sensitive. These expressions are all valid:
-
-* \`1day\`
-* \`1 day\`
-* \`1      day\`
-
-Combine \`DATE_TRUNC\` with \`STATS ... BY\` to create date histograms. For example, to return the number of hires per year:
-
-\`\`\`
-FROM employees
-| EVAL year = DATE_TRUNC(1 year, hire_date)
-| STATS hires = COUNT(emp_no) BY year
-| SORT year
-\`\`\`
-              `,
+  \`\`\`
+  FROM employees
+  | KEEP first_name, last_name, hire_date
+  | EVAL year_hired = DATE_TRUNC(1 year, hire_date)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eFunction',
-        {
-          defaultMessage: 'E',
-        }
-      ),
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.e', {
+        defaultMessage: 'E',
+      }),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.e.markdown',
             {
-              defaultMessage: `### E
-Euler’s number.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW E()
-\`\`\`
-              `,
+  ### E
+  Returns Euler's number.
+
+  \`\`\`
+  ROW E()
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.endsWithFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ends_with',
         {
           defaultMessage: 'ENDS_WITH',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.endsWithFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ends_with.markdown',
             {
-              defaultMessage: `### ENDS_WITH
-Returns a boolean that indicates whether a keyword string ends with another string:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-FROM employees
-| KEEP last_name
-| EVAL ln_E = ENDS_WITH(last_name, "d")
-\`\`\`
-              `,
+  ### ENDS_WITH
+  Returns a boolean that indicates whether a keyword string ends with another string.
+
+  \`\`\`
+  FROM employees
+  | KEEP last_name
+  | EVAL ln_E = ENDS_WITH(last_name, "d")
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.floorFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.floor',
         {
           defaultMessage: 'FLOOR',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.floorFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.floor.markdown',
             {
-              defaultMessage: `### FLOOR
-Round a number down to the nearest integer.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=1.8
-| EVAL a=FLOOR(a)
-\`\`\`
+  ### FLOOR
+  Round a number down to the nearest integer.
 
-Note: this is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to Java's \`Math.floor\`.
-              `,
+  \`\`\`
+  ROW a=1.8
+  | EVAL a=FLOOR(a)
+  \`\`\`
+  Note: This is a noop for \`long\` (including unsigned) and \`integer\`.
+  For \`double\` this picks the closest \`double\` value to the integer
+  similar to Math.floor.
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.greatestFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from_base64',
+        {
+          defaultMessage: 'FROM_BASE64',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from_base64.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### FROM_BASE64
+  Decode a base64 string.
+
+  \`\`\`
+  row a = "ZWxhc3RpYw==" 
+  | eval d = from_base64(a)
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.greatest',
         {
           defaultMessage: 'GREATEST',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.greatestFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.greatest.markdown',
             {
-              defaultMessage: `### GREATEST
-Returns the maximum value from many columns. This is similar to \`MV_MAX\` except it's intended to run on multiple columns at once.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a = 10, b = 20
-| EVAL g = GREATEST(a, b);
-\`\`\`
+  ### GREATEST
+  Returns the maximum value from multiple columns. This is similar to \`MV_MAX\`
+  except it is intended to run on multiple columns at once.
 
-Note: when run on \`keyword\` or \`text\` fields, this will return the last string in alphabetical order. When run on \`boolean\` columns this will return \`true\` if any values are \`true\`.
-              `,
+  \`\`\`
+  ROW a = 10, b = 20
+  | EVAL g = GREATEST(a, b)
+  \`\`\`
+  Note: When run on \`keyword\` or \`text\` fields, this returns the last string in alphabetical order. When run on \`boolean\` columns this will return \`true\` if any values are \`true\`.
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.leastFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ip_prefix',
+        {
+          defaultMessage: 'IP_PREFIX',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ip_prefix.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### IP_PREFIX
+  Truncates an IP to a given prefix length.
+
+  \`\`\`
+  row ip4 = to_ip("1.2.3.4"), ip6 = to_ip("fe80::cae2:65ff:fece:feb9")
+  | eval ip4_prefix = ip_prefix(ip4, 24, 0), ip6_prefix = ip_prefix(ip6, 0, 112);
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.least',
         {
           defaultMessage: 'LEAST',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.leastFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.least.markdown',
             {
-              defaultMessage: `### LEAST
-Returns the minimum value from many columns. This is similar to \`MV_MIN\` except it's intended to run on multiple columns at once.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a = 10, b = 20
-| EVAL l = LEAST(a, b)
-\`\`\`
+  ### LEAST
+  Returns the minimum value from multiple columns. This is similar to \`MV_MIN\` except it is intended to run on multiple columns at once.
 
-Note: when run on \`keyword\` or \`text\` fields, this will return the first string in alphabetical order. When run on \`boolean\` columns this will return \`false\` if any values are \`false\`.
-              `,
+  \`\`\`
+  ROW a = 10, b = 20
+  | EVAL l = LEAST(a, b)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.leftFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.left',
         {
           defaultMessage: 'LEFT',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.leftFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.left.markdown',
             {
-              defaultMessage: `### LEFT
-Return the substring that extracts \`length\` chars from the \`string\`, starting from the left.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-FROM employees
-| KEEP last_name
-| EVAL left = LEFT(last_name, 3)
-| SORT last_name ASC
-| LIMIT 5
-\`\`\`
-              `,
+  ### LEFT
+  Returns the substring that extracts 'length' chars from 'string' starting from the left.
+
+  \`\`\`
+  FROM employees
+  | KEEP last_name
+  | EVAL left = LEFT(last_name, 3)
+  | SORT last_name ASC
+  | LIMIT 5
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.lengthFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.length',
         {
           defaultMessage: 'LENGTH',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.lengthFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.length.markdown',
             {
-              defaultMessage: `### LENGTH
-Returns the character length of a string.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-FROM employees
-| KEEP first_name, last_name, height
-| EVAL fn_length = LENGTH(first_name)
-\`\`\`
-              `,
+  ### LENGTH
+  Returns the character length of a string.
+
+  \`\`\`
+  FROM employees
+  | KEEP first_name, last_name
+  | EVAL fn_length = LENGTH(first_name)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log10Function',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.locate',
+        {
+          defaultMessage: 'LOCATE',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.locate.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### LOCATE
+  Returns an integer that indicates the position of a keyword substring within another string
+
+  \`\`\`
+  row a = "hello"
+  | eval a_ll = locate(a, "ll")
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log',
+        {
+          defaultMessage: 'LOG',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### LOG
+  Returns the logarithm of a value to a base. The input can be any numeric value, the return value is always a double.
+
+  Logs of zero, negative numbers, and base of one return \`null\` as well as a warning.
+
+  \`\`\`
+  ROW base = 2.0, value = 8.0
+  | EVAL s = LOG(base, value)
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log10',
         {
           defaultMessage: 'LOG10',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log10Function.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log10.markdown',
             {
-              defaultMessage: `### LOG10
-Returns the log base 10. The input can be any numeric value, the return value is always a double.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-Logs of negative numbers are NaN. Logs of infinites are infinite, as is the log of 0.
+  ### LOG10
+  Returns the logarithm of a value to base 10. The input can be any numeric value, the return value is always a double.
 
-\`\`\`
-ROW d = 1000.0
-| EVAL s = LOG10(d)
-\`\`\`
-              `,
+  Logs of 0 and negative numbers return \`null\` as well as a warning.
+
+  \`\`\`
+  ROW d = 1000.0 
+  | EVAL s = LOG10(d)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ltrimunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ltrim',
         {
           defaultMessage: 'LTRIM',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ltrimFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ltrim.markdown',
             {
-              defaultMessage: `### LTRIM
-Removes leading whitespaces from strings.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW message = "   some text  ",  color = " red "
-| EVAL message = LTRIM(message)
-| EVAL color = LTRIM(color)
-| EVAL message = CONCAT("'", message, "'")
-| EVAL color = CONCAT("'", color, "'")
-\`\`\`
-              `,
+  ### LTRIM
+  Removes leading whitespaces from a string.
+
+  \`\`\`
+  ROW message = "   some text  ",  color = " red "
+  | EVAL message = LTRIM(message)
+  | EVAL color = LTRIM(color)
+  | EVAL message = CONCAT("'", message, "'")
+  | EVAL color = CONCAT("'", color, "'")
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvAvgFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_append',
+        {
+          defaultMessage: 'MV_APPEND',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_append.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### MV_APPEND
+  Concatenates values of two multi-value fields.
+
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_avg',
         {
           defaultMessage: 'MV_AVG',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvAvgFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_avg.markdown',
             {
-              defaultMessage: `### MV_AVG
-Converts a multivalued field into a single valued field containing the average of all of the values. For example:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=[3, 5, 1, 6]
-| EVAL avg_a = MV_AVG(a)
-\`\`\`
+  ### MV_AVG
+  Converts a multivalued field into a single valued field containing the average of all of the values.
 
-Returning:
-
-\`\`\`
-[3, 5, 1, 6] | 3.75
-\`\`\`
-
-NOTE: The output type is always a double and the input type can be any number.
-              `,
+  \`\`\`
+  ROW a=[3, 5, 1, 6]
+  | EVAL avg_a = MV_AVG(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvConcatFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_concat',
         {
           defaultMessage: 'MV_CONCAT',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvConcatFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_concat.markdown',
             {
-              defaultMessage: `### MV_CONCAT
-Converts a multivalued string field into a single valued field containing the concatenation of all values separated by a delimiter:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=["foo", "zoo", "bar"]
-| EVAL j = MV_CONCAT(a, ", ")
-\`\`\`
+  ### MV_CONCAT
+  Converts a multivalued string expression into a single valued column containing the concatenation of all values separated by a delimiter.
 
-Returning:
-
-\`\`\`
-["foo", "zoo", "bar"] | "foo, zoo, bar"
-\`\`\`
-
-If you want to join non-string fields call \`TO_STRING\` on them first:
-
-\`\`\`
-ROW a=[10, 9, 8]
-| EVAL j = MV_CONCAT(TO_STRING(a), ", ")
-\`\`\`
-
-Returning:
-
-\`\`\`
-[10, 9, 8] | "10, 9, 8"
-\`\`\`
-              `,
+  \`\`\`
+  ROW a=["foo", "zoo", "bar"]
+  | EVAL j = MV_CONCAT(a, ", ")
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvCountFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_count',
         {
           defaultMessage: 'MV_COUNT',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvCountFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_count.markdown',
             {
-              defaultMessage: `### MV_COUNT
-Converts a multivalued field into a single valued field containing a count of the number of values:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=["foo", "zoo", "bar"]
-| EVAL count_a = MV_COUNT(a)
-\`\`\`
+  ### MV_COUNT
+  Converts a multivalued expression into a single valued column containing a count of the number of values.
 
-Returning:
-
-\`\`\`
-["foo", "zoo", "bar"] | 3
-\`\`\`
-
-NOTE: This function accepts all types and always returns an integer.
-              `,
+  \`\`\`
+  ROW a=["foo", "zoo", "bar"]
+  | EVAL count_a = MV_COUNT(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvDedupeFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_dedupe',
         {
           defaultMessage: 'MV_DEDUPE',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvDedupeFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_dedupe.markdown',
             {
-              defaultMessage: `### MV_DEDUPE
-Removes duplicates from a multivalued field. For example:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=["foo", "foo", "bar", "foo"]
-| EVAL dedupe_a = MV_DEDUPE(a)
-\`\`\`
+  ### MV_DEDUPE
+  Remove duplicate values from a multivalued field.
 
-Returning:
-
-\`\`\`
-["foo", "foo", "bar", "foo"] | ["foo", "bar"]
-\`\`\`
-
-NOTE: \`MV_DEDUPE\` may, but won’t always, sort the values in the field.
-              `,
+  \`\`\`
+  ROW a=["foo", "foo", "bar", "foo"]
+  | EVAL dedupe_a = MV_DEDUPE(a)
+  \`\`\`
+  Note: \`MV_DEDUPE\` may, but won't always, sort the values in the column.
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvFirstFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_first',
         {
           defaultMessage: 'MV_FIRST',
         }
       ),
       description: (
         <Markdown
-          readOnly
-          openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvFirstFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_first.markdown',
             {
-              defaultMessage: `### MV_FIRST
-Converts a multivalued field into a single valued field containing the first value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-For example:
+  ### MV_FIRST
+  Converts a multivalued expression into a single valued column containing the
+  first value. This is most useful when reading from a function that emits
+  multivalued columns in a known order like \`SPLIT\`.
 
-\`\`\`
-ROW a="foo;bar;baz" 
-| EVAL first_a = MV_FIRST(SPLIT(a, ";"))
-\`\`\`
+  The order that  multivalued fields are read from
+  underlying storage is not guaranteed. It is *frequently* ascending, but don't
+  rely on that. If you need the minimum value use \`MV_MIN\` instead of
+  \`MV_FIRST\`. \`MV_MIN\` has optimizations for sorted values so there isn't a
+  performance benefit to \`MV_FIRST\`.
 
-Returning:
-
-\`\`\`
-foo;bar;baz | foo
-\`\`\`
-
-The order that [multivalued fields](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql-multivalued-fields.html) are read from underlying storage is not guaranteed. It is frequently ascending, but don’t rely on that. If you need the minimum field value use \`MV_MIN\` instead of \`MV_FIRST\`. \`MV_MIN\` has optimizations for sorted values so there isn’t a performance benefit to \`MV_FIRST\`. \`MV_FIRST\` is mostly useful with functions that create multivalued fields like \`SPLIT\`.
-            `,
+  \`\`\`
+  ROW a="foo;bar;baz"
+  | EVAL first_a = MV_FIRST(SPLIT(a, ";"))
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_last',
         {
           defaultMessage: 'MV_LAST',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_last.markdown',
             {
-              defaultMessage: `### MV_LAST
-Converts a multivalued field into a single valued field containing the last value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`:
-  
-\`\`\`
-ROW a="foo;bar;baz" 
-| EVAL first_a = MV_LAST(SPLIT(a, ";"))
-\`\`\`
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-Returning:
+  ### MV_LAST
+  Converts a multivalue expression into a single valued column containing the last
+  value. This is most useful when reading from a function that emits multivalued
+  columns in a known order like \`SPLIT\`.
 
-\`\`\`
-foo;bar;baz | baz
-\`\`\`
-            `,
+  The order that  multivalued fields are read from
+  underlying storage is not guaranteed. It is *frequently* ascending, but don't
+  rely on that. If you need the maximum value use \`MV_MAX\` instead of
+  \`MV_LAST\`. \`MV_MAX\` has optimizations for sorted values so there isn't a
+  performance benefit to \`MV_LAST\`.
+
+  \`\`\`
+  ROW a="foo;bar;baz"
+  | EVAL last_a = MV_LAST(SPLIT(a, ";"))
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMaxFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_max',
         {
           defaultMessage: 'MV_MAX',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMaxFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_max.markdown',
             {
-              defaultMessage: `### MV_MAX
-Converts a multivalued field into a single valued field containing the maximum value. For example:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=[3, 5, 1]
-| EVAL max_a = MV_MAX(a)
-\`\`\`
+  ### MV_MAX
+  Converts a multivalued expression into a single valued column containing the maximum value.
 
-Returning:
-
-\`\`\`
-[3, 5, 1] | 5
-\`\`\`
-
-It can be used by any field type, including \`keyword\` fields. In that case picks the last string, comparing their utf-8 representation byte by byte:
-
-\`\`\`
-ROW a=["foo", "zoo", "bar"]
-| EVAL max_a = MV_MAX(a)
-\`\`\`
-
-Returning:
-
-\`\`\`
-["foo", "zoo", "bar"] | "zoo"
-\`\`\`
-              `,
+  \`\`\`
+  ROW a=[3, 5, 1]
+  | EVAL max_a = MV_MAX(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMedianFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_median',
         {
           defaultMessage: 'MV_MEDIAN',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMedianFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_median.markdown',
             {
-              defaultMessage: `### MV_MEDIAN
-Converts a multivalued field into a single valued field containing the median value. For example:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=[3, 5, 1]
-| EVAL median_a = MV_MEDIAN(a)
-\`\`\`
+  ### MV_MEDIAN
+  Converts a multivalued field into a single valued field containing the median value.
 
-Returning:
-
-\`\`\`
-[3, 5, 1] | 3
-\`\`\`
-
-It can be used by any numeric field type and returns a value of the same type. If the row has an even number of values for a column the result will be the average of the middle two entries. If the field is not floating point then the average rounds **down**:
-
-\`\`\`
-ROW a=[3, 7, 1, 6]
-| EVAL median_a = MV_MEDIAN(a)
-\`\`\`
-
-Returning:
-
-\`\`\`
-[3, 7, 1, 6] | 4
-\`\`\`
-              `,
+  \`\`\`
+  ROW a=[3, 5, 1]
+  | EVAL median_a = MV_MEDIAN(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMinFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_min',
         {
           defaultMessage: 'MV_MIN',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMinFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_min.markdown',
             {
-              defaultMessage: `### MV_MIN
-Converts a multivalued field into a single valued field containing the minimum value. For example:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=[2, 1]
-| EVAL min_a = MV_MIN(a)
-\`\`\`
+  ### MV_MIN
+  Converts a multivalued expression into a single valued column containing the minimum value.
 
-Returning:
-
-\`\`\`
-[2, 1] | 1
-\`\`\`
-
-It can be used by any field type, including \`keyword\` fields. In that case picks the last string, comparing their utf-8 representation byte by byte:
-
-\`\`\`
-ROW a=["foo", "bar"]
-| EVAL min_a = MV_MIN(a)
-\`\`\`
-
-Returning:
-
-\`\`\`
-["foo", "bar"] | "bar"
-\`\`\`
-              `,
+  \`\`\`
+  ROW a=[2, 1]
+  | EVAL min_a = MV_MIN(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSortFunction',
-        {
-          defaultMessage: 'MV_SORT',
-        }
-      ),
-      description: (
-        <Markdown
-          readOnly
-          markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSortFunction.markdown',
-            {
-              defaultMessage: `### MV_SORT
-Sorts a multivalue expression in lexicographical order.
-
-Example:
-
-\`\`\`
-ROW a = [4, 2, -3, 2]
-| EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")
-\`\`\`
-
-
-Valid order options are \`ASC\` and \`DESC\`, default is \`ASC\`.
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSliceFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_slice',
         {
           defaultMessage: 'MV_SLICE',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSliceFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_slice.markdown',
             {
-              defaultMessage: `### MV_SLICE
-Returns a subset of the multivalued field using the start and end index values.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
+  ### MV_SLICE
+  Returns a subset of the multivalued field using the start and end index values.
 
-Example:
-
-\`\`\`
-ROW a = [1, 2, 2, 3]
-| EVAL a1 = MV_SLICE(a, 1), a2 = MV_SLICE(a, 2, 3)
-\`\`\`
-
-              `,
+  \`\`\`
+  row a = [1, 2, 2, 3]
+  | eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSumFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_sort',
+        {
+          defaultMessage: 'MV_SORT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_sort.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### MV_SORT
+  Sorts a multivalued field in lexicographical order.
+
+  \`\`\`
+  ROW a = [4, 2, -3, 2]
+  | EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_sum',
         {
           defaultMessage: 'MV_SUM',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSumFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_sum.markdown',
             {
-              defaultMessage: `### MV_SUM
-Converts a multivalued field into a single valued field containing the sum of all of the values. For example:
-\`\`\`
-ROW a=[3, 5, 6]
-| EVAL sum_a = MV_SUM(a)
-\`\`\`
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-Returning:
+  ### MV_SUM
+  Converts a multivalued field into a single valued field containing the sum of all of the values.
 
-\`\`\`
-[3, 5, 6] | 14
-\`\`\`
-
-NOTE: The input type can be any number and the output type is the same as the input type.
-              `,
+  \`\`\`
+  ROW a=[3, 5, 6]
+  | EVAL sum_a = MV_SUM(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvZipFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_zip',
         {
           defaultMessage: 'MV_ZIP',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvZipFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_zip.markdown',
             {
-              defaultMessage: `### MV_ZIP
-Combines the values from two multivalued fields with a delimiter that joins them together.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
+  ### MV_ZIP
+  Combines the values from two multivalued fields with a delimiter that joins them together.
 
-Example:
-
-\`\`\`
-ROW a = ["x", "y", "z"], b = ["1", "2"]
-| EVAL c = mv_zip(a, b, "-")
-| KEEP a, b, c
-\`\`\`
-
-Specifying a delimiter is optional. If omitted, the default delimiter \`,\` is used.
-
-
-              `,
+  \`\`\`
+  ROW a = ["x", "y", "z"], b = ["1", "2"]
+  | EVAL c = mv_zip(a, b, "-")
+  | KEEP a, b, c
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.nowFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.now',
         {
           defaultMessage: 'NOW',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.nowFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.now.markdown',
             {
-              defaultMessage: `### NOW
-Returns current date and time.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW current_date = NOW()
-\`\`\`
-              `,
+  ### NOW
+  Returns current date and time.
+
+  \`\`\`
+  ROW current_date = NOW()
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.piFunction',
-        {
-          defaultMessage: 'PI',
-        }
-      ),
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.pi', {
+        defaultMessage: 'PI',
+      }),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.piFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.pi.markdown',
             {
-              defaultMessage: `### PI
-The ratio of a circle's circumference to its diameter.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW PI()
-\`\`\`
-              `,
+  ### PI
+  Returns Pi, the ratio of a circle's circumference to its diameter.
+
+  \`\`\`
+  ROW PI()
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.powFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.pow',
         {
           defaultMessage: 'POW',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.powFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.pow.markdown',
             {
-              defaultMessage: `### POW
-Returns the value of a base (first argument) raised to the power of an exponent (second argument). Both arguments must be numeric. The output is always a double. Note that it is still possible to overflow a double result here; in that case, \`null\` will be returned.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW base = 2.0, exponent = 2.0 
-| EVAL s = POW(base, exponent)
-\`\`\`
+  ### POW
+  Returns the value of \`base\` raised to the power of \`exponent\`.
 
-#### Fractional exponents
-
-The exponent can be a fraction, which is similar to performing a root. For example, the exponent of 0.5 will give the square root of the base:
-
-\`\`\`
-ROW base = 4, exponent = 0.5
-| EVAL s = POW(base, exponent)
-\`\`\`
-              `,
+  \`\`\`
+  ROW base = 2.0, exponent = 2
+  | EVAL result = POW(base, exponent)
+  \`\`\`
+  Note: It is still possible to overflow a double result here; in that case, null will be returned.
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rightFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.repeat',
+        {
+          defaultMessage: 'REPEAT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.repeat.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### REPEAT
+  Returns a string constructed by concatenating \`string\` with itself the specified \`number\` of times.
+
+  \`\`\`
+  ROW a = "Hello!"
+  | EVAL triple_a = REPEAT(a, 3);
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.replace',
+        {
+          defaultMessage: 'REPLACE',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.replace.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### REPLACE
+  The function substitutes in the string \`str\` any match of the regular expression \`regex\`
+  with the replacement string \`newStr\`.
+
+  \`\`\`
+  ROW str = "Hello World"
+  | EVAL str = REPLACE(str, "World", "Universe")
+  | KEEP str
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.right',
         {
           defaultMessage: 'RIGHT',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rightFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.right.markdown',
             {
-              defaultMessage: `### RIGHT
-Return the substring that extracts \`length\` chars from the string starting from the \`right\`.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-FROM employees
-| KEEP last_name
-| EVAL right = RIGHT(last_name, 3)
-| SORT last_name ASC
-| LIMIT 5
-\`\`\`
-              `,
+  ### RIGHT
+  Return the substring that extracts 'length' chars from 'str' starting from the right.
+
+  \`\`\`
+  FROM employees
+  | KEEP last_name
+  | EVAL right = RIGHT(last_name, 3)
+  | SORT last_name ASC
+  | LIMIT 5
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.roundFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.round',
         {
           defaultMessage: 'ROUND',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.roundFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.round.markdown',
             {
-              defaultMessage: `### ROUND
-Rounds a number to the closest number with the specified number of digits. Defaults to 0 digits if no number of digits is provided. If the specified number of digits is negative, rounds to the number of digits left of the decimal point.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-FROM employees
-| KEEP first_name, last_name, height
-| EVAL height = ROUND(height * 3.281, 1)
-\`\`\`
-              `,
+  ### ROUND
+  Rounds a number to the specified number of decimal places.
+  Defaults to 0, which returns the nearest integer. If the
+  precision is a negative number, rounds to the number of digits left
+  of the decimal point.
+
+  \`\`\`
+  FROM employees
+  | KEEP first_name, last_name, height
+  | EVAL height_ft = ROUND(height * 3.281, 1)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rtrimFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rtrim',
         {
           defaultMessage: 'RTRIM',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rtrimFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rtrim.markdown',
             {
-              defaultMessage: `### RTRIM
-Removes trailing whitespaces from strings.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW message = "   some text  ",  color = " red "
-| EVAL message = RTRIM(message)
-| EVAL color = RTRIM(color)
-| EVAL message = CONCAT("'", message, "'")
-| EVAL color = CONCAT("'", color, "'")
-\`\`\`
-              `,
+  ### RTRIM
+  Removes trailing whitespaces from a string.
+
+  \`\`\`
+  ROW message = "   some text  ",  color = " red "
+  | EVAL message = RTRIM(message)
+  | EVAL color = RTRIM(color)
+  | EVAL message = CONCAT("'", message, "'")
+  | EVAL color = CONCAT("'", color, "'")
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.signumFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.signum',
         {
           defaultMessage: 'SIGNUM',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.signumFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.signum.markdown',
             {
-              defaultMessage: `### SIGNUM
-Returns the sign of the given number. Returns \`-1\` for negative numbers, \`0\` for \`0\` and \`1\` for positive numbers.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-Example:
+  ### SIGNUM
+  Returns the sign of the given number.
+  It returns \`-1\` for negative numbers, \`0\` for \`0\` and \`1\` for positive numbers.
 
-\`\`\`
-ROW d = 100.0
-| EVAL s = SIGNUM(d)
-\`\`\`
-              `,
+  \`\`\`
+  ROW d = 100.0
+  | EVAL s = SIGNUM(d)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sin',
         {
           defaultMessage: 'SIN',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sin.markdown',
             {
-              defaultMessage: `### SIN
-Sine trigonometric function.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=1.8
-| EVAL sin=SIN(a)
-\`\`\`
-              `,
+  ### SIN
+  Returns ths Sine trigonometric function of an angle.
+
+  \`\`\`
+  ROW a=1.8 
+  | EVAL sin=SIN(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinhFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinh',
         {
           defaultMessage: 'SINH',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinhFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinh.markdown',
             {
-              defaultMessage: `### SINH
-Sine hyperbolic function.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=1.8
-| EVAL sinh=SINH(a)
-\`\`\`
-              `,
+  ### SINH
+  Returns the hyperbolic sine of an angle.
+
+  \`\`\`
+  ROW a=1.8 
+  | EVAL sinh=SINH(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.splitFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.split',
         {
           defaultMessage: 'SPLIT',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.splitFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.split.markdown',
             {
-              defaultMessage: `### SPLIT
-Splits a single valued string into multiple strings. For example:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW words="foo;bar;baz;qux;quux;corge"
-| EVAL word = SPLIT(words, ";")
-\`\`\`
+  ### SPLIT
+  Split a single valued string into multiple strings.
 
-Which splits \`"foo;bar;baz;qux;quux;corge"\` on \`;\` and returns an array:
-
-\`\`\`
-foo;bar;baz;qux;quux;corge | [foo,bar,baz,qux,quux,corge]
-\`\`\`
-
-NOTE: Only single byte delimiters are currently supported.
-              `,
+  \`\`\`
+  ROW words="foo;bar;baz;qux;quux;corge"
+  | EVAL word = SPLIT(words, ";")
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sqrtFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sqrt',
         {
           defaultMessage: 'SQRT',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sqrtFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sqrt.markdown',
             {
-              defaultMessage: `### SQRT
-Returns the square root of a number. The input can be any numeric value, the return value is always a double.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-Square roots of negative numbers are NaN. Square roots of infinites are infinite.
+  ### SQRT
+  Returns the square root of a number. The input can be any numeric value, the return value is always a double.
+  Square roots of negative numbers and infinities are null.
 
-\`\`\`
-ROW d = 100.0
-| EVAL s = SQRT(d)
-\`\`\`
-              `,
+  \`\`\`
+  ROW d = 100.0
+  | EVAL s = SQRT(d)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.startsWithFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_contains',
+        {
+          defaultMessage: 'ST_CONTAINS',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_contains.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### ST_CONTAINS
+  Returns whether the first geometry contains the second geometry.
+  This is the inverse of the \`ST_WITHIN\` function.
+
+  \`\`\`
+  FROM airport_city_boundaries
+  | WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE("POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))"))
+  | KEEP abbrev, airport, region, city, city_location
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_disjoint',
+        {
+          defaultMessage: 'ST_DISJOINT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_disjoint.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### ST_DISJOINT
+  Returns whether the two geometries or geometry columns are disjoint.
+  This is the inverse of the \`ST_INTERSECTS\` function.
+  In mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅
+
+  \`\`\`
+  FROM airport_city_boundaries
+  | WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((-10 -60, 120 -60, 120 60, -10 60, -10 -60))"))
+  | KEEP abbrev, airport, region, city, city_location
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_intersects',
+        {
+          defaultMessage: 'ST_INTERSECTS',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_intersects.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### ST_INTERSECTS
+  Returns true if two geometries intersect.
+  They intersect if they have any point in common, including their interior points
+  (points along lines or within polygons).
+  This is the inverse of the \`ST_DISJOINT\` function.
+  In mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅
+
+  \`\`\`
+  FROM airports
+  | WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_within',
+        {
+          defaultMessage: 'ST_WITHIN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_within.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### ST_WITHIN
+  Returns whether the first geometry is within the second geometry.
+  This is the inverse of the \`ST_CONTAINS\` function.
+
+  \`\`\`
+  FROM airport_city_boundaries
+  | WHERE ST_WITHIN(city_boundary, TO_GEOSHAPE("POLYGON((109.1 18.15, 109.6 18.15, 109.6 18.65, 109.1 18.65, 109.1 18.15))"))
+  | KEEP abbrev, airport, region, city, city_location
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_x',
+        {
+          defaultMessage: 'ST_X',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_x.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### ST_X
+  Extracts the \`x\` coordinate from the supplied point.
+  If the points is of type \`geo_point\` this is equivalent to extracting the \`longitude\` value.
+
+  \`\`\`
+  ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
+  | EVAL x =  ST_X(point), y = ST_Y(point)
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_y',
+        {
+          defaultMessage: 'ST_Y',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_y.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### ST_Y
+  Extracts the \`y\` coordinate from the supplied point.
+  If the points is of type \`geo_point\` this is equivalent to extracting the \`latitude\` value.
+
+  \`\`\`
+  ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
+  | EVAL x =  ST_X(point), y = ST_Y(point)
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.starts_with',
         {
           defaultMessage: 'STARTS_WITH',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.startsWithFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.starts_with.markdown',
             {
-              defaultMessage: `### STARTS_WITH
-Returns a boolean that indicates whether a keyword string starts with another string:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-FROM employees
-| KEEP first_name, last_name, height
-| EVAL ln_S = STARTS_WITH(last_name, "S")
-\`\`\`
-              `,
+  ### STARTS_WITH
+  Returns a boolean that indicates whether a keyword string starts with another string.
+
+  \`\`\`
+  FROM employees
+  | KEEP last_name
+  | EVAL ln_S = STARTS_WITH(last_name, "B")
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.substringFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.substring',
         {
           defaultMessage: 'SUBSTRING',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.substringFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.substring.markdown',
             {
-              defaultMessage: `### SUBSTRING
-Returns a substring of a string, specified by a start position and an optional length. This example returns the first three characters of every last name:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-FROM employees
-| KEEP last_name
-| EVAL ln_sub = SUBSTRING(last_name, 1, 3)
-\`\`\`
+  ### SUBSTRING
+  Returns a substring of a string, specified by a start position and an optional length
 
-A negative start position is interpreted as being relative to the end of the string. This example returns the last three characters of of every last name:
-
-\`\`\`
-FROM employees
-| KEEP last_name
-| EVAL ln_sub = SUBSTRING(last_name, -3, 3)
-\`\`\`
-
-If length is omitted, substring returns the remainder of the string. This example returns all characters except for the first:
-
-\`\`\`
-FROM employees
-| KEEP last_name
-| EVAL ln_sub = SUBSTRING(last_name, 2)
-\`\`\`
-              `,
+  \`\`\`
+  FROM employees
+  | KEEP last_name
+  | EVAL ln_sub = SUBSTRING(last_name, 1, 3)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tan',
         {
           defaultMessage: 'TAN',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tan.markdown',
             {
-              defaultMessage: `### TAN
-Tangent trigonometric function.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=1.8
-| EVAL tan=TAN(a)
-\`\`\`
-              `,
+  ### TAN
+  Returns the Tangent trigonometric function of an angle.
+
+  \`\`\`
+  ROW a=1.8 
+  | EVAL tan=TAN(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanhFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanh',
         {
           defaultMessage: 'TANH',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanhFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanh.markdown',
             {
-              defaultMessage: `### TANH
-Tangent hyperbolic function.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=1.8
-| EVAL tanh=TANH(a)
-\`\`\`
-              `,
+  ### TANH
+  Returns the Tangent hyperbolic function of an angle.
+
+  \`\`\`
+  ROW a=1.8 
+  | EVAL tanh=TANH(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tauFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tau',
         {
           defaultMessage: 'TAU',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tauFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tau.markdown',
             {
-              defaultMessage: `### TAU
-The ratio of a circle's circumference to its radius.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW TAU()
-\`\`\`
-              `,
+  ### TAU
+  Returns the ratio of a circle's circumference to its radius.
+
+  \`\`\`
+  ROW TAU()
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toBooleanFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_base64',
+        {
+          defaultMessage: 'TO_BASE64',
+        }
+      ),
+      description: (
+        <Markdown
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_base64.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### TO_BASE64
+  Encode a string to a base64 string.
+
+  \`\`\`
+  row a = "elastic" 
+  | eval e = to_base64(a)
+  \`\`\`
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_boolean',
         {
           defaultMessage: 'TO_BOOLEAN',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toBooleanFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_boolean.markdown',
             {
-              defaultMessage: `### TO_BOOLEAN
-Converts an input value to a boolean value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression. The input type must be of a string or numeric type.
+  ### TO_BOOLEAN
+  Converts an input value to a boolean value.
+  A string value of *true* will be case-insensitive converted to the Boolean *true*.
+  For anything else, including the empty string, the function will return *false*.
+  The numerical value of *0* will be converted to *false*, anything else will be converted to *true*.
 
-A string value of **"true"** will be case-insensitive converted to the Boolean **true**. For anything else, including the empty string, the function will return **false**. For example:
-
-\`\`\`
-ROW str = ["true", "TRuE", "false", "", "yes", "1"]
-| EVAL bool = TO_BOOLEAN(str)
-\`\`\`
-
-Returning:
-
-\`\`\`
-["true", "TRuE", "false", "", "yes", "1"] | [true, true, false, false, false, false]
-\`\`\`
-
-The numerical value of **0** will be converted to **false**, anything else will be converted to **true**.
-
-Alias: TO_BOOL
-              `,
+  \`\`\`
+  ROW str = ["true", "TRuE", "false", "", "yes", "1"]
+  | EVAL bool = TO_BOOLEAN(str)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianpointFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_cartesianpoint',
         {
           defaultMessage: 'TO_CARTESIANPOINT',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianpointFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_cartesianpoint.markdown',
             {
-              defaultMessage: `### TO_CARTESIANPOINT
-Converts an input value to a \`point\` value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression. The input type must be a string or a cartesian point.
+  ### TO_CARTESIANPOINT
+  Converts an input value to a \`cartesian_point\` value.
+  A string will only be successfully converted if it respects WKT Point format.
 
-A string will only be successfully converted if it respects the [WKT Point](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format:
-
-\`\`\`
-ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
-| MV_EXPAND wkt
-| EVAL pt = TO_CARTESIANPOINT(wkt)
-\`\`\`
-              `,
+  \`\`\`
+  ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
+  | MV_EXPAND wkt
+  | EVAL pt = TO_CARTESIANPOINT(wkt)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianShapeFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_cartesianshape',
         {
           defaultMessage: 'TO_CARTESIANSHAPE',
         }
       ),
       description: (
         <Markdown
-          readOnly
-          openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianShapeFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_cartesianshape.markdown',
             {
-              defaultMessage: `### TO_CARTESIANSHAPE
-Converts an input value to a \`cartesian_shape\` value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression. The input type must be a string or a \`cartesian_shape\`.
-              
-A string will only be successfully converted if it respects the [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format:
-    
-For example:
-    
-\`\`\`
-ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]
-| MV_EXPAND wkt
-| EVAL geom = TO_CARTESIANSHAPE(wkt)
-\`\`\`
-                        `,
+  ### TO_CARTESIANSHAPE
+  Converts an input value to a \`cartesian_shape\` value.
+  A string will only be successfully converted if it respects WKT format.
+
+  \`\`\`
+  ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]
+  | MV_EXPAND wkt
+  | EVAL geom = TO_CARTESIANSHAPE(wkt)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDatetimeFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_datetime',
         {
           defaultMessage: 'TO_DATETIME',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDatetimeFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_datetime.markdown',
             {
-              defaultMessage: `### TO_DATETIME
-Converts an input value to a date value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression. The input type must be of a string or numeric type.
+  ### TO_DATETIME
+  Converts an input value to a date value.
+  A string will only be successfully converted if it's respecting the format \`yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\`.
+  To convert dates in other formats, use \`DATE_PARSE\`.
 
-A string will only be successfully converted if it’s respecting the format \`yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\`. For example:
-
-\`\`\`
-ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"]
-| EVAL datetime = TO_DATETIME(string)
-\`\`\`
-
-Returning:
-
-\`\`\`
-["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"] | [1953-09-02T00:00:00.000Z, 1964-06-02T00:00:00.000Z]
-\`\`\`
-
-Note that in this example, the last value in the source multi-valued field has not been converted. The reason being that if the date format is not respected, the conversion will result in a **null** value.
-
-If the input parameter is of a numeric type, its value will be interpreted as milliseconds since the Unix epoch. For example:
-
-\`\`\`
-ROW int = [0, 1]
-| EVAL dt = TO_DATETIME(int)
-\`\`\`
-
-Returning:
-
-\`\`\`
-[0, 1] | [1970-01-01T00:00:00.000Z, 1970-01-01T00:00:00.001Z]
-\`\`\`
-
-Alias: TO_DT
-              `,
+  \`\`\`
+  ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"]
+  | EVAL datetime = TO_DATETIME(string)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDegreesFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_degrees',
         {
           defaultMessage: 'TO_DEGREES',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDegreesFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_degrees.markdown',
             {
-              defaultMessage: `### TO_DEGREES
-Converts a number in radians to degrees.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression. The input type must be of a numeric type and result is always \`double\`.
+  ### TO_DEGREES
+  Converts a number in radians to degrees.
 
-\`\`\`
-ROW rad = [1.57, 3.14, 4.71]
-| EVAL deg = TO_DEGREES(rad)
-\`\`\`
-              `,
+  \`\`\`
+  ROW rad = [1.57, 3.14, 4.71]
+  | EVAL deg = TO_DEGREES(rad)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDoubleFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_double',
         {
           defaultMessage: 'TO_DOUBLE',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDoubleFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_double.markdown',
             {
-              defaultMessage: `### TO_DOUBLE
-Converts an input value to a double value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression. The input type must be of a boolean, date, string or numeric type.
+  ### TO_DOUBLE
+  Converts an input value to a double value. If the input parameter is of a date type,
+  its value will be interpreted as milliseconds since the Unix epoch,
+  converted to double. Boolean *true* will be converted to double *1.0*, *false* to *0.0*.
 
-Example:
-
-\`\`\`
-ROW str1 = "5.20128E11", str2 = "foo"
-| EVAL dbl = TO_DOUBLE("520128000000"), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)
-\`\`\`
-
-Returning:
-
-\`\`\`
-5.20128E11 | foo | 5.20128E11 | 5.20128E11 | null
-\`\`\`
-
-Note that in this example, the last conversion of the string isn’t possible. When this happens, the result is a **null** value.
-
-If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to double.
-
-Boolean **true** will be converted to double **1.0**, **false** to **0.0**.
-
-Alias: TO_DBL
-              `,
+  \`\`\`
+  ROW str1 = "5.20128E11", str2 = "foo"
+  | EVAL dbl = TO_DOUBLE("520128000000"), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeopointFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_geopoint',
         {
           defaultMessage: 'TO_GEOPOINT',
         }
       ),
       description: (
         <Markdown
-          readOnly
-          openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeopointFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_geopoint.markdown',
             {
-              defaultMessage: `### TO_GEOPOINT
-Converts an input value to a \`geo_point\` value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression. The input type must be a string or a \`geo_point\`.
+  ### TO_GEOPOINT
+  Converts an input value to a \`geo_point\` value.
+  A string will only be successfully converted if it respects WKT Point format.
 
-A string will only be successfully converted if it respects the [WKT Point](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format:
-
-\`\`\`
-ROW wkt = "POINT(42.97109630194 14.7552534413725)"
-| EVAL pt = TO_GEOPOINT(wkt)
-\`\`\`
-              `,
+  \`\`\`
+  ROW wkt = "POINT(42.97109630194 14.7552534413725)"
+  | EVAL pt = TO_GEOPOINT(wkt)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeoshapeFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_geoshape',
         {
           defaultMessage: 'TO_GEOSHAPE',
         }
       ),
       description: (
         <Markdown
-          readOnly
-          openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeoshapeFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_geoshape.markdown',
             {
-              defaultMessage: `### TO_GEOSHAPE
-Converts an input value to a \`geo_shape\` value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression. The input type must be a string or a \`geo_shape\`.
+  ### TO_GEOSHAPE
+  Converts an input value to a \`geo_shape\` value.
+  A string will only be successfully converted if it respects WKT format.
 
-A string will only be successfully converted if it respects the [WKT format](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry).
-
-For example:
-
-\`\`\`
-ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
-| EVAL geom = TO_GEOSHAPE(wkt)
-\`\`\`
-
-Returning:
-
-\`\`\`
-POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10)) | POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))
-\`\`\`
-              `,
+  \`\`\`
+  ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
+  | EVAL geom = TO_GEOSHAPE(wkt)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toIntegerFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_integer',
         {
           defaultMessage: 'TO_INTEGER',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toIntegerFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_integer.markdown',
             {
-              defaultMessage: `### TO_INTEGER
-Converts an input value to an integer value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression. The input type must be of a boolean, date, string or numeric type.
+  ### TO_INTEGER
+  Converts an input value to an integer value.
+  If the input parameter is of a date type, its value will be interpreted as milliseconds
+  since the Unix epoch, converted to integer.
+  Boolean *true* will be converted to integer *1*, *false* to *0*.
 
-Example:
-
-\`\`\`
-ROW long = [5013792, 2147483647, 501379200000]
-| EVAL int = TO_INTEGER(long)
-\`\`\`
-
-Returning:
-
-\`\`\`
-[5013792, 2147483647, 501379200000] | [5013792, 2147483647]
-\`\`\`
-
-Note that in this example, the last value of the multi-valued field cannot be converted as an integer. When this happens, the result is a **null** value.
-
-If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to integer.
-
-Boolean **true** will be converted to integer **1**, **false** to **0**.
-
-Alias: TO_INT
-              `,
+  \`\`\`
+  ROW long = [5013792, 2147483647, 501379200000]
+  | EVAL int = TO_INTEGER(long)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toIpFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_ip',
         {
           defaultMessage: 'TO_IP',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toIpFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_ip.markdown',
             {
-              defaultMessage: `### TO_IP
-Converts an input string to an IP value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression.
+  ### TO_IP
+  Converts an input string to an IP value.
 
-Example:
-
-\`\`\`
-ROW str1 = "1.1.1.1", str2 = "foo"
-| EVAL ip1 = TO_IP(str1), ip2 = TO_IP(str2)
-| WHERE CIDR_MATCH(ip1, "1.0.0.0/8")
-\`\`\`
-
-Returning:
-
-\`\`\`
-1.1.1.1 | foo | 1.1.1.1 | null
-\`\`\`
-
-Note that in the example above the last conversion of the string isn’t possible. When this happens, the result is a **null** value.
-              `,
+  \`\`\`
+  ROW str1 = "1.1.1.1", str2 = "foo"
+  | EVAL ip1 = TO_IP(str1), ip2 = TO_IP(str2)
+  | WHERE CIDR_MATCH(ip1, "1.0.0.0/8")
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toLongFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_long',
         {
           defaultMessage: 'TO_LONG',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toLongFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_long.markdown',
             {
-              defaultMessage: `### TO_LONG
-Converts an input value to an long value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression. The input type must be of a boolean, date, string or numeric type.
+  ### TO_LONG
+  Converts an input value to a long value. If the input parameter is of a date type,
+  its value will be interpreted as milliseconds since the Unix epoch, converted to long.
+  Boolean *true* will be converted to long *1*, *false* to *0*.
 
-Example:
-
-\`\`\`
-ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
-| EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2), long3 = TO_LONG(str3)
-\`\`\`
-
-Returning:
-
-\`\`\`
-2147483648 | 2147483648.2 | foo | 2147483648 | 2147483648 | null
-\`\`\`
-
-Note that in this example, the last conversion of the string isn't possible. When this happens, the result is a **null** value. 
-
-If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to integer.
-
-Boolean \`true\` will be converted to long \`1\`, \`false\` to \`0\`.
-              `,
+  \`\`\`
+  ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
+  | EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2), long3 = TO_LONG(str3)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toLowerFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_lower',
         {
           defaultMessage: 'TO_LOWER',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toLowerFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_lower.markdown',
             {
-              defaultMessage: `### TO_LOWER
-Returns a new string representing the input string converted to lower case.
-For example:
-    
-\`\`\`
-ROW message = "Some Text" 
-| EVAL message_lower = TO_LOWER(message)
-\`\`\`
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-Returning:
+  ### TO_LOWER
+  Returns a new string representing the input string converted to lower case.
 
-\`\`\`
-Some Text | some text
-\`\`\`
-              `,
+  \`\`\`
+  ROW message = "Some Text"
+  | EVAL message_lower = TO_LOWER(message)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toRadiansFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_radians',
         {
           defaultMessage: 'TO_RADIANS',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toRadiansFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_radians.markdown',
             {
-              defaultMessage: `### TO_RADIANS
-Converts a number in degrees to radians.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression. The input type must be of a numeric type and result is always \`double\`.
+  ### TO_RADIANS
+  Converts a number in degrees to radians.
 
-\`\`\`
-ROW deg = [90.0, 180.0, 270.0]
-| EVAL rad = TO_RADIANS(deg)
-\`\`\`
-              `,
+  \`\`\`
+  ROW deg = [90.0, 180.0, 270.0]
+  | EVAL rad = TO_RADIANS(deg)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toStringFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_string',
         {
           defaultMessage: 'TO_STRING',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toStringFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_string.markdown',
             {
-              defaultMessage: `### TO_STRING
-Converts a field into a string. For example:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW a=10
-| EVAL j = TO_STRING(a)
-\`\`\`
+  ### TO_STRING
+  Converts an input value into a string.
 
-It also works fine on multivalued fields:
-
-\`\`\`
-ROW a=[10, 9, 8]
-| EVAL j = TO_STRING(a)
-\`\`\`
-              `,
+  \`\`\`
+  ROW a=10
+  | EVAL j = TO_STRING(a)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUnsignedLongFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_unsigned_long',
         {
           defaultMessage: 'TO_UNSIGNED_LONG',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUnsignedLongFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_unsigned_long.markdown',
             {
-              defaultMessage: `### TO_UNSIGNED_LONG
-Converts an input value to an unsigned long value.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-The input can be a single- or multi-valued field or an expression. The input type must be of a boolean, date, string or numeric type.
+  ### TO_UNSIGNED_LONG
+  Converts an input value to an unsigned long value. If the input parameter is of a date type,
+  its value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long.
+  Boolean *true* will be converted to unsigned long *1*, *false* to *0*.
 
-\`\`\`
-ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
-| EVAL long1 = TO_UNSIGNED_LONG(str1), long2 = TO_ULONG(str2), long3 = TO_UL(str3)
-\`\`\`
-
-Note that in this example, the last conversion of the string isn't possible. When this happens, the result is a **null** value. In this case a Warning header is added to the response. The header will provide information on the source of the failure:
-
-\`\`\`
-"Line 1:133: evaluation of [TO_UL(str3)] failed, treating result as null. Only first 20 failures recorded."
-\`\`\`
-
-A following header will contain the failure reason and the offending value:
-
-\`\`\`
-"java.lang.NumberFormatException: Character f is neither a decimal digit number, decimal point, nor \"e\" notation exponential mark."
-\`\`\`
-
-If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long.
-
-Boolean \`true\` will be converted to unsigned long \`1\`, \`false\` to \`0\`.
-
-Alias: TO_ULONG, TO_UL
-              `,
+  \`\`\`
+  ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
+  | EVAL long1 = TO_UNSIGNED_LONG(str1), long2 = TO_ULONG(str2), long3 = TO_UL(str3)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUpperFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_upper',
         {
           defaultMessage: 'TO_UPPER',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUpperFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_upper.markdown',
             {
-              defaultMessage: `### TO_UPPER
-Returns a new string representing the input string converted to upper case.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-For example:
+  ### TO_UPPER
+  Returns a new string representing the input string converted to upper case.
 
-\`\`\`
-ROW message = "Some Text" 
-| EVAL message_upper = TO_UPPER(message)
-\`\`\`
-
-Returning:
-
-\`\`\`
-Some Text | SOME TEXT
-\`\`\`
-              `,
+  \`\`\`
+  ROW message = "Some Text"
+  | EVAL message_upper = TO_UPPER(message)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toVersionFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_version',
         {
           defaultMessage: 'TO_VERSION',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toVersionFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_version.markdown',
             {
-              defaultMessage: `### TO_VERSION
-Converts an input string to a version value. For example:
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW v = TO_VERSION("1.2.3")
-\`\`\`
+  ### TO_VERSION
+  Converts an input string to a version value.
 
-Returning:
-
-\`\`\`
-1.2.3
-\`\`\`
-
-Alias: TO_VER
-              `,
+  \`\`\`
+  ROW v = TO_VERSION("1.2.3")
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
       ),
     },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.trimFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.trim',
         {
           defaultMessage: 'TRIM',
         }
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.trimFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.trim.markdown',
             {
-              defaultMessage: `### TRIM
-Removes leading and trailing whitespaces from strings.
+              defaultMessage: `<!--
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
 
-\`\`\`
-ROW message = "   some text  ",  color = " red "
-| EVAL message = TRIM(message)
-| EVAL color = TRIM(color)
-\`\`\`
-              `,
+  ### TRIM
+  Removes leading and trailing whitespaces from a string.
+
+  \`\`\`
+  ROW message = "   some text  ",  color = " red "
+  | EVAL message = TRIM(message)
+  | EVAL color = TRIM(color)
+  \`\`\`
+  `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3229,7 +3772,6 @@ export const aggregationFunctions = {
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.avgFunction.markdown',
             {
@@ -3264,7 +3806,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.countFunction.markdown',
             {
@@ -3309,7 +3850,6 @@ ROW words="foo;bar;baz;qux;quux;foo"
       ),
       description: (
         <Markdown
-          readOnly
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.countDistinctFunction.markdown',
@@ -3352,7 +3892,6 @@ ROW words="foo;bar;baz;qux;quux;foo"
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.maxFunction.markdown',
             {
@@ -3387,7 +3926,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.medianFunction.markdown',
@@ -3429,7 +3967,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.medianAbsoluteDeviationFunction.markdown',
             {
@@ -3469,7 +4006,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.minFunction.markdown',
             {
@@ -3504,7 +4040,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.percentileFunction.markdown',
@@ -3546,7 +4081,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stCentroidFunction.markdown',
             {
@@ -3576,7 +4110,6 @@ FROM airports
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sumFunction.markdown',
             {
@@ -3611,7 +4144,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.valuesFunction.markdown',
@@ -3667,7 +4199,6 @@ export const groupingFunctions = {
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction.markdown',
             {
@@ -3784,224 +4315,6 @@ FROM employees
   ],
 };
 
-export const spatialFunctions = {
-  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.spatialFunctions', {
-    defaultMessage: 'Spatial functions',
-  }),
-  description: i18n.translate(
-    'textBasedEditor.query.textBasedLanguagesEditor.spatialFunctionsDocumentationESQLDescription',
-    {
-      defaultMessage: `ES|QL supports these spatial functions:`,
-    }
-  ),
-  items: [
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stcontainsFunction',
-        {
-          defaultMessage: 'ST_CONTAINS',
-        }
-      ),
-      description: (
-        <Markdown
-          readOnly
-          markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stcontainsFunction.markdown',
-            {
-              defaultMessage: `### ST_CONTAINS
-
-**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
-
-Returns whether the first geometry contains the second geometry.
-This is the inverse of the \`ST_WITHIN\` function.
-
-Example:
-
-\`\`\`
-FROM airport_city_boundaries
-| WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE("POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))"))
-| KEEP abbrev, airport, region, city, city_location
-\`\`\`
-            `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stdisjointFunction',
-        {
-          defaultMessage: 'ST_DISJOINT',
-        }
-      ),
-      description: (
-        <Markdown
-          readOnly
-          markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stdisjointFunction.markdown',
-            {
-              defaultMessage: `### ST_DISJOINT
-**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
-
-Returns whether the two geometries or geometry columns are disjoint.
-
-This is the inverse of the \`ST_INTERSECTS\` function.
-
-Example:
-
-\`\`\`
-FROM airport_city_boundaries
-| WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((-10 -60, 120 -60, 120 60, -10 60, -10 -60))"))
-| KEEP abbrev, airport, region, city, city_location
-\`\`\`
-            `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stintersectsFunction',
-        {
-          defaultMessage: 'ST_INTERSECTS',
-        }
-      ),
-      description: (
-        <Markdown
-          readOnly
-          markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stintersectsFunction.markdown',
-            {
-              defaultMessage: `### ST_INTERSECTS
-
-
-**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
-
-Returns true if two geometries intersect. They intersect if they have any point in common, including their interior points (points along lines or within polygons). This is the inverse of the \`ST_DISJOINT\` function. 
-
-Example:
-
-\`\`\`
-FROM airports
-| WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))
-\`\`\`
-
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stwithinFunction',
-        {
-          defaultMessage: 'ST_WITHIN',
-        }
-      ),
-      description: (
-        <Markdown
-          readOnly
-          markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stwithinFunction.markdown',
-            {
-              defaultMessage: `### ST_WITHIN
-**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
-
-Returns whether the first geometry is within the second geometry.
-This is the inverse of the \`ST_CONTAINS\` function.
-
-Example:
-
-\`\`\`
-FROM airport_city_boundaries
-| WHERE ST_WITHIN(city_boundary, TO_GEOSHAPE("POLYGON((109.1 18.15, 109.6 18.15, 109.6 18.65, 109.1 18.65, 109.1 18.15))"))
-| KEEP abbrev, airport, region, city, city_location
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stxFunction',
-        {
-          defaultMessage: 'ST_X',
-        }
-      ),
-      description: (
-        <Markdown
-          readOnly
-          markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stxFunction.markdown',
-            {
-              defaultMessage: `### ST_X
-**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
-
-
-Extracts the \`x\` coordinate from the supplied point. If the point is of type \`geo_point\` this is equivalent to extracting the \`longitude\` value.
-
-Example:
-
-\`\`\`
-ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
-| EVAL x =  ST_X(point), y = ST_Y(point)
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.styFunction',
-        {
-          defaultMessage: 'ST_Y',
-        }
-      ),
-      description: (
-        <Markdown
-          readOnly
-          markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.styFunction.markdown',
-            {
-              defaultMessage: `### ST_Y
-**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
-
-Extracts the \`y\` coordinate from the supplied point. If the point is of type \`geo_point\` this is equivalent to extracting the \`latitude\` value.
-
-Example:
-
-\`\`\`
-ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
-| EVAL x =  ST_X(point), y = ST_Y(point)
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-  ],
-};
-
 export const operators = {
   label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.operators', {
     defaultMessage: 'Operators',
@@ -4022,7 +4335,6 @@ export const operators = {
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.binaryOperators.markdown',
             {
@@ -4057,7 +4369,6 @@ These binary comparison operators are supported:
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.booleanOperators.markdown',
             {
@@ -4084,7 +4395,6 @@ The following boolean operators are supported:
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.inOperator.markdown',
             {
@@ -4112,7 +4422,6 @@ ROW a = 1, b = 4, c = 3
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stringOperators.markdown',
             {
@@ -4154,7 +4463,6 @@ FROM employees
       ),
       description: (
         <Markdown
-          readOnly
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.predicates.markdown',
             {

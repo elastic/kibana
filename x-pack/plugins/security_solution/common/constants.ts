@@ -168,9 +168,6 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
-export const ENABLE_EXPANDABLE_FLYOUT_SETTING = 'securitySolution:enableExpandableFlyout' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;

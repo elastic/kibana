@@ -219,6 +219,7 @@ describe('getSavedSearchAttributeService', () => {
             "getSearchRequestBody": [MockFunction],
             "getSerializedFields": [MockFunction],
             "history": Array [],
+            "loadDataViewFields": [MockFunction],
             "onRequestStart": [MockFunction],
             "parseActiveIndexPatternFromQueryString": [MockFunction],
             "removeField": [MockFunction],

@@ -45,3 +45,26 @@ jest.doMock('https', () => {
     createServer: createHttpsServerMock,
   };
 });
+
+export const createHttp2SecureServerMock = jest.fn(() => {
+  return {
+    on: jest.fn(),
+    setTimeout: jest.fn(),
+  };
+});
+
+export const createHttp2UnsecureServerMock = jest.fn(() => {
+  return {
+    on: jest.fn(),
+    setTimeout: jest.fn(),
+  };
+});
+
+jest.doMock('http2', () => {
+  const actual = jest.requireActual('https');
+  return {
+    ...actual,
+    createServer: createHttp2UnsecureServerMock,
+    createSecureServer: createHttp2SecureServerMock,
+  };
+});

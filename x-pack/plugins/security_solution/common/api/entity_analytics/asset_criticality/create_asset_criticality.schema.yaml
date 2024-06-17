@@ -12,6 +12,8 @@ servers:
 paths:
   /internal/asset_criticality:
     post:
+      x-labels: [ess, serverless]
+      x-internal: true
       operationId: AssetCriticalityCreateRecord
       summary: Create Criticality Record
       requestBody:

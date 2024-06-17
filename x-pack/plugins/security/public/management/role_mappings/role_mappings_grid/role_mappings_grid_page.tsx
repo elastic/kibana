@@ -388,7 +388,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             }),
             description: (record: RoleMapping) =>
               i18n.translate('xpack.security.management.roleMappings.actionCloneAriaLabel', {
-                defaultMessage: `Clone '{name}'`,
+                defaultMessage: `Clone ''{name}''`,
                 values: { name: record.name },
               }),
             href: (record: RoleMapping) =>
@@ -408,7 +408,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             }),
             description: (record: RoleMapping) =>
               i18n.translate('xpack.security.management.roleMappings.actionDeleteAriaLabel', {
-                defaultMessage: `Delete '{name}'`,
+                defaultMessage: `Delete ''{name}''`,
                 values: { name: record.name },
               }),
             'data-test-subj': (record: RoleMapping) => `deleteRoleMappingButton-${record.name}`,
@@ -424,7 +424,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             }),
             description: (record: RoleMapping) =>
               i18n.translate('xpack.security.management.roleMappings.actionEditAriaLabel', {
-                defaultMessage: `Edit '{name}'`,
+                defaultMessage: `Edit ''{name}''`,
                 values: { name: record.name },
               }),
             'data-test-subj': (record: RoleMapping) => `editRoleMappingButton-${record.name}`,

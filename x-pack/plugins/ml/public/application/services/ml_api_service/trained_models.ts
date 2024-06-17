@@ -25,6 +25,7 @@ import type {
   TrainedModelStat,
   NodesOverviewResponse,
   MemoryUsageInfo,
+  ModelDownloadState,
 } from '../../../../common/types/trained_models';
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
@@ -285,6 +286,14 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       return httpService.http<estypes.MlPutTrainedModelResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/install_elastic_trained_model/${modelId}`,
         method: 'POST',
+        version: '1',
+      });
+    },
+
+    getModelsDownloadStatus() {
+      return httpService.http<Record<string, ModelDownloadState>>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_status`,
+        method: 'GET',
         version: '1',
       });
     },

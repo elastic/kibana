@@ -66,14 +66,14 @@ export const saveFollowerIndex = (name, followerIndex, isUpdating = false) =>
         ? i18n.translate(
             'xpack.crossClusterReplication.followerIndex.updateAction.successNotificationTitle',
             {
-              defaultMessage: `Follower index '{name}' updated successfully`,
+              defaultMessage: `Follower index ''{name}'' updated successfully`,
               values: { name },
             }
           )
         : i18n.translate(
             'xpack.crossClusterReplication.followerIndex.addAction.successNotificationTitle',
             {
-              defaultMessage: `Added follower index '{name}'`,
+              defaultMessage: `Added follower index ''{name}''`,
               values: { name },
             }
           );
@@ -109,7 +109,7 @@ export const pauseFollowerIndex = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.followerIndex.pauseAction.errorSingleNotificationTitle',
               {
-                defaultMessage: `Error pausing follower index '{name}'`,
+                defaultMessage: `Error pausing follower index ''{name}''`,
                 values: { name: response.errors[0].id },
               }
             );
@@ -131,7 +131,7 @@ export const pauseFollowerIndex = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.followerIndex.pauseAction.successSingleNotificationTitle',
               {
-                defaultMessage: `Follower index '{name}' was paused`,
+                defaultMessage: `Follower index ''{name}'' was paused`,
                 values: { name: response.itemsPaused[0] },
               }
             );
@@ -168,7 +168,7 @@ export const resumeFollowerIndex = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.followerIndex.resumeAction.errorSingleNotificationTitle',
               {
-                defaultMessage: `Error resuming follower index '{name}'`,
+                defaultMessage: `Error resuming follower index ''{name}''`,
                 values: { name: response.errors[0].id },
               }
             );
@@ -190,7 +190,7 @@ export const resumeFollowerIndex = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.followerIndex.resumeAction.successSingleNotificationTitle',
               {
-                defaultMessage: `Follower index '{name}' was resumed`,
+                defaultMessage: `Follower index ''{name}'' was resumed`,
                 values: { name: response.itemsResumed[0] },
               }
             );
@@ -227,7 +227,7 @@ export const unfollowLeaderIndex = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.followerIndex.unfollowAction.errorSingleNotificationTitle',
               {
-                defaultMessage: `Error unfollowing leader index of follower index '{name}'`,
+                defaultMessage: `Error unfollowing leader index of follower index ''{name}''`,
                 values: { name: response.errors[0].id },
               }
             );
@@ -249,7 +249,7 @@ export const unfollowLeaderIndex = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.followerIndex.unfollowAction.successSingleNotificationTitle',
               {
-                defaultMessage: `Leader index of follower index '{name}' was unfollowed`,
+                defaultMessage: `Leader index of follower index ''{name}'' was unfollowed`,
                 values: { name: response.itemsUnfollowed[0] },
               }
             );
@@ -271,7 +271,7 @@ export const unfollowLeaderIndex = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.followerIndex.unfollowAction.notOpenWarningSingleNotificationTitle',
               {
-                defaultMessage: `Index '{name}' could not be re-opened`,
+                defaultMessage: `Index ''{name}'' could not be re-opened`,
                 values: { name: response.itemsNotOpen[0] },
               }
             );
