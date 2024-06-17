@@ -42,10 +42,7 @@ export const createDatasetQuality = ({
 
     return (
       <DatasetQualityContext.Provider value={datasetQualityProviderValue}>
-        <SummaryPanelProvider
-          dataStreamStatsClient={dataStreamStatsClient}
-          toasts={core.notifications.toasts}
-        >
+        <SummaryPanelProvider>
           <KibanaContextProviderForPlugin>
             <DatasetQuality />
           </KibanaContextProviderForPlugin>
@@ -56,6 +53,8 @@ export const createDatasetQuality = ({
 };
 
 const Header = dynamic(() => import('./header'));
+const Warnings = dynamic(() => import('./warnings/warnings'));
+const EmptyStateWrapper = dynamic(() => import('./empty_state/empty_state'));
 const Table = dynamic(() => import('./table/table'));
 const Filters = dynamic(() => import('./filters/filters'));
 const SummaryPanel = dynamic(() => import('./summary_panel/summary_panel'));
@@ -67,14 +66,20 @@ function DatasetQuality() {
         <Header />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <Filters />
+        <Warnings />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SummaryPanel />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <Table />
-      </EuiFlexItem>
+
+      <EmptyStateWrapper>
+        <EuiFlexItem grow={false}>
+          <Filters />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SummaryPanel />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <Table />
+        </EuiFlexItem>
+      </EmptyStateWrapper>
     </EuiFlexGroup>
   );
 }

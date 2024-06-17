@@ -21,7 +21,7 @@ export const finalizeAlertsMigration = async ({
   supertest,
   log,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   log: ToolingLog;
   migrationIds: string[];
 }): Promise<FinalizeMigrationResponse[]> => {

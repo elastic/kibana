@@ -445,37 +445,6 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Container.lastSavedState",
-            "type": "Object",
-            "tags": [],
-            "label": "lastSavedState",
-            "description": [],
-            "signature": [
-              "Subject",
-              "<void>"
-            ],
-            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.Container.getLastSavedStateForChild",
-            "type": "Function",
-            "tags": [],
-            "label": "getLastSavedStateForChild",
-            "description": [],
-            "signature": [
-              "() => undefined"
-            ],
-            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "embeddable",
             "id": "def-public.Container.Unnamed",
             "type": "Function",
             "tags": [],
@@ -658,6 +627,22 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Container.getPanelCount",
+            "type": "Function",
+            "tags": [],
+            "label": "getPanelCount",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -4261,10 +4246,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.onPhaseChange",
+            "id": "def-public.Embeddable.phase$",
             "type": "Object",
             "tags": [],
-            "label": "onPhaseChange",
+            "label": "phase$",
             "description": [],
             "signature": [
               "{ source: ",
@@ -7968,19 +7953,45 @@
         "parentPluginId": "embeddable",
         "id": "def-public.EmbeddablePanel",
         "type": "Function",
-        "tags": [],
-        "label": "EmbeddablePanel",
-        "description": [
-          "\nLoads and renders a legacy embeddable.\n\nAncestry chain must use 'key' attribute to reset DOM and state when embeddable changes\nFor example <Parent key={embeddableId}><EmbeddablePanel/></Parent>"
+        "tags": [
+          "deprecated"
         ],
+        "label": "EmbeddablePanel",
+        "description": [],
         "signature": [
           "(props: ",
           "EmbeddablePanelProps",
           ") => JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/embeddable_panel/embeddable_panel.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/component/grid/dashboard_grid_item.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/component/grid/dashboard_grid_item.tsx"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "embeddable",
@@ -8171,39 +8182,6 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.getReactEmbeddableSavedObjects",
-        "type": "Function",
-        "tags": [],
-        "label": "getReactEmbeddableSavedObjects",
-        "description": [],
-        "signature": [
-          "<TSavedObjectAttributes extends ",
-          {
-            "pluginId": "savedObjectsFinder",
-            "scope": "common",
-            "docId": "kibSavedObjectsFinderPluginApi",
-            "section": "def-common.FinderAttributes",
-            "text": "FinderAttributes"
-          },
-          ">() => IterableIterator<[string, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ReactEmbeddableSavedObject",
-            "text": "ReactEmbeddableSavedObject"
-          },
-          "<TSavedObjectAttributes>]>"
-        ],
-        "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -8962,7 +8940,7 @@
           "\nRenders a component from the React Embeddable registry into a Presentation Panel.\n\nTODO: Rename this to simply `Embeddable` when the legacy Embeddable system is removed."
         ],
         "signature": [
-          "<StateType extends object = object, ApiType extends ",
+          "<SerializedState extends object = object, Api extends ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -8970,7 +8948,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<StateType> = ",
+          "<SerializedState, SerializedState> = ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -8978,15 +8956,23 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<StateType>>({ maybeId, type, state, parentApi, onApiAvailable, panelProps, onAnyStateChange, hidePanelChrome, }: { maybeId?: string | undefined; type: string; state: ",
+          "<SerializedState, SerializedState>, RuntimeState extends object = SerializedState, ParentApi extends ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.SerializedPanelState",
-            "text": "SerializedPanelState"
+            "section": "def-common.HasSerializedChildState",
+            "text": "HasSerializedChildState"
           },
-          "<StateType>; parentApi?: unknown; onApiAvailable?: ((api: ApiType) => void) | undefined; panelProps?: Pick<",
+          "<SerializedState> = ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.HasSerializedChildState",
+            "text": "HasSerializedChildState"
+          },
+          "<SerializedState>>({ type, maybeId, getParentApi, panelProps, onAnyStateChange, onApiAvailable, hidePanelChrome, }: { type: string; maybeId?: string | undefined; getParentApi: () => ParentApi; onApiAvailable?: ((api: Api) => void) | undefined; panelProps?: Pick<",
           {
             "pluginId": "presentationPanel",
             "scope": "public",
@@ -8994,7 +8980,7 @@
             "section": "def-public.PresentationPanelProps",
             "text": "PresentationPanelProps"
           },
-          "<ApiType, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined; hidePanelChrome?: boolean | undefined; onAnyStateChange?: ((state: ",
+          "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined; hidePanelChrome?: boolean | undefined; onAnyStateChange?: ((state: ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
@@ -9002,7 +8988,7 @@
             "section": "def-common.SerializedPanelState",
             "text": "SerializedPanelState"
           },
-          "<StateType>) => void) | undefined; }) => JSX.Element"
+          "<SerializedState>) => void) | undefined; }) => JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
         "deprecated": false,
@@ -9013,12 +8999,23 @@
             "id": "def-public.ReactEmbeddableRenderer.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  maybeId,\n  type,\n  state,\n  parentApi,\n  onApiAvailable,\n  panelProps,\n  onAnyStateChange,\n  hidePanelChrome,\n}",
+            "label": "{\n  type,\n  maybeId,\n  getParentApi,\n  panelProps,\n  onAnyStateChange,\n  onApiAvailable,\n  hidePanelChrome,\n}",
             "description": [],
             "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableRenderer.$1.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
               {
                 "parentPluginId": "embeddable",
                 "id": "def-public.ReactEmbeddableRenderer.$1.maybeId",
@@ -9035,49 +9032,19 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.ReactEmbeddableRenderer.$1.type",
-                "type": "string",
+                "id": "def-public.ReactEmbeddableRenderer.$1.getParentApi",
+                "type": "Function",
                 "tags": [],
-                "label": "type",
-                "description": [],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.ReactEmbeddableRenderer.$1.state",
-                "type": "Object",
-                "tags": [],
-                "label": "state",
+                "label": "getParentApi",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
-                    "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.SerializedPanelState",
-                    "text": "SerializedPanelState"
-                  },
-                  "<StateType>"
+                  "() => ParentApi"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.ReactEmbeddableRenderer.$1.parentApi",
-                "type": "Unknown",
-                "tags": [],
-                "label": "parentApi",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
-                "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
               },
               {
                 "parentPluginId": "embeddable",
@@ -9087,7 +9054,7 @@
                 "label": "onApiAvailable",
                 "description": [],
                 "signature": [
-                  "((api: ApiType) => void) | undefined"
+                  "((api: Api) => void) | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
@@ -9101,7 +9068,7 @@
                     "label": "api",
                     "description": [],
                     "signature": [
-                      "ApiType"
+                      "Api"
                     ],
                     "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                     "deprecated": false,
@@ -9127,7 +9094,7 @@
                     "section": "def-public.PresentationPanelProps",
                     "text": "PresentationPanelProps"
                   },
-                  "<ApiType, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined"
+                  "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
@@ -9165,7 +9132,7 @@
                     "section": "def-common.SerializedPanelState",
                     "text": "SerializedPanelState"
                   },
-                  "<StateType>) => void) | undefined"
+                  "<SerializedState>) => void) | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
@@ -9186,7 +9153,7 @@
                         "section": "def-common.SerializedPanelState",
                         "text": "SerializedPanelState"
                       },
-                      "<StateType>"
+                      "<SerializedState>"
                     ],
                     "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                     "deprecated": false,
@@ -9374,119 +9341,6 @@
               "() => TFilterableEmbeddableInput"
             ],
             "path": "src/plugins/embeddable/public/lib/filterable_embeddable/should_fetch.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.startTrackingEmbeddableUnsavedChanges",
-        "type": "Function",
-        "tags": [],
-        "label": "startTrackingEmbeddableUnsavedChanges",
-        "description": [],
-        "signature": [
-          "<SerializedState extends object = object, RuntimeState extends object = object>(uuid: string, parentApi: unknown, comparators: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.StateComparators",
-            "text": "StateComparators"
-          },
-          "<RuntimeState>, deserializeState: (state: ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<SerializedState>) => RuntimeState) => { unsavedChanges: ",
-          "BehaviorSubject",
-          "<object | undefined>; resetUnsavedChanges: () => void; cleanup: () => void; } | { unsavedChanges: ",
-          "BehaviorSubject",
-          "<Partial<RuntimeState> | undefined>; resetUnsavedChanges: () => void; cleanup: () => void; }"
-        ],
-        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.startTrackingEmbeddableUnsavedChanges.$1",
-            "type": "string",
-            "tags": [],
-            "label": "uuid",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.startTrackingEmbeddableUnsavedChanges.$2",
-            "type": "Unknown",
-            "tags": [],
-            "label": "parentApi",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.startTrackingEmbeddableUnsavedChanges.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "comparators",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.StateComparators",
-                "text": "StateComparators"
-              },
-              "<RuntimeState>"
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.startTrackingEmbeddableUnsavedChanges.$4",
-            "type": "Function",
-            "tags": [],
-            "label": "deserializeState",
-            "description": [],
-            "signature": [
-              "(state: ",
-              {
-                "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<SerializedState>) => RuntimeState"
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -9807,7 +9661,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<SerializedState> extends ",
+          "<SerializedState, RuntimeState> extends ",
           "DefaultPresentationPanelApi",
           ",",
           {
@@ -9818,6 +9672,14 @@
             "text": "HasType"
           },
           "<string>,",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPhaseEvents",
+            "text": "PublishesPhaseEvents"
+          },
+          ",",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -9833,7 +9695,15 @@
             "section": "def-common.HasSerializableState",
             "text": "HasSerializableState"
           },
-          "<SerializedState>"
+          "<SerializedState>,",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.HasSnapshottableState",
+            "text": "HasSnapshottableState"
+          },
+          "<RuntimeState>"
         ],
         "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
         "deprecated": false,
@@ -10916,6 +10786,29 @@
             "description": [],
             "signature": [
               "{ width?: number | undefined; height?: number | undefined; } | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePackageState.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [
+              "\nCopy dashboard panel transfers serialized panel state for React embeddables.\nThe rawState will be passed into the input and references are passed separately\nso the container can update its references array and the updated references\nare correctly passed to the factory's deserialize method.\n\nLegacy embeddables have already injected the references\ninto the input state, so they will not pass references."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.Reference",
+                "text": "Reference"
+              },
+              "[] | undefined"
             ],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
@@ -12920,7 +12813,7 @@
             "section": "def-public.ReactEmbeddableFactory",
             "text": "ReactEmbeddableFactory"
           },
-          "<SerializedState, ApiType, RuntimeState>"
+          "<SerializedState, Api, RuntimeState>"
         ],
         "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
         "deprecated": false,
@@ -12946,10 +12839,10 @@
             "tags": [],
             "label": "deserializeState",
             "description": [
-              "\nA required synchronous function that transforms serialized state into runtime state.\nThis will be used twice - once for the parent state, and once for the last saved state\nfor comparison.\n\nThis can also be used to:\n\n- Inject references provided by the parent\n- Migrate the state to a newer version (this must be undone when serializing)"
+              "\nA required asynchronous function that transforms serialized state into runtime state.\n\nThis could be used to:\n- Load state from some external store\n- Inject references provided by the parent\n- Migrate the state to a newer version (this must be undone when serializing)"
             ],
             "signature": [
-              "(state: ",
+              "(panelState: ",
               {
                 "pluginId": "@kbn/presentation-containers",
                 "scope": "common",
@@ -12957,7 +12850,15 @@
                 "section": "def-common.SerializedPanelState",
                 "text": "SerializedPanelState"
               },
-              "<SerializedState>) => RuntimeState"
+              "<SerializedState>) => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<RuntimeState>"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
@@ -12968,7 +12869,7 @@
                 "id": "def-public.ReactEmbeddableFactory.deserializeState.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "state",
+                "label": "panelState",
                 "description": [],
                 "signature": [
                   {
@@ -12999,8 +12900,8 @@
             ],
             "signature": [
               "(initialState: RuntimeState, buildApi: (apiRegistration: ",
-              "ReactEmbeddableApiRegistration",
-              "<SerializedState, ApiType>, comparators: ",
+              "BuildReactEmbeddableApiRegistration",
+              "<SerializedState, Api>, comparators: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -13008,7 +12909,9 @@
                 "section": "def-common.StateComparators",
                 "text": "StateComparators"
               },
-              "<RuntimeState>) => ApiType, uuid: string, parentApi?: unknown) => Promise<{ Component: React.FC<{}>; api: ApiType; }>"
+              "<RuntimeState>) => Api, uuid: string, parentApi: unknown, setApi: (api: ",
+              "SetReactEmbeddableApiRegistration",
+              "<SerializedState, Api>) => Api) => Promise<{ Component: React.FC<{}>; api: Api; }>"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
@@ -13038,8 +12941,8 @@
                 "description": [],
                 "signature": [
                   "(apiRegistration: ",
-                  "ReactEmbeddableApiRegistration",
-                  "<SerializedState, ApiType>, comparators: ",
+                  "BuildReactEmbeddableApiRegistration",
+                  "<SerializedState, Api>, comparators: ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "common",
@@ -13047,7 +12950,7 @@
                     "section": "def-common.StateComparators",
                     "text": "StateComparators"
                   },
-                  "<RuntimeState>) => ApiType"
+                  "<RuntimeState>) => Api"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
@@ -13078,6 +12981,23 @@
                 "description": [],
                 "signature": [
                   "unknown"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableFactory.buildEmbeddable.$5",
+                "type": "Function",
+                "tags": [],
+                "label": "setApi",
+                "description": [],
+                "signature": [
+                  "(api: ",
+                  "SetReactEmbeddableApiRegistration",
+                  "<SerializedState, Api>) => Api"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
@@ -13621,38 +13541,6 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.ReactEmbeddableRegistration",
-        "type": "Type",
-        "tags": [],
-        "label": "ReactEmbeddableRegistration",
-        "description": [],
-        "signature": [
-          "(ref: React.ForwardedRef<ApiType>) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
-        ],
-        "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.ReactEmbeddableRegistration.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ref",
-            "description": [],
-            "signature": [
-              "((instance: ApiType | null) => void) | React.MutableRefObject<ApiType | null> | null"
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
         "id": "def-public.ReactEmbeddableSavedObject",
         "type": "Type",
         "tags": [],
@@ -14039,7 +13927,9 @@
           "type": "Function",
           "tags": [],
           "label": "registerReactEmbeddableSavedObject",
-          "description": [],
+          "description": [
+            "\nRegister an embeddable API saved object with the Add from library flyout.\n"
+          ],
           "signature": [
             "<TSavedObjectAttributes extends ",
             {
@@ -14128,15 +14018,31 @@
           "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableSetup.registerSavedObjectToPanelMethod",
           "type": "Function",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "registerSavedObjectToPanelMethod",
           "description": [],
           "signature": [
             "<TSavedObjectAttributes, TByValueAttributes>(savedObjectType: string, method: SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueAttributes>) => void"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
-          "deprecated": false,
+          "deprecated": true,
           "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "savedSearch",
+              "path": "src/plugins/saved_search/public/plugin.ts"
+            },
+            {
+              "plugin": "visualizations",
+              "path": "src/plugins/visualizations/public/plugin.ts"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/plugin.ts"
+            }
+          ],
           "returnComment": [],
           "children": [
             {
@@ -14208,7 +14114,7 @@
             "\nRegisters an async {@link ReactEmbeddableFactory} getter."
           ],
           "signature": [
-            "<StateType extends object = object, APIType extends ",
+            "<SerializedState extends object = object, Api extends ",
             {
               "pluginId": "embeddable",
               "scope": "public",
@@ -14216,7 +14122,7 @@
               "section": "def-public.DefaultEmbeddableApi",
               "text": "DefaultEmbeddableApi"
             },
-            "<StateType> = ",
+            "<SerializedState, SerializedState> = ",
             {
               "pluginId": "embeddable",
               "scope": "public",
@@ -14224,7 +14130,7 @@
               "section": "def-public.DefaultEmbeddableApi",
               "text": "DefaultEmbeddableApi"
             },
-            "<StateType>>(type: string, getFactory: () => Promise<",
+            "<SerializedState, SerializedState>, RuntimeState extends object = SerializedState>(type: string, getFactory: () => Promise<",
             {
               "pluginId": "embeddable",
               "scope": "public",
@@ -14232,11 +14138,12 @@
               "section": "def-public.ReactEmbeddableFactory",
               "text": "ReactEmbeddableFactory"
             },
-            "<StateType, APIType, StateType>>) => void"
+            "<SerializedState, Api, RuntimeState>>) => void"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false,
+          "returnComment": [],
           "children": [
             {
               "parentPluginId": "embeddable",
@@ -14245,13 +14152,9 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "signature": [
-                "string"
-              ],
-              "path": "src/plugins/embeddable/public/plugin.tsx",
+              "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
+              "trackAdoption": false
             },
             {
               "parentPluginId": "embeddable",
@@ -14269,15 +14172,15 @@
                   "section": "def-public.ReactEmbeddableFactory",
                   "text": "ReactEmbeddableFactory"
                 },
-                "<StateType, APIType, StateType>>"
+                "<SerializedState, Api, RuntimeState>>"
               ],
-              "path": "src/plugins/embeddable/public/plugin.tsx",
+              "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
               "deprecated": false,
               "trackAdoption": false,
-              "isRequired": true
+              "returnComment": [],
+              "children": []
             }
-          ],
-          "returnComment": []
+          ]
         },
         {
           "parentPluginId": "embeddable",
@@ -14388,44 +14291,8 @@
               "path": "src/plugins/dashboard/public/plugin.tsx"
             },
             {
-              "plugin": "aiops",
-              "path": "x-pack/plugins/aiops/public/embeddable/register_embeddable.ts"
-            },
-            {
-              "plugin": "maps",
-              "path": "x-pack/plugins/maps/public/plugin.ts"
-            },
-            {
               "plugin": "discover",
               "path": "src/plugins/discover/public/plugin.tsx"
-            },
-            {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/embeddables/index.ts"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/observability_solution/infra/public/plugin.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "slo",
-              "path": "x-pack/plugins/observability_solution/slo/public/plugin.ts"
             },
             {
               "plugin": "links",
@@ -14671,6 +14538,42 @@
         },
         {
           "parentPluginId": "embeddable",
+          "id": "def-public.EmbeddableStart.getReactEmbeddableSavedObjects",
+          "type": "Function",
+          "tags": [],
+          "label": "getReactEmbeddableSavedObjects",
+          "description": [
+            "\n"
+          ],
+          "signature": [
+            "<TSavedObjectAttributes extends ",
+            {
+              "pluginId": "savedObjectsFinder",
+              "scope": "common",
+              "docId": "kibSavedObjectsFinderPluginApi",
+              "section": "def-common.FinderAttributes",
+              "text": "FinderAttributes"
+            },
+            ">() => IterableIterator<[string, ",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.ReactEmbeddableSavedObject",
+              "text": "ReactEmbeddableSavedObject"
+            },
+            "<TSavedObjectAttributes>]>"
+          ],
+          "path": "src/plugins/embeddable/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": [
+            "An iterator over all {@link ReactEmbeddableSavedObject }s that have been registered using {@link registerReactEmbeddableSavedObject }."
+          ]
+        },
+        {
+          "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableStart.getEmbeddableFactory",
           "type": "Function",
           "tags": [
@@ -14784,26 +14687,6 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_renderer.tsx"
-            },
-            {
-              "plugin": "aiops",
-              "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart_component.tsx"
-            },
-            {
-              "plugin": "observabilityShared",
-              "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/profiling_embeddable.tsx"
-            },
-            {
-              "plugin": "observabilityShared",
-              "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx"
-            },
-            {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/embeddables/get_embeddable_component.tsx"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/public/explore/network/components/embeddables/create_embeddable.tsx"
             },
             {
               "plugin": "dashboard",

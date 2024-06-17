@@ -152,6 +152,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
               const result = await resolveAnomalySwimlaneUserInput(
                 { ...coreStartServices, ...pluginsStartServices },
+                parentApi,
+                uuid,
                 {
                   ...serializeTitles(),
                   ...serializeSwimLaneState(),
@@ -197,7 +199,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           ...swimLaneComparators,
         }
       );
-
       const appliedTimeRange$: Observable<TimeRange | undefined> = combineLatest([
         api.timeRange$,
         apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)

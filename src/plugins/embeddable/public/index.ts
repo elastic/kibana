@@ -25,7 +25,6 @@ export {
   EmbeddableStateTransfer,
   ErrorEmbeddable,
   genericEmbeddableInputIsEqual,
-  getReactEmbeddableSavedObjects,
   isContextMenuTriggerContext,
   isEmbeddable,
   isErrorEmbeddable,
@@ -99,8 +98,6 @@ export {
   ReactEmbeddableRenderer,
   type DefaultEmbeddableApi,
   type ReactEmbeddableFactory,
-  type ReactEmbeddableRegistration,
-  startTrackingEmbeddableUnsavedChanges,
 } from './react_embeddable_system';
 
 export function plugin(initializerContext: PluginInitializerContext) {

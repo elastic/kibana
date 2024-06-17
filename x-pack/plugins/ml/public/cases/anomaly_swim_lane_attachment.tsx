@@ -86,16 +86,16 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
           <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
             maybeId={inputProps.id}
             type={CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE}
-            state={{
-              rawState: inputProps,
-            }}
-            parentApi={{
+            getParentApi={() => ({
+              getSerializedStateForChild: () => ({
+                rawState: inputProps,
+              }),
               executionContext: {
                 type: 'cases',
                 description: caseData.title,
                 id: caseData.id,
               },
-            }}
+            })}
           />
         </>
       );

@@ -24,9 +24,9 @@
       "licensing",
       "ml",
       "alerting",
-      "features"
+      "features",
     ],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": ["kibanaReact", "esqlDataGrid"],
     "optionalPlugins": ["cloud"],
     "extraPublicDirs": []
   }

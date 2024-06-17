@@ -54,7 +54,8 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
     openTimelineFieldsBrowser();
   });
 
-  describe('Fields Browser rendering', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/178776
+  describe.skip('Fields Browser rendering', () => {
     it('should display the expected count of categories and fields that match the filter input', () => {
       const filterInput = 'host.mac';
 

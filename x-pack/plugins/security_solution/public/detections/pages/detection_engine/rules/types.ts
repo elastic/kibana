@@ -26,7 +26,6 @@ import type { FieldValueThreshold } from '../../../../detection_engine/rule_crea
 import type {
   BuildingBlockType,
   RelatedIntegrationArray,
-  RequiredFieldArray,
   RuleAuthorArray,
   RuleLicense,
   RuleNameOverride,
@@ -38,6 +37,7 @@ import type {
   AlertSuppression,
   ThresholdAlertSuppression,
   RelatedIntegration,
+  RequiredFieldInput,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -147,7 +147,7 @@ export interface DefineStepRule {
   dataViewId?: string;
   dataViewTitle?: string;
   relatedIntegrations?: RelatedIntegrationArray;
-  requiredFields: RequiredFieldArray;
+  requiredFields?: RequiredFieldInput[];
   ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;
@@ -226,6 +226,7 @@ export interface DefineStepRuleJson {
   tiebreaker_field?: string;
   alert_suppression?: AlertSuppression | ThresholdAlertSuppression;
   related_integrations?: RelatedIntegration[];
+  required_fields?: RequiredFieldInput[];
 }
 
 export interface AboutStepRuleJson {

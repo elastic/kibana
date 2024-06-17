@@ -22,6 +22,7 @@ export const useDatasetQualityFlyout = () => {
     datasetDetails: dataStreamDetails,
     insightsTimeRange,
     breakdownField,
+    isNonAggregatable,
   } = useSelector(service, (state) => state.context.flyout) ?? {};
 
   const { timeRange } = useSelector(service, (state) => state.context.filters);
@@ -32,14 +33,27 @@ export const useDatasetQualityFlyout = () => {
     datasetIntegrationsLoading: state.matches('flyout.initializing.integrationDashboards.fetching'),
   }));
 
+  const canUserAccessDashboards = useSelector(
+    service,
+    (state) => !state.matches('flyout.initializing.integrationDashboards.unauthorized')
+  );
+
+  const canUserViewIntegrations = useSelector(
+    service,
+    (state) => state.context.datasetUserPrivileges.canViewIntegrations
+  );
+
   return {
     dataStreamStat,
     dataStreamSettings,
     dataStreamDetails,
+    isNonAggregatable,
     fieldFormats,
     timeRange: insightsTimeRange ?? timeRange,
     breakdownField,
     loadingState,
     flyoutLoading: !dataStreamStat,
+    canUserAccessDashboards,
+    canUserViewIntegrations,
   };
 };

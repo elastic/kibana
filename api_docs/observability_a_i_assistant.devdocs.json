@@ -993,6 +993,20 @@
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.KnowledgeBaseEntry.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [],
+            "signature": [
+              "{ name: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1914,18 +1928,16 @@
               "<{ queries: ",
               "ArrayC",
               "<",
-              "BrandC",
-              "<",
+              "IntersectionC",
+              "<[",
+              "TypeC",
+              "<{ text: ",
               "StringC",
-              ", ",
-              {
-                "pluginId": "@kbn/io-ts-utils",
-                "scope": "common",
-                "docId": "kibKbnIoTsUtilsPluginApi",
-                "section": "def-common.NonEmptyStringBrand",
-                "text": "NonEmptyStringBrand"
-              },
-              ">>; }>, ",
+              "; }>, ",
+              "PartialC",
+              "<{ boost: ",
+              "NumberC",
+              "; }>]>>; }>, ",
               "PartialC",
               "<{ categories: ",
               "ArrayC",
@@ -1933,17 +1945,7 @@
               "StringC",
               ">; }>]>; }> | undefined; handler: ({}: ",
               "ObservabilityAIAssistantRouteHandlerResources",
-              " & { params: { body: { queries: ",
-              "Branded",
-              "<string, ",
-              {
-                "pluginId": "@kbn/io-ts-utils",
-                "scope": "common",
-                "docId": "kibKbnIoTsUtilsPluginApi",
-                "section": "def-common.NonEmptyStringBrand",
-                "text": "NonEmptyStringBrand"
-              },
-              ">[]; } & { categories?: string[] | undefined; }; }; }) => Promise<{ entries: ",
+              " & { params: { body: { queries: ({ text: string; } & { boost?: number | undefined; })[]; } & { categories?: string[] | undefined; }; }; }) => Promise<{ entries: ",
               "RecalledEntry",
               "[]; }>; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -2542,18 +2544,16 @@
               "<{ queries: ",
               "ArrayC",
               "<",
-              "BrandC",
-              "<",
+              "IntersectionC",
+              "<[",
+              "TypeC",
+              "<{ text: ",
               "StringC",
-              ", ",
-              {
-                "pluginId": "@kbn/io-ts-utils",
-                "scope": "common",
-                "docId": "kibKbnIoTsUtilsPluginApi",
-                "section": "def-common.NonEmptyStringBrand",
-                "text": "NonEmptyStringBrand"
-              },
-              ">>; }>, ",
+              "; }>, ",
+              "PartialC",
+              "<{ boost: ",
+              "NumberC",
+              "; }>]>>; }>, ",
               "PartialC",
               "<{ categories: ",
               "ArrayC",
@@ -2561,17 +2561,7 @@
               "StringC",
               ">; }>]>; }> | undefined; handler: ({}: ",
               "ObservabilityAIAssistantRouteHandlerResources",
-              " & { params: { body: { queries: ",
-              "Branded",
-              "<string, ",
-              {
-                "pluginId": "@kbn/io-ts-utils",
-                "scope": "common",
-                "docId": "kibKbnIoTsUtilsPluginApi",
-                "section": "def-common.NonEmptyStringBrand",
-                "text": "NonEmptyStringBrand"
-              },
-              ">[]; } & { categories?: string[] | undefined; }; }; }) => Promise<{ entries: ",
+              " & { params: { body: { queries: ({ text: string; } & { boost?: number | undefined; })[]; } & { categories?: string[] | undefined; }; }; }) => Promise<{ entries: ",
               "RecalledEntry",
               "[]; }>; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -3532,6 +3522,21 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.aiAssistantSearchConnectorIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantSearchConnectorIndexPattern",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSearchConnectorIndexPattern\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.aiAssistantSimulatedFunctionCalling",
         "type": "string",
         "tags": [],
@@ -3758,18 +3763,16 @@
           "<{ queries: ",
           "ArrayC",
           "<",
-          "BrandC",
-          "<",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ text: ",
           "StringC",
-          ", ",
-          {
-            "pluginId": "@kbn/io-ts-utils",
-            "scope": "common",
-            "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-common.NonEmptyStringBrand",
-            "text": "NonEmptyStringBrand"
-          },
-          ">>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ boost: ",
+          "NumberC",
+          "; }>]>>; }>, ",
           "PartialC",
           "<{ categories: ",
           "ArrayC",
@@ -3777,17 +3780,7 @@
           "StringC",
           ">; }>]>; }> | undefined; handler: ({}: ",
           "ObservabilityAIAssistantRouteHandlerResources",
-          " & { params: { body: { queries: ",
-          "Branded",
-          "<string, ",
-          {
-            "pluginId": "@kbn/io-ts-utils",
-            "scope": "common",
-            "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-common.NonEmptyStringBrand",
-            "text": "NonEmptyStringBrand"
-          },
-          ">[]; } & { categories?: string[] | undefined; }; }; }) => Promise<{ entries: ",
+          " & { params: { body: { queries: ({ text: string; } & { boost?: number | undefined; })[]; } & { categories?: string[] | undefined; }; }; }) => Promise<{ entries: ",
           "RecalledEntry",
           "[]; }>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -4175,7 +4168,25 @@
           "ObservabilityAIAssistantRouteCreateOptions",
           "; }[TEndpoint] extends { endpoint: any; params?: any; handler: ({}: any) => Promise<infer TReturnType>; } & ",
           "ServerRouteCreateOptions",
-          " ? TReturnType : never"
+          " ? TReturnType extends ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.ResponseErrorAttributes",
+            "text": "ResponseErrorAttributes"
+          },
+          " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/api/index.ts",
         "deprecated": false,
@@ -4241,6 +4252,41 @@
           "; } & { query: string; userOverrides?: unknown; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.CompatibleJSONSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "CompatibleJSONSchema",
+        "description": [],
+        "signature": [
+          "{ type?: ",
+          "JSONSchema7TypeName",
+          " | undefined; enum?: JSONSchemaOrPrimitive[] | readonly JSONSchemaOrPrimitive[] | undefined; const?: JSONSchemaOrPrimitive | undefined; minLength?: number | undefined; maxLength?: number | undefined; items?: ",
+          "CompatibleJSONSchema",
+          " | ",
+          "CompatibleJSONSchema",
+          "[] | undefined; required?: string[] | readonly string[] | undefined; properties?: Record<string, ",
+          "CompatibleJSONSchema",
+          "> | undefined; allOf?: ",
+          "CompatibleJSONSchema",
+          "[] | readonly ",
+          "CompatibleJSONSchema",
+          "[] | undefined; anyOf?: ",
+          "CompatibleJSONSchema",
+          "[] | readonly ",
+          "CompatibleJSONSchema",
+          "[] | undefined; oneOf?: ",
+          "CompatibleJSONSchema",
+          "[] | readonly ",
+          "CompatibleJSONSchema",
+          "[] | undefined; description?: string | undefined; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4488,18 +4534,16 @@
           "<{ queries: ",
           "ArrayC",
           "<",
-          "BrandC",
-          "<",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ text: ",
           "StringC",
-          ", ",
-          {
-            "pluginId": "@kbn/io-ts-utils",
-            "scope": "common",
-            "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-common.NonEmptyStringBrand",
-            "text": "NonEmptyStringBrand"
-          },
-          ">>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ boost: ",
+          "NumberC",
+          "; }>]>>; }>, ",
           "PartialC",
           "<{ categories: ",
           "ArrayC",
@@ -4507,17 +4551,7 @@
           "StringC",
           ">; }>]>; }> | undefined; handler: ({}: ",
           "ObservabilityAIAssistantRouteHandlerResources",
-          " & { params: { body: { queries: ",
-          "Branded",
-          "<string, ",
-          {
-            "pluginId": "@kbn/io-ts-utils",
-            "scope": "common",
-            "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-common.NonEmptyStringBrand",
-            "text": "NonEmptyStringBrand"
-          },
-          ">[]; } & { categories?: string[] | undefined; }; }; }) => Promise<{ entries: ",
+          " & { params: { body: { queries: ({ text: string; } & { boost?: number | undefined; })[]; } & { categories?: string[] | undefined; }; }; }) => Promise<{ entries: ",
           "RecalledEntry",
           "[]; }>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -5152,6 +5186,31 @@
     "objects": [
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.aiAssistantCapabilities",
+        "type": "Object",
+        "tags": [],
+        "label": "aiAssistantCapabilities",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.aiAssistantCapabilities.show",
+            "type": "string",
+            "tags": [],
+            "label": "show",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.DEFAULT_LANGUAGE_OPTION",
         "type": "Object",
         "tags": [],
@@ -5652,6 +5711,21 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-server.aiAssistantSearchConnectorIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantSearchConnectorIndexPattern",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSearchConnectorIndexPattern\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-server.aiAssistantSimulatedFunctionCalling",
         "type": "string",
         "tags": [],
@@ -5878,18 +5952,16 @@
           "<{ queries: ",
           "ArrayC",
           "<",
-          "BrandC",
-          "<",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ text: ",
           "StringC",
-          ", ",
-          {
-            "pluginId": "@kbn/io-ts-utils",
-            "scope": "common",
-            "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-common.NonEmptyStringBrand",
-            "text": "NonEmptyStringBrand"
-          },
-          ">>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ boost: ",
+          "NumberC",
+          "; }>]>>; }>, ",
           "PartialC",
           "<{ categories: ",
           "ArrayC",
@@ -5897,17 +5969,7 @@
           "StringC",
           ">; }>]>; }> | undefined; handler: ({}: ",
           "ObservabilityAIAssistantRouteHandlerResources",
-          " & { params: { body: { queries: ",
-          "Branded",
-          "<string, ",
-          {
-            "pluginId": "@kbn/io-ts-utils",
-            "scope": "common",
-            "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-common.NonEmptyStringBrand",
-            "text": "NonEmptyStringBrand"
-          },
-          ">[]; } & { categories?: string[] | undefined; }; }; }) => Promise<{ entries: ",
+          " & { params: { body: { queries: ({ text: string; } & { boost?: number | undefined; })[]; } & { categories?: string[] | undefined; }; }; }) => Promise<{ entries: ",
           "RecalledEntry",
           "[]; }>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -7171,6 +7233,20 @@
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.KnowledgeBaseEntry.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [],
+            "signature": [
+              "{ name: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7346,6 +7422,21 @@
         "description": [],
         "signature": [
           "\"observability:aiAssistantResponseLanguage\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.aiAssistantSearchConnectorIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantSearchConnectorIndexPattern",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSearchConnectorIndexPattern\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,

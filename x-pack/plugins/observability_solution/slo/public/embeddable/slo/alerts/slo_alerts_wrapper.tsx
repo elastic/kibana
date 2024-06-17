@@ -10,37 +10,35 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { IEmbeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Subject } from 'rxjs';
 import styled from 'styled-components';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { FetchContext } from '@kbn/presentation-publishing';
 import { SloIncludedCount } from './components/slo_included_count';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
-import type { SloItem } from './types';
-import { SloEmbeddableDeps } from './slo_alerts_embeddable';
-import { SloAlertsEmbeddableInput } from './types';
+import type { SloItem, SloEmbeddableDeps } from './types';
 import { EDIT_SLO_ALERTS_ACTION } from '../../../ui_actions/edit_slo_alerts_panel';
 
 interface Props {
   deps: SloEmbeddableDeps;
   slos: SloItem[];
   timeRange: TimeRange;
-  embeddable: IEmbeddable<SloAlertsEmbeddableInput, EmbeddableOutput>;
+  embeddable: any;
   onRenderComplete?: () => void;
-  reloadSubject: Subject<SloAlertsEmbeddableInput | undefined>;
+  reloadSubject: Subject<FetchContext>;
   showAllGroupByInstances?: boolean;
 }
 
 export function SloAlertsWrapper({
   embeddable,
-  slos: initialSlos,
+  slos,
   deps,
   timeRange: initialTimeRange,
   onRenderComplete,
   reloadSubject,
-  showAllGroupByInstances: initialShowAllGroupByInstances,
+  showAllGroupByInstances,
 }: Props) {
   const {
     application: { navigateToUrl },
@@ -48,24 +46,15 @@ export function SloAlertsWrapper({
   } = deps;
 
   const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
-  const [slos, setSlos] = useState<SloItem[]>(initialSlos);
-  const [showAllGroupByInstances, setShowAllGroupByInstances] = useState<boolean | undefined>(
-    initialShowAllGroupByInstances
-  );
-
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const subs = reloadSubject?.subscribe((input) => {
       if (input) {
-        const { timeRange: nTimeRange, slos: nSlos } = input;
-
-        setSlos(nSlos);
-
+        const { timeRange: nTimeRange } = input;
         if (nTimeRange && (nTimeRange.from !== timeRange.from || nTimeRange.to !== timeRange.to)) {
           setTimeRange(nTimeRange);
         }
-        setShowAllGroupByInstances(input.showAllGroupByInstances);
       }
       setLastRefreshTime(Date.now());
     });
@@ -100,10 +89,10 @@ export function SloAlertsWrapper({
       },rangeTo:${timeRange.to})`
     );
   };
-
   return (
     <Wrapper>
       <EuiFlexGroup
+        data-shared-item=""
         justifyContent="flexEnd"
         wrap
         css={`
@@ -174,4 +163,5 @@ export function SloAlertsWrapper({
 
 const Wrapper = styled.div`
   width: 100%;
+  overflow: scroll;
 `;

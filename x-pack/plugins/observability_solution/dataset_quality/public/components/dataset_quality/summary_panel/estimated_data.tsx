@@ -14,17 +14,19 @@ import {
   summaryPanelEstimatedDataText,
   summaryPanelEstimatedDataTooltipText,
 } from '../../../../common/translations';
-import { LastDayDataPlaceholder } from './last_day_data_placeholder';
+import { DataPlaceholder } from './data_placeholder';
 
 export function EstimatedData() {
-  const { estimatedData, isEstimatedDataLoading } = useSummaryPanelContext();
+  const { estimatedData, isEstimatedDataLoading, isUserAuthorizedForDataset } =
+    useSummaryPanelContext();
 
   return (
-    <LastDayDataPlaceholder
+    <DataPlaceholder
       title={summaryPanelEstimatedDataText}
       tooltip={summaryPanelEstimatedDataTooltipText}
-      value={formatNumber(estimatedData.estimatedDataInBytes, BYTE_NUMBER_FORMAT)}
+      value={formatNumber(estimatedData, BYTE_NUMBER_FORMAT)}
       isLoading={isEstimatedDataLoading}
+      isUserAuthorizedForDataset={isUserAuthorizedForDataset}
     />
   );
 }

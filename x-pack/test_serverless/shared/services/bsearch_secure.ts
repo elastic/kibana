@@ -25,7 +25,7 @@ const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>>
 };
 
 interface SendOptions {
-  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>;
+  supertestWithoutAuth: SuperTest.Agent;
   apiKeyHeader: { Authorization: string };
   referer?: string;
   kibanaVersion?: string;

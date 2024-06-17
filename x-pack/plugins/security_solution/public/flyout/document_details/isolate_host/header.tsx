@@ -9,6 +9,7 @@ import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui'
 import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isAlertFromCrowdstrikeEvent } from '../../../common/utils/crowdstrike_alert_check';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../common/translations';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
@@ -26,6 +27,13 @@ export const PanelHeader: FC = () => {
     'responseActionsSentinelOneV1Enabled'
   );
 
+  const isAlertFromCrowdstrikeAlert = isAlertFromCrowdstrikeEvent({ data });
+  const responseActionsCrowdstrikeManualHostIsolationEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
+  const showAsTechPreview =
+    (isSentinelOneV1Enabled && isSentinelOneAlert) ||
+    (responseActionsCrowdstrikeManualHostIsolationEnabled && isAlertFromCrowdstrikeAlert);
   const title = (
     <EuiFlexGroup responsive gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -41,7 +49,7 @@ export const PanelHeader: FC = () => {
           />
         )}
       </EuiFlexItem>
-      {isSentinelOneV1Enabled && isSentinelOneAlert && (
+      {showAsTechPreview && (
         <EuiFlexItem grow={false}>
           <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_TOOLTIP} />
         </EuiFlexItem>

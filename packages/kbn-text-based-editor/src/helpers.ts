@@ -157,7 +157,6 @@ export const getDocumentationSections = async (language: string) => {
       functions,
       aggregationFunctions,
       groupingFunctions,
-      spatialFunctions,
       operators,
     } = await import('./esql_documentation_sections');
     groups.push({
@@ -172,7 +171,6 @@ export const getDocumentationSections = async (language: string) => {
       functions,
       aggregationFunctions,
       groupingFunctions,
-      spatialFunctions,
       operators
     );
     return {
@@ -227,4 +225,12 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
       cache.delete(esqlQuery);
     }
   }
+};
+
+export const getESQLSources = async (dataViews: DataViewsPublicPluginStart) => {
+  const [remoteIndices, localIndices] = await Promise.all([
+    getRemoteIndicesList(dataViews),
+    getIndicesList(dataViews),
+  ]);
+  return [...localIndices, ...remoteIndices];
 };

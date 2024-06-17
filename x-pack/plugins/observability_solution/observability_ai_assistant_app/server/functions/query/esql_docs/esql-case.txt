@@ -1,19 +1,13 @@
-CASE
+## CASE
 
-Syntax
-CASE(condition1, value1[, ..., conditionN, valueN][, default_value])
-Parameters
-conditionX
-A condition.
-valueX
-The value that’s returned when the corresponding condition is the first to
-evaluate to true.
-default_value
-The default value that’s is returned when no condition matches.
-DescriptionAccepts pairs of conditions and values. The function returns the value that
-belongs to the first condition that evaluates to true.If the number of arguments is odd, the last argument is the default value which
-is returned when no condition matches. If the number of arguments is even, and
-no condition matches, the function returns null.ExampleDetermine whether employees are monolingual, bilingual, or polyglot:
+The `CASE` function in ES|QL accepts pairs of conditions and values. It returns the value that belongs to the first condition that evaluates to true. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches. If the number of arguments is even, and no condition matches, the function returns null.
+
+### Examples
+
+Here are a couple of examples of how you can use the `CASE` function in ES|QL:
+
+1. Determine whether employees are monolingual, bilingual, or polyglot:
+
 ```esql
 FROM employees
 | EVAL type = CASE(
@@ -23,7 +17,8 @@ FROM employees
 | KEEP emp_no, languages, type
 ```
 
-Calculate the total connection success rate based on log messages:
+2. Calculate the total connection success rate based on log messages:
+
 ```esql
 FROM sample_data
 | EVAL successful = CASE(
@@ -33,12 +28,12 @@ FROM sample_data
 | STATS success_rate = AVG(successful)
 ```
 
-Calculate an hourly error rate as a percentage of the total number of log
-messages:
+3. Calculate an hourly error rate as a percentage of the total number of log messages:
+
 ```esql
 FROM sample_data
 | EVAL error = CASE(message LIKE "*error*", 1, 0)
 | EVAL hour = DATE_TRUNC(1 hour, @timestamp)
-| STATS error_rate = AVG(error) by hour
+| STATS error_rate = AVG(error) BY hour
 | SORT hour
 ```

@@ -72,6 +72,7 @@ Does not currently support streaming.
 a|
 * GPT-3 turbo
 * GPT-4 turbo
+* GPT-4 omni
 a|
 
 | *Azure OpenAI*

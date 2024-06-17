@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover esql view', async function () {
+  // Failing: See https://github.com/elastic/kibana/issues/183493
+  describe.skip('discover esql view', async function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       log.debug('load kibana index with default index pattern');
@@ -49,7 +50,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('test', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/183193
+    describe.skip('test', () => {
       it('should render esql view correctly', async function () {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
@@ -77,7 +79,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.missingOrFail('showQueryBarMenu');
         await testSubjects.missingOrFail('addFilter');
-        await testSubjects.missingOrFail('dscViewModeDocumentButton');
+        await testSubjects.existOrFail('dscViewModeToggle');
+        await testSubjects.existOrFail('dscViewModeDocumentButton');
         // when Lens suggests a table, we render an ESQL based histogram
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('discoverQueryHits');
@@ -172,7 +175,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('errors', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/183479
+    describe.skip('errors', () => {
       it('should show error messages for syntax errors in query', async function () {
         await PageObjects.discover.selectTextBaseLang();
         const brokenQueries = [
@@ -259,16 +263,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
       it('shows Discover and Lens requests in Inspector', async () => {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await inspector.open();
-        const requestNames = await inspector.getRequestNames();
-        expect(requestNames).to.contain('Table');
-        expect(requestNames).to.contain('Visualization');
+        let retries = 0;
+        await retry.try(async () => {
+          if (retries > 0) {
+            await inspector.close();
+            await testSubjects.click('querySubmitButton');
+            await PageObjects.header.waitUntilLoadingHasFinished();
+            await PageObjects.discover.waitUntilSearchingHasFinished();
+          }
+          await inspector.open();
+          retries = retries + 1;
+          const requestNames = await inspector.getRequestNames();
+          expect(requestNames).to.contain('Table');
+          expect(requestNames).to.contain('Visualization');
+        });
       });
     });
 

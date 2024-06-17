@@ -15,6 +15,7 @@ import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { eventLogServiceMock } from '@kbn/event-log-plugin/server/mocks';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
 import type { ConfigType } from '../../../../config';
 import type { AlertAttributes } from '../types';
@@ -48,6 +49,21 @@ export const createRuleTypeMocks = (
     },
     getConfig: () => ({ run: { alerts: { max: DEFAULT_MAX_ALERTS } } }),
   } as AlertingPluginSetupContract;
+
+  const actions = {
+    registerType: jest.fn(),
+
+    registerSubActionConnectorType: jest.fn(),
+
+    isPreconfiguredConnector: (connectorId: string) => false,
+
+    getSubActionConnectorClass: jest.fn(),
+    getCaseConnectorClass: jest.fn(),
+    getActionsHealth: jest.fn(),
+    getActionsConfigurationUtilities: jest.fn(),
+    setEnabledConnectorTypes: jest.fn(),
+    isActionTypeEnabled: () => true,
+  } as ActionsPluginSetupContract;
 
   const scheduleActions = jest.fn();
 
@@ -92,6 +108,7 @@ export const createRuleTypeMocks = (
 
   return {
     dependencies: {
+      actions,
       alerting,
       config$: mockedConfig$,
       lists: listMock.createSetup(),

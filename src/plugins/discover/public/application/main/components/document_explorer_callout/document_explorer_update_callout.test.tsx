@@ -17,6 +17,8 @@ import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { DiscoverServices } from '../../../../build_services';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 
 const defaultServices = {
   ...discoverServiceMock,
@@ -62,9 +64,11 @@ describe('Document Explorer Update callout', () => {
   it('should start a tour when the button is clicked', () => {
     const result = mountWithIntl(
       <KibanaContextProvider services={defaultServices}>
-        <DiscoverTourProvider isPlainRecord={false}>
-          <DocumentExplorerUpdateCallout />
-        </DiscoverTourProvider>
+        <DiscoverMainProvider value={getDiscoverStateMock({})}>
+          <DiscoverTourProvider>
+            <DocumentExplorerUpdateCallout />
+          </DiscoverTourProvider>
+        </DiscoverMainProvider>
       </KibanaContextProvider>
     );
 

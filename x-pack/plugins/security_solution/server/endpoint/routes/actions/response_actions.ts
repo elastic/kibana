@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
@@ -12,42 +13,44 @@ import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import type {
-  NoParametersRequestSchema,
-  ResponseActionsRequestBody,
-  ExecuteActionRequestBody,
-  ResponseActionGetFileRequestBody,
-  UploadActionApiRequestBody,
-} from '../../../../common/api/endpoint';
 import {
-  ExecuteActionRequestSchema,
   EndpointActionGetFileSchema,
+  type ExecuteActionRequestBody,
+  ExecuteActionRequestSchema,
+  GetProcessesRouteRequestSchema,
   IsolateRouteRequestSchema,
   KillProcessRouteRequestSchema,
+  type NoParametersRequestSchema,
+  type ResponseActionGetFileRequestBody,
+  type ResponseActionsRequestBody,
+  type ScanActionRequestBody,
+  ScanActionRequestSchema,
   SuspendProcessRouteRequestSchema,
   UnisolateRouteRequestSchema,
-  GetProcessesRouteRequestSchema,
+  type UploadActionApiRequestBody,
   UploadActionRequestSchema,
 } from '../../../../common/api/endpoint';
 
 import {
-  ISOLATE_HOST_ROUTE_V2,
-  UNISOLATE_HOST_ROUTE_V2,
-  KILL_PROCESS_ROUTE,
-  SUSPEND_PROCESS_ROUTE,
+  EXECUTE_ROUTE,
+  GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE,
+  ISOLATE_HOST_ROUTE_V2,
+  KILL_PROCESS_ROUTE,
+  SCAN_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE,
-  GET_FILE_ROUTE,
-  EXECUTE_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
+  ActionDetails,
   EndpointActionDataParameterTypes,
+  KillOrSuspendProcessRequestBody,
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
-  ActionDetails,
-  KillOrSuspendProcessRequestBody,
+  ResponseActionsScanParameters,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -279,6 +282,29 @@ export function registerResponseActionRoutes(
         responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'upload')
       )
     );
+
+  // 8.15 route
+  if (endpointContext.experimentalFeatures.responseActionScanEnabled) {
+    router.versioned
+      .post({
+        access: 'public',
+        path: SCAN_ROUTE,
+        options: { authRequired: true, tags: ['access:securitySolution'] },
+      })
+      .addVersion(
+        {
+          version: '2023-10-31',
+          validate: {
+            request: ScanActionRequestSchema,
+          },
+        },
+        withEndpointAuthz(
+          { all: ['canWriteScanOperations'] },
+          logger,
+          responseActionRequestHandler<ResponseActionsScanParameters>(endpointContext, 'scan')
+        )
+      );
+  }
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -366,6 +392,10 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
         case 'upload':
           action = await responseActionsClient.upload(req.body as UploadActionApiRequestBody);
+          break;
+
+        case 'scan':
+          action = await responseActionsClient.scan(req.body as ScanActionRequestBody);
           break;
 
         default:

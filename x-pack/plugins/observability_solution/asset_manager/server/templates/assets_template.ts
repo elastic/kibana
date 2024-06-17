@@ -6,11 +6,13 @@
  */
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ASSETS_INDEX_PREFIX } from '../constants';
 
 export const assetsIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
   name: 'assets',
   priority: 100,
   data_stream: {},
+  index_patterns: [`${ASSETS_INDEX_PREFIX}*`],
   template: {
     settings: {},
     mappings: {

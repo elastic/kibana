@@ -66,7 +66,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
   }) => {
     const {
       actionTypeRegistry,
-      modelEvaluatorEnabled,
+      assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
       selectedSettingsTab,
       setSelectedSettingsTab,
@@ -162,6 +162,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
         iconType: 'check',
         title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
       });
+      setHasPendingChanges(false);
     }, [
       conversationSettings,
       defaultSelectedConversation.title,

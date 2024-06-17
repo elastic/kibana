@@ -8,7 +8,7 @@ import axios from 'axios';
 import * as rx from 'rxjs';
 import _, { cloneDeep } from 'lodash';
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, LogMeta } from '@kbn/core/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ITelemetryReceiver } from './receiver';
@@ -106,16 +106,21 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
       .subscribe({
         next: (result: Result) => {
           if (isFailure(result)) {
-            this.logger.l(
-              `Failure! unable to send ${result.events} events to channel "${result.channel}": ${result.message}`
-            );
+            this.logger.warn('Failure! Unable to send events to channel', {
+              events: result.events,
+              channel: result.channel,
+              error: result.message,
+            } as LogMeta);
             this.senderUtils?.incrementCounter(
               TelemetryCounter.DOCS_LOST,
               result.events,
               result.channel
             );
           } else {
-            this.logger.l(`Success! ${result.events} events sent to channel "${result.channel}"`);
+            this.logger.debug('Success! events sent to channel', {
+              events: result.events,
+              channel: result.channel,
+            } as LogMeta);
             this.senderUtils?.incrementCounter(
               TelemetryCounter.DOCS_SENT,
               result.events,
@@ -124,7 +129,9 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
           }
         },
         error: (err) => {
-          this.logger.l(`Unexpected error: "${err}"`);
+          this.logger.warn('Unexpected error sending events to channel', {
+            error: JSON.stringify(err),
+          } as LogMeta);
         },
         complete: () => {
           this.logger.l('Shutting down');
@@ -298,7 +305,10 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   }
 
   private async sendEvents(channel: TelemetryChannel, events: string[]): Promise<Result> {
-    this.logger.l(`Sending ${events.length} telemetry events to channel "${channel}"`);
+    this.logger.debug('Sending telemetry events to channel', {
+      events: events.length,
+      channel,
+    } as LogMeta);
 
     try {
       const senderMetadata = await this.getSenderMetadata(channel);
@@ -311,22 +321,23 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
           channel
         );
 
-        this.logger.l(`Unable to send events to channel "${channel}": Telemetry is not opted-in.`);
+        this.logger.warn('Unable to send events to channel: Telemetry is not opted-in.', {
+          channel,
+        } as LogMeta);
         throw newFailure('Telemetry is not opted-in', channel, events.length);
       }
 
       const isElasticTelemetryReachable = await senderMetadata.isTelemetryServicesReachable();
       if (!isElasticTelemetryReachable) {
-        this.logger.l('Telemetry Services are not reachable.');
+        this.logger.warn('Telemetry Services are not reachable.', {
+          channel,
+        } as LogMeta);
         this.senderUtils?.incrementCounter(
           TelemetryCounter.TELEMETRY_NOT_REACHABLE,
           events.length,
           channel
         );
 
-        this.logger.l(
-          `Unable to send events to channel "${channel}": Telemetry services are not reachable.`
-        );
         throw newFailure('Telemetry Services are not reachable', channel, events.length);
       }
 
@@ -353,7 +364,9 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
           if (r.status < 400) {
             return { events: events.length, channel };
           } else {
-            this.logger.l(`Unexpected response, got ${r.status}`);
+            this.logger.l('Unexpected response', {
+              status: r.status,
+            } as LogMeta);
             throw newFailure(`Got ${r.status}`, channel, events.length);
           }
         })
@@ -364,7 +377,9 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
             channel
           );
 
-          this.logger.l(`Runtime error: ${err.message}`);
+          this.logger.warn('Runtime error', {
+            error: err.message,
+          } as LogMeta);
           throw newFailure(`Error posting events: ${err}`, channel, events.length);
         });
     } catch (err: unknown) {

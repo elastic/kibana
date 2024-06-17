@@ -76,8 +76,18 @@ export const encodeGenerationIntervals = (
 export const decodeGenerationIntervals = (
   generationIntervals: string
 ): Record<string, GenerationInterval[]> | null => {
+  const parseDate = (key: string, value: unknown) => {
+    if (key === 'date' && typeof value === 'string') {
+      return new Date(value);
+    } else if (key === 'date' && typeof value !== 'string') {
+      throw new Error('Invalid date');
+    } else {
+      return value;
+    }
+  };
+
   try {
-    return JSON.parse(generationIntervals);
+    return JSON.parse(generationIntervals, parseDate);
   } catch {
     return null;
   }
@@ -87,7 +97,7 @@ export const getLocalStorageGenerationIntervals = (
   key: string
 ): Record<string, GenerationInterval[]> | null => {
   if (!isEmpty(key)) {
-    return decodeGenerationIntervals(sessionStorage.getItem(key) ?? '');
+    return decodeGenerationIntervals(localStorage.getItem(key) ?? '');
   }
 
   return null;

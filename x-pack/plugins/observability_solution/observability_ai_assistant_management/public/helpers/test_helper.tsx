@@ -15,11 +15,14 @@ import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { AppContextProvider } from '../context/app_context';
+import { merge } from 'lodash';
+import { DeepPartial } from 'utility-types';
+import { AppContextProvider, AppContextValue } from '../context/app_context';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
 import { aIAssistantManagementObservabilityRouter } from '../routes/config';
+import { CoreStartWithStartDeps } from '../hooks/use_kibana';
 
-export const coreStart = coreMock.createStart();
+export const coreStartMock = coreMock.createStart();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,7 +41,7 @@ const queryClient = new QueryClient({
 
 export const render = (
   component: React.ReactNode,
-  params?: { show?: boolean; coreStartMock?: Partial<ReturnType<typeof coreMock.createStart>> }
+  mocks?: { coreStart?: DeepPartial<CoreStartWithStartDeps>; appContextValue?: AppContextValue }
 ) => {
   const history = createMemoryHistory();
 
@@ -46,25 +49,35 @@ export const render = (
     observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
   };
 
+  const mergedCoreStartMock = merge(
+    coreStartMock,
+    {
+      application: {
+        capabilities: {
+          management: {
+            kibana: {
+              observabilityAiAssistantManagement: true,
+            },
+          },
+          observabilityAIAssistant: {
+            show: true,
+          },
+        },
+      },
+    },
+    mocks?.coreStart
+  );
+
+  const appContextValue = mocks?.appContextValue ?? {
+    setBreadcrumbs: () => {},
+  };
+
   return testLibRender(
     // @ts-ignore
     <IntlProvider locale="en-US" messages={translations.messages}>
-      <RedirectToHomeIfUnauthorized
-        coreStart={{
-          application: {
-            ...coreStart.application,
-            capabilities: {
-              // @ts-ignore
-              management: { show: true },
-              observabilityAIAssistant: {
-                show: params?.show ?? true,
-              },
-            },
-          },
-        }}
-      >
-        <KibanaContextProvider services={{ ...(params?.coreStartMock ?? coreStart), ...startDeps }}>
-          <AppContextProvider value={{ ...coreStart, ...startDeps, setBreadcrumbs: () => {} }}>
+      <RedirectToHomeIfUnauthorized coreStart={mergedCoreStartMock}>
+        <KibanaContextProvider services={{ ...mergedCoreStartMock, ...startDeps }}>
+          <AppContextProvider value={appContextValue}>
             <QueryClientProvider client={queryClient}>
               <RouterProvider
                 history={history}

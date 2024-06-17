@@ -7,7 +7,7 @@
  */
 
 import type { AnySchema, CustomValidator, ErrorReport } from 'joi';
-import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_REF_ID } from '../oas_meta_fields';
+import { META_FIELD_X_OAS_DEPRECATED } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
@@ -24,11 +24,6 @@ export interface TypeMeta {
    * Whether this field is deprecated.
    */
   deprecated?: boolean;
-  /**
-   * A string that uniquely identifies this schema. Used when generating OAS
-   * to create refs instead of inline schemas.
-   */
-  id?: string;
 }
 
 export interface TypeOptions<T> {
@@ -111,9 +106,6 @@ export abstract class Type<V> {
     if (options.meta) {
       if (options.meta.description) {
         schema = schema.description(options.meta.description);
-      }
-      if (options.meta.id) {
-        schema = schema.meta({ [META_FIELD_X_OAS_REF_ID]: options.meta.id });
       }
       if (options.meta.deprecated) {
         schema = schema.meta({ [META_FIELD_X_OAS_DEPRECATED]: true });

@@ -77,8 +77,10 @@ paths:
     $ref: 'paths/agents@{agent_id}@actions.yaml'
   '/agents/{agentId}/actions/{actionId}/cancel':
     $ref: 'paths/agents@{agent_id}@actions@{action_id}@cancel.yaml'
-  '/agents/files@{fileId}@{fileName}':
+  '/agents/files/{fileId}/{fileName}':
     $ref: 'paths/agents@files@{file_id}@{file_name}.yaml'
+  '/agents/files/{fileId}':
+    $ref: 'paths/agents@files@{file_id}.yaml'
   '/agents/{agentId}/reassign':
     $ref: 'paths/agents@{agent_id}@reassign.yaml'
   '/agents/{agentId}/unenroll':

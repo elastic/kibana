@@ -15,6 +15,7 @@ import { CloudProvider } from '@kbn/custom-icons';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { EntryTitle } from '../components/table/entry_title';
@@ -25,11 +26,11 @@ import type {
 } from '../../../../../common/http_api';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
-import { useMetricsDataViewContext } from './use_metrics_data_view';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
-import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
+import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 
 /**
  * Columns and items types
@@ -138,7 +139,7 @@ export const useHostsTable = () => {
       },
     },
   } = useKibanaContextForPlugin();
-  const { dataView } = useMetricsDataViewContext();
+  const { metricsView } = useMetricsDataViewContext();
 
   const closeFlyout = useCallback(() => setProperties({ detailsItemId: null }), [setProperties]);
 
@@ -151,15 +152,15 @@ export const useHostsTable = () => {
       return [];
     }
     const selectedHostNames = selectedItems.map(({ name }) => name);
-    const newFilter = buildCombinedHostsFilter({
-      field: 'host.name',
+    const newFilter = buildCombinedAssetFilter({
+      field: HOST_NAME_FIELD,
       values: selectedHostNames,
-      dataView,
+      dataView: metricsView?.dataViewReference,
     });
 
     filterManagerService.addFilters(newFilter);
     setSelectedItems([]);
-  }, [dataView, filterManagerService, selectedItems]);
+  }, [filterManagerService, metricsView?.dataViewReference, selectedItems]);
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {

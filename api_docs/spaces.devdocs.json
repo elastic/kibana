@@ -1782,6 +1782,22 @@
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.Space.solution",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "solution",
+            "description": [
+              "\nSolution selected for this space."
+            ],
+            "signature": [
+              "\"search\" | \"security\" | \"observability\" | \"classic\" | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1809,7 +1825,7 @@
               "The space to represent with an avatar."
             ],
             "signature": [
-              "{ id?: string | undefined; name?: string | undefined; description?: string | undefined; color?: string | undefined; initials?: string | undefined; imageUrl?: string | undefined; disabledFeatures?: string[] | undefined; _reserved?: boolean | undefined; }"
+              "{ id?: string | undefined; name?: string | undefined; description?: string | undefined; color?: string | undefined; initials?: string | undefined; imageUrl?: string | undefined; disabledFeatures?: string[] | undefined; _reserved?: boolean | undefined; solution?: \"search\" | \"security\" | \"observability\" | \"classic\" | undefined; }"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false,
@@ -3674,6 +3690,22 @@
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.Space.solution",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "solution",
+            "description": [
+              "\nSolution selected for this space."
+            ],
+            "signature": [
+              "\"search\" | \"security\" | \"observability\" | \"classic\" | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4904,6 +4936,22 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.Space.solution",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "solution",
+            "description": [
+              "\nSolution selected for this space."
+            ],
+            "signature": [
+              "\"search\" | \"security\" | \"observability\" | \"classic\" | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,

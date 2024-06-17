@@ -81,8 +81,8 @@ jest.mock('../../../lib/rule_api/bulk_delete', () => ({
 jest.mock('../../../lib/rule_api/update_api_key', () => ({
   bulkUpdateAPIKey: jest.fn(),
 }));
-jest.mock('../../../lib/rule_api/health', () => ({
-  alertingFrameworkHealth: jest.fn(() => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health', () => ({
+  fetchAlertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
   })),
@@ -91,11 +91,11 @@ jest.mock('../../../lib/rule_api/health', () => ({
 jest.mock('../../../lib/rule_api/aggregate_kuery_filter');
 jest.mock('../../../lib/rule_api/rules_kuery_filter');
 
-jest.mock('../../../../common/lib/health_api', () => ({
-  triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status', () => ({
+  fetchUiHealthStatus: jest.fn(() => ({ isRulesAvailable: true })),
 }));
-jest.mock('../../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config', () => ({
+  fetchUiConfig: jest
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
@@ -1382,7 +1382,10 @@ describe('rules_list with show only capability', () => {
       const rows = await screen.findAllByTestId('rule-row');
       expect(rows[0].className).not.toContain('actRulesList__tableRowDisabled');
       expect(rows[1].className).toContain('actRulesList__tableRowDisabled');
-      fireEvent.mouseOver(await screen.findByText('Info'));
+      const tooltips = await screen.findAllByText('Info');
+
+      fireEvent.mouseOver(tooltips[tooltips.length - 1]);
+
       const tooltip = await screen.findByTestId('ruleDisabledByLicenseTooltip');
       expect(tooltip).toHaveTextContent('This rule type requires a Platinum license.');
     });

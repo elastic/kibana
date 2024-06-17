@@ -9,7 +9,7 @@
 ##########################################################################
 
 nodejs_conf = nodejs_init
-.include /usr/local/ssl/fipsmodule.cnf
+.include /usr/share/kibana/openssl/ssl/fipsmodule.cnf
 
 [nodejs_init]
 providers = provider_sect

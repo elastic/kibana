@@ -52,6 +52,7 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
       spacesManager,
       getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
       config,
+      getRolesAPIClient: jest.fn(),
     })
     .mount({
       basePath,
@@ -72,6 +73,7 @@ describe('spacesManagementApp', () => {
         spacesManager: spacesManagerMock.create(),
         getStartServices: coreMock.createSetup().getStartServices as any,
         config,
+        getRolesAPIClient: jest.fn(),
       })
     ).toMatchInlineSnapshot(`
       Object {

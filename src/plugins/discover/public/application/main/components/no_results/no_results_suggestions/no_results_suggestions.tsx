@@ -10,16 +10,9 @@ import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiEmptyPrompt, EuiButton, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  isOfQueryType,
-  isOfAggregateQueryType,
-  type Query,
-  type AggregateQuery,
-  type Filter,
-} from '@kbn/es-query';
+import { isOfQueryType, type Query, type AggregateQuery, type Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { isTextBasedQuery } from '../../../utils/is_text_based_query';
 import { NoResultsSuggestionDefault } from './no_results_suggestion_default';
 import {
   NoResultsSuggestionWhenFilters,
@@ -31,6 +24,7 @@ import { hasActiveFilter } from '../../layout/utils';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { useFetchOccurrencesRange, TimeRangeExtendingStatus } from './use_fetch_occurances_range';
 import { NoResultsIllustration } from './assets/no_results_illustration';
+import { useIsEsqlMode } from '../../../hooks/use_is_esql_mode';
 
 interface NoResultsSuggestionProps {
   dataView: DataView;
@@ -50,8 +44,8 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
   const { data, uiSettings, timefilter, toastNotifications } = services;
-  const hasQuery =
-    (isOfQueryType(query) && !!query?.query) || (!!query && isOfAggregateQueryType(query));
+  const isEsqlMode = useIsEsqlMode();
+  const hasQuery = Boolean(isOfQueryType(query) && query.query) || isEsqlMode;
   const hasFilters = hasActiveFilter(filters);
 
   const [timeRangeExtendingStatus, setTimeRangeExtendingStatus] =
@@ -148,7 +142,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
       }
       body={body}
       actions={
-        !isTextBasedQuery(query) && isTimeBased ? (
+        !isEsqlMode && isTimeBased ? (
           <div
             css={css`
               min-block-size: ${euiTheme.size.xxl};
