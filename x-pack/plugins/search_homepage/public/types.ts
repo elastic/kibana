@@ -26,13 +26,35 @@ export interface SearchHomepageAppInfo {
 }
 
 export interface SearchHomepagePluginSetup {
+  /**
+   * Search Homepage shared information for the Kibana application.
+   * Used to ensure the stack and serverless apps have the same route
+   * and deep links.
+   */
   app: SearchHomepageAppInfo;
+  /**
+   * Checks if the Search Homepage feature flag is currently enabled.
+   * @returns true if Search Homepage feature is enabled
+   */
   isHomepageFeatureEnabled: () => boolean;
 }
 
 export interface SearchHomepagePluginStart {
+  /**
+   * Search Homepage shared information for the Kibana application.
+   * Used to ensure the stack and serverless apps have the same route
+   * and deep links.
+   */
   app: SearchHomepageAppInfo;
+  /**
+   * Checks if the Search Homepage feature flag is currently enabled.
+   * @returns true if Search Homepage feature is enabled
+   */
   isHomepageFeatureEnabled: () => boolean;
+  /**
+   * SearchHomepage shared component, used to render the search homepage in
+   * the Stack search plugin
+   */
   SearchHomepage: FC<ComponentProps<typeof App>>;
 }
 

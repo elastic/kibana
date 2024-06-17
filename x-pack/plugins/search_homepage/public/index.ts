@@ -13,4 +13,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new SearchHomepagePlugin(initializerContext);
 }
 
-export type { SearchHomepagePluginSetup, SearchHomepagePluginStart } from './types';
+export type {
+  SearchHomepagePluginSetup,
+  SearchHomepagePluginStart,
+  SearchHomepageAppInfo,
+} from './types';

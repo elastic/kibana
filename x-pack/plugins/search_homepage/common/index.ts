@@ -8,4 +8,7 @@
 export const PLUGIN_ID = 'searchHomepage';
 export const PLUGIN_NAME = 'searchHomepage';
 
+/**
+ * UI Setting id for the Search Homepage feature flag
+ */
 export const HOMEPAGE_FEATURE_FLAG_ID = 'searchHomepage:homepageEnabled';
