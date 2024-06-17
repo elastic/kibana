@@ -72,15 +72,16 @@ export function metricsRoute(params: MetricsRouteParams) {
       const metricsToReturn = lastMetrics
         ? cloneDeep(lastMetrics)
         : { process_uuid: taskManagerId, timestamp: new Date().toISOString(), metrics: {} };
-      debugLogger.debug(
-        `/api/task_manager/metrics route accessed with reset=${
-          req.query.reset
-        } - metrics ${JSON.stringify(metricsToReturn)}`
-      );
 
       if (req.query.reset) {
         resetMetrics$.next(true);
       }
+
+      debugLogger.info(
+        `/api/task_manager/metrics route accessed with reset=${
+          req.query.reset
+        } - metrics ${JSON.stringify(metricsToReturn)}`
+      );
 
       return res.ok({ body: metricsToReturn });
     }
