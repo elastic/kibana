@@ -82,6 +82,7 @@ export async function getApmServiceSummary({
   apmAlertsClient: ApmAlertsClient;
   logger: Logger;
 }): Promise<ServiceSummary> {
+  console.log('SERVICE SUMMARY!!');
   const start = datemath.parse(args.start)?.valueOf()!;
   const end = datemath.parse(args.end)?.valueOf()!;
 
