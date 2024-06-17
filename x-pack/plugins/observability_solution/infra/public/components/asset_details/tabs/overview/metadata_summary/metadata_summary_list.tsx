@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -29,11 +30,12 @@ import { Section } from '../../../components/section';
 interface MetadataSummaryProps {
   metadata: InfraMetadata | null;
   loading: boolean;
-  assetType: string;
+  assetType: InventoryItemType;
 }
 interface MetadataSummaryWrapperProps {
   visibleMetadata: MetadataData[];
   loading: boolean;
+  assetType: InventoryItemType;
 }
 
 export interface MetadataData {
@@ -115,6 +117,7 @@ const containerMetadataData = (metadataInfo: InfraMetadata['info']): MetadataDat
 const MetadataSummaryListWrapper = ({
   loading: metadataLoading,
   visibleMetadata,
+  assetType,
 }: MetadataSummaryWrapperProps) => {
   const { showTab } = useTabSwitcherContext();
 
@@ -156,13 +159,13 @@ const MetadataSummaryListWrapper = ({
       }
     >
       <>
-        <MetadataExplanationMessage />
+        <MetadataExplanationMessage assetType={assetType} />
         <EuiSpacer size="s" />
         <EuiFlexGroup>
           {visibleMetadata
             .filter((metadataValue) => metadataValue)
             .map((metadataValue) => (
-              <EuiFlexItem key={metadataValue.field} grow={false}>
+              <EuiFlexItem key={metadataValue.field} grow={false} style={{ width: '200px' }}>
                 <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
                   <MetadataHeader metadataValue={metadataValue} />
                   <EuiDescriptionListDescription>
@@ -190,6 +193,7 @@ export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSu
             ...hostExtendedMetadata(metadata?.info),
           ]}
           loading={loading}
+          assetType={assetType}
         />
       );
     case 'container':
@@ -200,10 +204,13 @@ export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSu
             ...containerExtendedMetadata(metadata?.info),
           ]}
           loading={loading}
+          assetType={assetType}
         />
       );
     default:
-      return <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} />;
+      return (
+        <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} assetType={assetType} />
+      );
   }
 };
 
@@ -218,6 +225,7 @@ export const MetadataSummaryListCompact = ({
         <MetadataSummaryListWrapper
           visibleMetadata={hostMetadataData(metadata?.info)}
           loading={loading}
+          assetType={assetType}
         />
       );
     case 'container':
@@ -225,9 +233,12 @@ export const MetadataSummaryListCompact = ({
         <MetadataSummaryListWrapper
           visibleMetadata={containerMetadataData(metadata?.info)}
           loading={loading}
+          assetType={assetType}
         />
       );
     default:
-      return <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} />;
+      return (
+        <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} assetType={assetType} />
+      );
   }
 };
