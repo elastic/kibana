@@ -17,7 +17,7 @@ import { useAppUrl } from '../../common/lib/kibana/hooks';
 import type { PolicyDetailsRouteState } from '../../../common/endpoint/types';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 
-const POLICY_NOT_FOUND_MESSAGE = i18n.translate(
+export const POLICY_NOT_FOUND_MESSAGE = i18n.translate(
   'xpack.securitySolution.endpointPolicyLink.policyNotFound',
   { defaultMessage: 'Policy no longer available!' }
 );
@@ -30,9 +30,13 @@ export type EndpointPolicyLinkProps = Omit<EuiLinkAnchorProps, 'href'> & {
    * displayed (`children`). The tooltip can also be customized by passing in the content to be shown.
    */
   tooltip?: boolean | React.ReactNode;
-  /** The revision of the policy that the Endpoint is running with (normally obtained from the host's metadata */
+  /**
+   * The revision of the policy that the Endpoint is running with (normally obtained from the host's metadata.
+   */
   revision?: number;
-  /** Will display an "out of date" message */
+  /**
+   * Will display an "out of date" message.
+   */
   isOutdated?: boolean;
   /** Text size to be applied to the display content (`children`) */
   textSize?: EuiTextProps['size'];
@@ -46,6 +50,11 @@ export type EndpointPolicyLinkProps = Omit<EuiLinkAnchorProps, 'href'> & {
   backLink?: PolicyDetailsRouteState['backLink'];
 };
 
+/**
+ * Will display the provided content (`children`) as a link that takes the user to the Endpoint
+ * Policy Details page. A link is only displayed if the user has Authz to that page, otherwise the
+ * provided display content will just be shown as is.
+ */
 export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
   ({
     policyId,
@@ -78,25 +87,39 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
 
     const displayValue = useMemo(() => {
       const content = (
-        <EuiText className="eui-displayInline eui-textTruncate" size={textSize}>
+        <EuiText
+          className="eui-displayInline eui-textTruncate"
+          size={textSize}
+          data-test-subj={testId('displayContent')}
+        >
           {children}
         </EuiText>
       );
 
       return displayAsLink ? (
         // eslint-disable-next-line @elastic/eui/href-or-on-click
-        <EuiLink href={toRouteUrl} onClick={clickHandler} {...euiLinkProps}>
+        <EuiLink
+          href={toRouteUrl}
+          onClick={clickHandler}
+          {...euiLinkProps}
+          data-test-subj={testId('link')}
+        >
           {content}
         </EuiLink>
       ) : (
         content
       );
-    }, [children, clickHandler, displayAsLink, euiLinkProps, textSize, toRouteUrl]);
+    }, [children, clickHandler, displayAsLink, euiLinkProps, testId, textSize, toRouteUrl]);
 
     const policyNoLongerAvailableMessage = useMemo(() => {
       return (
         ((!policyId || !policyExists) && (
-          <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+          <EuiText
+            color="subdued"
+            size="xs"
+            className="eui-textNoWrap"
+            data-test-subj={testId('policyNotFoundMsg')}
+          >
             <EuiIcon size="m" type="warning" color="warning" />
             &nbsp;
             {POLICY_NOT_FOUND_MESSAGE}
@@ -104,7 +127,7 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
         )) ||
         null
       );
-    }, [policyExists, policyId]);
+    }, [policyExists, policyId, testId]);
 
     const tooltipContent: React.ReactNode | undefined = useMemo(() => {
       const content = tooltip === true ? children : tooltip || undefined;
@@ -148,7 +171,7 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
                 color="subdued"
                 size="xs"
                 className="eui-textTruncate"
-                data-test-subj={testId('version')}
+                data-test-subj={testId('revision')}
               >
                 <FormattedMessage
                   id="xpack.securitySolution.endpointPolicyLink.policyVersion"
@@ -161,14 +184,9 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
 
           {isOutdated && (
             <EuiFlexItem grow={false}>
-              <EuiText
-                color="subdued"
-                size="xs"
-                className="eui-textTruncate"
-                data-test-subj={testId('outdatedMsg')}
-              >
+              <EuiText color="subdued" size="xs" className="eui-textTruncate">
                 <EuiIcon size="m" type="warning" color="warning" className="eui-alignTop" />
-                <span className="eui-displayInlineBlock">
+                <span className="eui-displayInlineBlock" data-test-subj={testId('outdatedMsg')}>
                   <FormattedMessage
                     id="xpack.securitySolution.endpointPolicyLink.outdatedMessage"
                     defaultMessage="Out-of-date"

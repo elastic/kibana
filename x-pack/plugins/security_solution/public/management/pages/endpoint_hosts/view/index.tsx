@@ -353,7 +353,6 @@ export const EndpointList = () => {
   const {
     canReadEndpointList,
     canAccessFleet,
-    canReadPolicyManagement,
     loading: endpointPrivilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
   const { search } = useFormatUrl(SecurityPageName.administration);
