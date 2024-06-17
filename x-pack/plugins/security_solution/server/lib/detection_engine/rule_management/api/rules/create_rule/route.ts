@@ -56,11 +56,10 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
             'lists',
             'actions',
           ]);
-
-          const rulesClient = ctx.alerting.getRulesClient();
-          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
-          const exceptionsClient = ctx.lists?.getExceptionListClient();
           const actionsClient = ctx.actions.getActionsClient();
+          const rulesClient = ctx.alerting.getRulesClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient(actionsClient);
+          const exceptionsClient = ctx.lists?.getExceptionListClient();
 
           if (request.body.rule_id != null) {
             const rule = await readRules({

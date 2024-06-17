@@ -114,7 +114,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
-      getDetectionRulesClient: memoize(() => {
+      getDetectionRulesClient: memoize((actionsClient) => {
         const mlAuthz = buildMlAuthz({
           license: licensing.license,
           ml: plugins.ml,
@@ -123,6 +123,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
 
         return createDetectionRulesClient(
+          actionsClient,
           startPlugins.alerting.getRulesClientWithRequest(request),
           mlAuthz
         );

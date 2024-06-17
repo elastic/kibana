@@ -6,6 +6,8 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
 import type { RuleAlertType } from '../../../rule_schema';
@@ -31,12 +33,13 @@ import { importRule } from './methods/import_rule';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 
 export const createDetectionRulesClient = (
+  actionsClient?: ActionsClient,
   rulesClient: RulesClient,
   mlAuthz: MlAuthz
 ): IDetectionRulesClient => ({
   async createCustomRule(args: CreateCustomRuleArgs): Promise<RuleAlertType> {
     return withSecuritySpan('DetectionRulesClient.createCustomRule', async () => {
-      return createCustomRule(rulesClient, args, mlAuthz);
+      return createCustomRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 
