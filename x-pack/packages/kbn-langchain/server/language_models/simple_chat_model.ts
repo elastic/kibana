@@ -36,6 +36,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   temperature?: number;
   request: KibanaRequest;
   streaming: boolean;
+  maxTokens?: number;
 }
 
 export class ActionsClientSimpleChatModel extends SimpleChatModel {
@@ -45,6 +46,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
   #request: KibanaRequest;
   #traceId: string;
   #signal?: AbortSignal;
+  #maxTokens?: number;
   llmType: string;
   streaming: boolean;
   model?: string;
@@ -60,6 +62,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     temperature,
     signal,
     streaming,
+    maxTokens,
   }: CustomChatModelInput) {
     super({});
 
@@ -69,6 +72,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     this.#logger = logger;
     this.#signal = signal;
     this.#request = request;
+    this.#maxTokens = maxTokens;
     this.llmType = llmType ?? 'ActionsClientSimpleChatModel';
     this.model = model;
     this.temperature = temperature;
@@ -95,7 +99,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       throw new Error('No messages provided.');
     }
     const formattedMessages = [];
-    if (messages.length === 2) {
+    if (messages.length >= 2) {
       messages.forEach((message, i) => {
         if (typeof message.content !== 'string') {
           throw new Error('Multimodal messages are not supported.');
@@ -121,6 +125,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         subActionParams: {
           model: this.model,
           messages: formattedMessages,
+          maxTokens: this.#maxTokens,
           ...getDefaultArguments(this.llmType, this.temperature, options.stop),
         },
       },
