@@ -8,6 +8,8 @@
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 
+export const DEFAULT_ANNOTATION_INDEX = 'observability-annotations';
+
 /**
  * Checks whether a string is a valid ISO timestamp,
  * but doesn't convert it into a Date object when decoding.

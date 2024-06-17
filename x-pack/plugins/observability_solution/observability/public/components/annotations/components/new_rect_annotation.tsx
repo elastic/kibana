@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  formatDate,
   useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
@@ -112,7 +113,10 @@ export function ObsRectAnnotation({
 
               <EuiFlexItem>
                 <EuiText size="s">
-                  {`${moment(timestamp).format('LLL')} — ${moment(timestampEnd).format('LLL')}`}
+                  {`${formatDate(timestamp, 'longDateTime')} — ${formatDate(
+                    timestampEnd,
+                    'longDateTime'
+                  )}`}
                 </EuiText>
               </EuiFlexItem>
               <EuiHorizontalRule margin="xs" />

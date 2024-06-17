@@ -14,6 +14,7 @@ import {
   DeleteAnnotationParams,
   GetByIdAnnotationParams,
   FindAnnotationParams,
+  DEFAULT_ANNOTATION_INDEX,
 } from '../../../common/annotations';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { unwrapEsResponse } from '../../../common/utils/unwrap_es_response';
@@ -45,6 +46,9 @@ export function createAnnotationsClient(params: {
 
   return {
     get index() {
+      if (index === DEFAULT_ANNOTATION_INDEX) {
+        return index + `-v${ANNOTATION_RESOURCES_VERSION}`;
+      }
       return index;
     },
     create: ensureGoldLicense(
@@ -54,7 +58,7 @@ export function createAnnotationsClient(params: {
         const indexExists = await unwrapEsResponse(
           esClient.indices.exists(
             {
-              index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
+              index: this.index,
             },
             { meta: true }
           )
