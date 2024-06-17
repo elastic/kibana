@@ -638,6 +638,10 @@ the infrastructure monitoring use-case within Kibana.
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/integration_assistant/README.md[integrationAssistant]
+|Team owner: Security Integrations Scalability
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate/README.md[investigate]
 |undefined
 
