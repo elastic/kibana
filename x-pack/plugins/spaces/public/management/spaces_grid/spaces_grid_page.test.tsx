@@ -58,6 +58,11 @@ featuresStart.getFeatures.mockResolvedValue([
   }),
 ]);
 
+const spacesGridCommonProps = {
+  serverBasePath: '',
+  maxSpaces: 1000,
+};
+
 describe('SpacesGridPage', () => {
   const getUrlForApp = (appId: string) => appId;
   const history = scopedHistoryMock.create();
@@ -79,7 +84,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
-        maxSpaces={1000}
+        {...spacesGridCommonProps}
       />
     );
 
@@ -107,7 +112,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
-        maxSpaces={1000}
+        {...spacesGridCommonProps}
       />
     );
 
@@ -137,6 +142,7 @@ describe('SpacesGridPage', () => {
           spaces: { manage: true },
         }}
         maxSpaces={1}
+        serverBasePath={spacesGridCommonProps.serverBasePath}
       />
     );
 
@@ -170,7 +176,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
-        maxSpaces={1000}
+        {...spacesGridCommonProps}
       />
     );
 
@@ -205,7 +211,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
-        maxSpaces={1000}
+        {...spacesGridCommonProps}
       />
     );
 
