@@ -11,13 +11,16 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { NOTE_URL } from '../../../../../common/constants';
 
 import type { SetupPlugins } from '../../../../plugin';
-import { buildRouteValidationWithExcess } from '../../../../utils/build_validation/route_validation';
+import {
+  // buildRouteValidationWithExcess,
+  buildRouteValidation,
+} from '../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { persistNoteSchema } from '../../../../../common/api/timeline';
+import { persistNoteSchema, persistNoteWithoutRefSchema } from '../../../../../common/api/timeline';
 import { persistNote } from '../../saved_object/notes';
 
 export const persistNoteRoute = (
@@ -36,7 +39,7 @@ export const persistNoteRoute = (
     .addVersion(
       {
         validate: {
-          request: { body: buildRouteValidationWithExcess(persistNoteSchema) },
+          request: { body: buildRouteValidation(persistNoteWithoutRefSchema) },
         },
         version: '2023-10-31',
       },
@@ -51,10 +54,7 @@ export const persistNoteRoute = (
           const res = await persistNote({
             request: frameworkRequest,
             noteId,
-            note: {
-              ...note,
-              timelineId: note.timelineId,
-            },
+            note,
             overrideOwner: true,
           });
 

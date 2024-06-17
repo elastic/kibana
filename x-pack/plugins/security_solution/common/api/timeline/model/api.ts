@@ -34,6 +34,9 @@ export const BareNoteSchema = runtimeTypes.intersection([
     createdBy: unionWithNullType(runtimeTypes.string),
     updated: unionWithNullType(runtimeTypes.number),
     updatedBy: unionWithNullType(runtimeTypes.string),
+    eventIngested: unionWithNullType(runtimeTypes.string),
+    eventTimestamp: unionWithNullType(runtimeTypes.string),
+    eventDataView: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 
@@ -44,6 +47,16 @@ export type BareNote = runtimeTypes.TypeOf<typeof BareNoteSchema>;
  * other saved objects.
  */
 export type BareNoteWithoutExternalRefs = Omit<BareNote, 'timelineId'>;
+
+export const BareNoteWithoutExternalRefsSchema = runtimeTypes.partial({
+  timelineId: unionWithNullType(runtimeTypes.string),
+  eventId: unionWithNullType(runtimeTypes.string),
+  note: unionWithNullType(runtimeTypes.string),
+  created: unionWithNullType(runtimeTypes.number),
+  createdBy: unionWithNullType(runtimeTypes.string),
+  updated: unionWithNullType(runtimeTypes.number),
+  updatedBy: unionWithNullType(runtimeTypes.string),
+});
 
 export const NoteRuntimeType = runtimeTypes.intersection([
   BareNoteSchema,

@@ -22,6 +22,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { appActions } from '../../../common/store/app';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { VIEW_SELECTION } from '../../../../common/constants';
@@ -265,6 +266,14 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     };
   }, []);
 
+  const onLoaded = useCallback(
+    (alerts) => {
+      const alertIds = alerts.map((alert) => alert._id);
+      dispatch(appActions.fetchNotesByDocumentsRequest({ documentIds: alertIds }));
+    },
+    [dispatch]
+  );
+
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
@@ -280,6 +289,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       browserFields: finalBrowserFields,
       onUpdate: onAlertTableUpdate,
       cellContext,
+      onLoaded,
       runtimeMappings,
       toolbarVisibility: {
         showColumnSelector: !isEventRenderedView,
@@ -300,6 +310,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       runtimeMappings,
       isEventRenderedView,
       cellContext,
+      onLoaded,
     ]
   );
 

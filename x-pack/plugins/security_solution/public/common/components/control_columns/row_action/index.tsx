@@ -10,11 +10,15 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
+import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useKibana } from '../../../lib/kibana';
 import { timelineActions } from '../../../../timelines/store';
 import { SecurityPageName } from '../../../../../common/constants';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -162,6 +166,32 @@ const RowActionComponent = ({
     tabType,
   ]);
 
+  const toggleShowNotes = useCallback(
+    () =>
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
+        },
+        left: {
+          id: DocumentDetailsLeftPanelKey,
+          path: {
+            tab: LeftPanelNotesTab,
+          },
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
+        },
+      }),
+    [eventId, indexName, openFlyout, tableId]
+  );
+
   const Action = controlColumn.rowCellRender;
 
   if (!timelineNonEcsData || !ecsData || !eventId) {
@@ -191,6 +221,7 @@ const RowActionComponent = ({
           showCheckboxes={showCheckboxes}
           tabType={tabType}
           timelineId={tableId}
+          toggleShowNotes={toggleShowNotes}
           width={width}
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}
