@@ -122,6 +122,12 @@ export type {
   SecurityServiceSetup,
   SecurityServiceStart,
   CoreAuthenticationService,
+  CoreAuditService,
+  AuditEvent,
+  AuditHttp,
+  AuditKibana,
+  AuditRequest,
+  AuditLogger,
 } from '@kbn/core-security-server';
 export type {
   User,
@@ -226,6 +232,7 @@ export type {
   HttpServiceStart,
   RawRequest,
   FakeRawRequest,
+  HttpProtocol,
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 

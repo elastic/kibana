@@ -171,7 +171,7 @@ export const RULE_NAME_OVERRIDE_FIELD_LABEL = i18n.translate(
 export const THREAT_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.threatFieldLabel',
   {
-    defaultMessage: 'MITRE ATT&CK\\u2122',
+    defaultMessage: 'MITRE ATT&CK\u2122',
   }
 );
 
@@ -340,5 +340,12 @@ export const FROM_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.fromFieldLabel',
   {
     defaultMessage: 'Additional look-back time',
+  }
+);
+
+export const MAX_SIGNALS_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.maxAlertsFieldLabel',
+  {
+    defaultMessage: 'Max alerts per run',
   }
 );

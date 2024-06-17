@@ -1618,7 +1618,7 @@ describe('update()', () => {
     rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');
     });
-    expect(
+    await expect(
       async () =>
         await rulesClient.update({
           id: '1',

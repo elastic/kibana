@@ -48,7 +48,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
       }
     } else {
       setDisableEditButton(true);
-      const language: 'sql' | 'esql' | undefined = getAggregateQueryMode(query);
+      const language: 'esql' | undefined = getAggregateQueryMode(query);
       return {
         queryString: query[language as keyof AggregateQuery],
         queryLanguage: language,

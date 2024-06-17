@@ -40,7 +40,7 @@ export class TelemetryReceiver {
     this.logger = logger.get('telemetry_events');
   }
 
-  public async start(core: CoreStart, osqueryContextService?: OsqueryAppContextService) {
+  public start(core: CoreStart, osqueryContextService?: OsqueryAppContextService) {
     this.agentClient = osqueryContextService?.getAgentService()?.asInternalUser;
     this.agentPolicyService = osqueryContextService?.getAgentPolicyService();
     this.packageService = osqueryContextService?.getPackageService();

@@ -209,6 +209,9 @@ The default selection in the time filter.
 The maximum height that a cell occupies in a table. Set to 0 to disable
 truncation.
 
+[[enableESQL]]`enableESQL`::
+This setting enables ES|QL in Kibana.
+
 [float]
 [[presentation-labs]]
 ==== Presentation Labs
@@ -265,7 +268,8 @@ the `xpack.banners.backgroundColor` configuration property.
 
 [horizontal]
 [[xpackdashboardmode-roles]]`xpackDashboardMode:roles`::
-**Deprecated. Use <<kibana-feature-privileges,feature privileges>> instead.**
+deprecated:[7.7.0]
+Deprecated; use <<kibana-feature-privileges,feature privileges>> instead.
 The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
 
 [float]
@@ -289,9 +293,6 @@ in the current data view is used.
 [[defaultcolumns]]`defaultColumns`::
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
-
-[[discover:enableESQL]]`discover:enableESQL`::
-experimental[] Allows ES|QL queries for search.
 
 [[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::
 Specifies the maximum number of fields to show in the document column of the *Discover* table.
@@ -444,6 +445,9 @@ beta:[] Enables faster searching in APM tables by adding a handy search bar with
 [[observability-enable-aws-lambda-metrics]]`observability:enableAwsLambdaMetrics`::
 preview:[] Display Amazon Lambda metrics in the service metrics tab.
 
+[[observability-enable-legacy-uptime-app]]`observability:enableLegacyUptimeApp`::
+Shows the Uptime app even if there is no recent Heartbeat data.
+
 [[observability-apm-enable-comparison]]`observability:enableComparisonByDefault`::
 Determines whether the <<service-time-comparison, comparison feature>> is enabled or disabled by default in the APM app.
 
@@ -542,7 +546,7 @@ because requests can be spread across all shard copies. However, results might
 be inconsistent because different shards might be in different refresh states.
 
 [[search-includefrozen]]`search:includeFrozen`::
-**This setting is deprecated and will not be supported as of 9.0.**
+deprecated:[7.16.0]
 Includes {ref}/frozen-indices.html[frozen indices] in results. Searching through
 frozen indices might increase the search time. This setting is off by default.
 Users must opt-in to include frozen indices.
@@ -619,11 +623,11 @@ of buckets to try to represent.
 
 [horizontal]
 [[visualization-colormapping]]`visualization:colorMapping`::
-**This setting is deprecated and will not be supported in a future version.**
+deprecated:[7.11.0]
 Maps values to specific colors in charts using the *Compatibility* palette.
 
 [[visualization-uselegacytimeaxis]]`visualization:useLegacyTimeAxis`::
-**This setting is deprecated and will not be supported in a future version.**
+deprecated:[8.10.0]
 Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::

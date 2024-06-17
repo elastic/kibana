@@ -60,6 +60,8 @@ const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough, it needs to be inline in this one file
 jest.mock('@kbn/i18n-react', () => {
+  const { i18n } = jest.requireActual('@kbn/i18n');
+  i18n.init({ locale: 'en' });
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
@@ -1029,7 +1031,7 @@ describe('when on the endpoint list page', () => {
       const agentPolicy = generator.generateAgentPolicy();
       agentPolicyId = agentPolicy.id;
       agentId = hosts[0].metadata.elastic.agent.id;
-      packagePolicy.policy_id = agentPolicyId;
+      packagePolicy.policy_ids = [agentPolicyId];
 
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: hostInfo,
@@ -1455,12 +1457,15 @@ describe('when on the endpoint list page', () => {
       const hostLink = await renderResult.findByTestId('hostLink');
       expect(hostLink).not.toBeNull();
     });
-    it('shows Agent Policy, View Agent Details and Reassign Policy Links when canAccessFleet RBAC control is enabled', async () => {
+    it('shows Agent Policy, View Agent Details and Reassign Policy Links when canReadFleetAgents,canWriteFleetAgents,canReadFleetAgentPolicies RBAC control is enabled', async () => {
       mockUserPrivileges.mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: {
           ...mockInitialUserPrivilegesState().endpointPrivileges,
           canAccessFleet: true,
+          canReadFleetAgents: true,
+          canWriteFleetAgents: true,
+          canReadFleetAgentPolicies: true,
         },
       });
       await renderAndClickActionsButton();

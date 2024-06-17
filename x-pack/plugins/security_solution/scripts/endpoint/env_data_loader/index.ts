@@ -22,7 +22,6 @@ export const cli = () => {
         url: cliContext.flags.kibana as string,
         username: cliContext.flags.username as string,
         password: cliContext.flags.password as string,
-        noCertForSsl: true,
       });
 
       const options = {

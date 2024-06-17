@@ -73,6 +73,22 @@ export const getErrorToastText = (
   }
 };
 
+export const showNoAlertsPrompt = ({
+  alertsContextCount,
+  isLoading,
+}: {
+  alertsContextCount: number | null;
+  isLoading: boolean;
+}): boolean => !isLoading && alertsContextCount != null && alertsContextCount === 0;
+
+export const showWelcomePrompt = ({
+  aiConnectorsCount,
+  isLoading,
+}: {
+  aiConnectorsCount: number | null;
+  isLoading: boolean;
+}): boolean => !isLoading && aiConnectorsCount != null && aiConnectorsCount === 0;
+
 export const showEmptyPrompt = ({
   attackDiscoveriesCount,
   isLoading,

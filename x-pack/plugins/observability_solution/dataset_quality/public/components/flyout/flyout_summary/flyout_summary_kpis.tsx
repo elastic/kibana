@@ -12,7 +12,7 @@ import { _IGNORED } from '../../../../common/es_fields';
 
 import { DataStreamDetails } from '../../../../common/api_types';
 import { useKibanaContextForPlugin } from '../../../utils';
-import { useLinkToLogsExplorer } from '../../../hooks';
+import { useRedirectLink } from '../../../hooks';
 import { FlyoutDataset, TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { FlyoutSummaryKpiItem, FlyoutSummaryKpiItemLoading } from './flyout_summary_kpi_item';
 import { getSummaryKpis } from './get_summary_kpis';
@@ -33,7 +33,7 @@ export function FlyoutSummaryKpis({
   } = useKibanaContextForPlugin();
   const hostsLocator = observabilityShared.locators.infra.hostsLocator;
 
-  const logsExplorerLinkProps = useLinkToLogsExplorer({
+  const redirectLinkProps = useRedirectLink({
     dataStreamStat,
     query: { language: 'kuery', query: `${_IGNORED}: *` },
     timeRangeConfig: timeRange,
@@ -44,10 +44,10 @@ export function FlyoutSummaryKpis({
       getSummaryKpis({
         dataStreamDetails,
         timeRange,
-        degradedDocsHref: logsExplorerLinkProps.href,
+        degradedDocsHref: redirectLinkProps.href,
         hostsLocator,
       }),
-    [dataStreamDetails, logsExplorerLinkProps, hostsLocator, timeRange]
+    [dataStreamDetails, redirectLinkProps, hostsLocator, timeRange]
   );
 
   return (

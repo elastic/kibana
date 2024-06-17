@@ -507,9 +507,9 @@ describe('getActionErrorLog()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.findEventsBySavedObjectIds.mockRejectedValueOnce(new Error('OMG 3!'));
 
-    expect(rulesClient.getActionErrorLog(getActionErrorLogParams())).rejects.toMatchInlineSnapshot(
-      `[Error: OMG 3!]`
-    );
+    await expect(
+      rulesClient.getActionErrorLog(getActionErrorLogParams())
+    ).rejects.toMatchInlineSnapshot(`[Error: OMG 3!]`);
   });
   describe('authorization', () => {
     beforeEach(() => {

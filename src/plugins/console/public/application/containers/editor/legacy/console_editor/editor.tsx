@@ -69,6 +69,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       storage,
     },
     docLinkVersion,
+    ...startServices
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
@@ -80,7 +81,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const editorInstanceRef = useRef<senseEditor.SenseEditor | null>(null);
 
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
-  useUIAceKeyboardMode(textArea, settings.isAccessibilityOverlayEnabled);
+  useUIAceKeyboardMode(textArea, startServices, settings.isAccessibilityOverlayEnabled);
 
   const openDocumentation = useCallback(async () => {
     const documentation = await getDocumentation(editorInstanceRef.current!, docLinkVersion);
@@ -222,7 +223,12 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     autocompleteInfo.retrieve(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
-    setupAutosave();
+    if (!initialQueryParams.load_from) {
+      // Don't setup autosaving editor content when we pre-load content
+      // This prevents losing the user's current console content when
+      // `loadFrom` query param is used for a console session
+      setupAutosave();
+    }
 
     return () => {
       unsubscribeResizer();
@@ -283,7 +289,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
         >
           <EuiFlexItem>
             <EuiToolTip
-              content={i18n.translate('console.sendRequestButtonTooltip', {
+              content={i18n.translate('console.sendRequestButtonTooltipContent', {
                 defaultMessage: 'Click to send request',
               })}
             >
@@ -291,7 +297,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
                 color="primary"
                 onClick={sendCurrentRequest}
                 data-test-subj="sendRequestButton"
-                aria-label={i18n.translate('console.sendRequestButtonTooltip', {
+                aria-label={i18n.translate('console.sendRequestButtonTooltipAriaLabel', {
                   defaultMessage: 'Click to send request',
                 })}
               >

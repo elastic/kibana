@@ -2,25 +2,25 @@ title: Bulk get assets response
 type: object
 deprecated: true
 properties:
-  response:
+  items:
     type: array
     items:
-      type: array
-      items:
-        type: object
-        properties:
-          id:
-            type: string
-          type:
-            $ref: ./saved_object_type.yaml
-          updatedAt:
-            type: string
-          attributes:
-            type: object
-            properties:
-              title:
-                type: string
-              description:
-                type: string
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          $ref: ./saved_object_type.yaml
+        updatedAt:
+          type: string
+        attributes:
+          type: object
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+        appLink:
+          type: string
 required:
   - items

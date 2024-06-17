@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LegendConfig } from '@kbn/visualizations-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
@@ -83,7 +82,6 @@ export type XYPersistedLayerConfig =
 export type XYPersistedState = Omit<XYState, 'layers'> & {
   layers: XYPersistedLayerConfig[];
   valuesInLegend?: boolean;
-  legend: Omit<LegendConfig, 'legendStats'>;
 };
 
 export function convertToRuntime(
@@ -97,7 +95,7 @@ export function convertToRuntime(
 }
 
 export function convertToPersistable(state: XYState) {
-  const persistableState: XYPersistedState = convertToValuesInLegend(state);
+  const persistableState: XYPersistedState = state;
   const savedObjectReferences: SavedObjectReference[] = [];
   const persistableLayers: XYPersistedLayerConfig[] = [];
 
@@ -290,16 +288,4 @@ function convertToLegendStats(state: XYState & { valuesInLegend?: unknown }) {
     return result;
   }
   return state;
-}
-
-function convertToValuesInLegend(state: XYState) {
-  const newState: XYPersistedState = cloneDeep(state);
-
-  if ('legendStats' in newState.legend && Array.isArray(newState.legend.legendStats)) {
-    newState.valuesInLegend = newState.legend.legendStats.includes(
-      XYLegendValue.CurrentAndLastValue
-    );
-    delete newState.legend.legendStats;
-  }
-  return newState;
 }

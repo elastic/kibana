@@ -89,7 +89,7 @@ export class TLSRuleExecutor {
   async getExpiredCertificates() {
     const { enabledMonitorQueryIds } = await this.getMonitors();
 
-    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(this.soClient);
+    const dynamicSettings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
 
     const expiryThreshold =
       this.params.certExpirationThreshold ??

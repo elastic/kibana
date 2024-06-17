@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 
 import type { CoreStart, AppMountParameters, AppLeaveHandler } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -58,6 +58,8 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { PluginStartContract } from '@kbn/alerting-plugin/public/plugin';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -129,6 +131,7 @@ export interface StartPlugins {
   timelines: TimelinesUIStart;
   sessionView: SessionViewStart;
   uiActions: UiActionsStart;
+  maps: MapsStartApi;
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
@@ -147,6 +150,7 @@ export interface StartPlugins {
   dataViewEditor: DataViewEditorStart;
   charts: ChartsPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  alerting: PluginStartContract;
   core: CoreStart;
 }
 
@@ -183,7 +187,7 @@ export type StartServices = CoreStart &
     telemetry: TelemetryClientStart;
     customDataService: DataPublicPluginStart;
     topValuesPopover: TopValuesPopoverService;
-    timelineFilterManager: FilterManager;
+    timelineDataService: DataPublicPluginStart;
   };
 
 export type StartRenderServices = Pick<

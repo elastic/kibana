@@ -78,8 +78,16 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     async getApiCredentialsForRole(role: string) {
       return sessionManager.getApiCredentialsForRole(role);
     },
+    async getEmail(role: string) {
+      return sessionManager.getEmail(role);
+    },
+
     async getUserData(role: string) {
       return sessionManager.getUserData(role);
+    },
+    async createApiKeyForDefaultRole() {
+      log.debug(`Creating api key for default role: [${this.DEFAULT_ROLE}]`);
+      return this.createApiKeyForRole(this.DEFAULT_ROLE);
     },
     async createApiKeyForRole(role: string): Promise<RoleCredentials> {
       const cookieHeader = await this.getApiCredentialsForRole(role);
@@ -98,6 +106,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
       const apiKey = body;
       const apiKeyHeader = { Authorization: 'ApiKey ' + apiKey.encoded };
 
+      log.debug(`Created api key for role: [${role}]`);
       return { apiKey, apiKeyHeader, cookieHeader };
     },
     async invalidateApiKeyForRole(roleCredentials: RoleCredentials) {

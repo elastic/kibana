@@ -57,7 +57,12 @@ export const validateRules = (
       return obj;
     }
 
-    const result = RuleToImport.safeParse(obj);
+    const result = RuleToImport.safeParse({
+      ...obj,
+      // Ignore the rule source field for now. A proper handling of this field
+      // will be added as part of https://github.com/elastic/kibana/issues/180168
+      rule_source: undefined,
+    });
     if (!result.success) {
       return new BadRequestError(stringifyZodError(result.error));
     }

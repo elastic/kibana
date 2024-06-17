@@ -8,12 +8,13 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiFilterButton, EuiIconTip, useEuiTheme } from '@elastic/eui';
+import { EuiFilterButton, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UserProfile, UserProfilesPopover } from '@kbn/user-profile-components';
 import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { useServices } from '../services';
+import { NoUsersTip } from './user_missing_tip';
 
 interface Context {
   enabled: boolean;
@@ -100,23 +101,6 @@ export const UserFilterPanel: FC<{}> = () => {
     });
   }, [query.data, searchTerm, selectedUsers, showNoUserOption]);
 
-  const noUsersTip = (
-    <EuiIconTip
-      aria-label="Additional information"
-      position="bottom"
-      type="questionInCircle"
-      color="inherit"
-      iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
-      css={{ textWrap: 'balance' }}
-      content={
-        <FormattedMessage
-          id="contentManagement.tableList.listing.userFilter.emptyMessageTooltip"
-          defaultMessage="Creators are assigned when dashboards are created, (for all dashboards created after version 8.14)."
-        />
-      }
-    />
-  );
-
   return (
     <>
       <UserProfilesPopover
@@ -154,7 +138,7 @@ export const UserFilterPanel: FC<{}> = () => {
                 id="contentManagement.tableList.listing.userFilter.emptyMessage"
                 defaultMessage="None of the dashboards have creators"
               />
-              {noUsersTip}
+              {<NoUsersTip />}
             </p>
           ),
           nullOptionLabel: i18n.translate(
@@ -164,7 +148,7 @@ export const UserFilterPanel: FC<{}> = () => {
             }
           ),
           nullOptionProps: {
-            append: noUsersTip,
+            append: <NoUsersTip />,
           },
           clearButtonLabel: (
             <FormattedMessage
@@ -180,7 +164,7 @@ export const UserFilterPanel: FC<{}> = () => {
           },
           onSearchChange: setSearchTerm,
         }}
-        panelProps={{ css: { minWidth: euiTheme.base * 18 } }}
+        panelProps={{ css: { minWidth: euiTheme.base * 22 } }}
       />
     </>
   );

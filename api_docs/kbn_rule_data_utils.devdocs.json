@@ -1519,7 +1519,7 @@
         "label": "AlertStatus",
         "description": [],
         "signature": [
-          "\"active\" | \"recovered\" | \"untracked\""
+          "\"recovered\" | \"active\" | \"untracked\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_status.ts",
         "deprecated": false,
@@ -1729,7 +1729,7 @@
         "label": "RuleCreationValidConsumer",
         "description": [],
         "signature": [
-          "\"alerts\" | \"observability\" | \"stackAlerts\" | \"logs\" | \"infrastructure\""
+          "\"observability\" | \"stackAlerts\" | \"alerts\" | \"logs\" | \"infrastructure\""
         ],
         "path": "packages/kbn-rule-data-utils/src/rule_types/index.ts",
         "deprecated": false,

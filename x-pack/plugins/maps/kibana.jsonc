@@ -24,7 +24,6 @@
       "navigation",
       "expressions",
       "visualizations",
-      "dashboard",
       "embeddable",
       "mapsEms",
       "share",
@@ -34,6 +33,7 @@
     "optionalPlugins": [
       "cloud",
       "customIntegrations",
+      "embeddableEnhanced",
       "home",
       "savedObjectsTagging",
       "charts",

@@ -232,6 +232,13 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
 
     return updateDataRetention(dataStreamName, data).then(({ data: responseData, error }) => {
       if (responseData) {
+        // If the response came back with a warning from ES, rely on that for the
+        // toast message.
+        if (responseData.warning) {
+          notificationService.showWarningToast(responseData.warning);
+          return onClose({ hasUpdatedDataRetention: true });
+        }
+
         const successMessage = i18n.translate(
           'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successDataRetentionNotification',
           {
@@ -249,7 +256,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         const errorMessage = i18n.translate(
           'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.errorDataRetentionNotification',
           {
-            defaultMessage: "Error updating data retention: '{error}'",
+            defaultMessage: "Error updating data retention: ''{error}''",
             values: { error: error.message },
           }
         );

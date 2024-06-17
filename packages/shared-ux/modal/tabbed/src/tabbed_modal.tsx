@@ -58,9 +58,15 @@ export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclarati
 export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
   modalWidth?: number;
   modalTitle?: string;
+  anchorElement?: HTMLElement;
 }
 
-const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWidth }) => {
+const TabbedModalInner: FC<ITabbedModalInner> = ({
+  onClose,
+  modalTitle,
+  modalWidth,
+  anchorElement,
+}) => {
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
 
@@ -91,6 +97,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
           disabled={tab.disabled}
           prepend={tab.prepend}
           append={tab.append}
+          data-test-subj={tab.id}
         >
           {tab.name}
         </EuiTab>
@@ -100,9 +107,13 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
 
   return (
     <EuiModal
-      onClose={onClose}
+      onClose={() => {
+        onClose();
+        setTimeout(() => anchorElement?.focus(), 1);
+      }}
       style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
       maxWidth={true}
+      data-test-subj="shareContextModal"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>

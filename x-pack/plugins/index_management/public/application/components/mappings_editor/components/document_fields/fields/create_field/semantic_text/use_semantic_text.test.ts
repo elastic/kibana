@@ -13,10 +13,15 @@ import { act } from 'react-dom/test-utils';
 const mlMock: any = {
   mlApi: {
     inferenceModels: {
-      createInferenceEndpoint: jest.fn(),
+      createInferenceEndpoint: jest.fn().mockResolvedValue({}),
     },
     trainedModels: {
-      startModelAllocation: jest.fn(),
+      startModelAllocation: jest.fn().mockResolvedValue({}),
+      getTrainedModels: jest.fn().mockResolvedValue([
+        {
+          fully_defined: true,
+        },
+      ]),
     },
   },
 };
@@ -93,6 +98,11 @@ describe('useSemanticText', () => {
       result.current.handleSemanticText(mockFieldData);
     });
 
+    expect(mlMock.mlApi.trainedModels.startModelAllocation).toHaveBeenCalledWith('.elser_model_2');
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'field.addSemanticText',
+      value: mockFieldData,
+    });
     expect(mlMock.mlApi.inferenceModels.createInferenceEndpoint).toHaveBeenCalledWith(
       'elser_model_2',
       'text_embedding',
@@ -105,16 +115,58 @@ describe('useSemanticText', () => {
         },
       }
     );
-    expect(mlMock.mlApi.trainedModels.startModelAllocation).toHaveBeenCalledWith('.elser_model_2');
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'field.addSemanticText',
-      value: mockFieldData,
+  });
+
+  it('should invoke the download api if the model does not exist', async () => {
+    const mlMockWithModelNotDownloaded: any = {
+      mlApi: {
+        inferenceModels: {
+          createInferenceEndpoint: jest.fn(),
+        },
+        trainedModels: {
+          startModelAllocation: jest.fn(),
+          getTrainedModels: jest.fn().mockResolvedValue([
+            {
+              fully_defined: false,
+            },
+          ]),
+          installElasticTrainedModelConfig: jest.fn().mockResolvedValue({}),
+        },
+      },
+    };
+    const { result } = renderHook(() =>
+      useSemanticText({
+        form,
+        setErrorsInTrainedModelDeployment: jest.fn(),
+        ml: mlMockWithModelNotDownloaded,
+      })
+    );
+
+    await act(async () => {
+      result.current.handleSemanticText(mockFieldData);
+    });
+
+    expect(
+      mlMockWithModelNotDownloaded.mlApi.trainedModels.installElasticTrainedModelConfig
+    ).toHaveBeenCalledWith('.elser_model_2');
+    expect(
+      mlMockWithModelNotDownloaded.mlApi.trainedModels.startModelAllocation
+    ).toHaveBeenCalledWith('.elser_model_2');
+    expect(
+      mlMockWithModelNotDownloaded.mlApi.inferenceModels.createInferenceEndpoint
+    ).toHaveBeenCalledWith('elser_model_2', 'text_embedding', {
+      service: 'elasticsearch',
+      service_settings: {
+        num_allocations: 1,
+        num_threads: 1,
+        model_id: '.elser_model_2',
+      },
     });
   });
 
   it('handles errors correctly', async () => {
     const mockError = new Error('Test error');
-    mlMock.mlApi.inferenceModels.createInferenceEndpoint.mockImplementationOnce(() => {
+    mlMock.mlApi?.trainedModels.startModelAllocation.mockImplementationOnce(() => {
       throw mockError;
     });
 

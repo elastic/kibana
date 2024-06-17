@@ -15,6 +15,7 @@ import {
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { useActor } from '@xstate/react';
+import { LogDocument } from '@kbn/discover-utils/src';
 import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 import {
   degradedDocButtonLabelWhenNotPresent,
@@ -24,7 +25,6 @@ import {
 } from '../components/common/translations';
 import * as constants from '../../common/constants';
 import { getStacktraceFields } from '../utils/get_stack_trace';
-import { LogDocument } from '../../common/document';
 import { ActionsColumnTooltip } from '../components/virtual_columns/column_tooltips/actions_column_tooltip';
 
 const ConnectedDegradedDocs = ({
@@ -141,7 +141,6 @@ export const createCustomControlColumnsConfiguration =
     };
 
     return {
-      leadingControlColumns: [checkBoxColumn],
-      trailingControlColumns: [actionsColumn],
+      leadingControlColumns: [checkBoxColumn, actionsColumn],
     };
   };

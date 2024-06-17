@@ -44,9 +44,9 @@ export const SessionPreviewContainer: FC = () => {
     ecsRowData: dataAsNestedObject,
   });
 
-  const goToSessionViewTab = useCallback(() => {
+  const goToSessionViewTab = useCallback(async () => {
     // open timeline
-    investigateInTimelineAlertClick();
+    await investigateInTimelineAlertClick();
 
     // open session view tab
     startTransaction({ name: ALERTS_ACTIONS.OPEN_SESSION_VIEW });
@@ -130,7 +130,7 @@ export const SessionPreviewContainer: FC = () => {
               tooltip: (
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTooltip"
-                  defaultMessage="Show session viewer"
+                  defaultMessage="Investigate in timeline"
                 />
               ),
             },

@@ -159,7 +159,10 @@ describe('useDiscoverInTimelineActions', () => {
             grid: undefined,
             hideAggregatedPreview: undefined,
             hideChart: true,
-            index: 'the-data-view-id',
+            dataSource: {
+              type: 'dataView',
+              dataViewId: 'the-data-view-id',
+            },
             interval: 'auto',
             query: customQuery,
             rowHeight: undefined,

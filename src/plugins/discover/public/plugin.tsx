@@ -29,6 +29,7 @@ import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
@@ -44,12 +45,14 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
+import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
@@ -79,6 +82,12 @@ import {
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
 import { ConfigSchema, ExperimentalFeatures } from '../common/config';
+import {
+  DataSourceProfileService,
+  DocumentProfileService,
+  ProfilesManager,
+  RootProfileService,
+} from './context_awareness';
 
 /**
  * @public
@@ -177,8 +186,10 @@ export interface DiscoverSetupPlugins {
  * @internal
  */
 export interface DiscoverStartPlugins {
+  aiops?: AiopsPluginStart;
   dataViews: DataViewsServicePublic;
   dataViewEditor: DataViewEditorStart;
+  dataVisualizer?: DataVisualizerPluginStart;
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
   navigation: NavigationStart;
@@ -204,8 +215,6 @@ export interface DiscoverStartPlugins {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
-export type StartRenderServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
-
 /**
  * Contains Discover, one of the oldest parts of Kibana
  * Discover provides embeddables for Dashboards
@@ -213,25 +222,28 @@ export type StartRenderServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'
 export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
 {
+  private readonly rootProfileService = new RootProfileService();
+  private readonly dataSourceProfileService = new DataSourceProfileService();
+  private readonly documentProfileService = new DocumentProfileService();
+  private readonly appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly historyService = new HistoryService();
+  private readonly inlineTopNav: Map<string | null, DiscoverCustomizationContext['inlineTopNav']> =
+    new Map([[null, defaultCustomizationContext.inlineTopNav]]);
+  private readonly experimentalFeatures: ExperimentalFeatures = {
+    ruleFormV2Enabled: false,
+  };
+
+  private scopedHistory?: ScopedHistory<unknown>;
+  private urlTracker?: UrlTracker;
+  private stopUrlTracking?: () => void;
+  private locator?: DiscoverAppLocator;
+  private contextLocator?: DiscoverContextAppLocator;
+  private singleDocLocator?: DiscoverSingleDocLocator;
+
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.experimentalFeatures =
       initializerContext.config.get().experimental ?? this.experimentalFeatures;
   }
-
-  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
-  private historyService = new HistoryService();
-  private scopedHistory?: ScopedHistory<unknown>;
-  private urlTracker?: UrlTracker;
-  private stopUrlTracking: (() => void) | undefined = undefined;
-  private locator?: DiscoverAppLocator;
-  private contextLocator?: DiscoverContextAppLocator;
-  private singleDocLocator?: DiscoverSingleDocLocator;
-  private inlineTopNav: Map<string | null, DiscoverCustomizationContext['inlineTopNav']> = new Map([
-    [null, defaultCustomizationContext.inlineTopNav],
-  ]);
-  private experimentalFeatures: ExperimentalFeatures = {
-    ruleFormV2Enabled: false,
-  };
 
   setup(
     core: CoreSetup<DiscoverStartPlugins, DiscoverStart>,
@@ -326,6 +338,7 @@ export class DiscoverPlugin
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
+          profilesManager: this.createProfilesManager(),
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
 
@@ -339,10 +352,11 @@ export class DiscoverPlugin
         const customizationContext$: Observable<DiscoverCustomizationContext> = services.chrome
           .getActiveSolutionNavId$()
           .pipe(
-            map((navId) => ({
+            map((solutionNavId) => ({
               ...defaultCustomizationContext,
+              solutionNavId,
               inlineTopNav:
-                this.inlineTopNav.get(navId) ??
+                this.inlineTopNav.get(solutionNavId) ??
                 this.inlineTopNav.get(null) ??
                 defaultCustomizationContext.inlineTopNav,
             }))
@@ -407,10 +421,7 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    // we need to register the application service at setup, but to render it
-    // there are some start dependencies necessary, for this reason
-    // initializeServices are assigned at start and used
-    // when the application/embeddable is mounted
+    this.registerProfiles();
 
     const viewSavedSearchAction = new ViewSavedSearchAction(core.application, this.locator!);
 
@@ -418,7 +429,6 @@ export class DiscoverPlugin
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
-    const getDiscoverServicesInternal = () => this.getDiscoverServices(core, plugins);
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 
     if (plugins.share && this.locator && isEsqlEnabled) {
@@ -429,6 +439,10 @@ export class DiscoverPlugin
         })
       );
     }
+
+    const getDiscoverServicesInternal = () => {
+      return this.getDiscoverServices(core, plugins, this.createEmptyProfilesManager());
+    };
 
     return {
       locator: this.locator,
@@ -444,7 +458,34 @@ export class DiscoverPlugin
     }
   }
 
-  private getDiscoverServices = (core: CoreStart, plugins: DiscoverStartPlugins) => {
+  private registerProfiles() {
+    // TODO: Conditionally register example profiles for functional testing in a follow up PR
+    // this.rootProfileService.registerProvider(o11yRootProfileProvider);
+    // this.dataSourceProfileService.registerProvider(logsDataSourceProfileProvider);
+    // this.documentProfileService.registerProvider(logDocumentProfileProvider);
+  }
+
+  private createProfilesManager() {
+    return new ProfilesManager(
+      this.rootProfileService,
+      this.dataSourceProfileService,
+      this.documentProfileService
+    );
+  }
+
+  private createEmptyProfilesManager() {
+    return new ProfilesManager(
+      new RootProfileService(),
+      new DataSourceProfileService(),
+      new DocumentProfileService()
+    );
+  }
+
+  private getDiscoverServices = (
+    core: CoreStart,
+    plugins: DiscoverStartPlugins,
+    profilesManager = this.createProfilesManager()
+  ) => {
     return buildServices({
       core,
       plugins,
@@ -454,6 +495,7 @@ export class DiscoverPlugin
       singleDocLocator: this.singleDocLocator!,
       history: this.historyService.getHistory(),
       urlTracker: this.urlTracker!,
+      profilesManager,
     });
   };
 

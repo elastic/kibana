@@ -65,3 +65,23 @@ vault_kv_set() {
 
   vault kv put "$VAULT_KV_PREFIX/$kv_path" "${fields[@]}"
 }
+
+function get_vault_role_id() {
+  if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
+    VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
+  else
+    VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
+  fi
+
+  echo "$VAULT_ROLE_ID"
+}
+
+function get_vault_secret_id() {
+    if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
+      VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
+    else
+      VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
+    fi
+
+    echo "$VAULT_SECRET_ID"
+}

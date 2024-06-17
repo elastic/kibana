@@ -6,4 +6,5 @@
  */
 
 export { HostCharts } from './host_charts';
-export { KubernetesCharts } from './kubernetes_charts';
+export { KubernetesNodeCharts, KubernetesContainerCharts } from './kubernetes_charts';
+export { DockerCharts } from './docker_charts';

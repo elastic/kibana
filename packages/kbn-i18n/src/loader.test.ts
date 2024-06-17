@@ -101,7 +101,10 @@ describe('I18n loader', () => {
         join(__dirname, './__fixtures__/test_plugin_1/translations/en.json')
       );
 
-      expect(await i18nLoader.getTranslationsByLocale('ru')).toEqual({ messages: {} });
+      expect(await i18nLoader.getTranslationsByLocale('ru')).toEqual({
+        locale: 'ru',
+        messages: {},
+      });
     });
 
     test('should return translation messages from a couple of files by specified locale', async () => {

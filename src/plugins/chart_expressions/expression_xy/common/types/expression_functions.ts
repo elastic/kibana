@@ -14,9 +14,12 @@ import type {
   DatatableColumnMeta,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import { LegendSize, XYLegendValue } from '@kbn/visualizations-plugin/common';
+import {
+  LegendSize,
+  ExpressionValueVisDimension,
+  XYLegendValue,
+} from '@kbn/visualizations-plugin/common';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
 import { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import {

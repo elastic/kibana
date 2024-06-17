@@ -12,7 +12,6 @@ import {
   ALERT_CONTEXT,
   ALERT_END,
   ALERT_EVALUATION_VALUE,
-  ALERT_INSTANCE_ID,
   ALERT_START,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
@@ -35,9 +34,7 @@ import { Threshold } from '../../../common/components/threshold';
 import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
 import { useLicense } from '../../../../hooks/use_license';
-import type { Group } from './types';
 
-const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 const formatThreshold = (threshold: number) => String(threshold);
 
 const AlertDetailsAppSection = ({
@@ -65,16 +62,6 @@ const AlertDetailsAppSection = ({
         .filter(identity)
         .join(' AND ')
     : '';
-  const groups: Group[] | undefined = rule.params.groupBy
-    ? rule.params.groupBy.flatMap((field) => {
-        const value: string = get(
-          alert.fields[ALERT_CONTEXT],
-          ['groupByKeys', ...field.split('.')],
-          null
-        );
-        return value ? { field, value } : [];
-      })
-    : undefined;
 
   const { derivedDataView } = useLogView({
     initialLogViewReference: rule.params.logView,
@@ -141,7 +128,7 @@ const AlertDetailsAppSection = ({
                 chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id={'threshold-ratio-chart'}
-                threshold={rule.params.count.value}
+                thresholds={[rule.params.count.value]}
                 value={Number(alert.fields[ALERT_EVALUATION_VALUE]?.toFixed(2))}
                 valueFormatter={formatThreshold}
               />
@@ -208,7 +195,7 @@ const AlertDetailsAppSection = ({
                 chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id="logCountThreshold"
-                threshold={rule.params.count.value}
+                thresholds={[rule.params.count.value]}
                 value={Number(alert.fields[ALERT_EVALUATION_VALUE])}
                 valueFormatter={formatThreshold}
               />
@@ -236,24 +223,6 @@ const AlertDetailsAppSection = ({
     } else return null;
   };
 
-  const getLogsHistoryChart = () => {
-    return (
-      rule &&
-      rule.params.criteria.length === 1 && (
-        <EuiFlexItem>
-          <LogsHistoryChart
-            rule={{
-              ...rule,
-              params: { ...rule.params, timeSize: 12, timeUnit: 'h' },
-            }}
-            instanceId={alert.fields[ALERT_INSTANCE_ID]}
-            groups={groups}
-          />
-        </EuiFlexItem>
-      )
-    );
-  };
-
   const getLogRateAnalysisSection = () => {
     return hasLicenseForLogRateAnalysis ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
   };
@@ -263,7 +232,6 @@ const AlertDetailsAppSection = ({
       {getLogRatioChart()}
       {getLogCountChart()}
       {getLogRateAnalysisSection()}
-      {getLogsHistoryChart()}
     </EuiFlexGroup>
   );
 };

@@ -6,6 +6,7 @@
  */
 
 import {
+  ClusterPutComponentTemplateRequest,
   IndicesGetIndexTemplateResponse,
   IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -47,18 +48,15 @@ function templateExists(
   });
 }
 
-// interface IndexPatternJson {
-//   index_patterns: string[];
-//   name: string;
-//   template: {
-//     mappings: Record<string, any>;
-//     settings: Record<string, any>;
-//   };
-// }
-
 interface TemplateManagementOptions {
   esClient: ElasticsearchClient;
   template: IndicesPutIndexTemplateRequest;
+  logger: Logger;
+}
+
+interface ComponentManagementOptions {
+  esClient: ElasticsearchClient;
+  component: ClusterPutComponentTemplateRequest;
   logger: Logger;
 }
 
@@ -93,9 +91,6 @@ export async function maybeCreateTemplate({
 }
 
 export async function upsertTemplate({ esClient, template, logger }: TemplateManagementOptions) {
-  const pattern = ASSETS_INDEX_PREFIX + '*';
-  template.index_patterns = [pattern];
-
   try {
     await esClient.indices.putIndexTemplate(template);
   } catch (error: any) {
@@ -107,4 +102,18 @@ export async function upsertTemplate({ esClient, template, logger }: TemplateMan
     `Asset manager index template is up to date (use debug logging to see what was installed)`
   );
   logger.debug(`Asset manager index template: ${JSON.stringify(template)}`);
+}
+
+export async function upsertComponent({ esClient, component, logger }: ComponentManagementOptions) {
+  try {
+    await esClient.cluster.putComponentTemplate(component);
+  } catch (error: any) {
+    logger.error(`Error updating asset manager component template: ${error.message}`);
+    return;
+  }
+
+  logger.info(
+    `Asset manager component template is up to date (use debug logging to see what was installed)`
+  );
+  logger.debug(`Asset manager component template: ${JSON.stringify(component)}`);
 }

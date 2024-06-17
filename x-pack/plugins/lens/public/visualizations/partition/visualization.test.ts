@@ -205,35 +205,6 @@ describe('pie_visualization', () => {
     });
   });
 
-  describe('#getPersistableState', () => {
-    describe('converting to legend stats', () => {
-      it('converts `legendStats` to `valuesInLegend`', () => {
-        const runtimeState = getExampleState();
-        // no legend stats at all
-        const { state } = pieVisualization.getPersistableState!(runtimeState);
-        expect('legendStats' in state.layers[0]).toBeFalsy();
-        expect(state.layers[0].showValuesInLegend).toEqual(undefined);
-
-        // legend stats === ['value']
-        runtimeState.layers[0].legendStats = [PartitionLegendValue.Value];
-        const { state: stateWithShowValuesInLegendTrue } =
-          pieVisualization.getPersistableState!(runtimeState);
-
-        expect('legendStats' in stateWithShowValuesInLegendTrue.layers[0]).toBeFalsy();
-        expect(stateWithShowValuesInLegendTrue.layers[0].showValuesInLegend).toEqual(true);
-
-        // legend stats === ['value']
-        runtimeState.layers[0].legendStats = [];
-
-        const { state: stateWithShowValuesInLegendFalse } =
-          pieVisualization.getPersistableState!(runtimeState);
-
-        expect('legendStats' in stateWithShowValuesInLegendFalse.layers[0]).toBeFalsy();
-        expect(stateWithShowValuesInLegendFalse.layers[0].showValuesInLegend).toEqual(false);
-      });
-    });
-  });
-
   describe('#removeDimension', () => {
     it('removes corresponding collapse function if exists', () => {
       const state = getExampleState();
