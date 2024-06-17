@@ -16,9 +16,16 @@ export type {
   CreateCrossClusterAPIKeyParams,
   GrantAPIKeyResult,
   APIKeys,
+  UpdateAPIKeyParams,
+  UpdateAPIKeyResult,
+  UpdateAPIKeyValidationError,
+  UpdateCrossClusterAPIKeyParams,
+  UpdateRestAPIKeyParams,
+  UpdateRestAPIKeyWithKibanaPrivilegesParams,
 } from './api_keys';
 export {
   crossClusterApiKeySchema,
   getRestApiKeyWithKibanaPrivilegesSchema,
+  getUpdateRestApiKeyWithKibanaPrivilegesSchema,
   restApiKeySchema,
 } from './api_keys';
