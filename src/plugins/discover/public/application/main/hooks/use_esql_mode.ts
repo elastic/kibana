@@ -79,7 +79,6 @@ export function useEsqlMode({
             let nextColumns: string[] = prev.current.recentlyUpdatedToColumns;
 
             if (hasResults) {
-              // check if state needs to contain column transformation due to a different columns in the result set
               const firstRow = next.result![0];
               const firstRowColumns = Object.keys(firstRow.raw);
 
