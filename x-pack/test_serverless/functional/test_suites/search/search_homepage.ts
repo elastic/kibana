@@ -14,7 +14,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'svlSearchHomePage']);
   const svlUserManager = getService('svlUserManager');
   const uiSettings = getService('uiSettings');
-  const svlSearchNavigation = getService('svlSearchNavigation');
   let roleAuthc: RoleCredentials;
 
   const HOMEPAGE_FF_UI_SETTING = 'searchHomepage:homepageEnabled';
