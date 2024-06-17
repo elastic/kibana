@@ -13,21 +13,33 @@ import { FormattedMessage } from '@kbn/i18n-react';
 const SolutionOptions = {
   search: {
     iconType: 'logoElasticsearch',
-    label: <FormattedMessage id="spaceSolutionBadge.elasticsearch" defaultMessage="Search" />,
+    label: (
+      <FormattedMessage
+        id="xpack.spaces.spaceSolutionBadge.elasticsearch"
+        defaultMessage="Search"
+      />
+    ),
   },
   security: {
     iconType: 'logoSecurity',
-    label: <FormattedMessage id="spaceSolutionBadge.security" defaultMessage="Security" />,
+    label: (
+      <FormattedMessage id="xpack.spaces.spaceSolutionBadge.security" defaultMessage="Security" />
+    ),
   },
   observability: {
     iconType: 'logoObservability',
     label: (
-      <FormattedMessage id="spaceSolutionBadge.observability" defaultMessage="Observability" />
+      <FormattedMessage
+        id="xpack.spaces.spaceSolutionBadge.observability"
+        defaultMessage="Observability"
+      />
     ),
   },
   classic: {
     iconType: 'logoElasticStack',
-    label: <FormattedMessage id="spaceSolutionBadge.classic" defaultMessage="Classic" />,
+    label: (
+      <FormattedMessage id="xpack.spaces.spaceSolutionBadge.classic" defaultMessage="Classic" />
+    ),
   },
 };
 
