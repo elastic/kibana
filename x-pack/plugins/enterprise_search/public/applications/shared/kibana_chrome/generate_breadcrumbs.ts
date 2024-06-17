@@ -15,7 +15,6 @@ import {
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   INFERENCE_ENDPOINTS_PLUGIN,
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   ENTERPRISE_SEARCH_PRODUCT_NAME,
   AI_SEARCH_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
@@ -28,6 +27,8 @@ import { stripLeadingSlash } from '../../../../common/strip_slashes';
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
 import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
+
+import { getHomeURL } from './breadcrumbs_home';
 
 /**
  * Types
@@ -97,16 +98,6 @@ export const useEuiBreadcrumbs = (breadcrumbs: Breadcrumbs): EuiBreadcrumb[] => 
 
     return breadcrumb;
   });
-};
-
-/**
- * HACK for base homepage URL, this can be removed and updated to a static
- * URL when Search Homepage is no longer feature flagged.
- */
-const breadCrumbHome = { url: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL };
-const getHomeURL = () => breadCrumbHome.url;
-export const setBreadcrumbHomeUrl = (url: string) => {
-  breadCrumbHome.url = url;
 };
 
 /**

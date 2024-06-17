@@ -71,7 +71,7 @@ import {
 
 import { INFERENCE_ENDPOINTS_PATH } from './applications/enterprise_search_relevance/routes';
 import { docLinks } from './applications/shared/doc_links';
-import { setBreadcrumbHomeUrl } from './applications/shared/kibana_chrome/generate_breadcrumbs';
+import { setBreadcrumbHomeUrl } from './applications/shared/kibana_chrome/breadcrumbs_home';
 import type { DynamicSideNavItems } from './navigation_tree';
 
 export interface ClientData extends InitialAppData {
