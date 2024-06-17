@@ -29,18 +29,16 @@ import {
   getSnappedWindowParameters,
   getWindowParametersForTrigger,
   type DocumentCountStatsChangePoint,
-  type LogRateAnalysisType,
   type LogRateHistogramItem,
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
+import { type BrushSelectionUpdatePayload } from '@kbn/aiops-log-rate-analysis/state';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { DualBrush, DualBrushAnnotation } from '../..';
-
-import { useLogRateAnalysisStateContext } from '../log_rate_analysis_state_provider';
 
 import { BrushBadge } from './brush_badge';
 
@@ -77,22 +75,17 @@ export interface BrushSettings {
 }
 
 /**
- * Callback function which gets called when the brush selection has changed
- *
- * @param windowParameters Baseline and deviation time ranges.
- * @param force Force update
- * @param logRateAnalysisType `spike` or `dip` based on median log rate bucket size
- */
-export type BrushSelectionUpdateHandler = (
-  windowParameters: WindowParameters,
-  force: boolean,
-  logRateAnalysisType: LogRateAnalysisType
-) => void;
-
-/**
  * Callback to set the autoRunAnalysis flag
  */
 type SetAutoRunAnalysisFn = (isAutoRun: boolean) => void;
+
+/**
+ * Brush selection update handler
+ */
+type BrushSelectionUpdateHandler = (
+  /** Payload for the brush selection update */
+  d: BrushSelectionUpdatePayload
+) => void;
 
 /**
  * Props for document count chart
@@ -126,7 +119,7 @@ export interface DocumentCountChartProps {
   /** Whether or not brush has been reset */
   isBrushCleared: boolean;
   /** Callback to set the autoRunAnalysis flag */
-  setAutoRunAnalysis?: SetAutoRunAnalysisFn;
+  setAutoRunAnalysisFn?: SetAutoRunAnalysisFn;
   /** Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
   /** Optional style to override bar chart */
@@ -190,7 +183,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     interval,
     chartPointsSplitLabel,
     isBrushCleared,
-    setAutoRunAnalysis,
+    setAutoRunAnalysisFn,
     autoAnalysisStart,
     barColorOverride,
     barStyleAccessor,
@@ -315,7 +308,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           windowParameters === undefined &&
           adjustedChartPoints !== undefined
         ) {
-          if (setAutoRunAnalysis) {
+          if (setAutoRunAnalysisFn) {
             const autoRun =
               typeof startRange !== 'number' ||
               (typeof startRange === 'number' &&
@@ -323,7 +316,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
                 startRange >= changePoint.startTs &&
                 startRange <= changePoint.endTs);
 
-            setAutoRunAnalysis(autoRun);
+            setAutoRunAnalysisFn(autoRun);
           }
 
           const wp = getWindowParametersForTrigger(
@@ -338,11 +331,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           setWindowParameters(wpSnap);
 
           if (brushSelectionUpdateHandler !== undefined) {
-            brushSelectionUpdateHandler(
-              wpSnap,
-              true,
-              getLogRateAnalysisType(adjustedChartPoints, wpSnap)
-            );
+            brushSelectionUpdateHandler({
+              windowParameters: wpSnap,
+              force: true,
+              analysisType: getLogRateAnalysisType(adjustedChartPoints, wpSnap),
+            });
           }
         }
       }
@@ -354,7 +347,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
       timeRangeLatest,
       snapTimestamps,
       originalWindowParameters,
-      setAutoRunAnalysis,
+      setAutoRunAnalysisFn,
       setWindowParameters,
       brushSelectionUpdateHandler,
       adjustedChartPoints,
@@ -395,7 +388,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     }
     setWindowParameters(wp);
     setWindowParametersAsPixels(wpPx);
-    brushSelectionUpdateHandler(wp, false, getLogRateAnalysisType(adjustedChartPoints, wp));
+    brushSelectionUpdateHandler({
+      windowParameters: wp,
+      force: false,
+      analysisType: getLogRateAnalysisType(adjustedChartPoints, wp),
+    });
   }
 
   const [mlBrushWidth, setMlBrushWidth] = useState<number>();
@@ -554,26 +551,5 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
         </Chart>
       </div>
     </>
-  );
-};
-
-/**
- * Functional component that renders a `DocumentCountChart` with additional properties
- * managed by the log rate analysis state. It leverages the `useLogRateAnalysisStateContext`
- * to acquire state variables like `initialAnalysisStart` and functions such as
- * `setAutoRunAnalysis`. These values are then passed as props to the `DocumentCountChart`.
- *
- * @param props - The properties passed to the DocumentCountChart component.
- * @returns The DocumentCountChart component enhanced with automatic analysis start capabilities.
- */
-export const DocumentCountChartWithAutoAnalysisStart: FC<DocumentCountChartProps> = (props) => {
-  const { initialAnalysisStart, setAutoRunAnalysis } = useLogRateAnalysisStateContext();
-
-  return (
-    <DocumentCountChart
-      {...props}
-      autoAnalysisStart={initialAnalysisStart}
-      setAutoRunAnalysis={setAutoRunAnalysis}
-    />
   );
 };
