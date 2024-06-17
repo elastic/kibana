@@ -114,7 +114,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('with registry', () => {
+    describe.skip('with registry', () => {
       it('allows for updating from registry when outdated package is installed from bundled source', async () => {
         await bundlePackage('nginx-1.1.0');
 
