@@ -6,31 +6,22 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexItem,
-  EuiPageTemplate,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
-import {
-  AnonymizationSettings,
-  EvaluationSettings,
-  KnowledgeBaseSettings,
-  QuickPromptSettings,
-  SystemPromptSettings,
-} from '.';
+import { EvaluationSettings, KnowledgeBaseSettings } from '.';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
-import { ConnectorsSettings } from '../../connectorland/connector_settings';
+import { ConnectorsSettingsManagement } from '../../connectorland/connector_settings_management';
 import { ConversationSettingsManagement } from '../conversations/converstaion_settings_management';
+import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management.tsx';
+import { SystemPromptSettingsManagement } from '../prompt_editor/system_prompt/system_prompt_settings_management';
+import { AnonymizationSettingsManagement } from '../../data_anonymization/settings/anonomization_settings_management';
 
 export const CONNECTORS_TAB = 'CONNECTORS_TAB' as const;
 export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
@@ -45,6 +36,7 @@ interface Props {
   selectedConversation: Conversation;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   isFlyoutMode: boolean;
+  refetchConversations: () => void;
 }
 
 /**
@@ -57,11 +49,13 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     setSelectedConversationId,
     conversations,
     isFlyoutMode,
+    refetchConversations,
   }) => {
     const {
       actionTypeRegistry,
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
+      navigateToApp,
       selectedSettingsTab,
       setSelectedSettingsTab,
       toasts,
@@ -70,11 +64,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     const { data: anonymizationFields } = useFetchAnonymizationFields();
 
     // Connector details
-    const {
-      data: connectors,
-      refetch: refetchConnectors,
-      isFetchedAfterMount: areConnectorsFetched,
-    } = useLoadConnectors({
+    const { data: connectors } = useLoadConnectors({
       http,
     });
     const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
@@ -112,6 +102,10 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
         return conversationSettings[defaultSelectedConversation.title];
       }
     );
+
+    const onHandleSelectedConversationChange = useCallback((conversation?: Conversation) => {
+      setSelectedConversation(conversation);
+    }, []);
 
     useEffect(() => {
       if (selectedConversation != null) {
@@ -246,57 +240,59 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           `}
         >
           {selectedSettingsTab === CONNECTORS_TAB && (
-            <ConnectorsSettings
-              connectors={connectors}
-              refetchConnectors={refetchConnectors}
-              areConnectorsFetched={areConnectorsFetched}
-            />
+            <ConnectorsSettingsManagement navigateToApp={navigateToApp} />
           )}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
             <ConversationSettingsManagement
               actionTypeRegistry={actionTypeRegistry}
               allSystemPrompts={systemPromptSettings}
-              areConnectorsFetched={areConnectorsFetched}
               assistantStreamingEnabled={assistantStreamingEnabled}
               connectors={connectors}
               conversations={conversations}
-              conversationSettings={conversationSettings}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               handleSave={handleSave}
               isFlyoutMode={isFlyoutMode}
+              refetchConversations={refetchConversations}
               resetSettings={resetSettings}
+              selectedConversation={selectedConversation}
               setAssistantStreamingEnabled={handleChange(setUpdatedAssistantStreamingEnabled)}
               setConversationSettings={handleChange(setConversationSettings)}
               setConversationsSettingsBulkActions={handleChange(
                 setConversationsSettingsBulkActions
               )}
-            />
-          )}
-          {selectedSettingsTab === QUICK_PROMPTS_TAB && (
-            <QuickPromptSettings
-              quickPromptSettings={quickPromptSettings}
-              onSelectedQuickPromptChange={onHandleSelectedQuickPromptChange}
-              selectedQuickPrompt={selectedQuickPrompt}
-              setUpdatedQuickPromptSettings={handleChange(setUpdatedQuickPromptSettings)}
+              onSelectedConversationChange={onHandleSelectedConversationChange}
             />
           )}
           {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
-            <SystemPromptSettings
+            <SystemPromptSettingsManagement
+              conversations={conversations}
               conversationSettings={conversationSettings}
               defaultConnector={defaultConnector}
               systemPromptSettings={systemPromptSettings}
-              onSelectedSystemPromptChange={onHandleSelectedSystemPromptChange}
+              handleSave={handleSave}
               selectedSystemPrompt={selectedSystemPrompt}
+              onSelectedSystemPromptChange={onHandleSelectedSystemPromptChange}
               setConversationSettings={handleChange(setConversationSettings)}
               setConversationsSettingsBulkActions={handleChange(
                 setConversationsSettingsBulkActions
               )}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               setUpdatedSystemPromptSettings={handleChange(setUpdatedSystemPromptSettings)}
+              resetSettings={resetSettings}
+            />
+          )}
+          {selectedSettingsTab === QUICK_PROMPTS_TAB && (
+            <QuickPromptSettingsManagement
+              quickPromptSettings={quickPromptSettings}
+              onSelectedQuickPromptChange={onHandleSelectedQuickPromptChange}
+              selectedQuickPrompt={selectedQuickPrompt}
+              setUpdatedQuickPromptSettings={handleChange(setUpdatedQuickPromptSettings)}
+              handleSave={handleSave}
+              resetSettings={resetSettings}
             />
           )}
           {selectedSettingsTab === ANONYMIZATION_TAB && (
-            <AnonymizationSettings
+            <AnonymizationSettingsManagement
               defaultPageSize={5}
               anonymizationFields={updatedAnonymizationData}
               anonymizationFieldsBulkActions={anonymizationFieldsBulkActions}
@@ -312,7 +308,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           )}
           {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
         </EuiPageTemplate.Section>
-        {hasPendingChanges && (
+        {/* {hasPendingChanges && (
           <EuiPageTemplate.BottomBar paddingSize="s" position="fixed">
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
@@ -340,7 +336,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageTemplate.BottomBar>
-        )}
+        )} */}
       </>
     );
   }

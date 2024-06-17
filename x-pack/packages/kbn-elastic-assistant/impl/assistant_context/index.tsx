@@ -10,14 +10,11 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import {
-  ActionTypeRegistryContract,
-  TriggersAndActionsUIPublicPluginStart,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage, useSessionStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { NavigateToAppOptions } from '@kbn/core/public';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -72,9 +69,6 @@ export interface AssistantProviderProps {
   baseSystemPrompts?: Prompt[];
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
-  getAddConnectorFlyout: TriggersAndActionsUIPublicPluginStart['getAddConnectorFlyout'];
-  getDeleteConnectorModalConfirmation: TriggersAndActionsUIPublicPluginStart['getDeleteConnectorModalConfirmation'];
-  getEditConnectorFlyout: TriggersAndActionsUIPublicPluginStart['getEditConnectorFlyout'];
   getComments: (commentArgs: {
     abortStream: () => void;
     currentConversation?: Conversation;
@@ -90,7 +84,7 @@ export interface AssistantProviderProps {
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
-  settings: SettingsStart;
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   title?: string;
   toasts?: IToasts;
 }
@@ -120,7 +114,6 @@ export interface UseAssistantContext {
   baseQuickPrompts: QuickPrompt[];
   baseSystemPrompts: Prompt[];
   baseConversations: Record<string, Conversation>;
-  getEditConnectorFlyout: TriggersAndActionsUIPublicPluginStart['getEditConnectorFlyout'];
   getComments: (commentArgs: {
     abortStream: () => void;
     currentConversation?: Conversation;
@@ -133,11 +126,11 @@ export interface UseAssistantContext {
     setIsStreaming: (isStreaming: boolean) => void;
     isFlyoutMode: boolean;
   }) => EuiCommentProps[];
-  getDeleteConnectorModalConfirmation: TriggersAndActionsUIPublicPluginStart['getDeleteConnectorModalConfirmation'];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;
   getLastConversationId: (conversationTitle?: string) => string;
   promptContexts: Record<string, PromptContext>;
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs | null;
@@ -149,7 +142,6 @@ export interface UseAssistantContext {
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
-  settings: SettingsStart;
   setTraceOptions: (traceOptions: {
     apmUrl: string;
     langSmithProject: string;
@@ -175,14 +167,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   baseQuickPrompts = [],
   baseSystemPrompts = BASE_SYSTEM_PROMPTS,
   children,
-  getAddConnectorFlyout,
-  getDeleteConnectorModalConfirmation,
-  getEditConnectorFlyout,
   getComments,
   http,
   baseConversations,
+  navigateToApp,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
-  settings,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
 }) => {
@@ -308,13 +297,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseQuickPrompts,
       baseSystemPrompts,
       docLinks,
-      getAddConnectorFlyout,
-      getEditConnectorFlyout,
-      getDeleteConnectorModalConfirmation,
       getComments,
       http,
       knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
       promptContexts,
+      navigateToApp,
       nameSpace,
       registerPromptContext,
       selectedSettingsTab,
@@ -326,7 +313,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setKnowledgeBase: setLocalStorageKnowledgeBase,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
-      settings,
       setTraceOptions: setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,
@@ -351,13 +337,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseQuickPrompts,
       baseSystemPrompts,
       docLinks,
-      getAddConnectorFlyout,
-      getEditConnectorFlyout,
-      getDeleteConnectorModalConfirmation,
       getComments,
       http,
       localStorageKnowledgeBase,
       promptContexts,
+      navigateToApp,
       nameSpace,
       registerPromptContext,
       selectedSettingsTab,
@@ -366,7 +350,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
       setLocalStorageKnowledgeBase,
-      settings,
       setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,

@@ -17,7 +17,7 @@ export const CONVERSATIONS_TABLE_COLUMN_TYPE = i18n.translate(
 export const CONVERSATIONS_TABLE_COLUMN_SYSTEM_PROMPT = i18n.translate(
   'xpack.elasticAssistant.assistant.conversationSettings.column.systemPrompt',
   {
-    defaultMessage: 'Title',
+    defaultMessage: 'System prompt',
   }
 );
 
@@ -39,5 +39,12 @@ export const CONVERSATIONS_TABLE_COLUMN_ACTIONS = i18n.translate(
   'xpack.elasticAssistant.assistant.conversationSettings.column.actions',
   {
     defaultMessage: 'Actions',
+  }
+);
+
+export const DELETE_CONVERSATION_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSettings.deleteConfirmation.title',
+  {
+    defaultMessage: 'conversation',
   }
 );

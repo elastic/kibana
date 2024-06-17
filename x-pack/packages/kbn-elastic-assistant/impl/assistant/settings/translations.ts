@@ -104,3 +104,10 @@ export const SAVE = i18n.translate(
     defaultMessage: 'Save',
   }
 );
+
+export const DELETE = i18n.translate(
+  'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.slDeleteButtonTitle',
+  {
+    defaultMessage: 'Delete',
+  }
+);

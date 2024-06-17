@@ -10,8 +10,7 @@ import type {
   ActionTypeModel,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { HttpSetup } from '@kbn/core/public';
-import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { PRECONFIGURED_CONNECTOR } from './translations';
 
@@ -76,27 +75,3 @@ export const getConnectorTypeTitle = (
 
   return actionType;
 };
-
-export async function deleteActions({
-  ids,
-  http,
-}: {
-  ids: string[];
-  http: HttpSetup;
-}): Promise<{ successes: string[]; errors: string[] }> {
-  const successes: string[] = [];
-  const errors: string[] = [];
-  await Promise.all(
-    ids.map((id) =>
-      http.delete<string>(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}`)
-    )
-  ).then(
-    function (fulfilled) {
-      successes.push(...fulfilled);
-    },
-    function (rejected) {
-      errors.push(...rejected);
-    }
-  );
-  return { successes, errors };
-}

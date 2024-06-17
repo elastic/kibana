@@ -68,17 +68,3 @@ export const SYSTEM_PROMPT_DEFAULT_CONVERSATIONS_HELP_TEXT = i18n.translate(
     defaultMessage: 'Conversations that should use this System Prompt by default',
   }
 );
-
-export const CANCEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.slCancelButtonTitle',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
-
-export const SAVE = i18n.translate(
-  'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.slSaveButtonTitle',
-  {
-    defaultMessage: 'Save',
-  }
-);

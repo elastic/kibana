@@ -11,6 +11,7 @@ import { Conversation } from '../../../assistant_context/types';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';
 import { Prompt } from '../../../..';
+import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 
 const emptyConversations = {};
 
@@ -26,7 +27,7 @@ export type ConversationTableItem = Conversation & {
   systemPrompt?: string;
 };
 
-export const useConversationSelectorSettings = ({
+export const useConversationsList = ({
   allSystemPrompts,
   actionTypeRegistry,
   connectors,
@@ -39,14 +40,22 @@ export const useConversationSelectorSettings = ({
       );
 
       const actionType = getConnectorTypeTitle(connector, actionTypeRegistry);
-      const systemPrompt = allSystemPrompts.find(
+      const systemPrompt: Prompt | undefined = allSystemPrompts.find(
         ({ id }) => id === conversation.apiConfig?.defaultSystemPromptId
       );
 
+      const defaultSystemPrompt = getDefaultSystemPrompt({
+        allSystemPrompts,
+        conversation,
+      });
       return {
         ...conversation,
         actionType,
-        systemPrompt: systemPrompt?.label ?? systemPrompt?.name,
+        systemPrompt:
+          systemPrompt?.label ??
+          systemPrompt?.name ??
+          defaultSystemPrompt?.label ??
+          defaultSystemPrompt?.name,
       };
     });
   }, [allSystemPrompts, actionTypeRegistry, connectors, conversations]);

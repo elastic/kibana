@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
-import * as i18n from './translations';
-import { useAnonymizationListUpdate } from './use_anonymization_list_update';
+import * as i18n from '../anonymization_settings/translations';
+import { useAnonymizationListUpdate } from '../anonymization_settings/use_anonymization_list_update';
 
 export interface Props {
   defaultPageSize?: number;
@@ -27,7 +28,7 @@ export interface Props {
   >;
 }
 
-const AnonymizationSettingsComponent: React.FC<Props> = ({
+const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
   defaultPageSize,
   anonymizationFields,
   anonymizationFieldsBulkActions,
@@ -41,32 +42,37 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
     setUpdatedAnonymizationData,
   });
   return (
-    <>
-      <EuiTitle size={'s'}>
+    <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+      <EuiTitle size={'xs'}>
         <h2>{i18n.SETTINGS_TITLE}</h2>
       </EuiTitle>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       <EuiText size={'xs'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
 
-      <EuiHorizontalRule margin={'s'} />
+      <EuiSpacer size="m" />
 
       <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
-        <Stats isDataAnonymizable={true} anonymizationFields={anonymizationFields.data} />
+        <Stats
+          isDataAnonymizable={true}
+          anonymizationFields={anonymizationFields.data}
+          titleSize="m"
+          gap={euiThemeVars.euiSizeS}
+        />
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
       <ContextEditor
         anonymizationFields={anonymizationFields}
+        compressed={false}
         onListUpdated={onListUpdated}
         rawData={null}
         pageSize={defaultPageSize}
-        compressed={true}
       />
-    </>
+    </EuiPanel>
   );
 };
 
-AnonymizationSettingsComponent.displayName = 'AnonymizationSettingsComponent';
+AnonymizationSettingsManagementComponent.displayName = 'AnonymizationSettingsManagementComponent';
 
-export const AnonymizationSettings = React.memo(AnonymizationSettingsComponent);
+export const AnonymizationSettingsManagement = React.memo(AnonymizationSettingsManagementComponent);

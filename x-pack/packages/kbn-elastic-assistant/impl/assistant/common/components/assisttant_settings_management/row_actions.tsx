@@ -11,32 +11,33 @@ import React, { useCallback, useState } from 'react';
 import {
   DELETE_CONNECTOR_BUTTON,
   EDIT_CONNECTOR_BUTTON,
-} from '../../../connectorland/translations';
+} from '../../../../connectorland/translations';
 
 interface Props<T> {
   rowItem: T;
-  onEdit: (rowItem: T) => void;
-  onDelete: (rowItem: T) => void;
+  onEdit?: (rowItem: T) => void;
+  onDelete?: (rowItem: T) => void;
+  disabled?: boolean;
 }
 
 type RowActionsComponentType = <T>(props: Props<T>) => JSX.Element;
 
-const RowActionsComponent = <T,>({ rowItem, onEdit, onDelete }: Props<T>) => {
+const RowActionsComponent = <T,>({ disabled, rowItem, onEdit, onDelete }: Props<T>) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const handleEditConnector = useCallback(() => {
     closePopover();
-    onEdit(rowItem);
+    onEdit?.(rowItem);
   }, [closePopover, onEdit, rowItem]);
 
   const handleDeleteConnector = useCallback(() => {
     closePopover();
-    onDelete(rowItem);
+    onDelete?.(rowItem);
   }, [closePopover, onDelete, rowItem]);
 
   const onButtonClick = useCallback(() => setIsPopoverOpen((prevState) => !prevState), []);
-  return (
+  return onEdit || onDelete ? (
     <EuiPopover
       button={
         <EuiButtonIcon
@@ -51,19 +52,23 @@ const RowActionsComponent = <T,>({ rowItem, onEdit, onDelete }: Props<T>) => {
       anchorPosition="downLeft"
     >
       <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-        <EuiFlexItem>
-          <EuiButtonEmpty iconType="pencil" onClick={handleEditConnector}>
-            {EDIT_CONNECTOR_BUTTON}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButtonEmpty iconType="trash" onClick={handleDeleteConnector}>
-            {DELETE_CONNECTOR_BUTTON}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {onEdit != null && (
+          <EuiFlexItem>
+            <EuiButtonEmpty iconType="pencil" onClick={handleEditConnector} disabled={disabled}>
+              {EDIT_CONNECTOR_BUTTON}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        {onDelete != null && (
+          <EuiFlexItem>
+            <EuiButtonEmpty iconType="trash" onClick={handleDeleteConnector} disabled={disabled}>
+              {DELETE_CONNECTOR_BUTTON}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPopover>
-  );
+  ) : null;
 };
 
 // casting to correctly infer the param of onEdit and onDelete when reusing this component
