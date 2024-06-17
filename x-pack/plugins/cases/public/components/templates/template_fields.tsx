@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField, TextAreaField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiFlexGroup } from '@elastic/eui';
 import { OptionalFieldLabel } from '../create/optional_field_label';
@@ -15,45 +15,35 @@ import { TemplateTags } from './template_tags';
 const TemplateFieldsComponent: React.FC<{
   isLoading: boolean;
   configurationTemplateTags: string[];
-}> = ({ isLoading = false, configurationTemplateTags }) => {
-  const [{ templateTags }] = useFormData({
-    watch: ['templateTags'],
-  });
-
-  return (
-    <EuiFlexGroup data-test-subj="template-fields" direction="column">
-      <UseField
-        path="name"
-        component={TextField}
-        componentProps={{
-          euiFieldProps: {
-            'data-test-subj': 'template-name-input',
-            fullWidth: true,
-            autoFocus: true,
-            isLoading,
-          },
-        }}
-      />
-      <TemplateTags
-        isLoading={isLoading}
-        tagOptions={configurationTemplateTags}
-        currentTags={templateTags}
-      />
-      <UseField
-        path="templateDescription"
-        component={TextAreaField}
-        componentProps={{
-          labelAppend: OptionalFieldLabel,
-          euiFieldProps: {
-            'data-test-subj': 'template-description-input',
-            fullWidth: true,
-            isLoading,
-          },
-        }}
-      />
-    </EuiFlexGroup>
-  );
-};
+}> = ({ isLoading = false, configurationTemplateTags }) => (
+  <EuiFlexGroup data-test-subj="template-fields" direction="column">
+    <UseField
+      path="name"
+      component={TextField}
+      componentProps={{
+        euiFieldProps: {
+          'data-test-subj': 'template-name-input',
+          fullWidth: true,
+          autoFocus: true,
+          isLoading,
+        },
+      }}
+    />
+    <TemplateTags isLoading={isLoading} tagOptions={configurationTemplateTags} />
+    <UseField
+      path="templateDescription"
+      component={TextAreaField}
+      componentProps={{
+        labelAppend: OptionalFieldLabel,
+        euiFieldProps: {
+          'data-test-subj': 'template-description-input',
+          fullWidth: true,
+          isLoading,
+        },
+      }}
+    />
+  </EuiFlexGroup>
+);
 
 TemplateFieldsComponent.displayName = 'TemplateFields';
 

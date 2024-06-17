@@ -50,7 +50,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
         isLoading={isLoading}
         setCustomFieldsOptional={setCustomFieldsOptional}
         configurationCustomFields={configurationCustomFields}
-        isTemplateEditMode={isEditMode}
+        isEditMode={isEditMode}
       />
     </EuiFlexGroup>
   );

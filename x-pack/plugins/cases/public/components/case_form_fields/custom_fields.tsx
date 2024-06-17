@@ -17,14 +17,14 @@ interface Props {
   isLoading: boolean;
   setCustomFieldsOptional: boolean;
   configurationCustomFields: CasesConfigurationUI['customFields'];
-  isTemplateEditMode?: boolean;
+  isEditMode?: boolean;
 }
 
 const CustomFieldsComponent: React.FC<Props> = ({
   isLoading,
   setCustomFieldsOptional,
   configurationCustomFields,
-  isTemplateEditMode,
+  isEditMode,
 }) => {
   const sortedCustomFields = useMemo(
     () => sortCustomFieldsByLabel(configurationCustomFields),
@@ -44,7 +44,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
           customFieldConfiguration={customField}
           key={customField.key}
           setAsOptional={setCustomFieldsOptional}
-          isEditMode={isTemplateEditMode}
+          setDefaultValue={!isEditMode}
         />
       );
     }

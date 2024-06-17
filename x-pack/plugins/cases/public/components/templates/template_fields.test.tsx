@@ -16,6 +16,7 @@ import { TemplateFields } from './template_fields';
 describe('Template fields', () => {
   let appMockRenderer: AppMockRenderer;
   const onSubmit = jest.fn();
+  const formDefaultValue = { templateTags: [] };
   const defaultProps = {
     isLoading: false,
     configurationTemplateTags: [],
@@ -28,7 +29,7 @@ describe('Template fields', () => {
 
   it('renders template fields correctly', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <TemplateFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -70,7 +71,7 @@ describe('Template fields', () => {
 
   it('calls onSubmit with template fields', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <TemplateFields {...defaultProps} />
       </FormTestComponent>
     );

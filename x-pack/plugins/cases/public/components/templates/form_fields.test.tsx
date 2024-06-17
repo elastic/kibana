@@ -25,7 +25,7 @@ const useGetChoicesMock = useGetChoices as jest.Mock;
 describe('form fields', () => {
   let appMockRenderer: AppMockRenderer;
   const onSubmit = jest.fn();
-  const formDefaultValue = { tags: [] };
+  const formDefaultValue = { tags: [], templateTags: [] };
   const defaultProps = {
     connectors: connectorsMock,
     currentConfiguration: {
@@ -111,6 +111,7 @@ describe('form fields', () => {
           tags: ['case-1', 'case-2'],
           category: 'new',
           severity: CaseSeverity.MEDIUM,
+          templateTags: [],
         }}
         onSubmit={onSubmit}
       >

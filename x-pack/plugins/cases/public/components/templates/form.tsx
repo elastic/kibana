@@ -43,7 +43,6 @@ const FormComponent: React.FC<Props> = ({
     },
     options: { stripEmptyFields: false },
     schema,
-    // serializer: templateSerializer,
     deserializer: templateDeserializer,
   });
 

@@ -190,6 +190,46 @@ describe('TemplateForm', () => {
     });
   });
 
+  it('serializes the template field data correctly with existing fields', async () => {
+    let formState: FormState<TemplateFormProps>;
+
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
+
+    const newProps = {
+      ...defaultProps,
+      initialValue: { ...templatesConfigurationMock[0], tags: ['foo', 'bar'] },
+      connectors: [],
+      onChange: onChangeState,
+      isEditMode: true,
+    };
+
+    appMockRenderer.render(<TemplateForm {...newProps} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    await act(async () => {
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toBe(true);
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        name: 'First test template',
+        title: '',
+        description: '',
+        templateDescription: 'This is a first test template',
+        tags: [],
+        connectorId: 'none',
+        severity: '',
+        syncAlerts: true,
+        category: null,
+        templateTags: ['foo', 'bar'],
+      });
+    });
+  });
+
   it('serializes the case field data correctly', async () => {
     let formState: FormState<TemplateFormProps>;
 

@@ -61,6 +61,14 @@ const TemplatesComponent: React.FC<Props> = ({
     [setError, onEditTemplate]
   );
 
+  const handleDeleteTemplate = useCallback(
+    (key: string) => {
+      setError(false);
+      onDeleteTemplate(key);
+    },
+    [setError, onDeleteTemplate]
+  );
+
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -81,7 +89,7 @@ const TemplatesComponent: React.FC<Props> = ({
             <TemplatesList
               templates={templates}
               onEditTemplate={handleEditTemplate}
-              onDeleteTemplate={onDeleteTemplate}
+              onDeleteTemplate={handleDeleteTemplate}
             />
             {error ? (
               <EuiFlexGroup justifyContent="center">

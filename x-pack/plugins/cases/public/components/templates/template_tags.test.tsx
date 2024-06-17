@@ -18,6 +18,7 @@ import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 describe('TemplateTags', () => {
   let appMockRenderer: AppMockRenderer;
   const onSubmit = jest.fn();
+  const formDefaultValue = { templateTags: [] };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -26,8 +27,8 @@ describe('TemplateTags', () => {
 
   it('renders template tags', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <TemplateTags isLoading={false} tagOptions={[]} currentTags={[]} />
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+        <TemplateTags isLoading={false} tagOptions={[]} />
       </FormTestComponent>
     );
 
@@ -36,8 +37,8 @@ describe('TemplateTags', () => {
 
   it('renders loading state', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <TemplateTags isLoading={true} tagOptions={[]} currentTags={[]} />
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+        <TemplateTags isLoading={true} tagOptions={[]} />
       </FormTestComponent>
     );
 
@@ -47,8 +48,8 @@ describe('TemplateTags', () => {
 
   it('shows template tags options', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <TemplateTags isLoading={false} tagOptions={['foo', 'bar', 'test']} currentTags={[]} />
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+        <TemplateTags isLoading={false} tagOptions={['foo', 'bar', 'test']} />
       </FormTestComponent>
     );
 
@@ -61,8 +62,8 @@ describe('TemplateTags', () => {
 
   it('shows template tags with current values', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <TemplateTags isLoading={false} tagOptions={[]} currentTags={['foo', 'bar']} />
+      <FormTestComponent formDefaultValue={{ templateTags: ['foo', 'bar'] }} onSubmit={onSubmit}>
+        <TemplateTags isLoading={false} tagOptions={[]} />
       </FormTestComponent>
     );
 
@@ -75,8 +76,8 @@ describe('TemplateTags', () => {
 
   it('adds template tag ', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <TemplateTags isLoading={false} tagOptions={[]} currentTags={[]} />
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+        <TemplateTags isLoading={false} tagOptions={[]} />
       </FormTestComponent>
     );
 
@@ -102,8 +103,8 @@ describe('TemplateTags', () => {
 
   it('adds new template tag to existing tags', async () => {
     appMockRenderer.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <TemplateTags isLoading={false} tagOptions={[]} currentTags={['foo', 'bar']} />
+      <FormTestComponent formDefaultValue={{ templateTags: ['foo', 'bar'] }} onSubmit={onSubmit}>
+        <TemplateTags isLoading={false} tagOptions={[]} />
       </FormTestComponent>
     );
 

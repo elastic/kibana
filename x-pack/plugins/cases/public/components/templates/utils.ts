@@ -51,7 +51,7 @@ export const templateDeserializer = (data: TemplateConfiguration): TemplateFormP
       key,
       name,
       templateDescription: description,
-      templateTags,
+      templateTags: templateTags ?? [],
       connectorId: connector?.id ?? 'none',
       fields: connectorFields.fields,
       customFields: convertedCustomFields ?? {},
