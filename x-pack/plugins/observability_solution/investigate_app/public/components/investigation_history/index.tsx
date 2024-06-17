@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { InvestigateTimeline } from '@kbn/investigate-plugin/common';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
+import { Investigation } from '@kbn/investigate-plugin/common';
 import { useInvestigateRouter } from '../../hooks/use_investigate_router';
 import { useTheme } from '../../hooks/use_theme';
 
@@ -71,7 +71,7 @@ export function InvestigationHistory({
   error,
   onNewInvestigationClick,
 }: {
-  investigations?: Array<Pick<InvestigateTimeline, 'id' | 'title'>>;
+  investigations?: Array<Pick<Investigation, 'id' | 'title'>>;
   loading: boolean;
   error?: Error;
   onNewInvestigationClick?: React.MouseEventHandler<HTMLAnchorElement>;

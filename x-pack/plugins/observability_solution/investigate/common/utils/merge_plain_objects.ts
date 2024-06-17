@@ -4,14 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RequiredKeys } from 'utility-types';
+import type { RequiredKeys } from 'utility-types';
 import { isPlainObject, mergeWith, MergeWithCustomizer } from 'lodash';
-
-// type DeepOverwrite<T, U> = T extends Record<string, any>
-//   ? Omit<T, keyof U> & {
-//       [TKey in keyof U]: T extends Record<TKey, any> ? DeepOverwrite<T[TKey], U[TKey]> : U[TKey];
-//     }
-//   : U;
 
 type DeepOverwrite<T, U> = U extends Record<string, any>
   ? Omit<T, RequiredKeys<U>> & {

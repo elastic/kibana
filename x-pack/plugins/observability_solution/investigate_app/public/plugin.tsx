@@ -6,6 +6,7 @@
  */
 import {
   AppMountParameters,
+  APP_WRAPPER_CLASS,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -18,6 +19,7 @@ import type { Logger } from '@kbn/logging';
 import { once } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { css } from '@emotion/css';
 import { createCallInvestigateAppAPI } from './api';
 import type { InvestigateAppServices } from './services/types';
 import type {
@@ -115,8 +117,18 @@ export class InvestigateAppPlugin
           appMountParameters.element
         );
 
+        const appWrapperClassName = css`
+          overflow-y: auto;
+          overflow-x: auto;
+        `;
+
+        const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
+
+        appWrapperElement.classList.add(appWrapperClassName);
+
         return () => {
           ReactDOM.unmountComponentAtNode(appMountParameters.element);
+          appWrapperElement.classList.remove(appWrapperClassName);
         };
       },
     });

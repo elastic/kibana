@@ -29,28 +29,20 @@ export default meta;
 const defaultStory: Story = {
   args: {
     props: {
-      timeline: {
+      investigation: {
         title: 'My investigation',
+      },
+      revision: {
         items: [],
       },
+      isAtLatestRevision: true,
+      isAtEarliestRevision: true,
     },
   },
   render: function Render(args) {
     return (
       <div style={{ width: 240 }}>
-        <Component
-          {...args.props}
-          onLockAllClick={() => {
-            return new Promise((resolve) => {
-              setTimeout(resolve, 1000);
-            });
-          }}
-          onUnlockAllClick={() => {
-            return new Promise((resolve) => {
-              setTimeout(resolve, 1000);
-            });
-          }}
-        />
+        <Component {...args.props} />
       </div>
     );
   },
@@ -68,7 +60,7 @@ export const InvestigateDetailAtLeastOneUnlockedStory: Story = {
   ...defaultStory,
   args: {
     props: extendProps(defaultStory.args!.props!, {
-      timeline: {
+      revision: {
         items: [
           {
             locked: false,
@@ -87,7 +79,7 @@ export const InvestigateDetailAllLockedStory: Story = {
   ...defaultStory,
   args: {
     props: extendProps(defaultStory.args!.props!, {
-      timeline: {
+      revision: {
         items: [
           {
             locked: true,

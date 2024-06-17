@@ -8,7 +8,7 @@
 import { Meta, StoryObj } from '@storybook/react';
 import moment from 'moment';
 import React from 'react';
-import { InvestigateTimeline } from '@kbn/investigate-plugin/common';
+import { InvestigationRevision } from '@kbn/investigate-plugin/common';
 import { AddWidgetUI as Component } from '.';
 import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
 
@@ -34,11 +34,12 @@ const defaultStory: Story = {
       start: moment().subtract(15, 'minutes'),
       end: moment(),
       onWidgetAdd: async () => {},
-      timeline: {
+      revision: {
         items: [],
-      } as unknown as InvestigateTimeline,
+      } as unknown as InvestigationRevision,
       user: {
-        name: 'John Doe',
+        username: 'johndoe',
+        full_name: 'John Doe',
       },
       filters: [],
       query: {

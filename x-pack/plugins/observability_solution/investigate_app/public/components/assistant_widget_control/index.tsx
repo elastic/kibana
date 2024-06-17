@@ -13,7 +13,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { InvestigateTimeline, InvestigateWidgetCreate } from '@kbn/investigate-plugin/common';
+import type {
+  InvestigateWidgetCreate,
+  InvestigationRevision,
+} from '@kbn/investigate-plugin/public';
 import type { Moment } from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
@@ -106,12 +109,12 @@ export function AssistantWidgetControlBase({
 
 export function AssistantWidgetControl({
   onWidgetAdd,
-  timeline,
+  revision,
   start,
   end,
 }: {
   onWidgetAdd: (widget: InvestigateWidgetCreate) => Promise<void>;
-  timeline: InvestigateTimeline;
+  revision: InvestigationRevision;
   start: Moment;
   end: Moment;
 }) {
@@ -155,7 +158,7 @@ export function AssistantWidgetControl({
 
     subscriptionRef.current = assistant
       .ask({
-        timeline,
+        revision,
         signal,
         connectorId: connectors.selectedConnector!,
         prompt,

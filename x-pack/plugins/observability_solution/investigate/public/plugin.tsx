@@ -6,6 +6,9 @@
  */
 import type { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import { useMemo } from 'react';
+import { useInvestigateWidget } from './hooks/use_investigate_widget';
+import { createUseInvestigation } from './hooks/use_investigation';
 import type {
   ConfigSchema,
   InvestigatePublicSetup,
@@ -58,6 +61,19 @@ export class InvestigatePlugin
   start(coreStart: CoreStart, pluginsStart: InvestigateStartDependencies): InvestigatePublicStart {
     return {
       getWidgetDefinitions: this.widgetRegistry.getWidgetDefinitions,
+      useInvestigation: ({ user, from, to }) => {
+        const widgetDefinitions = useMemo(() => this.widgetRegistry.getWidgetDefinitions(), []);
+
+        return createUseInvestigation({
+          notifications: coreStart.notifications,
+          widgetDefinitions,
+        })({
+          user,
+          from,
+          to,
+        });
+      },
+      useInvestigateWidget,
     };
   }
 }

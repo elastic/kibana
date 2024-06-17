@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { InvestigateTimeline, InvestigateWidgetCreate } from '@kbn/investigate-plugin/common';
+import type {
+  InvestigationRevision,
+  InvestigateWidgetCreate,
+} from '@kbn/investigate-plugin/common';
 import { Observable } from 'rxjs';
 import type {
   ObservabilityAIAssistantChatService,
@@ -54,7 +57,7 @@ export type TimelineAskUpdate = TimelineAskStatusUpdate | TimelineAskWidgetUpdat
 export interface AssistantService {
   ask: (options: {
     prompt: string;
-    timeline: InvestigateTimeline;
+    revision: InvestigationRevision;
     signal: AbortSignal;
     connectorId: string;
     start: Moment;

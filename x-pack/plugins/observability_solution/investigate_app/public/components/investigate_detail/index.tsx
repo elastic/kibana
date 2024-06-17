@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { InvestigateTimeline } from '@kbn/investigate-plugin/common';
+import type { Investigation, InvestigationRevision } from '@kbn/investigate-plugin/common';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
@@ -91,19 +91,17 @@ function UnlockAllButton(
 }
 
 export function InvestigateDetail({
-  timeline,
-  onLockAllClick,
-  onUnlockAllClick,
+  investigation,
+  revision,
+  isAtLatestRevision,
+  isAtEarliestRevision,
 }: {
-  timeline: Pick<InvestigateTimeline, 'title'> & {
-    items: Array<Pick<InvestigateTimeline['items'][number], 'locked'>>;
-  };
-  onLockAllClick: () => Promise<void>;
-  onUnlockAllClick: () => Promise<void>;
+  investigation: Pick<Investigation, 'title'>;
+  revision: Pick<InvestigationRevision, 'items'>;
+  isAtLatestRevision: boolean;
+  isAtEarliestRevision: boolean;
 }) {
-  const anyItems = timeline.items.length > 0;
-
-  const allItemsLocked = timeline.items.every((item) => item.locked);
+  const anyItems = revision.items.length > 0;
 
   const [loading, setLoading] = useState(false);
 
@@ -115,33 +113,11 @@ export function InvestigateDetail({
       justifyContent="flexStart"
     >
       <EuiFlexItem grow={false} className={titleClassName}>
-        <EuiText size="s">{timeline.title}</EuiText>
+        <EuiText size="s">{investigation.title}</EuiText>
       </EuiFlexItem>
       {anyItems ? (
         <>
-          <EuiFlexItem grow={false} className={actionsClassName}>
-            {allItemsLocked ? (
-              <UnlockAllButton
-                loading={loading}
-                onClick={() => {
-                  setLoading(true);
-                  onUnlockAllClick().finally(() => {
-                    setLoading(false);
-                  });
-                }}
-              />
-            ) : (
-              <LockAllButton
-                loading={loading}
-                onClick={() => {
-                  setLoading(true);
-                  onLockAllClick().finally(() => {
-                    setLoading(false);
-                  });
-                }}
-              />
-            )}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false} className={actionsClassName} />
         </>
       ) : null}
     </EuiFlexGroup>

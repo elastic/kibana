@@ -9,13 +9,12 @@ import React, { useState } from 'react';
 import { InvestigateWidgetCreate } from '@kbn/investigate-plugin/common';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { AuthenticatedUser } from '@kbn/core/public';
 import { ResizableTextInput } from '../resizable_text_input';
 import { createNoteWidget } from '../../widgets/note_widget/create_note_widget';
 
 interface NoteWidgetControlProps {
-  user: {
-    name: string;
-  };
+  user: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   onWidgetAdd: (widget: InvestigateWidgetCreate) => Promise<void>;
 }
 
@@ -31,7 +30,10 @@ export function NoteWidgetControl({ user, onWidgetAdd }: NoteWidgetControlProps)
         title: note,
         parameters: {
           note,
-          user,
+          user: {
+            username: user.username,
+            full_name: user.full_name,
+          },
         },
       })
     )

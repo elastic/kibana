@@ -6,11 +6,10 @@
  */
 
 import { InvestigateWidget } from '@kbn/investigate-plugin/common';
+import type { AuthenticatedUser } from '@kbn/core/public';
 
 export interface NoteWidgetCreateParameters {
-  user: {
-    name: string;
-  };
+  user: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   note: string;
 }
 

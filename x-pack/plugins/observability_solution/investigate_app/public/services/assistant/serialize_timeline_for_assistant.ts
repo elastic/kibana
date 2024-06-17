@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InvestigateTimeline, InvestigateWidget } from '@kbn/investigate-plugin/common';
+import type { InvestigationRevision, InvestigateWidget } from '@kbn/investigate-plugin/common';
 import { EMBEDDABLE_WIDGET_NAME } from '../../constants';
 import type { EmbeddableWidget } from '../../widgets/embeddable_widget/types';
 
@@ -21,7 +21,7 @@ function getDisplayTypeOfWidget(widget: InvestigateWidget) {
   return type;
 }
 
-export function serializeTimelineForAssistant(timelineItems: InvestigateTimeline['items']) {
+export function serializeTimelineForAssistant(timelineItems: InvestigationRevision['items']) {
   const message = `## Timeline
   
   What follows is a description of what the user sees on their screen, starting at the very items on the top,

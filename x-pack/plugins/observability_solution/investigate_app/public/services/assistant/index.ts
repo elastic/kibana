@@ -64,7 +64,7 @@ export function createAssistantService({
   });
 
   const service: AssistantService = {
-    ask: ({ prompt, timeline, signal, connectorId, start, end }) => {
+    ask: ({ prompt, revision, signal, connectorId, start, end }) => {
       const askUpdates$ = new Subject<TimelineAskUpdate>();
 
       async function ask() {
@@ -102,7 +102,7 @@ export function createAssistantService({
 
         const shortIdTable = new ShortIdTable();
 
-        const timelineItemsWithReplacedUuids = timeline.items.map((item) => {
+        const timelineItemsWithReplacedUuids = revision.items.map((item) => {
           const word = shortIdTable.take(item.id);
 
           return {

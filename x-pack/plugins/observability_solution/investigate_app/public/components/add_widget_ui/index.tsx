@@ -7,11 +7,13 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
   GlobalWidgetParameters,
-  InvestigateTimeline,
   InvestigateWidgetCreate,
+  InvestigationRevision,
   OnWidgetAdd,
   WorkflowBlock,
 } from '@kbn/investigate-plugin/public';
+import type { AuthenticatedUser } from '@kbn/core/public';
+
 import { Moment } from 'moment';
 import React, { useState } from 'react';
 import { AddWidgetMode } from '../../constants/add_widget_mode';
@@ -23,12 +25,10 @@ import { NoteWidgetControl } from '../note_widget_control';
 import { useWorkflowBlocks } from '../../hooks/workflow_blocks/use_workflow_blocks';
 
 type AddWidgetUIProps = {
-  user: {
-    name: string;
-  };
+  user: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   assistantAvailable: boolean;
   onWidgetAdd: OnWidgetAdd;
-  timeline: InvestigateTimeline;
+  revision: InvestigationRevision;
   start: Moment;
   end: Moment;
   workflowBlocks: WorkflowBlock[];
@@ -38,17 +38,17 @@ function getControlsForMode({
   user,
   mode,
   onWidgetAdd,
-  timeline,
+  revision,
   start,
   end,
   query,
   timeRange,
   filters,
 }: {
-  user: { name: string };
+  user: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   mode: AddWidgetMode;
   onWidgetAdd: (widget: InvestigateWidgetCreate) => Promise<void>;
-  timeline: InvestigateTimeline;
+  revision: InvestigationRevision;
   start: Moment;
   end: Moment;
 } & GlobalWidgetParameters) {
@@ -67,7 +67,7 @@ function getControlsForMode({
       return (
         <AssistantWidgetControl
           onWidgetAdd={onWidgetAdd}
-          timeline={timeline}
+          revision={revision}
           start={start}
           end={end}
         />
@@ -82,7 +82,7 @@ export function AddWidgetUI({
   user,
   assistantAvailable,
   onWidgetAdd,
-  timeline,
+  revision,
   start,
   end,
   query,
@@ -96,7 +96,7 @@ export function AddWidgetUI({
     start: start.toISOString(),
     end: end.toISOString(),
     dynamicBlocks: workflowBlocks,
-    isTimelineEmpty: timeline.items.length === 0,
+    isTimelineEmpty: revision.items.length === 0,
     onWidgetAdd,
   });
 
@@ -109,7 +109,7 @@ export function AddWidgetUI({
         {getControlsForMode({
           mode,
           onWidgetAdd,
-          timeline,
+          revision,
           start,
           end,
           query,
