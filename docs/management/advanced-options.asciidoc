@@ -269,7 +269,7 @@ the `xpack.banners.backgroundColor` configuration property.
 [horizontal]
 [[xpackdashboardmode-roles]]`xpackDashboardMode:roles`::
 deprecated:[7.7.0]
-**Use <<kibana-feature-privileges,feature privileges>> instead.**
+Deprecated; use <<kibana-feature-privileges,feature privileges>> instead.
 The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
 
 [float]
