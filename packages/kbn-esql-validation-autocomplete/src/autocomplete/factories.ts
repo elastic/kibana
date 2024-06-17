@@ -42,7 +42,7 @@ export function getSuggestionFunctionDefinition(fn: FunctionDefinition): Suggest
   const fullSignatures = getFunctionSignatures(fn);
   return {
     label: fullSignatures[0].declaration,
-    text: `${fn.name}($0)`,
+    text: `${fn.name.toUpperCase()}($0)`,
     asSnippet: true,
     kind: 'Function',
     detail: fn.description,
@@ -103,10 +103,10 @@ export function getSuggestionCommandDefinition(
   const commandDefinition = getCommandDefinition(command.name);
   const commandSignature = getCommandSignature(commandDefinition);
   return {
-    label: commandDefinition.name,
+    label: commandDefinition.name.toUpperCase(),
     text: commandDefinition.signature.params.length
-      ? `${commandDefinition.name} $0`
-      : commandDefinition.name,
+      ? `${commandDefinition.name.toUpperCase()} $0`
+      : commandDefinition.name.toUpperCase(),
     asSnippet: true,
     kind: 'Method',
     detail: commandDefinition.description,
@@ -239,14 +239,16 @@ export const buildOptionDefinition = (
   isAssignType: boolean = false
 ) => {
   const completeItem: SuggestionRawDefinition = {
-    label: option.name,
-    text: option.name,
+    label: option.name.toUpperCase(),
+    text: option.name.toUpperCase(),
     kind: 'Reference',
     detail: option.description,
     sortText: '1',
   };
   if (isAssignType || option.signature.params.length) {
-    completeItem.text = isAssignType ? `${option.name} = $0` : `${option.name} $0`;
+    completeItem.text = isAssignType
+      ? `${option.name.toUpperCase()} = $0`
+      : `${option.name.toUpperCase()} $0`;
     completeItem.asSnippet = true;
     completeItem.command = TRIGGER_SUGGESTION_COMMAND;
   }

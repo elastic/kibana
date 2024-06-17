@@ -25,7 +25,7 @@ export function getFunctionSignatures(
     const minParamsToAdd = Math.max((minParams || 0) - params.length, 0);
     const extraArg = Array(minParamsToAdd || 1).fill(params[Math.max(params.length - 1, 0)]);
     return {
-      declaration: `${name}(${params
+      declaration: `${name.toUpperCase()}(${params
         .map((arg) => printArguments(arg, withTypes))
         .join(', ')}${handleAdditionalArgs(minParamsToAdd > 0, extraArg, withTypes)})${
         withTypes ? `: ${returnType}` : ''
@@ -56,12 +56,16 @@ export function getCommandSignature(
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
   return {
-    declaration: `${name} ${printCommandArguments(signature, withTypes)} ${options.map(
+    declaration: `${name.toUpperCase()} ${printCommandArguments(
+      signature,
+      withTypes
+    )} ${options.map(
       (option) =>
-        `${option.wrapped ? option.wrapped[0] : ''}${option.name} ${printCommandArguments(
-          option.signature,
-          withTypes
-        )}${option.wrapped ? option.wrapped[1] : ''}`
+        `${
+          option.wrapped ? option.wrapped[0] : ''
+        }${option.name.toUpperCase()} ${printCommandArguments(option.signature, withTypes)}${
+          option.wrapped ? option.wrapped[1] : ''
+        }`
     )}`,
     examples,
   };

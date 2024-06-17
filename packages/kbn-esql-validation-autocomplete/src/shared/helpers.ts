@@ -122,7 +122,7 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['from', 'row', 'show'].includes(String(label));
+  return ['FROM', 'ROW', 'SHOW'].includes(label);
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
