@@ -193,6 +193,9 @@ export const APIKeysGridPage: FunctionComponent = () => {
             }}
             onCancel={() => history.push({ pathname: '/' })}
             canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+            currentUser={currentUser}
+            isLoadingCurrentUser={state.loading}
+            readOnly={readOnly}
           />
         </Breadcrumb>
       </Route>
@@ -214,6 +217,9 @@ export const APIKeysGridPage: FunctionComponent = () => {
           onCancel={() => setOpenedApiKey(undefined)}
           apiKey={openedApiKey}
           readOnly={readOnly}
+          canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+          currentUser={currentUser}
+          isLoadingCurrentUser={state.loading}
         />
       )}
       {totalKeys === 0 ? (

@@ -243,11 +243,15 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   }, [currentUser, roles]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    formik.setFieldValue('role_descriptors', defaultRoleDescriptors);
+    if (defaultRoleDescriptors && !apiKey) {
+      formik.setFieldValue('role_descriptors', defaultRoleDescriptors);
+    }
   }, [defaultRoleDescriptors]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    formik.setFieldValue('metadata', defaultMetadata);
+    if (defaultMetadata && !apiKey) {
+      formik.setFieldValue('metadata', defaultMetadata);
+    }
   }, [defaultRoleDescriptors]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isLoading = isLoadingCurrentUser || isLoadingRoles;

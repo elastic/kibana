@@ -34,6 +34,7 @@ export const ApiKeyCreatedCallout: FunctionComponent<ApiKeyCreatedCalloutProps> 
           defaultMessage="Copy this key now. You will not be able to view it again."
         />
       </p>
+      <ApiKeySelectableTokenField createdApiKey={createdApiKey} />
     </EuiCallOut>
   );
 };
