@@ -40,16 +40,19 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         query: params,
       })
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch data streams stats: ${error}`);
+        throw new GetDataStreamsStatsError(
+          `Failed to fetch data streams stats: ${error}`,
+          error.body.statusCode
+        );
       });
 
-    const { dataStreamsStats } = decodeOrThrow(
+    const { dataStreamsStats, datasetUserPrivileges } = decodeOrThrow(
       getDataStreamsStatsResponseRt,
       (message: string) =>
         new GetDataStreamsStatsError(`Failed to decode data streams stats response: ${message}`)
     )(response);
 
-    return dataStreamsStats;
+    return { dataStreamsStats, datasetUserPrivileges };
   }
 
   public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {
@@ -64,7 +67,10 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         }
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch data streams degraded stats: ${error}`);
+        throw new GetDataStreamsStatsError(
+          `Failed to fetch data streams degraded stats: ${error}`,
+          error.body.statusCode
+        );
       });
 
     const { degradedDocs } = decodeOrThrow(
@@ -90,7 +96,10 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         }
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch non aggregatable datasets: ${error}`);
+        throw new GetDataStreamsStatsError(
+          `Failed to fetch non aggregatable datasets: ${error}`,
+          error.body.statusCode
+        );
       });
 
     const nonAggregatableDatasets = decodeOrThrow(
@@ -110,7 +119,10 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         query: params,
       })
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch integrations: ${error}`);
+        throw new GetDataStreamsStatsError(
+          `Failed to fetch integrations: ${error}`,
+          error.body.statusCode
+        );
       });
 
     const { integrations } = decodeOrThrow(
