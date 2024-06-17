@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { useTableData } from '../../hooks/use_table_data';
@@ -14,17 +15,20 @@ import { useTableData } from '../../hooks/use_table_data';
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
 import { EndpointsTable } from './endpoints_table';
 import { useTableColumns } from './table_columns';
+import { TableSearch } from './search/table_search';
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
 }
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
+  const [searchKey, setSearchKey] = React.useState('');
   const { queryParams, setQueryParams } = useAllInferenceEndpointsState();
 
   const { paginatedSortedTableData, pagination, sorting } = useTableData(
     inferenceEndpoints,
-    queryParams
+    queryParams,
+    searchKey
   );
 
   const tableColumns = useTableColumns();
@@ -48,12 +52,19 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   );
 
   return (
-    <EndpointsTable
-      columns={tableColumns}
-      data={paginatedSortedTableData}
-      onChange={handleTableChange}
-      pagination={pagination}
-      sorting={sorting}
-    />
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EndpointsTable
+          columns={tableColumns}
+          data={paginatedSortedTableData}
+          onChange={handleTableChange}
+          pagination={pagination}
+          sorting={sorting}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

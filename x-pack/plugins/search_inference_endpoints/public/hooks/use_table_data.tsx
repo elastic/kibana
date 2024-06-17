@@ -27,15 +27,18 @@ interface UseTableDataReturn {
 
 export const useTableData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
-  queryParams: QueryParams
+  queryParams: QueryParams,
+  searchKey: string
 ): UseTableDataReturn => {
   const tableData: InferenceEndpointUI[] = useMemo(() => {
-    return inferenceEndpoints.map((endpoint) => ({
-      endpoint,
-      provider: endpoint.service,
-      type: endpoint.task_type,
-    }));
-  }, [inferenceEndpoints]);
+    return inferenceEndpoints
+      .filter((endpoint) => endpoint.model_id.startsWith(searchKey))
+      .map((endpoint) => ({
+        endpoint,
+        provider: endpoint.service,
+        type: endpoint.task_type,
+      }));
+  }, [inferenceEndpoints, searchKey]);
 
   const sortedTableData: InferenceEndpointUI[] = useMemo(() => {
     return [...tableData].sort((a, b) => {
