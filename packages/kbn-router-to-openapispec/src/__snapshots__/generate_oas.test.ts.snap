@@ -133,7 +133,6 @@ Object {
     "/bar": Object {
       "get": Object {
         "deprecated": true,
-        "description": undefined,
         "operationId": "/bar#0",
         "parameters": Array [
           Object {
@@ -222,6 +221,7 @@ Object {
     },
     "/foo/{id}/{path*}": Object {
       "get": Object {
+        "description": "route description",
         "operationId": "/foo/{id}/{path*}#0",
         "parameters": Array [
           Object {
@@ -366,6 +366,7 @@ Object {
         ],
       },
       "post": Object {
+        "description": "route description",
         "operationId": "/foo/{id}/{path*}#1",
         "parameters": Array [
           Object {
