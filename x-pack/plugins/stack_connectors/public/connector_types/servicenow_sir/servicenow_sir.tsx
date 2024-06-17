@@ -11,9 +11,11 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { MAX_ADDITIONAL_FIELDS_LENGTH } from '../../../common/servicenow/constants';
 import { ServiceNowConfig, ServiceNowSecrets } from '../lib/servicenow/types';
 import { ServiceNowSIRActionParams } from './types';
 import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from '../lib/servicenow/helpers';
+import { validateJSON } from '../lib/validate_json';
 
 export const SERVICENOW_SIR_DESC = i18n.translate(
   'xpack.stackConnectors.components.serviceNowSIR.selectMessageText',
@@ -46,7 +48,9 @@ export function getServiceNowSIRConnectorType(): ConnectorTypeModel<
       const translations = await import('../lib/servicenow/translations');
       const errors = {
         'subActionParams.incident.short_description': new Array<string>(),
+        'subActionParams.incident.additional_fields': new Array<string>(),
       };
+
       const validationResult = {
         errors,
       };
@@ -57,6 +61,16 @@ export function getServiceNowSIRConnectorType(): ConnectorTypeModel<
       ) {
         errors['subActionParams.incident.short_description'].push(translations.TITLE_REQUIRED);
       }
+
+      const jsonErrors = validateJSON({
+        value: actionParams.subActionParams?.incident?.additional_fields,
+        maxProperties: MAX_ADDITIONAL_FIELDS_LENGTH,
+      });
+
+      if (jsonErrors) {
+        errors['subActionParams.incident.additional_fields'] = [jsonErrors];
+      }
+
       return validationResult;
     },
     actionParamsFields: lazy(() => import('./servicenow_sir_params')),
