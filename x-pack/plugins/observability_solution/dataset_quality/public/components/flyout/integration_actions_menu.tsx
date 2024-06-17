@@ -45,7 +45,9 @@ export function IntegrationActionsMenu({
   integration: Integration;
   dashboardsLoading: boolean;
 }) {
-  const { type, name } = useDatasetQualityFlyout().dataStreamStat!;
+  const { dataStreamStat, canUserAccessDashboards, canUserViewIntegrations } =
+    useDatasetQualityFlyout();
+  const { type, name } = dataStreamStat!;
   const { dashboards = [], version, name: integrationName } = integration;
   const {
     isOpen,
@@ -71,11 +73,13 @@ export function IntegrationActionsMenu({
     buttonText,
     routerLinkProps,
     iconType,
+    disabled = false,
   }: {
     dataTestSubject: string;
-    buttonText: string;
+    buttonText: string | React.ReactNode;
     routerLinkProps: RouterLinkProps;
     iconType: string;
+    disabled?: boolean;
   }) => (
     <EuiButtonEmpty
       {...routerLinkProps}
@@ -86,6 +90,7 @@ export function IntegrationActionsMenu({
       color="text"
       iconType={iconType}
       data-test-subj={dataTestSubject}
+      disabled={disabled}
     >
       {buttonText}
     </EuiButtonEmpty>
@@ -93,16 +98,21 @@ export function IntegrationActionsMenu({
 
   const panelItems = useMemo(() => {
     const firstLevelItems: EuiContextMenuPanelItemDescriptor[] = [
-      {
-        renderItem: () => (
-          <MenuActionItem
-            buttonText={seeIntegrationText}
-            dataTestSubject="datasetQualityFlyoutIntegrationActionOverview"
-            routerLinkProps={getIntegrationOverviewLinkProps(integrationName, version)}
-            iconType="package"
-          />
-        ),
-      },
+      ...(canUserViewIntegrations
+        ? [
+            {
+              renderItem: () => (
+                <MenuActionItem
+                  buttonText={seeIntegrationText}
+                  dataTestSubject="datasetQualityFlyoutIntegrationActionOverview"
+                  routerLinkProps={getIntegrationOverviewLinkProps(integrationName, version)}
+                  iconType="package"
+                  disabled={!canUserViewIntegrations}
+                />
+              ),
+            },
+          ]
+        : []),
       {
         renderItem: () => (
           <MenuActionItem
@@ -122,12 +132,13 @@ export function IntegrationActionsMenu({
       },
     ];
 
-    if (dashboards.length) {
+    if (dashboards.length && canUserAccessDashboards) {
       firstLevelItems.push({
         icon: 'dashboardApp',
         panel: 1,
         name: viewDashboardsText,
         'data-test-subj': 'datasetQualityFlyoutIntegrationActionViewDashboards',
+        disabled: false,
       });
     } else if (dashboardsLoading) {
       firstLevelItems.push({
@@ -172,6 +183,8 @@ export function IntegrationActionsMenu({
     type,
     version,
     dashboardsLoading,
+    canUserAccessDashboards,
+    canUserViewIntegrations,
   ]);
 
   return (
