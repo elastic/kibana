@@ -12,6 +12,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
   // FLAKY: https://github.com/elastic/kibana/issues/186285
+  // FLAKY: https://github.com/elastic/kibana/issues/186286
   describe.skip('ML app', function () {
     this.tags(['mlqa', 'skipFirefox']);
 
