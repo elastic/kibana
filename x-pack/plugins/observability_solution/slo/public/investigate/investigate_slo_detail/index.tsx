@@ -415,6 +415,7 @@ export function InvestigateSloDetail({
                       }
                     ),
                     locked: true,
+                    rows: 18,
                     parameters: {
                       esql: queryForSlo.esql,
                       filters: queryForSlo.filters,

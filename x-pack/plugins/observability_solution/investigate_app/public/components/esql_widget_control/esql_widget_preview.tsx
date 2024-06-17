@@ -41,6 +41,12 @@ function getWidgetFromSuggestion({
 
   const makeItTall = suggestion.visualizationId !== 'lnsMetric';
 
+  let rows = makeItTall ? 12 : 4;
+
+  if (suggestion.visualizationId === 'lnsDatatable') {
+    rows = 18;
+  }
+
   return createEsqlWidget({
     title: suggestion.title,
     type: ESQL_WIDGET_NAME,
@@ -49,7 +55,7 @@ function getWidgetFromSuggestion({
       suggestion,
     },
     columns: makeItWide ? InvestigateWidgetColumnSpan.Four : InvestigateWidgetColumnSpan.One,
-    rows: makeItTall ? 12 : 4,
+    rows,
     locked: false,
   });
 }
@@ -62,9 +68,9 @@ function PreviewContainer({ children }: { children: React.ReactNode }) {
       justifyContent="center"
       className={css`
         width: 100%;
+        overflow: auto;
         > div {
           width: 100%;
-          height: 500px;
         }
       `}
     >

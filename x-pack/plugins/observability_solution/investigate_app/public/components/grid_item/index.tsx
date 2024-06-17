@@ -108,6 +108,7 @@ export function GridItem({
     height: 100%;
     max-width: 100%;
     transition: opacity ${theme.animation.normal} ${theme.animation.resistance};
+    overflow: auto;
 
     &:not(:hover) .${editTitleButtonClassName} {
       opacity: 0;
