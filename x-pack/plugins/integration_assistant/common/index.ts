@@ -5,31 +5,16 @@
  * 2.0.
  */
 
-export type {
-  BuildIntegrationApiRequest,
-  EcsMappingApiRequest,
-  CategorizationApiRequest,
-  RelatedApiRequest,
-  CategorizationApiResponse,
-  RelatedApiResponse,
-  EcsMappingApiResponse,
-  Pipeline,
-  ESProcessorItem,
-  ESProcessorOptions,
-  DataStream,
-  Integration,
-  InputTypes,
-  TestPipelineApiRequest,
-  TestPipelineApiResponse,
-} from './types';
+export { BuildIntegrationRequestBody } from './api/build_integration/build_integration';
+export { CategorizationRequestBody, CategorizationResponse } from './api/categorization/categorization_route';
+export { CheckPipelineRequestBody, CheckPipelineResponse } from './api/check_pipeline/check_pipeline';
+export { EcsMappingRequestBody, EcsMappingResponse } from './api/ecs/ecs_route';
+export { RelatedRequestBody, RelatedResponse } from "./api/related/related_route";
+
+export type { Pipeline } from './api/model/common_attributes';
+export type { ESProcessorItem } from './api/model/processor_attributes';
 
 export {
-  PLUGIN_ID,
-  INTEGRATION_ASSISTANT_APP_ROUTE,
-  ECS_GRAPH_PATH,
-  CATEGORIZATION_GRAPH_PATH,
-  RELATED_GRAPH_PATH,
-  TEST_PIPELINE_PATH,
-  INTEGRATION_BUILDER_PATH,
-  INTEGRATION_ASSISTANT_BASE_PATH,
+  CATEGORIZATION_GRAPH_PATH, ECS_GRAPH_PATH, INTEGRATION_ASSISTANT_APP_ROUTE, INTEGRATION_ASSISTANT_BASE_PATH, INTEGRATION_BUILDER_PATH, PLUGIN_ID, RELATED_GRAPH_PATH,
+  TEST_PIPELINE_PATH
 } from './constants';

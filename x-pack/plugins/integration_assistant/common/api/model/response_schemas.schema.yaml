@@ -4,9 +4,10 @@ info:
   version: "not applicable"
 paths: {}
 components:
-  x-codegen-enabled: true
+  x-codegen-enabled: false
   schemas:
-    EcsMappingResponse:
+    EcsMappingAPIResponse:
+      type: object
       required:
         - results
       properties:
@@ -17,36 +18,12 @@ components:
             - pipeline
           properties:
             mapping:
-              $ref: "../model/common_attributes.schema.yaml#/components/schemas/Mapping"
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Mapping"
             pipeline:
-              $ref: "../model/common_attributes.schema.yaml#/components/schemas/Pipeline"
-
-    EcsMappingAPIResponse:
-      discriminator:
-        propertyName: type
-      $ref: "#/components/schemas/EcsMappingResponse"
-
-    CategorizationResponse:
-      required:
-        - results
-      properties:
-        results:
-          type: object
-          required:
-            - docs
-            - pipeline
-          properties:
-            docs:
-              $ref: "../model/common_attributes.schema.yaml#/components/schemas/Docs"
-            pipeline:
-              $ref: "../model/common_attributes.schema.yaml#/components/schemas/Pipeline"
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Pipeline"
 
     CategorizationAPIResponse:
-      discriminator:
-        propertyName: type
-      $ref: "#/components/schemas/CategorizationResponse"
-
-    RelatedResponse:
+      type: object
       required:
         - results
       properties:
@@ -57,25 +34,32 @@ components:
             - pipeline
           properties:
             docs:
-              $ref: "../model/common_attributes.schema.yaml#/components/schemas/Docs"
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Docs"
             pipeline:
-              $ref: "../model/common_attributes.schema.yaml#/components/schemas/Pipeline"
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Pipeline"
 
     RelatedAPIResponse:
-      discriminator:
-        propertyName: type
-      $ref: "#/components/schemas/RelatedResponse"
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - docs
+            - pipeline
+          properties:
+            docs:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Docs"
+            pipeline:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Pipeline"
 
-    CheckPipelineResponse:
+    CheckPipelineAPIResponse:
+      type: object
       required:
         - pipelineResults
       properties:
         pipelineResults:
-          $ref: "../model/common_attributes.schema.yaml#/components/schemas/PipelineResults"
+          $ref: "./common_attributes.schema.yaml#/components/schemas/PipelineResults"
         errors:
-          $ref: "../model/common_attributes.schema.yaml#/components/schemas/Errors"
-
-    CheckPipelineAPIResponse:
-      discriminator:
-        propertyName: type
-      $ref: "#/components/schemas/CheckPipelineResponse"
+          $ref: "./common_attributes.schema.yaml#/components/schemas/Errors"
