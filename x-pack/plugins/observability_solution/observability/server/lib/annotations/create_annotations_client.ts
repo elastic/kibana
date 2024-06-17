@@ -149,7 +149,7 @@ export function createAnnotationsClient(params: {
       return response.hits.hits?.[0];
     }),
     find: ensureGoldLicense(async (findParams: FindAnnotationParams) => {
-      const { start, end, sloId, sloInstanceId } = findParams ?? {};
+      const { start, end, sloId, sloInstanceId, serviceName } = findParams ?? {};
 
       const result = await esClient.search({
         index: index + `-*`,
@@ -165,6 +165,8 @@ export function createAnnotationsClient(params: {
                   },
                 },
               },
+            ],
+            should: [
               ...(sloId
                 ? [
                     {
@@ -179,6 +181,15 @@ export function createAnnotationsClient(params: {
                     {
                       term: {
                         'slo.instanceId': sloInstanceId,
+                      },
+                    },
+                  ]
+                : []),
+              ...(serviceName
+                ? [
+                    {
+                      term: {
+                        'service.name': serviceName,
                       },
                     },
                   ]

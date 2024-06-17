@@ -24,7 +24,7 @@ export function NewLineAnnotation({
   const { watch, getValues } = useFormContext<CreateAnnotationParams>();
   const timestampEnd = watch('@timestampEnd');
 
-  if (timestampEnd) {
+  if (timestampEnd || !isCreateOpen) {
     return null;
   }
   const values = getValues();

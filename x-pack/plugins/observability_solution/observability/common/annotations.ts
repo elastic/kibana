@@ -27,27 +27,23 @@ const dateAsStringRt = new t.Type<string, string, unknown>(
 
 export const createAnnotationRt = t.intersection([
   t.type({
-    annotation: t.intersection([
-      t.type({
-        type: t.string,
-      }),
-      t.partial({
-        style: t.partial({
-          icon: t.string,
-          color: t.string,
-          line: t.partial({
-            width: t.number,
-            style: t.union([t.literal('dashed'), t.literal('solid'), t.literal('dotted')]),
-            iconPosition: t.union([t.literal('top'), t.literal('bottom')]),
-            textDecoration: t.union([t.literal('none'), t.literal('name')]),
-          }),
-          rect: t.partial({
-            fill: t.union([t.literal('inside'), t.literal('outside')]),
-            position: t.union([t.literal('top'), t.literal('bottom')]),
-          }),
+    annotation: t.partial({
+      type: t.string,
+      style: t.partial({
+        icon: t.string,
+        color: t.string,
+        line: t.partial({
+          width: t.number,
+          style: t.union([t.literal('dashed'), t.literal('solid'), t.literal('dotted')]),
+          iconPosition: t.union([t.literal('top'), t.literal('bottom')]),
+          textDecoration: t.union([t.literal('none'), t.literal('name')]),
+        }),
+        rect: t.partial({
+          fill: t.union([t.literal('inside'), t.literal('outside')]),
+          position: t.union([t.literal('top'), t.literal('bottom')]),
         }),
       }),
-    ]),
+    }),
     '@timestamp': dateAsStringRt,
     message: t.string,
   }),
@@ -79,6 +75,7 @@ export const findAnnotationRt = t.partial({
   end: t.string,
   sloId: t.string,
   sloInstanceId: t.string,
+  serviceName: t.string,
 });
 
 export const updateAnnotationRt = t.intersection([

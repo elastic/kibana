@@ -26,7 +26,7 @@ import { iconsSet } from './icon_set';
 export function AnnotationAppearance() {
   const { control, watch } = useFormContext<Annotation>();
 
-  const isRange = watch('annotation.type') === 'range';
+  const timestampEnd = watch('@timestampEnd');
 
   return (
     <>
@@ -39,7 +39,7 @@ export function AnnotationAppearance() {
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      {isRange ? (
+      {timestampEnd ? (
         <FillOptions />
       ) : (
         <>

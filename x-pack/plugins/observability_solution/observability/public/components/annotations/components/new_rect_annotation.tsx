@@ -98,7 +98,7 @@ export function ObsRectAnnotation({
               <EuiFlexGroup>
                 <EuiFlexItem grow={true}>
                   <EuiTitle size="xxxs">
-                    <h6>{annotation.name ?? 'Range'}</h6>
+                    <h2>{annotation.name}</h2>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

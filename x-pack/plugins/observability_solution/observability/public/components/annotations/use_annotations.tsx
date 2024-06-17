@@ -7,7 +7,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { BrushEvent, TooltipSpec, LineAnnotationEvent, RectAnnotationEvent } from '@elastic/charts';
 import { FormProvider, useForm } from 'react-hook-form';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import useKey from 'react-use/lib/useKey';
 import { clone } from 'lodash';
 import { useEditAnnotationHelper } from './hooks/use_edit_annotation_helper';
@@ -33,7 +33,7 @@ export const useAnnotations = ({
 } = {}) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const methods = useForm<CreateAnnotationForm>({
-    defaultValues: getDefaultAnnotation(sloId, sloInstanceId),
+    defaultValues: getDefaultAnnotation({ sloId, sloInstanceId }),
     mode: 'all',
   });
   const { setValue, reset } = methods;
@@ -132,12 +132,17 @@ export const useAnnotations = ({
     wrapOnBrushEnd: (originalHandler: (event: BrushEvent) => void) => {
       return (event: BrushEvent) => {
         if (isCtrlPressed) {
-          reset(getDefaultAnnotation(sloId, sloInstanceId));
           setSelectedEditAnnotation(null);
           const { to, from } = getBrushData(event);
-          setValue('@timestamp', moment(from));
-          setValue('@timestampEnd', moment(to));
-          setValue('annotation.type', 'range');
+          reset(
+            getDefaultAnnotation({
+              sloId,
+              sloInstanceId,
+              timestamp: moment(from),
+              timestampEnd: moment(to),
+            })
+          );
+
           setIsCreateOpen(true);
         } else {
           // Call the original handler
@@ -146,6 +151,8 @@ export const useAnnotations = ({
       };
     },
     createAnnotation: (start: string, end?: string) => {
+      reset(getDefaultAnnotation({ sloId, sloInstanceId }));
+
       if (isNaN(Number(start))) {
         setValue('@timestamp', moment(start));
       } else {
@@ -153,7 +160,6 @@ export const useAnnotations = ({
       }
       if (end) {
         setValue('@timestampEnd', moment(new Date(Number(end))));
-        setValue('annotation.type', 'range');
       }
       setIsCreateOpen(true);
     },
@@ -188,15 +194,22 @@ export const useAnnotations = ({
   };
 };
 
-const getDefaultAnnotation = (
-  sloId?: string,
-  sloInstanceId?: string
-): Partial<CreateAnnotationForm> => {
+const getDefaultAnnotation = ({
+  timestamp,
+  sloId,
+  sloInstanceId,
+  timestampEnd,
+}: {
+  timestamp?: Moment;
+  timestampEnd?: Moment;
+  sloId?: string;
+  sloInstanceId?: string;
+}): Partial<CreateAnnotationForm> => {
   return {
     message: '',
-    '@timestamp': moment(),
+    '@timestamp': timestamp ?? moment(),
+    '@timestampEnd': timestampEnd,
     annotation: {
-      type: 'line',
       style: {
         icon: 'iInCircle',
         color: '#D6BF57',

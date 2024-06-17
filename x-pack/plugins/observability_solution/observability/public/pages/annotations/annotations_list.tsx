@@ -16,6 +16,7 @@ import {
   formatDate,
   EuiSpacer,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { DatePicker } from './date_picker';
@@ -105,17 +106,29 @@ export function AnnotationsList() {
       name: TIMESTAMP_LABEL,
       dataType: 'date',
       sortable: true,
-      render: (timestamp: string) => formatDate(timestamp, 'longDateTime'),
+      render: (timestamp: string, annotation: Annotation) => {
+        if (annotation['@timestampEnd']) {
+          return (
+            <>
+              {formatDate(timestamp, 'longDateTime')}
+              <EuiIcon
+                type="sortRight"
+                css={{
+                  margin: '0 5px',
+                }}
+              />
+              {formatDate(annotation['@timestampEnd'], 'longDateTime')}
+            </>
+          );
+        }
+        return formatDate(timestamp, 'longDateTime');
+      },
     },
     {
       field: 'message',
       name: MESSAGE_LABEL,
       sortable: true,
       truncateText: true,
-    },
-    {
-      field: 'annotation.type',
-      name: TYPE_LABEL,
     },
     {
       field: 'tags',
@@ -188,10 +201,6 @@ const EDIT_LABEL = i18n.translate('xpack.observability.editAnnotation', { defaul
 
 const TAGS_LABEL = i18n.translate('xpack.observability.tagsAnnotations', {
   defaultMessage: 'Tags',
-});
-
-const TYPE_LABEL = i18n.translate('xpack.observability.typeAnnotations', {
-  defaultMessage: 'Type',
 });
 
 const MESSAGE_LABEL = i18n.translate('xpack.observability.messageAnnotations', {
