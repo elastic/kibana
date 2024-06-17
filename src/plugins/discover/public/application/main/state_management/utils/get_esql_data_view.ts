@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 import type { AggregateQuery } from '@kbn/es-query';
-import {
-  getESQLAdHocDataview,
-  getIndexPatternFromESQLQuery,
-  hasTimeNamedParams,
-  getTimeFieldFromESQLQuery,
-} from '@kbn/esql-utils';
+import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../../build_services';
 
@@ -26,8 +21,7 @@ export async function getEsqlDataView(
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern()
   ) {
-
-    return await getESQLAdHocDataview(indexPatternFromQuery, services.dataViews);
+    return await getESQLAdHocDataview(query.esql, services.dataViews);
   }
   return currentDataView;
 }

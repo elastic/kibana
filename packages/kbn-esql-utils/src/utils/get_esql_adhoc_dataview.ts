@@ -7,6 +7,11 @@
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import {
+  hasTimeNamedParams,
+  getTimeFieldFromESQLQuery,
+  getIndexPatternFromESQLQuery,
+} from './query_parsing_helpers';
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
@@ -28,9 +33,10 @@ async function sha256(str: string) {
 // the same adhoc dataview can be constructed/used. This comes with great advantages such
 // as solving the problem described here https://github.com/elastic/kibana/issues/168131
 export async function getESQLAdHocDataview(
-  indexPattern: string,
+  query: string,
   dataViewsService: DataViewsPublicPluginStart
 ) {
+  const indexPattern = getIndexPatternFromESQLQuery(query);
   const dataView = await dataViewsService.create({
     title: indexPattern,
     type: ESQL_TYPE,
@@ -41,6 +47,11 @@ export async function getESQLAdHocDataview(
   // we don't want to add the @timestamp field in this case https://github.com/elastic/kibana/issues/163417
   if (indexPattern && dataView?.fields?.getByName?.('@timestamp')?.type === 'date') {
     dataView.timeFieldName = '@timestamp';
+  }
+
+  if (hasTimeNamedParams(query)) {
+    const timeField = getTimeFieldFromESQLQuery(query);
+    dataView.timeFieldName = timeField;
   }
 
   return dataView;

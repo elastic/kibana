@@ -8,8 +8,6 @@ import {
   getIndexPatternFromESQLQuery,
   getESQLAdHocDataview,
   getESQLQueryColumns,
-  hasTimeNamedParams,
-  getTimeFieldFromESQLQuery,
 } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
@@ -36,7 +34,7 @@ export const getSuggestions = async (
 
     const dataView = dataViewSpec
       ? await deps.dataViews.create(dataViewSpec)
-      : await getESQLAdHocDataview(indexPattern, deps.dataViews);
+      : await getESQLAdHocDataview(query.esql, deps.dataViews);
 
     const columns = await getESQLQueryColumns({
       esqlQuery: 'esql' in query ? query.esql : '',
