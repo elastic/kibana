@@ -1,6 +1,6 @@
 .TextBasedLangEditor .monaco-editor {
-  border-top-left-radius: 6px;
-  border-bottom-left-radius: 6px;
+  border-top-left-radius: $euiBorderRadius;
+  border-bottom-left-radius: $euiBorderRadius;
 }
 
 .TextBasedLangEditor .monaco-editor .monaco-hover {
@@ -12,8 +12,8 @@
 }
 
 .TextBasedLangEditor .monaco-editor .margin {
-  border-top-left-radius: 6px;
-  border-bottom-left-radius: 6px;
+  border-top-left-radius: $euiBorderRadius;
+  border-bottom-left-radius: $euiBorderRadius;
 }
 
 .TextBasedLangEditor--compact .monaco-editor {
@@ -24,7 +24,6 @@
 .TextBasedLangEditor--compact .monaco-editor .margin {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  background-color: $euiColorLightestShade;
   color: $euiColorDisabledText;
 }
 
@@ -37,7 +36,7 @@
 }
 
 .TextBasedLangEditor--compact .monaco-editor .monaco-scrollable-element {
-  margin-left: 4px;
+  margin-left: $euiSizeS;
 }
 
 .TextBasedLangEditor_errorMessage {
