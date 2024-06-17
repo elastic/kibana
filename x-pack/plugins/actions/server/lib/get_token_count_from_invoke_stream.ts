@@ -20,6 +20,12 @@ export interface InvokeBody {
   signal?: AbortSignal;
 }
 
+interface UsageMetadata {
+  promptTokenCount: number;
+  candidatesTokenCount: number;
+  totalTokenCount: number;
+}
+
 /**
  * Takes the OpenAI and Bedrock `invokeStream` sub action response stream and the request messages array as inputs.
  * Uses gpt-tokenizer encoding to calculate the number of tokens in the prompt and completion parts of the response stream
@@ -128,6 +134,64 @@ const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) =
       logger.error('An error occurred while calculating streaming response tokens');
   }
   return parseOpenAIResponse(responseBody);
+};
+
+export const parseGeminiStreamForUsageMetadata = async ({
+  responseStream,
+  logger,
+}: {
+  responseStream: Readable;
+  logger: Logger;
+}): Promise<UsageMetadata> => {
+  let responseBody = '';
+
+  const onData = (chunk: Buffer) => {
+    responseBody += chunk.toString();
+  };
+
+  responseStream.on('data', onData);
+
+  return new Promise((resolve, reject) => {
+    responseStream.on('end', () => {
+      resolve(parseGeminiUsageMetadata(responseBody));
+    });
+    responseStream.on('error', (err) => {
+      logger.error('An error occurred while calculating streaming response tokens');
+      reject(err);
+    });
+  });
+};
+
+/** Parse Gemini stream response body */
+const parseGeminiUsageMetadata = (responseBody: string): UsageMetadata => {
+  const parsedLines = responseBody
+    .split('\n')
+    .filter((line) => line.startsWith('data: ') && !line.endsWith('[DONE]'))
+    .map((line) => JSON.parse(line.replace('data: ', '')));
+
+  parsedLines
+    .filter(
+      (
+        line
+      ): line is {
+        candidates: Array<{
+          content: { role: string; parts: Array<{ text: string }> };
+          finishReason: string;
+          safetyRatings: Array<{ category: string; probability: string }>;
+        }>;
+      } => 'candidates' in line
+    )
+    .reduce((prev, line) => {
+      const parts = line.candidates[0].content?.parts;
+      const chunkText = parts?.map((part) => part.text).join('');
+      return prev + chunkText;
+    }, '');
+
+  // Extract usage metadata from the last chunk
+  const lastChunk = parsedLines[parsedLines.length - 1];
+  const usageMetadata = 'usageMetadata' in lastChunk ? lastChunk.usageMetadata : null;
+
+  return usageMetadata;
 };
 
 /**
