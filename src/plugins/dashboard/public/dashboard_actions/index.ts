@@ -12,7 +12,7 @@ import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddabl
 import { DashboardStartDependencies } from '../plugin';
 import { AddToLibraryAction } from './add_to_library_action';
 import { LegacyAddToLibraryAction } from './legacy_add_to_library_action';
-import { ClonePanelAction } from './clone_panel_action';
+import { DuplicatePanelAction } from './duplicate_panel_action';
 import { CopyToDashboardAction } from './copy_to_dashboard_action';
 import { ExpandPanelAction } from './expand_panel_action';
 import { ExportCSVAction } from './export_csv_action';
@@ -35,9 +35,9 @@ export const buildAllDashboardActions = async ({
 }: BuildAllDashboardActionsProps) => {
   const { uiActions, share } = plugins;
 
-  const clonePanelAction = new ClonePanelAction();
-  uiActions.registerAction(clonePanelAction);
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
+  const duplicatePanelAction = new DuplicatePanelAction();
+  uiActions.registerAction(duplicatePanelAction);
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, duplicatePanelAction.id);
   const expandPanelAction = new ExpandPanelAction();
   uiActions.registerAction(expandPanelAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
