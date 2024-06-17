@@ -19,10 +19,7 @@ import {
 import { LegendValue, Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import {
-  LegendLayout,
-  type PartitionLegendValue,
-} from '@kbn/visualizations-plugin/common/constants';
+import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
@@ -149,16 +146,6 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   const onLegendStatsChange = useCallback(
     (legendStats) => {
       onStateChange({ legendStats });
-    },
-    [onStateChange]
-  );
-
-  const onLegendLayoutChange = useCallback(
-    (layout) => {
-      if (layout === LegendLayout.List) {
-        return onStateChange({ legendLayout: layout, legendMaxLines: 1, truncateLegend: true });
-      }
-      return onStateChange({ legendLayout: layout });
     },
     [onStateChange]
   );
@@ -291,8 +278,6 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         legendSize={legendSize}
         onLegendSizeChange={onLegendSizeChange}
         showAutoLegendSizeOption={hadAutoLegendSize}
-        legendLayout={layer.legendLayout}
-        onLegendLayoutChange={onLegendLayoutChange}
       />
     </EuiFlexGroup>
   );

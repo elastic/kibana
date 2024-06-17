@@ -10,11 +10,7 @@ import type { Position } from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
 import { CustomPaletteParams, PaletteOutput, ColorMapping } from '@kbn/coloring';
 import type { ColorMode } from '@kbn/charts-plugin/common';
-import type {
-  LegendLayout,
-  LegendSize,
-  PartitionLegendValue,
-} from '@kbn/visualizations-plugin/common/constants';
+import type { LegendSize, PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
 import { layerTypes } from './layer_types';
 import { CollapseFunction } from './expressions';
@@ -69,7 +65,6 @@ export interface SharedPieLayerState {
   legendDisplay: LegendDisplayType;
   legendPosition?: Position;
   legendStats?: PartitionLegendValue[];
-  legendLayout?: LegendLayout;
   nestedLegend?: boolean;
   percentDecimals?: number;
   emptySizeRatio?: number;

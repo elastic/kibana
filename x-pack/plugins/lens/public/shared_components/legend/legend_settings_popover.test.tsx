@@ -10,7 +10,6 @@ import { LegendSettingsPopover, LegendSettingsPopoverProps } from './legend_sett
 import userEvent from '@testing-library/user-event';
 import { RenderOptions, fireEvent, render, screen } from '@testing-library/react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
-import { LegendLayout } from '@kbn/visualizations-plugin/common';
 import { LegendValue } from '@elastic/charts';
 
 describe('Legend Settings', () => {
@@ -149,10 +148,5 @@ describe('Legend Settings', () => {
     fireEvent.click(screen.getByRole('option', { name: 'Current and last value' }));
     // expect(screen.getByRole('group', { name: 'Layout' })).toBeInTheDocument();
     expect(onLegendStatsChange).toBeCalledWith([LegendValue.CurrentAndLastValue], false);
-  });
-
-  it('should not show truncation options when layout is list', () => {
-    renderLegendSettingsPopover({ legendLayout: LegendLayout.List });
-    expect(screen.queryByRole('switch', { name: 'Label truncation' })).toBeNull();
   });
 });

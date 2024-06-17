@@ -11,11 +11,7 @@ import { LegendValue, Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import {
-  LegendLayout,
-  LegendSize,
-  XYLegendValue,
-} from '@kbn/visualizations-plugin/common/constants';
+import { LegendSize, XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
 import { State, XYState, AxesSettingsConfig } from '../types';
@@ -183,10 +179,10 @@ const xyLegendValues: Array<{
   },
   {
     value: LegendValue.LastNonNullValue,
-    label: i18n.translate('xpack.lens.shared.legendValues.lastValue', {
+    label: i18n.translate('xpack.lens.shared.legendValues.lastNonNullValue', {
       defaultMessage: 'Last non-null value',
     }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastValueDesc', {
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastNonNullValueDesc', {
       defaultMessage: 'Last non-null value in the series.',
     }),
   },
@@ -223,7 +219,7 @@ const xyLegendValues: Array<{
       defaultMessage: 'Difference %',
     }),
     toolTipContent: i18n.translate('xpack.lens.shared.legendValues.diffPercentDesc', {
-      defaultMessage: 'Difference in pecent between first and last value in the series.',
+      defaultMessage: 'Difference in percent between first and last value in the series.',
     }),
   },
   {
@@ -247,7 +243,7 @@ const xyLegendValues: Array<{
   {
     value: LegendValue.DistinctCount,
     label: i18n.translate('xpack.lens.shared.legendValues.distinctCount', {
-      defaultMessage: 'Distinct Count',
+      defaultMessage: 'Distinct count',
     }),
     toolTipContent: i18n.translate('xpack.lens.shared.legendValues.distinctCountDesc', {
       defaultMessage: 'Count of distinct values in the series.',
@@ -265,7 +261,7 @@ const xyLegendValues: Array<{
   {
     value: LegendValue.StdDeviation,
     label: i18n.translate('xpack.lens.shared.legendValues.stdDev', {
-      defaultMessage: 'Std Deviation',
+      defaultMessage: 'Std deviation',
     }),
     toolTipContent: i18n.translate('xpack.lens.shared.legendValues.stdDevDesc', {
       defaultMessage: 'Standard deviation of all the values in the series.',
@@ -642,27 +638,6 @@ export const XyToolbar = memo(function XyToolbar(
                   legendStats,
                   isVisible: true,
                   showSingleSeries: true,
-                },
-              });
-            }}
-            legendLayout={state?.legend.layout}
-            onLegendLayoutChange={(layout) => {
-              const propertiesToModify =
-                layout === LegendLayout.List
-                  ? {
-                      layout,
-                      maxLines: 1,
-                      shouldTruncate: true,
-                    }
-                  : {
-                      layout,
-                    };
-
-              setState({
-                ...state,
-                legend: {
-                  ...state.legend,
-                  ...propertiesToModify,
                 },
               });
             }}

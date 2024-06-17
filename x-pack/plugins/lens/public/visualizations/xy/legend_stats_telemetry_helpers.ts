@@ -37,7 +37,7 @@ function getRangeText(n: number) {
   if (n < 1) {
     return;
   }
-  if (n === 1 || n === 2 || n === 3) {
+  if (n < 4) {
     return `_amount_${String(n)}`;
   }
   if (n >= 4 && n <= 7) {

@@ -21,7 +21,7 @@ import {
 import { Position, VerticalAlignment, HorizontalAlignment, LegendValue } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { XYLegendValue, LegendLayout } from '@kbn/visualizations-plugin/common/constants';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
@@ -42,14 +42,6 @@ export interface LegendSettingsPopoverProps<LegendStats extends LegendValue = XY
    * Determines the legend mode
    */
   mode: 'default' | 'show' | 'hide' | 'auto';
-  /**
-   * Determines the legend layout
-   */
-  legendLayout?: LegendLayout;
-  /**
-   * Callback on legend option change
-   */
-  onLegendLayoutChange?: (id: LegendLayout) => void;
   /**
    * Callback on display option change
    */
@@ -198,22 +190,6 @@ const noop = () => {};
 const PANEL_STYLE = {
   width: '500px',
 };
-// const legendLayoutOptions = [
-//   {
-//     id: `lns_legend_table`,
-//     value: LegendLayout.Table,
-//     label: i18n.translate('xpack.lens.xyChart.legendLayout.table', {
-//       defaultMessage: 'Table',
-//     }),
-//   },
-//   {
-//     id: `lns_legend_list`,
-//     value: LegendLayout.List,
-//     label: i18n.translate('xpack.lens.xyChart.legendLayout.list', {
-//       defaultMessage: 'List',
-//     }),
-//   },
-// ];
 
 const legendTitleStrings = {
   header: i18n.translate('xpack.lens.label.shared.legendHeader', {
@@ -236,11 +212,9 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
   allowedLegendStats = [],
   legendOptions,
   mode,
-  legendLayout,
   legendTitle,
   isTitleVisible,
   onLegendTitleChange,
-  onLegendLayoutChange = noop,
   onDisplayChange,
   position,
   location,
@@ -413,35 +387,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
         </EuiFormRow>
       )}
 
-      {/* TODO: This setting will be used when implementing list option */}
-      {/* {allowedLegendStats && legendStats?.length !== 0 && (
-        <EuiFormRow
-          display="columnCompressed"
-          label={i18n.translate('xpack.lens.shared.legendLayout', {
-            defaultMessage: 'Legend layout',
-          })}
-          fullWidth
-        >
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.shared.legendLayout', {
-              defaultMessage: 'Legend layout',
-            })}
-            buttonSize="compressed"
-            options={legendLayoutOptions}
-            idSelected={
-              legendLayoutOptions.find(({ value }) => value === legendLayout)?.id ||
-              legendLayoutOptions[0].id
-            }
-            onChange={(l) => {
-              const layout = legendLayoutOptions.find(({ id }) => id === l)!.value;
-              onLegendLayoutChange(layout);
-            }}
-          />
-        </EuiFormRow>
-      )} */}
-
-      {isLegendNotHidden && legendLayout !== LegendLayout.List && (
+      {isLegendNotHidden && (
         <EuiFormRow
           display="columnCompressed"
           label={i18n.translate('xpack.lens.shared.labelTruncation', {

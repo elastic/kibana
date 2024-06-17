@@ -123,12 +123,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async selectOptionFromComboBox(testTargetId: string, name: string | string[]) {
       const target = await testSubjects.find(testTargetId, 1000);
       await comboBox.openOptionsList(target);
-      if (typeof name === 'string') {
-        await comboBox.setElement(target, name);
-      } else {
-        for (const option of name) {
-          await comboBox.setElement(target, option);
-        }
+      const names = Array.isArray(name) ? name : [name];
+      for (const option of names) {
+        await comboBox.setElement(target, option);
       }
     },
 

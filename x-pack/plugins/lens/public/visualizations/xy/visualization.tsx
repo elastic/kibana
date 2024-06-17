@@ -1072,7 +1072,7 @@ export const getXyVisualization = ({
       state.legend.legendStats,
       prevState ? prevState.legend.legendStats : undefined
     );
-    return [...colorMappingEvents, ...legendStatsEvents];
+    return colorMappingEvents.concat(legendStatsEvents);
   },
 
   getRenderEventCounters(state) {
