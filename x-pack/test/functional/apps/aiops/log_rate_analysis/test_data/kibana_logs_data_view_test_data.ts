@@ -19,6 +19,7 @@ export const kibanaLogsDataViewTestData: TestData = {
   sourceIndexOrSavedSearch: 'kibana_sample_data_logstsdb',
   brushIntervalFactor: 1,
   chartClickCoordinates: [235, 0],
+  columnSelectorSearch: 'p-value',
   fieldSelectorSearch: 'referer',
   fieldSelectorApplyAvailable: true,
   action: {
@@ -69,6 +70,7 @@ export const kibanaLogsDataViewTestData: TestData = {
       logRate: 'Chart type:bar chart',
       impact: 'High',
     })),
+    columnSelectorPopover: ['Log rate', 'Doc count', 'p-value', 'Impact', 'Actions'],
     fieldSelectorPopover: [
       'agent.keyword',
       'clientip',

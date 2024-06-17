@@ -48,7 +48,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/profiling-data-access-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/profiling-utils",
     "@kbn/security-plugin",
     "@kbn/shared-ux-utility",

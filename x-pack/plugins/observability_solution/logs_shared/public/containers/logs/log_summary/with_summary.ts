@@ -38,3 +38,6 @@ export const WithSummary = ({ serializedParsedQuery, children }: WithSummaryProp
 
   return children({ buckets, start, end });
 };
+
+// eslint-disable-next-line import/no-default-export
+export default WithSummary;
