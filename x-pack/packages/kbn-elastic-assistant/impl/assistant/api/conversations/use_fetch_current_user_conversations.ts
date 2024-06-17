@@ -26,7 +26,6 @@ export interface UseFetchCurrentUserConversationsParams {
   signal?: AbortSignal | undefined;
   refetchOnWindowFocus?: boolean;
   isAssistantEnabled: boolean;
-  query?: { page: number; perPage: number };
 }
 
 /**
