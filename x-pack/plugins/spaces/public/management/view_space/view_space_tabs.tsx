@@ -34,7 +34,7 @@ export const getTabs = (space: Space, features: KibanaFeature[], roles: Role[]):
   return [
     {
       id: TAB_ID_CONTENT,
-      name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.feature.heading', {
+      name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.content.heading', {
         defaultMessage: 'Content',
       }),
       content: <ViewSpaceContent space={space} />,

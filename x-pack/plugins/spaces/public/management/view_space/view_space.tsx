@@ -175,7 +175,10 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
         }}
       >
         <EuiButtonEmpty iconType="gear">
-          <FormattedMessage id="viewSpace.spaceSettingsButton.label" defaultMessage="Settings" />
+          <FormattedMessage
+            id="xpack.spaces.management.viewSpace.spaceSettingsButton.label"
+            defaultMessage="Settings"
+          />
         </EuiButtonEmpty>
       </a>
     ) : null;
