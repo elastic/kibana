@@ -7,6 +7,7 @@
 
 export { LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR } from './constants';
 export { getLogRateAnalysisType } from './get_log_rate_analysis_type';
+export { getWindowParametersMedianValues } from './get_window_parameters_median_values';
 export { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from './log_rate_analysis_type';
 export type { LogRateHistogramItem } from './log_rate_histogram_item';
 export type { DocumentCountStats, DocumentStats, DocumentCountStatsChangePoint } from './types';

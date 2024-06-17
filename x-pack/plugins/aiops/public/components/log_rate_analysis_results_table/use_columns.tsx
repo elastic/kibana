@@ -6,7 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { type EuiBasicTableColumn, EuiBadge, EuiCode, EuiIconTip, EuiText } from '@elastic/eui';
+import {
+  type EuiBasicTableColumn,
+  EuiBadge,
+  EuiCode,
+  EuiIcon,
+  EuiIconTip,
+  EuiText,
+} from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,6 +21,11 @@ import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
+import {
+  type WindowParameters,
+  LOG_RATE_ANALYSIS_TYPE,
+  getWindowParametersMedianValues,
+} from '@kbn/aiops-log-rate-analysis';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { FieldStatsPopover } from '../field_stats_popover';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -43,6 +55,12 @@ export const commonColumns = {
   ['Impact']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.impactColumnTitle', {
     defaultMessage: 'Impact',
   }),
+  ['Log rate change']: i18n.translate(
+    'xpack.aiops.logRateAnalysis.resultsTable.logRateChangeColumnTitle',
+    {
+      defaultMessage: 'Log rate change',
+    }
+  ),
   ['Actions']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnTitle', {
     defaultMessage: 'Actions',
   }),
@@ -96,9 +114,18 @@ const impactMessage = i18n.translate(
     defaultMessage: 'The level of impact of the field on the message rate difference.',
   }
 );
+const logRateChangeMessage = i18n.translate(
+  'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateChangeLabelColumnTooltip',
+  {
+    defaultMessage:
+      'The factor by which the log rate changed. This value is normalized to account for differing lengths in baseline and deviation time ranges.',
+  }
+);
 
 export const useColumns = (
   tableType: LogRateAnalysisResultsTableType,
+  analysisType: typeof LOG_RATE_ANALYSIS_TYPE[keyof typeof LOG_RATE_ANALYSIS_TYPE],
+  windowParameters: WindowParameters | undefined,
   skippedColumns: string[],
   searchQuery: estypes.QueryDslQueryContainer,
   barColorOverride?: string,
@@ -271,6 +298,70 @@ export const useColumns = (
           return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
         },
         sortable: true,
+        valign: 'middle',
+      },
+      ['Log rate change']: {
+        'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnLogRateChange',
+        field: 'histogram',
+        name: (
+          <>
+            <FormattedMessage
+              id="xpack.aiops.logRateAnalysis.resultsTable.logRateChangeLabel"
+              defaultMessage="Log rate change"
+            />
+            &nbsp;
+            <EuiIconTip
+              size="s"
+              position="top"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+              content={logRateChangeMessage}
+            />
+          </>
+        ),
+        render: (_, { histogram }) => {
+          if (histogram === undefined || windowParameters === undefined) return NOT_AVAILABLE;
+          const { baselineMedian, deviationMedian } = getWindowParametersMedianValues(
+            histogram,
+            windowParameters
+          );
+
+          const logRateChange =
+            baselineMedian > 0
+              ? analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+                ? `${Math.round((deviationMedian / baselineMedian) * 100) / 100}x`
+                : `${Math.round((baselineMedian / deviationMedian) * 100) / 100}x`
+              : analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+              ? i18n.translate(
+                  'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateChangeLabelColumnTooltip',
+                  {
+                    defaultMessage: '{deviationMedian} docs from 0 in baseline',
+                    values: { deviationMedian },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateChangeLabelColumnTooltip',
+                  {
+                    defaultMessage: '0 docs from ${baselineMedian} in baseline',
+                    values: { baselineMedian },
+                  }
+                );
+
+          return (
+            <>
+              <EuiIcon
+                size="s"
+                color="subdued"
+                type={analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? 'sortUp' : 'sortDown'}
+                className="eui-alignTop"
+              />
+              &nbsp;
+              {logRateChange}
+            </>
+          );
+        },
+        sortable: false,
         valign: 'middle',
       },
       ['p-value']: {
