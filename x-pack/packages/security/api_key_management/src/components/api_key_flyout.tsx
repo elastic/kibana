@@ -98,6 +98,7 @@ interface CommonApiKeyFlyoutProps {
   isLoadingCurrentUser?: boolean;
   defaultMetadata?: string;
   defaultRoleDescriptors?: string;
+  defaultExpiration?: string;
 }
 
 interface CreateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
@@ -168,6 +169,7 @@ const httpErrorText = i18n.translate('xpack.security.httpError', {
 export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   onSuccess,
   onCancel,
+  defaultExpiration,
   defaultMetadata,
   defaultRoleDescriptors,
   apiKey,
@@ -252,7 +254,14 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
     if (defaultMetadata && !apiKey) {
       formik.setFieldValue('metadata', defaultMetadata);
     }
-  }, [defaultRoleDescriptors]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [defaultMetadata]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (defaultExpiration && !apiKey) {
+      formik.setFieldValue('expiration', defaultExpiration);
+      formik.setFieldValue('customExpiration', true);
+    }
+  }, [defaultExpiration]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isLoading = isLoadingCurrentUser || isLoadingRoles;
 
@@ -319,6 +328,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               {responseError && (
                 <>
                   <EuiCallOut
+                    data-test-subj="apiKeyFlyoutResponseError"
                     color="danger"
                     title={
                       <FormattedMessage

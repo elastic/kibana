@@ -46,6 +46,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
       currentUser={user}
       defaultRoleDescriptors={DEFAULT_ROLE_DESCRIPTORS}
       defaultMetadata={DEFAULT_METADATA}
+      defaultExpiration="60"
     />
   );
 };

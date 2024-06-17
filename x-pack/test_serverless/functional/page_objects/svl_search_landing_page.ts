@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const monacoEditor = getService('monacoEditor');
 
   return {
     async assertSvlSearchSideNavExists() {
@@ -48,7 +49,7 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
       },
       async createApiKeySubmitAndError() {
         await testSubjects.click('formFlyoutSubmitButton');
-        await testSubjects.existOrFail('create-api-key-error-callout'); // TODO
+        await testSubjects.existOrFail('apiKeyFlyoutResponseError');
       },
       async createApiKeyCancel() {
         await testSubjects.click('formFlyoutCancelButton');
@@ -57,19 +58,19 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('apiKeysMetadataSwitch');
       },
       async expectMetadataEditorToExist() {
-        await monacoEditor.getCodeEditorValue(1).existOrFail();
+        await monacoEditor.getCodeEditorValue(1);
       },
       async createApiKeyToggleRoleDescriptorsSwitch() {
         await testSubjects.click('apiKeysRoleDescriptorsSwitch');
       },
       async expectRoleDescriptorsEditorToExist() {
-        await monacoEditor.getCodeEditorValue(0).existOrFail();
-        await testSubjects.existOrFail('serverlessSearchSecurityPrivilegesFormReadOnlyButton');
-        await testSubjects.existOrFail('serverlessSearchSecurityPrivilegesFormWriteOnlyButton');
+        await monacoEditor.getCodeEditorValue(0);
+        await testSubjects.existOrFail('apiKeysReadOnlyDescriptors');
+        await testSubjects.existOrFail('apiKeysWriteOnlyDescriptors');
       },
       async setRoleDescriptorsValue(value: string) {
-        await monacoEditor.getCodeEditorValue(0).existOrFail();
-        await await monacoEditor.setCodeEditorValue(0, value);
+        await monacoEditor.getCodeEditorValue(0);
+        await monacoEditor.setCodeEditorValue(value, 0);
       },
     },
     pipeline: {

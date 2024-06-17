@@ -25,7 +25,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/security-plugin-types-common",
     "@kbn/security-plugin-types-server",
-    "@kbn/security-plugin",
     "@kbn/ui-theme",
   ],
 }
