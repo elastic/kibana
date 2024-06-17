@@ -49,7 +49,7 @@ export class ConsolePageObject extends FtrService {
     },
     getOutputText: async () => {
       const outputPanel = await this.testSubjects.find('consoleMonacoOutput');
-      const outputViewDiv = await outputPanel.findByClassName('view-lines');
+      const outputViewDiv = await outputPanel.findByClassName('monaco-scrollable-element');
       return await outputViewDiv.getVisibleText();
     },
     pressEnter: async () => {
