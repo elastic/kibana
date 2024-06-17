@@ -36,7 +36,7 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
 };
 
 const emptyNotes: string[] = [];
-const DEFAULT_UDT_ROW_HEIGHT = 32;
+const DEFAULT_UDT_ROW_HEIGHT = 40;
 
 /**
  *
@@ -131,7 +131,8 @@ const CustomGridRow = styled.div.attrs<{
   width: fit-content;
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
   . euiDataGridRowCell--controlColumn {
-    height: ${(props: { $rowHeight: number }) => DEFAULT_UDT_ROW_HEIGHT + props.$rowHeight}px;
+    height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
+    min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
   }
   .udt--customRow {
     border-radius: 0;
@@ -164,13 +165,14 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
 }))`
   display: flex;
   align-items: center;
-  height: ${(props: { $rowHeight: number }) => DEFAULT_UDT_ROW_HEIGHT + props.$rowHeight}px;
+  height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
     display: flex;
     flex-direction: column;
     justify-content: center;
     height: 100%;
+    min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
     .unifiedDataTable__rowControl {
       margin-top: 0;
     }
@@ -219,7 +221,8 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     rowRenderers: enabledRowRenderers,
   });
 
-  const additionalRowHeight = 16 * rowHeight;
+  let cssRowHeight: string = 'auto';
+  if (rowHeight >= 0) cssRowHeight = `${DEFAULT_UDT_ROW_HEIGHT + 16 * rowHeight}px`;
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
    * which renders the row-renderer, notes and notes editor
@@ -259,10 +262,10 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   return (
     <CustomGridRow
       className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
-      $rowHeight={additionalRowHeight}
+      $cssRowHeight={cssRowHeight}
       key={rowIndex}
     >
-      <CustomGridRowCellWrapper className={eventTypeRowClassName} $rowHeight={additionalRowHeight}>
+      <CustomGridRowCellWrapper className={eventTypeRowClassName} $cssRowHeight={cssRowHeight}>
         {visibleColumns.map((column, colIndex) => {
           // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
           if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
