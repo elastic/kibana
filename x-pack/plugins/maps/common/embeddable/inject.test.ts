@@ -21,7 +21,7 @@ test('Should return original state with by-reference embeddable state', () => {
     },
   ];
 
-  expect(inject!(mapByReferenceInput, refernces)).toEqual(mapByReferenceInput);
+  expect(inject(mapByReferenceInput, refernces)).toEqual(mapByReferenceInput);
 });
 
 test('Should inject refNames with by-value embeddable state', () => {
@@ -41,7 +41,7 @@ test('Should inject refNames with by-value embeddable state', () => {
     },
   ];
 
-  expect(inject!(mapByValueInput, refernces)).toEqual({
+  expect(inject(mapByValueInput, refernces)).toEqual({
     id: '8d62c3f0-c61f-4c09-ac24-9b8ee4320e20',
     attributes: {
       layerListJSON: '[{"sourceDescriptor":{"indexPatternId":"changed_index_pattern_id"}}]',

@@ -283,7 +283,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   return (
     <EuiFlexGroup alignItems="flexStart">
       <EuiFlexItem grow={1} />
-      <EuiFlexItem grow={6}>
+      <EuiFlexItem grow={7}>
         {fetchError && (
           <>
             <Error

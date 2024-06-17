@@ -247,6 +247,7 @@ enabled:
   - x-pack/test/fleet_api_integration/config.epm.ts
   - x-pack/test/fleet_api_integration/config.fleet.ts
   - x-pack/test/fleet_api_integration/config.package_policy.ts
+  - x-pack/test/fleet_api_integration/config.space_awareness.ts
   - x-pack/test/fleet_functional/config.ts
   - x-pack/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/test/functional_basic/apps/ml/permissions/config.ts
@@ -406,6 +407,7 @@ enabled:
   - x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_trial.ts
   - x-pack/test/spaces_api_integration/spaces_only/config.ts
+  - x-pack/test/task_manager_claimer_mget/config.ts
   - x-pack/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.js
@@ -442,7 +444,8 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group6.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.basic.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.essentials.ts
   - x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group2.ts
@@ -572,4 +575,3 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations_feature_flag.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations_feature_flag.config.ts
-
