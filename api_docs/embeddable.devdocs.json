@@ -14041,10 +14041,6 @@
             {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/plugin.ts"
-            },
-            {
-              "plugin": "maps",
-              "path": "x-pack/plugins/maps/public/plugin.ts"
             }
           ],
           "returnComment": [],
@@ -14295,28 +14291,8 @@
               "path": "src/plugins/dashboard/public/plugin.tsx"
             },
             {
-              "plugin": "maps",
-              "path": "x-pack/plugins/maps/public/plugin.ts"
-            },
-            {
               "plugin": "discover",
               "path": "src/plugins/discover/public/plugin.tsx"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
             },
             {
               "plugin": "links",
@@ -14711,14 +14687,6 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_renderer.tsx"
-            },
-            {
-              "plugin": "observabilityShared",
-              "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/profiling_embeddable.tsx"
-            },
-            {
-              "plugin": "observabilityShared",
-              "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx"
             },
             {
               "plugin": "dashboard",
