@@ -2599,7 +2599,7 @@
             "label": "observabilityShared",
             "description": [],
             "signature": [
-              "{ locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
+              "{ registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -10192,7 +10192,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "false"
+                  "true"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
