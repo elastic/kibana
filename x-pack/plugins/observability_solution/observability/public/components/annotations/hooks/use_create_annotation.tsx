@@ -18,7 +18,7 @@ import { useKibana } from '../../../utils/kibana_react';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-interface CreateAnnotationResponse {
+export interface CreateAnnotationResponse {
   _id: string;
   _index: string;
   _source: Annotation;
