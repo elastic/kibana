@@ -70,9 +70,7 @@ export const useAttackDiscovery = ({
 
   const { data: anonymizationFields } = useFetchAnonymizationFields();
 
-  const [generationIntervals, setGenerationIntervals] = React.useState<
-    GenerationInterval[] | undefined
-  >(undefined);
+  const [generationIntervals, setGenerationIntervals] = React.useState<GenerationInterval[]>([]);
   const [attackDiscoveries, setAttackDiscoveries] = useState<AttackDiscoveries>([]);
   const [replacements, setReplacements] = useState<Replacements>({});
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);

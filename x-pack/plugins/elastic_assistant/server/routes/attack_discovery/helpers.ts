@@ -116,6 +116,7 @@ export const getAssistantToolParams = ({
     latestReplacements,
     langChainTimeout,
     llm,
+    logger,
     onNewReplacements,
     request,
     size,
