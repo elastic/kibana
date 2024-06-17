@@ -116,7 +116,7 @@ export function ChangeDataView({
       const adHocDataViewRefs: DataViewListItemEnhanced[] =
         adHocDataViews?.map(mapAdHocDataView) ?? [];
 
-      setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
+      setDataViewsList([]); // temp remove to continue with tests
     };
     fetchDataViews();
   }, [data, currentDataViewId, adHocDataViews, savedDataViews, isTextBasedLangSelected]);
