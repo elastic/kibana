@@ -6,21 +6,23 @@
  */
 
 export type {
+  ESProcessorOptions,
+  ESProcessorItem,
+  Pipeline,
+  InputType,
+  DataStream,
+  Integration,
   BuildIntegrationApiRequest,
   EcsMappingApiRequest,
   CategorizationApiRequest,
   RelatedApiRequest,
+  CheckPipelineApiRequest,
   CategorizationApiResponse,
   RelatedApiResponse,
   EcsMappingApiResponse,
-  Pipeline,
-  ESProcessorItem,
-  ESProcessorOptions,
-  DataStream,
-  Integration,
-  InputTypes,
-  TestPipelineApiRequest,
-  TestPipelineApiResponse,
+  CheckPipelineApiResponse,
+  InstallPackageResponse,
+  GetPackagesResponse,
 } from './types';
 
 export {
@@ -29,7 +31,7 @@ export {
   ECS_GRAPH_PATH,
   CATEGORIZATION_GRAPH_PATH,
   RELATED_GRAPH_PATH,
-  TEST_PIPELINE_PATH,
+  CHECK_PIPELINE_PATH,
   INTEGRATION_BUILDER_PATH,
   INTEGRATION_ASSISTANT_BASE_PATH,
 } from './constants';

@@ -63,7 +63,11 @@ export function registerIntegrationBuilderRoutes(
         const { integration } = request.body as BuildIntegrationApiRequest;
         try {
           const zippedIntegration = await buildPackage(integration);
-          return response.custom({ statusCode: 200, body: zippedIntegration });
+          return response.custom({
+            statusCode: 200,
+            body: zippedIntegration,
+            headers: { 'Content-Type': 'application/zip' },
+          });
         } catch (e) {
           return response.customError({ statusCode: 500, body: e });
         }

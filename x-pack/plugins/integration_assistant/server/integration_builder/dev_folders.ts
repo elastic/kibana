@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { join as joinPath } from 'path';
+import { resolve as resolvePath } from 'path';
 import nunjucks from 'nunjucks';
 import type { Integration } from '../../common';
 import { ensureDirSync, createSync } from '../util';
 
 export function createPackageSystemTests(integrationDir: string, integration: Integration) {
-  const systemTestsDockerDir = joinPath(integrationDir, '_dev/deploy/docker/');
-  const systemTestsSamplesDir = joinPath(systemTestsDockerDir, 'sample_logs');
+  const systemTestsDockerDir = resolvePath(integrationDir, '_dev/deploy/docker/');
+  const systemTestsSamplesDir = resolvePath(systemTestsDockerDir, 'sample_logs');
   ensureDirSync(systemTestsSamplesDir);
 
   const streamVersion = '0.13.0';
@@ -22,7 +22,7 @@ export function createPackageSystemTests(integrationDir: string, integration: In
     const packageName = integration.name.replace(/_/g, '-');
     const dataStreamName = stream.name.replace(/_/g, '-');
 
-    const systemTestFileName = joinPath(
+    const systemTestFileName = resolvePath(
       systemTestsSamplesDir,
       `test-${packageName}-${dataStreamName}.log`
     );
@@ -48,6 +48,6 @@ export function createPackageSystemTests(integrationDir: string, integration: In
     docker_compose_version: dockerComposeVersion,
   });
 
-  const dockerComposeFileName = joinPath(systemTestsDockerDir, 'docker-compose.yml');
+  const dockerComposeFileName = resolvePath(systemTestsDockerDir, 'docker-compose.yml');
   createSync(dockerComposeFileName, renderedDockerCompose);
 }

@@ -119,12 +119,6 @@ export interface EndpointAgentTamperProtectionExtension {
   Component: LazyExoticComponent<ComponentType>;
 }
 
-export interface PliAuthBlockExtension {
-  package: string;
-  view: 'pli-auth-block';
-  Component: LazyExoticComponent<ComponentType>;
-}
-
 export interface PackageGenericErrorsListExtension {
   package: string;
   view: 'package-generic-errors-list';
@@ -232,5 +226,4 @@ export type UIExtensionPoint =
   | PackageGenericErrorsListExtension
   | AgentEnrollmentFlyoutFinalStepExtension
   | PackagePolicyCreateMultiStepExtension
-  | EndpointAgentTamperProtectionExtension
-  | PliAuthBlockExtension;
+  | EndpointAgentTamperProtectionExtension;
