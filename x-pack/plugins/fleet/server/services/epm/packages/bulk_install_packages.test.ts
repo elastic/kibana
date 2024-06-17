@@ -15,23 +15,37 @@ import { createAppContextStartContractMock } from '../../../mocks';
 import { fetchFindLatestPackageOrThrow } from '../registry';
 
 import { bulkInstallPackages } from './bulk_install_packages';
+import { installPackage } from './install';
 
+jest.mock('./install');
+jest.mock('../registry');
+
+const mockedInstallPackage = jest.mocked(installPackage);
 const mockedFetchFindLatestPackageOrThrow = jest.mocked(fetchFindLatestPackageOrThrow);
-
-jest.mock('../registry', () => {
-  return {
-    fetchFindLatestPackageOrThrow: jest.fn().mockResolvedValue({}),
-  };
-});
 
 describe('bulkInstallPackages', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   const mockSoClient = savedObjectsClientMock.create();
   const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 
+  mockedFetchFindLatestPackageOrThrow.mockImplementation(async (pkgName: string) => {
+    return {
+      name: pkgName,
+      version: '1.0.0',
+      title: pkgName,
+      description: 'Test',
+      release: 'experimental',
+      owner: 'elastic',
+      prerelease: true,
+      skipDataStreamRollover: false,
+    } as any;
+  });
+
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
+    mockedInstallPackage.mockClear();
+    mockedFetchFindLatestPackageOrThrow.mockClear();
   });
 
   describe('only makes one installation attempt per unique package name', () => {
@@ -47,7 +61,7 @@ describe('bulkInstallPackages', () => {
         spaceId: 'default',
       });
 
-      expect(mockedFetchFindLatestPackageOrThrow).toHaveBeenCalledTimes(1);
+      expect(mockedInstallPackage).toHaveBeenCalledTimes(1);
     });
 
     test('with objects', async () => {
@@ -65,7 +79,7 @@ describe('bulkInstallPackages', () => {
         spaceId: 'default',
       });
 
-      expect(mockedFetchFindLatestPackageOrThrow).toHaveBeenCalledTimes(1);
+      expect(mockedInstallPackage).toHaveBeenCalledTimes(1);
     });
     test('with a mixture of plain strings and objects', async () => {
       const NUM_PACKAGES = 20000;
@@ -83,7 +97,20 @@ describe('bulkInstallPackages', () => {
         spaceId: 'default',
       });
 
-      expect(mockedFetchFindLatestPackageOrThrow).toHaveBeenCalledTimes(2);
+      expect(mockedInstallPackage).toHaveBeenCalledTimes(2);
     });
+  });
+
+  test('prevents installation of forbidden packages', async () => {
+    const packagesToInstall = ['security_detection_engine', 'some_other_package'];
+
+    await bulkInstallPackages({
+      savedObjectsClient: mockSoClient,
+      packagesToInstall,
+      esClient: mockEsClient,
+      spaceId: 'default',
+    });
+
+    expect(mockedInstallPackage).toHaveBeenCalledTimes(1);
   });
 });

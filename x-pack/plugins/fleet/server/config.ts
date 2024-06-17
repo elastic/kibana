@@ -234,6 +234,12 @@ export const config: PluginConfigDescriptor = {
               },
             }
           ),
+          // Limit the number of concurrent package installations during bulk installation requests. Increasing
+          // this limit will use more Kibana memory, and can result in many more concurrent requests to Elasticsearch.
+          maxConcurrentBulkInstallations: schema.number({
+            defaultValue: 5,
+            min: 1,
+          }),
         })
       ),
       enabled: schema.boolean({ defaultValue: true }),

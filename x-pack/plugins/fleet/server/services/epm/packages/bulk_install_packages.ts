@@ -20,6 +20,12 @@ import type { InstallResult } from '../../../types';
 import { installPackage, isPackageVersionOrLaterInstalled } from './install';
 import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
+// Fallback value for maxConcurrentBulkInstallations if `xpack.fleet.internal` is not defined
+const DEFAULT_MAX_CONCURRENT_INSTALLS = 5;
+
+// These packages can't be included in bulk install operations due to their size or other factors
+const FORBIDDEN_BULK_INSTALL_PACKAGE_NAMES = ['security_detection_engine'];
+
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
   packagesToInstall: Array<
@@ -55,10 +61,32 @@ export async function bulkInstallPackages({
     return pkg.name;
   });
 
-  const limiter = pLimit(10);
+  const forbiddenPackages = uniquePackages
+    .filter((pkg) =>
+      typeof pkg === 'string'
+        ? FORBIDDEN_BULK_INSTALL_PACKAGE_NAMES.includes(pkg)
+        : FORBIDDEN_BULK_INSTALL_PACKAGE_NAMES.includes(pkg.name)
+    )
+    .map((pkg) => (typeof pkg === 'string' ? pkg : pkg.name));
+
+  if (forbiddenPackages.length > 0) {
+    logger.warn(
+      `Package(s) cannot be bulk installed and will be ignored: ${forbiddenPackages.join(',')}`
+    );
+  }
+
+  const filteredPackagesToInstall = uniquePackages.filter(
+    (pkg) => !forbiddenPackages.includes(typeof pkg === 'string' ? pkg : pkg.name)
+  );
+
+  const maxConcurrentInstalls =
+    appContextService.getConfig()?.internal?.maxConcurrentBulkInstallations ??
+    DEFAULT_MAX_CONCURRENT_INSTALLS;
+
+  const limiter = pLimit(maxConcurrentInstalls);
 
   const packagesResults = await Promise.allSettled(
-    uniquePackages.map(async (pkg) => {
+    filteredPackagesToInstall.map(async (pkg) => {
       return limiter(async () => {
         if (typeof pkg === 'string') {
           return Registry.fetchFindLatestPackageOrThrow(pkg, {
