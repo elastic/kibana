@@ -615,7 +615,7 @@ class TimeseriesChartIntl extends Component {
     axes.append('g').attr('class', 'y axis');
 
     // Create the elements for the metric value line and model bounds area.
-    fcsGroup.append('path');
+    fcsGroup.append('path').attr('class', 'area bounds');
     fcsGroup.append('path').attr('class', 'values-line');
     fcsGroup.append('g').attr('class', 'focus-chart-markers');
 
