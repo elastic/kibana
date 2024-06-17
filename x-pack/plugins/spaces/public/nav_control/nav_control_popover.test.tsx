@@ -21,6 +21,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { NavControlPopover } from './nav_control_popover';
 import type { Space } from '../../common';
 import { SpaceAvatarInternal } from '../space_avatar/space_avatar_internal';
+import { SpaceSolutionBadge } from '../space_solution_badge';
 import type { SpacesManager } from '../spaces_manager';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 
@@ -221,5 +222,32 @@ describe('NavControlPopover', () => {
     wrapper.update();
 
     expect(wrapper.find(EuiPopover).props().isOpen).toEqual(false);
+  });
+
+  it('should render solution for spaces', async () => {
+    const spaces: Space[] = [
+      {
+        id: 'space-1',
+        name: 'Space-1',
+        disabledFeatures: [],
+        solution: 'classic',
+      },
+      {
+        id: 'space-2',
+        name: 'Space 2',
+        disabledFeatures: [],
+        solution: 'security',
+      },
+    ];
+
+    const wrapper = await setup(spaces);
+
+    await act(async () => {
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
+    });
+
+    wrapper.update();
+
+    expect(wrapper.find(SpaceSolutionBadge)).toHaveLength(2);
   });
 });
