@@ -669,7 +669,7 @@ describe('Sourcerer Hooks', () => {
       });
     });
 
-    it('should update the title of the data view according to the selected patterns', async () => {
+    it('should update the title and name of the data view according to the selected patterns', async () => {
       const { result, rerender } = renderHook<SourcererScopeName, SelectedDataView>(
         () => useSourcererDataView(),
         {
@@ -690,11 +690,12 @@ describe('Sourcerer Hooks', () => {
             selectedPatterns: testPatterns,
           })
         );
-
-        await rerender();
-
-        expect(result.current.sourcererDataView?.title).toBe(testPatterns.join(','));
       });
+
+      await rerender();
+
+      expect(result.current.sourcererDataView?.title).toBe(testPatterns.join(','));
+      expect(result.current.sourcererDataView?.name).toBe(testPatterns.join(','));
     });
   });
 });
