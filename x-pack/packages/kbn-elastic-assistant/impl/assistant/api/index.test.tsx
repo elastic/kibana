@@ -134,7 +134,7 @@ describe('API tests', () => {
       );
     });
 
-    it('calls the non-stream API when assistantStreamingEnabled is true and actionTypeId is gemini and isEnabledKnowledgeBase is true', async () => {
+    it('calls the stream API when assistantStreamingEnabled is true and actionTypeId is gemini and isEnabledKnowledgeBase is true', async () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
         apiConfig: apiConfig.gemini,
@@ -145,13 +145,13 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          ...staticDefaults,
-          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gemini","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
+          ...streamingDefaults,
+          body: '{"message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".gemini","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
         }
       );
     });
 
-    it('calls the non-stream API when assistantStreamingEnabled is true and actionTypeId is gemini and isEnabledKnowledgeBase is false and isEnabledRAGAlerts is true', async () => {
+    it('calls the stream API when assistantStreamingEnabled is true and actionTypeId is gemini and isEnabledKnowledgeBase is false and isEnabledRAGAlerts is true', async () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
         apiConfig: apiConfig.gemini,
@@ -164,8 +164,8 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          ...staticDefaults,
-          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gemini","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
+          ...streamingDefaults,
+          body: '{"message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".gemini","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
         }
       );
     });
