@@ -85,35 +85,49 @@ export async function bulkInstallPackages({
 
   const limiter = pLimit(maxConcurrentInstalls);
 
-  const packagesResults = await Promise.allSettled(
+  const packagesResults = await Promise.allSettled<{
+    name: string;
+    version: string;
+    prerelease?: boolean;
+    skipDataStreamRollover?: boolean;
+    forbidden?: boolean;
+  }>(
     filteredPackagesToInstall.map(async (pkg) => {
       return limiter(async () => {
+        const packageName = typeof pkg === 'string' ? pkg : pkg.name;
+        const isPackageForbidden = FORBIDDEN_BULK_INSTALL_PACKAGE_NAMES.includes(packageName);
+
+        if (isPackageForbidden) {
+          logger.warn(`Package cannot be bulk installed and will be ignored: ${packageName}`);
+
+          return Promise.resolve({
+            name: packageName,
+            version: '',
+            prerelease: undefined,
+            skipDataStreamRollover: undefined,
+            forbidden: true,
+          });
+        }
+
         if (typeof pkg === 'string') {
           return Registry.fetchFindLatestPackageOrThrow(pkg, {
             prerelease,
           }).then((pkgRes) => ({
             name: pkgRes.name,
-            version: pkgRes.version,
+            version: pkgRes.version ?? '',
             prerelease: undefined,
             skipDataStreamRollover: undefined,
           }));
         }
         if (pkg.version !== undefined) {
-          return Promise.resolve(
-            pkg as {
-              name: string;
-              version: string;
-              prerelease?: boolean;
-              skipDataStreamRollover?: boolean;
-            }
-          );
+          return Promise.resolve({ ...pkg, version: pkg.version ?? '' });
         }
 
         return Registry.fetchFindLatestPackageOrThrow(pkg.name, {
           prerelease: prerelease || pkg.prerelease,
         }).then((pkgRes) => ({
           name: pkgRes.name,
-          version: pkgRes.version,
+          version: pkgRes.version ?? '',
           prerelease: pkg.prerelease,
           skipDataStreamRollover: pkg.skipDataStreamRollover,
         }));
@@ -135,12 +149,29 @@ export async function bulkInstallPackages({
         return { name: packageName, error: result.reason };
       }
 
-      const pkgKeyProps = result.value;
+      if (result.value.forbidden) {
+        return {
+          name: packageName,
+          status: 'not_installed',
+          error: new Error(
+            `Bulk installation of ${packageName} is forbidden. Please install it via the single package installation API.`
+          ),
+        };
+      }
+
+      const pkgKeyProps: {
+        name: string;
+        version: string;
+        prerelease?: boolean;
+        skipDataStreamRollover?: boolean;
+        forbidden?: boolean;
+      } = result.value;
+
       if (!force || skipIfInstalled) {
         const installedPackageResult = await isPackageVersionOrLaterInstalled({
           savedObjectsClient,
           pkgName: pkgKeyProps.name,
-          pkgVersion: pkgKeyProps.version,
+          pkgVersion: pkgKeyProps.version ?? '',
         });
 
         if (installedPackageResult) {
@@ -152,7 +183,7 @@ export async function bulkInstallPackages({
           } = installedPackageResult.package;
           return {
             name,
-            version,
+            version: version ?? '',
             result: {
               assets: [...installedEs, ...installedKibana],
               status: 'already_installed',

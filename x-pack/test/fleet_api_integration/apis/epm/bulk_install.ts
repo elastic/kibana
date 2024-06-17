@@ -84,5 +84,18 @@ export default function (providerContext: FtrProviderContext) {
         'multiple_versions-0.1.0 is out-of-date and cannot be installed or updated'
       );
     });
+
+    it('should prevent installing forbidden packages', async () => {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/_bulk`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          packages: ['security_detection_engine'],
+        });
+
+      expect(response.body.items.length).equal(1);
+      expect(response.body.items[0].statusCode).equal(200);
+      expect(response.body.items[0].status).equal('not_installed');
+    });
   });
 }
