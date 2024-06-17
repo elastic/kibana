@@ -210,12 +210,15 @@ export const useDataVisualizerGridData = (
       if (!buckets || !tf || !currentDataView) return;
 
       const activeBounds = tf.getActiveBounds();
-
-      let earliest: number | undefined;
-      let latest: number | undefined;
+      let earliest: number | string | undefined;
+      let latest: number | string | undefined;
       if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
         earliest = activeBounds.min?.valueOf();
         latest = activeBounds.max?.valueOf();
+      }
+      if (input.timeRange) {
+        earliest = input.timeRange.from;
+        latest = input.timeRange.to;
       }
 
       const bounds = tf.getActiveBounds();
@@ -264,7 +267,6 @@ export const useDataVisualizerGridData = (
         nonAggregatableFields,
         browserSessionSeed,
         samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
-        componentExecutionContext,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -273,14 +275,11 @@ export const useDataVisualizerGridData = (
       timefilter,
       currentDataView.id,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(searchQuery),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(samplingOption),
+      JSON.stringify({ searchQuery, samplingOption, fieldsToFetch }),
       searchSessionId,
-      lastRefresh,
-      fieldsToFetch,
       browserSessionSeed,
-      componentExecutionContext,
+      input.timeRange?.from,
+      input.timeRange?.to,
     ]
   );
 
@@ -335,7 +334,6 @@ export const useDataVisualizerGridData = (
     () => overallStatsProgress.loaded * 0.2 + strategyResponse.progress.loaded * 0.8,
     [overallStatsProgress.loaded, strategyResponse.progress.loaded]
   );
-
   useEffect(() => {
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),

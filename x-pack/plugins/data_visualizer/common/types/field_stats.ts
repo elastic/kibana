@@ -227,8 +227,8 @@ export type SupportedAggs = Set<string>;
 
 export interface OverallStatsSearchStrategyParams {
   sessionId?: string;
-  earliest?: number;
-  latest?: number;
+  earliest?: number | string;
+  latest?: number | string;
   aggInterval: TimeBucketsInterval;
   intervalMs?: number;
   searchQuery: Query['query'];

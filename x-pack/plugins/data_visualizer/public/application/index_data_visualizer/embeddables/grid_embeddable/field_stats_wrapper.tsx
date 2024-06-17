@@ -57,13 +57,33 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
         shouldGetSubfields={props.shouldGetSubfields}
         showPreviewByDefault={props.showPreviewByDefault}
         totalDocuments={props.totalDocuments}
+        timeRange={props.timeRange}
         visibleFieldNames={props.visibleFieldNames}
         resetData$={props.resetData$}
       />
     );
   }
   if (isFieldStatisticTableEmbeddableState(props)) {
-    return <EmbeddableFieldStatsTableWrapper {...props} />;
+    return (
+      <EmbeddableFieldStatsTableWrapper
+        dataView={props.dataView}
+        isEsqlMode={false}
+        filters={props.filters}
+        lastReloadRequestTime={props.lastReloadRequestTime}
+        onAddFilter={props.onAddFilter}
+        onTableUpdate={props.onTableUpdate}
+        query={props.query}
+        samplingOption={props.samplingOption}
+        savedSearch={props.savedSearch}
+        sessionId={props.sessionId}
+        shouldGetSubfields={props.shouldGetSubfields}
+        showPreviewByDefault={props.showPreviewByDefault}
+        totalDocuments={props.totalDocuments}
+        timeRange={props.timeRange}
+        visibleFieldNames={props.visibleFieldNames}
+        resetData$={props.resetData$}
+      />
+    );
   } else {
     return (
       <EuiEmptyPrompt
@@ -169,6 +189,7 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
             totalDocuments={props.totalDocuments}
             visibleFieldNames={props.visibleFieldNames}
             resetData$={props.resetData$}
+            timeRange={props.timeRange}
           />
         </DatePickerContextProvider>
       </KibanaContextProvider>

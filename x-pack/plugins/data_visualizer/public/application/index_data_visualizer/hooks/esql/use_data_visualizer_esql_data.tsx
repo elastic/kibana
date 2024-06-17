@@ -20,6 +20,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { buildEsQuery } from '@kbn/es-query';
+import usePrevious from 'react-use/lib/usePrevious';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
 import type { SupportedFieldType } from '../../../../../common/types/job_field_type';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
@@ -107,11 +108,14 @@ export const useESQLDataVisualizerData = (
     autoRefreshSelector: true,
   });
 
+  const [delayedESQLQuery, setDelayedESQLQuery] = useState<ESQLQuery | undefined>(input?.esqlQuery);
+  const previousQuery = usePrevious(delayedESQLQuery);
+
   const { currentDataView, parentQuery, parentFilters, query, visibleFieldNames, indexPattern } =
     useMemo(() => {
       let q = FALLBACK_ESQL_QUERY;
       if (input?.query && isESQLQuery(input?.query)) q = input.query;
-      if (input?.esqlQuery && isESQLQuery(input?.esqlQuery)) q = input?.esqlQuery;
+      if (delayedESQLQuery && isESQLQuery(delayedESQLQuery)) q = delayedESQLQuery;
       if (input?.savedSearch && isESQLQuery(input.savedSearch.searchSource.getField('query'))) {
         q = input.savedSearch.searchSource.getField('query') as ESQLQuery;
       }
@@ -131,7 +135,7 @@ export const useESQLDataVisualizerData = (
       input?.filters,
       input?.visibleFieldNames,
       input?.indexPattern,
-      input?.esqlQuery,
+      delayedESQLQuery,
     ]);
 
   const restorableDefaults = useMemo(
@@ -182,6 +186,7 @@ export const useESQLDataVisualizerData = (
         (Array.isArray(parentQuery) ? parentQuery : [parentQuery]) as AnyQuery | AnyQuery[],
         parentFilters ?? []
       );
+      const timeRange = input.timeRange ? input.timeRange : timefilter.getTime();
 
       if (currentDataView?.timeFieldName) {
         if (Array.isArray(filter?.bool?.filter)) {
@@ -189,8 +194,8 @@ export const useESQLDataVisualizerData = (
             range: {
               [currentDataView.timeFieldName]: {
                 format: 'strict_date_optional_time',
-                gte: timefilter.getTime().from,
-                lte: timefilter.getTime().to,
+                gte: timeRange.from,
+                lte: timeRange.to,
               },
             },
           });
@@ -203,8 +208,8 @@ export const useESQLDataVisualizerData = (
                   range: {
                     [currentDataView.timeFieldName]: {
                       format: 'strict_date_optional_time',
-                      gte: timefilter.getTime().from,
-                      lte: timefilter.getTime().to,
+                      gte: timeRange.from,
+                      lte: timeRange.to,
                     },
                   },
                 },
@@ -240,6 +245,8 @@ export const useESQLDataVisualizerData = (
       indexPattern,
       lastRefresh,
       limitSize,
+      input.timeRange?.from,
+      input.timeRange?.to,
     ]
   );
 
@@ -635,6 +642,14 @@ export const useESQLDataVisualizerData = (
     },
     [cancelFieldStatsRequest, cancelOverallStatsRequest]
   );
+
+  useEffect(() => {
+    if (previousQuery?.esql !== input?.esqlQuery) {
+      resetData();
+      setDelayedESQLQuery(input?.esqlQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input?.esqlQuery?.esql, resetData]);
 
   return {
     totalCount,

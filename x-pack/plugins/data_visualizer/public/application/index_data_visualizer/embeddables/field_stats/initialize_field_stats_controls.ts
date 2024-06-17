@@ -31,10 +31,7 @@ export const initializeFieldStatsControls = (rawState: FieldStatsInitialState) =
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-  const updateUserInput = (update: FieldStatsInitialState) => {
-    const currentState = serializeFieldStatsChartState();
-    const shouldResetData =
-      currentState.query?.esql !== update.query?.esql || currentState.viewType !== update.viewType;
+  const updateUserInput = (update: FieldStatsInitialState, shouldResetData = false) => {
     if (shouldResetData) {
       resetData$.next(Date.now());
     }

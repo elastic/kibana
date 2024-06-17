@@ -664,6 +664,7 @@ export class SavedSearchEmbeddable
       isEsqlMode,
     });
 
+    const timeRange = this.getTimeRange();
     if (
       this.services.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
       viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
@@ -683,6 +684,7 @@ export class SavedSearchEmbeddable
               onAddFilter={searchProps.onFilter}
               searchSessionId={this.input.searchSessionId}
               isEsqlMode={isEsqlMode}
+              timeRange={timeRange}
             />
           </KibanaContextProvider>
         </KibanaRenderContextProvider>,

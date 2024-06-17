@@ -51,6 +51,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
     trackUiMetric,
     searchSessionId,
     additionalFieldGroups,
+    timeRange,
   } = props;
 
   const visibleFields = useMemo(
@@ -156,7 +157,8 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
         dataView={dataView}
         savedSearch={savedSearch}
         filters={filters}
-        query={query}
+        esqlQuery={isEsqlMode ? query : undefined}
+        query={isEsqlMode ? undefined : query}
         visibleFieldNames={visibleFields}
         sessionId={searchSessionId}
         totalDocuments={totalDocuments}
@@ -166,8 +168,9 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
         showPreviewByDefault={showPreviewByDefault}
         onTableUpdate={updateState}
         renderFieldName={renderFieldName}
-        esql={isEsqlMode}
+        isEsqlMode={isEsqlMode}
         overridableServices={overridableServices}
+        timeRange={timeRange}
       />
     </EuiFlexItem>
   );
