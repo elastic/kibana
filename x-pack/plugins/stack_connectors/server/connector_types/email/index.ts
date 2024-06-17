@@ -379,8 +379,6 @@ async function executor(
       serviceMessage: err.message,
     };
 
-    logger.info(`Error with email connector ${err}`);
-
     // Mark cloud errors for rate limiting (SMTP 450) and
     // recipient address being rejected (SMTP 554) as user errors
     const statusCode = err?.response?.status;
