@@ -182,7 +182,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Filter bar uses the field's customLabel in the DataView
 
         await filterBar.addFilter({
-          field: 'Resource Name',
+          field: 'resource.name',
           operation: 'is',
           value: resourceName1,
         });
