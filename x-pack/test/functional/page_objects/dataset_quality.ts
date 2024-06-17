@@ -535,6 +535,13 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
   };
 }
 
+async function getDatasetTableHeaderTexts(tableWrapper: WebElementWrapper) {
+  const headerElementWrappers = await tableWrapper.findAllByCssSelector('thead th, thead td');
+  return Promise.all(
+    headerElementWrappers.map((headerElementWrapper) => headerElementWrapper.getVisibleText())
+  );
+}
+
 /**
  * Get all elements matching the given selector and text
  * @example
