@@ -26,6 +26,5 @@
     "@kbn/security-plugin-types-common",
     "@kbn/security-plugin-types-server",
     "@kbn/ui-theme",
-    "@kbn/security-plugin",
   ],
 }
