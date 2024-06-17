@@ -168,8 +168,12 @@ export class NavigationPublicPlugin
       activeSpace,
     }: { isFeatureEnabled: boolean; isServerless: boolean; activeSpace?: Space }
   ) {
-    const solutionView = serializeSpaceSolution(activeSpace);
-    const isProjectNav = isFeatureEnabled && Boolean(solutionView) && solutionView !== 'classic';
+    const solutionView = activeSpace?.solution;
+    const isProjectNav =
+      isFeatureEnabled &&
+      Boolean(solutionView) &&
+      isKnownSolutionView(solutionView) &&
+      solutionView !== 'classic';
 
     // On serverless the chrome style is already set by the serverless plugin
     if (!isServerless) {
@@ -182,10 +186,6 @@ export class NavigationPublicPlugin
   }
 }
 
-function serializeSpaceSolution(space?: Space): 'classic' | 'es' | 'oblt' | 'security' | undefined {
-  if (!space) return undefined;
-  if (space.solution === 'search') return 'es';
-  if (space.solution === 'observability') return 'oblt';
-  if (space.solution === 'security') return 'security';
-  return undefined;
+function isKnownSolutionView(solution?: string) {
+  return solution && ['oblt', 'es', 'security'].includes(solution);
 }
