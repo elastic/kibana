@@ -115,11 +115,11 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
 
             await expectErrors('metrics a_index numberField=', [
               expect.any(String),
-              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
             ]);
             await expectErrors('metrics a_index numberField=5 by ', [
               expect.any(String),
-              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
             ]);
           });
 
@@ -240,11 +240,9 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
             const { expectErrors } = await setup();
 
             await expectErrors('metrics a_index count(* + 1) BY ipField', [
-              expect.any(String),
               "SyntaxError: no viable alternative at input 'count(* +'",
             ]);
             await expectErrors('metrics a_index \n count(* + round(numberField)) BY ipField', [
-              expect.any(String),
               "SyntaxError: no viable alternative at input 'count(* +'",
             ]);
           });
