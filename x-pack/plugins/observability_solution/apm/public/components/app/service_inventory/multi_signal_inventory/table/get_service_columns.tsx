@@ -9,13 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { EntityServiceListItem } from '../../../../../../common/assets/types';
+import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
 import {
+  asDecimalOrInteger,
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../../common/utils/formatters';
-
 import { Breakpoints } from '../../../../../hooks/use_breakpoints';
 import { unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';
@@ -23,6 +23,7 @@ import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ServiceLink } from '../../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../../shared/list_metric';
 import { ITableColumn } from '../../../../shared/managed_table';
+import { NotAvailableApmMetrics } from '../../../../shared/not_available_apm_metrics';
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
 
@@ -77,8 +78,10 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics }) => {
-        return (
+      render: (_, { metrics, signalTypes }) => {
+        return !signalTypes.includes(SignalTypes.METRICS) ? (
+          <NotAvailableApmMetrics />
+        ) : (
           <ListMetric
             isLoading={false}
             hideSeries={true}
@@ -95,8 +98,10 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics }) => {
-        return (
+      render: (_, { metrics, signalTypes }) => {
+        return !signalTypes.includes(SignalTypes.METRICS) ? (
+          <NotAvailableApmMetrics />
+        ) : (
           <ListMetric
             isLoading={false}
             hideSeries={true}
@@ -113,8 +118,10 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics }) => {
-        return (
+      render: (_, { metrics, signalTypes }) => {
+        return !signalTypes.includes(SignalTypes.METRICS) ? (
+          <NotAvailableApmMetrics />
+        ) : (
           <ListMetric
             isLoading={false}
             hideSeries={true}
@@ -133,7 +140,11 @@ export function getServiceColumns({
       align: RIGHT_ALIGNMENT,
       render: (_, { metrics }) => {
         return (
-          <ListMetric isLoading={false} hideSeries={true} valueLabel={metrics.logRatePerMinute} />
+          <ListMetric
+            isLoading={false}
+            hideSeries={true}
+            valueLabel={asDecimalOrInteger(metrics.logRatePerMinute)}
+          />
         );
       },
     },
