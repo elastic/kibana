@@ -9,6 +9,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { HostMetrics } from './host_metrics';
+import { ContainerMetrics } from './container_metrics';
 import { Section } from '../../../components/section';
 import { MetricsSectionTitle } from '../section_titles';
 
@@ -24,6 +25,8 @@ export const MetricsContent = ({ assetType, ...props }: Props) => {
     switch (assetType) {
       case 'host':
         return <HostMetrics {...props} />;
+      case 'container':
+        return <ContainerMetrics {...props} />;
       default:
         return null;
     }
@@ -31,7 +34,7 @@ export const MetricsContent = ({ assetType, ...props }: Props) => {
 
   return (
     <Section
-      title={<MetricsSectionTitle />}
+      title={<MetricsSectionTitle assetType={assetType} />}
       data-test-subj="infraAssetDetailsMetricsCollapsible"
       id="metrics"
       collapsible

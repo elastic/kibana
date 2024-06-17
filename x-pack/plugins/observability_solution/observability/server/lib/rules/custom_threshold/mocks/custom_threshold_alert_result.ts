@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   Aggregators,
-  Comparator,
   CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
 import { Evaluation } from '../lib/evaluate_rule';
 
 const customThresholdNonCountCriterion: CustomMetricExpressionParams = {
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
   metrics: [
     {
       aggType: Aggregators.AVERAGE,
@@ -30,7 +30,7 @@ export const alertResultsMultipleConditions: Array<Record<string, Evaluation>> =
   {
     '*': {
       ...customThresholdNonCountCriterion,
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       threshold: [0.75],
       currentValue: 1.0,
       timestamp: new Date().toISOString(),
@@ -42,7 +42,7 @@ export const alertResultsMultipleConditions: Array<Record<string, Evaluation>> =
   {
     '*': {
       ...customThresholdNonCountCriterion,
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       threshold: [0.75],
       currentValue: 3.0,
       timestamp: new Date().toISOString(),

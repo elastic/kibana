@@ -35,6 +35,7 @@ import {
   RULE_PASSED,
 } from '../../../../common/constants';
 import { AccountsEvaluatedWidget } from '../../../components/accounts_evaluated_widget';
+import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 
 export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   first: 3,
@@ -64,22 +65,29 @@ export const SummarySection = ({
   const { euiTheme } = useEuiTheme();
 
   const handleEvalCounterClick = (evaluation: Evaluation) => {
-    navToFindings({ 'result.evaluation': evaluation, ...getPolicyTemplateQuery(dashboardType) });
+    navToFindings({ 'result.evaluation': evaluation, ...getPolicyTemplateQuery(dashboardType) }, [
+      FINDINGS_GROUPING_OPTIONS.NONE,
+    ]);
   };
 
   const handleCellClick = (
     ruleSection: string,
     resultEvaluation: 'passed' | 'failed' = RULE_FAILED
   ) => {
-    navToFindings({
-      ...getPolicyTemplateQuery(dashboardType),
-      'rule.section': ruleSection,
-      'result.evaluation': resultEvaluation,
-    });
+    navToFindings(
+      {
+        ...getPolicyTemplateQuery(dashboardType),
+        'rule.section': ruleSection,
+        'result.evaluation': resultEvaluation,
+      },
+      [FINDINGS_GROUPING_OPTIONS.NONE]
+    );
   };
 
   const handleViewAllClick = () => {
-    navToFindings({ 'result.evaluation': RULE_FAILED, ...getPolicyTemplateQuery(dashboardType) });
+    navToFindings({ 'result.evaluation': RULE_FAILED, ...getPolicyTemplateQuery(dashboardType) }, [
+      FINDINGS_GROUPING_OPTIONS.RULE_SECTION,
+    ]);
   };
 
   const counters: CspCounterCardProps[] = useMemo(
@@ -128,7 +136,9 @@ export const SummarySection = ({
           <EuiButtonEmpty
             iconType="search"
             onClick={() => {
-              navToFindings(getPolicyTemplateQuery(dashboardType));
+              navToFindings(getPolicyTemplateQuery(dashboardType), [
+                FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME,
+              ]);
             }}
           >
             {i18n.translate(
@@ -160,7 +170,7 @@ export const SummarySection = ({
       gutterSize="l"
       css={css`
         // height for compliance by cis section with max rows
-        height: 310px;
+        height: 350px;
       `}
       data-test-subj={DASHBOARD_SUMMARY_CONTAINER}
     >

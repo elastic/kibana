@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
+import { FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useAppContext } from '../../../../app_context';
 import { useForm, Form } from '../../shared_imports';
 import { GenericObject, MappingsConfiguration } from '../../types';
 import { MapperSizePluginId } from '../../constants';
@@ -25,7 +27,7 @@ interface Props {
   esNodesPlugins: string[];
 }
 
-const formSerializer = (formData: GenericObject) => {
+const formSerializer = (formData: GenericObject, sourceFieldMode?: string) => {
   const {
     dynamicMapping: {
       enabled: dynamicMappingsEnabled,
@@ -49,7 +51,7 @@ const formSerializer = (formData: GenericObject) => {
     numeric_detection,
     date_detection,
     dynamic_date_formats,
-    _source: sourceField,
+    _source: sourceFieldMode ? { mode: sourceFieldMode } : sourceField,
     _meta: metaField,
     _routing,
     _size,
@@ -97,11 +99,20 @@ const formDeserializer = (formData: GenericObject) => {
 };
 
 export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) => {
+  const {
+    config: { enableMappingsSourceFieldSection },
+  } = useAppContext();
+
   const isMounted = useRef(false);
+
+  const serializerCallback = useCallback(
+    (formData: FormData) => formSerializer(formData, value?._source?.mode),
+    [value?._source?.mode]
+  );
 
   const { form } = useForm({
     schema: configurationFormSchema,
-    serializer: formSerializer,
+    serializer: serializerCallback,
     deserializer: formDeserializer,
     defaultValue: value,
     id: 'configurationForm',
@@ -159,8 +170,11 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
       <EuiSpacer size="xl" />
       <MetaFieldSection />
       <EuiSpacer size="xl" />
-      <SourceFieldSection />
-      <EuiSpacer size="xl" />
+      {enableMappingsSourceFieldSection && !value?._source?.mode && (
+        <>
+          <SourceFieldSection /> <EuiSpacer size="xl" />
+        </>
+      )}
       <RoutingSection />
       {isMapperSizeSectionVisible && <MapperSizePluginSection />}
     </Form>

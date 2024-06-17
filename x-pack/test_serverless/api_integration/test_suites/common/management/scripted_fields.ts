@@ -8,14 +8,21 @@
 import expect from 'expect';
 import { DATA_VIEW_PATH } from '@kbn/data-views-plugin/server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('scripted fields disabled', function () {
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       // TODO: We're running into a 'Duplicate data view: basic_index'
       // error in Serverless, so make sure to clean up first
       await kibanaServer.savedObjects.cleanStandardList();
@@ -26,11 +33,13 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload(
         'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
       );
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
     it('scripted fields are ignored when disabled', async () => {
-      const response = await supertest
+      const response = await supertestWithoutAuth
         .post(DATA_VIEW_PATH)
-        .set('kbn-xsrf', 'some-xsrf-token')
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           data_view: {
             title: 'basic_index',

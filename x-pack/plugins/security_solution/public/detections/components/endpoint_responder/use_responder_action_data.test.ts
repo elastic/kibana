@@ -10,6 +10,8 @@ import { useResponderActionData } from './use_responder_action_data';
 import { renderHook } from '@testing-library/react-hooks';
 import { useGetEndpointDetails } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { HOST_ENDPOINT_UNENROLLED_TOOLTIP } from './translations';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../management/hooks', () => ({
@@ -109,12 +111,47 @@ describe('#useResponderActionData', () => {
       );
       expect(result.current.isDisabled).toEqual(true);
     });
+
+    it('should return responder menu item `disabled` when agentType is `endpoint` but no endpoint id is provided', () => {
+      const { result } = renderHook(() =>
+        useResponderActionData({
+          endpointId: '',
+          agentType: 'endpoint',
+        })
+      );
+      expect(result.current.isDisabled).toEqual(true);
+      expect(result.current.tooltip).toEqual(HOST_ENDPOINT_UNENROLLED_TOOLTIP);
+    });
   });
 
   describe('when agentType is `sentinel_one`', () => {
+    const createEventDataMock = (): TimelineEventsDetailsItem[] => {
+      return [
+        {
+          category: 'observer',
+          field: 'observer.serial_number',
+          values: ['c06d63d9-9fa2-046d-e91e-dc94cf6695d8'],
+          originalValue: ['c06d63d9-9fa2-046d-e91e-dc94cf6695d8'],
+          isObjectArray: false,
+        },
+      ];
+    };
+
     it('should return `responder` menu item as `disabled` if agentType is `sentinel_one` and feature flag is disabled', () => {
       useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
+      const { result } = renderHook(() =>
+        useResponderActionData({
+          endpointId: 'sentinel-one-id',
+          agentType: 'sentinel_one',
+          eventData: createEventDataMock(),
+        })
+      );
+      expect(result.current.isDisabled).toEqual(true);
+    });
+
+    it('should return responder menu item as disabled with tooltip if agent id property is missing from event data', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
       const { result } = renderHook(() =>
         useResponderActionData({
           endpointId: 'sentinel-one-id',
@@ -123,6 +160,9 @@ describe('#useResponderActionData', () => {
         })
       );
       expect(result.current.isDisabled).toEqual(true);
+      expect(result.current.tooltip).toEqual(
+        'Event data missing SentinelOne agent identifier (observer.serial_number)'
+      );
     });
 
     it('should return `responder` menu item as `enabled `if agentType is `sentinel_one` and feature flag is enabled', () => {
@@ -131,7 +171,60 @@ describe('#useResponderActionData', () => {
         useResponderActionData({
           endpointId: 'sentinel-one-id',
           agentType: 'sentinel_one',
+          eventData: createEventDataMock(),
+        })
+      );
+      expect(result.current.isDisabled).toEqual(false);
+    });
+  });
+  describe('when agentType is `crowdstrike`', () => {
+    const createEventDataMock = (): TimelineEventsDetailsItem[] => {
+      return [
+        {
+          category: 'crowdstrike',
+          field: 'crowdstrike.event.DeviceId',
+          values: ['mockedAgentId'],
+          originalValue: ['mockedAgentId'],
+          isObjectArray: false,
+        },
+      ];
+    };
+
+    it('should return `responder` menu item as `disabled` if agentType is `crowdstrike` and feature flag is disabled', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+
+      const { result } = renderHook(() =>
+        useResponderActionData({
+          endpointId: 'crowdstrike-id',
+          agentType: 'crowdstrike',
+          eventData: createEventDataMock(),
+        })
+      );
+      expect(result.current.isDisabled).toEqual(true);
+    });
+
+    it('should return responder menu item as disabled with tooltip if agent id property is missing from event data', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+      const { result } = renderHook(() =>
+        useResponderActionData({
+          endpointId: 'crowdstrike-id',
+          agentType: 'crowdstrike',
           eventData: [],
+        })
+      );
+      expect(result.current.isDisabled).toEqual(true);
+      expect(result.current.tooltip).toEqual(
+        'Event data missing Crowdstrike agent identifier (crowdstrike.event.DeviceId)'
+      );
+    });
+
+    it('should return `responder` menu item as `enabled `if agentType is `crowdstrike` and feature flag is enabled', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+      const { result } = renderHook(() =>
+        useResponderActionData({
+          endpointId: 'crowdstrike-id',
+          agentType: 'crowdstrike',
+          eventData: createEventDataMock(),
         })
       );
       expect(result.current.isDisabled).toEqual(false);

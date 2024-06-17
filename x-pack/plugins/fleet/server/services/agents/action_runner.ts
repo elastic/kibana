@@ -83,12 +83,12 @@ export abstract class ActionRunner {
     // create task to check result with some delay, this runs in case of kibana crash too
     this.checkTaskId = await this.createCheckResultTask();
 
-    withSpan({ name: this.getActionType(), type: 'action' }, () =>
+    await withSpan({ name: this.getActionType(), type: 'action' }, () =>
       this.processAgentsInBatches()
-        .then(() => {
+        .then(async () => {
           if (this.checkTaskId) {
             // no need for check task, action succeeded
-            this.bulkActionsResolver!.removeIfExists(this.checkTaskId);
+            await this.bulkActionsResolver!.removeIfExists(this.checkTaskId);
           }
         })
         .catch(async (error) => {
@@ -233,7 +233,7 @@ export abstract class ActionRunner {
       allAgentsProcessed += currentAgents.length;
       if (this.checkTaskId) {
         // updating check task with latest checkpoint (this.retryParams.searchAfter)
-        this.bulkActionsResolver?.removeIfExists(this.checkTaskId);
+        await this.bulkActionsResolver?.removeIfExists(this.checkTaskId);
         this.checkTaskId = await this.createCheckResultTask();
       }
     }

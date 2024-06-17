@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 
 import { AppMountParameters } from '@kbn/core/public';
-import { KibanaContextProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
@@ -38,7 +38,6 @@ export const renderApp = (
             <TableListViewKibanaProvider
               {...{
                 core: services.core,
-                toMountPoint,
                 savedObjectsTagging: services.savedObjectsTagging,
                 FormattedRelative,
               }}

@@ -372,7 +372,7 @@ describe('getAlertSummary()', () => {
     eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
 
     const dateStart = 'ain"t no way this will get parsed as a date';
-    expect(rulesClient.getAlertSummary({ id: '1', dateStart })).rejects.toMatchInlineSnapshot(
+    await expect(rulesClient.getAlertSummary({ id: '1', dateStart })).rejects.toMatchInlineSnapshot(
       `[Error: Invalid date for parameter dateStart: "ain"t no way this will get parsed as a date"]`
     );
   });
@@ -381,7 +381,9 @@ describe('getAlertSummary()', () => {
     unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('OMG!'));
     eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
 
-    expect(rulesClient.getAlertSummary({ id: '1' })).rejects.toMatchInlineSnapshot(`[Error: OMG!]`);
+    await expect(rulesClient.getAlertSummary({ id: '1' })).rejects.toMatchInlineSnapshot(
+      `[Error: OMG!]`
+    );
   });
 
   test('findEvents throws an error', async () => {

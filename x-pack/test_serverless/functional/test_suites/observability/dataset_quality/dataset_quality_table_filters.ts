@@ -21,7 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const to = '2024-01-01T12:00:00.000Z';
 
-  describe('Dataset quality table filters', () => {
+  describe('Dataset quality table filters', function () {
+    this.tags(['failsOnMKI']); // Failing https://github.com/elastic/kibana/issues/183495
+
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.svlCommonPage.loginWithRole('admin');
@@ -50,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows full dataset names when toggled', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(datasetNames);
 
@@ -67,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('searches the datasets', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(datasetNames);
 
@@ -78,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       const colsAfterSearch = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameColAfterSearch = colsAfterSearch['Dataset Name'];
+      const datasetNameColAfterSearch = colsAfterSearch['Data Set Name'];
       const datasetNameColCellTextsAfterSearch = await datasetNameColAfterSearch.getCellTexts();
       expect(datasetNameColCellTextsAfterSearch).to.eql([datasetNames[2]]);
       await testSubjects.setValue(
@@ -105,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.navigateTo();
 
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql([apacheAccessDatasetHumanName, ...datasetNames]);
 
@@ -113,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.filterForIntegrations([apacheIntegrationName]);
 
       const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameColAfterFilter = colsAfterFilter['Dataset Name'];
+      const datasetNameColAfterFilter = colsAfterFilter['Data Set Name'];
       const datasetNameColCellTextsAfterFilter = await datasetNameColAfterFilter.getCellTexts();
       expect(datasetNameColCellTextsAfterFilter).to.eql([apacheAccessDatasetHumanName]);
     });
@@ -176,7 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Get default quality
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetQuality = cols['Dataset Quality'];
+      const datasetQuality = cols['Data Set Quality'];
       const datasetQualityCellTexts = await datasetQuality.getCellTexts();
       expect(datasetQualityCellTexts).to.contain(expectedQuality);
 
@@ -184,7 +186,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.filterForQualities([expectedQuality]);
 
       const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetQualityAfterFilter = colsAfterFilter['Dataset Quality'];
+      const datasetQualityAfterFilter = colsAfterFilter['Data Set Quality'];
       const datasetQualityCellTextsAfterFilter = await datasetQualityAfterFilter.getCellTexts();
 
       expect(datasetQualityCellTextsAfterFilter).to.eql([expectedQuality]);

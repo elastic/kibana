@@ -20,7 +20,7 @@ import {
   deleteRiskScoreIndices,
 } from '../../../utils';
 
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default ({ getService }: FtrProviderContextWithSpaces): void => {
   const supertest = getService('supertest');

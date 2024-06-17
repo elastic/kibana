@@ -7,32 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { FilteringRule, FilteringRules } from '@kbn/search-connectors';
+import { FilteringRules } from '@kbn/search-connectors';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface PutConnectorFilteringArgs {
-  advancedSnippet: string;
   connectorId: string;
-  filteringRules: FilteringRule[];
 }
 
 export type PutConnectorFilteringResponse = FilteringRules;
 
-export const putConnectorFiltering = async ({
-  advancedSnippet,
-  connectorId,
-  filteringRules,
-}: PutConnectorFilteringArgs) => {
+export const putConnectorFiltering = async ({ connectorId }: PutConnectorFilteringArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/filtering`;
 
-  return await HttpLogic.values.http.put(route, {
-    body: JSON.stringify({
-      advanced_snippet: advancedSnippet,
-      filtering_rules: filteringRules,
-    }),
-  });
+  return await HttpLogic.values.http.put(route);
 };
 
 export const ConnectorFilteringApiLogic = createApiLogic(

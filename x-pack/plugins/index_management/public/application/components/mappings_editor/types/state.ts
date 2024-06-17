@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { EuiSelectableOption } from '@elastic/eui';
 import { InferenceToModelIdMap } from '../components/document_fields/fields';
 import { FormHook, OnFormUpdateArg, RuntimeField } from '../shared_imports';
 import {
   Field,
+  NormalizedField,
   NormalizedFields,
   NormalizedRuntimeField,
   NormalizedRuntimeFields,
@@ -30,6 +32,7 @@ export interface MappingsConfiguration {
     enabled?: boolean;
     includes?: string[];
     excludes?: string[];
+    mode?: string;
   };
   _meta?: string;
   _size?: { enabled: boolean };
@@ -93,6 +96,11 @@ export interface State {
     format(): MappingsFields;
     isValid: boolean;
   };
+  filter: {
+    filteredFields: NormalizedField[];
+    selectedOptions: EuiSelectableOption[];
+    selectedDataTypes: string[];
+  };
   search: {
     term: string;
     result: SearchResult[];
@@ -129,6 +137,7 @@ export type Action =
   | { type: 'runtimeField.edit'; value: NormalizedRuntimeField }
   | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
   | { type: 'search:update'; value: string }
-  | { type: 'validity:update'; value: boolean };
+  | { type: 'validity:update'; value: boolean }
+  | { type: 'filter:update'; value: { selectedOptions: EuiSelectableOption[] } };
 
 export type Dispatch = (action: Action) => void;

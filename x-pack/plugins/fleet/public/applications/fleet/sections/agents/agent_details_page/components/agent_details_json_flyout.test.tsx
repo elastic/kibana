@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-
+import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
 import type { Agent } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
 
@@ -35,7 +34,9 @@ describe('AgentDetailsJsonFlyout', () => {
   });
 
   const renderComponent = () => {
-    return render(<AgentDetailsJsonFlyout agent={agent} onClose={jest.fn()} />);
+    return renderReactTestingLibraryWithI18n(
+      <AgentDetailsJsonFlyout agent={agent} onClose={jest.fn()} />
+    );
   };
 
   it('renders a title with the agent id if host name is not defined', () => {

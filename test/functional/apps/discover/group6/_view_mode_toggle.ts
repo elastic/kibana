@@ -88,6 +88,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('discoverErrorCalloutTitle');
         });
 
+        it('should not show Patterns tab (basic license)', async () => {
+          await testSubjects.missingOrFail('dscViewModePatternAnalysisButton');
+          await retry.try(async () => {
+            const documentTab = await testSubjects.find('dscViewModeDocumentButton');
+            expect(await documentTab.getAttribute('aria-selected')).to.be('true');
+          });
+        });
+
         it('should show Field Statistics tab', async () => {
           await testSubjects.click('dscViewModeFieldStatsButton');
 
@@ -99,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('dscViewModeToggle');
         });
 
-        it('should not show view mode toggle for text-based searches', async () => {
+        it('should still show view mode toggle for ES|QL searches', async () => {
           await testSubjects.click('dscViewModeDocumentButton');
 
           await retry.try(async () => {
@@ -111,14 +119,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.discover.selectTextBaseLang();
 
-          await testSubjects.missingOrFail('dscViewModeToggle');
+          await testSubjects.existOrFail('dscViewModeToggle');
 
           if (!useLegacyTable) {
             await testSubjects.existOrFail('unifiedDataTableToolbar');
           }
         });
 
-        it('should show text-based columns callout', async () => {
+        it('should show ES|QL columns callout', async () => {
           await testSubjects.missingOrFail('dscSelectedColumnsCallout');
           await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
           await PageObjects.header.waitUntilLoadingHasFinished();

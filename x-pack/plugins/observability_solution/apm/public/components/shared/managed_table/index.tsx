@@ -153,6 +153,13 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // update table options state when url params change
   useEffect(() => setTableOptions(getStateFromUrl()), [getStateFromUrl]);
 
+  // Clean up searchQuery when fast filter is toggled off
+  useEffect(() => {
+    if (!tableSearchBar.isEnabled) {
+      setSearchQuery('');
+    }
+  }, [tableSearchBar.isEnabled]);
+
   // update table options state when `onTableChange` is invoked and persist to url
   const onTableChange = useCallback(
     (newTableOptions: Partial<TableOptions<T>>) => {

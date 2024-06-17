@@ -14,37 +14,71 @@ export function isValidNamespace(
   namespace: string,
   allowBlankNamespace?: boolean
 ): { valid: boolean; error?: string } {
-  if (!namespace.trim() && !allowBlankNamespace) {
+  return isValidEntity(namespace, 'Namespace', allowBlankNamespace);
+}
+
+export function isValidDataset(
+  dataset: string,
+  allowBlank?: boolean
+): { valid: boolean; error?: string } {
+  const { valid, error } = isValidEntity(dataset, 'Dataset', allowBlank);
+  if (!valid) {
+    return { valid, error };
+  }
+  if (dataset.startsWith('_') || dataset.startsWith('.')) {
+    return {
+      valid: false,
+      error: i18n.translate(
+        'xpack.fleet.datasetValidation.datasetStartsWithUnderscoreErrorMessage',
+        {
+          defaultMessage: 'Dataset cannot start with an underscore or dot',
+        }
+      ),
+    };
+  }
+  return { valid, error };
+}
+
+function isValidEntity(
+  name: string,
+  type: string,
+  allowBlank?: boolean
+): { valid: boolean; error?: string } {
+  if (!name.trim() && !allowBlank) {
     return {
       valid: false,
       error: i18n.translate('xpack.fleet.namespaceValidation.requiredErrorMessage', {
-        defaultMessage: 'Namespace is required',
+        defaultMessage: '{type} is required',
+        values: { type },
       }),
     };
-  } else if (namespace !== namespace.toLowerCase()) {
+  } else if (name !== name.toLowerCase()) {
     return {
       valid: false,
       error: i18n.translate('xpack.fleet.namespaceValidation.lowercaseErrorMessage', {
-        defaultMessage: 'Namespace must be lowercase',
+        defaultMessage: '{type} must be lowercase',
+        values: { type },
       }),
     };
-  } else if (INVALID_NAMESPACE_CHARACTERS.test(namespace)) {
+  } else if (INVALID_NAMESPACE_CHARACTERS.test(name)) {
     return {
       valid: false,
       error: i18n.translate('xpack.fleet.namespaceValidation.invalidCharactersErrorMessage', {
-        defaultMessage: 'Namespace contains invalid characters',
+        defaultMessage: '{type} contains invalid characters',
+        values: { type },
       }),
     };
   }
   // Node.js doesn't have Blob, and browser doesn't have Buffer :)
   else if (
-    (typeof Blob === 'function' && new Blob([namespace]).size > 100) ||
-    (typeof Buffer === 'function' && Buffer.from(namespace).length > 100)
+    (typeof Blob === 'function' && new Blob([name]).size > 100) ||
+    (typeof Buffer === 'function' && Buffer.from(name).length > 100)
   ) {
     return {
       valid: false,
       error: i18n.translate('xpack.fleet.namespaceValidation.tooLongErrorMessage', {
-        defaultMessage: 'Namespace cannot be more than 100 bytes',
+        defaultMessage: '{type} cannot be more than 100 bytes',
+        values: { type },
       }),
     };
   }

@@ -21,6 +21,7 @@ import { dataViewWithoutTimefieldMock } from '../../__mocks__/data_view_without_
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
 import { ROWS_HEIGHT_OPTIONS } from '../constants';
+import { UnifiedDataTableSettingsColumn } from '../types';
 
 const columns = ['extension', 'message'];
 const columnsWithTimeCol = getVisibleColumns(
@@ -93,6 +94,11 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
+        columnsMeta: {
+          extension: { type: 'string' },
+          message: { type: 'string', esType: 'keyword' },
+          timestamp: { type: 'date', esType: 'dateTime' },
+        },
       });
       expect(actual).toMatchSnapshot();
     });
@@ -299,7 +305,7 @@ describe('Data table columns', function () {
       const actual = getEuiGridColumns({
         showColumnTokens: true,
         columnsMeta: {
-          extension: { type: 'number' },
+          extension: { type: 'string' },
           message: { type: 'string', esType: 'keyword' },
         },
         columns,
@@ -348,7 +354,7 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         columnsMeta: {
-          var_test: { type: 'number' },
+          extension: { type: 'string' },
         },
       });
       expect(gridColumns[1].schema).toBe('string');
@@ -402,6 +408,10 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
+        columnsMeta: {
+          extension: { type: 'string' },
+          message: { type: 'string', esType: 'keyword' },
+        },
       });
 
       const extensionGridColumn = gridColumns[0];
@@ -428,6 +438,10 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         customGridColumnsConfiguration,
+        columnsMeta: {
+          extension: { type: 'string' },
+          message: { type: 'string', esType: 'keyword' },
+        },
       });
 
       expect(customizedGridColumns).toMatchSnapshot();
@@ -445,6 +459,37 @@ describe('Data table columns', function () {
 
     it('returns the value for other values', () => {
       expect(deserializeHeaderRowHeight(2)).toBe(2);
+    });
+  });
+
+  describe('Column label display', () => {
+    it('Column Name should display provided label from display otherwise it defaults to columns name', () => {
+      const mockColumnHeaders: Record<string, UnifiedDataTableSettingsColumn> = {
+        test_column_1: { display: 'test_column_one' },
+        test_column_2: { display: 'test_column_two' },
+        test_column_3: { display: 'test_column_three' },
+      } as const;
+      const customizedGridColumns = getEuiGridColumns({
+        columns: ['test_column_1', 'test_column_2', 'test_column_4'],
+        settings: { columns: mockColumnHeaders },
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+      });
+      const columnDisplayNames = customizedGridColumns.map((column) => column.displayAsText);
+      expect(columnDisplayNames.includes('test_column_one')).toBeTruthy();
+      expect(columnDisplayNames.includes('test_column_two')).toBeTruthy();
+      expect(columnDisplayNames.includes('test_column_three')).toBeFalsy();
+      expect(columnDisplayNames.includes('test_column_4')).toBeTruthy();
     });
   });
 });

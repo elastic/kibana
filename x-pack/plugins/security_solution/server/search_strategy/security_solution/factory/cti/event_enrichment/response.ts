@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { EventEnrichmentRequestOptions } from '../../../../../../common/api/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildIndicatorEnrichments, getTotalCount } from './helpers';

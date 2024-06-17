@@ -400,7 +400,7 @@
           "position": "right",
           "showSingleSeries": true,
           "legendStats": [
-            "values"
+            "currentAndLastValue"
           ]
         },
         "preferredSeriesType": "bar_stacked",
@@ -729,7 +729,7 @@
             "numberDisplay": "percent",
             "primaryGroups": [],
             "legendStats": [
-              "values"
+              "value"
             ]
           }
         ],

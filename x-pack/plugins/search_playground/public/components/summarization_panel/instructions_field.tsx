@@ -10,6 +10,8 @@ import React from 'react';
 import { EuiFormRow, EuiIcon, EuiTextArea, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface InstructionsFieldProps {
   value?: string;
@@ -17,8 +19,20 @@ interface InstructionsFieldProps {
 }
 
 export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onChange }) => {
-  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+  const [baseValue, setBaseValue] = React.useState(value);
+  const usageTracker = useUsageTracker();
+  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
+  };
+  const handleFocus = () => {
+    setBaseValue(value);
+  };
+  const handleBlur = () => {
+    if (baseValue !== value) {
+      usageTracker?.click(AnalyticsEvents.instructionsFieldChanged);
+    }
+    setBaseValue('');
+  };
 
   return (
     <EuiFormRow
@@ -48,6 +62,8 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
           }
         )}
         value={value}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         onChange={handlePromptChange}
         fullWidth
         isInvalid={isEmpty(value)}

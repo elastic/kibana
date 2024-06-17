@@ -1,8 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/solution-nav-oblt",
-  "owner": [
-    "@elastic/appex-sharedux",
-    "@elastic/obs-ux-management-team"
-  ]
-}

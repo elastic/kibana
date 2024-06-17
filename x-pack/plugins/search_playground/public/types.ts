@@ -20,6 +20,8 @@ import { SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { ChatRequestData } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
@@ -39,9 +41,11 @@ export interface SearchPlaygroundPluginStart {
 
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
+  usageCollection?: UsageCollectionStart;
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
+  console?: ConsolePluginStart;
 }
 
 export interface AppServicesContext {
@@ -50,6 +54,8 @@ export interface AppServicesContext {
   share: SharePluginStart;
   cloud?: CloudSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  usageCollection?: UsageCollectionStart;
+  console?: ConsolePluginStart;
 }
 
 export enum ChatFormFields {
@@ -71,7 +77,7 @@ export interface ChatForm {
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: LLMModel;
   [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
-  [ChatFormFields.sourceFields]: string[];
+  [ChatFormFields.sourceFields]: { [index: string]: string[] };
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
 }
@@ -95,9 +101,16 @@ export interface DocAnnotation {
   pageContent: string;
 }
 
-export interface Annotation {
+export type Annotation = AnnotationDoc | AnnotationTokens;
+
+export interface AnnotationDoc {
   type: 'citations' | 'retrieved_docs';
   documents: DocAnnotation[];
+}
+
+export interface AnnotationTokens {
+  type: 'prompt_token_count' | 'context_token_count' | 'context_clipped';
+  count: number;
 }
 
 export interface Doc {
@@ -109,6 +122,11 @@ export interface AIMessage extends Message {
   role: MessageRole.assistant;
   citations: Doc[];
   retrievalDocs: Doc[];
+  inputTokens: {
+    context: number;
+    total: number;
+    contextClipped?: number;
+  };
 }
 
 export interface ElasticsearchIndex {
@@ -199,6 +217,8 @@ export interface LLMModel {
   showConnectorName?: boolean;
   connectorId: string;
   connectorName: string;
+  connectorType: string;
   icon: ComponentType;
   disabled: boolean;
+  promptTokenLimit?: number;
 }

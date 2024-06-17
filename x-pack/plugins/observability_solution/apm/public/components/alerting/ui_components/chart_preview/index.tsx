@@ -80,7 +80,7 @@ export function ChartPreview({
 
   const { yMin, yMax, xMin, xMax } = getDomain(series);
   const chartDomain = {
-    max: Math.max(yMax, threshold) * 1.1, // Add 10% headroom.
+    max: Math.max(yMax === 0 ? 1 : yMax, threshold) * 1.1, // Add 10% headroom.
     min: Math.min(yMin, threshold) * 0.9, // Add 10% headroom.
   };
 
@@ -110,7 +110,6 @@ export function ChartPreview({
         data-test-subj="ChartPreview"
       >
         <Tooltip
-          type="none"
           headerFormatter={({ value }) => {
             const dateFormat =
               (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT;

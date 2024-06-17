@@ -22,10 +22,10 @@ import {
 } from '@kbn/core/server/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
-import { ISearchClient, ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { ISearchClient, IKibanaSearchResponse } from '@kbn/search-types';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { CancellationToken } from '@kbn/reporting-common';
@@ -73,6 +73,7 @@ describe('CsvGenerator', () => {
 
   const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
     create: jest.fn().mockReturnValue(searchSourceMock),
+    createLazy: jest.fn().mockReturnValue(searchSourceMock),
     createEmpty: jest.fn().mockReturnValue(searchSourceMock),
     telemetry: jest.fn(),
     inject: jest.fn(),

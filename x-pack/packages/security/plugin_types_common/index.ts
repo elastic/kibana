@@ -16,6 +16,7 @@ export type {
   RoleIndexPrivilege,
   RoleKibanaPrivilege,
   RoleRemoteIndexPrivilege,
+  RoleRemoteClusterPrivilege,
   FeaturesPrivileges,
 } from './src/authorization';
 export type { SecurityLicense, SecurityLicenseFeatures, LoginLayout } from './src/licensing';

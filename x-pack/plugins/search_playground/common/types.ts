@@ -19,6 +19,7 @@ export interface QuerySourceFields {
   dense_vector_query_fields: ModelFields[];
   bm25_query_fields: string[];
   source_fields: string[];
+  skipped_fields: number;
 }
 
 export enum APIRoutes {
@@ -49,4 +50,11 @@ export interface SearchPlaygroundConfigType {
   ui: {
     enabled: boolean;
   };
+}
+
+export interface ModelProvider {
+  name: string;
+  model: string;
+  promptTokenLimit: number;
+  provider: LLMs;
 }

@@ -109,6 +109,7 @@ export const internalUnifiedManifestSchema = t.intersection([
     t.type({
       id: identifier,
       created: t.union([t.string, t.undefined]),
+      version: t.union([t.string, t.undefined]),
     })
   ),
 ]);

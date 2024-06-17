@@ -27,7 +27,15 @@ contentManagement.client.create = jest.fn().mockImplementation(({ options }) => 
   if (options.id === undefined) {
     return { item: { id: 'newlyGeneratedId' } };
   }
-  return { item: { id: options.id } };
+
+  throw new Error('Update should be used when id is provided');
+});
+
+contentManagement.client.update = jest.fn().mockImplementation(({ id }) => {
+  if (id === undefined) {
+    throw new Error('Update needs an id');
+  }
+  return { item: { id } };
 });
 
 const allServices = {
@@ -61,10 +69,8 @@ describe('Save dashboard state', () => {
     });
 
     expect(result.id).toBe('Boogaloo');
-    expect(allServices.contentManagement.client.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        options: expect.objectContaining({ id: 'Boogaloo', overwrite: true }),
-      })
+    expect(allServices.contentManagement.client.update).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'Boogaloo' })
     );
     expect(allServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       title: `Dashboard 'BOO' was saved`,
@@ -88,7 +94,7 @@ describe('Save dashboard state', () => {
     expect(result.redirectRequired).toBe(true);
     expect(allServices.contentManagement.client.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        options: expect.objectContaining({ id: undefined, overwrite: true }),
+        options: { references: [] },
       })
     );
     expect(allServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -116,6 +122,34 @@ describe('Save dashboard state', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           panelsJSON: expect.not.stringContaining('neverGonnaGetThisId'),
+        }),
+      })
+    );
+  });
+
+  it('should update prefixes on references when save as copy is true', async () => {
+    const result = await saveDashboardState({
+      currentState: {
+        ...getSampleDashboardInput(),
+        title: 'BooFour',
+        panels: { idOne: { type: 'boop' } },
+      } as unknown as DashboardContainerInput,
+      panelReferences: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
+      lastSavedId: 'Boogatoonie',
+      saveOptions: { saveAsCopy: true },
+      ...allServices,
+    });
+
+    expect(result.id).toBe('newlyGeneratedId');
+    expect(allServices.contentManagement.client.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          references: expect.arrayContaining([
+            expect.objectContaining({
+              id: 'idOne',
+              name: expect.not.stringContaining('idOne:panel_idOne'),
+            }),
+          ]),
         }),
       })
     );

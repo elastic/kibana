@@ -61,19 +61,17 @@ export function getDataViewFieldList(
   return [...dataViewFields, ...unknownFields];
 }
 
-export function getTextBasedQueryFieldList(
-  textBasedQueryColumns?: DatatableColumn[]
-): DataViewField[] {
-  if (!textBasedQueryColumns) {
+export function getEsqlQueryFieldList(esqlQueryColumns?: DatatableColumn[]): DataViewField[] {
+  if (!esqlQueryColumns) {
     return [];
   }
-  return textBasedQueryColumns.map(
+  return esqlQueryColumns.map(
     (column) =>
       new DataViewField({
         name: column.name,
         type: column.meta?.type ?? 'unknown',
         esTypes: column.meta?.esType ? [column.meta?.esType] : undefined,
-        searchable: false,
+        searchable: true,
         aggregatable: false,
         isNull: Boolean(column?.isNull),
       })

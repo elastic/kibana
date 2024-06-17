@@ -12,8 +12,8 @@ import { UnifiedTimeline } from '.';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers';
 import { useTimelineEventsDetails } from '../../../containers/details';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
 import {
   createSecuritySolutionStorageMock,
   mockTimelineData,
@@ -31,7 +31,6 @@ import { allowedExperimentalValues } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { getColumnHeaders } from '../body/column_headers/helpers';
 import { defaultUdtHeaders } from './default_headers';
 import type { ColumnHeaderType } from '../../../../../common/types';
@@ -50,8 +49,8 @@ jest.mock('../body/events', () => ({
   Events: () => <></>,
 }));
 
-jest.mock('../../../../common/containers/sourcerer');
-jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
+jest.mock('../../../../sourcerer/containers');
+jest.mock('../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
@@ -174,13 +173,11 @@ const useSourcererDataViewMocked = jest.fn().mockReturnValue({
 });
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
-const mockTimelineFilterManager = createFilterManagerMock();
 
 describe('unified timeline', () => {
   const kibanaServiceMock: StartServices = {
     ...createStartServicesMock(),
     storage: storageMock,
-    timelineFilterManager: mockTimelineFilterManager,
   };
 
   afterEach(() => {
@@ -571,7 +568,9 @@ describe('unified timeline', () => {
 
         fireEvent.click(screen.getByTestId(`timelineFieldListPanelAddExistFilter-${field.name}`));
         await waitFor(() => {
-          expect(mockTimelineFilterManager.addFilters).toHaveBeenNthCalledWith(
+          expect(
+            kibanaServiceMock.timelineDataService.query.filterManager.addFilters
+          ).toHaveBeenNthCalledWith(
             1,
             expect.arrayContaining([
               expect.objectContaining({

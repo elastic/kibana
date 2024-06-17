@@ -14,6 +14,8 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState, useCallback } from 'react';
 import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
+import { TimeBounds } from '../types';
+import { SloTabId } from './slo_details';
 import { useKibana } from '../../../utils/kibana_react';
 import { ChartData } from '../../../typings/slo';
 import { ErrorBudgetChart } from './error_budget_chart';
@@ -24,9 +26,11 @@ export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
+  selectedTabId: SloTabId;
+  onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
+export function ErrorBudgetChartPanel({ data, isLoading, slo, selectedTabId, onBrushed }: Props) {
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
@@ -81,9 +85,16 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
             showTitle={true}
             isMouseOver={isMouseOver}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
+            selectedTabId={selectedTabId}
           />
 
-          <ErrorBudgetChart slo={slo} data={data} isLoading={isLoading} />
+          <ErrorBudgetChart
+            slo={slo}
+            data={data}
+            isLoading={isLoading}
+            selectedTabId={selectedTabId}
+            onBrushed={onBrushed}
+          />
         </EuiFlexGroup>
       </EuiPanel>
       {isDashboardAttachmentReady ? (

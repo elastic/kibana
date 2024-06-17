@@ -45,6 +45,9 @@ export function definePutRolesRoutes({
   router.put(
     {
       path: '/api/security/role/{name}',
+      options: {
+        summary: `Create or update a role`,
+      },
       validate: {
         params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }),
         query: schema.object({ createOnly: schema.boolean({ defaultValue: false }) }),
@@ -62,12 +65,14 @@ export function definePutRolesRoutes({
       const { createOnly } = request.query;
       try {
         const esClient = (await context.core).elasticsearch.client;
+
         const [features, rawRoles] = await Promise.all([
           getFeatures(),
           esClient.asCurrentUser.security.getRole({ name: request.params.name }, { ignore: [404] }),
         ]);
 
         const { validationErrors } = validateKibanaPrivileges(features, request.body.kibana);
+
         if (validationErrors.length) {
           return response.badRequest({
             body: {

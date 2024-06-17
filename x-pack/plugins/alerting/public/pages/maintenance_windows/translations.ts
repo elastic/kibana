@@ -326,7 +326,7 @@ export const CREATE_FORM_ENDS_ON_DATE = i18n.translate(
 export const CREATE_FORM_ENDS_AFTER_X = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.ends.afterX',
   {
-    defaultMessage: 'After \\{x\\}',
+    defaultMessage: `After '{x}'`,
   }
 );
 

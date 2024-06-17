@@ -7,23 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const UPGRADE_LICENSE_MESSAGE = (requiredLicense: string) =>
-  i18n.translate('securitySolutionPackages.entityAnalytics.paywall.upgradeLicenseMessage', {
-    defaultMessage: 'This feature is available with {requiredLicense} or higher subscription',
-    values: {
-      requiredLicense,
-    },
-  });
-
-export const UPGRADE_PRODUCT_MESSAGE = (requiredProduct: string) =>
-  i18n.translate('securitySolutionPackages.entityAnalytics.paywall.upgradeProductMessage', {
-    defaultMessage:
-      'Entity risk scoring capability is available in our {requiredProduct} license tier',
-    values: {
-      requiredProduct,
-    },
-  });
-
 export const UPGRADE_BUTTON = (requiredLicenseOrProduct: string) =>
   i18n.translate('securitySolutionPackages.entityAnalytics.paywall.upgradeButton', {
     defaultMessage: 'Upgrade to {requiredLicenseOrProduct}',

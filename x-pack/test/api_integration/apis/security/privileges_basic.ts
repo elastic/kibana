@@ -54,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
             rulesSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
+            aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
@@ -217,6 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
+            aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
         };

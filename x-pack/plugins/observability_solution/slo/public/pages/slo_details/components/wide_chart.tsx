@@ -24,6 +24,8 @@ import moment from 'moment';
 import React, { useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { getBrushTimeBounds } from '../../../utils/slo/duration';
+import { TimeBounds } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
 import { ChartData } from '../../../typings';
 
@@ -36,9 +38,10 @@ export interface Props {
   chart: ChartType;
   state: State;
   isLoading: boolean;
+  onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function WideChart({ chart, data, id, isLoading, state }: Props) {
+export function WideChart({ chart, data, id, isLoading, state, onBrushed }: Props) {
   const { charts, uiSettings } = useKibana().services;
   const baseTheme = charts.theme.useChartsBaseTheme();
   const { euiTheme } = useEuiTheme();
@@ -63,7 +66,16 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
       <Settings
         baseTheme={baseTheme}
         showLegend={false}
-        noResults={<EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />}
+        noResults={
+          <EuiIcon
+            type="visualizeApp"
+            size="l"
+            color="subdued"
+            title={i18n.translate('xpack.slo.wideChart.euiIcon.noResultsLabel', {
+              defaultMessage: 'no results',
+            })}
+          />
+        }
         onPointerUpdate={handleCursorUpdate}
         externalPointerEvents={{
           tooltip: { visible: true },
@@ -71,6 +83,9 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
         pointerUpdateDebounce={0}
         pointerUpdateTrigger={'x'}
         locale={i18n.getLocale()}
+        onBrushEnd={(brushArea) => {
+          onBrushed?.(getBrushTimeBounds(brushArea));
+        }}
       />
       <Axis
         id="bottom"

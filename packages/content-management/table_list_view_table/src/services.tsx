@@ -6,16 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren, useContext, useMemo, useCallback } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import type { Observable } from 'rxjs';
-import type { FormattedRelative } from '@kbn/i18n-react';
-import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
-import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
+
 import {
   ContentEditorKibanaProvider,
   type SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
+import type { UserProfile } from '@kbn/user-profile-components';
+import type { FormattedRelative } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
+import { createBatcher } from './utils/batcher';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';
@@ -53,11 +62,16 @@ export interface Services {
   /** Handler to retrieve the list of available tags */
   getTagList: () => Tag[];
   TagList: FC<TagListProps>;
+  /** Predicate to indicate if tagging features is enabled */
+  isTaggingEnabled: () => boolean;
   /** Predicate function to indicate if some of the saved object references are tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
   /** Handler to return the url to navigate to the kibana tags management */
   getTagManagementUrl: () => string;
   getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
+  /** resolve user profiles for the user filter and creator functionality */
+  bulkGetUserProfiles: (uids: string[]) => Promise<UserProfile[]>;
+  getUserProfile: (uid: string) => Promise<UserProfile>;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -73,11 +87,20 @@ export const TableListViewProvider: FC<PropsWithChildren<Services>> = ({
 };
 
 /**
+ * Specific services for mounting React
+ */
+interface TableListViewStartServices {
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
+}
+
+/**
  * Kibana-specific service types.
  */
 export interface TableListViewKibanaDependencies {
   /** CoreStart contract */
-  core: {
+  core: TableListViewStartServices & {
     application: {
       capabilities: {
         [key: string]: Readonly<Record<string, boolean | Record<string, boolean>>>;
@@ -99,23 +122,10 @@ export interface TableListViewKibanaDependencies {
     overlays: {
       openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
     };
-    theme: {
-      theme$: Observable<{
-        readonly darkMode: boolean;
-      }>;
+    userProfile: {
+      bulkGet: UserProfileServiceStart['bulkGet'];
     };
   };
-  /**
-   * Handler from the '@kbn/kibana-react-plugin/public' Plugin
-   *
-   * ```
-   * import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-   * ```
-   */
-  toMountPoint: (
-    node: React.ReactNode,
-    options?: { theme$: Observable<{ readonly darkMode: boolean }> }
-  ) => MountPoint;
   /**
    * The public API from the savedObjectsTaggingOss plugin.
    * It is returned by calling `getTaggingApi()` from the SavedObjectTaggingOssPluginStart
@@ -165,7 +175,8 @@ export interface TableListViewKibanaDependencies {
 export const TableListViewKibanaProvider: FC<
   PropsWithChildren<TableListViewKibanaDependencies>
 > = ({ children, ...services }) => {
-  const { core, toMountPoint, savedObjectsTagging, FormattedRelative } = services;
+  const { core, savedObjectsTagging, FormattedRelative } = services;
+  const { application, http, notifications, ...startServices } = core;
 
   const searchQueryParser = useMemo(() => {
     if (savedObjectsTagging) {
@@ -218,32 +229,47 @@ export const TableListViewKibanaProvider: FC<
     [getTagIdsFromReferences]
   );
 
+  const bulkGetUserProfiles = useCallback<(userProfileIds: string[]) => Promise<UserProfile[]>>(
+    async (uids: string[]) => {
+      if (uids.length === 0) return [];
+
+      return core.userProfile.bulkGet({ uids: new Set(uids), dataPath: 'avatar' });
+    },
+    [core.userProfile]
+  );
+
+  const getUserProfile = useMemo(() => {
+    return createBatcher({
+      fetcher: bulkGetUserProfiles,
+      resolver: (users, id) => users.find((u) => u.uid === id)!,
+    }).fetch;
+  }, [bulkGetUserProfiles]);
+
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
-      <ContentEditorKibanaProvider
-        core={core}
-        toMountPoint={toMountPoint}
-        savedObjectsTagging={savedObjectsTagging}
-      >
+      <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
         <TableListViewProvider
-          canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
+          canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
           getListingLimitSettingsUrl={() =>
-            core.application.getUrlForApp('management', {
+            application.getUrlForApp('management', {
               path: `/kibana/settings?query=savedObjects:listingLimit`,
             })
           }
           notifyError={(title, text) => {
-            core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
+            notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
           }}
           searchQueryParser={searchQueryParser}
           DateFormatterComp={(props) => <FormattedRelative {...props} />}
-          currentAppId$={core.application.currentAppId$}
-          navigateToUrl={core.application.navigateToUrl}
+          currentAppId$={application.currentAppId$}
+          navigateToUrl={application.navigateToUrl}
+          isTaggingEnabled={() => Boolean(savedObjectsTagging)}
           getTagList={getTagList}
           TagList={TagList}
           itemHasTags={itemHasTags}
           getTagIdsFromReferences={getTagIdsFromReferences}
           getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+          bulkGetUserProfiles={bulkGetUserProfiles}
+          getUserProfile={getUserProfile}
         >
           {children}
         </TableListViewProvider>

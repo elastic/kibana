@@ -480,6 +480,42 @@
           }
         }
       },
+      "create_connector_request_gemini": {
+        "title": "Create Google Gemini connector request",
+        "description": "The Google Gemini connector uses axios to send a POST request to Google Gemini.",
+        "type": "object",
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_gemini"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".gemini"
+            ],
+            "examples": [
+              ".gemini"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector.",
+            "examples": [
+              "my-connector"
+            ]
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_gemini"
+          }
+        }
+      },
       "create_connector_request_cases_webhook": {
         "title": "Create Webhook - Case Managment connector request",
         "description": "The Webhook - Case Management connector uses axios to send POST, PUT, and GET requests to a case management RESTful API web service.\n",
@@ -1289,6 +1325,49 @@
           }
         }
       },
+      "config_properties_gemini": {
+        "title": "Connector request properties for an Google Gemini connector",
+        "description": "Defines properties for connectors when type is `.gemini`.",
+        "type": "object",
+        "required": [
+          "apiUrl",
+          "gcpRegion",
+          "gcpProjectID"
+        ],
+        "properties": {
+          "apiUrl": {
+            "type": "string",
+            "description": "The Google Gemini request URL."
+          },
+          "defaultModel": {
+            "type": "string",
+            "description": "The generative artificial intelligence model for Google Gemini to use.",
+            "default": "gemini-1.5-pro-preview-0409"
+          },
+          "gcpRegion": {
+            "type": "string",
+            "description": "The GCP region where the Vertex AI endpoint enabled."
+          },
+          "gcpProjectID": {
+            "type": "string",
+            "description": "The Google ProjectID that has Vertex AI endpoint enabled."
+          }
+        }
+      },
+      "secrets_properties_gemini": {
+        "title": "Connector secrets properties for a Google Gemini connector",
+        "description": "Defines secrets for connectors when type is `.gemini`.",
+        "type": "object",
+        "required": [
+          "credentialsJSON"
+        ],
+        "properties": {
+          "credentialsJSON": {
+            "type": "string",
+            "description": "The service account credentials JSON file. The service account should have Vertex AI user IAM role assigned to it."
+          }
+        }
+      },
       "config_properties_cases_webhook": {
         "title": "Connector request properties for Webhook - Case Management connector",
         "required": [
@@ -1308,11 +1387,7 @@
             "type": "string",
             "description": "A JSON payload sent to the create comment URL to create a case comment. You can use variables to add Kibana Cases data to the payload. The required variable is `case.comment`. Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated once the Mustache variables have been placed when the REST method runs. Manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.\n",
             "examples": [
-              {
-                "body": {
-                  "[object Object]": null
-                }
-              }
+              "{\"body\": {{{case.comment}}}}"
             ]
           },
           "createCommentMethod": {
@@ -1336,19 +1411,7 @@
             "type": "string",
             "description": "A JSON payload sent to the create case URL to create a case. You can use variables to add case data to the payload. Required variables are `case.title` and `case.description`. Due to Mustache template variables (which is the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid to avoid future validation errors; disregard Mustache variables during your review.\n",
             "examples": [
-              {
-                "fields": {
-                  "summary": {
-                    "[object Object]": null
-                  },
-                  "description": {
-                    "[object Object]": null
-                  },
-                  "labels": {
-                    "[object Object]": null
-                  }
-                }
-              }
+              "{\"fields\": {\"summary\": {{{case.title}}},\"description\": {{{case.description}}},\"labels\": {{{case.tags}}}}}"
             ]
           },
           "createIncidentMethod": {
@@ -1393,19 +1456,7 @@
             "type": "string",
             "description": "The JSON payload sent to the update case URL to update the case. You can use variables to add Kibana Cases data to the payload. Required variables are `case.title` and `case.description`. Due to Mustache template variables (which is the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid to avoid future validation errors; disregard Mustache variables during your review.\n",
             "examples": [
-              {
-                "fields": {
-                  "summary": {
-                    "[object Object]": null
-                  },
-                  "description": {
-                    "[object Object]": null
-                  },
-                  "labels": {
-                    "[object Object]": null
-                  }
-                }
-              }
+              "{\"fields\": {\"summary\": {{{case.title}}},\"description\": {{{case.description}}},\"labels\": {{{case.tags}}}}}"
             ]
           },
           "updateIncidentMethod": {
@@ -2440,6 +2491,9 @@
             "$ref": "#/components/schemas/create_connector_request_bedrock"
           },
           {
+            "$ref": "#/components/schemas/create_connector_request_gemini"
+          },
+          {
             "$ref": "#/components/schemas/create_connector_request_cases_webhook"
           },
           {
@@ -2510,6 +2564,7 @@
           "propertyName": "connector_type_id",
           "mapping": {
             ".bedrock": "#/components/schemas/create_connector_request_bedrock",
+            ".gemini": "#/components/schemas/create_connector_request_gemini",
             ".cases-webhook": "#/components/schemas/create_connector_request_cases_webhook",
             ".d3security": "#/components/schemas/create_connector_request_d3security",
             ".email": "#/components/schemas/create_connector_request_email",
@@ -2576,6 +2631,52 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          }
+        }
+      },
+      "connector_response_properties_gemini": {
+        "title": "Connector response properties for a Google Gemini connector",
+        "type": "object",
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_gemini"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".gemini"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the connector."
+          },
+          "is_deprecated": {
+            "$ref": "#/components/schemas/is_deprecated"
+          },
+          "is_missing_secrets": {
+            "$ref": "#/components/schemas/is_missing_secrets"
+          },
+          "is_preconfigured": {
+            "$ref": "#/components/schemas/is_preconfigured"
+          },
+          "is_system_action": {
+            "$ref": "#/components/schemas/is_system_action"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3634,6 +3735,9 @@
             "$ref": "#/components/schemas/connector_response_properties_bedrock"
           },
           {
+            "$ref": "#/components/schemas/connector_response_properties_gemini"
+          },
+          {
             "$ref": "#/components/schemas/connector_response_properties_cases_webhook"
           },
           {
@@ -3704,6 +3808,7 @@
           "propertyName": "connector_type_id",
           "mapping": {
             ".bedrock": "#/components/schemas/connector_response_properties_bedrock",
+            ".gemini": "#/components/schemas/connector_response_properties_gemini",
             ".cases-webhook": "#/components/schemas/connector_response_properties_cases_webhook",
             ".d3security": "#/components/schemas/connector_response_properties_d3security",
             ".email": "#/components/schemas/connector_response_properties_email",
@@ -3746,6 +3851,26 @@
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_bedrock"
+          }
+        }
+      },
+      "update_connector_request_gemini": {
+        "title": "Update Google Gemini connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_gemini"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_gemini"
           }
         }
       },
@@ -4160,6 +4285,9 @@
             "$ref": "#/components/schemas/update_connector_request_bedrock"
           },
           {
+            "$ref": "#/components/schemas/update_connector_request_gemini"
+          },
+          {
             "$ref": "#/components/schemas/update_connector_request_cases_webhook"
           },
           {
@@ -4230,7 +4358,9 @@
         "enum": [
           "alerting",
           "cases",
-          "generativeAI",
+          "generativeAIForSecurity",
+          "generativeAIForObservability",
+          "generativeAIForSearchPlayground",
           "siem",
           "uptime"
         ]
@@ -4241,6 +4371,7 @@
         "description": "The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.",
         "enum": [
           ".bedrock",
+          ".gemini",
           ".cases-webhook",
           ".d3security",
           ".email",
@@ -4469,7 +4600,9 @@
             "enabled_in_license": true,
             "minimum_license_required": "enterprise",
             "supported_feature_ids": [
-              "generativeAI"
+              "generativeAIForSecurity",
+              "generativeAIForObservability",
+              "generativeAIForSearchPlayground"
             ],
             "is_system_action_type": false
           },
@@ -4481,7 +4614,21 @@
             "enabled_in_license": true,
             "minimum_license_required": "enterprise",
             "supported_feature_ids": [
-              "generativeAI"
+              "generativeAIForSecurity",
+              "generativeAIForObservability",
+              "generativeAIForSearchPlayground"
+            ],
+            "is_system_action_type": false
+          },
+          {
+            "id": ".gemini",
+            "name": "Google Gemini",
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "minimum_license_required": "enterprise",
+            "supported_feature_ids": [
+              "generativeAIForSecurity"
             ],
             "is_system_action_type": false
           }

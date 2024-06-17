@@ -42,6 +42,7 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
     type: 'dashboard',
     id: hit.id,
     updatedAt: hit.updatedAt!,
+    createdBy: hit.createdBy,
     references: hit.references,
     managed: hit.managed,
     attributes: {
@@ -297,6 +298,7 @@ export const useDashboardListingTable = ({
       setPageDataTestSubject,
       title,
       urlStateEnabled,
+      createdByEnabled: true,
     }),
     [
       contentEditorValidators,

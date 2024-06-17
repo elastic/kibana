@@ -72,9 +72,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test on share panel', async () => {
       await PageObjects.share.clickShareTopNavButton();
       await a11y.testAppSnapshot();
+      await PageObjects.share.closeShareModal();
     });
 
     it('a11y test on open sidenav filter', async () => {
+      await PageObjects.share.closeShareModal();
       await PageObjects.unifiedFieldList.openSidebarFieldFilter();
       await a11y.testAppSnapshot();
       await PageObjects.unifiedFieldList.closeSidebarFieldFilter();

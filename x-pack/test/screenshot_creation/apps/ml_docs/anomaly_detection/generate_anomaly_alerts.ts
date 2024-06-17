@@ -65,9 +65,8 @@ function createTestJobAndDatafeed() {
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  const pageObjects = getPageObjects(['triggersActionsUI']);
+  const pageObjects = getPageObjects(['triggersActionsUI', 'header']);
   const commonScreenshots = getService('commonScreenshots');
-  const browser = getService('browser');
   const actions = getService('actions');
   const testSubjects = getService('testSubjects');
 
@@ -105,16 +104,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('alert flyout screenshots', async () => {
         await ml.navigation.navigateToAlertsAndAction();
         await pageObjects.triggersActionsUI.clickCreateAlertButton();
-        await ml.alerting.setRuleName('test-ecommerce');
-        const searchBox = await testSubjects.find('ruleSearchField');
-        await searchBox.click();
-        await searchBox.clearValue();
-        await searchBox.type('ml');
-        await searchBox.pressKeys(browser.keys.ENTER);
-        await ml.testExecution.logTestStep('take screenshot');
-        await commonScreenshots.takeScreenshot('ml-rule', screenshotDirectories, 1920, 1400);
-
+        await ml.testExecution.logTestStep('Create anomaly detection jobs health rule');
         await ml.alerting.selectAnomalyDetectionJobHealthAlertType();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await ml.alerting.setRuleName('test-ecommerce');
         await ml.alerting.selectJobs([testJobId]);
         await ml.testExecution.logTestStep('take screenshot');
         await commonScreenshots.takeScreenshot(
@@ -137,9 +130,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         await ml.alerting.clickCancelSaveRuleButton();
 
+        await ml.testExecution.logTestStep('Create anomaly detection rule');
         await pageObjects.triggersActionsUI.clickCreateAlertButton();
-        await ml.alerting.setRuleName('test-ecommerce');
         await ml.alerting.selectAnomalyDetectionAlertType();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await ml.alerting.setRuleName('test-ecommerce');
         await ml.testExecution.logTestStep('should have correct default values');
         await ml.alerting.assertSeverity(75);
         await ml.alerting.assertPreviewButtonState(false);

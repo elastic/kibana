@@ -9,11 +9,11 @@ import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
 import expect from '@kbn/expect';
 import {
   Aggregators,
-  Comparator,
   InfraRuleType,
   MetricThresholdParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
 
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { createRule } from '../../../alerting_api_integration/observability/helpers/alerting_api_helper';
 import {
   waitForDocumentInIndex,
@@ -192,7 +192,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 criteria: [
                   {
                     aggType: Aggregators.AVERAGE,
-                    comparator: Comparator.GT,
+                    comparator: COMPARATORS.GREATER_THAN,
                     threshold: [0.5],
                     timeSize: 5,
                     timeUnit: 'm',

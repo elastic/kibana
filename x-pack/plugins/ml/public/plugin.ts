@@ -50,7 +50,7 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { ENABLE_ESQL } from '@kbn/discover-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
@@ -73,6 +73,7 @@ import type { ElasticModels } from './application/services/elastic_models_servic
 import type { MlApiServices } from './application/services/ml_api_service';
 import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
+import { getMlServices } from './embeddables/single_metric_viewer/get_services';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -272,7 +273,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 registerEmbeddables(pluginsSetup.embeddable, core);
 
                 if (pluginsSetup.cases) {
-                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+                  const mlServices = await getMlServices(coreStart, pluginStart);
+                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart, mlServices);
                 }
 
                 if (pluginsSetup.maps) {

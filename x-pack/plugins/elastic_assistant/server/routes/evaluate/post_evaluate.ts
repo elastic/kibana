@@ -17,9 +17,9 @@ import {
   PostEvaluateResponse,
   ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
-import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
+import { ActionsClientLlm } from '@kbn/langchain/server';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { ESQL_RESOURCE } from '../knowledge_base/constants';
+import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { EVALUATE } from '../../../common/constants';
@@ -37,6 +37,7 @@ import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
  * and reference your specific AgentExecutor function
  */
 import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
+import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 
 const DEFAULT_SIZE = 20;
 
@@ -136,7 +137,7 @@ export const postEvaluateRoute = (
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
           // Default ELSER model
-          const elserId = await getElser(request, (await context.core).savedObjects.getClient());
+          const elserId = await getElser();
 
           // Skeleton request from route to pass to the agents
           // params will be passed to the actions executor
@@ -157,6 +158,27 @@ export const postEvaluateRoute = (
             },
           };
 
+          // Create an ElasticsearchStore for KB interactions
+          // Setup with kbDataClient if `enableKnowledgeBaseByDefault` FF is enabled
+          const enableKnowledgeBaseByDefault =
+            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const kbDataClient = enableKnowledgeBaseByDefault
+            ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
+            : undefined;
+          const kbIndex =
+            enableKnowledgeBaseByDefault && kbDataClient != null
+              ? kbDataClient.indexTemplateAndPattern.alias
+              : KNOWLEDGE_BASE_INDEX_PATTERN;
+          const esStore = new ElasticsearchStore(
+            esClient,
+            kbIndex,
+            logger,
+            telemetry,
+            elserId,
+            ESQL_RESOURCE,
+            kbDataClient
+          );
+
           // Create an array of executor functions to call in batches
           // One for each connector/model + agent combination
           // Hoist `langChainMessages` so they can be batched by dataset.input in the evaluator
@@ -175,14 +197,12 @@ export const postEvaluateRoute = (
                     assistantTools,
                     connectorId,
                     esClient,
-                    elserId,
+                    esStore,
                     isStream: false,
                     langChainMessages,
                     llmType: 'openai',
                     logger,
                     request: skeletonRequest,
-                    kbResource: ESQL_RESOURCE,
-                    telemetry,
                     traceOptions: {
                       exampleId,
                       projectName,

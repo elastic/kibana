@@ -20,6 +20,7 @@ import {
 } from '../types';
 import {
   ConcreteTaskInstance,
+  createTaskRunError,
   isUnrecoverableError,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
@@ -93,6 +94,7 @@ import { RuleResultService } from '../monitoring/rule_result_service';
 import { ruleResultServiceMock } from '../monitoring/rule_result_service.mock';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import * as getExecutorServicesModule from './get_executor_services';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -105,6 +107,8 @@ jest.mock('../lib/wrap_scoped_cluster_client', () => ({
 jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 
 jest.mock('../monitoring/rule_result_service');
+
+jest.spyOn(getExecutorServicesModule, 'getExecutorServices');
 
 let fakeTimer: sinon.SinonFakeTimers;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -1924,6 +1928,35 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
+  test('should set unexpected errors as framework-error', async () => {
+    (getExecutorServicesModule.getExecutorServices as jest.Mock).mockRejectedValue(
+      new Error('test')
+    );
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    await taskRunner.run();
+
+    expect(logger.error).toBeCalledTimes(1);
+
+    const loggerCall = logger.error.mock.calls[0][0];
+    const loggerMeta = logger.error.mock.calls[0][1];
+    const loggerCallPrefix = (loggerCall as string).split('-');
+    expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
+      `"Executing Rule default:test:1 has resulted in Error: test"`
+    );
+    expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed', 'framework-error']);
+  });
+
   test('recovers gracefully when the RuleType executor throws an exception', async () => {
     const taskRunError = new Error(GENERIC_ERROR_MESSAGE);
 
@@ -3357,7 +3390,7 @@ describe('Task Runner', () => {
     );
   });
 
-  test('returns user error if all the errors are user error', async () => {
+  test('returns user error if all the errors reported by getLastRunResults are user error', async () => {
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
@@ -3377,6 +3410,39 @@ describe('Task Runner', () => {
       warnings: [],
       outcomeMessage: '',
     }));
+
+    const runnerResult = await taskRunner.run();
+
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
+  });
+
+  test('returns a taskRunError as user error when ruleType.executor throws a user error', async () => {
+    const taskRunError = createTaskRunError(new Error(GENERIC_ERROR_MESSAGE), TaskErrorSource.USER);
+
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        throw taskRunError;
+      }
+    );
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
 

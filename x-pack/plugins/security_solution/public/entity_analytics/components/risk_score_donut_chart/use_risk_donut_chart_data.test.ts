@@ -13,11 +13,11 @@ import type { SeverityCount } from '../severity/types';
 describe('useRiskDonutChartData', () => {
   it('returns the total', () => {
     const severityCount: SeverityCount = {
-      [RiskSeverity.low]: 1,
-      [RiskSeverity.high]: 2,
-      [RiskSeverity.moderate]: 3,
-      [RiskSeverity.unknown]: 4,
-      [RiskSeverity.critical]: 5,
+      [RiskSeverity.Low]: 1,
+      [RiskSeverity.High]: 2,
+      [RiskSeverity.Moderate]: 3,
+      [RiskSeverity.Unknown]: 4,
+      [RiskSeverity.Critical]: 5,
     };
 
     const { result } = renderHook(() => useRiskDonutChartData(severityCount));
@@ -29,11 +29,11 @@ describe('useRiskDonutChartData', () => {
 
   it('returns all legends', () => {
     const severityCount: SeverityCount = {
-      [RiskSeverity.low]: 1,
-      [RiskSeverity.high]: 1,
-      [RiskSeverity.moderate]: 1,
-      [RiskSeverity.unknown]: 1,
-      [RiskSeverity.critical]: 1,
+      [RiskSeverity.Low]: 1,
+      [RiskSeverity.High]: 1,
+      [RiskSeverity.Moderate]: 1,
+      [RiskSeverity.Unknown]: 1,
+      [RiskSeverity.Critical]: 1,
     };
 
     const { result } = renderHook(() => useRiskDonutChartData(severityCount));

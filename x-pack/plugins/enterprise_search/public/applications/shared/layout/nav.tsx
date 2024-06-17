@@ -9,7 +9,8 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiIcon, EuiSideNavItemType, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
+import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -22,6 +23,7 @@ import {
   AI_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  INFERENCE_ENDPOINTS_PLUGIN,
 } from '../../../../common/constants';
 import {
   SEARCH_APPLICATIONS_PATH,
@@ -34,16 +36,24 @@ import {
   CRAWLERS_PATH,
   SEARCH_INDICES_PATH,
 } from '../../enterprise_search_content/routes';
+
+import { INFERENCE_ENDPOINTS_PATH } from '../../enterprise_search_relevance/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
 
-export const useEnterpriseSearchNav = () => {
+/**
+ * Hook to generate the Enterprise Search navigation items
+ *
+ * @param alwaysReturn Flag to always return the nav items, even if the sidebar is disabled
+ * @returns The Enterprise Search navigation items
+ */
+export const useEnterpriseSearchNav = (alwaysReturn = false) => {
   const { isSidebarEnabled, productAccess } = useValues(KibanaLogic);
   const indicesNavItems = useIndicesNav();
-  if (!isSidebarEnabled) return undefined;
+  if (!isSidebarEnabled && !alwaysReturn) return undefined;
 
-  const navItems: Array<EuiSideNavItemType<unknown>> = [
+  const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = [
     {
       id: 'home',
       name: (
@@ -141,6 +151,25 @@ export const useEnterpriseSearchNav = () => {
       }),
     },
     {
+      id: 'relevance',
+      items: [
+        {
+          id: 'inference_endpoints',
+          name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
+            defaultMessage: 'Inference Endpoints',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: INFERENCE_ENDPOINTS_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
+          }),
+        },
+      ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
+        defaultMessage: 'Relevance',
+      }),
+    },
+    {
       id: 'es_getting_started',
       items: [
         {
@@ -224,9 +253,10 @@ export const useEnterpriseSearchNav = () => {
 export const useEnterpriseSearchApplicationNav = (
   searchApplicationName?: string,
   isEmptyState?: boolean,
-  hasSchemaConflicts?: boolean
+  hasSchemaConflicts?: boolean,
+  alwaysReturn?: boolean
 ) => {
-  const navItems = useEnterpriseSearchNav();
+  const navItems = useEnterpriseSearchNav(alwaysReturn);
   if (!navItems) return undefined;
   if (!searchApplicationName) return navItems;
   const applicationsItem = navItems.find((item) => item.id === 'build');
@@ -264,6 +294,8 @@ export const useEnterpriseSearchApplicationNav = (
               }),
             },
             {
+              // Required for the new side nav
+              iconToString: hasSchemaConflicts ? 'warning' : undefined,
               id: 'enterpriseSearchApplicationsContent',
               name: (
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -272,6 +304,13 @@ export const useEnterpriseSearchApplicationNav = (
                   })}
                   {hasSchemaConflicts && <EuiIcon type="warning" color="danger" />}
                 </EuiFlexGroup>
+              ),
+              // Required for the new side nav
+              nameToString: i18n.translate(
+                'xpack.enterpriseSearch.nav.searchApplication.contentTitle',
+                {
+                  defaultMessage: 'Content',
+                }
               ),
               ...generateNavLink({
                 shouldNotCreateHref: true,
@@ -317,9 +356,10 @@ export const useEnterpriseSearchAnalyticsNav = (
     explorer: string;
     integration: string;
     overview: string;
-  }
+  },
+  alwaysReturn?: boolean
 ) => {
-  const navItems = useEnterpriseSearchNav();
+  const navItems = useEnterpriseSearchNav(alwaysReturn);
 
   if (!navItems) return undefined;
 

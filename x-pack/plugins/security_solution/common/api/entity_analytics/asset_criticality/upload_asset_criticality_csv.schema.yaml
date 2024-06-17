@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 1.0.0
+  version: '1'
   title: Asset Criticality Create Record Schema
 servers:
   - url: 'http://{kibana_host}:{port}'
@@ -12,6 +12,8 @@ servers:
 paths:
   /internal/asset_criticality/upload_csv:
     post:
+      x-labels: [ess, serverless]
+      x-internal: true
       summary: Uploads a CSV file containing asset criticality data
       requestBody:
         content:

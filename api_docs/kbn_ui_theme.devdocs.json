@@ -91,11 +91,11 @@
           },
           {
             "plugin": "@kbn/monaco",
-            "path": "packages/kbn-monaco/src/console/theme/shared.ts"
+            "path": "packages/kbn-monaco/src/console/theme.ts"
           },
           {
             "plugin": "@kbn/monaco",
-            "path": "packages/kbn-monaco/src/console/theme/shared.ts"
+            "path": "packages/kbn-monaco/src/console/theme.ts"
           },
           {
             "plugin": "securitySolution",

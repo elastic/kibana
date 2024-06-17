@@ -95,6 +95,20 @@ describe('getSuggestions', () => {
           suggestedSearch: 'tag:BAR',
         })
       );
+
+      const suggestions1 = getSuggestions({
+        searchTerm: 'Bar',
+        tagCache,
+        searchableTypes: [],
+      });
+
+      expect(suggestions1).toHaveLength(1);
+      expect(suggestions1[0]).toEqual(
+        expect.objectContaining({
+          label: 'tag: BAR',
+          suggestedSearch: 'tag:BAR',
+        })
+      );
     });
     it('escapes the name in the query when containing whitespaces', () => {
       const suggestions = getSuggestions({

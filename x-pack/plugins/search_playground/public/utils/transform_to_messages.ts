@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { AIMessage, Message, MessageRole, UseChatHelpers } from '../types';
+import {
+  AIMessage,
+  Message,
+  MessageRole,
+  UseChatHelpers,
+  AnnotationDoc,
+  AnnotationTokens,
+} from '../types';
 import { transformAnnotationToDoc } from './transform_annotation_to_doc';
 
 export const transformFromChatMessages = (messages: UseChatHelpers['messages']): Message[] =>
-  messages.map(({ id, content, createdAt, role, annotations }) => {
+  messages.map(({ id, content, createdAt, role, annotations = [] }) => {
     const commonMessageProp = {
       id,
       content,
@@ -20,16 +27,24 @@ export const transformFromChatMessages = (messages: UseChatHelpers['messages']):
     if (role === MessageRole.assistant) {
       return {
         ...commonMessageProp,
-        citations: Array.isArray(annotations)
-          ? annotations
-              .find((annotation) => annotation.type === 'citations')
-              ?.documents?.map(transformAnnotationToDoc)
-          : [],
-        retrievalDocs: Array.isArray(annotations)
-          ? annotations
-              .find((annotation) => annotation.type === 'retrieved_docs')
-              ?.documents?.map(transformAnnotationToDoc)
-          : [],
+        citations: annotations
+          .find((annotation): annotation is AnnotationDoc => annotation.type === 'citations')
+          ?.documents?.map(transformAnnotationToDoc),
+        retrievalDocs: annotations
+          .find((annotation): annotation is AnnotationDoc => annotation.type === 'retrieved_docs')
+          ?.documents?.map(transformAnnotationToDoc),
+        inputTokens: {
+          context: annotations?.find(
+            (annotation): annotation is AnnotationTokens =>
+              annotation.type === 'context_token_count'
+          )?.count,
+          total: annotations?.find(
+            (annotation): annotation is AnnotationTokens => annotation.type === 'prompt_token_count'
+          )?.count,
+          contextClipped: annotations?.find(
+            (annotation): annotation is AnnotationTokens => annotation.type === 'context_clipped'
+          )?.count,
+        },
       } as AIMessage;
     }
 

@@ -11,6 +11,7 @@ import { EuiButton, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { useEnablement } from '../../../hooks';
 import { RunTestButton } from './run_test_btn';
 import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
 import { useMonitorSave } from '../hooks/use_monitor_save';
@@ -44,6 +45,8 @@ export const ActionBar = ({
   const { status, loading, isEdit } = useMonitorSave({ monitorData });
 
   const canEditSynthetics = useCanEditSynthetics();
+
+  const { isServiceAllowed } = useEnablement();
 
   const formSubmitter = (formData: Record<string, any>) => {
     if (isValid) {
@@ -82,7 +85,10 @@ export const ActionBar = ({
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <RunTestButton canUsePublicLocations={canUsePublicLocations} />
+          <RunTestButton
+            canUsePublicLocations={canUsePublicLocations}
+            isServiceAllowed={isServiceAllowed}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
           <NoPermissionsTooltip
@@ -94,7 +100,7 @@ export const ActionBar = ({
               isLoading={loading}
               onClick={handleSubmit(formSubmitter)}
               data-test-subj="syntheticsMonitorConfigSubmitButton"
-              disabled={!canEditSynthetics || !canUsePublicLocations}
+              disabled={!canEditSynthetics || !canUsePublicLocations || !isServiceAllowed}
             >
               {isEdit ? UPDATE_MONITOR_LABEL : CREATE_MONITOR_LABEL}
             </EuiButton>

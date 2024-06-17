@@ -6,33 +6,50 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PlaygroundProvider } from './providers/playground_provider';
 
 import { App } from './components/app';
 import { PlaygroundToolbar } from './embeddable';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
+import { useKibana } from './hooks/use_kibana';
 
 export const ChatPlaygroundOverview: React.FC = () => {
+  const {
+    services: { console: consolePlugin },
+  } = useKibana();
+
+  const embeddableConsole = useMemo(
+    () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
+    [consolePlugin]
+  );
+
   return (
-    <PlaygroundProvider
-      defaultValues={{
-        indices: [],
-      }}
-    >
-      <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlPlaygroundPage">
+    <PlaygroundProvider>
+      <EuiPageTemplate
+        offset={0}
+        restrictWidth={false}
+        data-test-subj="svlPlaygroundPage"
+        grow={false}
+      >
         <EuiPageTemplate.Header
+          css={{ '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' } }}
           pageTitle={
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <span data-test-subj="chat-playground-home-page-title">
-                  <FormattedMessage
-                    id="xpack.searchPlayground.pageTitle"
-                    defaultMessage="Playground"
-                  />
-                </span>
+                <EuiTitle
+                  css={{ whiteSpace: 'nowrap' }}
+                  data-test-subj="chat-playground-home-page-title"
+                >
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.searchPlayground.pageTitle"
+                      defaultMessage="Playground"
+                    />
+                  </h2>
+                </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
@@ -48,6 +65,7 @@ export const ChatPlaygroundOverview: React.FC = () => {
           rightSideItems={[<PlaygroundHeaderDocs />, <PlaygroundToolbar />]}
         />
         <App />
+        {embeddableConsole}
       </EuiPageTemplate>
     </PlaygroundProvider>
   );
