@@ -67,7 +67,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   let testJobId = '';
 
-  describe('anomaly detection alert', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/102012
+  describe.skip('anomaly detection alert', function () {
     this.tags('ciGroup13');
 
     before(async () => {
