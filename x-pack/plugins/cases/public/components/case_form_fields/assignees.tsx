@@ -176,6 +176,7 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
         }
         isInvalid={isInvalid}
         error={errorMessage}
+        data-test-subj="caseAssignees"
       >
         <EuiComboBox
           fullWidth

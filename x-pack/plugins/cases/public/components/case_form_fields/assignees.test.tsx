@@ -27,11 +27,8 @@ describe('Assignees', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
 
-  const MockHookWrapperComponent: FC<PropsWithChildren<{ uids?: string[] }>> = ({
-    children,
-    uids = [],
-  }) => {
-    const { form } = useForm({ defaultValue: { assignees: uids?.map((uid) => ({ uid })) } });
+  const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
+    const { form } = useForm();
     globalForm = form;
 
     return <Form form={form}>{children}</Form>;
