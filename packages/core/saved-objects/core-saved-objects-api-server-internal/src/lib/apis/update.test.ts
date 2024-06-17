@@ -43,6 +43,7 @@ import {
   createConflictErrorPayload,
   createGenericNotFoundErrorPayload,
   updateSuccess,
+  mockTimestampFieldsWithCreated,
 } from '../../test_helpers/repository.test.common';
 
 describe('#update', () => {
@@ -319,7 +320,7 @@ describe('#update', () => {
         const expected = {
           'index-pattern': { description: 'bar', title: 'foo' },
           type: 'index-pattern',
-          ...mockTimestampFields,
+          ...mockTimestampFieldsWithCreated,
         };
         expect(
           (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
@@ -352,7 +353,7 @@ describe('#update', () => {
           multiNamespaceIsolatedType: { description: 'bar', title: 'foo' },
           namespaces: ['default'],
           type: 'multiNamespaceIsolatedType',
-          ...mockTimestampFields,
+          ...mockTimestampFieldsWithCreated,
         };
         expect(
           (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!

@@ -6,18 +6,20 @@
  */
 
 import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { kqlQuerySchema, QuerySchema } from '@kbn/slo-schema';
+import { QuerySchema, kqlQuerySchema } from '@kbn/slo-schema';
+import { Logger } from '@kbn/logging';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { SLODefinition } from '../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../domain/services/get_delay_in_seconds_from_slo';
 import { InvalidTransformError } from '../../errors';
 
-export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '') {
+export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '', dataView?: DataView) {
   try {
     if (kqlQuerySchema.is(kuery)) {
       return toElasticsearchQuery(fromKueryExpression(kuery));
     } else {
       return buildEsQuery(
-        undefined,
+        dataView,
         {
           query: kuery?.kqlQuery,
           language: 'kuery',
@@ -28,6 +30,19 @@ export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '') {
   } catch (err) {
     throw new InvalidTransformError(`Invalid KQL: ${kuery}`);
   }
+}
+
+export function parseStringFilters(filters: string, logger: Logger) {
+  if (!filters) {
+    return {};
+  }
+  try {
+    return JSON.parse(filters);
+  } catch (e) {
+    logger.error(`Failed to parse filters: ${e.message}`);
+  }
+
+  return {};
 }
 
 export function parseIndex(index: string): string | string[] {

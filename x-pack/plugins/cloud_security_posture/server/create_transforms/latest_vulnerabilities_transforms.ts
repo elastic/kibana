@@ -13,8 +13,15 @@ import {
   VULNERABILITIES_INDEX_PATTERN,
 } from '../../common/constants';
 
+const CURRENT_VULN_TRANSFORM_VERSION =
+  'cloud_security_posture.vulnerabilities_latest-default-8.15.0';
+
+export const DEPRECATED_VULN_TRANSFORM_VERSIONS = [
+  'cloud_security_posture.vulnerabilities_latest-default-8.8.0',
+];
+
 export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
-  transform_id: 'cloud_security_posture.vulnerabilities_latest-default-8.8.0',
+  transform_id: CURRENT_VULN_TRANSFORM_VERSION,
   description:
     'Defines vulnerabilities transformation to view only the latest vulnerability per resource',
   source: {

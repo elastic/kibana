@@ -8,18 +8,16 @@ exports[`ConfirmAlterActiveSpaceModal renders as expected 1`] = `
   onCancel={[MockFunction]}
   onConfirm={[MockFunction]}
   title={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Confirm update space"
       id="xpack.spaces.management.confirmAlterActiveSpaceModal.title"
-      values={Object {}}
     />
   }
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="You have updated the visible features in this space. Your page will reload after saving."
       id="xpack.spaces.management.confirmAlterActiveSpaceModal.reloadWarningMessage"
-      values={Object {}}
     />
   </p>
 </EuiConfirmModal>

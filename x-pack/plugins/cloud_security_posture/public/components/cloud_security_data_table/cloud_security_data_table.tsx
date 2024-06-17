@@ -8,9 +8,15 @@ import React, { useState, useMemo } from 'react';
 import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
-import { EuiDataGridCellValueElementProps, EuiDataGridStyle, EuiProgress } from '@elastic/eui';
+import {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridControlColumn,
+  EuiDataGridStyle,
+  EuiProgress,
+} from '@elastic/eui';
 import { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -22,7 +28,9 @@ import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
 import { AdditionalControls } from './additional_controls';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
+import { TakeAction } from '../take_action';
 
+import { RuleResponse } from '../../common/types';
 export interface CloudSecurityDefaultColumn {
   id: string;
   width?: number;
@@ -77,6 +85,13 @@ export interface CloudSecurityDataTableProps {
    * Height override for the data grid.
    */
   height?: number | string;
+
+  /**
+   * This function will be used in the control column to create a rule for a specific finding.
+   */
+  createRuleFn?: (rowIndex: number) => ((http: HttpSetup) => Promise<RuleResponse>) | undefined;
+  /* Optional props passed to Columns to display Provided Labels as Column name instead of field name */
+  columnHeaders?: Record<string, string>;
   /**
    * Specify if distribution bar is shown on data table, used to calculate height of data table in virtualized mode
    */
@@ -95,6 +110,8 @@ export const CloudSecurityDataTable = ({
   customCellRenderer,
   groupSelectorComponent,
   height,
+  createRuleFn,
+  columnHeaders,
   hasDistributionBar = true,
   ...rest
 }: CloudSecurityDataTableProps) => {
@@ -117,7 +134,9 @@ export const CloudSecurityDataTable = ({
     `${columnsLocalStorageKey}:settings`,
     {
       columns: defaultColumns.reduce((prev, curr) => {
-        const columnDefaultSettings = curr.width ? { width: curr.width } : {};
+        const columnDefaultSettings = curr.width
+          ? { width: curr.width, display: columnHeaders?.[curr.id] }
+          : { display: columnHeaders?.[curr.id] };
         const newColumn = { [curr.id]: columnDefaultSettings };
         return { ...prev, ...newColumn };
       }, {} as UnifiedDataTableSettings['columns']),
@@ -227,6 +246,7 @@ export const CloudSecurityDataTable = ({
     const newColumns = { ...(grid.columns || {}) };
     newColumns[colSettings.columnId] = {
       width: Math.round(colSettings.width),
+      display: columnHeaders?.[colSettings.columnId],
     };
     const newGrid = { ...grid, columns: newColumns };
     setSettings(newGrid);
@@ -259,6 +279,20 @@ export const CloudSecurityDataTable = ({
       onResetColumns={onResetColumns}
     />
   );
+
+  const externalControlColumns: EuiDataGridControlColumn[] | undefined = createRuleFn
+    ? [
+        {
+          id: 'select',
+          width: 20,
+          headerCellRender: () => null,
+          rowCellRender: ({ rowIndex }) =>
+            createRuleFn && (
+              <TakeAction isDataGridControlColumn createRuleFn={createRuleFn(rowIndex)} />
+            ),
+        },
+      ]
+    : undefined;
 
   const rowHeightState = 0;
 
@@ -306,6 +340,7 @@ export const CloudSecurityDataTable = ({
           showTimeCol={false}
           settings={settings}
           onFetchMoreRecords={loadMore}
+          externalControlColumns={externalControlColumns}
           externalCustomRenderers={externalCustomRenderers}
           externalAdditionalControls={externalAdditionalControls}
           gridStyleOverride={gridStyle}

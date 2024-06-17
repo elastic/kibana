@@ -22,7 +22,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { useDetailPanel } from '../../../side_panel/hooks/use_detail_panel';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { isFullScreen } from '../../body/column_headers';
 import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../../../common/constants';
 import { FULL_SCREEN } from '../../body/column_headers/translations';

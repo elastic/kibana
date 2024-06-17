@@ -20,16 +20,20 @@ import { RuleTypeIndexWithDescriptions, RuleTypeWithDescription } from '../types
 export interface UseRuleTypesProps {
   http: HttpStart;
   toasts: ToastsStart;
-  filteredRuleTypes: string[];
+  filteredRuleTypes?: string[];
   registeredRuleTypes?: Array<{ id: string; description: string }>;
   enabled?: boolean;
 }
 
-const getFilteredIndex = (
-  data: Array<RuleType<string, string>>,
-  filteredRuleTypes: string[],
-  registeredRuleTypes: UseRuleTypesProps['registeredRuleTypes']
-) => {
+const getFilteredIndex = ({
+  data,
+  filteredRuleTypes,
+  registeredRuleTypes,
+}: {
+  data: Array<RuleType<string, string>>;
+  filteredRuleTypes?: string[];
+  registeredRuleTypes: UseRuleTypesProps['registeredRuleTypes'];
+}) => {
   const index: RuleTypeIndexWithDescriptions = new Map();
   const registeredRuleTypesDictionary = registeredRuleTypes ? keyBy(registeredRuleTypes, 'id') : {};
   for (const ruleType of data) {
@@ -88,7 +92,7 @@ export const useLoadRuleTypesQuery = ({
   const filteredIndex = useMemo(
     () =>
       data
-        ? getFilteredIndex(data, filteredRuleTypes, registeredRuleTypes)
+        ? getFilteredIndex({ data, filteredRuleTypes, registeredRuleTypes })
         : new Map<string, RuleTypeWithDescription>(),
     [data, filteredRuleTypes, registeredRuleTypes]
   );

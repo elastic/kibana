@@ -54,6 +54,16 @@ export class SpacesSavedObjectsService {
             }),
           },
         },
+        2: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                disabledFeatures: { type: 'keyword' },
+              },
+            },
+          ],
+        },
       },
     });
 

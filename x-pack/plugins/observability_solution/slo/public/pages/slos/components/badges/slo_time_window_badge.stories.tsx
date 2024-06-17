@@ -9,7 +9,7 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
+import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloTimeWindowBadge as Component, Props } from './slo_time_window_badge';
 import { buildSlo } from '../../../../data/slo/slo';
 
