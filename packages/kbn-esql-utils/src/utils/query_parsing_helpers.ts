@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ESQLSource, ESQLFunction, ESQLColumn } from '@kbn/esql-ast';
+import type { ESQLSource, ESQLFunction, ESQLColumn, ESQLSingleAstItem } from '@kbn/esql-ast';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 500;
@@ -64,6 +64,31 @@ export const hasTimeNamedParams = (esql: string) => {
   return /\?earliest/i.test(esql) && /\?latest/i.test(esql);
 };
 
+// should use here the new walk function, hasnt been merged yet
+function findInAst(astItem: ESQLFunction, variable: string): string | undefined {
+  const singleAstItem = astItem as ESQLFunction;
+  const args = singleAstItem.args;
+  const isLastNode = args?.some((a) => 'type' in a && a.type === 'column');
+  if (isLastNode) {
+    const column = args.find((a) => {
+      const argument = a as ESQLSingleAstItem;
+      return argument.type === 'column';
+    }) as ESQLColumn;
+    if (column) {
+      return column.name;
+    }
+  } else {
+    const functions = args?.filter((item) => 'type' in item && item.type === 'function');
+    for (const functionAstItem of functions) {
+      const item = findInAst(functionAstItem as ESQLFunction, variable);
+      if (item) {
+        return item;
+      }
+    }
+  }
+  return undefined;
+}
+
 /**
  * When the ?earliest and ?latest params are used, we want to retrieve the timefield from the query.
  * @param esql:string
@@ -72,16 +97,11 @@ export const hasTimeNamedParams = (esql: string) => {
 export const getTimeFieldFromESQLQuery = (esql: string) => {
   const { ast } = getAstAndSyntaxErrors(esql);
   const whereCommand = ast.find(({ name }) => name === 'where');
-  const whereClause =
-    whereCommand && esql.substring(whereCommand?.location.min, whereCommand?.location.max);
-  if (!whereClause) {
+  if (!whereCommand) {
     return;
   }
-  // const matches = whereClause.match(new RegExp(field + '(.*)' + String(filterValue)));
-  // not sure if the best way to add this here is with ast parsing or with regex,
-  // we need to add the named parameters first to the lexer and parser
-  const args = (whereCommand?.args ?? []) as ESQLFunction[];
-  const functionArgs = args.filter((arg) => arg.type === 'function');
-  const timeFieldArg = (functionArgs[0].args as ESQLColumn[]).find((arg) => arg.type === 'column');
-  return timeFieldArg?.text;
+  return (
+    findInAst(whereCommand as unknown as ESQLFunction, '?earliest') ??
+    findInAst(whereCommand as unknown as ESQLFunction, '?latest')
+  );
 };
