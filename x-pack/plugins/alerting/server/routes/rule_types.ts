@@ -57,7 +57,7 @@ export const ruleTypesRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule_types`,
       options: {
         access: 'public',
-        description: `Get rule types`,
+        summary: `Get rule types`,
       },
       validate: {},
     },

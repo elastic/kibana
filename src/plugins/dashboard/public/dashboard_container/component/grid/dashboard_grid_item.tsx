@@ -9,7 +9,6 @@
 import { EuiLoadingChart } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddablePanel, ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
-import { PhaseEvent } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { DashboardPanelState } from '../../../../common';
@@ -26,7 +25,6 @@ export interface Props extends DivProps {
   focusedPanelId?: string;
   key: string;
   isRenderable?: boolean;
-  onPanelStatusChange?: (info: PhaseEvent) => void;
 }
 
 export const Item = React.forwardRef<HTMLDivElement, Props>(
@@ -37,7 +35,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       id,
       index,
       type,
-      onPanelStatusChange,
       isRenderable = true,
       // The props below are passed from ReactGridLayoutn and need to be merged with their counterparts.
       // https://github.com/react-grid-layout/react-grid-layout/issues/1241#issuecomment-658306889
@@ -103,7 +100,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         showBorder: useMargins,
         showNotifications: true,
         showShadow: false,
-        onPanelStatusChange,
       };
 
       // render React embeddable
@@ -128,7 +124,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           {...panelProps}
         />
       );
-    }, [id, container, type, index, useMargins, onPanelStatusChange]);
+    }, [id, container, type, index, useMargins]);
 
     return (
       <div

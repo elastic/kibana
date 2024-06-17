@@ -47,7 +47,7 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
 
   const { data: dataView } = useFetcher(async () => {
     return await dataViews.create({ title: SYNTHETICS_INDEX_PATTERN });
-  }, []);
+  }, [dataViews]);
 
   useEffect(() => {
     onChange(query);

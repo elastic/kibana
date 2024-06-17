@@ -23,7 +23,7 @@ export function registerPipelineSaveRoute(
       path: '/api/logstash/pipeline/{id}',
       options: {
         access: 'public',
-        description: `Create a managed Logstash pipeline`,
+        summary: `Create a managed Logstash pipeline`,
       },
       validate: {
         params: schema.object({

@@ -102,6 +102,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.body.degradedFields.length).to.be(2);
         expect(degradedFields).to.eql(expectedDegradedFields);
       });
+
+      it('returns proper timeSeries data for degraded fields', async () => {
+        const logsTimeSeriesData = [
+          { x: 1716357600000, y: 60 },
+          { x: 1716368400000, y: 180 },
+          { x: 1716379200000, y: 180 },
+          { x: 1716390000000, y: 180 },
+          { x: 1716400800000, y: 180 },
+          { x: 1716411600000, y: 180 },
+          { x: 1716422400000, y: 180 },
+          { x: 1716433200000, y: 180 },
+          { x: 1716444000000, y: 122 },
+        ];
+
+        const resp = await callApiAs(
+          'datasetQualityLogsUser',
+          `${type}-${degradedFieldDataset}-${namespace}`
+        );
+
+        const logLevelTimeSeries = resp.body.degradedFields.find(
+          (dFields) => dFields.name === 'log.level'
+        )?.timeSeries;
+
+        expect(logLevelTimeSeries).to.eql(logsTimeSeriesData);
+      });
     });
   });
 }
