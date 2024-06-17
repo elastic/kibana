@@ -19,6 +19,7 @@ import {
   ScopedHistory,
   IUiSettingsClient,
   ChromeStart,
+  SecurityServiceStart,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -28,6 +29,7 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
+import { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
@@ -49,6 +51,7 @@ export interface KibanaLogicProps {
   config: ClientConfigType;
   connectorTypes?: ConnectorDefinition[];
   console?: ConsolePluginStart;
+  coreSecurity?: SecurityServiceStart;
   data?: DataPublicPluginStart;
   esConfig: ESConfig;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
@@ -63,6 +66,7 @@ export interface KibanaLogicProps {
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   searchPlayground?: SearchPlaygroundPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -70,7 +74,6 @@ export interface KibanaLogicProps {
   share?: SharePluginStart;
   uiSettings?: IUiSettingsClient;
   updateSideNavDefinition: UpdateSideNavDefinitionFn;
-  user: AuthenticatedUser | null;
 }
 
 export interface KibanaValues {
@@ -96,6 +99,7 @@ export interface KibanaValues {
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   searchPlayground: SearchPlaygroundPluginStart | null;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | null;
   security: SecurityPluginStart | null;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -107,6 +111,9 @@ export interface KibanaValues {
 }
 
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
+  actions: {
+    setUser: (user: AuthenticatedUser | null) => ({ user }),
+  },
   path: ['enterprise_search', 'kibana_logic'],
   reducers: ({ props }) => ({
     application: [props.application, {}],
@@ -137,6 +144,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
     searchPlayground: [props.searchPlayground || null, {}],
+    searchInferenceEndpoints: [props.searchInferenceEndpoints || null, {}],
     security: [props.security || null, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
@@ -144,7 +152,12 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     share: [props.share || null, {}],
     uiSettings: [props.uiSettings, {}],
     updateSideNavDefinition: [props.updateSideNavDefinition, {}],
-    user: [props.user || null, {}],
+    user: [
+      props.user || null,
+      {
+        setUser: (_, { user }) => user || null,
+      },
+    ],
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: CloudSetup) => Boolean(cloud?.isCloudEnabled)],
@@ -154,5 +167,8 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
 export const mountKibanaLogic = (props: KibanaLogicProps) => {
   KibanaLogic(props);
   const unmount = KibanaLogic.mount();
+  props.coreSecurity?.authc.getCurrentUser()?.then((user) => {
+    KibanaLogic.actions.setUser(user);
+  });
   return unmount;
 };
