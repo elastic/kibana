@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RouteValidationFunction,
-  RouteValidationResultFactory
-} from '@kbn/core/server';
+import type { RouteValidationFunction, RouteValidationResultFactory } from '@kbn/core/server';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import type { TypeOf, ZodType } from 'zod';
 

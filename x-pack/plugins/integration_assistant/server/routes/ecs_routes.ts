@@ -33,7 +33,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(EcsMappingRequestBody)
+            body: buildRouteValidationWithZod(EcsMappingRequestBody),
           },
         },
       },
@@ -69,20 +69,20 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
 
           const graph = await getEcsGraph(model);
 
-          let results : EcsMappingResponse;
+          let results: EcsMappingResponse;
           if (req.body?.mapping) {
-            results = (await graph.invoke({
+            results = await graph.invoke({
               packageName,
               datastreamName,
               rawSamples,
               mapping,
-            }));
+            });
           } else
-            results = (await graph.invoke({
+            results = await graph.invoke({
               packageName,
               datastreamName,
               rawSamples,
-            }));
+            });
           return res.ok({ body: results });
         } catch (e) {
           return res.badRequest({ body: e });

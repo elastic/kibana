@@ -11,7 +11,11 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
-import { CATEGORIZATION_GRAPH_PATH, CategorizationRequestBody, CategorizationResponse } from '../../common';
+import {
+  CATEGORIZATION_GRAPH_PATH,
+  CategorizationRequestBody,
+  CategorizationResponse,
+} from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
@@ -35,7 +39,7 @@ export function registerCategorizationRoutes(
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CategorizationRequestBody)
+            body: buildRouteValidationWithZod(CategorizationRequestBody),
           },
         },
       },
@@ -72,12 +76,12 @@ export function registerCategorizationRoutes(
           });
 
           const graph = await getCategorizationGraph(client, model);
-          const results: CategorizationResponse = (await graph.invoke({
+          const results: CategorizationResponse = await graph.invoke({
             packageName,
             datastreamName,
             rawSamples,
             currentPipeline,
-          }));
+          });
           return res.ok({ body: results });
         } catch (e) {
           return res.badRequest({ body: e });

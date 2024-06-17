@@ -28,7 +28,7 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CheckPipelineRequestBody)
+            body: buildRouteValidationWithZod(CheckPipelineRequestBody),
           },
         },
       },
@@ -37,11 +37,7 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
         try {
-          const results: CheckPipelineResponse = (await testPipeline(
-            rawSamples,
-            pipeline,
-            client
-          ));
+          const results: CheckPipelineResponse = await testPipeline(rawSamples, pipeline, client);
           if (results?.errors && results.errors.length > 0) {
             return res.badRequest({ body: JSON.stringify(results.errors) });
           }

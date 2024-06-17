@@ -11,7 +11,6 @@ import { buildPackage } from '../integration_builder';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 
-
 export function registerIntegrationBuilderRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
 ) {

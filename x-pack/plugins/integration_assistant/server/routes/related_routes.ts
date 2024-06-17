@@ -33,11 +33,11 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(RelatedRequestBody)
+            body: buildRouteValidationWithZod(RelatedRequestBody),
           },
         },
       },
-      async (context, req, res):Promise<IKibanaResponse<RelatedResponse>> => {
+      async (context, req, res): Promise<IKibanaResponse<RelatedResponse>> => {
         const { packageName, datastreamName, rawSamples, currentPipeline } = req.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
@@ -69,12 +69,12 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
           });
 
           const graph = await getRelatedGraph(client, model);
-          const results:RelatedResponse = (await graph.invoke({
+          const results: RelatedResponse = await graph.invoke({
             packageName,
             datastreamName,
             rawSamples,
             currentPipeline,
-          }));
+          });
           return res.ok({ body: results });
         } catch (e) {
           return res.badRequest({ body: e });
