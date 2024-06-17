@@ -100,6 +100,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           </>
         )}
         <FormGroupResponsiveFields
+          fullWidth
           title={
             <h3>
               <FormattedMessage
@@ -119,6 +120,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             {/* Name */}
             <EuiFlexItem>
               <EuiFormRow
+                fullWidth
                 isInvalid={!!validationResults.name}
                 error={validationResults.name}
                 label={
@@ -129,6 +131,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 }
               >
                 <EuiFieldText
+                  fullWidth
                   readOnly={isManaged}
                   value={packagePolicy.name}
                   onChange={(e) =>
@@ -144,6 +147,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             {/* Description */}
             <EuiFlexItem>
               <EuiFormRow
+                fullWidth
                 label={
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel"
@@ -162,6 +166,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 error={validationResults.description}
               >
                 <EuiFieldText
+                  fullWidth
                   readOnly={isManaged}
                   value={packagePolicy.description}
                   onChange={(e) =>
