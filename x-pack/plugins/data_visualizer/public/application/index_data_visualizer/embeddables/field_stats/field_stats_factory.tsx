@@ -21,6 +21,7 @@ import {
 import { cloneDeep } from 'lodash';
 import React, { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
   map,
@@ -36,6 +37,7 @@ import fastIsEqual from 'fast-deep-equal';
 import { isDefined } from '@kbn/ml-is-defined';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { TimeRange } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
@@ -227,6 +229,11 @@ export const getFieldStatsChartEmbeddableFactory = (
       );
       const reset$ = resetData$.pipe(skip(1), distinctUntilChanged());
 
+      const appliedTimeRange$: Observable<TimeRange | undefined> = fetch$(api).pipe(
+        map((fetchContext) => fetchContext.timeRange),
+        distinctUntilChanged(fastIsEqual)
+      );
+
       const onTableUpdate = (changes: Partial<DataVisualizerTableState>) => {
         if (isDefined(changes?.showDistributions)) {
           fieldStatsControlsApi.showDistributions$.next(changes.showDistributions);
@@ -252,6 +259,8 @@ export const getFieldStatsChartEmbeddableFactory = (
               api.viewType$,
               api.showDistributions$
             );
+
+          const timeRange = useObservable(appliedTimeRange$, undefined);
           const globalQuery = useObservable(query$, undefined);
           const globalFilters = useObservable(filters$, undefined);
           const lastReloadRequestTime = useObservable(reload$, Date.now());
@@ -304,6 +313,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 showPreviewByDefault={showPreviewByDefault}
                 onAddFilter={onAddFilter}
                 resetData$={reset$}
+                timeRange={timeRange}
               />
             </EuiFlexItem>
           );

@@ -211,8 +211,8 @@ export function isValidFieldStats(arg: unknown): arg is FieldStats {
 export interface FieldStatsCommonRequestParams {
   index: string;
   timeFieldName?: string;
-  earliestMs?: number | undefined;
-  latestMs?: number | undefined;
+  earliestMs?: number | string | undefined;
+  latestMs?: number | string | undefined;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   intervalMs?: number;
   query: estypes.QueryDslQueryContainer;

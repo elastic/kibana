@@ -20,6 +20,7 @@ import {
   SmartFieldFallbackTooltip,
 } from '@kbn/unified-field-list';
 import type { DataVisualizerTableItem } from '@kbn/data-visualizer-plugin/public/application/common/components/stats_table/types';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 
@@ -157,8 +158,8 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
         dataView={dataView}
         savedSearch={savedSearch}
         filters={filters}
-        esqlQuery={isEsqlMode ? query : undefined}
-        query={isEsqlMode ? undefined : query}
+        esqlQuery={isEsqlMode && isOfAggregateQueryType(query) ? query : undefined}
+        query={query}
         visibleFieldNames={visibleFields}
         sessionId={searchSessionId}
         totalDocuments={totalDocuments}

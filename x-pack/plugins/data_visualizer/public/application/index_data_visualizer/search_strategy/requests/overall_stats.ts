@@ -27,8 +27,8 @@ export const checkAggregatableFieldsExistRequest = (
   aggregatableFields: OverallStatsSearchStrategyParams['aggregatableFields'],
   samplingOption: SamplingOption,
   timeFieldName: string | undefined,
-  earliestMs?: number,
-  latestMs?: number,
+  earliestMs?: number | string,
+  latestMs?: number | string,
   datafeedConfig?: estypes.MlDatafeed,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.SearchRequest => {
@@ -217,8 +217,8 @@ export const checkNonAggregatableFieldExistsRequest = (
   query: Query['query'],
   field: string,
   timeFieldName: string | undefined,
-  earliestMs: number | undefined,
-  latestMs: number | undefined,
+  earliestMs: number | string | undefined,
+  latestMs: number | string | undefined,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.SearchRequest => {
   const index = dataViewTitle;
@@ -256,8 +256,8 @@ export const getSampleOfDocumentsForNonAggregatableFields = (
   dataViewTitle: string,
   query: Query['query'],
   timeFieldName: string | undefined,
-  earliestMs: number | undefined,
-  latestMs: number | undefined,
+  earliestMs: number | string | undefined,
+  latestMs: number | string | undefined,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.SearchRequest => {
   const index = dataViewTitle;

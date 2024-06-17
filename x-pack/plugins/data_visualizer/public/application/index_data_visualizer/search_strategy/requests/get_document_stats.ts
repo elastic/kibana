@@ -229,12 +229,11 @@ export const processDocumentCountStats = (
     buckets[time] = dataForTime.doc_count;
     totalCount += dataForTime.doc_count;
   });
-
   return {
     interval: params.intervalMs,
     buckets,
-    timeRangeEarliest: params.earliest,
-    timeRangeLatest: params.latest,
+    timeRangeEarliest: typeof params.earliest === 'number' ? params.earliest : undefined,
+    timeRangeLatest: typeof params.latest === 'number' ? params.latest : undefined,
     totalCount,
   };
 };

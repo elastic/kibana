@@ -11,7 +11,6 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
@@ -114,7 +113,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
+      <>
         <EuiForm>
           {initialInput?.viewType === FieldStatsInitializerViewType.ESQL && !isEsqlEnabled ? (
             <>
@@ -163,7 +162,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
             />
           ) : null}
         </EuiForm>
-      </EuiFlyoutBody>
+      </>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

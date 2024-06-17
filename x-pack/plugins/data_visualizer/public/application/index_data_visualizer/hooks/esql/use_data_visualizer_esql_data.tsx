@@ -644,7 +644,7 @@ export const useESQLDataVisualizerData = (
   );
 
   useEffect(() => {
-    if (previousQuery?.esql !== input?.esqlQuery) {
+    if (previousQuery?.esql !== input?.esqlQuery?.esql) {
       resetData();
       setDelayedESQLQuery(input?.esqlQuery);
     }
