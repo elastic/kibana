@@ -14,7 +14,6 @@ import {
   filterSchema,
   durationSchema,
   identityFieldsSchema,
-  BUILT_IN_DEFINITION_ALLOWED_INDICES,
 } from './common';
 
 export const entityDefinitionSchema = z.object({
@@ -56,19 +55,5 @@ export const entityDefinitionSchema = z.object({
     })
   ),
 });
-
-export const builtInEntityDefinitionSchema = entityDefinitionSchema.merge(
-  z.object({
-    indexPatterns: z
-      .array(z.string())
-      .refine(
-        (patterns) =>
-          patterns.every((pattern) => BUILT_IN_DEFINITION_ALLOWED_INDICES.includes(pattern)),
-        {
-          message: `Some index patterns provided in the built in definition are not supported. List of supported patterns: (${BUILT_IN_DEFINITION_ALLOWED_INDICES})`,
-        }
-      ),
-  })
-);
 
 export type EntityDefinition = z.infer<typeof entityDefinitionSchema>;

@@ -15,14 +15,6 @@ export enum EntityType {
   node = 'node',
 }
 
-export const BUILT_IN_DEFINITION_ALLOWED_INDICES = [
-  'apm-*',
-  'logs-*',
-  'metrics-*',
-  'filebeat*',
-  'metricbeat*',
-];
-
 export const arrayOfStringsSchema = z.array(z.string());
 
 export const entityTypeSchema = z.nativeEnum(EntityType);
