@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: Machine learning APIs
   description: Kibana APIs for the machine learning feature
@@ -14,8 +14,11 @@ servers:
 paths:
   /api/ml/saved_objects/sync:
     get:
-      summary: Synchronizes Kibana saved objects for machine learning jobs and trained models.
-      description: This API runs automatically when you start Kibana and periodically thereafter.
+      summary: Sync saved objects in the default space
+      description: >
+        Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space.
+        You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
+        This API runs automatically when you start Kibana and periodically thereafter.
       operationId: mlSync
       tags:
         - ml
@@ -40,8 +43,9 @@ paths:
 
   /s/{spaceId}/api/ml/saved_objects/sync:
     get:
-      summary: Synchronizes Kibana saved objects for machine learning jobs and trained models.
+      summary: Sync saved objects
       description: >
+        Synchronizes Kibana saved objects for machine learning jobs and trained models.
         You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
         This API runs automatically when you start Kibana and periodically thereafter.
       operationId: mlSyncWithSpaceId
