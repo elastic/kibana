@@ -20,7 +20,7 @@ describe('When semantic_text is enabled', () => {
     getItemSpy = jest.spyOn(Storage.prototype, 'getItem');
     setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
     const setup = registerTestBed(SemanticTextBanner, {
-      defaultProps: { isSemanticTextEnabled: true, hasMLPermissions: true },
+      defaultProps: { isSemanticTextEnabled: true, isPlatinumLicense: true },
       memoryRouter: { wrapComponent: false },
     });
     const testBed = setup();
@@ -58,7 +58,7 @@ describe('When semantic_text is enabled', () => {
 
 describe('when user does not have ML permissions', () => {
   const setupWithNoMlPermission = registerTestBed(SemanticTextBanner, {
-    defaultProps: { isSemanticTextEnabled: true, hasMLPermissions: false },
+    defaultProps: { isSemanticTextEnabled: true, isPlatinumLicense: false },
     memoryRouter: { wrapComponent: false },
   });
 

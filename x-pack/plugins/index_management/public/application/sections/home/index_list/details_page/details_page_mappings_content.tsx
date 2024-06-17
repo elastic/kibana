@@ -27,6 +27,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { Index } from '../../../../../../common';
 import { useDetailsPageMappingsModelManagement } from '../../../../../hooks/use_details_page_mappings_model_management';
 import { useAppContext } from '../../../../app_context';
@@ -69,10 +70,20 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       getUrlForApp,
       application: { capabilities },
     },
-    plugins: { ml },
+    plugins: { ml, licensing },
     url,
     config,
   } = useAppContext();
+
+  const [isPlatinumLicense, setIsPlatinumLicense] = useState<boolean>(false);
+  useEffect(() => {
+    const subscription = licensing?.license$.subscribe((license: ILicense) => {
+      setIsPlatinumLicense(license.isActive && license.hasAtLeast('platinum'));
+    });
+
+    return () => subscription?.unsubscribe();
+  }, [licensing]);
+
   const { enableSemanticText: isSemanticTextEnabled } = config;
   const [errorsInTrainedModelDeployment, setErrorsInTrainedModelDeployment] = useState<string[]>(
     []
@@ -81,7 +92,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
 
   const semanticTextInfo = {
-    isSemanticTextEnabled: isSemanticTextEnabled && hasMLPermissions,
+    isSemanticTextEnabled: isSemanticTextEnabled && hasMLPermissions && isPlatinumLicense,
     indexName: index.name,
     ml,
     setErrorsInTrainedModelDeployment,
@@ -493,10 +504,12 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexItem grow={true}>
-            <SemanticTextBanner
-              isSemanticTextEnabled={isSemanticTextEnabled}
-              hasMLPermissions={hasMLPermissions}
-            />
+            {hasMLPermissions && (
+              <SemanticTextBanner
+                isSemanticTextEnabled={isSemanticTextEnabled}
+                isPlatinumLicense={isPlatinumLicense}
+              />
+            )}
           </EuiFlexItem>
           {errorSavingMappings}
           {isAddingFields && (

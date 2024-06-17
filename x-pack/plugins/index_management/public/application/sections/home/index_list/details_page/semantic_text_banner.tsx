@@ -11,7 +11,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 interface SemanticTextBannerProps {
   isSemanticTextEnabled: boolean;
-  hasMLPermissions?: boolean;
+  isPlatinumLicense?: boolean;
 }
 
 const defaultLicenseMessage = (
@@ -50,7 +50,7 @@ const platinumLicenseMessage = (
 
 export function SemanticTextBanner({
   isSemanticTextEnabled,
-  hasMLPermissions = false,
+  isPlatinumLicense = false,
 }: SemanticTextBannerProps) {
   const [isSemanticTextBannerDisplayable, setIsSemanticTextBannerDisplayable] =
     useLocalStorage<boolean>('semantic-text-banner-display', true);
@@ -61,7 +61,7 @@ export function SemanticTextBanner({
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiText size="m" color="success">
-              {hasMLPermissions ? platinumLicenseMessage : defaultLicenseMessage}
+              {isPlatinumLicense ? platinumLicenseMessage : defaultLicenseMessage}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
