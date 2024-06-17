@@ -38,7 +38,7 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
 
     this.projectName = projectName ?? 'default';
     this.exampleId = exampleId;
-    this.logger = logger;
+    this.logger = logger.get('apmTracer');
   }
 
   protected async persistRun(_run: Run): Promise<void> {}
