@@ -489,6 +489,9 @@ describe('edit package policy page', () => {
       jest
         .spyOn(ExperimentalFeaturesService, 'get')
         .mockReturnValue({ enableReusableIntegrationPolicies: true });
+      (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValue({
+        data: { results: { total: 0 } },
+      });
     });
 
     it('should create agent policy with sys monitoring when new hosts is selected', async () => {
@@ -511,6 +514,9 @@ describe('edit package policy page', () => {
         fireEvent.click(renderResult.getByText(/Save integration/).closest('button')!);
       });
 
+      await act(async () => {
+        fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
+      });
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
         {
           description: '',
