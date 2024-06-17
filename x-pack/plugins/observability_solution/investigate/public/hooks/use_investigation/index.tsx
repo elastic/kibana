@@ -427,9 +427,20 @@ function useInvestigationWithoutContext({
 
   const unlockItem = useCallback(
     async (id: string) => {
-      return updateItem(id, async () => ({ locked: false }));
+      return updateItem(id, async (prev) => {
+        return regenerateItem({
+          user: user!,
+          widget: {
+            ...prev,
+            locked: false,
+          },
+          signal: new AbortController().signal,
+          globalWidgetParameters: currentRevision.parameters,
+          widgetDefinitions,
+        });
+      });
     },
-    [updateItem]
+    [updateItem, currentRevision.parameters, user, widgetDefinitions]
   );
 
   const setItemParameters = useCallback(
@@ -449,9 +460,9 @@ function useInvestigationWithoutContext({
 
   const setGlobalParameters = useCallback(
     async (nextParameters: GlobalWidgetParameters) => {
-      updateInvestigation((prevInvestigation) => {
+      updateInvestigation((prevRevision) => {
         Promise.all(
-          prevInvestigation.items.map((item) => {
+          prevRevision.items.map((item) => {
             if (item.locked) {
               return item;
             }
@@ -464,11 +475,11 @@ function useInvestigationWithoutContext({
             });
           })
         ).then((allUpdatedItems) => {
-          updateInvestigation((_prevInvestigation) => {
+          updateInvestigation((_prevRevision) => {
             const updatedItemsById = keyBy(allUpdatedItems, (item) => item.id);
             return {
-              ...prevInvestigation,
-              items: _prevInvestigation.items.map((item) => ({
+              ..._prevRevision,
+              items: _prevRevision.items.map((item) => ({
                 ...item,
                 ...updatedItemsById[item.id],
                 loading: false,
@@ -478,13 +489,14 @@ function useInvestigationWithoutContext({
         });
 
         return {
-          ...prevInvestigation,
-          items: prevInvestigation.items.map((item) => {
+          ...prevRevision,
+          items: prevRevision.items.map((item) => {
             if (item.locked) {
               return item;
             }
             return { ...item };
           }),
+          parameters: nextParameters,
         };
       });
     },

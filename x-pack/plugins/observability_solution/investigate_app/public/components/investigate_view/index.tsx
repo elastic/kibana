@@ -189,6 +189,10 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
 
   const [searchBarFocused, setSearchBarFocused] = useState(false);
 
+  useEffect(() => {
+    setGlobalParameters(globalWidgetParameters);
+  }, [globalWidgetParameters, setGlobalParameters]);
+
   return (
     <MiniMapContextProvider container={scrollableContainer}>
       <EuiFlexGroup direction="row" className={containerClassName}>
