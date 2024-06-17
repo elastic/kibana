@@ -19,6 +19,8 @@ export type FieldListSerializedStateState = SerializedTitles & {
   selectedFieldNames?: string[];
 };
 
+export type FieldListRuntimeState = FieldListSerializedStateState;
+
 export type FieldListApi = DefaultEmbeddableApi<
   FieldListSerializedStateState,
   FieldListSerializedStateState
