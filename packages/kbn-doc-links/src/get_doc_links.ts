@@ -421,6 +421,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingSourceFields: `${ELASTICSEARCH_DOCS}mapping-source-field.html`,
       mappingSourceFieldsDisable: `${ELASTICSEARCH_DOCS}mapping-source-field.html#disable-source-field`,
       mappingStore: `${ELASTICSEARCH_DOCS}mapping-store.html`,
+      mappingSubobjects: `${ELASTICSEARCH_DOCS}subobjects.html`,
       mappingTermVector: `${ELASTICSEARCH_DOCS}term-vector.html`,
       mappingTypesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
       migrateIndexAllocationFilters: `${ELASTICSEARCH_DOCS}migrate-index-allocation-filters.html`,
