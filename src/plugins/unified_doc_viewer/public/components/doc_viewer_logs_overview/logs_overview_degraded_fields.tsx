@@ -20,7 +20,6 @@ import {
   EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DegradedField } from '@kbn/dataset-quality-plugin/common/api_types';
 import { orderBy } from 'lodash';
 
 type Direction = 'asc' | 'desc';
@@ -29,6 +28,11 @@ type SortField = 'issue' | 'values';
 const DEFAULT_SORT_FIELD = 'issue';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_ROWS_PER_PAGE = 5;
+
+interface DegradedField {
+  issue: string;
+  values: string[];
+}
 
 interface TableOptions {
   page: {
@@ -102,7 +106,7 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
 
   const onTableChange = (options: {
     page: { index: number; size: number };
-    sort?: { field: keyof DegradedField; direction: Direction };
+    sort?: { field: string; direction: Direction };
   }) => {
     setTableOptions({
       page: {
@@ -196,7 +200,9 @@ const getDegradedFieldsColumns = (): Array<EuiBasicTableColumn<DegradedField>> =
   },
 ];
 
-const getDataFormattedForTable = (ignoredFieldValues: Record<string, string[]>) => {
+const getDataFormattedForTable = (
+  ignoredFieldValues: Record<string, string[]>
+): DegradedField[] => {
   return Object.entries(ignoredFieldValues).map(([field, values]) => ({
     issue: field,
     values,
