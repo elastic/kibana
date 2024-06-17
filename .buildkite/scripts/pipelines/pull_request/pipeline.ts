@@ -147,6 +147,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
       GITHUB_PR_LABELS.includes('ci:project-deploy-security')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));
+    } else if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_project.yml'));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
