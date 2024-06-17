@@ -9,4 +9,4 @@
 export { showSettings } from './show_settings';
 export { addFromLibrary } from './add_panel_from_library';
 export { addOrUpdateEmbeddable } from './panel_management';
-export { runSaveAs, runQuickSave, runClone } from './run_save_functions';
+export { runQuickSave, runInteractiveSave } from './run_save_functions';

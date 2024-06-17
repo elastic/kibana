@@ -28,7 +28,6 @@ import { useHostIsolationAction } from '../host_isolation/use_host_isolation_act
 import { getFieldValue } from '../host_isolation/helpers';
 import type { Status } from '../../../../common/api/detection_engine';
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
 import { useKibana } from '../../../common/lib/kibana';
@@ -76,7 +75,6 @@ export const TakeActionDropdown = React.memo(
     onOsqueryClick,
     scopeId,
   }: TakeActionDropdownProps) => {
-    const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
     const { loading: endpointPrivilegesLoading, canWriteEventFilters } =
       useUserPrivileges().endpointPrivileges;
 
@@ -267,7 +265,7 @@ export const TakeActionDropdown = React.memo(
 
     const items: AlertTableContextMenuItem[] = useMemo(
       () => [
-        ...(tGridEnabled ? addToCaseActionItems : []),
+        ...addToCaseActionItems,
         ...alertsActionItems,
         ...hostIsolationActionItems,
         ...endpointResponseActionsConsoleItems,
@@ -275,7 +273,6 @@ export const TakeActionDropdown = React.memo(
         ...investigateInTimelineActionItems,
       ],
       [
-        tGridEnabled,
         addToCaseActionItems,
         alertsActionItems,
         hostIsolationActionItems,

@@ -15,6 +15,20 @@ bundle({
   sourceGlob: join(SECURITY_SOLUTION_ROOT, 'common/api/**/*.schema.yaml'),
   outputFilePath: join(
     SECURITY_SOLUTION_ROOT,
-    'target/openapi/security_solution-{version}.bundled.schema.yaml'
+    'target/openapi/serverless/security_solution-{version}.bundled.schema.yaml'
   ),
+  options: {
+    includeLabels: ['serverless'],
+  },
+});
+
+bundle({
+  sourceGlob: join(SECURITY_SOLUTION_ROOT, 'common/api/**/*.schema.yaml'),
+  outputFilePath: join(
+    SECURITY_SOLUTION_ROOT,
+    'target/openapi/ess/security_solution-{version}.bundled.schema.yaml'
+  ),
+  options: {
+    includeLabels: ['ess'],
+  },
 });

@@ -9,9 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import type { ESQLColumn, ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
+import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
-import { ESQL_LATEST_VERSION } from '../../constants';
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
   return columns.map(({ name, type }) => {
@@ -41,7 +40,6 @@ export async function getESQLQueryColumnsRaw({
         {
           params: {
             query: `${esqlQuery} | limit 0`,
-            version: ESQL_LATEST_VERSION,
           },
         },
         {
@@ -51,7 +49,7 @@ export async function getESQLQueryColumnsRaw({
       )
     );
 
-    return (response.rawResponse as unknown as ESQLSearchReponse).columns ?? [];
+    return (response.rawResponse as unknown as ESQLSearchResponse).columns ?? [];
   } catch (error) {
     throw new Error(
       i18n.translate('esqlUtils.columnsErrorMsg', {
@@ -76,7 +74,6 @@ export async function getESQLQueryColumns({
   try {
     const rawColumns = await getESQLQueryColumnsRaw({ esqlQuery, search, signal });
     const columns = formatESQLColumns(rawColumns) ?? [];
-
     return columns;
   } catch (error) {
     throw new Error(
@@ -103,7 +100,7 @@ export async function getESQLResults({
   filter?: unknown;
   dropNullColumns?: boolean;
 }): Promise<{
-  response: ESQLSearchReponse;
+  response: ESQLSearchResponse;
   params: ESQLSearchParams;
 }> {
   const result = await lastValueFrom(
@@ -112,7 +109,6 @@ export async function getESQLResults({
         params: {
           ...(filter ? { filter } : {}),
           query: esqlQuery,
-          version: ESQL_LATEST_VERSION,
           ...(dropNullColumns ? { dropNullColumns: true } : {}),
         },
       },
@@ -123,7 +119,7 @@ export async function getESQLResults({
     )
   );
   return {
-    response: result.rawResponse as unknown as ESQLSearchReponse,
+    response: result.rawResponse as unknown as ESQLSearchResponse,
     params: result.requestParams as unknown as ESQLSearchParams,
   };
 }

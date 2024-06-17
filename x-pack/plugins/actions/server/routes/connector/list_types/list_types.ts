@@ -26,7 +26,7 @@ export const listTypesRoute = (
       path: `${BASE_ACTION_API_PATH}/connector_types`,
       options: {
         access: 'public',
-        description: `Get connector types`,
+        summary: `Get connector types`,
       },
       validate: {
         query: connectorTypesQuerySchemaV1,

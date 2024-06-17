@@ -17,10 +17,11 @@ export function getSyncJobDuration(syncJob: ConnectorSyncJob): moment.Duration |
 
 export function durationToText(input?: moment.Duration): string {
   if (input) {
+    const days = input.days();
     const hours = input.hours();
     const minutes = input.minutes();
     const seconds = input.seconds();
-    return `${hours}h ${minutes}m ${seconds}s`;
+    return `${hours + days * 24}h ${minutes}m ${seconds}s`;
   } else {
     return '--';
   }

@@ -230,7 +230,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
           <h2 data-test-subj="title">
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateForm.stepReview.stepTitle"
-              defaultMessage="Review details for '{templateName}'"
+              defaultMessage="Review details for ''{templateName}''"
               values={{ templateName: name }}
             />
           </h2>

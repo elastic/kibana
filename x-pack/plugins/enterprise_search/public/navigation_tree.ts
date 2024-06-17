@@ -80,7 +80,6 @@ export const getNavigationTreeDefinition = ({
       map(({ indices, searchApps, collections }) => {
         const navTree: NavigationTreeDefinition = {
           body: [
-            { type: 'recentlyAccessed' },
             {
               breadcrumbStatus: 'hidden',
               children: [
@@ -208,6 +207,13 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
                 {
+                  children: [{ link: 'searchInferenceEndpoints' }],
+                  id: 'relevance',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
+                    defaultMessage: 'Relevance',
+                  }),
+                },
+                {
                   children: [
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
@@ -242,6 +248,7 @@ export const getNavigationTreeDefinition = ({
             },
           ],
           footer: [
+            { type: 'recentlyAccessed' },
             {
               breadcrumbStatus: 'hidden',
               children: [

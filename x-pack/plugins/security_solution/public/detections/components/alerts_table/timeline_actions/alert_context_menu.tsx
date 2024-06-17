@@ -152,8 +152,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       refetchQuery([timelineQuery]);
     } else {
       refetchQuery(globalQuery);
-      if (refetch) refetch();
     }
+
+    if (refetch) refetch();
   }, [scopeId, globalQuery, timelineQuery, refetch]);
 
   const ruleIndex =
@@ -426,10 +427,15 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     return null;
   }, [maybeRule]);
 
+  const ruleType = enrichedAlert?.['kibana.alert.rule.parameters']?.type;
+  const isAlertWithoutIndex = ruleType === 'esql' || ruleType === 'machine_learning';
+  const isWaitingForIndexOrDataView =
+    !isAlertWithoutIndex && memoRuleIndices == null && memoDataViewId == null;
+
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
     enrichedAlert == null ||
-    (memoRuleIndices == null && memoDataViewId == null);
+    isWaitingForIndexOrDataView;
 
   if (isLoading || isRuleLoading) return null;
 

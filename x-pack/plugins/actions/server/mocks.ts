@@ -35,6 +35,7 @@ const createSetupMock = () => {
     getActionsHealth: jest.fn(),
     getActionsConfigurationUtilities: jest.fn(),
     setEnabledConnectorTypes: jest.fn(),
+    isActionTypeEnabled: jest.fn(),
   };
   return mock;
 };

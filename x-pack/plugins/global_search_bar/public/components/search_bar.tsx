@@ -18,6 +18,7 @@ import {
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
 } from '@elastic/eui';
+import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
@@ -70,6 +71,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
   const [showAppend, setShowAppend] = useState<boolean>(true);
   const UNKNOWN_TAG_ID = '__unknown__';
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (initialLoad) {
@@ -125,7 +127,9 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           searchSubscription.current = null;
         }
 
+        setIsLoading(true);
         const suggestions = loadSuggestions(searchValue.toLowerCase());
+        setIsLoading(false);
 
         let aggregatedResults: GlobalSearchResult[] = [];
         if (searchValue.length !== 0) {
@@ -151,7 +155,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         // so the SearchOption won't highlight anything if only one call is fired
         // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
         setSearchTerm(rawParams.term ?? '');
-
+        setIsLoading(true);
         searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
           next: ({ results }) => {
             if (searchValue.length > 0) {
@@ -168,11 +172,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
             setOptions(aggregatedResults, suggestions, searchParams.tags);
           },
           error: (err) => {
+            setIsLoading(false);
             // Not doing anything on error right now because it'll either just show the previous
             // results or empty results which is basically what we want anyways
             reportEvent.error({ message: err, searchValue });
           },
-          complete: () => {},
+          complete: () => {
+            setIsLoading(false);
+          },
         });
       }
     },
@@ -198,7 +205,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   );
 
   const onChange = useCallback(
-    (selection: EuiSelectableTemplateSitewideOption[]) => {
+    (selection: EuiSelectableTemplateSitewideOption[], event: EuiSelectableOnChangeEvent) => {
       let selectedRank: number | null = null;
       const selected = selection.find(({ checked }, rank) => {
         const isChecked = checked === 'on';
@@ -249,7 +256,13 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         console.log('Error trying to track searchbar metrics', err);
       }
 
-      navigateToUrl(url);
+      if (event.shiftKey) {
+        window.open(url);
+      } else if (event.ctrlKey || event.metaKey) {
+        window.open(url, '_blank');
+      } else {
+        navigateToUrl(url);
+      }
 
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {
@@ -313,6 +326,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   return (
     <EuiSelectableTemplateSitewide
+      isLoading={isLoading}
       isPreFiltered
       onChange={onChange}
       options={options}

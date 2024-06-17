@@ -30,10 +30,9 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
         >
           1
            
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="more not shown"
             id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
-            values={Object {}}
           />
         </EuiTextColor>
       </p>

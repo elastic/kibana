@@ -123,7 +123,9 @@ export const cumulativeSumOperation: OperationDefinition<
         return dataLayerErrors.join(', ');
       }
     }
-    return checkForDateHistogram(layer, opName)?.join(', ');
+    return checkForDateHistogram(layer, opName)
+      .map((e) => e.message)
+      .join(', ');
   },
   filterable: true,
   quickFunctionDocumentation: i18n.translate(
