@@ -24,11 +24,9 @@ import {
 export class Session {
   readonly cookie;
   readonly email;
-  readonly fullname;
-  constructor(cookie: Cookie, email: string, fullname: string) {
+  constructor(cookie: Cookie, email: string) {
     this.cookie = cookie;
     this.email = email;
-    this.fullname = fullname;
   }
 
   getCookieValue() {
@@ -239,7 +237,7 @@ export const finishSAMLHandshake = async ({
   );
 };
 
-const getSecurityProfile = async ({
+export const getSecurityProfile = async ({
   kbnHost,
   cookie,
   log,
@@ -274,8 +272,7 @@ export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => 
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion, log);
   const samlResponse = await createSAMLResponse({ location, ecSession, email, kbnHost, log });
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, sid, log });
-  const userProfile = await getSecurityProfile({ kbnHost, cookie, log });
-  return new Session(cookie, email, userProfile.full_name);
+  return new Session(cookie, email);
 };
 
 export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => {
@@ -288,5 +285,5 @@ export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => 
     roles: [role],
   });
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, log });
-  return new Session(cookie, email, fullname);
+  return new Session(cookie, email);
 };

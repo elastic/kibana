@@ -696,6 +696,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     lightbulb: {
       enabled: false,
     },
+    fixedOverflowWidgets: true,
     readOnly:
       isLoading ||
       isDisabled ||
