@@ -853,10 +853,10 @@ async function getExpressionSuggestionsByType(
         const policies = await getPolicies();
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
-        const indices = getSourcesFromCommands(commands, 'index');
+        const index = getSourcesFromCommands(commands, 'index');
         // This is going to be empty for simple indices, and not empty for integrations
-        if (indices.length === 1 && indices[0].text) {
-          const source = indices[0].text.replace(EDITOR_MARKER, '');
+        if (index && index.text) {
+          const source = index.text.replace(EDITOR_MARKER, '');
           const dataSourcesList = await getDataSourcesList();
           const dataSource = dataSourcesList.find(({ name }) => name === source);
           const newDefinitions = buildSourcesDefinitions(

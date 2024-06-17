@@ -21,6 +21,16 @@ import { getParamAtPosition } from './helper';
 import { nonNullable } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 
+interface Integration {
+  name: string;
+  hidden: boolean;
+  title?: string;
+  dataStreams: Array<{
+    name: string;
+    title?: string;
+  }>;
+}
+
 const triggerCharacters = [',', '(', '=', ' '];
 
 const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
@@ -54,7 +64,7 @@ const indexes = ([] as Array<{ name: string; hidden: boolean; suggestedAs?: stri
   }))
 );
 
-const integrations = ['nginx', 'k8s'].map((name) => ({
+const integrations: Integration[] = ['nginx', 'k8s'].map((name) => ({
   name,
   hidden: false,
   title: `integration-${name}`,

@@ -67,5 +67,7 @@ export function getQueryForFields(queryString: string, commands: ESQLCommand[]) 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
   const fromCommand = commands.find(({ name }) => name === 'from');
   const args = (fromCommand?.args ?? []) as ESQLSource[];
-  return args.filter((arg) => arg.sourceType === sourceType);
+  const sources = args.filter((arg) => arg.sourceType === sourceType);
+
+  return sources.length ? sources[0] : undefined;
 }
