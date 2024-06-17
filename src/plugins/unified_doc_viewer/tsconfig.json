@@ -31,7 +31,6 @@
     "@kbn/ui-theme",
     "@kbn/discover-shared-plugin",
     "@kbn/fields-metadata-plugin",
-    "@kbn/dataset-quality-plugin"
   ],
   "exclude": [
     "target/**/*",
