@@ -92,21 +92,22 @@ function set_in_legacy_vault() {
   shift
   fields=("$@")
 
-  OLD_VAULT_ADDR=$VAULT_ADDR
+  VAULT_ADDR_BACKUP=$VAULT_ADDR
 
   VAULT_ROLE_ID="$(get_vault_role_id)"
   VAULT_SECRET_ID="$(get_vault_secret_id)"
   export VAULT_ADDR=$LEGACY_VAULT_ADDR
 
-  VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-  retry 5 30 vault login -no-print "$VAULT_TOKEN"
+  VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+  vault login -no-print "$VAULT_TOKEN"
 
   set +e
-  vault_set "$key_path" "${fields[@]}"
+  # shellcheck disable=SC2068
+  vault write "secret/kibana-issues/dev/$key_path" ${fields[@]}
   EXIT_CODE=$?
   set -e
 
-  export VAULT_ADDR=$OLD_VAULT_ADDR
+  export VAULT_ADDR=$VAULT_ADDR_BACKUP
 
   return $EXIT_CODE
 }
