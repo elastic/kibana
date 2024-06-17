@@ -140,10 +140,14 @@ export const ReactControlExample = ({
   // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
   const {
     loading,
-    value: dataViews,
+    value: dataView,
     error,
   } = useAsync(async () => {
-    return await dataViewsService.find('kibana_sample_data_logs');
+    const dataViews = await dataViewsService.find('Kibana Sample Data Logs');
+    if (dataViews.length === 0) {
+      throw new Error('Unable to find "Kibana Sample Data Logs" data view. Install "Sample web logs" to run example');
+    }
+    return dataViews[0];
   }, []);
 
   useEffect(() => {
@@ -158,13 +162,13 @@ export const ReactControlExample = ({
     };
   }, [dashboardApi, controlGroupApi]);
 
-  if (error || (!dataViews?.[0]?.id && !loading))
+  if (error)
     return (
       <EuiEmptyPrompt
         iconType="error"
         color="danger"
-        title={<h2>There was an error!</h2>}
-        body={<p>{error ? error.message : 'Please add at least one data view.'}</p>}
+        title={<h2>Error</h2>}
+        body={<p>error.message</p>}
       />
     );
 
@@ -238,12 +242,12 @@ export const ReactControlExample = ({
               {
                 name: `controlGroup_${searchControlId}:${SEARCH_CONTROL_TYPE}DataView`,
                 type: 'index-pattern',
-                id: dataViews?.[0].id!,
+                id: dataView?.id!,
               },
               {
                 name: `controlGroup_${rangeSliderControlId}:${RANGE_SLIDER_CONTROL_TYPE}DataView`,
                 type: 'index-pattern',
-                id: dataViews?.[0].id!,
+                id: dataView?.id!,
               },
             ],
           }),
