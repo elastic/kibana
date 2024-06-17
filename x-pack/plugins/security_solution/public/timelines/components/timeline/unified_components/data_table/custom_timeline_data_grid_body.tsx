@@ -36,6 +36,7 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
 };
 
 const emptyNotes: string[] = [];
+const DEFAULT_UDT_ROW_HEIGHT = 32;
 
 /**
  *
@@ -130,7 +131,7 @@ const CustomGridRow = styled.div.attrs<{
   width: fit-content;
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
   . euiDataGridRowCell--controlColumn {
-    height: ${(props: { $rowHeight: number }) => 32 + props.$rowHeight}px;
+    height: ${(props: { $rowHeight: number }) => DEFAULT_UDT_ROW_HEIGHT + props.$rowHeight}px;
   }
   .udt--customRow {
     border-radius: 0;
@@ -163,7 +164,7 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
 }))`
   display: flex;
   align-items: center;
-  height: ${(props: { $rowHeight: number }) => 32 + props.$rowHeight}px;
+  height: ${(props: { $rowHeight: number }) => DEFAULT_UDT_ROW_HEIGHT + props.$rowHeight}px;
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
     display: flex;
