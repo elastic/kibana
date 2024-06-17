@@ -10,7 +10,7 @@ import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 import { readEntityDiscoveryAPIKey, deleteEntityDiscoveryAPIKey } from '../../lib/auth';
 
-export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
+export function disableEntityDiscoveryKeyRoute<T extends RequestHandlerContext>({
   router,
   server,
 }: SetupRouteOptions<T>) {

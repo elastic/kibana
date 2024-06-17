@@ -20,7 +20,7 @@ import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 import { ERROR_API_KEY_SERVICE_DISABLED, ERROR_USER_NOT_AUTHORIZED } from '../../../common/errors';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 
-export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
+export function enableEntityDiscoveryKeyRoute<T extends RequestHandlerContext>({
   router,
   server,
 }: SetupRouteOptions<T>) {

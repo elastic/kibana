@@ -18,11 +18,14 @@ import { createEntityDefinitionRoute } from './entities/create';
 import { deleteEntityDefinitionRoute } from './entities/delete';
 import { resetEntityDefinitionRoute } from './entities/reset';
 import { getEntityDefinitionRoute } from './entities/get';
-import { checkEntityDiscoveryEnabledRoute } from './enablement/check';
-import { enableEntityDiscoveryRoute } from './enablement/enable';
-import { disableEntityDiscoveryRoute } from './enablement/disable';
+import { checkEntityDiscoveryKeyRoute } from './enablement/check';
+import { enableEntityDiscoveryKeyRoute } from './enablement/enable';
+import { disableEntityDiscoveryKeyRoute } from './enablement/disable';
 import { installBuiltinEntityDefinitionsRoute } from './enablement/install_builtin_definitions';
 import { uninstallBuiltinEntityDefinitionsRoute } from './enablement/uninstall_builtin_definitions';
+import { checkEntityDiscoveryEnabledRoute } from './entity_discovery/check';
+import { enableEntityDiscoveryRoute } from './entity_discovery/start';
+import { disableEntityDiscoveryRoute } from './entity_discovery/stop';
 
 export function setupRoutes<T extends RequestHandlerContext>(dependencies: SetupRouteOptions<T>) {
   pingRoute<T>(dependencies);
@@ -36,9 +39,12 @@ export function setupRoutes<T extends RequestHandlerContext>(dependencies: Setup
   deleteEntityDefinitionRoute<T>(dependencies);
   resetEntityDefinitionRoute<T>(dependencies);
   getEntityDefinitionRoute<T>(dependencies);
+  checkEntityDiscoveryKeyRoute<T>(dependencies);
+  enableEntityDiscoveryKeyRoute<T>(dependencies);
+  disableEntityDiscoveryKeyRoute<T>(dependencies);
+  checkEntityDiscoveryEnabledRoute<T>(dependencies);
   enableEntityDiscoveryRoute<T>(dependencies);
   disableEntityDiscoveryRoute<T>(dependencies);
-  checkEntityDiscoveryEnabledRoute<T>(dependencies);
   installBuiltinEntityDefinitionsRoute<T>(dependencies);
   uninstallBuiltinEntityDefinitionsRoute<T>(dependencies);
 }

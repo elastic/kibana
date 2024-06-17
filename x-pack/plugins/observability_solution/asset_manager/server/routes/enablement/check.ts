@@ -11,7 +11,7 @@ import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 import { ERROR_API_KEY_NOT_FOUND, ERROR_API_KEY_NOT_VALID } from '../../../common/errors';
 
-export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext>({
+export function checkEntityDiscoveryKeyRoute<T extends RequestHandlerContext>({
   router,
   server,
 }: SetupRouteOptions<T>) {
