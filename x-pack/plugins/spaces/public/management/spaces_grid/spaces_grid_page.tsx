@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -35,6 +36,7 @@ import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
+import { SpaceSolutionBadge } from '../../space_solution_badge';
 import type { SpacesManager } from '../../spaces_manager';
 import { ConfirmDeleteModal, UnauthorizedPrompt } from '../components';
 import { getEnabledFeatures } from '../lib/feature_utils';
@@ -233,7 +235,10 @@ export class SpacesGridPage extends Component<Props, State> {
   };
 
   public getColumnConfig() {
-    return [
+    // TODO use from https://github.com/elastic/kibana/pull/186178/files#diff-bbd1ade87fa29c63e1504ab5f48924a477882d2bf66e5a656c1b61ea6afb02efR67
+    const isSolutionNavEnabled = true;
+
+    const config: Array<EuiBasicTableColumn<Space>> = [
       {
         field: 'initials',
         name: '',
@@ -320,49 +325,63 @@ export class SpacesGridPage extends Component<Props, State> {
           return id;
         },
       },
-      {
-        name: i18n.translate('xpack.spaces.management.spacesGridPage.actionsColumnName', {
-          defaultMessage: 'Actions',
-        }),
-        actions: [
-          {
-            render: (record: Space) => (
-              <EuiButtonIcon
-                data-test-subj={`${record.name}-editSpace`}
-                aria-label={i18n.translate(
-                  'xpack.spaces.management.spacesGridPage.editSpaceActionName',
-                  {
-                    defaultMessage: `Edit {spaceName}.`,
-                    values: { spaceName: record.name },
-                  }
-                )}
-                color={'primary'}
-                iconType={'pencil'}
-                {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}
-              />
-            ),
-          },
-          {
-            available: (record: Space) => !isReservedSpace(record),
-            render: (record: Space) => (
-              <EuiButtonIcon
-                data-test-subj={`${record.name}-deleteSpace`}
-                aria-label={i18n.translate(
-                  'xpack.spaces.management.spacesGridPage.deleteActionName',
-                  {
-                    defaultMessage: `Delete {spaceName}.`,
-                    values: { spaceName: record.name },
-                  }
-                )}
-                color={'danger'}
-                iconType={'trash'}
-                onClick={() => this.onDeleteSpaceClick(record)}
-              />
-            ),
-          },
-        ],
-      },
     ];
+
+    if (isSolutionNavEnabled) {
+      config.push({
+        field: 'solution',
+        name: i18n.translate('xpack.spaces.management.spacesGridPage.solutionColumnName', {
+          defaultMessage: 'Solution View',
+        }),
+        sortable: true,
+        render: (solution?: Space['solution']) => <SpaceSolutionBadge solution={solution} />,
+      });
+    }
+
+    config.push({
+      name: i18n.translate('xpack.spaces.management.spacesGridPage.actionsColumnName', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          render: (record: Space) => (
+            <EuiButtonIcon
+              data-test-subj={`${record.name}-editSpace`}
+              aria-label={i18n.translate(
+                'xpack.spaces.management.spacesGridPage.editSpaceActionName',
+                {
+                  defaultMessage: `Edit {spaceName}.`,
+                  values: { spaceName: record.name },
+                }
+              )}
+              color={'primary'}
+              iconType={'pencil'}
+              {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}
+            />
+          ),
+        },
+        {
+          available: (record: Space) => !isReservedSpace(record),
+          render: (record: Space) => (
+            <EuiButtonIcon
+              data-test-subj={`${record.name}-deleteSpace`}
+              aria-label={i18n.translate(
+                'xpack.spaces.management.spacesGridPage.deleteActionName',
+                {
+                  defaultMessage: `Delete {spaceName}.`,
+                  values: { spaceName: record.name },
+                }
+              )}
+              color={'danger'}
+              iconType={'trash'}
+              onClick={() => this.onDeleteSpaceClick(record)}
+            />
+          ),
+        },
+      ],
+    });
+
+    return config;
   }
 
   private getEditSpacePath = (space: Space) => `edit/${encodeURIComponent(space.id)}`;

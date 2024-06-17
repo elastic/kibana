@@ -126,7 +126,8 @@ class SpacesMenuUI extends Component<Props> {
   }
 
   private getSpaceOptions = (): EuiSelectableOption[] => {
-    const canShowSolution = true;
+    // TODO use from https://github.com/elastic/kibana/pull/186178/files#diff-bbd1ade87fa29c63e1504ab5f48924a477882d2bf66e5a656c1b61ea6afb02efR67
+    const isSolutionNavEnabled = true;
 
     return this.props.spaces.map((space) => {
       return {
@@ -139,7 +140,7 @@ class SpacesMenuUI extends Component<Props> {
             <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />
           </Suspense>
         ),
-        ...(canShowSolution && { append: <SpaceSolutionBadge solution={space.solution} /> }),
+        ...(isSolutionNavEnabled && { append: <SpaceSolutionBadge solution={space.solution} /> }),
         checked: this.props.activeSpace?.id === space.id ? 'on' : undefined,
         'data-test-subj': `${space.id}-selectableSpaceItem`,
         className: 'selectableSpaceItem',
