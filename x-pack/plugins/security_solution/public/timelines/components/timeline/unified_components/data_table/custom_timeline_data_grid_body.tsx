@@ -130,7 +130,7 @@ const CustomGridRow = styled.div.attrs<{
   width: fit-content;
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
   . euiDataGridRowCell--controlColumn {
-    height: ${(props: { $rowHeight: number }) => props.$rowHeight}em;
+    height: ${(props: { $rowHeight: number }) => 32 + props.$rowHeight}px;
   }
   .udt--customRow {
     border-radius: 0;
@@ -163,7 +163,7 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
 }))`
   display: flex;
   align-items: center;
-  height: ${(props: { $rowHeight: number }) => props.$rowHeight}em;
+  height: ${(props: { $rowHeight: number }) => 32 + props.$rowHeight}px;
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
     display: flex;
@@ -210,7 +210,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     eventId = '',
     onToggleShowNotes,
     refetch,
-    rowHeight = 3,
+    rowHeight = 0,
   } = props;
   const dispatch = useDispatch();
   const { canShowRowRenderer } = useStatefulRowRenderer({
@@ -218,6 +218,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     rowRenderers: enabledRowRenderers,
   });
 
+  const additionalRowHeight = 16 * rowHeight;
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
    * which renders the row-renderer, notes and notes editor
@@ -257,10 +258,10 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   return (
     <CustomGridRow
       className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
-      $rowHeight={rowHeight}
+      $rowHeight={additionalRowHeight}
       key={rowIndex}
     >
-      <CustomGridRowCellWrapper className={eventTypeRowClassName} $rowHeight={rowHeight}>
+      <CustomGridRowCellWrapper className={eventTypeRowClassName} $rowHeight={additionalRowHeight}>
         {visibleColumns.map((column, colIndex) => {
           // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
           if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
