@@ -32,6 +32,8 @@ interface IndexFieldModel {
   semanticTextFields: SemanticField[];
 }
 
+const EMBEDDING_TYPE = { sparse_embedding: 'sparse_vector', text_embedding: 'dense_vector' };
+
 export const getModelIdFields = (fieldCapsResponse: FieldCapsResponse) => {
   const { fields } = fieldCapsResponse;
   return Object.keys(fields).reduce<Array<{ path: string; aggField: string }>>((acc, fieldKey) => {
@@ -185,9 +187,7 @@ export const parseFieldsCapabilities = (
           inferenceId: mappingProperties[field]?.inference_id,
           embeddingType:
             // @ts-ignore
-            mappingProperties[field]?.model_settings?.task_type === 'sparse_embedding'
-              ? 'sparse_vector'
-              : 'dense_vector',
+            EMBEDDING_TYPE[mappingProperties[field]?.model_settings?.task_type],
         };
       });
 

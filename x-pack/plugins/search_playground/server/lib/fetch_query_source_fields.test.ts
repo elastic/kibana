@@ -23,6 +23,9 @@ import {
   SPARSE_SEMANTIC_FIELD_MAPPINGS,
   DENSE_SPARSE_SAME_FIELD_NAME_CAPS,
   DENSE_SPARSE_SAME_FIELD_NAME_DOCS,
+  DENSE_SEMANTIC_FIELD_MAPPINGS,
+  DENSE_SEMANTIC_FIELD_FIELD_CAPS,
+  DENSE_SEMANTIC_FIELD_MAPPINGS_MISSING_TASK_TYPE,
 } from '../../__mocks__/fetch_query_source_fields.mock';
 import {
   fetchFields,
@@ -352,7 +355,7 @@ describe('fetch_query_source_fields', () => {
     });
 
     describe('semantic text support', () => {
-      it('should return the correct fields for semantic text', () => {
+      it('should return the correct fields for semantic text - sparse', () => {
         expect(
           parseFieldsCapabilities(SPARSE_SEMANTIC_FIELD_FIELD_CAPS, [
             {
@@ -377,6 +380,57 @@ describe('fetch_query_source_fields', () => {
             ],
             skipped_fields: 4,
             source_fields: ['infer_field', 'non_infer_field'],
+          },
+        });
+      });
+
+      it('should return the correct fields for semantic text - dense', () => {
+        expect(
+          parseFieldsCapabilities(DENSE_SEMANTIC_FIELD_FIELD_CAPS, [
+            {
+              index: 'test-index2',
+              // unused
+              doc: DENSE_INPUT_OUTPUT_ONE_INDEX[0],
+              mapping: DENSE_SEMANTIC_FIELD_MAPPINGS,
+            },
+          ])
+        ).toEqual({
+          'test-index2': {
+            bm25_query_fields: ['non_infer_field'],
+            dense_vector_query_fields: [],
+            elser_query_fields: [],
+            semantic_fields: [
+              {
+                embeddingType: 'dense_vector',
+                field: 'infer_field',
+                inferenceId: 'cohere',
+                indices: ['test-index2'],
+              },
+            ],
+            skipped_fields: 4,
+            source_fields: ['infer_field', 'non_infer_field'],
+          },
+        });
+      });
+
+      it('skips if the semantic_text field not setup correctly', () => {
+        expect(
+          parseFieldsCapabilities(DENSE_SEMANTIC_FIELD_FIELD_CAPS, [
+            {
+              index: 'test-index2',
+              // unused
+              doc: DENSE_INPUT_OUTPUT_ONE_INDEX[0],
+              mapping: DENSE_SEMANTIC_FIELD_MAPPINGS_MISSING_TASK_TYPE,
+            },
+          ])
+        ).toEqual({
+          'test-index2': {
+            bm25_query_fields: ['non_infer_field'],
+            dense_vector_query_fields: [],
+            elser_query_fields: [],
+            semantic_fields: [],
+            skipped_fields: 5, // increat by 1 for the semantic field
+            source_fields: ['non_infer_field'],
           },
         });
       });

@@ -80,6 +80,103 @@ export const SPARSE_SEMANTIC_FIELD_MAPPINGS = {
   },
 } as any as IndicesGetMappingResponse;
 
+export const DENSE_SEMANTIC_FIELD_MAPPINGS = {
+  'test-index2': {
+    mappings: {
+      properties: {
+        infer_field: {
+          type: 'semantic_text',
+          inference_id: 'cohere',
+          model_settings: {
+            task_type: 'text_embedding',
+            dimensions: 1536,
+            similarity: 'dot_product',
+          },
+        },
+        non_infer_field: {
+          type: 'text',
+        },
+      },
+    },
+  },
+} as any as IndicesGetMappingResponse;
+
+// for when semantic_text field hasn't been mapped with task_type
+// when theres no data / no inference has been performed in the field
+export const DENSE_SEMANTIC_FIELD_MAPPINGS_MISSING_TASK_TYPE = {
+  'test-index2': {
+    mappings: {
+      properties: {
+        infer_field: {
+          type: 'semantic_text',
+          inference_id: 'cohere',
+          model_settings: {
+            dimensions: 1536,
+            similarity: 'dot_product',
+          },
+        },
+        non_infer_field: {
+          type: 'text',
+        },
+      },
+    },
+  },
+} as any as IndicesGetMappingResponse;
+
+export const DENSE_SEMANTIC_FIELD_FIELD_CAPS = {
+  indices: ['test-index2'],
+  fields: {
+    infer_field: {
+      semantic_text: {
+        type: 'semantic_text',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'infer_field.inference.chunks.embeddings': {
+      sparse_vector: {
+        type: 'dense_vector',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    non_infer_field: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'infer_field.inference.chunks.text': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'infer_field.inference': {
+      object: {
+        type: 'object',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'infer_field.inference.chunks': {
+      nested: {
+        type: 'nested',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+  },
+};
+
 export const DENSE_SPARSE_SAME_FIELD_NAME_CAPS = {
   indices: ['cohere-embeddings', 'elser_index'],
   fields: {
