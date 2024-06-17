@@ -53,6 +53,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/rollup-deprecation-tooltip",
+    "@kbn/rollup-plugin",
   ],
   "exclude": ["target/**/*"]
 }
