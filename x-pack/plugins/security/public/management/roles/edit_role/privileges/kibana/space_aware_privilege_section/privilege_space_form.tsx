@@ -105,10 +105,18 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             <h2>
               <FormattedMessage
                 id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
-                defaultMessage="Kibana privileges"
+                defaultMessage="Assign role to space"
               />
             </h2>
           </EuiTitle>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.security.management.editRole.spacePrivilegeForm.modalHeadline"
+                defaultMessage="This role will be granted access to the following spaces"
+              />
+            </p>
+          </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiErrorBoundary>{this.getForm()}</EuiErrorBoundary>

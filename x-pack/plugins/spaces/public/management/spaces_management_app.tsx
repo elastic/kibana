@@ -71,6 +71,7 @@ export const spacesManagementApp = Object.freeze({
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
+              serverBasePath={http.basePath.serverBasePath}
               history={history}
               getUrlForApp={application.getUrlForApp}
               maxSpaces={config.maxSpaces}

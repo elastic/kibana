@@ -16,19 +16,21 @@ import {
   EuiTab,
   EuiTabs,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import type { FC } from 'react';
 
 import type { ApplicationStart, Capabilities, ScopedHistory } from '@kbn/core/public';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { Role } from '@kbn/security-plugin-types-common';
 
 import { TAB_ID_CONTENT, TAB_ID_FEATURES, TAB_ID_ROLES } from './constants';
 import { useTabs } from './hooks/use_tabs';
 import { ViewSpaceContextProvider } from './hooks/view_space_context_provider';
-import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
+import { getSpaceNavigationURL, type Space } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import type { SpacesManager } from '../../spaces_manager';
 
@@ -76,6 +78,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   const [activeSpaceId, setActiveSpaceId] = useState<string | null>(null);
   const selectedTabId = getSelectedTabId(_selectedTabId);
   const [space, setSpace] = useState<Space | null>(null);
+  const [userActiveSpace, setUserActiveSpace] = useState<Space | null>(null);
   const [features, setFeatures] = useState<KibanaFeature[] | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoadingSpace, setIsLoadingSpace] = useState(true);
@@ -94,26 +97,20 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     if (!spaceId) {
       return;
     }
-    const getSpace = async () => {
-      const result = await spacesManager.getSpace(spaceId);
-      if (!result) {
-        throw new Error(`Could not get resulting space by id ${spaceId}`);
-      }
-      setSpace(result);
+
+    const getSpaceInfo = async () => {
+      const [activeSpace, currentSpace] = await Promise.all([
+        spacesManager.getActiveSpace(),
+        spacesManager.getSpace(spaceId),
+      ]);
+
+      setSpace(currentSpace);
+      setUserActiveSpace(activeSpace);
       setIsLoadingSpace(false);
     };
 
-    getSpace().catch(handleApiError);
+    getSpaceInfo().catch(handleApiError);
   }, [spaceId, spacesManager]);
-
-  useEffect(() => {
-    const _getFeatures = async () => {
-      const result = await getFeatures();
-      setFeatures(result);
-      setIsLoadingFeatures(false);
-    };
-    _getFeatures().catch(handleApiError);
-  }, [getFeatures]);
 
   useEffect(() => {
     if (spaceId) {
@@ -127,12 +124,23 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     }
   }, [spaceId, spacesManager]);
 
+  useEffect(() => {
+    const _getFeatures = async () => {
+      const result = await getFeatures();
+      setFeatures(result);
+      setIsLoadingFeatures(false);
+    };
+    _getFeatures().catch(handleApiError);
+  }, [getFeatures]);
+
+  useEffect(() => {
+    if (space) {
+      onLoadSpace?.(space);
+    }
+  }, [onLoadSpace, space]);
+
   if (!space) {
     return null;
-  }
-
-  if (onLoadSpace) {
-    onLoadSpace(space);
   }
 
   if (isLoadingSpace || isLoadingFeatures || isLoadingRoles) {
@@ -146,27 +154,9 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   }
 
   const HeaderAvatar = () => {
-    return space.imageUrl != null ? (
+    return (
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazySpaceAvatar
-          space={{
-            ...space,
-            initials: space.initials ?? 'X',
-            name: undefined,
-          }}
-          size="xl"
-        />
-      </Suspense>
-    ) : (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazySpaceAvatar
-          space={{
-            ...space,
-            name: space.name ?? 'Y',
-            imageUrl: undefined,
-          }}
-          size="xl"
-        />
+        <LazySpaceAvatar space={space} size="xl" />
       </Suspense>
     );
   };
@@ -184,7 +174,9 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
           navigateToUrl(href);
         }}
       >
-        <EuiButtonEmpty iconType="gear">Settings</EuiButtonEmpty>
+        <EuiButtonEmpty iconType="gear">
+          <FormattedMessage id="viewSpace.spaceSettingsButton.label" defaultMessage="Settings" />
+        </EuiButtonEmpty>
       </a>
     ) : null;
   };
@@ -195,16 +187,22 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     }
 
     const { serverBasePath } = props;
-    const urlToSelectedSpace = addSpaceIdToPath(
-      serverBasePath,
-      space.id,
-      `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/view/${space.id}`
-    );
+
+    if (userActiveSpace?.id === space.id) {
+      return null;
+    }
 
     // use href to force full page reload (needed in order to change spaces)
     return (
-      <EuiButton iconType="merge" href={urlToSelectedSpace}>
-        Switch to this space
+      <EuiButton
+        iconType="merge"
+        href={getSpaceNavigationURL({ serverBasePath, spaceId: space.id })}
+        data-test-subj="spaceSwitcherButton"
+      >
+        <FormattedMessage
+          id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"
+          defaultMessage="Switch to this space"
+        />
       </EuiButton>
     );
   };
@@ -217,18 +215,24 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
       getUrlForApp={getUrlForApp}
     >
       <EuiText>
-        <EuiFlexGroup>
+        <EuiFlexGroup data-test-subj="spaceDetailsHeader">
           <EuiFlexItem grow={false}>
             <HeaderAvatar />
           </EuiFlexItem>
           <EuiFlexItem>
-            <h1>{space.name}</h1>
-            <p>
-              <small>
-                {space.description ??
-                  'Organize your saved objects and show related features for creating new content.'}
-              </small>
-            </p>
+            <EuiTitle size="l">
+              <h1 data-test-subj="spaceTitle">{space.name}</h1>
+            </EuiTitle>
+            <EuiText size="s">
+              <p>
+                {space.description ?? (
+                  <FormattedMessage
+                    id="xpack.spaces.management.spaceDetails.space.description"
+                    defaultMessage="Organize your saved objects and show related features for creating new content."
+                  />
+                )}
+              </p>
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center">
@@ -244,22 +248,26 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
 
         <EuiSpacer />
 
-        <EuiTabs>
-          {tabs.map((tab, index) => (
-            <EuiTab
-              key={index}
-              isSelected={tab.id === selectedTabId}
-              append={tab.append}
-              {...reactRouterNavigate(history, `/view/${encodeURIComponent(space.id)}/${tab.id}`)}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-
-        <EuiSpacer />
-
-        {selectedTabContent ?? null}
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiTabs>
+              {tabs.map((tab, index) => (
+                <EuiTab
+                  key={index}
+                  isSelected={tab.id === selectedTabId}
+                  append={tab.append}
+                  {...reactRouterNavigate(
+                    history,
+                    `/view/${encodeURIComponent(space.id)}/${tab.id}`
+                  )}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          </EuiFlexItem>
+          <EuiFlexItem>{selectedTabContent ?? null}</EuiFlexItem>
+        </EuiFlexGroup>
       </EuiText>
     </ViewSpaceContextProvider>
   );
