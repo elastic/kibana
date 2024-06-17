@@ -6,16 +6,13 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
+import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../../lib/auth';
-import {
-  ERROR_API_KEY_NOT_FOUND,
-  ERROR_API_KEY_NOT_VALID,
-} from '@kbn/assetManager-plugin/common/errors';
+import { ERROR_API_KEY_NOT_FOUND, ERROR_API_KEY_NOT_VALID } from '../../../common/errors';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 import { builtInDefinitions } from '../../lib/entities/built_in';
-import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 
 export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext>({
   router,

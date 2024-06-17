@@ -28,7 +28,7 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   server,
   logger,
 }: SetupRouteOptions<T>) {
-  router.delete<unknown, unknown, unknown>(
+  router.post<unknown, unknown, unknown>(
     {
       path: `${ENTITY_INTERNAL_API_PREFIX}/eem`,
       validate: false,
