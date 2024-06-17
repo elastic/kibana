@@ -1533,6 +1533,7 @@ class AgentPolicyService {
     const cloudSetup = appContextService.getCloud();
     if (
       (!cloudSetup?.isServerlessEnabled ||
+        !cloudSetup.isCloudEnabled ||
         !appContextService.getExperimentalFeatures().agentless) &&
       agentPolicy?.supports_agentless !== undefined
     ) {
