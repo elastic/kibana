@@ -569,10 +569,10 @@ const areFunctionArgsAggClosed = (fn: ESQLFunction): boolean =>
 /**
  * Looks for first nested aggregate function in an aggregate function, recursively.
  */
-const findNestedAggFunctionOfAggFunction = (agg: ESQLFunction): ESQLFunction | undefined => {
+const findNestedAggFunctionInAggFunction = (agg: ESQLFunction): ESQLFunction | undefined => {
   for (const arg of agg.args) {
     if (isFunctionItem(arg)) {
-      return isAggFunction(arg) ? arg : findNestedAggFunctionOfAggFunction(arg);
+      return isAggFunction(arg) ? arg : findNestedAggFunctionInAggFunction(arg);
     }
   }
 };
@@ -590,7 +590,7 @@ const findNestedAggFunction = (
   parentIsAgg: boolean = false
 ): ESQLFunction | undefined => {
   if (isAggFunction(fn)) {
-    return parentIsAgg ? fn : findNestedAggFunctionOfAggFunction(fn);
+    return parentIsAgg ? fn : findNestedAggFunctionInAggFunction(fn);
   }
 
   for (const arg of fn.args) {
