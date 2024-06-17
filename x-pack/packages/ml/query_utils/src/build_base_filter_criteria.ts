@@ -25,7 +25,8 @@ export function buildBaseFilterCriteria(
   timeFieldName?: string,
   earliestMs?: number | string,
   latestMs?: number | string,
-  query?: Query['query']
+  query?: Query['query'],
+  timeFormat = 'epoch_millis'
 ): estypes.QueryDslQueryContainer[] {
   const filterCriteria = [];
 
@@ -35,7 +36,7 @@ export function buildBaseFilterCriteria(
         [timeFieldName]: {
           gte: earliestMs,
           lte: latestMs,
-          format: 'epoch_millis||strict_date_optional_time',
+          format: timeFormat,
         },
       },
     });

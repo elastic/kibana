@@ -13,7 +13,8 @@ import { last, cloneDeep } from 'lodash';
 import { mergeMap, switchMap } from 'rxjs';
 import { Comparators } from '@elastic/eui';
 import type { ISearchOptions } from '@kbn/search-types';
-import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
+import { getSafeAggregationName } from '@kbn/ml-query-utils';
+import { buildFilterCriteria } from '../../../../common/utils/build_query_filters';
 import type {
   DataStatsFetchProgress,
   FieldStatsSearchStrategyReturnBase,
@@ -146,7 +147,7 @@ export function useFieldStatsSearchStrategy(
       return;
     }
 
-    const filterCriteria = buildBaseFilterCriteria(
+    const filterCriteria = buildFilterCriteria(
       searchStrategyParams.timeFieldName,
       searchStrategyParams.earliest,
       searchStrategyParams.latest,

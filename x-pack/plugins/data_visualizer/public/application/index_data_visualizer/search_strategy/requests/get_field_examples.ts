@@ -16,7 +16,6 @@ import type {
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getUniqGeoOrStrExamples } from '../../../common/util/example_utils';
 import type {
@@ -35,7 +34,7 @@ export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, f
   // Request at least 100 docs so that we have a chance of obtaining
   // 'maxExamples' of the field.
   const size = Math.max(100, maxExamples ?? MAX_EXAMPLES_DEFAULT);
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
+  const filterCriteria = buildFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
   // Use an exists filter to return examples of the field.
   if (Array.isArray(filterCriteria)) {

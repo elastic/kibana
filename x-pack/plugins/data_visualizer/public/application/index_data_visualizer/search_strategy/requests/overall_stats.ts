@@ -11,7 +11,7 @@ import type { Query } from '@kbn/es-query';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { AggCardinality } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
+import { getSafeAggregationName } from '@kbn/ml-query-utils';
 import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import { getDatafeedAggregations } from '../../../../../common/utils/datafeed_utils';
 import type { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
@@ -20,6 +20,7 @@ import type {
   OverallStatsSearchStrategyParams,
   SamplingOption,
 } from '../../../../../common/types/field_stats';
+import { buildFilterCriteria } from '../../../../../common/utils/build_query_filters';
 
 export const checkAggregatableFieldsExistRequest = (
   dataViewTitle: string,
@@ -34,7 +35,7 @@ export const checkAggregatableFieldsExistRequest = (
 ): estypes.SearchRequest => {
   const index = dataViewTitle;
   const size = 0;
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
+  const filterCriteria = buildFilterCriteria(timeFieldName, earliestMs, latestMs, query);
   const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
 
   // Value count aggregation faster way of checking if field exists than using
@@ -223,7 +224,7 @@ export const checkNonAggregatableFieldExistsRequest = (
 ): estypes.SearchRequest => {
   const index = dataViewTitle;
   const size = 0;
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
+  const filterCriteria = buildFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
   if (Array.isArray(filterCriteria)) {
     filterCriteria.push({ exists: { field } });
@@ -261,7 +262,7 @@ export const getSampleOfDocumentsForNonAggregatableFields = (
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.SearchRequest => {
   const index = dataViewTitle;
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
+  const filterCriteria = buildFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
   return {
     index,
