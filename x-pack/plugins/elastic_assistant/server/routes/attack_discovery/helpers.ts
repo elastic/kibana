@@ -129,6 +129,7 @@ const formatAssistantToolParams = ({
   langChainTimeout,
   latestReplacements,
   llm,
+  logger,
   onNewReplacements,
   request,
   size,
@@ -139,6 +140,7 @@ const formatAssistantToolParams = ({
   langChainTimeout: number;
   latestReplacements: Replacements;
   llm: ActionsClientLlm;
+  logger: Logger;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<
     unknown,
@@ -154,6 +156,7 @@ const formatAssistantToolParams = ({
   esClient,
   langChainTimeout,
   llm,
+  logger,
   modelExists: false, // not required for attack discovery
   onNewReplacements,
   replacements: latestReplacements,
