@@ -156,7 +156,7 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
         id={accordionId}
         buttonContent={accordionTitle}
         paddingSize="m"
-        initialIsOpen={true}
+        initialIsOpen={false}
       >
         <EuiBasicTable
           tableLayout="fixed"
