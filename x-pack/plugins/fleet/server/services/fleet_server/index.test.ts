@@ -130,6 +130,7 @@ describe('getFleetServerPolicies', () => {
         version: '1.0.0',
       },
       policy_id: 'fs-policy-1',
+      policy_ids: ['fs-policy-1'],
     },
     {
       id: 'package-policy-2',
@@ -140,6 +141,7 @@ describe('getFleetServerPolicies', () => {
         version: '1.0.0',
       },
       policy_id: 'fs-policy-2',
+      policy_ids: ['fs-policy-2'],
     },
     {
       id: 'package-policy-3',
@@ -150,6 +152,7 @@ describe('getFleetServerPolicies', () => {
         version: '1.0.0',
       },
       policy_id: 'agent-policy-2',
+      policy_ids: ['agent-policy-2'],
     },
   ];
   const mockFleetServerPolicies = [
