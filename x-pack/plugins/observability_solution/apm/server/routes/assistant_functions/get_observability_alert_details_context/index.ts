@@ -12,6 +12,8 @@ import type {
 } from '@kbn/observability-plugin/server/services';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
+import { fetchSimpleLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_simple_log_rate_analysis';
+import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import { getApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
@@ -159,6 +161,24 @@ export const getAlertDetailsContextHandler = (
         };
       });
     }
+
+    // log rate analysis
+    dataFetchers.push(async () => {
+      const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
+      const logRateAnalysis = await fetchSimpleLogRateAnalysis(
+        esClient,
+        index,
+        moment(alertStartedAt).subtract(15, 'minute').toISOString(),
+        moment(alertStartedAt).add(15, 'minute').toISOString(),
+        '@timestamp'
+      );
+
+      return {
+        key: 'logRateAnalysis',
+        description: `Significant field/value pairs in log data that contributed to changes in the log rate.`,
+        data: logRateAnalysis,
+      };
+    });
 
     // log categories
     dataFetchers.push(async () => {
