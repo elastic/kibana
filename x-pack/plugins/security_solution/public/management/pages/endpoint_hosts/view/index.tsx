@@ -43,7 +43,7 @@ import {
 } from '../../../../common/components/agents/agent_status';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
-import { getEndpointPendingActionsCallback } from '../store/selectors';
+import { getEndpointPendingActionsCallback, nonExistingPolicies } from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import type { CreateStructuredSelector } from '../../../../common/store';
@@ -82,7 +82,7 @@ const StyledDatePicker = styled.div`
 
 interface GetEndpointListColumnsProps {
   agentStatusClientEnabled: boolean;
-  canReadPolicyManagement: boolean;
+  missingPolicies: ReturnType<typeof nonExistingPolicies>;
   backToEndpointList: PolicyDetailsRouteState['backLink'];
   getHostPendingActions: ReturnType<typeof getEndpointPendingActionsCallback>;
   queryParams: Immutable<EndpointIndexUIQueryParams>;
@@ -107,7 +107,7 @@ const columnWidths: Record<
 
 const getEndpointListColumns = ({
   agentStatusClientEnabled,
-  canReadPolicyManagement,
+  missingPolicies,
   backToEndpointList,
   getHostPendingActions,
   queryParams,
@@ -186,6 +186,7 @@ const getEndpointListColumns = ({
             policyId={policy.id}
             revision={policy.endpoint_policy_version}
             isOutdated={isPolicyOutOfDate(policy, item.policy_info)}
+            policyExists={!missingPolicies[policy.id]}
             data-test-subj="policyNameCellLink"
             backLink={backToEndpointList}
           >
@@ -347,6 +348,7 @@ export const EndpointList = () => {
     metadataTransformStats,
     isInitialized,
   } = useEndpointSelector(selector);
+  const missingPolicies = useEndpointSelector(nonExistingPolicies);
   const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
   const {
     canReadEndpointList,
@@ -512,9 +514,9 @@ export const EndpointList = () => {
     () =>
       getEndpointListColumns({
         agentStatusClientEnabled,
-        canReadPolicyManagement,
         backToEndpointList,
         getAppUrl,
+        missingPolicies,
         getHostPendingActions,
         queryParams,
         search,
@@ -522,9 +524,9 @@ export const EndpointList = () => {
     [
       agentStatusClientEnabled,
       backToEndpointList,
-      canReadPolicyManagement,
       getAppUrl,
       getHostPendingActions,
+      missingPolicies,
       queryParams,
       search,
     ]
