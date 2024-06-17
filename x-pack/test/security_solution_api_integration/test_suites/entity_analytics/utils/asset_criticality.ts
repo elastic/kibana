@@ -17,6 +17,7 @@ import {
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
   ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
+  ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import type { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { Client } from '@elastic/elasticsearch';
@@ -153,6 +154,18 @@ export const assetCriticalityRouteHelpersFactory = (
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .expect(expectStatusCode);
+  },
+  bulkUpload: async (
+    records: Array<{ id_field: string; id_value: string; criticality_level: string }>,
+    { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
+  ) => {
+    return supertest
+      .post(routeWithNamespace(ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send({ records })
       .expect(expectStatusCode);
   },
   uploadCsv: async (
