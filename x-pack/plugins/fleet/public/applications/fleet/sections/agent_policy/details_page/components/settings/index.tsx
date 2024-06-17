@@ -53,10 +53,11 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'agent_features',
     'is_protected',
     'advanced_settings',
+    'global_data_tags',
   ]);
 
 const FormWrapper = styled.div`
-  max-width: 800px;
+  max-width: 1200px;
   margin-right: auto;
   margin-left: auto;
 `;
