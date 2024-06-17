@@ -274,6 +274,10 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
         let newTitle = currentState.title;
 
         if (lastSavedId) {
+          const [baseTitle, baseCount] = extractTitleAndCount(newTitle);
+
+          newTitle = `${baseTitle} (${baseCount + 1})`;
+
           await checkForDuplicateDashboardTitle({
             title: newTitle,
             lastSavedTitle: currentState.title,
