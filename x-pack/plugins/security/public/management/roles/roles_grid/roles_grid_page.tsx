@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+  EuiSwitchEvent,
+  Query,
+} from '@elastic/eui';
 import {
+  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
   EuiLink,
-  EuiPageHeader,
+  EuiSearchBar,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -28,6 +33,7 @@ import type { NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ConfirmDelete } from './confirm_delete';
@@ -53,6 +59,12 @@ export interface Props extends StartServices {
   cloudOrgUrl?: string;
 }
 
+interface RolesTableState {
+  query: Query;
+  from: number;
+  size: number;
+}
+
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
   return `/${action}${roleName ? `/${encodeURIComponent(roleName)}` : ''}`;
 };
@@ -65,6 +77,17 @@ const getVisibleRoles = (roles: Role[], filter: string, includeReservedRoles: bo
       normalized.indexOf(normalizedQuery) !== -1 && (includeReservedRoles || !isRoleReserved(role))
     );
   });
+};
+
+const DEFAULT_TABLE_STATE = {
+  query: EuiSearchBar.Query.MATCH_ALL,
+  sort: {
+    field: 'creation' as const,
+    direction: 'desc' as const,
+  },
+  from: 0,
+  size: 25,
+  filters: {},
 };
 
 export const RolesGridPage: FC<Props> = ({
@@ -86,6 +109,7 @@ export const RolesGridPage: FC<Props> = ({
   const [permissionDenied, setPermissionDenied] = useState<boolean>(false);
   const [includeReservedRoles, setIncludeReservedRoles] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [tableState, setTableState] = useState<RolesTableState>(DEFAULT_TABLE_STATE);
 
   useEffect(() => {
     loadRoles();
@@ -211,6 +235,15 @@ export const RolesGridPage: FC<Props> = ({
     }
   };
 
+  const onTableChange = ({ page, sort }: CriteriaWithPagination<Role>) => {
+    const newState = {
+      ...tableState,
+      from: page?.index! * page?.size!,
+      size: page?.size!,
+    };
+    setTableState(newState);
+  };
+
   const getColumnConfig = (): Array<EuiBasicTableColumn<Role>> => {
     const config: Array<EuiBasicTableColumn<Role>> = [
       {
@@ -332,11 +365,17 @@ export const RolesGridPage: FC<Props> = ({
     setShowDeleteConfirmation(false);
   };
 
+  const pagination = {
+    pageIndex: tableState.from / tableState.size,
+    pageSize: tableState.size,
+    totalItemCount: visibleRoles.length,
+    pageSizeOptions: [25, 50, 100],
+  };
   return permissionDenied ? (
     <PermissionDenied />
   ) : (
     <>
-      <EuiPageHeader
+      <KibanaPageTemplate.Header
         bottomBorder
         data-test-subj="rolesGridPageHeader"
         pageTitle={
@@ -398,75 +437,76 @@ export const RolesGridPage: FC<Props> = ({
       />
 
       <EuiSpacer size="l" />
+      <KibanaPageTemplate.Section paddingSize="none">
+        {showDeleteConfirmation ? (
+          <ConfirmDelete
+            onCancel={onCancelDelete}
+            rolesToDelete={selection.map((role) => role.name)}
+            callback={handleDelete}
+            cloudOrgUrl={cloudOrgUrl}
+            notifications={notifications}
+            rolesAPIClient={rolesAPIClient}
+            buildFlavor={buildFlavor}
+            theme={theme}
+            analytics={analytics}
+            i18n={i18nStart}
+          />
+        ) : null}
 
-      {showDeleteConfirmation ? (
-        <ConfirmDelete
-          onCancel={onCancelDelete}
-          rolesToDelete={selection.map((role) => role.name)}
-          callback={handleDelete}
-          cloudOrgUrl={cloudOrgUrl}
-          notifications={notifications}
-          rolesAPIClient={rolesAPIClient}
-          buildFlavor={buildFlavor}
-          theme={theme}
-          analytics={analytics}
-          i18n={i18nStart}
-        />
-      ) : null}
-
-      <EuiInMemoryTable
-        data-test-subj="rolesTable"
-        itemId="name"
-        columns={getColumnConfig()}
-        selection={
-          readOnly
-            ? undefined
-            : {
-                selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
-                selectableMessage: (selectable: boolean) => (!selectable ? 'Role is reserved' : ''),
-                onSelectionChange: (value: Role[]) => setSelection(value),
-                selected: selection,
-              }
-        }
-        pagination={{
-          initialPageSize: 20,
-          pageSizeOptions: [10, 20, 30, 50, 100],
-        }}
-        message={
-          buildFlavor === 'serverless' ? (
-            <FormattedMessage
-              id="xpack.security.management.roles.noCustomRolesFound"
-              defaultMessage="No custom roles to show"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.security.management.roles.noRolesFound"
-              defaultMessage="No items found"
-            />
-          )
-        }
-        items={visibleRoles}
-        loading={isLoading}
-        search={{
-          toolsLeft: renderToolsLeft(),
-          toolsRight: renderToolsRight(),
-          box: {
+        <EuiSearchBar
+          box={{
             incremental: true,
             'data-test-subj': 'searchRoles',
-          },
-          onChange: (query: Record<string, any>) => {
+          }}
+          onChange={(query: Record<string, any>) => {
             setFilter(query.queryText);
             setVisibleRoles(getVisibleRoles(roles, query.queryText, includeReservedRoles));
-          },
-        }}
-        sorting={{
-          sort: {
-            field: 'name',
-            direction: 'asc',
-          },
-        }}
-        rowProps={{ 'data-test-subj': 'roleRow' }}
-      />
+          }}
+          toolsLeft={renderToolsLeft()}
+          toolsRight={renderToolsRight()}
+        />
+        <EuiSpacer size="s" />
+        <EuiBasicTable
+          data-test-subj="rolesTable"
+          itemId="name"
+          columns={getColumnConfig()}
+          selection={
+            readOnly
+              ? undefined
+              : {
+                  selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
+                  selectableMessage: (selectable: boolean) =>
+                    !selectable ? 'Role is reserved' : '',
+                  onSelectionChange: (value: Role[]) => setSelection(value),
+                  selected: selection,
+                }
+          }
+          onChange={onTableChange}
+          pagination={pagination}
+          noItemsMessage={
+            buildFlavor === 'serverless' ? (
+              <FormattedMessage
+                id="xpack.security.management.roles.noCustomRolesFound"
+                defaultMessage="No custom roles to show"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.security.management.roles.noRolesFound"
+                defaultMessage="No items found"
+              />
+            )
+          }
+          items={visibleRoles}
+          loading={isLoading}
+          sorting={{
+            sort: {
+              field: 'name',
+              direction: 'asc',
+            },
+          }}
+          rowProps={{ 'data-test-subj': 'roleRow' }}
+        />
+      </KibanaPageTemplate.Section>
     </>
   );
 };
