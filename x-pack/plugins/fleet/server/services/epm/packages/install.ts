@@ -414,6 +414,36 @@ async function installPackageFromRegistry({
   try {
     // get the currently installed package
 
+    if (pkgName === 'endpoint') {
+      // force bundle
+
+      const matchingBundledPackage = await getBundledPackageByPkgKey(pkgName);
+
+      if (matchingBundledPackage) {
+        logger.info(`Circumventing registry install for endpoint package, using manual bundle`);
+
+        const archiveBuffer = await matchingBundledPackage.getBuffer();
+
+        const response = await installPackageByUpload({
+          savedObjectsClient,
+          esClient,
+          archiveBuffer,
+          contentType: 'application/zip',
+          spaceId,
+          version: matchingBundledPackage.version,
+          authorizationHeader,
+          ignoreMappingUpdateErrors,
+          skipDataStreamRollover,
+          isBundledPackage: true,
+          skipRateLimitCheck: true,
+        });
+
+        return { ...response, installSource: 'bundled' };
+      } else {
+        logger.info(`endpoint bundle not found when hijacking registry install`);
+      }
+    }
+
     const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
     installType = getInstallType({ pkgVersion, installedPkg });
 
@@ -1018,7 +1048,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
 
     if (matchingBundledPackage) {
-      logger.debug(
+      logger.info(
         `Found bundled package for requested install of ${pkgkey} - installing from bundled package archive`
       );
 
@@ -1039,6 +1069,10 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       });
 
       return { ...response, installSource: 'bundled' };
+    } else {
+      logger.info(
+        `package ${pkgKey} was not in bundled package archive. Installing from registry.`
+      );
     }
 
     logger.debug(`Kicking off install of ${pkgkey} from registry`);
