@@ -1688,7 +1688,9 @@
         "MlTrainedModelConfig",
         ">; installElasticTrainedModelConfig(modelId: string): Promise<",
         "MlTrainedModelConfig",
-        ">; }; inferenceModels: { createInferenceEndpoint(inferenceId: string, taskType: ",
+        ">; getModelsDownloadStatus(): Promise<Record<string, ",
+        "ModelDownloadState",
+        ">>; }; inferenceModels: { createInferenceEndpoint(inferenceId: string, taskType: ",
         "InferenceTaskType",
         ", modelConfig: ",
         {
