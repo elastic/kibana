@@ -90,6 +90,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await sloUi.common.assertGroupOverviewPanelExists();
         await sloUi.common.dismissAllToasts();
       });
+
+      it('displays the group view', async () => {
+        await sloUi.common.assertSloGroupViewExists();
+      });
+
+      it('expands the clicked group', async () => {
+        await sloUi.common.clickGroupViewPanelAccordion();
+        await sloUi.common.assertGroupViewAccordionIsOpenWithNoError();
+      });
     });
   });
 }
