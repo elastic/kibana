@@ -36,7 +36,7 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   };
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+  const soClient = coreContext.savedObjects.client;
   try {
     // Get all possible fleet server or scoped normal agent policies
     const { fleetServerPolicies, scopedAgentPolicy: scopedAgentPolicyResponse } =
@@ -53,7 +53,7 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
       settingsResponse.fleet_server.policies = fleetServerPolicies;
       settingsResponse.fleet_server.has_active = await hasFleetServersForPolicies(
         esClient,
-        soClient,
+        appContextService.getInternalUserSOClientWithoutSpaceExtension(),
         fleetServerPolicies,
         true
       );
@@ -137,7 +137,9 @@ export const getFleetServerOrAgentPolicies = async (
   }
 
   // If an agent policy is not specified, return all fleet server policies
-  const fleetServerPolicies = (await getFleetServerPolicies(soClient)).map(mapPolicy);
+  const fleetServerPolicies = (
+    await getFleetServerPolicies(appContextService.getInternalUserSOClientWithoutSpaceExtension())
+  ).map(mapPolicy);
   return { fleetServerPolicies };
 };
 
