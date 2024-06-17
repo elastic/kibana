@@ -38,14 +38,6 @@ export const getSuggestions = async (
       ? await deps.dataViews.create(dataViewSpec)
       : await getESQLAdHocDataview(indexPattern, deps.dataViews);
 
-    if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
-      dataView.timeFieldName = '@timestamp';
-    }
-
-    if (hasTimeNamedParams(query.esql) && !dataViewSpec) {
-      dataView.timeFieldName = getTimeFieldFromESQLQuery(query.esql);
-    }
-
     const columns = await getESQLQueryColumns({
       esqlQuery: 'esql' in query ? query.esql : '',
       search: deps.data.search.search,

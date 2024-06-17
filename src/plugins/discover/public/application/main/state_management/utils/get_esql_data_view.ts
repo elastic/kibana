@@ -26,20 +26,8 @@ export async function getEsqlDataView(
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern()
   ) {
-    const dataViewObj = await getESQLAdHocDataview(indexPatternFromQuery, services.dataViews);
 
-    // If the indexPatternFromQuery is empty string means that the user used either the ROW or SHOW META / SHOW INFO commands
-    // we don't want to add the @timestamp field in this case https://github.com/elastic/kibana/issues/163417
-    if (indexPatternFromQuery && dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-      dataViewObj.timeFieldName = '@timestamp';
-    }
-
-    // If the query has the ?earliest and ?latest named parameters we set the timeFieldName to timestamp
-    if (hasTimeNamedParams(query.esql)) {
-      const timeField = getTimeFieldFromESQLQuery(query.esql);
-      dataViewObj.timeFieldName = timeField;
-    }
-    return dataViewObj;
+    return await getESQLAdHocDataview(indexPatternFromQuery, services.dataViews);
   }
   return currentDataView;
 }
