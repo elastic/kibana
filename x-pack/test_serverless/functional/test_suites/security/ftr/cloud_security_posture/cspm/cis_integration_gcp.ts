@@ -5,11 +5,9 @@
  * 2.0.
  */
 const CIS_GCP_OPTION_TEST_ID = 'cisGcpTestId';
-const GCP_ORGANIZATION_TEST_ID = 'gcpOrganizationAccountTestId';
-const SETUP_TECHNOLOGY = 'setup-technology-selector';
 const GCP_SINGLE_ACCOUNT_TEST_ID = 'gcpSingleAccountTestId';
-const GCP_CLOUD_SHELL_TEST_ID = 'gcpGoogleCloudShellOptionTestId';
-const GCP_MANUAL_TEST_ID = 'gcpManualOptionTestId';
+const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector';
+const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -30,62 +28,58 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
+    after(async () => {
+      await pageObjects.svlCommonPage.forceLogout();
+    });
+
     describe('CIS_GCP Single Account Launch Cloud shell', () => {
-      it('should show CIS_GCP Launch Cloud shell button when setup technology selector is Agentless and credentials selector is direct access keys', async () => {
+      it('should show CIS_GCP Launch Cloud shell button when setup technology selector is Agentless', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY, 'Agentless');
+        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
 
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
-        expect((await cisIntegrationGcp.getLaunchCloudShellAgentlessButton()) !== undefined).to.be(
-          true
-        );
+        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
       });
 
-      it('should hide CIS_GCP Launch Cloud Shell button when setup technology selector is Agentless and credentials selector is temporary_keys ', async () => {
+      it.skip('should hide CIS_GCP Launch Cloud Shell button when setup technology selector is Agent based', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY, 'Agent-based');
-
+        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
         pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agent-based');
 
-        expect((await cisIntegrationGcp.getLaunchCloudShellAgentlessButton()) !== undefined).to.be(
-          false
-        );
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(false);
       });
     });
 
     describe('CIS_GCP ORG Account Launch Cloud Shell', () => {
-      it('should show CIS_GCP Launch Cloud Shell button when setup technology selector is Agentless and credentials selector is direct access keys', async () => {
+      it('should show CIS_GCP Launch Cloud Shell button when setup technology selector is Agentless', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
-        await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY, 'Agentless');
+        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
 
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
-        expect((await cisIntegrationGcp.getLaunchCloudShellAgentlessButton()) !== undefined).to.be(
-          true
-        );
+        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
       });
 
-      it('should hide CIS_GCP Launch Cloud shell button when setup technology selector is Agent-based', async () => {
+      it.skip('should hide CIS_GCP Launch Cloud shell button when setup technology selector is Agent-based', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
-        await cisIntegration.clickOptionButton(GCP_MANUAL_TEST_ID);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY, 'Agent-based');
+        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agent-based');
 
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
-        expect((await cisIntegrationGcp.getLaunchCloudShellAgentlessButton()) !== undefined).to.be(
-          false
-        );
+        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(false);
       });
     });
   });

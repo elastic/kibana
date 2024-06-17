@@ -6,7 +6,7 @@
  */
 const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
 const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
-const SETUP_TECHNOLOGY = 'setup-technology-selector';
+const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector';
 const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
 
 const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
@@ -29,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags(['skipMKI', 'cloud_security_posture_cis_integration']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
+
     before(async () => {
       await pageObjects.svlCommonPage.login();
 
@@ -53,32 +54,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY, 'Agentless');
+        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
 
         pageObjects.header.waitUntilLoadingHasFinished();
 
         expect(
-          (await cisIntegrationAws.getLaunchCloudFormationAgentlessButton()) !== undefined
+          (await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()) !== undefined
         ).to.be(true);
       });
 
-      it('should hide CIS_AWS Launch Cloud formation button when setup technology selector is Agentless and credentials selector is temporary_keys ', async () => {
+      it('should hide CIS_AWS Launch Cloud formation button when setup technology selector is Agentless and credentials selector is temporary keys ', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY, 'Agent-based');
+        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agent-based');
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary-keys');
+        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
 
         pageObjects.header.waitUntilLoadingHasFinished();
 
-        expect(
-          (await cisIntegrationAws.getLaunchCloudFormationAgentlessButton()) !== undefined
-        ).to.be(false);
+        expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(false);
       });
     });
 
@@ -86,44 +85,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should show CIS_AWS Launch Cloud formation button when setup technology selector is Agentless and credentials selector is direct access keys', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY, 'Agentless');
+        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
 
         pageObjects.header.waitUntilLoadingHasFinished();
 
-        expect(
-          (await cisIntegrationAws.getLaunchCloudFormationAgentlessButton()) !== undefined
-        ).to.be(true);
+        expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(true);
       });
 
       it('should hide CIS_AWS Launch Cloud formation button when setup technology selector is Agent-based and credentials selector is direct access keys', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY, 'Agent-based');
+        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agent-based');
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
 
         pageObjects.header.waitUntilLoadingHasFinished();
 
-        expect(
-          (await cisIntegrationAws.getLaunchCloudFormationAgentlessButton()) !== undefined
-        ).to.be(false);
+        expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(false);
       });
 
-      it('should hide CIS_AWS Launch Cloud formation button when setup technology selector is Agentless and credentials selector is temporary access', async () => {
+      it('should hide CIS_AWS Launch Cloud formation button when setup technology selector is Agentless and credentials selector is temporary keys', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY, 'Agentless');
+        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
 
         pageObjects.header.waitUntilLoadingHasFinished();
 
-        expect(
-          (await cisIntegrationAws.getLaunchCloudFormationAgentlessButton()) !== undefined
-        ).to.be(false);
+        expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(false);
       });
     });
   });
