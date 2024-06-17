@@ -124,11 +124,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
       },
     },
     savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
-    dashboardContentManagement: {
-      checkForDuplicateDashboardTitle,
-      saveDashboardState,
-      findDashboards,
-    },
+    dashboardContentManagement: { checkForDuplicateDashboardTitle, saveDashboardState },
   } = pluginServices.getServices();
 
   const {
@@ -278,28 +274,6 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
         let newTitle = currentState.title;
 
         if (lastSavedId) {
-          const [baseTitle] = extractTitleAndCount(newTitle);
-
-          const { hits: recentlyCreatedDashboards } = await findDashboards.search({
-            size: 1,
-            search: baseTitle,
-            options: {
-              onlyTitle: true,
-              sort: {
-                sortField: 'created_at',
-                sortOrder: 'desc',
-              },
-            },
-          });
-
-          const [, mostRecentDuplicationId] = extractTitleAndCount(
-            recentlyCreatedDashboards[0].attributes.title
-          );
-
-          const copyCount = mostRecentDuplicationId + 1;
-
-          newTitle = `${baseTitle} (${copyCount})`;
-
           await checkForDuplicateDashboardTitle({
             title: newTitle,
             lastSavedTitle: currentState.title,

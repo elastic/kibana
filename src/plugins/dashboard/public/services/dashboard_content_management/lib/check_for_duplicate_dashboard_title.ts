@@ -35,7 +35,7 @@ export async function checkForDuplicateDashboardTitle(
     lastSavedTitle,
     onTitleDuplicate,
     isTitleDuplicateConfirmed,
-    searchLimit = 10,
+    searchLimit = 20,
   }: DashboardDuplicateTitleCheckProps,
   contentManagement: DashboardStartDependencies['contentManagement']
 ): Promise<boolean> {
@@ -64,10 +64,6 @@ export async function checkForDuplicateDashboardTitle(
     },
     options: {
       onlyTitle: true,
-      sort: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
     },
   });
 
@@ -81,7 +77,7 @@ export async function checkForDuplicateDashboardTitle(
 
   const [largestDuplicationId] = hits
     .map((hit) => extractTitleAndCount(hit.attributes.title)[1])
-    .sort((a, b) => (b > a ? 1 : -1));
+    .sort((a, b) => b - a);
 
   const speculativeCollisionFreeTitle = `${baseDashboardName} (${largestDuplicationId + 1})`;
 

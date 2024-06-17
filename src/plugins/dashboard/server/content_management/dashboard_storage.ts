@@ -22,10 +22,7 @@ const searchArgsToSOFindOptions = (
   return {
     type: contentTypeId,
     searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
-    fields: ['description', 'title', 'timeRestore'].concat(
-      options?.sort ? options.sort.sortField : []
-    ),
-    ...(options?.sort ?? {}),
+    fields: ['description', 'title', 'timeRestore'],
     search: query.text,
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,
