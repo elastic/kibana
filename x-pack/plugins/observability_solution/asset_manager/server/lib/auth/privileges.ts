@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { BUILT_IN_DEFINITION_ALLOWED_INDICES } from '@kbn/entities-schema';
 import { ENTITY_BASE_PREFIX } from '../../../common/constants_entities';
-import { BUILT_IN_ALLOWED_INDICES } from '../entities/built_in/constants';
 
 export const requiredRunTimePrivileges = {
   // all of
@@ -17,7 +17,7 @@ export const requiredRunTimePrivileges = {
       privileges: ['create_index', 'index', 'create_doc', 'auto_configure', 'read'],
     },
     {
-      names: [...BUILT_IN_ALLOWED_INDICES, `${ENTITY_BASE_PREFIX}*`],
+      names: [...BUILT_IN_DEFINITION_ALLOWED_INDICES, `${ENTITY_BASE_PREFIX}*`],
       privileges: ['read', 'view_index_metadata'],
     },
   ],
