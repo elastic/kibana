@@ -53,19 +53,18 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
 
         const { getStartServices, logger } = await context.integrationAssistant;
         const [, { actions: actionsPlugin }] = await getStartServices();
-        const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
-        const connector = req.body.connectorId
-          ? await actionsClient.get({ id: req.body.connectorId })
-          : (await actionsClient.getAll()).filter(
-              (connectorItem) => connectorItem.actionTypeId === '.bedrock'
-            )[0];
-
-        const abortSignal = getRequestAbortedSignal(req.events.aborted$);
-        const isOpenAI = connector.actionTypeId === '.gen-ai';
-        const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
-
-        let results = { results: { mapping: {}, pipeline: {} } };
         try {
+          const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
+          const connector = req.body.connectorId
+            ? await actionsClient.get({ id: req.body.connectorId })
+            : (await actionsClient.getAll()).filter(
+                (connectorItem) => connectorItem.actionTypeId === '.bedrock'
+              )[0];
+
+          const abortSignal = getRequestAbortedSignal(req.events.aborted$);
+          const isOpenAI = connector.actionTypeId === '.gen-ai';
+          const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+
           const model = new llmClass({
             actions: actionsPlugin,
             connectorId: connector.id,
@@ -78,7 +77,9 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             signal: abortSignal,
             streaming: false,
           });
+
           const graph = await getEcsGraph(model);
+          let results = { results: { mapping: {}, pipeline: {} } };
 
           if (req.body?.mapping) {
             results = (await graph.invoke({
@@ -93,11 +94,11 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
               dataStreamName,
               rawSamples,
             })) as EcsMappingApiResponse;
+
+          return res.ok({ body: results });
         } catch (e) {
           return res.badRequest({ body: e });
         }
-
-        return res.ok({ body: results });
       }
     );
 }

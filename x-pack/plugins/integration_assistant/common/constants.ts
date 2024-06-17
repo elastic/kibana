@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+// Plugin information
+export const PLUGIN_ID = 'integrationAssistant';
+
+// Public App Routes
+export const INTEGRATION_ASSISTANT_APP_ROUTE = '/app/integration_assistant';
+
 // Server API Routes
 export const INTEGRATION_ASSISTANT_BASE_PATH = '/api/integration_assistant';
+
 export const ECS_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/ecs`;
 export const CATEGORIZATION_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/categorization`;
 export const RELATED_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/related`;

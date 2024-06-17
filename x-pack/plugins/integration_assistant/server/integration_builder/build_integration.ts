@@ -137,7 +137,7 @@ function createPackageManifest(packageDir: string, integration: Integration): vo
     package_name: integration.name,
     package_version: '0.1.0',
     package_description: integration.description,
-    package_owner: `'@elastic/custom-integrations'`,
+    package_owner: '@elastic/custom-integrations',
     min_version: '^8.13.0',
     inputs: uniqueInputsList,
   });

@@ -1,16 +1,13 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
-    "esModuleInterop": true 
+    "outDir": "target/types"
   },
-  "assets": ["**/*.njk"],
   "include": [
     "index.ts",
-    "server/**/*",
-    "server/**/*.njk",
-    "common/**/*",
-    "public/**/*",
+    "server/**/*.ts",
+    "public/**/*.ts",
+    "common/**/*.ts",
     "__jest__/**/*",
     "../../typings/**/*"
   ],
