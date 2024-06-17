@@ -1071,7 +1071,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       return { ...response, installSource: 'bundled' };
     } else {
       logger.info(
-        `package ${pkgKey} was not in bundled package archive. Installing from registry.`
+        `package ${pkgkey} was not in bundled package archive. Installing from registry.`
       );
     }
 
