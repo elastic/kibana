@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui';
 
-import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services';
-
 import type { AgentPolicy, NewAgentPolicy, NewPackagePolicy } from '../../../../../../../common';
-
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services';
 import { SelectedPolicyTab, StepSelectHosts } from '../../create_package_policy_page/components';
 import type { PackageInfo } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
@@ -35,6 +33,7 @@ interface Params {
   isLoadingData: boolean;
   packagePolicy: NewPackagePolicy;
   packagePolicyId: string;
+  setNewAgentPolicyName: (newAgentPolicyName: string | undefined) => void;
 }
 
 export function usePackagePolicySteps({
@@ -48,6 +47,7 @@ export function usePackagePolicySteps({
   isLoadingData,
   packagePolicy,
   packagePolicyId,
+  setNewAgentPolicyName,
 }: Params) {
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
@@ -201,6 +201,12 @@ export function usePackagePolicySteps({
     packageInfo,
     packagePolicyId,
   });
+
+  useEffect(() => {
+    setNewAgentPolicyName(
+      selectedPolicyTab === SelectedPolicyTab.NEW ? newAgentPolicy.name : undefined
+    );
+  }, [newAgentPolicy, selectedPolicyTab, setNewAgentPolicyName]);
 
   return {
     steps,

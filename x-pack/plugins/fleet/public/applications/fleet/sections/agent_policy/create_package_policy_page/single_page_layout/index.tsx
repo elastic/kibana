@@ -449,10 +449,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }
 
   const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
-  const unprivilegedAgentsCount = agentPolicies.reduce(
-    (acc, curr) => acc + (curr.unprivileged_agents ?? 0),
-    0
-  );
 
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
@@ -463,11 +459,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             agentPolicies={agentPolicies}
             onConfirm={onSubmit}
             onCancel={() => setFormState('VALID')}
-            showUnprivilegedAgentsCallout={Boolean(
-              packageInfo && isRootPrivilegesRequired(packageInfo) && unprivilegedAgentsCount > 0
-            )}
-            unprivilegedAgentsCount={unprivilegedAgentsCount}
-            dataStreams={rootPrivilegedDataStreams}
           />
         )}
         {formState === 'SUBMITTED_NO_AGENTS' &&

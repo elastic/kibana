@@ -139,6 +139,7 @@ export const EditPackagePolicyForm = memo<{
 
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
+  const [newAgentPolicyName, setNewAgentPolicyName] = useState<string | undefined>();
 
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
 
@@ -209,13 +210,35 @@ export const EditPackagePolicyForm = memo<{
     }
   }, [existingAgentPolicies, isFirstLoad]);
 
+  const agentPoliciesToAdd = useMemo(
+    () => [
+      ...agentPolicies
+        .filter(
+          (policy) =>
+            !existingAgentPolicies.find((existingPolicy) => existingPolicy.id === policy.id)
+        )
+        .map((policy) => policy.name),
+      ...(newAgentPolicyName ? [newAgentPolicyName] : []),
+    ],
+    [agentPolicies, existingAgentPolicies, newAgentPolicyName]
+  );
+  const agentPoliciesToRemove = useMemo(
+    () =>
+      existingAgentPolicies
+        .filter(
+          (existingPolicy) => !agentPolicies.find((policy) => policy.id === existingPolicy.id)
+        )
+        .map((policy) => policy.name),
+    [agentPolicies, existingAgentPolicies]
+  );
+
   const onSubmit = async () => {
     if (formState === 'VALID' && hasErrors) {
       setFormState('INVALID');
       return;
     }
     if (
-      agentCount !== 0 &&
+      (agentCount !== 0 || agentPoliciesToAdd.length > 0 || agentPoliciesToRemove.length > 0) &&
       !packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID) &&
       formState !== 'CONFIRM'
     ) {
@@ -441,6 +464,7 @@ export const EditPackagePolicyForm = memo<{
     isLoadingData,
     packagePolicy,
     packagePolicyId,
+    setNewAgentPolicyName,
   });
 
   return (
@@ -479,6 +503,8 @@ export const EditPackagePolicyForm = memo<{
                 agentPolicies={agentPolicies}
                 onConfirm={onSubmit}
                 onCancel={() => setFormState('VALID')}
+                agentPoliciesToAdd={agentPoliciesToAdd}
+                agentPoliciesToRemove={agentPoliciesToRemove}
               />
             )}
             {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
