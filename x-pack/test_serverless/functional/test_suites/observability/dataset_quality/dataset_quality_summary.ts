@@ -50,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dataset quality summary', () => {
     before(async () => {
+      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.svlCommonPage.loginWithRole('admin');
       await PageObjects.datasetQuality.navigateTo();
     });
@@ -59,7 +60,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows poor, degraded and good count as 0 and all dataset as healthy', async () => {
-      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.datasetQuality.refreshTable();
       const summary = await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
       expect(summary).to.eql({
