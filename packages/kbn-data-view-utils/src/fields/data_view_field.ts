@@ -9,15 +9,14 @@
 import { KbnFieldType, getKbnFieldType } from '@kbn/field-types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DataViewFieldBase } from '@kbn/es-query';
-import type { RuntimeFieldSpec } from '../types';
-import { FieldSpec, DataView } from '..';
+import type { FieldSpec, DataView, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import {
   shortenDottedString,
   isDataViewFieldSubtypeMulti,
   isDataViewFieldSubtypeNested,
   getDataViewFieldSubtypeMulti,
   getDataViewFieldSubtypeNested,
-} from './utils';
+} from '../utils/utils';
 
 /**
  * Optional format getter when serializing a field

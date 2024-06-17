@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataViewField } from '../fields';
 
-export function convertColumnToDataViewField(column: DatatableColumn): DataViewField {
+export function convertDatatableColumnToDataViewField(column: DatatableColumn): DataViewField {
   let esType = column.meta?.esType;
   let timeSeriesMetric: MappingTimeSeriesMetricType | undefined;
 
