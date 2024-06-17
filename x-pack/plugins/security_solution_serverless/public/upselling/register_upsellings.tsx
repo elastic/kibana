@@ -20,6 +20,13 @@ import type {
   UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
 import React from 'react';
+import { CloudSecurityPostureIntegrationPliBlockLazy } from './sections/cloud_security_posture';
+import {
+  EndpointAgentTamperProtectionLazy,
+  EndpointPolicyProtectionsLazy,
+  EndpointProtectionUpdatesLazy,
+  RuleDetailsEndpointExceptionsLazy,
+} from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductProductFeatures } from '../../common/pli/pli_features';
 import type { Services } from '../common/services';
@@ -32,12 +39,6 @@ import {
   OsqueryResponseActionsUpsellingSectionLazy,
   ThreatIntelligencePaywallLazy,
 } from './lazy_upselling';
-import {
-  EndpointAgentTamperProtectionLazy,
-  EndpointPolicyProtectionsLazy,
-  EndpointProtectionUpdatesLazy,
-  RuleDetailsEndpointExceptionsLazy,
-} from './sections/endpoint_management';
 import * as i18n from './translations';
 
 interface UpsellingsConfig {
@@ -159,6 +160,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'endpoint_protection_updates',
     pli: ProductFeatureKey.endpointProtectionUpdates,
     component: EndpointProtectionUpdatesLazy,
+  },
+  {
+    id: 'cloud_security_posture_integration_installation',
+    pli: ProductFeatureKey.cloudSecurityPosture,
+    component: CloudSecurityPostureIntegrationPliBlockLazy,
   },
   {
     id: 'entity_analytics_panel',

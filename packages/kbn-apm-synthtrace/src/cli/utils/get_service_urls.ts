@@ -12,7 +12,7 @@ import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
 
 async function discoverAuth(parsedTarget: Url) {
-  const possibleCredentials = [`admin:changeme`, `elastic:changeme`];
+  const possibleCredentials = [`admin:changeme`, `elastic:changeme`, `elastic_serverless:changeme`];
   for (const auth of possibleCredentials) {
     const url = format({
       ...parsedTarget,
