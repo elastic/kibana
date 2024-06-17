@@ -45,7 +45,7 @@ export function installBuiltinEntityDefinitionsRoute<T extends RequestHandlerCon
         const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
 
         logger.info(`Starting installation of builtin definitions`);
-        await installBuiltInEntityDefinitions({
+        const definitions = await installBuiltInEntityDefinitions({
           esClient,
           soClient,
           logger,
@@ -54,7 +54,7 @@ export function installBuiltinEntityDefinitionsRoute<T extends RequestHandlerCon
         });
         logger.info(`Builtin definitions are running`);
 
-        return res.ok({ body: { success: true } });
+        return res.ok({ body: { success: true, definitions } });
       } catch (e) {
         logger.error(e);
         return res.customError({ body: e, statusCode: 500 });

@@ -107,8 +107,10 @@ export async function installBuiltInEntityDefinitions({
   logger,
   builtInDefinitions,
   spaceId,
-}: Omit<InstallDefinitionParams, 'definition'> & { builtInDefinitions: EntityDefinition[] }) {
-  if (builtInDefinitions.length === 0) return;
+}: Omit<InstallDefinitionParams, 'definition'> & {
+  builtInDefinitions: EntityDefinition[];
+}): Promise<EntityDefinition[]> {
+  if (builtInDefinitions.length === 0) return [];
 
   logger.debug(`Starting installation of ${builtInDefinitions.length} built-in definitions`);
   const installPromises = builtInDefinitions.map(async (builtInDefinition) => {
@@ -146,12 +148,14 @@ export async function installBuiltInEntityDefinitions({
       logger.debug(`Starting transforms for definition [${definition.id}]`);
       await startTransform(esClient, definition, logger);
     }
+    return definition;
   });
 
-  await Promise.all(installPromises);
+  return await Promise.all(installPromises);
 }
 
 async function installAndStartDefinition(params: InstallDefinitionParams) {
   const definition = await installEntityDefinition(params);
   await startTransform(params.esClient, definition, params.logger);
+  return definition;
 }
