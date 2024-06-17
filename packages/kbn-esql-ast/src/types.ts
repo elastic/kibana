@@ -67,6 +67,17 @@ export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem
   castType: string;
 }
 
+/**
+ * This node represents something the AST generator
+ * didn't recognize in the ANTLR parse tree.
+ *
+ * It can show up if the AST generator code is out of sync
+ * with the ANTLR grammar or if there is some idiosyncrasy
+ * or bug in the parse tree.
+ *
+ * These nodes can be ignored for the purpose of validation
+ * and autocomplete, but they may be helpful in detecting bugs.
+ */
 export interface ESQLUnknownItem extends ESQLAstBaseItem {
   type: 'unknown';
 }
