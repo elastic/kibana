@@ -14,12 +14,11 @@ import { findEntityDefinitions } from '../../lib/entities/find_entity_definition
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
 }: SetupRouteOptions<T>) {
-  router.get<unknown, { managed?: boolean; page?: number; perPage?: number }, unknown>(
+  router.get<unknown, { page?: number; perPage?: number }, unknown>(
     {
       path: `${ENTITY_INTERNAL_API_PREFIX}/definition`,
       validate: {
         query: schema.object({
-          managed: schema.maybe(schema.boolean()),
           page: schema.maybe(schema.number()),
           perPage: schema.maybe(schema.number()),
         }),
@@ -34,7 +33,6 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
           soClient,
           page: req.query.page ?? 1,
           perPage: req.query.perPage ?? 10,
-          managed: req.query.managed,
         });
         return res.ok({ body: definitions });
       } catch (e) {

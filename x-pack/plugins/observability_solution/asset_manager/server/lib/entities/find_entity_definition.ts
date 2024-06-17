@@ -18,7 +18,6 @@ import { BUILT_IN_ID_PREFIX } from './built_in';
 export async function findEntityDefinitions({
   soClient,
   esClient,
-  managed,
   builtIn,
   id,
   page = 1,
@@ -26,16 +25,12 @@ export async function findEntityDefinitions({
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
-  managed?: boolean;
   builtIn?: boolean;
   id?: string;
   page?: number;
   perPage?: number;
 }): Promise<Array<EntityDefinition & { state: { installed: boolean; running: boolean } }>> {
   const filter = compact([
-    typeof managed === 'boolean'
-      ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.managed:(${managed})`
-      : undefined,
     typeof builtIn === 'boolean'
       ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${BUILT_IN_ID_PREFIX}*)`
       : undefined,
