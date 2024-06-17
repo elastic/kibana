@@ -25,11 +25,16 @@ export function createAnnotationsClient(params: {
   logger: Logger;
   license?: ILicense;
 }) {
-  const { index, esClient, logger, license } = params;
+  const { index: rawIndex, esClient, logger, license } = params;
+
+  const index =
+    rawIndex === DEFAULT_ANNOTATION_INDEX
+      ? rawIndex + `-v${ANNOTATION_RESOURCES_VERSION}`
+      : rawIndex;
 
   const initIndex = () =>
     createOrUpdateIndex({
-      index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
+      index,
       client: esClient,
       logger,
       mappings: ANNOTATION_MAPPINGS,
@@ -45,12 +50,6 @@ export function createAnnotationsClient(params: {
   }
 
   return {
-    get index() {
-      if (index === DEFAULT_ANNOTATION_INDEX) {
-        return index + `-v${ANNOTATION_RESOURCES_VERSION}`;
-      }
-      return index;
-    },
     create: ensureGoldLicense(
       async (
         createParams: CreateAnnotationParams
@@ -58,7 +57,7 @@ export function createAnnotationsClient(params: {
         const indexExists = await unwrapEsResponse(
           esClient.indices.exists(
             {
-              index: this.index,
+              index,
             },
             { meta: true }
           )
@@ -78,7 +77,7 @@ export function createAnnotationsClient(params: {
         const body = await unwrapEsResponse(
           esClient.index(
             {
-              index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
+              index,
               body: annotation,
               refresh: 'wait_for',
             },
@@ -89,7 +88,7 @@ export function createAnnotationsClient(params: {
         return (
           await esClient.get<Annotation>(
             {
-              index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
+              index,
               id: body._id,
             },
             { meta: true }
@@ -113,7 +112,7 @@ export function createAnnotationsClient(params: {
         const body = await unwrapEsResponse(
           esClient.index(
             {
-              index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
+              index,
               id,
               body: annotation,
               refresh: 'wait_for',
@@ -125,7 +124,7 @@ export function createAnnotationsClient(params: {
         return (
           await esClient.get<Annotation>(
             {
-              index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
+              index,
               id: body._id,
             },
             { meta: true }
@@ -137,7 +136,7 @@ export function createAnnotationsClient(params: {
       const { id } = getByIdParams;
 
       const response = await esClient.search({
-        index: index + `-*`,
+        index: rawIndex + `*`,
         query: {
           bool: {
             filter: [
@@ -156,7 +155,7 @@ export function createAnnotationsClient(params: {
       const { start, end, sloId, sloInstanceId, serviceName } = findParams ?? {};
 
       const result = await esClient.search({
-        index: index + `-*`,
+        index: rawIndex + `*`,
         size: 10000,
         query: {
           bool: {
@@ -208,7 +207,7 @@ export function createAnnotationsClient(params: {
       const { id } = deleteParams;
 
       return await esClient.deleteByQuery({
-        index: index + `-*`,
+        index: rawIndex + `-*`,
         body: {
           query: {
             term: {
