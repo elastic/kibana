@@ -64,6 +64,7 @@ export const useAnnotations = ({
     setValue('@timestamp', null);
     setValue('@timestampEnd', null);
     setIsCreateOpen(false);
+    setSelectedEditAnnotation(null);
   }, [setValue]);
 
   const { createAnnotation, updateAnnotation, deleteAnnotation, isLoading } = useAnnotationCRUDS();
@@ -150,7 +151,8 @@ export const useAnnotations = ({
         }
       };
     },
-    createAnnotation: (start: string, end?: string) => {
+    createAnnotation: (start: string | number, end?: string) => {
+      if (isCreateOpen) return;
       reset(getDefaultAnnotation({ sloId, sloInstanceId }));
 
       if (isNaN(Number(start))) {

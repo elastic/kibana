@@ -71,20 +71,16 @@ export function AnnotationsListChart({
       max: parse(end, { roundUp: true })?.valueOf()!,
     };
   }, [end, start]);
+  // we need at least two points for chart to render
 
-  const domainPoints = useMemo(() => {
-    const points = [
+  const domainPoints =
+    // we need at least two points for chart to render
+    [
       { x: domain.min, y: 1 },
+      { x: domain.min + 1, y: 1 },
+      { x: domain.min + 1, y: 1 },
       { x: domain.max, y: 1 },
     ];
-    // add 1000 points between the min and max domain
-
-    for (let i = 1; i < 1000; i++) {
-      const x = domain.min + (domain.max - domain.min) * (i / 1000);
-      points.push({ x, y: 1 });
-    }
-    return points;
-  }, [domain]);
 
   return (
     <>
@@ -147,7 +143,7 @@ export function AnnotationsListChart({
         />
         <BarSeries
           id="bars"
-          xScaleType={ScaleType.Linear}
+          xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}

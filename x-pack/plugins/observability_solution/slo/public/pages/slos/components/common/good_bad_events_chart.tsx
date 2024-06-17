@@ -83,11 +83,11 @@ export function GoodBadEventsChart({
 
   const barClickHandler = (params: XYChartElementEvent[]) => {
     if (slo?.indicator?.type === 'sli.kql.custom') {
-      const [dataenum, eventDetail] = params[0];
+      const [datum, eventDetail] = params[0];
       const isBad = eventDetail.specId === badEventId;
       const timeRange = {
-        from: moment(dataenum.x).toISOString(),
-        to: moment(dataenum.x).add(intervalInMilliseconds, 'ms').toISOString(),
+        from: moment(datum.x).toISOString(),
+        to: moment(datum.x).add(intervalInMilliseconds, 'ms').toISOString(),
         mode: 'absolute' as const,
       };
       openInDiscover(discover, slo, isBad, !isBad, timeRange);
