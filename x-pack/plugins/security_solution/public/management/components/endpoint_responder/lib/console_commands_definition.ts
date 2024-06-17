@@ -42,6 +42,7 @@ import { getCommandAboutInfo } from './get_command_about_info';
 
 import { validateUnitOfTime } from './utils';
 import { CONSOLE_COMMANDS } from '../../../common/translations';
+import { ScanActionResult } from '../command_render_components/scan_action';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -151,6 +152,7 @@ export const getEndpointConsoleCommands = ({
   const featureFlags = ExperimentalFeaturesService.get();
 
   const isUploadEnabled = featureFlags.responseActionUploadEnabled;
+  const isScanEnabled = featureFlags.responseActionScanEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     // Agent capabilities is only validated for Endpoint agent types
@@ -364,7 +366,7 @@ export const getEndpointConsoleCommands = ({
       name: 'get-file',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.getFile.about,
-        isSupported: doesEndpointSupportCommand('processes'),
+        isSupported: doesEndpointSupportCommand('get-file'),
       }),
       RenderComponent: GetFileActionResult,
       meta: {
@@ -496,6 +498,48 @@ export const getEndpointConsoleCommands = ({
       helpDisabled: !doesEndpointSupportCommand('upload'),
       helpHidden: !getRbacControl({
         commandName: 'upload',
+        privileges: endpointPrivileges,
+      }),
+    });
+  }
+
+  if (isScanEnabled) {
+    consoleCommands.push({
+      name: 'scan',
+      about: getCommandAboutInfo({
+        aboutInfo: CONSOLE_COMMANDS.scan.about,
+        isSupported: doesEndpointSupportCommand('scan'),
+      }),
+      RenderComponent: ScanActionResult,
+      meta: {
+        agentType,
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: 'scan --path "/full/path/to/folder" --comment "Scan folder for malware"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
+      mustHaveArgs: true,
+      args: {
+        path: {
+          required: true,
+          allowMultiples: false,
+          mustHaveValue: 'non-empty-string',
+          about: CONSOLE_COMMANDS.scan.args.path.about,
+        },
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 8,
+      helpDisabled: !doesEndpointSupportCommand('scan'),
+      helpHidden: !getRbacControl({
+        commandName: 'scan',
         privileges: endpointPrivileges,
       }),
     });
