@@ -150,7 +150,7 @@ describe('useEsqlMode', () => {
     });
   });
 
-  test('changing an ES|QL query with same result columns should change state when loading and finished', async () => {
+  test('changing an ES|QL query with same result columns but a different index pattern should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
