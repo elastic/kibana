@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a runtime field.
+  summary: Get a runtime field
   operationId: getRuntimeField
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -34,7 +34,7 @@ get:
             $ref: '../components/schemas/404_response.yaml'
 
 delete:
-  summary: Delete a runtime field from a data view.
+  summary: Delete a runtime field from a data view
   operationId: deleteRuntimeField
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -55,7 +55,7 @@ delete:
             $ref: '../components/schemas/404_response.yaml'
 
 post:
-  summary: Update an existing runtime field.
+  summary: Update a runtime field
   operationId: updateRuntimeField
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.

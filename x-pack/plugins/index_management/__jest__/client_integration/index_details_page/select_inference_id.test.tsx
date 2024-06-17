@@ -7,13 +7,13 @@
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { SelectInferenceId } from './select_inference_id';
+import { SelectInferenceId } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
 
 const onChangeMock = jest.fn();
 const setValueMock = jest.fn();
 const setNewInferenceEndpointMock = jest.fn();
 
-jest.mock('../../../../../app_context', () => ({
+jest.mock('../../../public/application/app_context', () => ({
   useAppContext: jest.fn().mockReturnValue({
     core: { application: {} },
     docLinks: {},
@@ -30,6 +30,17 @@ jest.mock('../../../../../app_context', () => ({
   }),
 }));
 
+jest.mock(
+  '../../../public/application/components/component_templates/component_templates_context',
+  () => ({
+    useComponentTemplatesContext: jest.fn().mockReturnValue({
+      toasts: {
+        addError: jest.fn(),
+        addSuccess: jest.fn(),
+      },
+    }),
+  })
+);
 describe('SelectInferenceId', () => {
   let exists: any;
   let find: any;
