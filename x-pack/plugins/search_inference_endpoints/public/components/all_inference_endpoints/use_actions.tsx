@@ -100,7 +100,10 @@ export const useActions = (): UseBulkActionsReturnValue => {
       align: 'right',
       render: (interfaceEndpoint: InferenceEndpointUI) => {
         return (
-          <ActionColumn interfaceEndpoint={interfaceEndpoint} key={interfaceEndpoint.endpoint} />
+          <ActionColumn
+            interfaceEndpoint={interfaceEndpoint}
+            key={interfaceEndpoint.endpoint.model_id}
+          />
         );
       },
       width: '100px',

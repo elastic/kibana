@@ -8,8 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useActions } from './use_actions';
 import { ServiceProvider } from './service_provider';
+import { RenderEndpoint } from './render_endpoint/render_endpoint';
 
 export const useTableColumns = () => {
   const { actions } = useActions();
@@ -20,6 +22,13 @@ export const useTableColumns = () => {
       name: i18n.translate('xpack.searchInferenceEndpoints.inferenceEndpoints.table.endpoint', {
         defaultMessage: 'Endpoint',
       }),
+      render: (endpoint: InferenceAPIConfigResponse) => {
+        if (endpoint != null) {
+          return <RenderEndpoint endpoint={endpoint} />;
+        }
+
+        return null;
+      },
       sortable: true,
       width: '50%',
     },

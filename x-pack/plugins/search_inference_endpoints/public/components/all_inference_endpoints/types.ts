@@ -5,7 +5,16 @@
  * 2.0.
  */
 
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
+
+export enum ProviderKeys {
+  huggingFace = 'hugging_face',
+  elser = 'elser',
+  cohere = 'cohere',
+  elasticsearch = 'elasticsearch',
+  openai = 'openai',
+}
 
 export enum SortFieldInferenceEndpoint {
   endpoint = 'endpoint',
@@ -35,7 +44,7 @@ export interface EuiBasicTableSortTypes {
 }
 
 export interface InferenceEndpointUI {
-  endpoint: string;
+  endpoint: InferenceAPIConfigResponse;
   provider: string;
   type: string;
 }

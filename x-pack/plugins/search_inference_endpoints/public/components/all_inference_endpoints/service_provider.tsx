@@ -10,6 +10,8 @@ import React from 'react';
 import elasticIcon from '../../assets/images/providers/elastic.svg';
 import huggingFaceIcon from '../../assets/images/providers/hugging_face.svg';
 import cohereIcon from '../../assets/images/providers/cohere.svg';
+import OpenAIIcon from '../../assets/images/providers/open_ai.svg';
+import { ProviderKeys } from './types';
 
 interface ServiceProviderProps {
   providerKey: string;
@@ -21,17 +23,25 @@ interface ProviderRecord {
 }
 
 const PROVIDERS: Record<string, ProviderRecord> = {
-  hugging_face: {
+  [ProviderKeys.huggingFace]: {
     icon: huggingFaceIcon,
     name: 'Hugging Face',
   },
-  elser: {
+  [ProviderKeys.elser]: {
     icon: elasticIcon,
     name: 'Elser',
   },
-  cohere: {
+  [ProviderKeys.elasticsearch]: {
+    icon: elasticIcon,
+    name: 'elasticsearch',
+  },
+  [ProviderKeys.cohere]: {
     icon: cohereIcon,
     name: 'Cohere',
+  },
+  [ProviderKeys.openai]: {
+    icon: OpenAIIcon,
+    name: 'Open AI',
   },
 };
 

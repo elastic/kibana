@@ -35,7 +35,7 @@ export const useDeleteAction = ({ onAction, onActionSuccess }: UseActionProps) =
 
     deleteEndpoint({
       type: endpointToBeDeleted.type,
-      id: endpointToBeDeleted.endpoint,
+      id: endpointToBeDeleted.endpoint.model_id,
     });
   }, [deleteEndpoint, onCloseModal, endpointToBeDeleted]);
 
