@@ -132,9 +132,9 @@ export function createQuery(
           if (elserField) {
             // when another index has the same field, we don't want to duplicate the match rule
             const hasExistingSparseMatch = acc.queryMatches.find(
-              (x: any) =>
-                x?.sparse_vector.field === field &&
-                x?.sparse_vector.model_id === elserField?.model_id
+              (x) =>
+                x?.sparse_vector?.field === field &&
+                x?.sparse_vector?.inference_id === elserField?.model_id
             );
 
             if (hasExistingSparseMatch) {

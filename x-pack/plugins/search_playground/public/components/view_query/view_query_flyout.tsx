@@ -65,6 +65,12 @@ const groupTypeQueryFields = (
       typeQueryFields += (typeQueryFields ? '_' : '') + 'SPARSE';
     }
 
+    if (
+      selectedFields.some((field) => indexFields.semantic_fields.find((f) => f.field === field))
+    ) {
+      typeQueryFields += (typeQueryFields ? '_' : '') + 'SEMANTIC';
+    }
+
     return typeQueryFields;
   });
 
