@@ -14,6 +14,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -282,7 +283,14 @@ describe('SecurityUsageReportingTask', () => {
         );
       });
 
-      describe('lastSuccessfulReport', () => {
+      it('should do nothing if task instance id is outdated', async () => {
+      const result = await runTask({ ...buildMockTaskInstance(), id: 'old-id' });
+
+      expect(result).toEqual(getDeleteTaskRunResult());
+
+      expect(reportUsageSpy).not.toHaveBeenCalled();
+      expect(meteringCallbackMock).not.toHaveBeenCalled();
+    });describe('lastSuccessfulReport', () => {
         it('should set lastSuccessfulReport correctly if report success', async () => {
           reportUsageSpy.mockResolvedValueOnce({ status: 201 });
           const taskInstance = buildMockTaskInstance();
