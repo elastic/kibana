@@ -1110,6 +1110,56 @@
           }
         ]
       },
+      "kql_with_filters_good": {
+        "title": "KQL with filters",
+        "description": "The KQL query used to define the good events.",
+        "oneOf": [
+          {
+            "description": "the KQL query to filter the documents with.",
+            "type": "string",
+            "example": "request.latency <= 150 and request.status_code : \"2xx\""
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kqlQuery": {
+                "type": "string"
+              },
+              "filters": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/filter"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "kql_with_filters_total": {
+        "title": "KQL with filters",
+        "description": "The KQL query used to define all events.",
+        "oneOf": [
+          {
+            "description": "the KQL query to filter the documents with.",
+            "type": "string",
+            "example": "field.environment : \"production\" and service.name : \"my-service\""
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kqlQuery": {
+                "type": "string"
+              },
+              "filters": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/filter"
+                }
+              }
+            }
+          }
+        ]
+      },
       "indicator_properties_custom_kql": {
         "title": "Custom Query",
         "required": [
@@ -1141,18 +1191,13 @@
                 "example": "03b80ab3-003d-498b-881c-3beedbaf1162"
               },
               "filter": {
-                "description": "the KQL query to filter the documents with.",
                 "$ref": "#/components/schemas/kql_with_filters"
               },
               "good": {
-                "description": "the KQL query used to define the good events.",
-                "$ref": "#/components/schemas/kql_with_filters",
-                "example": "request.latency <= 150 and request.status_code : \"2xx\""
+                "$ref": "#/components/schemas/kql_with_filters_good"
               },
               "total": {
-                "description": "the KQL query used to define all events.",
-                "$ref": "#/components/schemas/kql_with_filters",
-                "example": ""
+                "$ref": "#/components/schemas/kql_with_filters_total"
               },
               "timestampField": {
                 "description": "The timestamp field used in the source indice.\n",
