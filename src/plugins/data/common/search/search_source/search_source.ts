@@ -788,7 +788,7 @@ export class SearchSource {
       }
     }
     for (const query of request.query) {
-      if (query.query) {
+      if (query.query && query.language === 'kuery') {
         const nodes = fromKueryExpression(query.query);
         const queryFields = getKqlFieldNames(nodes);
         fields = fields.concat(queryFields);

@@ -44,9 +44,10 @@ export function connectorStatusToText(connector: Connector): string {
     );
   }
   if (
-    connector.error === SyncStatus.ERROR ||
-    connector.last_sync_error !== null ||
-    connector.last_access_control_sync_error !== null
+    connector.last_sync_status === SyncStatus.ERROR ||
+    connector.last_access_control_sync_status === SyncStatus.ERROR ||
+    connector.last_sync_error != null ||
+    connector.last_access_control_sync_error != null
   ) {
     return i18n.translate(
       'xpack.enterpriseSearch.content.searchIndices.connectorStatus.syncFailure.label',
@@ -87,9 +88,10 @@ export function connectorStatusToColor(connector: Connector): 'warning' | 'dange
   if (
     isLastSeenOld(connector) ||
     connectorStatus === ConnectorStatus.ERROR ||
-    connector.error === SyncStatus.ERROR ||
-    connector.last_sync_error !== null ||
-    connector.last_access_control_sync_error !== null
+    connector.last_sync_status === SyncStatus.ERROR ||
+    connector.last_access_control_sync_status === SyncStatus.ERROR ||
+    connector.last_sync_error != null ||
+    connector.last_access_control_sync_error != null
   ) {
     return 'danger';
   }

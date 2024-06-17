@@ -104,15 +104,41 @@ function buildMetricEquation(keyMetric: KeyMetric) {
   };
 }
 
-export function generateMetricAggregations(definition: EntityDefinition) {
+export function generateHistoryMetricAggregations(definition: EntityDefinition) {
   if (!definition.metrics) {
     return {};
   }
   return definition.metrics.reduce((aggs, keyMetric) => {
     return {
       ...aggs,
-      ...buildMetricAggregations(keyMetric, definition.timestampField),
-      [`entity.metric.${keyMetric.name}`]: buildMetricEquation(keyMetric),
+      ...buildMetricAggregations(keyMetric, definition.history.timestampField),
+      [`entity.metrics.${keyMetric.name}`]: buildMetricEquation(keyMetric),
+    };
+  }, {});
+}
+
+export function generateLatestMetricAggregations(definition: EntityDefinition) {
+  if (!definition.metrics) {
+    return {};
+  }
+
+  return definition.metrics.reduce((aggs, keyMetric) => {
+    return {
+      ...aggs,
+      [`_${keyMetric.name}`]: {
+        top_metrics: {
+          metrics: [{ field: `entity.metrics.${keyMetric.name}` }],
+          sort: [{ '@timestamp': 'desc' }],
+        },
+      },
+      [`entity.metrics.${keyMetric.name}`]: {
+        bucket_script: {
+          buckets_path: {
+            value: `_${keyMetric.name}[entity.metrics.${keyMetric.name}]`,
+          },
+          script: 'params.value',
+        },
+      },
     };
   }, {});
 }

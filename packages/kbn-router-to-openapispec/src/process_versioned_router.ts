@@ -20,9 +20,10 @@ import {
   prepareRoutes,
   getPathParameters,
   extractContentType,
-  assignToPathsObject,
+  assignToPaths,
   getVersionedHeaderParam,
   getVersionedContentTypeString,
+  extractTags,
 } from './util';
 
 export const processVersionedRouter = (
@@ -82,25 +83,28 @@ export const processVersionedRouter = (
       const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);
       const contentType = extractContentType(route.options.options?.body);
       const hasVersionFilter = Boolean(filters?.version);
+      const operation: OpenAPIV3.OperationObject = {
+        summary: route.options.summary ?? '',
+        description: route.options.description,
+        tags: route.options.options?.tags ? extractTags(route.options.options.tags) : [],
+        requestBody: hasBody
+          ? {
+              content: hasVersionFilter
+                ? extractVersionedRequestBody(handler, converter, contentType)
+                : extractVersionedRequestBodies(route, converter, contentType),
+            }
+          : undefined,
+        responses: hasVersionFilter
+          ? extractVersionedResponse(handler, converter, contentType)
+          : extractVersionedResponses(route, converter, contentType),
+        parameters,
+        operationId: getOpId(route.path),
+      };
       const path: OpenAPIV3.PathItemObject = {
-        [route.method]: {
-          summary: route.options.description ?? '',
-          requestBody: hasBody
-            ? {
-                content: hasVersionFilter
-                  ? extractVersionedRequestBody(handler, converter, contentType)
-                  : extractVersionedRequestBodies(route, converter, contentType),
-              }
-            : undefined,
-          responses: hasVersionFilter
-            ? extractVersionedResponse(handler, converter, contentType)
-            : extractVersionedResponses(route, converter, contentType),
-          parameters,
-          operationId: getOpId(route.path),
-        },
+        [route.method]: operation,
       };
 
-      assignToPathsObject(paths, route.path, path);
+      assignToPaths(paths, route.path, path);
     } catch (e) {
       // Enrich the error message with a bit more context
       e.message = `Error generating OpenAPI for route '${route.path}' using newest version '${version}': ${e.message}`;

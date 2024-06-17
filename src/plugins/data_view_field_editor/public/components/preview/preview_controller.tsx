@@ -253,7 +253,7 @@ export class PreviewController {
 
       const afterSave = () => {
         const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
-          defaultMessage: "Saved '{fieldName}'",
+          defaultMessage: "Saved ''{fieldName}''",
           values: { fieldName: updatedField.name },
         });
         this.deps.notifications.toasts.addSuccess(message);

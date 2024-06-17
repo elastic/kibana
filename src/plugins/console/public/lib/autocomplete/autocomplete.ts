@@ -43,8 +43,14 @@ function isUrlParamsToken(token: { type: string } | null) {
   }
 }
 
+/* Logs the provided arguments to the console if the `window.autocomplete_trace` flag is set to true.
+ * This function checks if the `autocomplete_trace` flag is enabled on the `window` object. This is
+ * only used when executing functional tests.
+ * If the flag is enabled, it logs each argument to the console.
+ * If an argument is an object, it is stringified before logging.
+ */
 const tracer = (...args: any[]) => {
-  // @ts-expect-error ts upgrade v4.7.4
+  // @ts-ignore
   if (window.autocomplete_trace) {
     // eslint-disable-next-line no-console
     console.log.call(
