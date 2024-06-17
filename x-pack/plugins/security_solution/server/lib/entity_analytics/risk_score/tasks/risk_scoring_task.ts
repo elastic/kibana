@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import { asyncForEach } from '@kbn/std';
 import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -15,7 +14,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
 import {
   type IdentifierType,
   RiskScoreEntity,
@@ -23,7 +21,6 @@ import {
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from '../risk_score_data_client';
-import { isRiskScoreCalculationComplete } from '../helpers';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -211,12 +208,11 @@ export const runTask = async ({
     const taskStartTime = moment().utc().toISOString();
     log('running task');
 
-    let scoresWritten = 0;
     const updatedState = {
       lastExecutionTimestamp: taskStartTime,
       namespace: state.namespace,
       runs: state.runs + 1,
-      scoresWritten,
+      scoresWritten: 0,
     };
 
     if (taskId !== getTaskId(state.namespace)) {
@@ -247,7 +243,6 @@ export const runTask = async ({
       identifierType: configuredIdentifierType,
       range: configuredRange,
       pageSize,
-      alertSampleSizePerShard,
     } = configuration;
     if (!enabled) {
       log('risk engine is not enabled, exiting task');
@@ -262,51 +257,30 @@ export const runTask = async ({
       ? [configuredIdentifierType]
       : [RiskScoreEntity.host, RiskScoreEntity.user];
 
-    const runs: Array<{
-      identifierType: IdentifierType;
-      scoresWritten: number;
-      tookMs: number;
-    }> = [];
-
-    await asyncForEach(identifierTypes, async (identifierType) => {
-      let isWorkComplete = isCancelled();
-      let afterKeys: AfterKeys = {};
-      while (!isWorkComplete) {
-        const now = Date.now();
-        const result = await riskScoreService.calculateAndPersistScores({
-          afterKeys,
-          index,
-          filter,
-          identifierType,
-          pageSize,
-          range,
-          runtimeMappings,
-          weights: [],
-          alertSampleSizePerShard,
-        });
-        const tookMs = Date.now() - now;
-
-        runs.push({
-          identifierType,
-          scoresWritten: result.scores_written,
-          tookMs,
-        });
-
-        isWorkComplete = isRiskScoreCalculationComplete(result) || isCancelled();
-        afterKeys = result.after_keys;
-        scoresWritten += result.scores_written;
-      }
+    const result = await riskScoreService.calculateAndPersistScores({
+      index,
+      filter,
+      identifierTypes,
+      pageSize,
+      range,
+      runtimeMappings,
+      weights: [],
     });
 
-    updatedState.scoresWritten = scoresWritten;
+    updatedState.scoresWritten = result.scores_written;
 
     const taskCompletionTime = moment().utc().toISOString();
     const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
+    const taskDurationInMilliseconds = moment(taskCompletionTime).diff(
+      moment(taskStartTime),
+      'milliseconds'
+    );
+    console.log('taskDurationInMs ', taskDurationInMilliseconds);
     const telemetryEvent = {
-      scoresWritten,
+      scoresWritten: result.scores_written,
       taskDurationInSeconds,
       interval: taskInstance?.schedule?.interval,
-      alertSampleSizePerShard,
+      alertSampleSizePerShard: 0,
     };
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
 
@@ -315,14 +289,14 @@ export const runTask = async ({
       telemetry.reportEvent(RISK_SCORE_EXECUTION_CANCELLATION_EVENT.eventType, telemetryEvent);
     }
 
-    if (scoresWritten > 0) {
+    if (result.scores_written > 0) {
       log('refreshing risk score index and scheduling transform');
       await riskScoreService.refreshRiskScoreIndex();
       await riskScoreService.scheduleLatestTransformNow();
     }
 
     log('task run completed');
-    log(JSON.stringify({ ...telemetryEvent, runs }));
+    log(JSON.stringify(telemetryEvent));
 
     return {
       state: updatedState,

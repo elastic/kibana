@@ -11,7 +11,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { isEmpty } from 'lodash/fp';
 import type { RiskScoresCalculationResponse } from '../../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
-import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
 import { RiskScoresEntityCalculationRequest } from '../../../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_URL } from '../../../../../common/constants';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
@@ -89,8 +88,7 @@ export const riskScoreEntityCalculationRoute = (
             enabled,
             range: configuredRange,
             pageSize,
-            alertSampleSizePerShard,
-            filter: userFilter,
+            filter: userFilter, // TODO: remove alertSampleSizePerShard from API
           } = entityAnalyticsConfig;
 
           if (!enabled) {
@@ -108,8 +106,6 @@ export const riskScoreEntityCalculationRoute = (
 
           const range = convertRangeToISO(configuredRange);
 
-          const afterKeys: AfterKeys = {};
-
           const identifierFilter = {
             term: { [getFieldForIdentifier(identifierType)]: identifier },
           };
@@ -119,7 +115,7 @@ export const riskScoreEntityCalculationRoute = (
           const result: RiskScoresCalculationResponse =
             await riskScoreService.calculateAndPersistScores({
               pageSize,
-              identifierType,
+              identifierTypes: identifierType ? [identifierType] : undefined,
               index,
               filter: {
                 bool: {
@@ -129,8 +125,6 @@ export const riskScoreEntityCalculationRoute = (
               range,
               runtimeMappings,
               weights: [],
-              alertSampleSizePerShard,
-              afterKeys,
               returnScores: true,
               refresh,
             });

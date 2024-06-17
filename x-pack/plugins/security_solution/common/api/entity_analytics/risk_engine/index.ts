@@ -6,3 +6,4 @@
  */
 
 export * from './engine_settings_route.gen';
+export * from './preview_route.gen';
