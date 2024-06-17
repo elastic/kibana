@@ -13,6 +13,11 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { EmptyMessage } from '../../../shared/empty_message';
+import { SearchBar } from '../../../shared/search_bar/search_bar';
+import {
+  getItemsFilteredBySearchQuery,
+  TableSearchBar,
+} from '../../../shared/table_search_bar/table_search_bar';
 import {
   MultiSignalServicesTable,
   ServiceInventoryFieldName,
@@ -69,30 +74,51 @@ function useServicesMainStatisticsFetcher() {
 }
 
 export const MultiSignalInventory = () => {
+  const [searchQuery, setSearchQuery] = React.useState('');
   const { mainStatisticsData, mainStatisticsStatus } = useServicesMainStatisticsFetcher();
 
-  const tiebreakerField = ServiceInventoryFieldName.Throughput;
+  const initialSortField = ServiceInventoryFieldName.Throughput;
 
-  const initialSortField = tiebreakerField;
+  const filteredData = getItemsFilteredBySearchQuery({
+    items: mainStatisticsData.services,
+    searchQuery,
+    fieldsToSearch: [ServiceInventoryFieldName.ServiceName],
+  });
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem>
-        <MultiSignalServicesTable
-          status={mainStatisticsStatus}
-          data={mainStatisticsData}
-          initialSortField={initialSortField}
-          initialPageSize={INITIAL_PAGE_SIZE}
-          initialSortDirection={INITIAL_SORT_DIRECTION}
-          noItemsMessage={
-            <EmptyMessage
-              heading={i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
-                defaultMessage: 'No services found',
-              })}
-            />
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem grow={true}>
+          <TableSearchBar
+            placeholder={i18n.translate('xpack.apm.servicesTable.filterServicesPlaceholder', {
+              defaultMessage: 'Search services by name',
+            })}
+            searchQuery={searchQuery}
+            onChangeSearchQuery={setSearchQuery}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SearchBar showQueryInput={false} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem>
+          <MultiSignalServicesTable
+            status={mainStatisticsStatus}
+            data={filteredData}
+            initialSortField={initialSortField}
+            initialPageSize={INITIAL_PAGE_SIZE}
+            initialSortDirection={INITIAL_SORT_DIRECTION}
+            noItemsMessage={
+              <EmptyMessage
+                heading={i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
+                  defaultMessage: 'No services found',
+                })}
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };

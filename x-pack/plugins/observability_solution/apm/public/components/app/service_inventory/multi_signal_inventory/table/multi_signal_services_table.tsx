@@ -62,7 +62,7 @@ export function MultiSignalServicesTable({
           isLoading={isPending(status)}
           error={isFailure(status)}
           columns={serviceColumns}
-          items={data.services}
+          items={data}
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
           initialSortDirection={initialSortDirection}
