@@ -48,6 +48,9 @@ const summarySchema = t.intersection([
     status: statusSchema,
     sliValue: t.number,
     errorBudget: errorBudgetSchema,
+    fiveMinuteBurnRate: t.number,
+    oneHourBurnRate: t.number,
+    oneDayBurnRate: t.number,
   }),
   t.partial({
     summaryUpdatedAt: t.union([t.string, t.null]),
