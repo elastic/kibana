@@ -27,7 +27,7 @@ import {
   type ResponseActionGetFileParameters,
   type ResponseActionScanOutputContent,
   type ResponseActionsExecuteParameters,
-  type ResponseActionsScanParameters,
+  type ResponseActionScanParameters,
   type ResponseActionUploadOutputContent,
   type ResponseActionUploadParameters,
   type WithAllKeys,
@@ -291,7 +291,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         (
           details as unknown as ActionDetails<
             ResponseActionScanOutputContent,
-            ResponseActionsScanParameters
+            ResponseActionScanParameters
           >
         ).parameters = {
           path: '/some/folder/to/scan',
@@ -302,7 +302,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         (
           details as unknown as ActionDetails<
             ResponseActionScanOutputContent,
-            ResponseActionsScanParameters
+            ResponseActionScanParameters
           >
         ).outputs = {
           [details.agents[0]]: {
