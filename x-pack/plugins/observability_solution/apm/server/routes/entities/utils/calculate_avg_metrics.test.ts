@@ -5,7 +5,7 @@ describe('calculateAverageMetrics', () => {
     const entities = [
       {
         agentName: 'nodejs',
-        dataStreams: ['foo', 'bar'],
+        signalTypes: ['foo', 'bar'],
         environments: [],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: [
@@ -28,7 +28,7 @@ describe('calculateAverageMetrics', () => {
       },
       {
         agentName: 'java',
-        dataStreams: ['baz'],
+        signalTypes: ['baz'],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: [
@@ -56,7 +56,7 @@ describe('calculateAverageMetrics', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        dataStreams: ['foo', 'bar'],
+        signalTypes: ['foo', 'bar'],
         environments: [],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: {
@@ -70,7 +70,7 @@ describe('calculateAverageMetrics', () => {
       },
       {
         agentName: 'java',
-        dataStreams: ['baz'],
+        signalTypes: ['baz'],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: {
@@ -88,7 +88,7 @@ describe('calculateAverageMetrics', () => {
     const entities = [
       {
         agentName: 'nodejs',
-        dataStreams: ['foo', 'bar'],
+        signalTypes: ['foo', 'bar'],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: [
@@ -116,7 +116,7 @@ describe('calculateAverageMetrics', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        dataStreams: ['foo', 'bar'],
+        signalTypes: ['foo', 'bar'],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: {

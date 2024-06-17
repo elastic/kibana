@@ -13,7 +13,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-1',
         agentName: 'nodejs',
-        dataStreams: ['metrics', 'logs'],
+        signalTypes: ['metrics', 'logs'],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
@@ -32,7 +32,7 @@ describe('mergeEntities', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        dataStreams: ['metrics', 'logs'],
+        signalTypes: ['metrics', 'logs'],
         environments: ['test'],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: [
@@ -54,7 +54,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-1',
         agentName: 'nodejs',
-        dataStreams: ['foo'],
+        signalTypes: ['foo'],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
@@ -72,7 +72,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-1',
         agentName: 'nodejs',
-        dataStreams: ['bar'],
+        signalTypes: ['bar'],
         entity: {
           latestTimestamp: '2024-03-05T10:34:40.810Z',
           metrics: {
@@ -89,7 +89,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-2',
         agentName: 'java',
-        dataStreams: ['baz'],
+        signalTypes: ['baz'],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
@@ -106,7 +106,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-2',
         agentName: 'java',
-        dataStreams: ['baz'],
+        signalTypes: ['baz'],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
@@ -126,7 +126,7 @@ describe('mergeEntities', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        dataStreams: ['foo', 'bar'],
+        signalTypes: ['foo', 'bar'],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: [
@@ -149,7 +149,7 @@ describe('mergeEntities', () => {
       },
       {
         agentName: 'java',
-        dataStreams: ['baz'],
+        signalTypes: ['baz'],
         environments: ['env-service-3', 'env-service-4'],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: [
@@ -177,7 +177,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-1',
         agentName: 'nodejs',
-        dataStreams: ['metrics', 'logs'],
+        signalTypes: ['metrics', 'logs'],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
@@ -194,7 +194,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-1',
         agentName: 'nodejs',
-        dataStreams: ['metrics', 'logs'],
+        signalTypes: ['metrics', 'logs'],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
@@ -211,7 +211,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-1',
         agentName: 'nodejs',
-        dataStreams: ['foo'],
+        signalTypes: ['foo'],
         entity: {
           latestTimestamp: '2024-23-05T10:34:40.810Z',
           metrics: {
@@ -230,7 +230,7 @@ describe('mergeEntities', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        dataStreams: ['metrics', 'logs', 'foo'],
+        signalTypes: ['metrics', 'logs', 'foo'],
         environments: ['test', 'prod'],
         latestTimestamp: '2024-23-05T10:34:40.810Z',
         metrics: [
@@ -265,7 +265,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-1',
         agentName: 'nodejs',
-        dataStreams: [],
+        signalTypes: [],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
@@ -284,7 +284,7 @@ describe('mergeEntities', () => {
     expect(entityResult).toEqual([
       {
         agentName: 'nodejs',
-        dataStreams: [],
+        signalTypes: [],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: [
@@ -304,7 +304,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-1',
         agentName: 'nodejs',
-        dataStreams: [],
+        signalTypes: [],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
@@ -321,7 +321,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-1',
         agentName: 'nodejs',
-        dataStreams: [],
+        signalTypes: [],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
@@ -340,7 +340,7 @@ describe('mergeEntities', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        dataStreams: [],
+        signalTypes: [],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: [
@@ -369,7 +369,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-1',
         agentName: 'nodejs',
-        dataStreams: [],
+        signalTypes: [],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
@@ -388,7 +388,7 @@ describe('mergeEntities', () => {
     expect(entityResult).toEqual([
       {
         agentName: 'nodejs',
-        dataStreams: [],
+        signalTypes: [],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: [
@@ -408,7 +408,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-1',
         agentName: 'nodejs',
-        dataStreams: [],
+        signalTypes: [],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
@@ -425,7 +425,7 @@ describe('mergeEntities', () => {
       {
         serviceName: 'service-1',
         agentName: 'nodejs',
-        dataStreams: [],
+        signalTypes: [],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
@@ -444,7 +444,7 @@ describe('mergeEntities', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        dataStreams: [],
+        signalTypes: [],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: [

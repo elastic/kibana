@@ -20,7 +20,7 @@ export interface TraceMetrics {
 }
 
 export interface EntityServiceListItem {
-  dataStreams: SignalTypes[];
+  signalTypes: SignalTypes[];
   metrics: TraceMetrics & LogsRatesMetrics;
   environments: string[];
   serviceName: string;

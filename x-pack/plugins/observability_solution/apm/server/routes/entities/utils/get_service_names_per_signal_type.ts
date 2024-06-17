@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EntityServiceListItem, SignalType } from '../../../../common/assets/types';
+import { EntityServiceListItem, SignalTypes } from '../../../../common/assets/types';
 
-export function getServiceNamesPerSignalType(serviceAssets: EntityServiceListItem[]) {
-  const tracesServiceNames = serviceAssets
-    .filter(({ asset }) => asset.signalTypes[SignalType.ASSET_TRACES])
-    .map(({ service }) => service.name);
+export function getServiceNamesPerSignalType(serviceEntities: EntityServiceListItem[]) {
+  const tracesServiceNames = serviceEntities
+    .filter(({ signalTypes }) => signalTypes.includes(SignalTypes.METRICS))
+    .map(({ serviceName }) => serviceName);
 
-  const logsServiceNames = serviceAssets
-    .filter(({ asset }) => asset.signalTypes[SignalType.ASSET_LOGS])
-    .map(({ service }) => service.name);
+  const logsServiceNames = serviceEntities
+    .filter(({ signalTypes }) => signalTypes.includes(SignalTypes.LOGS))
+    .map(({ serviceName }) => serviceName);
 
   return { tracesServiceNames, logsServiceNames };
 }

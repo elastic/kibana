@@ -32,7 +32,7 @@ function mergeFunc(entity: ServiceEntities, existingEntity?: MergedServiceEntiti
     return {
       serviceName: entity.serviceName,
       agentName: entity.agentName,
-      dataStreams: entity.dataStreams,
+      signalTypes: entity.signalTypes,
       environments: compact([entity.entity.identityFields.service?.environment]),
       latestTimestamp: entity.entity.latestTimestamp,
       metrics: [entity.entity.metrics],
@@ -41,7 +41,7 @@ function mergeFunc(entity: ServiceEntities, existingEntity?: MergedServiceEntiti
   return {
     serviceName: entity.serviceName,
     agentName: entity.agentName,
-    dataStreams: uniq(compact([...(existingEntity?.dataStreams ?? []), ...entity.dataStreams])),
+    signalTypes: uniq(compact([...(existingEntity?.signalTypes ?? []), ...entity.signalTypes])),
     environments: uniq(
       compact([...existingEntity?.environments, entity.entity.identityFields?.service?.environment])
     ),

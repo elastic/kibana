@@ -13,14 +13,14 @@ import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_asse
 export interface ServiceEntities {
   serviceName: string;
   agentName?: string;
-  dataStreams: string[];
+  signalTypes: string[];
   entity: Entity;
 }
 
 export interface MergedServiceEntities {
   serviceName: string;
   agentName?: string;
-  dataStreams: string[];
+  signalTypes: string[];
   environments: string[];
   metrics: EntityMetrics[];
 }
@@ -114,7 +114,7 @@ export async function getEntities({
     return {
       serviceName: entity.entity.identityFields.service.name,
       agentName: entity.agent.name[0],
-      dataStreams: entity.data_stream.type,
+      signalTypes: entity.data_stream.type,
       entity: entity.entity,
     };
   });
