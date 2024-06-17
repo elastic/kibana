@@ -98,7 +98,7 @@ function createChangelog(packageDir: string): void {
 function createReadme(packageDir: string, integration: Integration) {
   const readmeDirPath = resolvePath(packageDir, '_dev/build/docs/');
   ensureDirSync(readmeDirPath);
-  const readmeTemplate = nunjucks.render('package_description.njk', {
+  const readmeTemplate = nunjucks.render('package_readme.md.njk', {
     package_name: integration.name,
     data_streams: integration.dataStreams,
   });

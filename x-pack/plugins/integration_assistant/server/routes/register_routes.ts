@@ -50,7 +50,7 @@ export function registerRoutes(router: IRouter<IntegrationAssistantRouteHandlerC
           body.templateDir = templateDir;
           body.templateFiles = fs.readdirSync(templateDir);
 
-          const templateFile = resolvePath(templateDir, 'package_description.njk');
+          const templateFile = resolvePath(templateDir, 'package_readme.md.njk');
           body.templateFile = templateFile;
           body.templateContent = fs.readFileSync(templateFile).toString();
 
@@ -58,7 +58,7 @@ export function registerRoutes(router: IRouter<IntegrationAssistantRouteHandlerC
             autoescape: false,
           });
 
-          const readmeTemplate = nunjucks.render('package_description.njk', {
+          const readmeTemplate = nunjucks.render('package_readme.md.njk', {
             package_name: 'testPackageName',
             data_streams: ['testDataStreamName'],
           });

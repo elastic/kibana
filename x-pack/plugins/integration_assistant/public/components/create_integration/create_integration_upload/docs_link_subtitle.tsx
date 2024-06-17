@@ -19,10 +19,7 @@ export const DocsLinkSubtitle = React.memo(() => {
         defaultMessage="Have some issues? Please read the {link}"
         values={{
           link: (
-            <EuiLink
-              href={docLinks?.links.fleet.installAndUninstallIntegrationAssets} // TODO: Update the docs link to the correct place
-              target="_blank"
-            >
+            <EuiLink href={docLinks?.links.integrationDeveloper.upload} target="_blank">
               <FormattedMessage
                 id="xpack.integrationAssistant.createIntegrationUpload.documentation"
                 defaultMessage="documentation"
