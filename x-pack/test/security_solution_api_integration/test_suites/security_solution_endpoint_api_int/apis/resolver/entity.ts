@@ -40,11 +40,9 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'process.entity_id',
               parent: 'process.parent.entity_id',
               name: 'process.name',
-              agentId: 'agent.id',
             },
-            // these values come from the es archive
+            // this value comes from the es archive
             id: '{98da333e-2060-5fc9-2e01-000000003f00}',
-            agentId: '2ed94512-0ef0-4cf5-96f1-841568dc52f4',
           },
         ]);
       });
