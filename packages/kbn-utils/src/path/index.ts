@@ -7,9 +7,10 @@
  */
 
 import { join } from 'path';
-import { accessSync, constants } from 'fs';
+import { accessSync, constants, readFileSync } from 'fs';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getConfigFromFiles } from '@kbn/config';
 
 const isString = (v: any): v is string => typeof v === 'string';
 
@@ -57,7 +58,21 @@ export const getConfigDirectory = () => findFile(CONFIG_DIRECTORIES);
  * Get the directory containing runtime data
  * @internal
  */
-export const getDataPath = () => findFile(DATA_PATHS);
+export const getDataPath = () => {
+  // Attempt to read the path.data setting from kibana.yml
+  const configPath = getConfigPath(); // Get the path of the kibana.yml file
+  console.log("CONFIG FILE " + configPath);
+  try {
+    const configContent = readFileSync(configPath, 'utf8'); // Read the content of the kibana.yml file
+    const match = configContent.match(/path\.data:\s*(.*)/); // Search for the path.data setting using a regular expression
+    if (match && match[1]) {
+      return match[1].trim(); // Return the value of path.data if found
+    }
+  } catch (e) {
+    // Handle any errors that occur while reading the file
+  }
+  return findFile(DATA_PATHS);
+};
 
 /**
  * Get the directory containing logs
