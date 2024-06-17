@@ -10,7 +10,7 @@ import { processMapping } from './validate';
 describe('Testing ecs handler', () => {
   it('processMapping()', async () => {
     const path: string[] = [];
-    let value = {
+    const value = {
       checkpoint: {
         firewall: {
           product: null,
