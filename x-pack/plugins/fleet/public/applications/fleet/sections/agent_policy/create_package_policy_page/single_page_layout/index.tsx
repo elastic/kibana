@@ -323,7 +323,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
 
-  const { agentlessPolicy, handleSetupTechnologyChange, selectedSetupTechnology } =
+  const { isAgentlessEnabled, handleSetupTechnologyChange, selectedSetupTechnology } =
     useSetupTechnology({
       newAgentPolicy,
       updateNewAgentPolicy,
@@ -346,7 +346,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            agentlessPolicy={agentlessPolicy}
+            isAgentlessEnabled={isAgentlessEnabled}
+            // agentlessPolicy={agentlessPolicy}
           />
         </ExtensionWrapper>
       )

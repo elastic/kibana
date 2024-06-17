@@ -1523,11 +1523,18 @@ class AgentPolicyService {
   private checkAgentless(agentPolicy: Partial<NewAgentPolicy>) {
     const cloudSetup = appContextService.getCloud();
     if (
-      (!cloudSetup?.isServerlessEnabled ||
-        !cloudSetup.isCloudEnabled ||
-        !appContextService.getExperimentalFeatures().agentless) &&
+      (!cloudSetup?.isServerlessEnabled || !cloudSetup.isCloudEnabled) &&
+      !appContextService.getExperimentalFeatures().agentless &&
       agentPolicy?.supports_agentless !== undefined
     ) {
+      console.log('supports_agentless', agentPolicy?.supports_agentless);
+      console.log('cloudSetup?.isServerlessEnabled', cloudSetup?.isServerlessEnabled);
+      console.log('cloudSetup.isCloudEnabled', cloudSetup.isCloudEnabled);
+      console.log(
+        'appContextService.getExperimentalFeatures().agentless',
+        appContextService.getExperimentalFeatures().agentless
+      );
+
       throw new AgentPolicyInvalidError(
         'supports_agentless is only allowed in serverless environments that support the agentless feature'
       );

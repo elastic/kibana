@@ -14,7 +14,7 @@ import type {
   NewPackagePolicy,
   PackageInfo,
 } from '../../../../../types';
-import { sendCreateAgentPolicy, useConfig } from '../../../../../hooks';
+import { useConfig } from '../../../../../hooks';
 import { SetupTechnology } from '../../../../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
@@ -82,7 +82,7 @@ export function useSetupTechnology({
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
   );
-  const [agentlessPolicy, setAgentlessPolicy] = useState<AgentPolicy | undefined>();
+  // const [agentlessPolicy, setAgentlessPolicy] = useState<AgentPolicy | undefined>();
 
   useEffect(() => {
     if (isAgentlessEnabled && packageInfo && isAgentlessIntegration(packageInfo)) {
@@ -90,35 +90,38 @@ export function useSetupTechnology({
     }
   }, [isAgentlessEnabled, isAgentlessIntegration, packageInfo]);
 
-  useEffect(() => {
-    const fetchAgentlessPolicy = async () => {
-      const { data, error } = await sendGetOneAgentPolicy(AGENTLESS_POLICY_ID);
-      const isAgentlessAvailable = !error && data && data.item;
+  // useEffect(() => {
+  //   const fetchAgentlessPolicy = async () => {
+  //     const { data, error } = await sendGetOneAgentPolicy(AGENTLESS_POLICY_ID);
+  //     const isAgentlessAvailable = !error && data && data.item;
 
-      if (isAgentlessAvailable) {
-        setAgentlessPolicy(data.item);
-      }
-    };
+  //     if (isAgentlessAvailable) {
+  //       setAgentlessPolicy(data.item);
+  //     }
+  //   };
 
-    if (isAgentlessEnabled && !agentlessAPI) {
-      fetchAgentlessPolicy();
-    }
-  }, [isAgentlessEnabled, agentlessAPI]);
+  //   if (isAgentlessEnabled && !agentlessAPI) {
+  //     fetchAgentlessPolicy();
+  //   }
+  // }, [isAgentlessEnabled, agentlessAPI]);
 
   const handleSetupTechnologyChange = useCallback(
-    (setupTechnology) => {
+    async (setupTechnology: SetupTechnology) => {
       if (!isAgentlessEnabled || setupTechnology === selectedSetupTechnology) {
         return;
       }
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
-        if (agentlessPolicy) {
-          updateAgentPolicy(agentlessPolicy);
-          setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
-        } else if (agentlessAPI) {
-          console.log('CREATE AGENT POLICY');
-          // sendCreateAgentPolicy());
-          // setSelectedPolicyTab(SelectedPolicyTab.NEW);
+        if (agentlessAPI) {
+          updateNewAgentPolicy({ ...newAgentPolicy, supports_agentless: true });
+          setSelectedPolicyTab(SelectedPolicyTab.NEW);
+        } else {
+          // get the agentless policy and then
+          const { data, error } = await sendGetOneAgentPolicy(AGENTLESS_POLICY_ID);
+          if (!error && data && data.item) {
+            updateAgentPolicy(data.item);
+            setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
+          }
         }
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         updateNewAgentPolicy(newAgentPolicy);
@@ -131,7 +134,7 @@ export function useSetupTechnology({
       isAgentlessEnabled,
       agentlessAPI,
       selectedSetupTechnology,
-      agentlessPolicy,
+      // agentlessPolicy,
       updateAgentPolicy,
       setSelectedPolicyTab,
       updateNewAgentPolicy,
@@ -142,7 +145,7 @@ export function useSetupTechnology({
   return {
     isAgentlessEnabled,
     handleSetupTechnologyChange,
-    agentlessPolicy,
+    // agentlessPolicy,
     selectedSetupTechnology,
   };
 }

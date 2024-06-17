@@ -312,8 +312,10 @@ export function useOnSubmit({
         ? [createdPolicy?.id]
         : packagePolicy.policy_ids;
 
+      const isAgentless = isAgentlessAgentPolicy(createdPolicy);
+
       const shouldForceInstallOnAgentless =
-        isAgentlessAgentPolicy(createdPolicy) ||
+        isAgentless ||
         isAgentlessIntegration(packageInfo) ||
         isAgentlessPackagePolicy(packagePolicy);
 
@@ -361,7 +363,7 @@ export function useOnSubmit({
         setSavedPackagePolicy(data!.item);
 
         const promptForAgentEnrollment =
-          !(agentCount && agentPolicy) && hasFleetAddAgentsPrivileges;
+          !isAgentless && !(agentCount && agentPolicy) && hasFleetAddAgentsPrivileges;
         if (promptForAgentEnrollment && hasAzureArmTemplate) {
           setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
           return;
@@ -378,7 +380,14 @@ export function useOnSubmit({
           setFormState('SUBMITTED_NO_AGENTS');
           return;
         }
-        onSaveNavigate(data!.item);
+
+        if (isAgentless) {
+          if (savedPackagePolicy) {
+            onSaveNavigate(savedPackagePolicy, ['openEnrollmentFlyout']);
+          }
+        } else {
+          onSaveNavigate(data!.item);
+        }
 
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
@@ -417,6 +426,7 @@ export function useOnSubmit({
       }
     },
     [
+      savedPackagePolicy,
       formState,
       hasErrors,
       agentCount,
@@ -437,9 +447,13 @@ export function useOnSubmit({
     ]
   );
 
+  const updateAgentPolicyWrapper = (updatedAgentPolicy: AgentPolicy | undefined) => {
+    setAgentPolicy(updatedAgentPolicy);
+  };
+
   return {
     agentPolicy,
-    updateAgentPolicy,
+    updateAgentPolicy: updateAgentPolicyWrapper,
     packagePolicy,
     updatePackagePolicy,
     savedPackagePolicy,
@@ -455,5 +469,6 @@ export function useOnSubmit({
     // TODO check
     navigateAddAgent,
     navigateAddAgentHelp,
+    isAgentlessAgentPolicy,
   };
 }
