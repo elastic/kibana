@@ -87,7 +87,9 @@ export class ProfilesManager {
     this.prevRootProfileParams = serializedParams;
   }
 
-  public async resolveDataSourceProfile(params: DataSourceProfileProviderParams) {
+  public async resolveDataSourceProfile(
+    params: Omit<DataSourceProfileProviderParams, 'rootContext'>
+  ) {
     const serializedParams = serializeDataSourceProfileParams(params);
 
     if (isEqual(this.prevDataSourceProfileParams, serializedParams)) {
@@ -101,7 +103,10 @@ export class ProfilesManager {
     let context = this.dataSourceProfileService.defaultContext;
 
     try {
-      context = await this.dataSourceProfileService.resolve(params);
+      context = await this.dataSourceProfileService.resolve({
+        ...params,
+        rootContext: this.rootContext$.getValue(),
+      });
     } catch (e) {
       logResolutionError(ContextType.DataSource, serializedParams, e);
     }
@@ -114,7 +119,9 @@ export class ProfilesManager {
     this.prevDataSourceProfileParams = serializedParams;
   }
 
-  public resolveDocumentProfile(params: DocumentProfileProviderParams) {
+  public resolveDocumentProfile(
+    params: Omit<DocumentProfileProviderParams, 'rootContext' | 'dataSourceContext'>
+  ) {
     let context: ContextWithProfileId<DocumentContext> | undefined;
 
     return new Proxy(params.record, {
@@ -126,7 +133,11 @@ export class ProfilesManager {
 
         if (!context) {
           try {
-            context = this.documentProfileService.resolve(params);
+            context = this.documentProfileService.resolve({
+              ...params,
+              rootContext: this.rootContext$.getValue(),
+              dataSourceContext: this.dataSourceContext$.getValue(),
+            });
           } catch (e) {
             logResolutionError(ContextType.Document, { recordId: params.record.id }, e);
             context = this.documentProfileService.defaultContext;
@@ -164,7 +175,7 @@ const serializeRootProfileParams = (
 };
 
 const serializeDataSourceProfileParams = (
-  params: DataSourceProfileProviderParams
+  params: Omit<DataSourceProfileProviderParams, 'rootContext'>
 ): SerializedDataSourceProfileParams => {
   return {
     dataViewId: isDataSourceType(params.dataSource, DataSourceType.DataView)
