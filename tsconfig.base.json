@@ -1872,9 +1872,7 @@
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": [
-        "typings/@emotion"
-      ]
+      "@emotion/core": ["typings/@emotion"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
