@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: SLOs
   description: OpenAPI schema for SLOs endpoints
@@ -667,6 +667,8 @@ components:
           type: object
         value:
           type: string
+        field:
+          type: string
     filter:
       title: Filter
       description: Defines properties for a filter
@@ -713,6 +715,10 @@ components:
               description: The index or index pattern to use
               type: string
               example: my-service-*
+            dataViewId:
+              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              type: string
+              example: 03b80ab3-003d-498b-881c-3beedbaf1162
             filter:
               description: the KQL query to filter the documents with.
               $ref: '#/components/schemas/kql_with_filters'
@@ -807,6 +813,10 @@ components:
               description: The index or index pattern to use
               type: string
               example: my-service-*
+            dataViewId:
+              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              type: string
+              example: 03b80ab3-003d-498b-881c-3beedbaf1162
             filter:
               description: the KQL query to filter the documents with.
               type: string
@@ -924,6 +934,10 @@ components:
               description: The index or index pattern to use
               type: string
               example: my-service-*
+            dataViewId:
+              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              type: string
+              example: 03b80ab3-003d-498b-881c-3beedbaf1162
             filter:
               description: the KQL query to filter the documents with.
               type: string
@@ -1107,6 +1121,10 @@ components:
               description: The index or index pattern to use
               type: string
               example: my-service-*
+            dataViewId:
+              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              type: string
+              example: 03b80ab3-003d-498b-881c-3beedbaf1162
             filter:
               description: the KQL query to filter the documents with.
               type: string

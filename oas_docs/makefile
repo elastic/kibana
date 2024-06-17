@@ -13,24 +13,19 @@
 # this material is strictly forbidden unless prior written
 # permission is obtained from Elasticsearch B.V.
 
-VERSION_REDOCLY_CLI:=1.12.2
 VERSION_SPECTRAL_CLI:=6.11.1
+
 .PHONY: api-docs
-api-docs: redocly-cli
-	redocly join "kibana.info.serverless.yaml" "../x-pack/plugins/actions/docs/openapi/bundled_serverless.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis_serverless.yaml" "../packages/core/saved-objects/docs/openapi/bundled.yaml" -o "kibana.serverless.yaml" --prefix-components-with-info-prop title
+api-docs: # Generate kibana.serverless.yaml
+	@npx @redocly/cli join "kibana.info.serverless.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../packages/core/saved-objects/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" -o "kibana.serverless.yaml" --prefix-components-with-info-prop title
+	@$(MAKE) api-docs-lint
 
 .PHONY: api-docs-lint
-api-docs-lint: ## Run spectral API docs linter
+api-docs-lint: spectral-cli ## Run spectral API docs linter
 	spectral lint "kibana.serverless.yaml" --ruleset ".spectral.yaml"
 
-.PHONY: redocly-cli
-redocly-cli: ## Install redocly-cli: https://github.com/Redocly/redocly-cli
-ifneq ($(VERSION_REDOCLY_CLI), $(shell redocly --version))
-	npm install -g @redocly/cli@$(VERSION_REDOCLY_CLI)
-endif
-
 .PHONY: spectral-cli
-spectral-cli: ## Install spectral-cli: https://github.com/stoplightio/spectral
+spectral-cli: ## Install spectral-cli per https://github.com/stoplightio/spectral
 ifneq ($(VERSION_SPECTRAL_CLI), $(shell spectral --version))
 	npm install -g @stoplight/spectral-cli@$(VERSION_SPECTRAL_CLI)
 endif
