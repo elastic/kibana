@@ -20,5 +20,5 @@ import { CreateAssetCriticalityRecord } from './common.gen';
 
 export type AssetCriticalityBulkUploadRequest = z.infer<typeof AssetCriticalityBulkUploadRequest>;
 export const AssetCriticalityBulkUploadRequest = z.object({
-  records: z.array(CreateAssetCriticalityRecord).min(1).max(1000).optional(),
+  records: z.array(CreateAssetCriticalityRecord).min(1).max(1000),
 });
