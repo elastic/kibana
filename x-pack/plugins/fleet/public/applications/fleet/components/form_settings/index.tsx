@@ -63,33 +63,28 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, ({ disabled, ...se
   );
 });
 
-settingComponentRegistry.set(
-  ZodFirstPartyTypeKind.ZodNativeEnum,
-  ({ disabled, ...settingsConfig }) => {
-    return (
-      <SettingsFieldWrapper
-        disabled={disabled}
-        settingsConfig={settingsConfig}
-        typeName={ZodFirstPartyTypeKind.ZodString}
-        renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
-          <EuiSelect
-            data-test-subj={fieldKey}
-            value={fieldValue}
-            fullWidth
-            disabled={disabled}
-            onChange={handleChange}
-            options={Object.entries(settingsConfig.schema._def.innerType._def.values).map(
-              ([key, value]) => ({
-                text: key,
-                value: value as string,
-              })
-            )}
-          />
-        )}
-      />
-    );
-  }
-);
+settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodEnum, ({ disabled, ...settingsConfig }) => {
+  return (
+    <SettingsFieldWrapper
+      disabled={disabled}
+      settingsConfig={settingsConfig}
+      typeName={ZodFirstPartyTypeKind.ZodString}
+      renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
+        <EuiSelect
+          data-test-subj={fieldKey}
+          value={fieldValue}
+          fullWidth
+          disabled={disabled}
+          onChange={handleChange}
+          options={settingsConfig.schema._def.innerType._def.values.map((value: string) => ({
+            text: value,
+            value,
+          }))}
+        />
+      )}
+    />
+  );
+});
 
 export function ConfiguredSettings({
   configuredSettings,
