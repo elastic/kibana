@@ -105,7 +105,7 @@ describe('TaskClaiming', () => {
       store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
 
       if (hits.length === 1) {
-        store.fetch.mockResolvedValue({ docs: hits[0] });
+        store.fetch.mockResolvedValue({ docs: hits[0], versionMap: new Map() });
         store.updateByQuery.mockResolvedValue({
           updated: hits[0].length,
           version_conflicts: versionConflicts,
@@ -113,7 +113,7 @@ describe('TaskClaiming', () => {
         });
       } else {
         for (const docs of hits) {
-          store.fetch.mockResolvedValueOnce({ docs });
+          store.fetch.mockResolvedValueOnce({ docs, versionMap: new Map() });
           store.updateByQuery.mockResolvedValueOnce({
             updated: docs.length,
             version_conflicts: versionConflicts,
@@ -364,13 +364,13 @@ describe('TaskClaiming', () => {
                 },
               },
               source: `
-            String taskType = doc['task.taskType'].value;
-            if (params.priority_map.containsKey(taskType)) {
-              return params.priority_map[taskType];
-            } else {
-              return 50;
-            }
-          `,
+          String taskType = doc['task.taskType'].value;
+          if (params.priority_map.containsKey(taskType)) {
+            return params.priority_map[taskType];
+          } else {
+            return 50;
+          }
+        `,
             },
           },
         },
@@ -1227,7 +1227,7 @@ if (doc['task.runAt'].size()!=0) {
       const taskStore = taskStoreMock.create({ taskManagerId });
       taskStore.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
       for (const docs of taskCycles) {
-        taskStore.fetch.mockResolvedValueOnce({ docs });
+        taskStore.fetch.mockResolvedValueOnce({ docs, versionMap: new Map() });
         taskStore.updateByQuery.mockResolvedValueOnce({
           updated: docs.length,
           version_conflicts: 0,
@@ -1235,7 +1235,7 @@ if (doc['task.runAt'].size()!=0) {
         });
       }
 
-      taskStore.fetch.mockResolvedValue({ docs: [] });
+      taskStore.fetch.mockResolvedValue({ docs: [], versionMap: new Map() });
       taskStore.updateByQuery.mockResolvedValue({
         updated: 0,
         version_conflicts: 0,
