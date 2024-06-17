@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
@@ -15,8 +14,13 @@ export default createTestConfig({
   },
   kbnServerArgs: [
     `--xpack.fleet.packages.0.name=cloud_security_posture`,
-    `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
+    `--xpack.fleet.packages.0.version=1.5.2`,
+    `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
+      { product_line: 'security', product_tier: 'essentials' },
+      { product_line: 'endpoint', product_tier: 'essentials' },
+      { product_line: 'cloud', product_tier: 'essentials' },
+    ])}`,
   ],
-  // load tests in the index file
-  testFiles: [require.resolve('./ftr/cloud_security_posture')],
+  // we should only resolve files which are ending with `.essentials.ts`
+  testFiles: [require.resolve('./ftr/cloud_security_posture/csp_integrations_form.essentials.ts')],
 });
