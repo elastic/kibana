@@ -18,30 +18,8 @@ paths:
           application/json:
             schema:
               oneOf:
-                - type: object
-                  properties:
-                    signal_ids:
-                      type: array
-                      items:
-                        $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-                      minItems: 1
-                    status:
-                      $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
-                  required: [signal_ids]
-                - type: object
-                  properties:
-                    query:
-                      type: object
-                      additionalProperties: true
-                    status:
-                      $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
-                    conflicts:
-                      type: string
-                      enum:
-                        - abort
-                        - proceed
-                      default: abort
-                  required: [query]
+                - $ref: '#/components/schemas/SetAlertsStatusByIds'
+                - $ref: '#/components/schemas/SetAlertsStatusByQuery'
       responses:
         200:
           description: Successful response
@@ -71,3 +49,33 @@ paths:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  schemas:
+    SetAlertsStatusByIds:
+      type: object
+      properties:
+        signal_ids:
+          type: array
+          items:
+            $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          minItems: 1
+        status:
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
+      required: [signal_ids, status]
+
+    SetAlertsStatusByQuery:
+      type: object
+      properties:
+        query:
+          type: object
+          additionalProperties: true
+        status:
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
+        conflicts:
+          type: string
+          enum:
+            - abort
+            - proceed
+          default: abort
+      required: [query, status]

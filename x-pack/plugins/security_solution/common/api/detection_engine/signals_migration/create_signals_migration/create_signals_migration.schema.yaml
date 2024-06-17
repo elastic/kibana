@@ -17,23 +17,17 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                index:
-                  type: array
-                  items:
-                    $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-                  minItems: 1
-                requests_per_second:
-                  type: integer
-                  minimum: 1
-                size:
-                  type: integer
-                  minimum: 1
-                slices:
-                  type: integer
-                  minimum: 1
-              required: [index]
+              allOf:
+                - type: object
+                  properties:
+                    index:
+                      type: array
+                      items:
+                        $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                      minItems: 1
+                  required: [index]
+                - $ref: '#/components/schemas/AlertsReindexOptions'
+
       responses:
         200:
           description: Successful response
@@ -73,6 +67,19 @@ paths:
 
 components:
   schemas:
+    AlertsReindexOptions:
+      type: object
+      properties:
+        requests_per_second:
+          type: integer
+          minimum: 1
+        size:
+          type: integer
+          minimum: 1
+        slices:
+          type: integer
+          minimum: 1
+
     AlertsIndexMigrationSuccess:
       type: object
       properties:

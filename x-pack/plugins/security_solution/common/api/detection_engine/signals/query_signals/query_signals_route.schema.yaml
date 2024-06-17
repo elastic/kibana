@@ -45,8 +45,7 @@ paths:
                   type: object
                   additionalProperties: true
                 sort:
-                  type: object
-                  additionalProperties: true
+                  $ref: '#/components/schemas/AlertsSort'
               description: Elasticsearch query and aggregation request
       responses:
         200:
@@ -77,3 +76,18 @@ paths:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  schemas:
+    AlertsSortCombinations:
+      anyOf:
+        - type: string
+        - type: object
+          additionalProperties: true
+
+    AlertsSort:
+      oneOf:
+        - $ref: '#/components/schemas/AlertsSortCombinations'
+        - type: array
+          items:
+            $ref: '#/components/schemas/AlertsSortCombinations'
