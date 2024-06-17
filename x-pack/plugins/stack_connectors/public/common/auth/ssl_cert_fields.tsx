@@ -67,8 +67,8 @@ export const SSLCertFields: React.FC<BasicAuthProps> = ({
       />
       <EuiSpacer size="s" />
       {certType === SSLCertType.CRT && (
-        <EuiFlexGroup>
-          <EuiFlexItem>
+        <EuiFlexGroup wrap>
+          <EuiFlexItem css={{ minWidth: 200 }}>
             <UseField
               path="secrets.crt"
               config={{
@@ -89,7 +89,7 @@ export const SSLCertFields: React.FC<BasicAuthProps> = ({
               }}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem css={{ minWidth: 200 }}>
             <UseField
               path="secrets.key"
               config={{

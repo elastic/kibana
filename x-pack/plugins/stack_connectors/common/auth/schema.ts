@@ -48,7 +48,7 @@ export const SecretConfigurationSchemaValidation = {
     if (secrets.password && secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
     if (secrets.crt && secrets.key && !secrets.user && !secrets.pfx) return;
     if (!secrets.crt && !secrets.key && !secrets.user && secrets.pfx) return;
-    return i18n.translate('xpack.stackConnectors.webhook.invalidUsernamePassword', {
+    return i18n.translate('xpack.stackConnectors.webhook.invalidSecrets', {
       defaultMessage:
         'must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)',
     });

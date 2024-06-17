@@ -26,7 +26,7 @@ import {
   ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
 import { api } from './api';
-import { validateCasesWebhookConfig } from './validators';
+import { validateCasesWebhookConfig, validateConnector } from './validators';
 import * as i18n from './translations';
 
 const supportedSubActions: string[] = ['pushToService'];
@@ -55,6 +55,7 @@ export function getConnectorType(): ConnectorType<
       params: {
         schema: ExecutorParamsSchema,
       },
+      connector: validateConnector,
     },
     executor,
     supportedFeatureIds: [CasesConnectorFeatureId],

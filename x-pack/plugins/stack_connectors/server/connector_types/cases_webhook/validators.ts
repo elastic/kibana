@@ -7,8 +7,9 @@
 
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { isEmpty } from 'lodash';
 import * as i18n from './translations';
-import { CasesWebhookPublicConfigurationType } from './types';
+import { CasesWebhookPublicConfigurationType, CasesWebhookSecretConfigurationType } from './types';
 
 export const validateCasesWebhookConfig = (
   configObject: CasesWebhookPublicConfigurationType,
@@ -45,6 +46,14 @@ export const validateCasesWebhookConfig = (
       }
     }
   }
+};
+
+export const validateConnector = (
+  configObject: CasesWebhookPublicConfigurationType,
+  secrets: CasesWebhookSecretConfigurationType
+): string | null => {
+  if (configObject.hasAuth && isEmpty(secrets)) return i18n.INVALID_AUTH;
+  return null;
 };
 
 const validProtocols: string[] = ['http:', 'https:'];
