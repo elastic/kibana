@@ -126,6 +126,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data_views.scriptedFieldsEnabled (any)', // It's a boolean (any because schema.conditional)
         'data_visualizer.resultLinks.fileBeat.enabled (boolean)',
         'dev_tools.deeplinks.navLinkStatus (string)',
+        'discover.experimental.enabledProfiles (array)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
         'enterpriseSearch.ui.enabled (boolean)',

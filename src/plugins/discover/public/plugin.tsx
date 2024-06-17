@@ -229,9 +229,7 @@ export class DiscoverPlugin
   private readonly historyService = new HistoryService();
   private readonly inlineTopNav: Map<string | null, DiscoverCustomizationContext['inlineTopNav']> =
     new Map([[null, defaultCustomizationContext.inlineTopNav]]);
-  private readonly experimentalFeatures: ExperimentalFeatures = {
-    ruleFormV2Enabled: false,
-  };
+  private readonly experimentalFeatures: ExperimentalFeatures;
 
   private scopedHistory?: ScopedHistory<unknown>;
   private urlTracker?: UrlTracker;
@@ -239,10 +237,15 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
+  private profileProvidersRegistered = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.experimentalFeatures =
-      initializerContext.config.get().experimental ?? this.experimentalFeatures;
+    const experimental = this.initializerContext.config.get().experimental;
+
+    this.experimentalFeatures = {
+      ruleFormV2Enabled: experimental?.ruleFormV2Enabled ?? false,
+      enabledProfiles: experimental?.enabledProfiles ?? [],
+    };
   }
 
   setup(
@@ -338,7 +341,7 @@ export class DiscoverPlugin
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
-          profilesManager: this.createProfilesManager(),
+          profilesManager: await this.createProfilesManager(),
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
 
@@ -421,8 +424,6 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    this.registerProfiles();
-
     const viewSavedSearchAction = new ViewSavedSearchAction(core.application, this.locator!);
 
     plugins.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
@@ -458,14 +459,21 @@ export class DiscoverPlugin
     }
   }
 
-  private registerProfiles() {
-    // TODO: Conditionally register example profiles for functional testing in a follow up PR
-    // this.rootProfileService.registerProvider(o11yRootProfileProvider);
-    // this.dataSourceProfileService.registerProvider(logsDataSourceProfileProvider);
-    // this.documentProfileService.registerProvider(logDocumentProfileProvider);
-  }
+  private async createProfilesManager() {
+    if (!this.profileProvidersRegistered) {
+      const { registerProfileProviders } = await import('./context_awareness/profile_providers');
+      const enabledProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
 
-  private createProfilesManager() {
+      registerProfileProviders({
+        rootProfileService: this.rootProfileService,
+        dataSourceProfileService: this.dataSourceProfileService,
+        documentProfileService: this.documentProfileService,
+        enabledProfileIds,
+      });
+
+      this.profileProvidersRegistered = true;
+    }
+
     return new ProfilesManager(
       this.rootProfileService,
       this.dataSourceProfileService,
@@ -484,7 +492,7 @@ export class DiscoverPlugin
   private getDiscoverServices = (
     core: CoreStart,
     plugins: DiscoverStartPlugins,
-    profilesManager = this.createProfilesManager()
+    profilesManager: ProfilesManager
   ) => {
     return buildServices({
       core,
@@ -510,7 +518,8 @@ export class DiscoverPlugin
 
     const getDiscoverServicesInternal = async () => {
       const [coreStart, deps] = await core.getStartServices();
-      return this.getDiscoverServices(coreStart, deps);
+      const profilesManager = await this.createProfilesManager();
+      return this.getDiscoverServices(coreStart, deps, profilesManager);
     };
 
     const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServicesInternal);
