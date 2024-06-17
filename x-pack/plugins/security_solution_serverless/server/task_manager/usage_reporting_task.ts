@@ -23,7 +23,6 @@ import type { ServerlessSecurityConfig } from '../config';
 import { stateSchemaByVersion, emptyState } from './task_state';
 
 const SCOPE = ['serverlessSecurity'];
-const TIMEOUT = '1m';
 
 export const VERSION = '1.0.0';
 
@@ -59,7 +58,7 @@ export class SecurityUsageReportingTask {
       taskManager.registerTaskDefinitions({
         [taskType]: {
           title: taskTitle,
-          timeout: TIMEOUT,
+          timeout: this.config.usageReportingTaskTimeout,
           stateSchemaByVersion,
           createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
             return {
@@ -159,7 +158,12 @@ export class SecurityUsageReportingTask {
 
     if (usageRecords.length !== 0) {
       try {
-        usageReportResponse = await usageReportingService.reportUsage(usageRecords);
+        this.logger.debug(`Sending ${usageRecords.length} usage records to the API`);
+
+        usageReportResponse = await usageReportingService.reportUsage(
+          usageRecords,
+          this.config.usageReportingApiUrl
+        );
 
         if (!usageReportResponse.ok) {
           const errorResponse = await usageReportResponse.json();
@@ -167,7 +171,7 @@ export class SecurityUsageReportingTask {
           return { state: taskInstance.state, runAt: new Date() };
         }
 
-        this.logger.info(
+        this.logger.debug(
           `(${
             usageRecords.length
           }) usage records starting from ${lastSuccessfulReport.toISOString()} were sent successfully: ${
