@@ -438,7 +438,7 @@ async function installPackageFromRegistry({
           skipRateLimitCheck: true,
         });
 
-        return { ...response, installSource: 'bundled' };
+        return { ...response, installSource };
       } else {
         logger.info(`endpoint bundle not found when hijacking registry install`);
       }
