@@ -40,6 +40,7 @@ import { EPMApp } from './sections/epm';
 import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
 import { AgentEnrollmentFlyout } from './components';
+import { ReadOnlyContextProvider } from './hooks/use_read_only_context';
 
 const queryClient = new QueryClient();
 
@@ -106,16 +107,18 @@ export const IntegrationsAppContext: React.FC<{
                         <startServices.customIntegrations.ContextProvider>
                           <CloudContext>
                             <Router history={history}>
-                              <AgentPolicyContextProvider>
-                                <PackageInstallProvider startServices={startServices}>
-                                  <FlyoutContextProvider>
-                                    <IntegrationsHeader
-                                      {...{ setHeaderActionMenu, startServices }}
-                                    />
-                                    {children}
-                                  </FlyoutContextProvider>
-                                </PackageInstallProvider>
-                              </AgentPolicyContextProvider>
+                              <ReadOnlyContextProvider>
+                                <AgentPolicyContextProvider>
+                                  <PackageInstallProvider startServices={startServices}>
+                                    <FlyoutContextProvider>
+                                      <IntegrationsHeader
+                                        {...{ setHeaderActionMenu, startServices }}
+                                      />
+                                      {children}
+                                    </FlyoutContextProvider>
+                                  </PackageInstallProvider>
+                                </AgentPolicyContextProvider>
+                              </ReadOnlyContextProvider>
                             </Router>
                           </CloudContext>
                         </startServices.customIntegrations.ContextProvider>
