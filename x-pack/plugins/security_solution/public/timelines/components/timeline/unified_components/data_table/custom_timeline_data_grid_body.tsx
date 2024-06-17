@@ -13,6 +13,7 @@ import type { FC } from 'react';
 import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import type { RowRenderer } from '../../../../../../common/types';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { appSelectors } from '../../../../../common/store';
@@ -70,6 +71,13 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       [rows, visibleRowData]
     );
     const eventIds = useMemo(() => events.map((event) => event._id), [events]);
+
+    const parentRef = React.useRef();
+    const rowVirtualizer = useVirtualizer({
+      count: 10000,
+      getScrollElement: () => parentRef.current,
+      estimateSize: () => 35,
+    });
 
     return (
       <>
