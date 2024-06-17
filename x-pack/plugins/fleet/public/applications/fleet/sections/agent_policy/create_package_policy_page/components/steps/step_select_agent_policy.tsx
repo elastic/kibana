@@ -347,6 +347,14 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     );
   }
 
+  const someNewAgentPoliciesHaveLimitedPackage =
+    !packageInfo ||
+    selectedAgentPolicies
+      .filter((policy) => !selectedAgentPolicyIds.find((id) => policy.id === id))
+      .some((selectedAgentPolicy) =>
+        doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo)
+      );
+
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -400,11 +408,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 ) : null
               }
               isInvalid={Boolean(
-                selectedPolicyIds.length === 0 ||
-                  !packageInfo ||
-                  selectedAgentPolicies.every((selectedAgentPolicy) =>
-                    doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo)
-                  )
+                selectedPolicyIds.length === 0 || someNewAgentPoliciesHaveLimitedPackage
               )}
               error={
                 selectedPolicyIds.length === 0 ? (
@@ -412,12 +416,12 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.noPolicySelectedError"
                     defaultMessage="An agent policy is required."
                   />
-                ) : (
+                ) : someNewAgentPoliciesHaveLimitedPackage ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddLimitedIntegrationError"
                     defaultMessage="This integration can only be added once per agent policy."
                   />
-                )
+                ) : null
               }
             >
               {enableReusableIntegrationPolicies ? (
