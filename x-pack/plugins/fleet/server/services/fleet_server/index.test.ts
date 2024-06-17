@@ -218,7 +218,7 @@ describe('hasActiveFleetServersForPolicies', () => {
       const hasFs = await hasFleetServersForPolicies(
         mockEsClient,
         mockSoClient,
-        ['policy-1'],
+        [{ id: 'policy-1' }],
         true
       );
       expect(hasFs).toBe(true);
@@ -241,7 +241,7 @@ describe('hasActiveFleetServersForPolicies', () => {
       const hasFs = await hasFleetServersForPolicies(
         mockEsClient,
         mockSoClient,
-        ['policy-1'],
+        [{ id: 'policy-1' }],
         true
       );
       expect(hasFs).toBe(true);
@@ -264,7 +264,7 @@ describe('hasActiveFleetServersForPolicies', () => {
       const hasFs = await hasFleetServersForPolicies(
         mockEsClient,
         mockSoClient,
-        ['policy-1'],
+        [{ id: 'policy-1' }],
         true
       );
       expect(hasFs).toBe(false);
@@ -286,7 +286,9 @@ describe('hasActiveFleetServersForPolicies', () => {
         online: 0,
         error: 0,
       });
-      const hasFs = await hasFleetServersForPolicies(mockEsClient, mockSoClient, ['policy-1']);
+      const hasFs = await hasFleetServersForPolicies(mockEsClient, mockSoClient, [
+        { id: 'policy-1' },
+      ]);
       expect(hasFs).toBe(true);
     });
   });
