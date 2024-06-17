@@ -9,10 +9,18 @@ import React from 'react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { render } from '../../../utils/test_helper';
 import { AlertSummary } from './alert_summary';
-import { alertWithTags } from '../mock/alert';
+import { alertWithGroupsAndTags } from '../mock/alert';
 import { alertSummaryFieldsMock } from '../mock/alert_summary_fields';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
+import { Group } from '../../../../common/typings';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_GROUP,
+  ALERT_RULE_NAME,
+  TAGS,
+} from '@kbn/rule-data-utils';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -48,12 +56,25 @@ describe('Alert summary', () => {
 
   it('should show alert data', async () => {
     const alertSummary = render(
-      <AlertSummary alert={alertWithTags} alertSummaryFields={alertSummaryFieldsMock} />
+      <AlertSummary alert={alertWithGroupsAndTags} alertSummaryFields={alertSummaryFieldsMock} />
     );
 
+    const groups = alertWithGroupsAndTags.fields[ALERT_GROUP] as Group[];
+
+    expect(alertSummary.queryByText('Source')).toBeInTheDocument();
+    expect(alertSummary.queryByText(groups[0].field, { exact: false })).toBeInTheDocument();
+    expect(alertSummary.queryByText(groups[0].value)).toBeInTheDocument();
+    expect(alertSummary.queryByText(groups[1].field, { exact: false })).toBeInTheDocument();
+    expect(alertSummary.queryByText(groups[1].value)).toBeInTheDocument();
+    expect(alertSummary.queryByText('Tags')).toBeInTheDocument();
+    expect(alertSummary.queryByText(alertWithGroupsAndTags.fields[TAGS]![0])).toBeInTheDocument();
+    expect(alertSummary.queryByText('Rule')).toBeInTheDocument();
+    expect(
+      alertSummary.queryByText(alertWithGroupsAndTags.fields[ALERT_RULE_NAME])
+    ).toBeInTheDocument();
     expect(alertSummary.queryByText('Actual value')).toBeInTheDocument();
-    expect(alertSummary.queryByText(alertWithTags.fields['kibana.alert.evaluation.value']!));
+    expect(alertSummary.queryByText(alertWithGroupsAndTags.fields[ALERT_EVALUATION_VALUE]!));
     expect(alertSummary.queryByText('Expected value')).toBeInTheDocument();
-    expect(alertSummary.queryByText(alertWithTags.fields['kibana.alert.evaluation.threshold']!));
+    expect(alertSummary.queryByText(alertWithGroupsAndTags.fields[ALERT_EVALUATION_THRESHOLD]!));
   });
 });
