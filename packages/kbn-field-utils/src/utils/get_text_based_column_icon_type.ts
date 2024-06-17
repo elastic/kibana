@@ -7,6 +7,7 @@
  */
 
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import { convertDatatableColumnToDataViewField } from '@kbn/data-view-utils';
 import { getFieldIconType } from './get_field_icon_type';
 
 export function getTextBasedColumnIconType(
@@ -19,10 +20,8 @@ export function getTextBasedColumnIconType(
     | null
 ): string | null {
   return columnMeta && columnMeta.type
-    ? getFieldIconType({
-        name: '',
-        type: columnMeta.type,
-        esTypes: columnMeta.esType ? [columnMeta.esType] : [],
-      })
+    ? getFieldIconType(
+        convertDatatableColumnToDataViewField({ id: '', name: '', meta: columnMeta })
+      )
     : null;
 }

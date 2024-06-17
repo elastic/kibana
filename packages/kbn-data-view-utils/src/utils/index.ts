@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
-export * from './src/constants';
-export { DataViewField } from './src/fields';
+export { convertDatatableColumnToDataViewField } from './convert_to_data_view_field';
 export {
   shortenDottedString,
-  isFilterable,
-  isDataViewFieldSubtypeNested,
-  isDataViewFieldSubtypeMulti,
-  getDataViewFieldSubtypeNested,
   getDataViewFieldSubtypeMulti,
+  getDataViewFieldSubtypeNested,
   getFieldSubtypeMulti,
   getFieldSubtypeNested,
+  isDataViewFieldSubtypeMulti,
+  isDataViewFieldSubtypeNested,
   isMultiField,
   isNestedField,
-  convertDatatableColumnToDataViewField,
-} from './src/utils';
+  isFilterable,
+} from './utils';

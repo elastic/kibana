@@ -6,12 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  DataViewField,
-  isFilterable,
-  isNestedField,
-  isMultiField,
-  getFieldSubtypeMulti,
-  getFieldSubtypeNested,
-} from '@kbn/data-view-utils';
-export * from './field_list';
+export { DataViewField } from './data_view_field';
