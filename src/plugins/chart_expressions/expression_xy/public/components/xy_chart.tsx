@@ -863,7 +863,7 @@ export function XYChart({
             xDomain={xDomain}
             // enable brushing only for time charts, for both ES|QL and DSL queries
             onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
-            onElementClick={interactive && !isEsqlMode ? clickHandler : undefined}
+            onElementClick={interactive ? clickHandler : undefined}
             legendAction={
               interactive
                 ? getLegendAction(

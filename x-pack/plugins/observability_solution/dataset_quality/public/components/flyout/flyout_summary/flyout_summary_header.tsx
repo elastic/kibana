@@ -73,6 +73,6 @@ export function FlyoutSummaryHeader({
 const flyoutSummaryTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.flyoutSummaryTooltip"
-    defaultMessage="Stats of the dataset within the selected time range."
+    defaultMessage="Stats of the data set within the selected time range."
   />
 );
