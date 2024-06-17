@@ -49,5 +49,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/search-playground",
     "@kbn/security-api-key-management",
+    "@kbn/search-inference-endpoints",
   ]
 }

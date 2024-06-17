@@ -93,6 +93,25 @@ export const navigationTree: NavigationTreeDefinition = {
             },
           ],
         },
+        {
+          id: 'relevance',
+          title: i18n.translate('xpack.serverlessSearch.nav.relevance', {
+            defaultMessage: 'Relevance',
+          }),
+          spaceBefore: 'm',
+          children: [
+            {
+              id: 'searchInferenceEndpoints',
+              title: i18n.translate(
+                'xpack.serverlessSearch.nav.relevance.searchInferenceEndpoints',
+                {
+                  defaultMessage: 'Inference Endpoints',
+                }
+              ),
+              link: 'searchInferenceEndpoints',
+            },
+          ],
+        },
       ],
     },
   ],
