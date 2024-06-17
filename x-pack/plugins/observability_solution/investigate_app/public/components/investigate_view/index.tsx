@@ -32,13 +32,12 @@ import { InvestigationHistory } from '../investigation_history';
 import { MiniTimeline } from '../mini_timeline';
 
 const containerClassName = css`
-  overflow-x: auto;
-  overflow-y: auto;
+  overflow: auto;
   padding: 24px 24px 0px 24px;
 `;
 
 const scrollContainerClassName = css`
-  overflow-x: auto;
+  min-width: 1px;
 `;
 
 const addWidgetContainerClassName = css`

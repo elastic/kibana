@@ -118,8 +118,7 @@ export class InvestigateAppPlugin
         );
 
         const appWrapperClassName = css`
-          overflow-y: auto;
-          overflow-x: auto;
+          overflow: auto;
         `;
 
         const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
