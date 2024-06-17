@@ -6,13 +6,13 @@
  */
 
 import { loadAttackDiscoveryData } from '@kbn/security-solution-plugin/scripts/assistant/attack_discovery/load';
+import { ConnectorResponse } from '@kbn/actions-plugin/common/routes/connector/response';
 import { test, expect } from '../../fixtures';
 
 test.describe('Attack discovery', () => {
   test.beforeAll(async ({ stackServices, connectors }) => {
-    if (!connectors) {
-      test.skip('No connectors found');
-    }
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip(!connectors, 'No connectors found');
 
     await loadAttackDiscoveryData({
       kbnClient: stackServices.kbnClient,
@@ -27,7 +27,10 @@ test.describe('Attack discovery', () => {
   });
 
   test('it works', async ({ page, connectors }) => {
-    for (const connector of connectors) {
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip(!connectors, 'No connectors found');
+
+    for (const connector of connectors as ConnectorResponse[]) {
       await test.step(`${connector.name} connector is present`, async () => {
         await page.getByTestId('connectorSelectorPlaceholderButton').click();
         await page.getByTestId(`${connector.id}`).click();

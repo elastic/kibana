@@ -7,7 +7,7 @@
 
 import { test, expect } from '../fixtures';
 
-test.beforeEach(async ({ page }, testInfo) => {
+test.beforeEach(async ({ page }) => {
   await page.goto('/app/security');
 });
 
@@ -17,14 +17,13 @@ test.describe('Chat', () => {
       (connector) => connector.connector_type_id === '.gen-ai'
     )?.id;
 
-    if (!connectorId) {
-      test.skip('No Azure connector found');
-    }
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip(!connectorId, 'No Azure connector found');
 
     await page.getByTestId('assistantHeaderLink').click();
     await page.getByRole('button', { name: 'New chat' }).first().click();
     await page.getByTestId('connector-selector').click();
-    await page.getByTestId(connectorId).click();
+    await page.getByTestId(connectorId!).click();
     await page.getByTestId('prompt-textarea').click();
     await page.getByLabel('Workflow suggestions').click();
     await page.getByTestId('submit-chat').click();
@@ -38,14 +37,13 @@ test.describe('Chat', () => {
       (connector) => connector.connector_type_id === '.bedrock'
     )?.id;
 
-    if (!connectorId) {
-      test.skip('No Bedrock connector found');
-    }
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip(!connectorId, 'No Bedrock connector found');
 
     await page.getByTestId('assistantHeaderLink').click();
     await page.getByRole('button', { name: 'New chat' }).first().click();
     await page.getByTestId('connector-selector').click();
-    await page.getByTestId(connectorId).click();
+    await page.getByTestId(connectorId!).click();
     await page.getByTestId('prompt-textarea').click();
     await page.getByLabel('Workflow suggestions').click();
     await page.getByTestId('submit-chat').click();

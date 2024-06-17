@@ -15,11 +15,16 @@ import { prefixedOutputLogger } from '@kbn/security-solution-plugin/scripts/endp
 import { ToolingLog } from '@kbn/tooling-log';
 import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { ConnectorResponse } from '@kbn/actions-plugin/common/routes/connector/response';
+import { RuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
+import { AxiosResponse } from 'axios';
 
 export const connectorsFile = '../../../.ftr/actions_connectors.json';
 
 export * from '@playwright/test';
-export const test = base.extend({
+export const test = base.extend<{
+  stackServices: RuntimeServices;
+  connectors?: ConnectorResponse[];
+}>({
   stackServices: async ({}, use) => {
     const stackConfig = {
       KIBANA_URL: process.env.KIBANA_URL || 'http://localhost:5620',
@@ -38,12 +43,13 @@ export const test = base.extend({
 
     return use(await stackServicesPromise);
   },
-  connectors: async ({ stackServices }, use) => {
+  connectors: async ({ stackServices }: { stackServices: RuntimeServices }, use) => {
     const logger = new ToolingLog();
     const prefixedLogger = prefixedOutputLogger('Playwright fixtures', logger);
     const existingConnectors = (
       (
         await stackServices.kbnClient.request({
+          method: 'GET',
           path: '/api/actions/connectors',
         })
       ).data as ConnectorResponse[]
@@ -75,7 +81,8 @@ export const test = base.extend({
             'utf8'
           );
         } catch (e) {
-          prefixedLogger.error('Error reading kibana.dev.yml', e);
+          prefixedLogger.error('Error reading kibana.dev.yml');
+          prefixedLogger.error(e);
         }
 
         if (!kibanaDevConfig) {
@@ -95,31 +102,33 @@ export const test = base.extend({
       }
 
       if (prebuiltConnectors) {
-        await pMap<[string, Connector & { secrets: Record<string, string> }], Promise<void>>(
-          Object.entries(prebuiltConnectors),
-          async ([connectorId, connector]) => {
-            return stackServices.kbnClient.request({
-              method: 'POST',
-              path: '/api/actions/connector',
-              body: {
-                name: connector.name,
-                secrets: connector.secrets,
-                connector_type_id: connector.actionTypeId,
-                config: connector.config,
-              },
-            });
-          }
-        );
+        await pMap<
+          [string, Connector & { secrets: Record<string, string> }],
+          Promise<AxiosResponse>
+        >(Object.entries(prebuiltConnectors), async ([_connectorId, connector]) => {
+          return stackServices.kbnClient.request({
+            method: 'POST',
+            path: '/api/actions/connector',
+            body: {
+              name: connector.name,
+              secrets: connector.secrets,
+              connector_type_id: connector.actionTypeId,
+              config: connector.config,
+            },
+          });
+        });
       }
     } catch (e) {
-      prefixedLogger.error('Error copying action connectors', e);
+      prefixedLogger.error('Error copying action connectors');
+      prefixedLogger.error(e);
     }
 
     const connectors = (
       await stackServices.kbnClient.request({
+        method: 'GET',
         path: '/api/actions/connectors',
       })
-    ).data;
+    ).data as ConnectorResponse[];
 
     return use(
       connectors.filter((connector) =>
