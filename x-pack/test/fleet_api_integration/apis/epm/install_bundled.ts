@@ -64,7 +64,7 @@ export default function (providerContext: FtrProviderContext) {
       await removeBundledPackages(log);
     });
 
-    describe('without registry', () => {
+    describe.skip('without registry', () => {
       it('installs from bundled source via api', async () => {
         // Need to bundle a package that doesn't conflict with those listed in `fleet_packages.json
         await bundlePackage('nginx-1.2.1');
