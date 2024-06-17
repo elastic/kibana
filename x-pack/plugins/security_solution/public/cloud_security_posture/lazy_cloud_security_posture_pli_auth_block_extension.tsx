@@ -6,26 +6,25 @@
  */
 
 import { lazy } from 'react';
-import type { FleetUiExtensionGetterOptions } from '../../../../../common/types';
+import type { FleetUiExtensionGetterOptions } from '../common/types';
 
-export const getLazyEndpointAgentTamperProtectionExtension = ({
+export const getLazyCloudSecurityPosturePliAuthBlockExtension = ({
   coreStart,
   depsStart,
   services,
 }: FleetUiExtensionGetterOptions) =>
   lazy(async () => {
-    const [{ withSecurityContext }, { EndpointAgentTamperProtectionExtension }] = await Promise.all(
-      [
-        import('../../../../../common/components/with_security_context/with_security_context'),
-        import('./endpoint_agent_tamper_protection_extension'),
-      ]
-    );
+    const [{ withSecurityContext }, { CloudSecurityPosturePliAuthBlockExtension }] =
+      await Promise.all([
+        import('../common/components/with_security_context/with_security_context'),
+        import('./cloud_security_posture_pli_auth_block_extension'),
+      ]);
     return {
       default: withSecurityContext({
         coreStart,
         depsStart,
         services,
-        WrappedComponent: EndpointAgentTamperProtectionExtension,
+        WrappedComponent: CloudSecurityPosturePliAuthBlockExtension,
       }),
     };
   });
