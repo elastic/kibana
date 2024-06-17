@@ -32,50 +32,44 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
     apiKeys: {
       async openCreateFlyout() {
         await testSubjects.click('new-api-key-button');
-        await testSubjects.existOrFail('create-api-key-submit');
+        await testSubjects.existOrFail('formFlyoutSubmitButton');
       },
       async setApiKeyName(value: string) {
-        await testSubjects.existOrFail('create-api-key-name');
-        await testSubjects.setValue('create-api-key-name', value);
+        await testSubjects.existOrFail('apiKeyNameInput');
+        await testSubjects.setValue('apiKeyNameInput', value);
       },
       async selectNeverExpires() {
-        await (
-          await (
-            await testSubjects.find('create-api-key-expires-never-radio')
-          ).findByTagName('label')
-        ).click();
-        await testSubjects.missingOrFail('create-api-key-expires-days-number-field');
+        await (await await testSubjects.find('apiKeyCustomExpirationSwitch')).click();
+        await testSubjects.missingOrFail('apiKeyCustomExpirationInput');
       },
       async createApiKeySubmitAndSuccess() {
-        await testSubjects.click('create-api-key-submit');
+        await testSubjects.click('formFlyoutSubmitButton');
         await testSubjects.existOrFail('api-key-create-success-panel');
       },
       async createApiKeySubmitAndError() {
-        await testSubjects.click('create-api-key-submit');
-        await testSubjects.existOrFail('create-api-key-error-callout');
+        await testSubjects.click('formFlyoutSubmitButton');
+        await testSubjects.existOrFail('create-api-key-error-callout'); // TODO
       },
       async createApiKeyCancel() {
-        await testSubjects.click('create-api-key-cancel');
+        await testSubjects.click('formFlyoutCancelButton');
       },
       async createApiKeyToggleMetadataSwitch() {
-        await testSubjects.click('create-api-metadata-switch');
+        await testSubjects.click('apiKeysMetadataSwitch');
       },
       async expectMetadataEditorToExist() {
-        await testSubjects.existOrFail('create-api-metadata-code-editor-container');
+        await monacoEditor.getCodeEditorValue(1).existOrFail();
       },
       async createApiKeyToggleRoleDescriptorsSwitch() {
-        await testSubjects.click('create-api-role-descriptors-switch');
+        await testSubjects.click('apiKeysRoleDescriptorsSwitch');
       },
       async expectRoleDescriptorsEditorToExist() {
-        await testSubjects.existOrFail('create-api-role-descriptors-code-editor-container');
+        await monacoEditor.getCodeEditorValue(0).existOrFail();
         await testSubjects.existOrFail('serverlessSearchSecurityPrivilegesFormReadOnlyButton');
         await testSubjects.existOrFail('serverlessSearchSecurityPrivilegesFormWriteOnlyButton');
       },
       async setRoleDescriptorsValue(value: string) {
-        await testSubjects.existOrFail('create-api-role-descriptors-code-editor-container');
-        await testSubjects.setValue('kibanaCodeEditor', value, {
-          clearWithKeyboard: true,
-        });
+        await monacoEditor.getCodeEditorValue(0).existOrFail();
+        await await monacoEditor.setCodeEditorValue(0, value);
       },
     },
     pipeline: {
