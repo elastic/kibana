@@ -76,6 +76,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
         </EuiCallOut>
       ) : (
         <EuiCallOut
+          data-test-subj="confirmAddRemovePoliciesCallout"
           iconType="iInCircle"
           title={i18n.translate('xpack.fleet.agentPolicy.confirmModalPoliciesCalloutTitle', {
             defaultMessage: 'This action will update the selected agent policies',
