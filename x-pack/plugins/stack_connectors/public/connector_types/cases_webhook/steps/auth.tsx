@@ -19,7 +19,7 @@ interface Props {
 export const AuthStep: FunctionComponent<Props> = ({ display, readOnly }) => {
   return (
     <span data-test-subj="authStep" style={{ display: display ? 'block' : 'none' }}>
-      <AuthConfig readOnly={readOnly} />
+      <AuthConfig readOnly={readOnly} hideSSL />
       <EuiSpacer size="s" />
     </span>
   );
