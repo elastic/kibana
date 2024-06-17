@@ -7,6 +7,7 @@
  */
 
 import {
+  BehaviorSubject,
   combineLatest,
   debounceTime,
   delay,
@@ -23,6 +24,7 @@ import {
   tap,
 } from 'rxjs';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { useMemo, useEffect } from 'react';
 import {
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
@@ -32,6 +34,7 @@ import {
 import { apiPublishesSearchSession, PublishesSearchSession } from './publishes_search_session';
 import { apiHasParentApi, HasParentApi } from '../has_parent_api';
 import { apiPublishesReload } from './publishes_reload';
+import { useStateFromPublishingSubject } from '../../publishing_subject';
 
 export interface FetchContext {
   isReload: boolean;
@@ -83,19 +86,19 @@ function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
         filter(() => !hasSearchSession(api))
       )
     );
+  }
 
-    if (apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)) {
-      const timeObservables: Array<Observable<unknown>> = [api.parentApi.timeRange$];
-      if (api.parentApi.timeslice$) {
-        timeObservables.push(api.parentApi.timeslice$);
-      }
-      observables.push(
-        combineLatest(timeObservables).pipe(
-          skip(1),
-          filter(() => !hasSearchSession(api) && !hasLocalTimeRange(api))
-        )
-      );
+  if (apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)) {
+    const timeObservables: Array<Observable<unknown>> = [api.parentApi.timeRange$];
+    if (api.parentApi.timeslice$) {
+      timeObservables.push(api.parentApi.timeslice$);
     }
+    observables.push(
+      combineLatest(timeObservables).pipe(
+        skip(1),
+        filter(() => !hasSearchSession(api) && !hasLocalTimeRange(api))
+      )
+    );
   }
 
   return observables;
@@ -145,3 +148,19 @@ export function fetch$(api: unknown): Observable<FetchContext> {
 
   return merge(immediateChange$, batchedChanges$).pipe(startWith(getFetchContext(api, false)));
 }
+
+export const useFetchContext = (api: unknown): FetchContext => {
+  const context$: BehaviorSubject<FetchContext> = useMemo(() => {
+    return new BehaviorSubject<FetchContext>(getFetchContext(api, false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const subsctription = fetch$(api).subscribe((nextContext) => context$.next(nextContext));
+
+    return () => subsctription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return useStateFromPublishingSubject(context$);
+};

@@ -27,7 +27,9 @@ export type {
 } from '@kbn/data-views-plugin/common';
 export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
-export { createKibanaReactContext, toMountPoint } from '@kbn/kibana-react-plugin/public';
+export { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+
+export { toMountPoint } from '@kbn/react-kibana-mount';
 
 export { CodeEditor } from '@kbn/code-editor';
 

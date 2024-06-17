@@ -8,6 +8,7 @@
 // @ts-expect-error
 import registerDataSession from 'cypress-data-session/src/plugin';
 import { merge } from 'lodash';
+import { samlAuthentication } from './support/saml_authentication';
 import { getVideosForFailedSpecs } from './support/filter_videos';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
@@ -26,6 +27,7 @@ export const getCypressBaseConfig = (
         configFile: './public/management/reporter_config.json',
       },
 
+      chromeWebSecurity: false,
       defaultCommandTimeout: 60000,
       execTimeout: 120000,
       pageLoadTimeout: 12000,
@@ -41,8 +43,8 @@ export const getCypressBaseConfig = (
       video: true,
       videoCompression: 15,
       videosFolder: '../../../target/kibana-security-solution/public/management/cypress/videos',
-      viewportHeight: 900,
-      viewportWidth: 1440,
+      viewportHeight: 1200,
+      viewportWidth: 1920,
       experimentalStudio: true,
 
       env: {
@@ -73,14 +75,28 @@ export const getCypressBaseConfig = (
         // baseUrl: To override, set Env. variable `CYPRESS_BASE_URL`
         baseUrl: 'http://localhost:5601',
         supportFile: 'public/management/cypress/support/e2e.ts',
+        // TODO: undo before merge
         specPattern: 'public/management/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+          on('before:browser:launch', (browser, launchOptions) => {
+            if (browser.name === 'chrome' && browser.isHeadless) {
+              launchOptions.args.push('--window-size=1920,1200');
+              return launchOptions;
+            }
+            if (browser.family === 'chromium') {
+              launchOptions.args.push(
+                '--js-flags="--max_old_space_size=4096 --max_semi_space_size=1024"'
+              );
+            }
+            return launchOptions;
+          });
           registerDataSession(on, config);
           // IMPORTANT: setting the log level should happen before any tooling is called
           setupToolingLogLevel(config);
+          samlAuthentication(on, config);
 
           dataLoaders(on, config);
 

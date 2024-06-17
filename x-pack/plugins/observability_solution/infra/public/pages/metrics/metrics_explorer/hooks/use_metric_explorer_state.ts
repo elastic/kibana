@@ -7,7 +7,6 @@
 
 import DateMath from '@kbn/datemath';
 import { useCallback, useEffect } from 'react';
-import { DataViewBase } from '@kbn/es-query';
 import type {
   MetricsExplorerChartOptions,
   MetricsExplorerOptions,
@@ -15,7 +14,6 @@ import type {
   MetricsExplorerView,
   MetricsExplorerViewState,
 } from '../../../../../common/metrics_explorer_views';
-import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -25,11 +23,7 @@ import { useMetricsExplorerOptionsContainerContext } from './use_metrics_explore
 
 export type { MetricsExplorerViewState };
 
-export const useMetricsExplorerState = (
-  source: MetricsSourceConfigurationProperties,
-  derivedIndexPattern: DataViewBase,
-  enabled = true
-) => {
+export const useMetricsExplorerState = ({ enabled }: { enabled: boolean } = { enabled: true }) => {
   const {
     defaultViewState,
     options,
@@ -53,13 +47,11 @@ export const useMetricsExplorerState = (
     });
   }, [setTimestamps, timeRange]);
 
-  const { data, error, fetchNextPage, isLoading } = useMetricsExplorerData(
+  const { data, error, fetchNextPage, isLoading } = useMetricsExplorerData({
     options,
-    source,
-    derivedIndexPattern,
     timestamps,
-    enabled
-  );
+    enabled,
+  });
 
   useEffect(() => {
     refreshTimestamps();

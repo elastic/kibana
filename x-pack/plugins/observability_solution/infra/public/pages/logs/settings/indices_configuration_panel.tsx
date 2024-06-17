@@ -168,14 +168,14 @@ export const IndicesConfigurationPanel = React.memo<{
             data-test-subj="infraIndicesPanelSettingsWarningCallout"
             size="m"
             title={i18n.translate('xpack.infra.sourceConfiguration.logsIndicesUsedByRulesTitle', {
-              defaultMessage: 'Rules utilize this data source.',
+              defaultMessage: 'Alerting rules use this data source setting',
             })}
             color="warning"
             iconType="warning"
           >
             <FormattedMessage
               id="xpack.infra.sourceConfiguration.logsIndicesUsedByRulesMessage"
-              defaultMessage="One or more rules rely on this data source setting. Changing this setting may impact the execution of these rules."
+              defaultMessage="One or more alerting rules rely on this data source setting. Changing this setting will change which data is used to generate alerts."
             />
             <EuiSpacer size="s" />
             <EuiLink

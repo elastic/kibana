@@ -28,6 +28,8 @@ import { InsightsSection } from './insights_section';
 import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandSection } from '../hooks/use_expand_section';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 
 jest.mock('../../../../common/containers/alerts/use_alert_prevalence');
 
@@ -55,6 +57,11 @@ jest.mock('react-router-dom', () => {
   alertIds: [],
 });
 
+jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
+  useTimelineDataFilters: jest.fn(),
+}));
+const mockUseTimelineDataFilters = useTimelineDataFilters as jest.Mock;
+
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
 const selectedPatterns = 'alerts';
@@ -68,7 +75,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 
 const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../common/containers/sourcerer', () => {
+jest.mock('../../../../sourcerer/containers', () => {
   return {
     useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
@@ -90,6 +97,11 @@ jest.mock('../hooks/use_fetch_threat_intelligence');
 
 jest.mock('../../shared/hooks/use_prevalence');
 
+const mockUseTourContext = useTourContext as jest.Mock;
+jest.mock('../../../../common/components/guided_onboarding_tour', () => ({
+  useTourContext: jest.fn().mockReturnValue({ activeStep: 1, isTourShown: jest.fn(() => true) }),
+}));
+
 const renderInsightsSection = (contextValue: RightPanelContext) =>
   render(
     <TestProviders>
@@ -101,6 +113,7 @@ const renderInsightsSection = (contextValue: RightPanelContext) =>
 
 describe('<InsightsSection />', () => {
   beforeEach(() => {
+    mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
     mockUseUserDetails.mockReturnValue([false, { userDetails: null }]);
     mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
     mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
@@ -145,6 +158,20 @@ describe('<InsightsSection />', () => {
 
   it('should render the component expanded if value is true in local storage', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
+
+    const contextValue = {
+      eventId: 'some_Id',
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      getFieldsData: mockGetFieldsData,
+    } as unknown as RightPanelContext;
+
+    const wrapper = renderInsightsSection(contextValue);
+    expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).toBeVisible();
+  });
+
+  it('should render the component expanded if guided onboarding tour is shown', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(false);
+    mockUseTourContext.mockReturnValue({ activeStep: 7, isTourShown: jest.fn(() => true) });
 
     const contextValue = {
       eventId: 'some_Id',

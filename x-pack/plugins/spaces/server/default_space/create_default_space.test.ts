@@ -106,7 +106,7 @@ test(`it throws all other errors from the saved objects client when checking for
     simulateGetErrorCondition: true,
   });
 
-  expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingInlineSnapshot(
+  await expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"unit test: unexpected exception condition"`
   );
 });
@@ -131,7 +131,7 @@ test(`it throws other errors if there is an error creating the default space`, a
     simulateCreateErrorCondition: true,
   });
 
-  expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingInlineSnapshot(
+  await expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"unit test: some other unexpected error"`
   );
 });

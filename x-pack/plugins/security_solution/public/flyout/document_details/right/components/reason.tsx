@@ -14,7 +14,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getField } from '../../shared/utils';
-import { AlertReasonPreviewPanel, DocumentDetailsPreviewPanelKey } from '../../preview';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { AlertReasonPreviewPanel } from '../../preview';
 import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,

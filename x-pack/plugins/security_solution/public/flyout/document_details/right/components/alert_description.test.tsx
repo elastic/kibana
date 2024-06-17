@@ -17,7 +17,7 @@ import { AlertDescription } from './alert_description';
 import { RightPanelContext } from '../context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { DocumentDetailsPreviewPanelKey } from '../../preview';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { TestProviders } from '../../../../common/mock';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';

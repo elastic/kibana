@@ -58,7 +58,7 @@ import { XYChart, XYChartRenderProps } from './xy_chart';
 import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { LegendSize, XYLegendValue } from '@kbn/visualizations-plugin/common';
 import type { LayerCellValueActions } from '../types';
 
 const onClickValue = jest.fn();
@@ -731,18 +731,24 @@ describe('XYChart component', () => {
     });
   });
 
-  test('disabled legend extra by default', () => {
+  test('disabled legend values by default', () => {
     const { args } = sampleArgs();
     const component = shallow(<XYChart {...defaultProps} args={args} />);
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([]);
   });
 
   test('ignores legend extra for ordinal chart', () => {
     const { args } = sampleArgs();
     const component = shallow(
-      <XYChart {...defaultProps} args={{ ...args, valuesInLegend: true }} />
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          legend: { ...args.legend, legendStats: [XYLegendValue.CurrentAndLastValue] },
+        }}
+      />
     );
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([]);
   });
 
   test('shows legend extra for histogram chart', () => {
@@ -752,12 +758,17 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
+          legend: {
+            ...args.legend,
+            legendStats: [XYLegendValue.CurrentAndLastValue],
+          },
           layers: [dateHistogramLayer],
-          valuesInLegend: true,
         }}
       />
     );
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(true);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([
+      XYLegendValue.CurrentAndLastValue,
+    ]);
   });
 
   test('applies the mark size ratio', () => {

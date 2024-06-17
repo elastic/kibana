@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import type { OverlayStart, SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
+import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import {
   extractSearchSourceReferences,
@@ -26,6 +26,7 @@ import type {
   ISavedVis,
   SaveVisOptions,
   GetVisOptions,
+  StartServices,
 } from '../types';
 import type { TypesStart, BaseVisType } from '../vis_types';
 // @ts-ignore
@@ -211,7 +212,7 @@ export async function findListItems(
 }
 
 export async function getSavedVisualization(
-  services: {
+  services: StartServices & {
     search: DataPublicPluginStart['search'];
     dataViews: DataPublicPluginStart['dataViews'];
     spaces?: SpacesPluginStart;
@@ -305,7 +306,7 @@ export async function getSavedVisualization(
     savedObject.tags = services.savedObjectsTagging.ui.getTagIdsFromReferences(resp.references);
   }
 
-  savedObject.visState = await updateOldState(savedObject.visState);
+  savedObject.visState = updateOldState(savedObject.visState);
 
   return savedObject;
 }
@@ -318,8 +319,7 @@ export async function saveVisualization(
     onTitleDuplicate,
     copyOnSave = false,
   }: SaveVisOptions,
-  services: {
-    overlays: OverlayStart;
+  services: StartServices & {
     savedObjectsTagging?: SavedObjectsTaggingApi;
   }
 ) {

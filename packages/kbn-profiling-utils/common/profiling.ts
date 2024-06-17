@@ -33,6 +33,7 @@ export enum FrameType {
   Perl,
   JavaScript,
   PHPJIT,
+  DotNET,
   ErrorFlag = 0x80,
   Error = 0xff,
 }
@@ -48,6 +49,7 @@ const frameTypeDescriptions = {
   [FrameType.Perl]: 'Perl',
   [FrameType.JavaScript]: 'JavaScript',
   [FrameType.PHPJIT]: 'PHP JIT',
+  [FrameType.DotNET]: '.NET',
   [FrameType.ErrorFlag]: 'ErrorFlag',
   [FrameType.Error]: 'Error',
 };

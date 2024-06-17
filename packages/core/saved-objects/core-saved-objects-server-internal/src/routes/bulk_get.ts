@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { RouteAccess } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -21,16 +22,21 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
 }
 
 export const registerBulkGetRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/_bulk_get',
+      options: {
+        access,
+        description: `Get saved objects`,
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({
@@ -42,25 +48,27 @@ export const registerBulkGetRoute = (
         ),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'post',
         path: '/api/saved_objects/_bulk_get',
-        req,
+        request,
         logger,
       });
+      const types = [...new Set(request.body.map(({ type }) => type))];
+
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsBulkGet({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsBulkGet({ request, types }).catch(() => {});
 
       const { savedObjects } = await context.core;
-      const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
+
       if (!allowHttpApiAccess) {
-        throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
+        throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
       }
-      const result = await savedObjects.client.bulkGet(req.body, {
+      const result = await savedObjects.client.bulkGet(request.body, {
         migrationVersionCompatibility: 'compatible',
       });
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

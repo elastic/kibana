@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiButtonIcon,
@@ -81,7 +82,7 @@ export interface ExpandablePanelPanelProps {
  * The content section can display a loading spinner, an error message, or any other content.
  * The component can be expanded or collapsed by clicking on the chevron icon on the left of the title.
  */
-export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
+export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> = ({
   header: { title, link, iconType, headerContent },
   content: { loading, error } = { loading: false, error: false },
   expand: { expandable, expandedOnFirstRender } = {

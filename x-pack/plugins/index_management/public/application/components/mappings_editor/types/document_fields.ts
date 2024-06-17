@@ -9,8 +9,8 @@ import { ReactNode } from 'react';
 
 import { GenericObject } from './mappings_editor';
 
-import { FieldConfig, RuntimeField } from '../shared_imports';
 import { PARAMETERS_DEFINITION } from '../constants';
+import { FieldConfig, RuntimeField } from '../shared_imports';
 
 export interface DataTypeDefinition {
   label: string;
@@ -183,6 +183,9 @@ interface FieldBasic {
   subType?: SubType;
   properties?: { [key: string]: Omit<Field, 'name'> };
   fields?: { [key: string]: Omit<Field, 'name'> };
+  referenceField?: string;
+  inferenceId?: string;
+  inference_id?: string;
 
   // other* exist together as a holder of types that the mappings editor does not yet know about but
   // enables the user to create mappings with them.
@@ -194,11 +197,6 @@ type FieldParams = {
 };
 
 export type Field = FieldBasic & Partial<FieldParams>;
-
-export interface FieldWithSemanticTextInfo extends Field {
-  referenceField?: string;
-  inferenceId?: string;
-}
 
 export interface FieldMeta {
   childFieldsName: ChildFieldName | undefined;

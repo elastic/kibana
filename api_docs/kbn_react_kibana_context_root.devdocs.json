@@ -29,7 +29,7 @@
           "\nPrepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context\nshould not be used.  Instead, refer to `KibanaRootContextProvider` to set up the root of Kibana."
         ],
         "signature": [
-          "({ theme: { theme$ }, globalStyles: globalStylesProp, colorMode: colorModeProp, children, }: React.PropsWithChildren<",
+          "({ theme: { theme$ }, globalStyles: globalStylesProp, colorMode: colorModeProp, modify, children, }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/react-kibana-context-root",
             "scope": "common",
@@ -37,7 +37,7 @@
             "section": "def-common.KibanaEuiProviderProps",
             "text": "KibanaEuiProviderProps"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/react/kibana_context/root/eui_provider.tsx",
         "deprecated": false,
@@ -48,10 +48,10 @@
             "id": "def-common.KibanaEuiProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  theme: { theme$ },\n  globalStyles: globalStylesProp,\n  colorMode: colorModeProp,\n  children,\n}",
+            "label": "{\n  theme: { theme$ },\n  globalStyles: globalStylesProp,\n  colorMode: colorModeProp,\n  modify,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/react-kibana-context-root",
                 "scope": "common",
@@ -59,7 +59,7 @@
                 "section": "def-common.KibanaEuiProviderProps",
                 "text": "KibanaEuiProviderProps"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/react/kibana_context/root/eui_provider.tsx",
             "deprecated": false,
@@ -80,7 +80,7 @@
           "\nThe `KibanaRootContextProvider` provides the necessary context at the root of Kibana, including\ninitialization and the theme and i18n contexts.  This context should only be used _once_, and\nat the _very top_ of the application root, rendered by the `RenderingService`.\n\nWhile this context is exposed for edge cases and tooling, (e.g. Storybook, Jest, etc.), it should\n_not_ be used in applications.  Instead, applications should choose the context that makes the\nmost sense for the problem they are trying to solve:\n\n- Consider `KibanaRenderContextProvider` for rendering components outside the current tree, (e.g.\nwith `ReactDOM.render`).\n- Consider `KibanaThemeContextProvider` for altering the theme of a component or tree of components.\n"
         ],
         "signature": [
-          "({ children, i18n, ...props }: React.PropsWithChildren<",
+          "({ children, i18n, ...props }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/react-kibana-context-root",
             "scope": "common",
@@ -88,7 +88,7 @@
             "section": "def-common.KibanaRootContextProviderProps",
             "text": "KibanaRootContextProviderProps"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/react/kibana_context/root/root_provider.tsx",
         "deprecated": false,
@@ -102,7 +102,7 @@
             "label": "{\n  children,\n  i18n,\n  ...props\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/react-kibana-context-root",
                 "scope": "common",
@@ -110,7 +110,7 @@
                 "section": "def-common.KibanaRootContextProviderProps",
                 "text": "KibanaRootContextProviderProps"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,
@@ -247,6 +247,7 @@
               "The `AnalyticsServiceStart` API from `CoreStart`."
             ],
             "signature": [
+              "Pick<",
               {
                 "pluginId": "@kbn/core-analytics-browser",
                 "scope": "common",
@@ -254,7 +255,7 @@
                 "section": "def-common.AnalyticsServiceStart",
                 "text": "AnalyticsServiceStart"
               },
-              " | undefined"
+              ", \"reportEvent\"> | undefined"
             ],
             "path": "packages/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,

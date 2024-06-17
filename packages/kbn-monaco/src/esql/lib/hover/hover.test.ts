@@ -74,7 +74,6 @@ function createCustomCallbackMocks(
     getFieldsFor: jest.fn(async () => finalFields),
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
-    getMetaFields: jest.fn(async () => ['_index', '_score']),
   };
 }
 
@@ -124,7 +123,7 @@ describe('hover', () => {
           model,
           position,
           token,
-          async (text) => (text ? await getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
+          async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
           callbackMocks
         );
         expect(contents.map(({ value }) => value)).toEqual(expected);

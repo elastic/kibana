@@ -32,6 +32,8 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import { useLocation } from 'react-router-dom';
 import { decode } from '@kbn/rison';
+import { isEqual } from 'lodash';
+import type { AssetDashboardLoadedParams } from '../../../../services/telemetry/types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { buildAssetIdFilter } from '../../../../utils/filters/build';
 import type {
@@ -56,16 +58,38 @@ export function Dashboards() {
   const { asset, renderMode } = useAssetDetailsRenderPropsContext();
   const location = useLocation();
   const {
-    services: { share },
+    services: { share, telemetry },
   } = useKibanaContextForPlugin();
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [customDashboards, setCustomDashboards] = useState<DashboardItemWithTitle[]>([]);
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItemWithTitle>();
+  const [trackingEventProperties, setTrackingEventProperties] = useState({});
   const { data: allAvailableDashboards, status } = useDashboardFetcher();
   const { metrics } = useDataViewsContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const trackOnlyOnceTheSameDashboardFilters = React.useRef(false);
 
   const { dashboards, loading, reload } = useFetchCustomDashboards({ assetType: asset.type });
+
+  useEffect(() => {
+    trackOnlyOnceTheSameDashboardFilters.current = false;
+    if (currentDashboard) {
+      const currentEventTrackingProperties: AssetDashboardLoadedParams = {
+        assetType: asset.type,
+        state: currentDashboard.dashboardFilterAssetIdEnabled,
+        filtered_by: currentDashboard.dashboardFilterAssetIdEnabled ? ['assetId'] : [],
+      };
+      if (isEqual(trackingEventProperties, currentEventTrackingProperties)) {
+        trackOnlyOnceTheSameDashboardFilters.current = true;
+        return;
+      }
+
+      setTrackingEventProperties(currentEventTrackingProperties);
+      if (!trackOnlyOnceTheSameDashboardFilters.current) {
+        telemetry.reportAssetDashboardLoaded(currentEventTrackingProperties);
+      }
+    }
+  }, [asset.type, currentDashboard, telemetry, trackingEventProperties]);
 
   useEffect(() => {
     const allAvailableDashboardsMap = new Map<string, DashboardItem>();
@@ -99,9 +123,11 @@ export function Dashboards() {
     }
   }, [
     allAvailableDashboards,
+    asset.type,
     currentDashboard?.dashboardSavedObjectId,
     dashboards,
     setUrlState,
+    telemetry,
     urlState?.dashboardId,
   ]);
 
@@ -110,7 +136,10 @@ export function Dashboards() {
       viewMode: ViewMode.VIEW,
       timeRange: { from: dateRange.from, to: dateRange.to },
     });
-    return Promise.resolve<DashboardCreationOptions>({ getInitialInput });
+    return Promise.resolve<DashboardCreationOptions>({
+      getInitialInput,
+      useControlGroupIntegration: true,
+    });
   }, [dateRange.from, dateRange.to]);
 
   useEffect(() => {

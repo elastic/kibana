@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
+import React, { useCallback, FC, PropsWithChildren } from 'react';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useSelector } from '@xstate/react';
@@ -161,7 +161,10 @@ const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
   }
 };
 
-const LogSourceErrorCallout: React.FC<{ title: React.ReactNode }> = ({ title, children }) => (
+const LogSourceErrorCallout: FC<PropsWithChildren<{ title: React.ReactNode }>> = ({
+  title,
+  children,
+}) => (
   <EuiCallOut className="eui-textLeft" color="danger" iconType="warning" title={title}>
     <p>{children}</p>
   </EuiCallOut>

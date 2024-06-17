@@ -20,12 +20,10 @@ export function registerGetApmDatasetInfoFunction({
   registerFunction(
     {
       name: 'get_apm_dataset_info',
-      contexts: ['core'],
       visibility: FunctionVisibility.AssistantOnly,
       description: `Use this function to get information about APM data.`,
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           start: {
             type: 'string',
@@ -96,6 +94,15 @@ export function registerGetApmDatasetInfoFunction({
             .filter((index) => indicesWithData.includes(index))
         );
       });
+
+      if (!Object.values(availableIndices).flat().length) {
+        return {
+          content: {
+            fields: [],
+            description: 'There is no APM data available',
+          },
+        };
+      }
 
       return {
         content: {

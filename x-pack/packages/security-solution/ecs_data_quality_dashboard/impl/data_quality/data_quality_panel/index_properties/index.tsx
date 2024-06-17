@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFlat, EcsVersion } from '@elastic/ecs';
+import { EcsVersion } from '@elastic/ecs';
 import type {
   FlameElementEvent,
   HeatmapElementEvent,
@@ -39,12 +39,13 @@ import {
   getSameFamilyFields,
 } from '../tabs/incompatible_tab/helpers';
 import * as i18n from './translations';
-import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
+import type { IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
 import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
 import { useDataQualityContext } from '../data_quality_context';
 import { formatStorageResult, postStorageResult, getSizeInBytes } from '../../helpers';
+import { EcsFlatTyped } from '../../constants';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
 
@@ -109,7 +110,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   const requestItems = useMemo(
     () =>
       getUnallowedValueRequestItems({
-        ecsMetadata: EcsFlat as unknown as Record<string, EcsMetadata>,
+        ecsMetadata: EcsFlatTyped,
         indexName,
       }),
     [indexName]
@@ -134,7 +135,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   const partitionedFieldMetadata: PartitionedFieldMetadata | null = useMemo(
     () =>
       getSortedPartitionedFieldMetadata({
-        ecsMetadata: EcsFlat as unknown as Record<string, EcsMetadata>,
+        ecsMetadata: EcsFlatTyped,
         loadingMappings,
         mappingsProperties,
         unallowedValues,
@@ -270,7 +271,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         };
         updatePatternRollup(updatedRollup);
 
-        if (indexId && requestTime != null && requestTime > 0 && partitionedFieldMetadata) {
+        if (indexName && requestTime != null && requestTime > 0 && partitionedFieldMetadata) {
           const report = {
             batchId: uuidv4(),
             ecsVersion: EcsVersion,

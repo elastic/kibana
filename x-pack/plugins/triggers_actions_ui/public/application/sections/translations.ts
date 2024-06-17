@@ -32,17 +32,17 @@ export const SECURITY_DISPLAY_NAME = i18n.translate(
   }
 );
 
-export const STACK_MANAGEMENT_DISPLAY_NAME = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.stackManagement',
+export const STACK_DISPLAY_NAME = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsTable.stack',
   {
-    defaultMessage: 'Stack management',
+    defaultMessage: 'Stack',
   }
 );
 
 export const STACK_MONITORING_DISPLAY_NAME = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.stackMonitoring',
   {
-    defaultMessage: 'Stack monitoring',
+    defaultMessage: 'Stack Monitoring',
   }
 );
 

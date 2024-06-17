@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { SentinelOneGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type {
+  SentinelOneGetAgentsResponse,
+  SentinelOneGetActivitiesResponse,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
@@ -127,6 +130,58 @@ const createSentinelOneAgentDetailsMock = (
   );
 };
 
+const createSentinelOneGetActivitiesApiResponseMock = (): SentinelOneGetActivitiesResponse => {
+  return {
+    errors: undefined,
+    pagination: {
+      nextCursor: null,
+      totalItems: 1,
+    },
+    data: [
+      {
+        accountId: '1392053568574369781',
+        accountName: 'Elastic',
+        activityType: 81,
+        activityUuid: 'ee9227f5-8f59-4f6d-bd46-3b74f93fd939',
+        agentId: '1913920934584665209',
+        agentUpdatedVersion: null,
+        comments: null,
+        createdAt: '2024-04-16T19:21:08.492444Z',
+        data: {
+          accountName: 'Elastic',
+          commandBatchUuid: '7011777f-77e7-4a01-a674-e5f767808895',
+          computerName: 'ptavares-sentinelone-1371',
+          externalIp: '108.77.84.191',
+          fullScopeDetails: 'Group Default Group in Site Default site of Account Elastic',
+          fullScopeDetailsPath: 'Global / Elastic / Default site / Default Group',
+          groupName: 'Default Group',
+          groupType: 'Manual',
+          ipAddress: '108.77.84.191',
+          scopeLevel: 'Group',
+          scopeName: 'Default Group',
+          siteName: 'Default site',
+          username: 'Defend Workflows Automation',
+          uuid: 'c06d63d9-9fa2-046d-e91e-dc94cf6695d8',
+        },
+        description: null,
+        groupId: '1392053568591146999',
+        groupName: 'Default Group',
+        hash: null,
+        id: '1929937418124016884',
+        osFamily: null,
+        primaryDescription:
+          'The management user Defend Workflows Automation initiated a fetch file command to the agent ptavares-sentinelone-1371 (108.77.84.191).',
+        secondaryDescription: 'IP address: 108.77.84.191',
+        siteId: '1392053568582758390',
+        siteName: 'Default site',
+        threatId: null,
+        updatedAt: '2024-04-16T19:21:08.492450Z',
+        userId: '1796254913836217560',
+      },
+    ],
+  };
+};
+
 const createSentinelOneGetAgentsApiResponseMock = (
   data: SentinelOneGetAgentsResponse['data'] = [createSentinelOneAgentDetailsMock()]
 ): SentinelOneGetAgentsResponse => {
@@ -165,6 +220,11 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
             data: createSentinelOneGetAgentsApiResponseMock(),
           });
 
+        case SUB_ACTION.GET_ACTIVITIES:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: createSentinelOneGetActivitiesApiResponseMock(),
+          });
+
         default:
           return responseActionsClientMock.createConnectorActionExecuteResponse();
       }
@@ -188,4 +248,5 @@ export const sentinelOneMock = {
   createSentinelOneAgentDetails: createSentinelOneAgentDetailsMock,
   createConnectorActionsClient: createConnectorActionsClientMock,
   createConstructorOptions: createConstructorOptionsMock,
+  createSentinelOneActivitiesApiResponse: createSentinelOneGetActivitiesApiResponseMock,
 };

@@ -72,9 +72,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test on share panel', async () => {
       await PageObjects.share.clickShareTopNavButton();
       await a11y.testAppSnapshot();
+      await PageObjects.share.closeShareModal();
     });
 
     it('a11y test on open sidenav filter', async () => {
+      await PageObjects.share.closeShareModal();
       await PageObjects.unifiedFieldList.openSidebarFieldFilter();
       await a11y.testAppSnapshot();
       await PageObjects.unifiedFieldList.closeSidebarFieldFilter();
@@ -133,11 +135,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for actions on a field', async () => {
       await PageObjects.discover.clickDocViewerTab('doc_view_table');
       if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
-        await testSubjects.click('openFieldActionsButton-Cancelled');
+        await testSubjects.click('openFieldActionsButton-Cancelled'); // Open the actions
       } else {
         await testSubjects.existOrFail('fieldActionsGroup-Cancelled');
       }
       await a11y.testAppSnapshot();
+      if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
+        await testSubjects.click('openFieldActionsButton-Cancelled'); // Close the actions
+      }
     });
 
     it('a11y test for data-grid table with columns', async () => {

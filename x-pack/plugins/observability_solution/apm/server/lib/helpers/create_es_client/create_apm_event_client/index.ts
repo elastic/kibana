@@ -90,7 +90,6 @@ export interface APMEventClientConfig {
   indices: APMIndices;
   options: {
     includeFrozen: boolean;
-    forceSyntheticSource: boolean;
   };
 }
 
@@ -100,7 +99,6 @@ export class APMEventClient {
   private readonly request: KibanaRequest;
   public readonly indices: APMIndices;
   private readonly includeFrozen: boolean;
-  private readonly forceSyntheticSource: boolean;
 
   constructor(config: APMEventClientConfig) {
     this.esClient = config.esClient;
@@ -108,7 +106,6 @@ export class APMEventClient {
     this.request = config.request;
     this.indices = config.indices;
     this.includeFrozen = config.options.includeFrozen;
-    this.forceSyntheticSource = config.options.forceSyntheticSource;
   }
 
   private callAsyncWithDebug<T extends { body: any }>({
@@ -156,13 +153,10 @@ export class APMEventClient {
     operationName: string,
     params: TParams
   ): Promise<TypedSearchResponse<TParams>> {
-    const { events, index, filters } = getRequestBase({
+    const { index, filters } = getRequestBase({
       apm: params.apm,
       indices: this.indices,
     });
-
-    const forceSyntheticSourceForThisRequest =
-      this.forceSyntheticSource && events.includes(ProcessorEvent.metric);
 
     const searchParams = {
       ...omit(params, 'apm', 'body'),
@@ -180,7 +174,6 @@ export class APMEventClient {
       ignore_unavailable: true,
       preference: 'any',
       expand_wildcards: ['open' as const, 'hidden' as const],
-      ...(forceSyntheticSourceForThisRequest ? { force_synthetic_source: true } : {}),
     };
 
     return this.callAsyncWithDebug({

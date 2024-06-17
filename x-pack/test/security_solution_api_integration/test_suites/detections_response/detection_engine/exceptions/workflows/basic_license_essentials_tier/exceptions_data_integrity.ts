@@ -37,8 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  // @skipInQA purposefully - only running tests in MKI whose failure should block release
-  describe('@serverless @ess @skipInQA exceptions data integrity', () => {
+  describe('@serverless @ess exceptions data integrity', () => {
     afterEach(async () => {
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);

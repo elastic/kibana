@@ -36,6 +36,11 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
   types: Record<string, ExpressionType>;
 
   /**
+   * Allow caching in the current execution.
+   */
+  allowCache?: boolean;
+
+  /**
    * Adds ability to abort current execution.
    */
   abortSignal: AbortSignal;

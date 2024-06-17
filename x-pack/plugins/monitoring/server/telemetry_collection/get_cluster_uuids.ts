@@ -45,7 +45,20 @@ export async function fetchClusterUuids(
     filter_path: 'aggregations.cluster_uuids.buckets.key',
     body: {
       size: 0,
-      query: createQuery({ type: 'cluster_stats', start, end }) as estypes.QueryDslQueryContainer,
+      query: createQuery({
+        start,
+        end,
+        filters: [
+          {
+            bool: {
+              should: [
+                { term: { type: 'cluster_stats' } },
+                { term: { 'metricset.name': 'cluster_stats' } },
+              ],
+            },
+          },
+        ],
+      }) as estypes.QueryDslQueryContainer,
       aggs: {
         cluster_uuids: {
           terms: {

@@ -9,8 +9,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
-  Comparator,
   Aggregators,
   CustomThresholdSearchSourceFields,
 } from '../../../../../common/custom_threshold_rule/types';
@@ -69,7 +69,7 @@ describe('Rule condition chart', () => {
       timeUnit: 'm',
       sourceId: 'default',
       threshold: [1],
-      comparator: Comparator.GT_OR_EQ,
+      comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
     };
     const { wrapper } = await setup(expression);
     expect(wrapper.find('[data-test-subj="thresholdRuleNoChartData"]').exists()).toBeTruthy();

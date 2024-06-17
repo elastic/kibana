@@ -121,6 +121,7 @@ export function useConversation({
     service,
     connectorId,
     onConversationUpdate: (event) => {
+      conversation.refresh();
       setDisplayedConversationId(event.conversation.id);
       onConversationUpdate?.({ conversation: event.conversation });
     },
@@ -151,7 +152,7 @@ export function useConversation({
             throw error;
           });
       },
-      [displayedConversationId, initialTitle],
+      [displayedConversationId, initialTitle, service, setMessages],
       {
         defaultValue: () => {
           if (!displayedConversationId) {

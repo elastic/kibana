@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
@@ -175,6 +176,18 @@ export function PackageCard({
     >
       <TrackApplicationView viewId={testid}>
         <Card
+          // EUI TODO: Custom component CSS
+          css={css`
+            [class*='euiCard__content'] {
+              display: flex;
+              flex-direction: column;
+              block-size: 100%;
+            }
+
+            [class*='euiCard__description'] {
+              flex-grow: 1;
+            }
+          `}
           data-test-subj={testid}
           isquickstart={isQuickstart}
           betaBadgeProps={quickstartBadge(isQuickstart)}

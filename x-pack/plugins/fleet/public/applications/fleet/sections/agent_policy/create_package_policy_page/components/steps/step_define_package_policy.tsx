@@ -48,7 +48,7 @@ const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
 `;
 
 export const StepDefinePackagePolicy: React.FunctionComponent<{
-  agentPolicy?: AgentPolicy;
+  agentPolicies?: AgentPolicy[];
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
@@ -58,7 +58,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   noAdvancedToggle?: boolean;
 }> = memo(
   ({
-    agentPolicy,
+    agentPolicies,
     packageInfo,
     packagePolicy,
     updatePackagePolicy,
@@ -105,13 +105,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           </>
         )}
         <FormGroupResponsiveFields
+          fullWidth
           title={
-            <h4>
+            <h3>
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.stepConfigure.integrationSettingsSectionTitle"
                 defaultMessage="Integration settings"
               />
-            </h4>
+            </h3>
           }
           description={
             <FormattedMessage
@@ -124,6 +125,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             {/* Name */}
             <EuiFlexItem>
               <EuiFormRow
+                fullWidth
                 isInvalid={!!validationResults.name}
                 error={validationResults.name}
                 label={
@@ -134,6 +136,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 }
               >
                 <EuiFieldText
+                  fullWidth
                   readOnly={isManaged}
                   value={packagePolicy.name}
                   onChange={(e) =>
@@ -149,6 +152,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             {/* Description */}
             <EuiFlexItem>
               <EuiFormRow
+                fullWidth
                 label={
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel"
@@ -167,6 +171,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 error={validationResults.description}
               >
                 <EuiFieldText
+                  fullWidth
                   readOnly={isManaged}
                   value={packagePolicy.description}
                   onChange={(e) =>
@@ -283,8 +288,9 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       }
                     >
                       <EuiComboBox
+                        data-test-subj="packagePolicyNamespaceInput"
                         noSuggestions
-                        placeholder={agentPolicy?.namespace}
+                        placeholder={agentPolicies?.[0]?.namespace}
                         isDisabled={isEditPage && packageInfo.type === 'input'}
                         singleSelection={true}
                         selectedOptions={

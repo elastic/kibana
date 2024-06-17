@@ -47,5 +47,8 @@
     "@kbn/discover-plugin",
     "@kbn/search-connectors-plugin",
     "@kbn/index-management",
+    "@kbn/react-kibana-context-render",
+    "@kbn/search-playground",
+    "@kbn/search-inference-endpoints",
   ]
 }

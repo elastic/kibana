@@ -15,6 +15,8 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { isAdvancedSyncRuleSnippetEmpty } from '../../../../utils/sync_rules_helpers';
+
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 
 export const AdvancedSyncRules: React.FC = () => {
@@ -24,6 +26,9 @@ export const AdvancedSyncRules: React.FC = () => {
     advancedSnippet,
   } = useValues(ConnectorFilteringLogic);
   const { setLocalAdvancedSnippet } = useActions(ConnectorFilteringLogic);
+  const isAdvancedSnippetEmpty = isAdvancedSyncRuleSnippetEmpty(advancedSnippet);
+  const isLocalSnippetEmpty = isAdvancedSyncRuleSnippetEmpty(localAdvancedSnippet);
+
   return (
     <>
       <EuiFormRow
@@ -63,7 +68,7 @@ export const AdvancedSyncRules: React.FC = () => {
         />
       </EuiFormRow>
 
-      {(!!advancedSnippet || !!localAdvancedSnippet) && (
+      {(!isAdvancedSnippetEmpty || !isLocalSnippetEmpty) && (
         <EuiCallOut
           title={i18n.translate(
             'xpack.enterpriseSearch.content.index.connector.syncRules.advancedTabCallout.title',

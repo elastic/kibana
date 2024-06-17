@@ -13,7 +13,6 @@ import {
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
-import { renderToString } from 'react-dom/server';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { apiPublishesTimeRange, EmbeddableApiContext } from '@kbn/presentation-publishing';
@@ -31,16 +30,29 @@ export class CustomTimeRangeBadge
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!apiPublishesTimeRange(embeddable)) throw new IncompatibleActionError();
-    const timeRange = embeddable.timeRange$.value;
-    if (!timeRange) return '';
-    return renderToString(
+    /**
+     * WARNING!! We would not normally return an empty string here - but in order for i18n to be
+     * handled properly by the `PrettyDuration` component, we need it to handle the aria label.
+     */
+    return '';
+  }
+
+  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
+    const { embeddable } = context;
+    if (!apiPublishesTimeRange(embeddable)) throw new IncompatibleActionError();
+
+    const timeRange = embeddable.timeRange$.getValue();
+    if (!timeRange) {
+      throw new IncompatibleActionError();
+    }
+    return (
       <PrettyDuration
         timeTo={timeRange.to}
         timeFrom={timeRange.from}
         dateFormat={core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT) ?? 'Browser'}
       />
     );
-  }
+  };
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
     return apiPublishesTimeRange(embeddable);

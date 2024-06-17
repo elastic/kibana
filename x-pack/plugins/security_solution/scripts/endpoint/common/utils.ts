@@ -9,6 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
+import { inspect } from 'util';
 
 /**
  * Capture and return the calling stack for the context that called this utility.
@@ -60,4 +61,36 @@ export const prefixedOutputLogger = (prefix: string, log: ToolingLog): ToolingLo
   });
 
   return proxy;
+};
+
+/**
+ * Safely traverse some content (object, array, etc) and stringify it
+ * @param content
+ * @param depth
+ */
+export const dump = (content: any, depth: number = 5): string => {
+  return inspect(content, { depth });
+};
+
+export interface DeferredPromiseInterface<T = void> {
+  promise: Promise<T>;
+  resolve: (data: T) => void;
+  reject: (e: Error) => void;
+}
+
+/**
+ * Returns back an interface that provide a Promise along with exposed method to resolve it and reject it
+ * from outside of the actual Promise executor
+ */
+export const getDeferredPromise = function <T = void>(): DeferredPromiseInterface<T> {
+  let resolve: DeferredPromiseInterface<T>['resolve'];
+  let reject: DeferredPromiseInterface<T>['reject'];
+
+  const promise = new Promise<T>((_resolve, _reject) => {
+    resolve = _resolve;
+    reject = _reject;
+  });
+
+  // @ts-ignore
+  return { promise, resolve, reject };
 };

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { BoolQuery } from '@kbn/es-query';
 import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -25,6 +26,7 @@ export interface FailedTransactionRateResponse {
 export async function getFailedTransactionRatePeriods({
   environment,
   kuery,
+  filters,
   serviceName,
   transactionType,
   transactionName,
@@ -38,6 +40,7 @@ export async function getFailedTransactionRatePeriods({
 }: {
   environment: string;
   kuery: string;
+  filters?: BoolQuery;
   serviceName: string;
   transactionType: string;
   transactionName?: string;
@@ -52,6 +55,7 @@ export async function getFailedTransactionRatePeriods({
   const commonProps = {
     environment,
     kuery,
+    filters,
     serviceName,
     transactionTypes: [transactionType],
     transactionName,

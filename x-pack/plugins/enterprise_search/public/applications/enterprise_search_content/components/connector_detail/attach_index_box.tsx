@@ -253,6 +253,8 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="entSearchContent-connector-connectorDetail-saveConfigurationButton"
+            data-telemetry-id="entSearchContent-connector-connectorDetail-saveConfigurationButton"
             onClick={() => onSave()}
             disabled={!selectedIndex || selectedIndex.label === connector.index_name}
             isLoading={isSaveLoading}
@@ -286,6 +288,8 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-telemetry-id="entSearchContent-connector-connectorDetail-createAttachIndexButton"
+                data-test-subj="entSearchContent-connector-connectorDetail-createAttachIndexButton"
                 iconType="sparkles"
                 color="primary"
                 fill

@@ -16,6 +16,7 @@ import {
   IconChartMosaic,
   IconChartWaffle,
 } from '@kbn/chart-icons';
+import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { SharedPieLayerState, EmptySizeRatios } from '../../../common/types';
 import { CategoryDisplay, NumberDisplay } from '../../../common/constants';
 import type { PieChartType } from '../../../common/types';
@@ -44,7 +45,7 @@ interface PartitionChartMeta {
   };
   legend: {
     flat?: boolean;
-    showValues?: boolean;
+    defaultLegendStats?: PartitionLegendValue[];
     hideNestedLegendSwitch?: boolean;
     getShowLegendDefault?: (bucketColumns: DatatableColumn[]) => boolean;
   };
@@ -211,7 +212,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     },
     legend: {
       flat: true,
-      showValues: true,
+      defaultLegendStats: [PartitionLegendValue.Value],
       hideNestedLegendSwitch: true,
       getShowLegendDefault: () => true,
     },

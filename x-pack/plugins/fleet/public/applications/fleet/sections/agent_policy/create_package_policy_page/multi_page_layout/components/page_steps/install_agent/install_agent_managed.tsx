@@ -21,6 +21,8 @@ import { ManualInstructions } from '../../../../../../../../../components/enroll
 
 import { KubernetesManifestApplyStep } from '../../../../../../../../../components/agent_enrollment_flyout/steps/run_k8s_apply_command_step';
 
+import { getRootIntegrations } from '../../../../../../../../../../common/services';
+
 import type { InstallAgentPageProps } from './types';
 
 export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps> = (props) => {
@@ -31,7 +33,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     setIsManaged,
     agentPolicy,
     enrollmentAPIKey,
-    fleetServerHosts,
+    fleetServerHost,
     fleetProxy,
     enrolledAgentIds,
   } = props;
@@ -65,7 +67,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const installManagedCommands = ManualInstructions({
     apiKey: enrollmentAPIKey.api_key,
     fleetProxy,
-    fleetServerHosts,
+    fleetServerHost,
     agentVersion: agentVersion || '',
   });
 
@@ -78,8 +80,9 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       selectedApiKeyId: enrollmentAPIKey.id,
       isComplete: commandCopied || !!enrolledAgentIds.length,
       fullCopyButton: true,
-      fleetServerHost: fleetServerHosts?.[0],
+      fleetServerHost,
       onCopy: () => setCommandCopied(true),
+      rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
     }),
   ];
 

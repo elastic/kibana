@@ -1,0 +1,32 @@
+env:
+  DISABLE_CI_STATS_SHIPPING: "true"
+steps:
+  - command: .buildkite/scripts/steps/build_kibana.sh
+    label: Build Kibana Distribution and Plugins
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-16
+      preemptible: true
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: "-1"
+          limit: 3
+
+  - wait
+
+  - command: TEST_PACKAGE=fips .buildkite/scripts/steps/package_testing/test.sh
+    label: "Smoke testing for FIPS"
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-4
+    timeout_in_minutes: 600

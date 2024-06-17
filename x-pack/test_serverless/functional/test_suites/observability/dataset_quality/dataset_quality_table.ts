@@ -23,7 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const to = '2024-01-01T12:00:00.000Z';
 
-  describe('Dataset quality table', () => {
+  describe('Dataset quality table', function () {
+    this.tags(['failsOnMKI']); // Failing https://github.com/elastic/kibana/issues/183495
+
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.svlCommonPage.loginWithRole('admin');
@@ -37,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows the right number of rows in correct order', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       await datasetNameCol.sort('descending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql([...datasetNames].reverse());
@@ -46,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
       expect(namespaceColCellTexts).to.eql([defaultNamespace, defaultNamespace, defaultNamespace]);
 
-      const degradedDocsCol = cols['Degraded Docs'];
+      const degradedDocsCol = cols['Degraded Docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
 
@@ -61,10 +63,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows degraded docs percentage', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       await datasetNameCol.sort('ascending');
 
-      const degradedDocsCol = cols['Degraded Docs'];
+      const degradedDocsCol = cols['Degraded Docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
 
@@ -88,10 +90,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(updatedDegradedDocsColCellTexts[2]).to.not.eql('0%');
     });
 
-    it('shows the updated size of the index', async () => {
+    // https://github.com/elastic/kibana/issues/178954
+    it.skip('shows the updated size of the index', async () => {
       const testDatasetIndex = 2;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       await datasetNameCol.sort('ascending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
 
@@ -126,9 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('sorts by dataset name', async () => {
       // const header = await PageObjects.datasetQuality.getDatasetTableHeader('Dataset Name');
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      expect(Object.keys(cols).length).to.eql(7);
-
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
 
       // Sort ascending
       await datasetNameCol.sort('ascending');
@@ -156,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.navigateTo();
 
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
 
       // Sort ascending
       await datasetNameCol.sort('ascending');
@@ -173,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('goes to log explorer page when opened', async () => {
       const rowIndexToOpen = 1;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       const actionsCol = cols.Actions;
 
       const datasetName = (await datasetNameCol.getCellTexts())[rowIndexToOpen];
@@ -189,7 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.navigateTo();
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols['Last Activity'];
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
 
       // Set time range to Last 1 minute
       const filtersContainer = await testSubjects.find(

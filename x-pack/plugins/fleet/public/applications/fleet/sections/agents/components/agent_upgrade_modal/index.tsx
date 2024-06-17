@@ -287,24 +287,30 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   const { startDatetime, onChangeStartDateTime, initialDatetime, minTime, maxTime } =
     useScheduleDateTime();
 
-  const isSubmitButtonDisabled = useMemo(
-    () =>
+  const isSingleAgentFleetServer =
+    isSingleAgent && fleetServerAgents.map((agent) => agent.id).includes(agents[0].id);
+
+  const isSubmitButtonDisabled = useMemo(() => {
+    if (!isSubmitting && isUpdating && isSingleAgent && isStuckInUpdating(agents[0])) return false;
+    return (
       isSubmitting ||
       (isUpdating && updatingAgents === 0) ||
       !selectedVersion[0].value ||
       (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)) ||
       (isSingleAgent &&
-        !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents)),
-    [
-      agents,
-      fleetServerAgents,
-      isSingleAgent,
-      isSubmitting,
-      isUpdating,
-      selectedVersion,
-      updatingAgents,
-    ]
-  );
+        !isSingleAgentFleetServer &&
+        !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents))
+    );
+  }, [
+    agents,
+    fleetServerAgents,
+    isSingleAgent,
+    isSubmitting,
+    isUpdating,
+    selectedVersion,
+    updatingAgents,
+    isSingleAgentFleetServer,
+  ]);
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
@@ -354,9 +360,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       setIsSubmitting(false);
       notifications.toasts.addError(error, {
         title: i18n.translate('xpack.fleet.upgradeAgents.fatalErrorNotificationTitle', {
-          defaultMessage:
-            'Error upgrading {count, plural, one {agent} other {{count} agents} =true {all selected agents}}',
-          values: { count: isAllAgents || agentCount },
+          defaultMessage: `Error upgrading {isAllAgents, select,
+            true {all selected agents}
+            other {{count, plural, one {agent} other {# agents}}}
+          }`,
+          values: { isAllAgents, count: agentCount },
         }),
       });
     }
@@ -393,20 +401,39 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           ) : isScheduled ? (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.scheduleUpgradeMultipleTitle"
-              defaultMessage="Schedule upgrade for {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
-              values={{ count: isAllAgents || agentCount }}
+              defaultMessage="Schedule upgrade for {isAllAgents, select,
+                true {all selected agents}
+                other {{count, plural, one {agent} other {# agents}}}
+              }"
+              values={{
+                isAllAgents,
+                count: agentCount,
+              }}
             />
           ) : isUpdating ? (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.restartUpgradeMultipleTitle"
-              defaultMessage="Restart upgrade on {updating} out of {count, plural, one {agent} other {{count} agents} =true {all agents}} stuck in updating"
-              values={{ count: isAllAgents || agentCount, updating: updatingAgents }}
+              defaultMessage="Restart upgrade on {updating} out of {isAllAgents, select,
+                true {all agents}
+                other {{count, plural, one {agent} other {# agents}}}
+              } stuck in updating"
+              values={{
+                isAllAgents,
+                count: agentCount,
+                updating: updatingAgents,
+              }}
             />
           ) : (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.upgradeMultipleTitle"
-              defaultMessage="Upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
-              values={{ count: isAllAgents || agentCount }}
+              defaultMessage="Upgrade {isAllAgents, select,
+                true {all selected agents}
+                other {{count, plural, one {agent} other {# agents}}}
+              }"
+              values={{
+                isAllAgents,
+                count: agentCount,
+              }}
             />
           )}
         </>
@@ -434,14 +461,23 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         ) : isUpdating ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.restartConfirmMultipleButtonLabel"
-            defaultMessage="Restart upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
-            values={{ count: updatingAgents }}
+            defaultMessage="Restart upgrade {isAllAgents, select,
+              true {all selected agents}
+              other {{count, plural, one {agent} other {# agents}}}
+            }"
+            values={{
+              isAllAgents: typeof updatingAgents === 'boolean',
+              count: updatingAgents,
+            }}
           />
         ) : (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.confirmMultipleButtonLabel"
-            defaultMessage="Upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
-            values={{ count: isAllAgents || agentCount }}
+            defaultMessage="Upgrade {isAllAgents, select,
+              true {all selected agents}
+              other {{count, plural, one {agent} other {# agents}}}
+            }"
+            values={{ isAllAgents, count: agentCount }}
           />
         )
       }
@@ -460,7 +496,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               <p>
                 <FormattedMessage
                   id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
-                  defaultMessage="This action will upgrade the agent running on '{hostName}'{version}. This action can not be undone. Are you sure you wish to continue?"
+                  defaultMessage="This action will upgrade the agent running on ''{hostName}''{version}. This action can not be undone. Are you sure you wish to continue?"
                   values={{
                     hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
                     version: selectedVersion[0].value

@@ -74,6 +74,7 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-logging-browser-mocks",
     "@kbn/data-views-plugin",
+    "@kbn/core-http-router-server-internal",
   ],
   "exclude": [
     "target/**/*",

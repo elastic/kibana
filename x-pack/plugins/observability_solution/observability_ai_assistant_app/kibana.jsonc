@@ -11,6 +11,7 @@
       "aiAssistantManagementSelection",
       "observabilityAIAssistant",
       "observabilityShared",
+      "observability",
       "actions",
       "data",
       "dataViews",
@@ -23,9 +24,9 @@
       "licensing",
       "ml",
       "alerting",
-      "features"
+      "features",
     ],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": ["kibanaReact", "esqlDataGrid"],
     "optionalPlugins": ["cloud"],
     "extraPublicDirs": []
   }

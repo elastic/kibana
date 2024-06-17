@@ -69,7 +69,7 @@ import { wrapSearchSourceClient } from './wrap_search_source_client';
 const PREVIEW_TIMEOUT_SECONDS = 60;
 const MAX_ROUTE_CONCURRENCY = 10;
 
-export const previewRulesRoute = async (
+export const previewRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   ml: SetupPlugins['ml'],
@@ -286,6 +286,7 @@ export const previewRulesRoute = async (
                 },
                 spaceId,
                 startedAt: startedAt.toDate(),
+                startedAtOverridden: true,
                 state: statePreview,
                 logger,
                 flappingSettings: DISABLE_FLAPPING_SETTINGS,
@@ -430,7 +431,7 @@ export const previewRulesRoute = async (
               );
               break;
             case 'esql':
-              if (!config.settings.ESQLEnabled || config.experimentalFeatures.esqlRulesDisabled) {
+              if (config.experimentalFeatures.esqlRulesDisabled) {
                 throw Error('ES|QL rule type is not supported');
               }
               const esqlAlertType = previewRuleTypeWrapper(createEsqlAlertType(ruleOptions));

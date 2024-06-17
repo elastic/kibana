@@ -29,10 +29,11 @@ const timelineId = 'timeline-1';
  * Checks if the SessionView component is available, if so render it or else render an error message
  */
 export const SessionPreviewContainer: FC = () => {
-  const { dataAsNestedObject, getFieldsData, isPreview } = useRightPanelContext();
+  const { dataAsNestedObject, getFieldsData, isPreview, dataFormattedForFieldBrowser } =
+    useRightPanelContext();
 
   // decide whether to show the session view or not
-  const sessionViewConfig = useSessionPreview({ getFieldsData });
+  const sessionViewConfig = useSessionPreview({ getFieldsData, dataFormattedForFieldBrowser });
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
@@ -43,9 +44,9 @@ export const SessionPreviewContainer: FC = () => {
     ecsRowData: dataAsNestedObject,
   });
 
-  const goToSessionViewTab = useCallback(() => {
+  const goToSessionViewTab = useCallback(async () => {
     // open timeline
-    investigateInTimelineAlertClick();
+    await investigateInTimelineAlertClick();
 
     // open session view tab
     startTransaction({ name: ALERTS_ACTIONS.OPEN_SESSION_VIEW });
@@ -129,7 +130,7 @@ export const SessionPreviewContainer: FC = () => {
               tooltip: (
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTooltip"
-                  defaultMessage="Show session viewer"
+                  defaultMessage="Investigate in timeline"
                 />
               ),
             },

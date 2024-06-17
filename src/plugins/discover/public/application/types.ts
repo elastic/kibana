@@ -21,8 +21,8 @@ export enum FetchStatus {
 
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
-  textBasedQueryColumns?: DatatableColumn[];
-  textBasedHeaderWarning?: string;
+  esqlQueryColumns?: DatatableColumn[];
+  esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
 }
 

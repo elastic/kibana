@@ -6,13 +6,21 @@
  */
 import { notImplemented } from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
+import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
+import { from, map } from 'rxjs';
 import { Readable } from 'stream';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
+import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
+import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
+import { LangTracer } from '../../service/client/instrumentation/lang_tracer';
 import { flushBuffer } from '../../service/util/flush_buffer';
+import { observableIntoOpenAIStream } from '../../service/util/observable_into_openai_stream';
 import { observableIntoStream } from '../../service/util/observable_into_stream';
+import { withAssistantSpan } from '../../service/util/with_assistant_span';
+import { recallAndScore } from '../../utils/recall/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { screenContextRt, messageRt, functionRt } from '../runtime_types';
+import { functionRt, messageRt, screenContextRt } from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 
 const chatCompleteBaseRt = t.type({
@@ -26,13 +34,24 @@ const chatCompleteBaseRt = t.type({
       conversationId: t.string,
       title: t.string,
       responseLanguage: t.string,
+      disableFunctions: t.union([
+        toBooleanRt,
+        t.type({
+          except: t.array(t.string),
+        }),
+      ]),
       instructions: t.array(
         t.union([
           t.string,
-          t.type({
-            doc_id: t.string,
-            text: t.string,
-          }),
+          t.intersection([
+            t.type({
+              doc_id: t.string,
+              text: t.string,
+            }),
+            t.partial({
+              system: t.boolean,
+            }),
+          ]),
         ])
       ),
     }),
@@ -50,12 +69,59 @@ const chatCompleteInternalRt = t.intersection([
 
 const chatCompletePublicRt = t.intersection([
   chatCompleteBaseRt,
-  t.type({
+  t.partial({
     body: t.partial({
       actions: t.array(functionRt),
     }),
+    query: t.partial({
+      format: t.union([t.literal('default'), t.literal('openai')]),
+    }),
   }),
 ]);
+
+async function initializeChatRequest({
+  context,
+  request,
+  plugins: { cloud, actions },
+  params: {
+    body: { connectorId },
+  },
+  service,
+}: ObservabilityAIAssistantRouteHandlerResources & { params: { body: { connectorId: string } } }) {
+  await withAssistantSpan('guard_against_invalid_connector', async () => {
+    const actionsClient = await (await actions.start()).getActionsClientWithRequest(request);
+
+    const connector = await actionsClient.get({
+      id: connectorId,
+      throwIfSystemAction: true,
+    });
+
+    return connector;
+  });
+
+  const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
+    service.getClient({ request }),
+    cloud?.start(),
+    (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
+  ]);
+
+  if (!client) {
+    throw notImplemented();
+  }
+
+  const controller = new AbortController();
+
+  request.events.aborted$.subscribe(() => {
+    controller.abort();
+  });
+
+  return {
+    client,
+    isCloudEnabled: Boolean(cloudStart?.isCloudEnabled),
+    simulateFunctionCalling,
+    signal: controller.signal,
+  };
+}
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat',
@@ -76,32 +142,20 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     ]),
   }),
   handler: async (resources): Promise<Readable> => {
-    const { request, params, service, context } = resources;
-
-    const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
-      service.getClient({ request }),
-      resources.plugins.cloud?.start(),
-      (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
-    ]);
-
-    if (!client) {
-      throw notImplemented();
-    }
+    const { params } = resources;
 
     const {
       body: { name, messages, connectorId, functions, functionCall },
     } = params;
 
-    const controller = new AbortController();
+    const { client, simulateFunctionCalling, signal, isCloudEnabled } = await initializeChatRequest(
+      resources
+    );
 
-    request.events.aborted$.subscribe(() => {
-      controller.abort();
-    });
-
-    const response$ = await client.chat(name, {
+    const response$ = client.chat(name, {
       messages,
       connectorId,
-      signal: controller.signal,
+      signal,
       ...(functions.length
         ? {
             functions,
@@ -109,9 +163,68 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
           }
         : {}),
       simulateFunctionCalling,
+      tracer: new LangTracer(otelContext.active()),
     });
 
-    return observableIntoStream(response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled)));
+    return observableIntoStream(response$.pipe(flushBuffer(isCloudEnabled)));
+  },
+});
+
+const chatRecallRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/chat/recall',
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  params: t.type({
+    body: t.type({
+      prompt: t.string,
+      context: t.string,
+      connectorId: t.string,
+    }),
+  }),
+  handler: async (resources): Promise<Readable> => {
+    const { client, simulateFunctionCalling, signal, isCloudEnabled } = await initializeChatRequest(
+      resources
+    );
+
+    const { connectorId, prompt, context } = resources.params.body;
+
+    const response$ = from(
+      recallAndScore({
+        analytics: (await resources.context.core).coreStart.analytics,
+        chat: (name, params) =>
+          client
+            .chat(name, {
+              ...params,
+              connectorId,
+              simulateFunctionCalling,
+              signal,
+              tracer: new LangTracer(otelContext.active()),
+            })
+            .pipe(withoutTokenCountEvents()),
+        context,
+        logger: resources.logger,
+        messages: [],
+        userPrompt: prompt,
+        recall: client.recall,
+        signal,
+      })
+    ).pipe(
+      map(({ scores, suggestions, relevantDocuments }) => {
+        return createFunctionResponseMessage({
+          name: 'context',
+          data: {
+            suggestions,
+            scores,
+          },
+          content: {
+            relevantDocuments,
+          },
+        });
+      })
+    );
+
+    return observableIntoStream(response$.pipe(flushBuffer(isCloudEnabled)));
   },
 });
 
@@ -120,19 +233,7 @@ async function chatComplete(
     params: t.TypeOf<typeof chatCompleteInternalRt>;
   }
 ) {
-  const { request, params, service } = resources;
-
-  const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
-    service.getClient({ request }),
-    resources.plugins.cloud?.start() || Promise.resolve(undefined),
-    (
-      await resources.context.core
-    ).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
-  ]);
-
-  if (!client) {
-    throw notImplemented();
-  }
+  const { params, service } = resources;
 
   const {
     body: {
@@ -144,17 +245,16 @@ async function chatComplete(
       screenContexts,
       responseLanguage,
       instructions,
+      disableFunctions,
     },
   } = params;
 
-  const controller = new AbortController();
-
-  request.events.aborted$.subscribe(() => {
-    controller.abort();
-  });
+  const { client, isCloudEnabled, signal, simulateFunctionCalling } = await initializeChatRequest(
+    resources
+  );
 
   const functionClient = await service.getFunctionClient({
-    signal: controller.signal,
+    signal,
     resources,
     client,
     screenContexts,
@@ -166,14 +266,15 @@ async function chatComplete(
     conversationId,
     title,
     persist,
-    signal: controller.signal,
+    signal,
     functionClient,
     responseLanguage,
     instructions,
     simulateFunctionCalling,
+    disableFunctions,
   });
 
-  return response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled));
+  return response$.pipe(flushBuffer(isCloudEnabled));
 }
 
 const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
@@ -194,29 +295,38 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   },
   params: chatCompletePublicRt,
   handler: async (resources): Promise<Readable> => {
+    const { params, logger } = resources;
+
     const {
       body: { actions, ...restOfBody },
-    } = resources.params;
-    return observableIntoStream(
-      await chatComplete({
-        ...resources,
-        params: {
-          body: {
-            ...restOfBody,
-            screenContexts: [
-              {
-                actions,
-              },
-            ],
-          },
+      query = {},
+    } = params;
+
+    const { format = 'default' } = query;
+
+    const response$ = await chatComplete({
+      ...resources,
+      params: {
+        body: {
+          ...restOfBody,
+          screenContexts: [
+            {
+              actions,
+            },
+          ],
         },
-      })
-    );
+      },
+    });
+
+    return format === 'openai'
+      ? observableIntoOpenAIStream(response$, logger)
+      : observableIntoStream(response$);
   },
 });
 
 export const chatRoutes = {
   ...chatRoute,
+  ...chatRecallRoute,
   ...chatCompleteRoute,
   ...publicChatCompleteRoute,
 };

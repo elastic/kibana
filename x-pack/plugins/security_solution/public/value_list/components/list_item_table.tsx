@@ -20,6 +20,7 @@ import {
   FAILED_TO_FETCH_LIST_ITEM,
   DELETE_LIST_ITEM,
   DELETE_LIST_ITEM_DESCRIPTION,
+  NOT_FOUND_ITEMS,
 } from '../translations';
 
 export const ListItemTable = ({
@@ -80,6 +81,7 @@ export const ListItemTable = ({
       error={isError ? FAILED_TO_FETCH_LIST_ITEM : undefined}
       loading={loading}
       onChange={onChange}
+      noItemsMessage={NOT_FOUND_ITEMS}
     />
   );
 };

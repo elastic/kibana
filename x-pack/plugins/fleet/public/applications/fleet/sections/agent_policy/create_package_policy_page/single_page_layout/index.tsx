@@ -34,7 +34,11 @@ import {
 
 import { useCancelAddPackagePolicy } from '../hooks';
 
-import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
+import {
+  getRootPrivilegedDataStreams,
+  isRootPrivilegesRequired,
+  splitPkgKey,
+} from '../../../../../../../common/services';
 import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
 import {
@@ -75,6 +79,7 @@ import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
+import { RootPrivilegesCallout } from './root_callout';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -150,8 +155,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     onSubmit,
     updatePackagePolicy,
     packagePolicy,
-    agentPolicy,
-    updateAgentPolicy,
+    agentPolicies,
+    updateAgentPolicies,
     savedPackagePolicy,
     formState,
     setFormState,
@@ -211,25 +216,34 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   // Retrieve agent count
-  const agentPolicyId = agentPolicy?.id;
+  const agentPolicyIds = agentPolicies.map((policy) => policy.id);
 
   const { cancelClickHandler, cancelUrl } = useCancelAddPackagePolicy({
     from,
     pkgkey: params.pkgkey,
-    agentPolicyId,
+    agentPolicyId: agentPolicyIds[0],
   });
   useEffect(() => {
     const getAgentCount = async () => {
-      const { data } = await sendGetAgentStatus({ policyId: agentPolicyId });
-      if (data?.results.total !== undefined) {
-        setAgentCount(data.results.total);
+      let count = 0;
+      for (const policyId of agentPolicyIds) {
+        const { data } = await sendGetAgentStatus({ policyId });
+        if (data?.results.total) {
+          count += data.results.total;
+        }
       }
+      setAgentCount(count);
     };
 
-    if (isFleetEnabled && agentPolicyId) {
+    if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+      setAgentCount(0);
+      return;
+    }
+
+    if (isFleetEnabled && agentPolicyIds.length > 0) {
       getAgentCount();
     }
-  }, [agentPolicyId, isFleetEnabled]);
+  }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
@@ -259,18 +273,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       from,
       cancelUrl,
       onCancel: cancelClickHandler,
-      agentPolicy,
+      agentPolicies,
       packageInfo,
       integrationInfo,
     }),
-    [agentPolicy, cancelClickHandler, cancelUrl, from, integrationInfo, packageInfo]
+    [agentPolicies, cancelClickHandler, cancelUrl, from, integrationInfo, packageInfo]
   );
 
   const stepSelectAgentPolicy = useMemo(
     () => (
       <StepSelectHosts
-        agentPolicy={agentPolicy}
-        updateAgentPolicy={updateAgentPolicy}
+        agentPolicies={agentPolicies}
+        updateAgentPolicies={updateAgentPolicies}
         newAgentPolicy={newAgentPolicy}
         updateNewAgentPolicy={updateNewAgentPolicy}
         withSysMonitoring={withSysMonitoring}
@@ -284,8 +298,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ),
     [
       packageInfo,
-      agentPolicy,
-      updateAgentPolicy,
+      agentPolicies,
+      updateAgentPolicies,
       newAgentPolicy,
       updateNewAgentPolicy,
       validation,
@@ -317,8 +331,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     useSetupTechnology({
       newAgentPolicy,
       updateNewAgentPolicy,
-      updateAgentPolicy,
+      updateAgentPolicies,
       setSelectedPolicyTab,
+      packageInfo,
     });
 
   const replaceStepConfigurePackagePolicy =
@@ -328,7 +343,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       ) : (
         <ExtensionWrapper>
           <replaceDefineStepView.Component
-            agentPolicy={agentPolicy}
+            agentPolicy={agentPolicies[0]}
             packageInfo={packageInfo}
             newPolicy={packagePolicy}
             onChange={handleExtensionViewOnChange}
@@ -348,7 +363,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       ) : packageInfo ? (
         <>
           <StepDefinePackagePolicy
-            agentPolicy={agentPolicy}
+            agentPolicies={agentPolicies}
             packageInfo={packageInfo}
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
@@ -384,7 +399,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [
       isInitialized,
       isPackageInfoLoading,
-      agentPolicy,
+      agentPolicies,
       packageInfo,
       packagePolicy,
       updatePackagePolicy,
@@ -403,6 +418,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       }),
       'data-test-subj': 'dataCollectionSetupStep',
       children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
+      headingElement: 'h2',
     },
   ];
 
@@ -412,6 +428,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         defaultMessage: 'Where to add this integration?',
       }),
       children: stepSelectAgentPolicy,
+      headingElement: 'h2',
     });
   }
 
@@ -429,19 +446,31 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       />
     );
   }
+
+  const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
+  const unprivilegedAgentsCount = agentPolicies.reduce(
+    (acc, curr) => acc + (curr.unprivileged_agents ?? 0),
+    0
+  );
+
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
-        {formState === 'CONFIRM' && agentPolicy && (
+        {formState === 'CONFIRM' && agentPolicies.length > 0 && (
           <ConfirmDeployAgentPolicyModal
             agentCount={agentCount}
-            agentPolicy={agentPolicy}
+            agentPolicies={agentPolicies}
             onConfirm={onSubmit}
             onCancel={() => setFormState('VALID')}
+            showUnprivilegedAgentsCallout={Boolean(
+              packageInfo && isRootPrivilegesRequired(packageInfo) && unprivilegedAgentsCount > 0
+            )}
+            unprivilegedAgentsCount={unprivilegedAgentsCount}
+            dataStreams={rootPrivilegedDataStreams}
           />
         )}
         {formState === 'SUBMITTED_NO_AGENTS' &&
-          agentPolicy &&
+          agentPolicies.length > 0 &&
           packageInfo &&
           savedPackagePolicy && (
             <PostInstallAddAgentModal
@@ -450,30 +479,36 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
             />
           )}
-        {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' && agentPolicy && savedPackagePolicy && (
-          <PostInstallAzureArmTemplateModal
-            agentPolicy={agentPolicy}
-            packagePolicy={savedPackagePolicy}
-            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
-          />
-        )}
-        {formState === 'SUBMITTED_CLOUD_FORMATION' && agentPolicy && savedPackagePolicy && (
-          <PostInstallCloudFormationModal
-            agentPolicy={agentPolicy}
-            packagePolicy={savedPackagePolicy}
-            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
-          />
-        )}
-        {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' && agentPolicy && savedPackagePolicy && (
-          <PostInstallGoogleCloudShellModal
-            agentPolicy={agentPolicy}
-            packagePolicy={savedPackagePolicy}
-            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
-          />
-        )}
+        {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' &&
+          agentPolicies.length > 0 &&
+          savedPackagePolicy && (
+            <PostInstallAzureArmTemplateModal
+              agentPolicy={agentPolicies[0]}
+              packagePolicy={savedPackagePolicy}
+              onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+              onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+            />
+          )}
+        {formState === 'SUBMITTED_CLOUD_FORMATION' &&
+          agentPolicies.length > 0 &&
+          savedPackagePolicy && (
+            <PostInstallCloudFormationModal
+              agentPolicy={agentPolicies[0]}
+              packagePolicy={savedPackagePolicy}
+              onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+              onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+            />
+          )}
+        {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' &&
+          agentPolicies.length > 0 &&
+          savedPackagePolicy && (
+            <PostInstallGoogleCloudShellModal
+              agentPolicy={agentPolicies[0]}
+              packagePolicy={savedPackagePolicy}
+              onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+              onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+            />
+          )}
         {packageInfo && (
           <IntegrationBreadcrumb
             pkgTitle={integrationInfo?.title || packageInfo.title}
@@ -483,21 +518,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         )}
         {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
           <>
-            <EuiCallOut
-              size="s"
-              color="warning"
-              title={
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.requireRootCalloutTitle"
-                  defaultMessage="Requires root privileges"
-                />
-              }
-            >
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.requireRootCalloutDescription"
-                defaultMessage="Elastic Agent needs to be run with root/administrator privileges for this integration."
-              />
-            </EuiCallOut>
+            <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
             <EuiSpacer size="m" />
           </>
         ) : null}

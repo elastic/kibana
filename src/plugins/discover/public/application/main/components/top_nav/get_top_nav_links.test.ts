@@ -9,7 +9,7 @@
 import { getTopNavLinks } from './get_top_nav_links';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverServices } from '../../../../build_services';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 
 const services = {
   capabilities: {
@@ -27,7 +27,7 @@ test('getTopNavLinks result', () => {
     onOpenInspector: jest.fn(),
     services,
     state,
-    isTextBased: false,
+    isEsqlMode: false,
     adHocDataViews: [],
     topNavCustomization: undefined,
   });
@@ -80,7 +80,7 @@ test('getTopNavLinks result for ES|QL mode', () => {
     onOpenInspector: jest.fn(),
     services,
     state,
-    isTextBased: true,
+    isEsqlMode: true,
     adHocDataViews: [],
     topNavCustomization: undefined,
   });

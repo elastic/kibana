@@ -11,7 +11,6 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
-import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { defaultRowRenderers } from '../../body/renderers';
 import type { Sort } from '../../body/sort';
@@ -19,8 +18,8 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import type { Props as PinnedTabContentComponentProps } from '.';
 import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../../common/search_strategy';
@@ -39,7 +38,7 @@ jest.mock('../../body/events', () => ({
   Events: () => <></>,
 }));
 
-jest.mock('../../../../../common/containers/sourcerer');
+jest.mock('../../../../../sourcerer/containers');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -126,6 +125,8 @@ describe('PinnedTabContent', () => {
       pinnedEventIds: {},
       showExpandedDetails: false,
       onEventClosed: jest.fn(),
+      eventIdToNoteIds: {},
+      expandedDetail: {},
     };
   });
 

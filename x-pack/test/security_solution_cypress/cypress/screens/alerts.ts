@@ -7,7 +7,6 @@
 
 import { IS_SERVERLESS, CLOUD_SERVERLESS } from '../env_var_names_constants';
 import { getDataTestSubjectSelector } from '../helpers/common';
-import { GLOBAL_FILTERS_CONTAINER } from './date_picker';
 
 export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 
@@ -58,8 +57,6 @@ export const TAKE_ACTION_MENU = '[data-test-subj="takeActionPanelMenu"]';
 export const CLOSE_FLYOUT = '[data-test-subj="euiFlyoutCloseButton"]';
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
-
-export const ALERTS_REFRESH_BTN = `${GLOBAL_FILTERS_CONTAINER} [data-test-subj="querySubmitButton"]`;
 
 export const ALERTS_HISTOGRAM_PANEL_LOADER = '[data-test-subj="loadingPanelAlertsHistogram"]';
 
@@ -183,7 +180,7 @@ export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRen
 export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 
-export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');
+export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hoverActionsPopover');
 
 export const SECURITY_SOLUTION_USERS_AVATAR = (user: string) =>
   `[data-test-subj="securitySolutionUsersAvatar-${user}"]`;

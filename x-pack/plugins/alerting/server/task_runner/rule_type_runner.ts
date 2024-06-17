@@ -8,25 +8,28 @@
 import { AlertInstanceContext, AlertInstanceState, RuleTaskState } from '@kbn/alerting-state-types';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { Logger } from '@kbn/core/server';
-import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { some } from 'lodash';
+import {
+  ConcreteTaskInstance,
+  createTaskRunError,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { IAlertsClient } from '../alerts_client/types';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { ErrorWithReason } from '../lib';
 import { getTimeRange } from '../lib/get_time_range';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
+  DEFAULT_FLAPPING_SETTINGS,
   RuleAlertData,
   RuleExecutionStatusErrorReasons,
-  RuleNotifyWhen,
   RuleTypeParams,
   RuleTypeState,
   SanitizedRule,
 } from '../types';
 import { ExecutorServices } from './get_executor_services';
-import { StackTraceLog } from './task_runner';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
-import { RuleTypeRunnerContext, TaskRunnerContext } from './types';
+import { RuleRunnerErrorStackTraceLog, RuleTypeRunnerContext, TaskRunnerContext } from './types';
 
 interface ConstructorOpts<
   Params extends RuleTypeParams,
@@ -39,22 +42,36 @@ interface ConstructorOpts<
   AlertData extends RuleAlertData
 > {
   context: TaskRunnerContext;
-  timer: TaskRunnerTimer;
   logger: Logger;
-  ruleType: NormalizedRuleType<
-    Params,
-    ExtractedParams,
-    RuleState,
-    State,
-    Context,
-    ActionGroupIds,
-    RecoveryActionGroupId,
-    AlertData
-  >;
+  task: ConcreteTaskInstance;
+  timer: TaskRunnerTimer;
 }
+
+export type RuleData<Params extends RuleTypeParams> = Pick<
+  SanitizedRule<Params>,
+  | 'alertTypeId'
+  | 'consumer'
+  | 'schedule'
+  | 'throttle'
+  | 'notifyWhen'
+  | 'name'
+  | 'tags'
+  | 'createdBy'
+  | 'updatedBy'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'enabled'
+  | 'actions'
+  | 'muteAll'
+  | 'revision'
+  | 'snoozeSchedule'
+  | 'alertDelay'
+>;
 
 interface RunOpts<
   Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  RuleState extends RuleTypeState,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -72,8 +89,18 @@ interface RunOpts<
   };
   maintenanceWindows?: MaintenanceWindow[];
   maintenanceWindowsWithoutScopedQueryIds?: string[];
-  rule: SanitizedRule<Params>;
-  startedAt: Date | null;
+  rule: RuleData<Params>;
+  ruleType: NormalizedRuleType<
+    Params,
+    ExtractedParams,
+    RuleState,
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId,
+    AlertData
+  >;
+  startedAt: Date;
   state: RuleTaskState;
   validatedParams: Params;
 }
@@ -81,7 +108,7 @@ interface RunOpts<
 interface RunResult {
   state: RuleTypeState | undefined;
   error?: Error;
-  stackTrace?: StackTraceLog | null;
+  stackTrace?: RuleRunnerErrorStackTraceLog | null;
 }
 
 export class RuleTypeRunner<
@@ -121,11 +148,14 @@ export class RuleTypeRunner<
     maintenanceWindows = [],
     maintenanceWindowsWithoutScopedQueryIds = [],
     rule,
+    ruleType,
     startedAt,
     state,
     validatedParams,
   }: RunOpts<
     Params,
+    ExtractedParams,
+    RuleState,
     State,
     Context,
     ActionGroupIds,
@@ -154,6 +184,9 @@ export class RuleTypeRunner<
 
     const { alertTypeState: ruleTypeState = {}, previousStartedAt } = state;
 
+    const startedAtOverridden =
+      this.options.task.startedAt?.toISOString() !== startedAt.toISOString();
+
     const { updatedRuleTypeState, error, stackTrace } = await this.options.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
       async () => {
@@ -179,7 +212,7 @@ export class RuleTypeRunner<
             }] namespace`,
           };
           executorResult = await this.options.context.executionContext.withContext(ctx, () =>
-            this.options.ruleType.executor({
+            ruleType.executor({
               executionId,
               services: {
                 alertFactory: alertsClient.factory(),
@@ -192,12 +225,14 @@ export class RuleTypeRunner<
                 searchSourceClient: executorServices.wrappedSearchSourceClient.searchSourceClient,
                 share: this.options.context.share,
                 shouldStopExecution: () => this.cancelled,
-                shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
+                shouldWriteAlerts: () =>
+                  this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout),
                 uiSettingsClient: executorServices.uiSettingsClient,
               },
               params: validatedParams,
               state: ruleTypeState as RuleState,
-              startedAt: startedAt!,
+              startedAtOverridden,
+              startedAt,
               previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
               spaceId: context.spaceId,
               namespace: context.namespace,
@@ -206,10 +241,10 @@ export class RuleTypeRunner<
                 name,
                 tags,
                 consumer,
-                producer: this.options.ruleType.producer,
+                producer: ruleType.producer,
                 revision,
                 ruleTypeId,
-                ruleTypeName: this.options.ruleType.name,
+                ruleTypeName: ruleType.name,
                 enabled,
                 schedule,
                 actions,
@@ -224,13 +259,18 @@ export class RuleTypeRunner<
                 alertDelay,
               },
               logger: this.options.logger,
-              flappingSettings: context.flappingSettings,
+              flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
               // passed in so the rule registry knows about maintenance windows
               ...(maintenanceWindowsWithoutScopedQueryIds.length
                 ? { maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds }
                 : {}),
               getTimeRange: (timeWindow) =>
-                getTimeRange(this.options.logger, context.queryDelaySettings, timeWindow),
+                getTimeRange({
+                  logger: this.options.logger,
+                  window: timeWindow,
+                  ...(context.queryDelaySec ? { queryDelay: context.queryDelaySec } : {}),
+                  ...(startedAtOverridden ? { forceNow: startedAt } : {}),
+                }),
             })
           );
           // Rule type execution has successfully completed
@@ -246,10 +286,11 @@ export class RuleTypeRunner<
               `rule execution failure: ${context.ruleLogPrefix}`,
               err.message
             );
+
             return {
               error: createTaskRunError(
                 new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err),
-                TaskErrorSource.FRAMEWORK
+                getErrorSource(err) || TaskErrorSource.FRAMEWORK
               ),
               stackTrace: { message: err, stackTrace: err.stack },
             };
@@ -279,10 +320,7 @@ export class RuleTypeRunner<
 
     await this.options.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
       alertsClient.processAlerts({
-        flappingSettings: context.flappingSettings,
-        notifyOnActionGroupChange:
-          notifyWhen === RuleNotifyWhen.CHANGE ||
-          some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
+        flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
         maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
         alertDelay: alertDelay?.active ?? 0,
         ruleRunMetricsStore: context.ruleRunMetricsStore,
@@ -296,7 +334,10 @@ export class RuleTypeRunner<
 
       // Set the event log MW ids again, this time including the ids that matched alerts with
       // scoped query
-      if (updateAlertsMaintenanceWindowResult?.maintenanceWindowIds) {
+      if (
+        updateAlertsMaintenanceWindowResult?.maintenanceWindowIds &&
+        updateAlertsMaintenanceWindowResult?.maintenanceWindowIds.length > 0
+      ) {
         context.alertingEventLogger.setMaintenanceWindowIds(
           updateAlertsMaintenanceWindowResult.maintenanceWindowIds
         );
@@ -306,22 +347,21 @@ export class RuleTypeRunner<
     alertsClient.logAlerts({
       eventLogger: context.alertingEventLogger,
       ruleRunMetricsStore: context.ruleRunMetricsStore,
-      shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+      shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(
+        ruleType.cancelAlertsOnRuleTimeout
+      ),
     });
 
     return { state: updatedRuleTypeState };
   }
 
-  private shouldLogAndScheduleActionsForAlerts() {
+  private shouldLogAndScheduleActionsForAlerts(ruleTypeShouldCancel?: boolean) {
     // if execution hasn't been cancelled, return true
     if (!this.cancelled) {
       return true;
     }
 
     // if execution has been cancelled, return true if EITHER alerting config or rule type indicate to proceed with scheduling actions
-    return (
-      !this.options.context.cancelAlertsOnRuleTimeout ||
-      !this.options.ruleType.cancelAlertsOnRuleTimeout
-    );
+    return !this.options.context.cancelAlertsOnRuleTimeout || !ruleTypeShouldCancel;
   }
 }

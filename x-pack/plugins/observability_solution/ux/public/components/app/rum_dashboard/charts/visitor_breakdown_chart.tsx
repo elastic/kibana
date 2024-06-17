@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   CountIndexPatternColumn,
   PersistedIndexPatternLayer,
-  PieVisualizationState,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
@@ -77,7 +77,13 @@ export function VisitorBreakdownChart({
   );
 
   if (!LensEmbeddableComponent) {
-    return <EuiText>No lens component</EuiText>;
+    return (
+      <EuiText>
+        {i18n.translate('xpack.ux.visitorBreakdownChart.noLensComponentTextLabel', {
+          defaultMessage: 'No lens component',
+        })}
+      </EuiText>
+    );
   }
 
   return (
@@ -97,7 +103,7 @@ export function VisitorBreakdownChart({
   );
 }
 
-const visConfig: PieVisualizationState = {
+const visConfig = {
   layers: [
     {
       layerId: 'layer1',
@@ -106,7 +112,7 @@ const visConfig: PieVisualizationState = {
       categoryDisplay: 'default',
       legendDisplay: 'hide',
       numberDisplay: 'percent',
-      showValuesInLegend: true,
+      legendStats: ['value'],
       nestedLegend: false,
       layerType: 'data',
     },

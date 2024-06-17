@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidV4 } from 'uuid';
 import type {
   BulkOperationContainer,
   BulkOperationType,
@@ -241,7 +240,8 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
   ): Promise<BulkOperationContainer[]> => {
     const documentCreateBody = params.documentsToCreate
       ? params.documentsToCreate.flatMap((document) => [
-          { create: { _index: this.options.index, _id: uuidV4() } },
+          // Do not pre-gen _id for bulk create operations to avoid `version_conflict_engine_exception`
+          { create: { _index: this.options.index } },
           document,
         ])
       : [];

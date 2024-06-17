@@ -93,7 +93,7 @@ describe('installKibanaSavedObjects', () => {
 
     mockImporter.import.mockResolvedValueOnce(errorResponse).mockResolvedValueOnce(successResponse);
 
-    expect(
+    await expect(
       installKibanaSavedObjects({
         savedObjectsImporter: mockImporter,
         logger: mockLogger,

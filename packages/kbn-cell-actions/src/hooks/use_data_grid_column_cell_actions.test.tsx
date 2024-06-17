@@ -6,20 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { JSXElementConstructor, MutableRefObject } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiDataGridColumnCellActionProps,
-  EuiDataGridRefProps,
-  type EuiDataGridColumnCellAction,
-} from '@elastic/eui';
+import type { JSXElementConstructor, MutableRefObject } from 'react';
+import React from 'react';
+import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
+import { EuiButtonEmpty, type EuiDataGridColumnCellAction } from '@elastic/eui';
 import { render, waitFor, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { makeAction } from '../mocks/helpers';
-import {
-  useDataGridColumnsCellActions,
-  UseDataGridColumnsCellActionsProps,
-} from './use_data_grid_column_cell_actions';
+import type { UseDataGridColumnsCellActionsProps } from './use_data_grid_column_cell_actions';
+import { useDataGridColumnsCellActions } from './use_data_grid_column_cell_actions';
 
 const action1 = makeAction('action-1', 'icon1', 1);
 action1.execute = jest.fn();

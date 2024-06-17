@@ -73,6 +73,8 @@ export const NativePopover: React.FC<NativePopoverProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="entSearchContent-connectors-nativePopover-trialButton"
+              data-telemetry-id="entSearchContent-connectors-nativePopover-trialButton"
               iconType="popout"
               target="_blank"
               href="https://www.elastic.co/cloud/cloud-trial-overview"

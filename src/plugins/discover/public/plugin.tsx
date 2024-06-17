@@ -7,7 +7,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import {
   AppMountParameters,
   AppUpdater,
@@ -29,6 +29,7 @@ import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
@@ -44,8 +45,14 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
+import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
@@ -66,11 +73,7 @@ import {
   DiscoverAppLocatorDefinition,
   DiscoverESQLLocatorDefinition,
 } from '../common';
-import type { DiscoverCustomizationContext, RegisterCustomizationProfile } from './customizations';
-import {
-  createRegisterCustomizationProfile,
-  createProfileRegistry,
-} from './customizations/profile_registry';
+import { defaultCustomizationContext, DiscoverCustomizationContext } from './customizations';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
@@ -79,6 +82,12 @@ import {
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
 import { ConfigSchema, ExperimentalFeatures } from '../common/config';
+import {
+  DataSourceProfileService,
+  DocumentProfileService,
+  ProfilesManager,
+  RootProfileService,
+} from './context_awareness';
 
 /**
  * @public
@@ -115,8 +124,10 @@ export interface DiscoverSetup {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly showInlineTopNav: (
-    options?: Partial<Omit<DiscoverCustomizationContext['inlineTopNav'], 'enabled'>>
+  readonly showInlineTopNav: () => void;
+  readonly configureInlineTopNav: (
+    projectNavId: string,
+    options: DiscoverCustomizationContext['inlineTopNav']
   ) => void;
 }
 
@@ -153,7 +164,6 @@ export interface DiscoverStart {
    */
   readonly locator: undefined | DiscoverAppLocator;
   readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
-  readonly registerCustomizationProfile: RegisterCustomizationProfile;
 }
 
 /**
@@ -169,14 +179,17 @@ export interface DiscoverSetupPlugins {
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
 
 /**
  * @internal
  */
 export interface DiscoverStartPlugins {
+  aiops?: AiopsPluginStart;
   dataViews: DataViewsServicePublic;
   dataViewEditor: DataViewEditorStart;
+  dataVisualizer?: DataVisualizerPluginStart;
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
   navigation: NavigationStart;
@@ -199,6 +212,7 @@ export interface DiscoverStartPlugins {
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
   noDataPage?: NoDataPagePluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 /**
@@ -208,27 +222,28 @@ export interface DiscoverStartPlugins {
 export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
 {
+  private readonly rootProfileService = new RootProfileService();
+  private readonly dataSourceProfileService = new DataSourceProfileService();
+  private readonly documentProfileService = new DocumentProfileService();
+  private readonly appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly historyService = new HistoryService();
+  private readonly inlineTopNav: Map<string | null, DiscoverCustomizationContext['inlineTopNav']> =
+    new Map([[null, defaultCustomizationContext.inlineTopNav]]);
+  private readonly experimentalFeatures: ExperimentalFeatures = {
+    ruleFormV2Enabled: false,
+  };
+
+  private scopedHistory?: ScopedHistory<unknown>;
+  private urlTracker?: UrlTracker;
+  private stopUrlTracking?: () => void;
+  private locator?: DiscoverAppLocator;
+  private contextLocator?: DiscoverContextAppLocator;
+  private singleDocLocator?: DiscoverSingleDocLocator;
+
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.experimentalFeatures =
       initializerContext.config.get().experimental ?? this.experimentalFeatures;
   }
-
-  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
-  private historyService = new HistoryService();
-  private scopedHistory?: ScopedHistory<unknown>;
-  private urlTracker?: UrlTracker;
-  private stopUrlTracking: (() => void) | undefined = undefined;
-  private profileRegistry = createProfileRegistry();
-  private locator?: DiscoverAppLocator;
-  private contextLocator?: DiscoverContextAppLocator;
-  private singleDocLocator?: DiscoverSingleDocLocator;
-  private inlineTopNav: DiscoverCustomizationContext['inlineTopNav'] = {
-    enabled: false,
-    showLogsExplorerTabs: false,
-  };
-  private experimentalFeatures: ExperimentalFeatures = {
-    ruleFormV2Enabled: false,
-  };
 
   setup(
     core: CoreSetup<DiscoverStartPlugins, DiscoverStart>,
@@ -239,7 +254,6 @@ export class DiscoverPlugin
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
-      // Create locators for external use without profile-awareness
       this.locator = plugins.share.url.locators.create(
         new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl })
       );
@@ -290,23 +304,10 @@ export class DiscoverPlugin
     this.urlTracker = { setTrackedUrl, restorePreviousUrl, setTrackingEnabled };
     this.stopUrlTracking = stopUrlTracker;
 
-    const appStateUpdater$ = combineLatest([
-      this.appStateUpdater,
-      this.profileRegistry.getContributedAppState$(),
-    ]).pipe(
-      map(
-        ([urlAppStateUpdater, profileAppStateUpdater]): AppUpdater =>
-          (app) => ({
-            ...urlAppStateUpdater(app),
-            ...profileAppStateUpdater(app),
-          })
-      )
-    );
-
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
-      updater$: appStateUpdater$,
+      updater$: this.appStateUpdater,
       order: 1000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -327,22 +328,17 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        const { locator, contextLocator, singleDocLocator } = await this.getProfileAwareLocators({
-          locator: this.locator!,
-          contextLocator: this.contextLocator!,
-          singleDocLocator: this.singleDocLocator!,
-        });
-
         const services = buildServices({
           core: coreStart,
           plugins: discoverStartPlugins,
           context: this.initializerContext,
-          locator,
-          contextLocator,
-          singleDocLocator,
+          locator: this.locator!,
+          contextLocator: this.contextLocator!,
+          singleDocLocator: this.singleDocLocator!,
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
+          profilesManager: this.createProfilesManager(),
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
 
@@ -353,15 +349,24 @@ export class DiscoverPlugin
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
 
+        const customizationContext$: Observable<DiscoverCustomizationContext> = services.chrome
+          .getActiveSolutionNavId$()
+          .pipe(
+            map((solutionNavId) => ({
+              ...defaultCustomizationContext,
+              solutionNavId,
+              inlineTopNav:
+                this.inlineTopNav.get(solutionNavId) ??
+                this.inlineTopNav.get(null) ??
+                defaultCustomizationContext.inlineTopNav,
+            }))
+          );
+
         const { renderApp } = await import('./application');
         const unmount = renderApp({
           element: params.element,
           services,
-          profileRegistry: this.profileRegistry,
-          customizationContext: {
-            displayMode: 'standalone',
-            inlineTopNav: this.inlineTopNav,
-          },
+          customizationContext$,
           experimentalFeatures: this.experimentalFeatures,
         });
 
@@ -403,28 +408,26 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      showInlineTopNav: ({ showLogsExplorerTabs } = {}) => {
-        this.inlineTopNav.enabled = true;
-        this.inlineTopNav.showLogsExplorerTabs = showLogsExplorerTabs ?? false;
+      showInlineTopNav: () => {
+        this.inlineTopNav.set(null, {
+          enabled: true,
+          showLogsExplorerTabs: false,
+        });
+      },
+      configureInlineTopNav: (projectNavId, options) => {
+        this.inlineTopNav.set(projectNavId, options);
       },
     };
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    // we need to register the application service at setup, but to render it
-    // there are some start dependencies necessary, for this reason
-    // initializeServices are assigned at start and used
-    // when the application/embeddable is mounted
+    this.registerProfiles();
 
     const viewSavedSearchAction = new ViewSavedSearchAction(core.application, this.locator!);
 
     plugins.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
-
-    const getDiscoverServicesInternal = () => {
-      return this.getDiscoverServices(core, plugins);
-    };
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 
@@ -437,12 +440,15 @@ export class DiscoverPlugin
       );
     }
 
+    const getDiscoverServicesInternal = () => {
+      return this.getDiscoverServices(core, plugins, this.createEmptyProfilesManager());
+    };
+
     return {
       locator: this.locator,
       DiscoverContainer: (props: DiscoverContainerProps) => (
         <DiscoverContainerInternal getDiscoverServices={getDiscoverServicesInternal} {...props} />
       ),
-      registerCustomizationProfile: createRegisterCustomizationProfile(this.profileRegistry),
     };
   }
 
@@ -452,46 +458,46 @@ export class DiscoverPlugin
     }
   }
 
-  private getDiscoverServices = async (core: CoreStart, plugins: DiscoverStartPlugins) => {
-    const { locator, contextLocator, singleDocLocator } = await this.getProfileAwareLocators({
-      locator: this.locator!,
-      contextLocator: this.contextLocator!,
-      singleDocLocator: this.singleDocLocator!,
-    });
+  private registerProfiles() {
+    // TODO: Conditionally register example profiles for functional testing in a follow up PR
+    // this.rootProfileService.registerProvider(o11yRootProfileProvider);
+    // this.dataSourceProfileService.registerProvider(logsDataSourceProfileProvider);
+    // this.documentProfileService.registerProvider(logDocumentProfileProvider);
+  }
 
+  private createProfilesManager() {
+    return new ProfilesManager(
+      this.rootProfileService,
+      this.dataSourceProfileService,
+      this.documentProfileService
+    );
+  }
+
+  private createEmptyProfilesManager() {
+    return new ProfilesManager(
+      new RootProfileService(),
+      new DataSourceProfileService(),
+      new DocumentProfileService()
+    );
+  }
+
+  private getDiscoverServices = (
+    core: CoreStart,
+    plugins: DiscoverStartPlugins,
+    profilesManager = this.createProfilesManager()
+  ) => {
     return buildServices({
       core,
       plugins,
       context: this.initializerContext,
-      locator,
-      contextLocator,
-      singleDocLocator,
+      locator: this.locator!,
+      contextLocator: this.contextLocator!,
+      singleDocLocator: this.singleDocLocator!,
       history: this.historyService.getHistory(),
       urlTracker: this.urlTracker!,
+      profilesManager,
     });
   };
-
-  /**
-   * Create profile-aware locators for internal use
-   */
-  private async getProfileAwareLocators({
-    locator,
-    contextLocator,
-    singleDocLocator,
-  }: {
-    locator: DiscoverAppLocator;
-    contextLocator: DiscoverContextAppLocator;
-    singleDocLocator: DiscoverSingleDocLocator;
-  }) {
-    const { ProfileAwareLocator } = await import('./customizations/profile_aware_locator');
-    const history = this.historyService.getHistory();
-
-    return {
-      locator: new ProfileAwareLocator(locator, history),
-      contextLocator: new ProfileAwareLocator(contextLocator, history),
-      singleDocLocator: new ProfileAwareLocator(singleDocLocator, history),
-    };
-  }
 
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
     const getStartServices = async () => {

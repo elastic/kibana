@@ -213,6 +213,9 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           hasError={hasError}
         />
       )}
+      {services.consolePlugin?.EmbeddableConsole ? (
+        <services.consolePlugin.EmbeddableConsole />
+      ) : null}
     </>
   );
 };

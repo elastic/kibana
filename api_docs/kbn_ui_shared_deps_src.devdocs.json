@@ -412,6 +412,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticeuilibcomponentsprovidernested",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/eui/lib/components/provider/nested'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.elasticeuilibservices",
             "type": "string",
             "tags": [],
@@ -640,6 +651,17 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/code-editor'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnesqlast",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/esql-ast'",
             "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,

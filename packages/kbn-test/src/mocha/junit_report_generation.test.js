@@ -54,17 +54,14 @@ describe('dev/mocha/junit report generation', () => {
     const [testsuite] = report.testsuites.testsuite;
     expect(testsuite.$.time).toMatch(DURATION_REGEX);
     expect(testsuite.$.timestamp).toMatch(ISO_DATE_SEC_REGEX);
-    expect(testsuite).toEqual({
-      $: {
-        failures: '2',
-        name: 'test',
-        skipped: '1',
-        tests: '4',
-        'metadata-json': '{}',
-        time: testsuite.$.time,
-        timestamp: testsuite.$.timestamp,
-      },
-      testcase: testsuite.testcase,
+    expect(testsuite.$).toEqual({
+      failures: '2',
+      name: 'test',
+      skipped: '1',
+      tests: '4',
+      'metadata-json': '{}',
+      time: testsuite.$.time,
+      timestamp: testsuite.$.timestamp,
     });
 
     // there are actually only three tests, but since the hook failed
@@ -94,6 +91,7 @@ describe('dev/mocha/junit report generation', () => {
         name: 'SUITE fails',
         time: testFail.$.time,
         'metadata-json': '{}',
+        owners: '',
       },
       'system-out': testFail['system-out'],
       failure: [testFail.failure[0]],
@@ -108,6 +106,7 @@ describe('dev/mocha/junit report generation', () => {
         name: 'SUITE SUB_SUITE "before each" hook: fail hook for "never runs"',
         time: beforeEachFail.$.time,
         'metadata-json': '{}',
+        owners: '',
       },
       'system-out': testFail['system-out'],
       failure: [beforeEachFail.failure[0]],

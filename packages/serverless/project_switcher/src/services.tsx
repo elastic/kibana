@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Loader } from './loader';
 
@@ -17,14 +17,17 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const ProjectSwitcherProvider: FC<Services> = ({ children, ...services }) => {
+export const ProjectSwitcherProvider: FC<PropsWithChildren<Services>> = ({
+  children,
+  ...services
+}) => {
   return <Context.Provider value={services}>{children}</Context.Provider>;
 };
 
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const ProjectSwitcherKibanaProvider: FC<KibanaDependencies> = ({
+export const ProjectSwitcherKibanaProvider: FC<PropsWithChildren<KibanaDependencies>> = ({
   children,
   coreStart,
   projectChangeAPIUrl,

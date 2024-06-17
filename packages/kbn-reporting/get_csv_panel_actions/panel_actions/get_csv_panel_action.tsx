@@ -48,11 +48,26 @@ export interface PanelActionDependencies {
   licensing: LicensingPluginStart;
 }
 
+type StartServices = [
+  Pick<
+    CoreStart,
+    // required for modules that render React
+    | 'analytics'
+    | 'i18n'
+    | 'theme'
+    // used extensively in Reporting share panel action
+    | 'application'
+    | 'uiSettings'
+  >,
+  PanelActionDependencies,
+  unknown
+];
+
 interface Params {
   apiClient: ReportingAPIClient;
   csvConfig: ClientConfigType['csv'];
   core: CoreSetup;
-  startServices$: Observable<[CoreStart, PanelActionDependencies, unknown]>;
+  startServices$: Observable<StartServices>;
   usesUiCapabilities: boolean;
 }
 
@@ -123,14 +138,6 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       return false;
     }
 
-    const savedSearch = embeddable.getSavedSearch();
-    const query = savedSearch?.searchSource.getField('query');
-
-    // using isOfAggregateQueryType(query) added increased the bundle size over the configured limit of 55.7KB
-    if (query && Boolean(query && 'sql' in query)) {
-      // hide exporting CSV for SQL
-      return false;
-    }
     return embeddable.getInput().viewMode !== ViewMode.EDIT;
   };
 

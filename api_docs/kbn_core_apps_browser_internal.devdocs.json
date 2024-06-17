@@ -115,7 +115,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ application, docLinks, http, notifications, uiSettings, }: ",
+              "({ application, docLinks, http, notifications, uiSettings, analytics, i18n, theme, }: ",
               {
                 "pluginId": "@kbn/core-apps-browser-internal",
                 "scope": "common",
@@ -134,7 +134,7 @@
                 "id": "def-common.CoreAppsService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    application,\n    docLinks,\n    http,\n    notifications,\n    uiSettings,\n  }",
+                "label": "{\n    application,\n    docLinks,\n    http,\n    notifications,\n    uiSettings,\n    analytics,\n    i18n,\n    theme,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -364,6 +364,78 @@
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-apps-browser-internal",
+            "id": "def-common.CoreAppsServiceStartDeps.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.OptInConfig",
+                "text": "OptInConfig"
+              },
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.TelemetryCounter",
+                "text": "TelemetryCounter"
+              },
+              ">; }"
+            ],
+            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-apps-browser-internal",
+            "id": "def-common.CoreAppsServiceStartDeps.i18n",
+            "type": "Object",
+            "tags": [],
+            "label": "i18n",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-i18n-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreI18nBrowserPluginApi",
+                "section": "def-common.I18nStart",
+                "text": "I18nStart"
+              }
+            ],
+            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-apps-browser-internal",
+            "id": "def-common.CoreAppsServiceStartDeps.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
               }
             ],
             "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",

@@ -30,6 +30,8 @@ import * as Transactions from './__fixtures__/mock_data';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
 import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
+import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 const apmContextMock = {
   ...mockApmPluginContextValue,
@@ -51,6 +53,15 @@ const apmContextMock = {
 
           if (id === TRACE_LOGS_LOCATOR_ID) {
             return logsLocatorsMock.traceLogsLocator;
+          }
+          if (id === uptimeOverviewLocatorID) {
+            return {
+              ...sharePluginMock.createLocator(),
+              getRedirectUrl: jest.fn(
+                () =>
+                  'http://localhost/basepath/app/uptime?dateRangeStart=now-24h&dateRangeEnd=now&search=url.domain:%22example.com%22'
+              ),
+            };
           }
         },
       },

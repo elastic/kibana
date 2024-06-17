@@ -7,6 +7,7 @@
  */
 
 import React, { Component, ReactElement } from 'react';
+import * as Rx from 'rxjs';
 
 import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
@@ -22,13 +23,14 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { BaseParams } from '@kbn/reporting-common/types';
 
-import { ReportingAPIClient } from '../../../reporting_api_client';
+import type { StartServices } from '../..';
+import type { ReportingAPIClient } from '../../../reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';
 
@@ -38,8 +40,6 @@ import { getMaxUrlLength } from './constants';
  */
 export interface ReportingPanelProps {
   apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
-  uiSettings: IUiSettingsClient;
   reportType: string;
 
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
@@ -51,7 +51,8 @@ export interface ReportingPanelProps {
   options?: ReactElement | null;
   isDirty?: boolean;
   onClose?: () => void;
-  theme: ThemeServiceSetup;
+
+  startServices$: Rx.Observable<StartServices>;
 }
 
 export type Props = ReportingPanelProps & { intl: InjectedIntl };
@@ -277,68 +278,66 @@ class ReportingPanelContentUi extends Component<Props, State> {
     this.setState({ absoluteUrl });
   };
 
-  private createReportingJob = () => {
-    const { intl } = this.props;
-    const decoratedJobParams = this.props.apiClient.getDecoratedJobParams(
-      this.props.getJobParams()
-    );
+  private createReportingJob = async () => {
+    const { startServices$, apiClient, intl } = this.props;
+    const [coreStart] = await Rx.firstValueFrom(startServices$);
+    const decoratedJobParams = apiClient.getDecoratedJobParams(this.props.getJobParams());
+    const { toasts } = coreStart.notifications;
 
     this.setState({ isCreatingReportJob: true });
 
-    return this.props.apiClient
-      .createReportingJob(this.props.reportType, decoratedJobParams)
-      .then(() => {
-        this.props.toasts.addSuccess({
-          title: intl.formatMessage(
-            {
-              id: 'reporting.share.panelContent.successfullyQueuedReportNotificationTitle',
-              defaultMessage: 'Queued report for {objectType}',
-            },
-            { objectType: this.state.objectType }
-          ),
-          text: toMountPoint(
-            <FormattedMessage
-              id="reporting.share.panelContent.successfullyQueuedReportNotificationDescription"
-              defaultMessage="Track its progress in {path}."
-              values={{
-                path: (
-                  <a href={this.props.apiClient.getManagementLink()}>
-                    <FormattedMessage
-                      id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                      defaultMessage="Stack Management &gt; Reporting"
-                    />
-                  </a>
-                ),
-              }}
-            />,
-            { theme$: this.props.theme.theme$ }
-          ),
-          'data-test-subj': 'queueReportSuccess',
-        });
-        if (this.props.onClose) {
-          this.props.onClose();
-        }
-        if (this.mounted) {
-          this.setState({ isCreatingReportJob: false });
-        }
-      })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error(error);
-        this.props.toasts.addError(error, {
-          title: intl.formatMessage({
-            id: 'reporting.share.panelContent.notification.reportingErrorTitle',
-            defaultMessage: 'Unable to create report',
-          }),
-          toastMessage: intl.formatMessage({
-            id: 'reporting.share.panelContent.notification.reportingErrorToastMessage',
-            defaultMessage: `We couldn't create a report at this time.`,
-          }),
-        });
-        if (this.mounted) {
-          this.setState({ isCreatingReportJob: false });
-        }
+    try {
+      await this.props.apiClient.createReportingJob(this.props.reportType, decoratedJobParams);
+      toasts.addSuccess({
+        title: intl.formatMessage(
+          {
+            id: 'reporting.share.panelContent.successfullyQueuedReportNotificationTitle',
+            defaultMessage: 'Queued report for {objectType}',
+          },
+          { objectType: this.state.objectType }
+        ),
+        text: toMountPoint(
+          <FormattedMessage
+            id="reporting.share.panelContent.successfullyQueuedReportNotificationDescription"
+            defaultMessage="Track its progress in {path}."
+            values={{
+              path: (
+                <a href={this.props.apiClient.getManagementLink()}>
+                  <FormattedMessage
+                    id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                    defaultMessage="Stack Management &gt; Reporting"
+                  />
+                </a>
+              ),
+            }}
+          />,
+          coreStart
+        ),
+        'data-test-subj': 'queueReportSuccess',
       });
+      if (this.props.onClose) {
+        this.props.onClose();
+      }
+      if (this.mounted) {
+        this.setState({ isCreatingReportJob: false });
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      toasts.addError(error, {
+        title: intl.formatMessage({
+          id: 'reporting.share.panelContent.notification.reportingErrorTitle',
+          defaultMessage: 'Unable to create report',
+        }),
+        toastMessage: intl.formatMessage({
+          id: 'reporting.share.panelContent.notification.reportingErrorToastMessage',
+          defaultMessage: `We couldn't create a report at this time.`,
+        }),
+      });
+      if (this.mounted) {
+        this.setState({ isCreatingReportJob: false });
+      }
+    }
   };
 }
 

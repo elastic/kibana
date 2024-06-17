@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getAgentUploads should return right list of files 1`] = `
+Array [
+  Object {
+    "actionId": "current-in-progress-action",
+    "error": undefined,
+    "filePath": "",
+    "id": "current-in-progress-action",
+    "status": "IN_PROGRESS",
+  },
+  Object {
+    "actionId": "current-complete-action",
+    "error": undefined,
+    "filePath": "/api/fleet/agents/files/current-complete-file/current-complete-file.zip",
+    "id": "current-complete-file",
+    "status": "READY",
+  },
+  Object {
+    "actionId": "expired-incomplete-action",
+    "error": undefined,
+    "filePath": "",
+    "id": "expired-incomplete-action",
+    "status": "EXPIRED",
+  },
+  Object {
+    "actionId": "expired-complete-action",
+    "error": undefined,
+    "filePath": "/api/fleet/agents/files/expired-complete-file/expired-complete-file.zip",
+    "id": "expired-complete-file",
+    "status": "READY",
+  },
+  Object {
+    "actionId": "current-error-action",
+    "error": "some diagnostics err",
+    "filePath": "",
+    "id": "current-error-action",
+    "status": "FAILED",
+  },
+  Object {
+    "actionId": "expired-error-action",
+    "error": "some diagnostics err",
+    "filePath": "",
+    "id": "expired-error-action",
+    "status": "EXPIRED",
+  },
+  Object {
+    "actionId": "old-complete-action",
+    "error": undefined,
+    "filePath": "/api/fleet/agents/files/old-complete-file/old-complete-file.zip",
+    "id": "old-complete-file",
+    "status": "READY",
+  },
+]
+`;

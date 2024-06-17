@@ -13,10 +13,7 @@ import {
 } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
 
-interface SloInstanceTuple {
-  sloId: string;
-  instanceId: string;
-}
+type List = DeleteSLOInstancesParams['list'];
 
 export class DeleteSLOInstances {
   constructor(private esClient: ElasticsearchClient) {}
@@ -31,26 +28,29 @@ export class DeleteSLOInstances {
     await this.deleteSummaryData(params.list);
   }
 
-  private async deleteRollupData(list: SloInstanceTuple[]): Promise<void> {
+  // Delete rollup data when excluding rollup data is not explicitly requested
+  private async deleteRollupData(list: List): Promise<void> {
     await this.esClient.deleteByQuery({
       index: SLO_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
       query: {
         bool: {
-          should: list.map((item) => ({
-            bool: {
-              must: [
-                { term: { 'slo.id': item.sloId } },
-                { term: { 'slo.instanceId': item.instanceId } },
-              ],
-            },
-          })),
+          should: list
+            .filter((item) => item.excludeRollup !== true)
+            .map((item) => ({
+              bool: {
+                must: [
+                  { term: { 'slo.id': item.sloId } },
+                  { term: { 'slo.instanceId': item.instanceId } },
+                ],
+              },
+            })),
         },
       },
     });
   }
 
-  private async deleteSummaryData(list: SloInstanceTuple[]): Promise<void> {
+  private async deleteSummaryData(list: List): Promise<void> {
     await this.esClient.deleteByQuery({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,

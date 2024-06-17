@@ -11,7 +11,6 @@ import { CONNECTORS_LABEL } from '../common/i18n_string';
 
 export const navigationTree: NavigationTreeDefinition = {
   body: [
-    { type: 'recentlyAccessed' },
     {
       type: 'navGroup',
       id: 'search_project_nav',
@@ -38,61 +37,85 @@ export const navigationTree: NavigationTreeDefinition = {
           getIsActive: ({ pathNameSerialized, prepend }) => {
             return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
           },
-          spaceBefore: 'm',
         },
         {
-          link: 'discover',
-          spaceBefore: 'm',
-        },
-        {
-          link: 'dashboards',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-          },
-        },
-        {
-          link: 'management:triggersActions',
-          title: i18n.translate('xpack.serverlessSearch.nav.alerts', {
-            defaultMessage: 'Alerts',
+          id: 'kibana',
+          title: i18n.translate('xpack.serverlessSearch.nav.kibana', {
+            defaultMessage: 'Kibana',
           }),
-        },
-        {
-          title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
-            defaultMessage: 'Index Management',
-          }),
-          link: 'management:index_management',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
           spaceBefore: 'm',
+          children: [
+            {
+              link: 'discover',
+            },
+            {
+              link: 'dashboards',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+              },
+            },
+          ],
         },
         {
-          title: i18n.translate('xpack.serverlessSearch.nav.content.pipelines', {
-            defaultMessage: 'Pipelines',
+          id: 'content',
+          title: i18n.translate('xpack.serverlessSearch.nav.content', {
+            defaultMessage: 'Content',
           }),
-          link: 'management:ingest_pipelines',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
-        },
-        {
-          title: CONNECTORS_LABEL,
-          link: 'serverlessConnectors',
-        },
-        {
-          link: 'management:api_keys',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
           spaceBefore: 'm',
+          children: [
+            {
+              title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
+                defaultMessage: 'Index Management',
+              }),
+              link: 'management:index_management',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+            },
+            {
+              title: CONNECTORS_LABEL,
+              link: 'serverlessConnectors',
+            },
+          ],
+        },
+        {
+          id: 'build',
+          title: i18n.translate('xpack.serverlessSearch.nav.build', {
+            defaultMessage: 'Build',
+          }),
+          spaceBefore: 'm',
+          children: [
+            {
+              id: 'searchPlayground',
+              title: i18n.translate('xpack.serverlessSearch.nav.build.searchPlayground', {
+                defaultMessage: 'Playground',
+              }),
+              link: 'searchPlayground',
+            },
+          ],
+        },
+        {
+          id: 'relevance',
+          title: i18n.translate('xpack.serverlessSearch.nav.relevance', {
+            defaultMessage: 'Relevance',
+          }),
+          spaceBefore: 'm',
+          children: [
+            {
+              id: 'searchInferenceEndpoints',
+              title: i18n.translate(
+                'xpack.serverlessSearch.nav.relevance.searchInferenceEndpoints',
+                {
+                  defaultMessage: 'Inference Endpoints',
+                }
+              ),
+              link: 'searchInferenceEndpoints',
+            },
+          ],
         },
       ],
     },
   ],
   footer: [
-    {
-      type: 'navItem',
-      id: 'search_getting_started',
-      title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-        defaultMessage: 'Get started',
-      }),
-      icon: 'launch',
-      link: 'serverlessElasticsearch',
-    },
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',

@@ -6,6 +6,8 @@
  */
 
 import { filter } from 'rxjs';
+import { get } from 'lodash';
+import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, Logger } from '@kbn/core/server';
@@ -32,6 +34,8 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
+import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
+import { getSystemMessageFromInstructions } from '@kbn/observability-ai-assistant-plugin/server/service/util/get_system_message_from_instructions';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 
@@ -86,7 +90,8 @@ export type ObsAIAssistantConnectorTypeExecutorOptions = ConnectorTypeExecutorOp
 >;
 
 export function getObsAIAssistantConnectorType(
-  initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>
+  initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>,
+  alertDetailsContextService: AlertDetailsContextualInsightsService
 ): ObsAIAssistantConnectorType {
   return {
     id: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
@@ -111,7 +116,7 @@ export function getObsAIAssistantConnectorType(
     },
     renderParameterTemplates,
     executor(options) {
-      return executor(options, initResources);
+      return executor(options, initResources, alertDetailsContextService);
     },
   };
 }
@@ -131,7 +136,8 @@ function renderParameterTemplates(
 
 async function executor(
   execOptions: ObsAIAssistantConnectorTypeExecutorOptions,
-  initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>
+  initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>,
+  alertDetailsContextService: AlertDetailsContextualInsightsService
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const request = execOptions.request;
   const alerts = execOptions.params.alerts;
@@ -171,12 +177,34 @@ async function executor(
     });
   });
 
-  const systemMessage = functionClient
-    .getContexts()
-    .find((def) => def.name === 'core')?.description;
-  const backgroundInstruction = getBackgroundProcessInstruction(
+  const backgroundInstruction = dedent(
+    `You are called as a background process because alerts have changed state.
+    As a background process you are not interacting with a user. Because of that DO NOT ask for user
+    input if tasked to execute actions. You can generate multiple responses in a row.
+    If available, include the link of the conversation at the end of your answer.`
+  );
+
+  const alertsContext = await getAlertsContext(
     execOptions.params.rule,
-    execOptions.params.alerts
+    execOptions.params.alerts,
+    async (alert: Record<string, any>) => {
+      const prompt = await alertDetailsContextService.getAlertDetailsContext(
+        {
+          core: resources.context.core,
+          licensing: resources.context.licensing,
+          request: resources.request,
+        },
+        {
+          alert_started_at: get(alert, 'kibana.alert.start'),
+          'service.name': get(alert, 'service.name'),
+          'service.environment': get(alert, 'service.environment'),
+          'host.name': get(alert, 'host.name'),
+        }
+      );
+      return prompt
+        .map(({ description, data }) => `${description}:\n${JSON.stringify(data, null, 2)}`)
+        .join('\n\n');
+    }
   );
 
   client
@@ -193,7 +221,12 @@ async function executor(
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.System,
-            content: systemMessage,
+            content: getSystemMessageFromInstructions({
+              availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
+              registeredInstructions: functionClient.getInstructions(),
+              userInstructions: [],
+              requestInstructions: [],
+            }),
           },
         },
         {
@@ -201,6 +234,26 @@ async function executor(
           message: {
             role: MessageRole.User,
             content: execOptions.params.message,
+          },
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.Assistant,
+            content: '',
+            function_call: {
+              name: 'get_alerts_context',
+              arguments: JSON.stringify({}),
+              trigger: MessageRole.Assistant as const,
+            },
+          },
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.User,
+            name: 'get_alerts_context',
+            content: JSON.stringify({ context: alertsContext }),
           },
         },
         {
@@ -265,23 +318,38 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
   };
 };
 
-function getBackgroundProcessInstruction(rule: RuleType, alerts: AlertSummary) {
-  let instruction = `You are called as a background process because the following alerts have changed state for the rule ${JSON.stringify(
-    rule
+async function getAlertsContext(
+  rule: RuleType,
+  alerts: AlertSummary,
+  getAlertContext: (alert: Record<string, any>) => Promise<string>
+): Promise<string> {
+  const getAlertGroupDetails = async (alertGroup: Array<Record<string, any>>) => {
+    const formattedDetails = await Promise.all(
+      alertGroup.map(async (alert) => {
+        return `- ${JSON.stringify(
+          alert
+        )}. The following contextual information is available:\n${await getAlertContext(alert)}`;
+      })
+    ).then((messages) => messages.join('\n'));
+
+    return formattedDetails;
+  };
+
+  let details = `The following alerts have changed state for the rule ${JSON.stringify(
+    rule,
+    null,
+    2
   )}:\n`;
   if (alerts.new.length > 0) {
-    instruction += `- ${alerts.new.length} alerts have fired: ${JSON.stringify(alerts.new)}\n`;
+    details += `- ${alerts.new.length} alerts have fired:\n${await getAlertGroupDetails(
+      alerts.new
+    )}\n`;
   }
   if (alerts.recovered.length > 0) {
-    instruction += `- ${alerts.recovered.length} alerts have recovered: ${JSON.stringify(
+    details += `- ${alerts.recovered.length} alerts have recovered\n: ${await getAlertGroupDetails(
       alerts.recovered
     )}\n`;
   }
-  instruction +=
-    ' As a background process you are not interacting with a user. Because of that DO NOT ask for user';
-  instruction +=
-    ' input if tasked to execute actions. You can generate multiple responses in a row.';
-  instruction += ' If available, include the link of the conversation at the end of your answer.';
 
-  return instruction;
+  return details;
 }

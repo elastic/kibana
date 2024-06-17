@@ -11,7 +11,6 @@ import {
   SingleDatasetLocatorParams,
   ObsLogsExplorerDataViewLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
-import { DatasetQualityLocatorDefinition } from './dataset_quality_locator';
 import { AllDatasetsLocatorDefinition } from './all_datasets_locator';
 import { DataViewLocatorDefinition } from './data_view_locator';
 import { SingleDatasetLocatorDefinition } from './single_dataset_locator';
@@ -24,13 +23,11 @@ const setup = async () => {
   const allDatasetsLocator = new AllDatasetsLocatorDefinition(dep);
   const dataViewLocator = new DataViewLocatorDefinition(dep);
   const singleDatasetLocator = new SingleDatasetLocatorDefinition(dep);
-  const datasetQualityLocator = new DatasetQualityLocatorDefinition(dep);
 
   return {
     allDatasetsLocator,
     dataViewLocator,
     singleDatasetLocator,
-    datasetQualityLocator,
   };
 };
 
@@ -95,6 +92,21 @@ describe('Observability Logs Explorer Locators', () => {
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
         path: '/?pageState=(dataSourceSelection:(selectionType:all),refreshInterval:(pause:!f,value:666),v:2)',
+        state: {},
+      });
+    });
+
+    it('should allow specifying breakdown field', async () => {
+      const params: AllDatasetsLocatorParams = {
+        breakdownField: 'service.name',
+      };
+
+      const { allDatasetsLocator } = await setup();
+      const location = await allDatasetsLocator.getLocation(params);
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: '/?pageState=(breakdownField:service.name,dataSourceSelection:(selectionType:all),v:2)',
         state: {},
       });
     });
@@ -207,6 +219,22 @@ describe('Observability Logs Explorer Locators', () => {
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
         path: `/?pageState=(dataSourceSelection:(selection:(dataView:(dataType:unresolved,id:data-view-id)),selectionType:dataView),refreshInterval:(pause:!f,value:666),v:2)`,
+        state: {},
+      });
+    });
+
+    it('should allow specifying breakdown field', async () => {
+      const params: ObsLogsExplorerDataViewLocatorParams = {
+        id: 'data-view-id',
+        breakdownField: 'service.name',
+      };
+
+      const { dataViewLocator } = await setup();
+      const location = await dataViewLocator.getLocation(params);
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: `/?pageState=(breakdownField:service.name,dataSourceSelection:(selection:(dataView:(dataType:unresolved,id:data-view-id)),selectionType:dataView),v:2)`,
         state: {},
       });
     });
@@ -331,6 +359,23 @@ describe('Observability Logs Explorer Locators', () => {
       });
     });
 
+    it('should allow specifying breakdown field', async () => {
+      const params: SingleDatasetLocatorParams = {
+        integration,
+        dataset,
+        breakdownField: 'service.name',
+      };
+
+      const { singleDatasetLocator } = await setup();
+      const location = await singleDatasetLocator.getLocation(params);
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: `/?pageState=(breakdownField:service.name,dataSourceSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),v:2)`,
+        state: {},
+      });
+    });
+
     it('should allow specifying columns', async () => {
       const params: SingleDatasetLocatorParams = {
         integration,
@@ -376,43 +421,6 @@ describe('Observability Logs Explorer Locators', () => {
       expect(location.path).toMatchInlineSnapshot(
         `"/?pageState=(dataSourceSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),filters:!((meta:(alias:foo,disabled:!f,negate:!f)),(meta:(alias:bar,disabled:!f,negate:!f))),v:2)"`
       );
-    });
-  });
-
-  describe('Dataset Quality Locator', () => {
-    it('should create a link with correct path and no state', async () => {
-      const { datasetQualityLocator } = await setup();
-      const location = await datasetQualityLocator.getLocation({});
-
-      expect(location).toMatchObject({
-        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
-        path: '/dataset-quality?pageState=(v:1)',
-        state: {},
-      });
-    });
-
-    it('should create a link with correct timeRange', async () => {
-      const refresh = {
-        pause: false,
-        value: 0,
-      };
-      const locatorParams = {
-        filters: {
-          timeRange: {
-            ...timeRange,
-            refresh,
-          },
-        },
-      };
-      const { datasetQualityLocator } = await setup();
-
-      const location = await datasetQualityLocator.getLocation(locatorParams);
-
-      expect(location).toMatchObject({
-        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
-        path: '/dataset-quality?pageState=(filters:(timeRange:(from:now-30m,refresh:(pause:!f,value:0),to:now)),v:1)',
-        state: {},
-      });
     });
   });
 });

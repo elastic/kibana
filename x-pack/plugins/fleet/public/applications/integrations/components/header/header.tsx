@@ -10,18 +10,20 @@ import { EuiHeaderSectionItem, EuiHeaderSection, EuiHeaderLinks } from '@elastic
 
 import type { AppMountParameters } from '@kbn/core/public';
 
+import type { FleetStartServices } from '../../../../plugin';
+
 import { HeaderPortal } from './header_portal';
 import { DeploymentDetails } from './deployment_details';
 
 export const IntegrationsHeader = ({
   setHeaderActionMenu,
-  theme$,
+  startServices,
 }: {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
+  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
 }) => {
   return (
-    <HeaderPortal {...{ setHeaderActionMenu, theme$ }}>
+    <HeaderPortal {...{ setHeaderActionMenu, startServices }}>
       <EuiHeaderSection grow={false}>
         <EuiHeaderSectionItem>
           <EuiHeaderLinks>

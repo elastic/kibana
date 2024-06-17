@@ -19,7 +19,8 @@ import { mockContextValue } from '../mocks/mock_context';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
-import { LeftPanelInvestigationTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInvestigationTab } from '../../left';
 
 jest.mock('../../shared/hooks/use_investigation_guide');
 jest.mock('@kbn/expandable-flyout', () => ({ useExpandableFlyoutApi: jest.fn() }));

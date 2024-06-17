@@ -19,6 +19,33 @@
     "dynamic": false,
     "properties": {}
   },
+  "ad_hoc_run_params": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "end": {
+        "type": "date"
+      },
+      "rule": {
+        "properties": {
+          "alertTypeId": {
+            "type": "keyword"
+          },
+          "consumer": {
+            "type": "keyword"
+          }
+        }
+      },
+      "start": {
+        "type": "date"
+      }
+    }
+  },
   "alert": {
     "dynamic": false,
     "properties": {
@@ -937,6 +964,20 @@
       }
     }
   },
+  "endpoint:unified-user-artifact-manifest": {
+    "dynamic": false,
+    "properties": {
+      "artifactIds": {
+        "type": "keyword"
+      },
+      "policyId": {
+        "type": "keyword"
+      },
+      "semanticVersion": {
+        "type": "keyword"
+      }
+    }
+  },
   "endpoint:user-artifact-manifest": {
     "dynamic": false,
     "properties": {
@@ -1505,6 +1546,19 @@
       }
     }
   },
+  "fleet-setup-lock": {
+    "properties": {
+      "started_at": {
+        "type": "date"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "uuid": {
+        "type": "text"
+      }
+    }
+  },
   "fleet-uninstall-tokens": {
     "dynamic": false,
     "properties": {
@@ -1637,6 +1691,10 @@
       "fleet_server_host_id": {
         "type": "keyword"
       },
+      "global_data_tags": {
+        "index": false,
+        "type": "flattened"
+      },
       "inactivity_timeout": {
         "type": "integer"
       },
@@ -1683,6 +1741,9 @@
       },
       "status": {
         "type": "keyword"
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "unenroll_timeout": {
         "type": "integer"
@@ -1964,10 +2025,17 @@
       "namespace": {
         "type": "keyword"
       },
+      "overrides": {
+        "index": false,
+        "type": "flattened"
+      },
       "package": {
         "properties": {
           "name": {
             "type": "keyword"
+          },
+          "requires_root": {
+            "type": "boolean"
           },
           "title": {
             "type": "keyword"
@@ -1978,6 +2046,9 @@
         }
       },
       "policy_id": {
+        "type": "keyword"
+      },
+      "policy_ids": {
         "type": "keyword"
       },
       "revision": {
@@ -3003,6 +3074,9 @@
   "space": {
     "dynamic": false,
     "properties": {
+      "disabledFeatures": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -3011,10 +3085,17 @@
           }
         },
         "type": "text"
+      },
+      "solution": {
+        "type": "keyword"
       }
     }
   },
   "spaces-usage-stats": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
   },

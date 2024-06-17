@@ -51,3 +51,11 @@ export const SUPPORTED_AGGREGATIONS = [
   ...Object.values(METRIC_TYPES),
   ...Object.values(BUCKET_TYPES),
 ] as const;
+
+export enum XYLegendValue {
+  CurrentAndLastValue = 'currentAndLastValue',
+}
+
+export enum PartitionLegendValue {
+  Value = 'value',
+}

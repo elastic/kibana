@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react-hooks/rules-of-hooks */
-
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public';
@@ -14,18 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { waitFor } from 'xstate/lib/waitFor';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { LogsExplorerController } from '../controller';
-import { LogsExplorerControllerProvider } from '../controller/provider';
 import type { LogsExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';
-import { createCustomCellRenderer } from './custom_cell_renderer';
-import { createCustomGridColumnsConfiguration } from './custom_column';
-import { smartFields } from './custom_field_list';
 import { createCustomUnifiedHistogram } from './custom_unified_histogram';
 
 const LazyCustomDataSourceFilters = dynamic(() => import('./custom_data_source_filters'));
 const LazyCustomDataSourceSelector = dynamic(() => import('./custom_data_source_selector'));
-const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'));
 
 export interface CreateLogsExplorerProfileCustomizationsDeps {
   core: CoreStart;
@@ -87,8 +80,7 @@ export const createLogsExplorerProfileCustomizations =
 
     customizations.set({
       id: 'data_table',
-      customCellRenderer: createCustomCellRenderer({ data }),
-      customGridColumnsConfiguration: createCustomGridColumnsConfiguration(),
+      logsEnabled: true,
       customControlColumnsConfiguration: await import('./custom_control_column').then((module) =>
         module.createCustomControlColumnsConfiguration(service)
       ),
@@ -96,9 +88,7 @@ export const createLogsExplorerProfileCustomizations =
 
     customizations.set({
       id: 'field_list',
-      additionalFieldGroups: {
-        smartFields,
-      },
+      logsFieldsEnabled: true,
     });
 
     // Fix bug where filtering on histogram does not work
@@ -120,11 +110,16 @@ export const createLogsExplorerProfileCustomizations =
     });
 
     /**
-     * Hide flyout actions to prevent rendering hard-coded actions.
+     * Flyout customization.
+     * The latest changes moved the implementation of the flyout overview tab into the unified_doc_viewer presets.
+     * To keep control over the overview tab and enable it only on the Logs Explorer,
+     * the docViewsRegistry is updated to allow enable/disable of any doc view.
+     * In a close future, when the contextual awareness for Discover will be in place,
+     * this configuration will be moved into a flavored logs experience directly defined in Discover.
      */
     customizations.set({
       id: 'flyout',
-      size: '60%',
+      size: 650,
       title: i18n.translate('xpack.logsExplorer.flyoutDetail.title', {
         defaultMessage: 'Log details',
       }),
@@ -135,24 +130,7 @@ export const createLogsExplorerProfileCustomizations =
         },
       },
       docViewsRegistry: (registry) => {
-        registry.add({
-          id: 'doc_view_log_overview',
-          title: i18n.translate('xpack.logsExplorer.flyoutDetail.docViews.overview', {
-            defaultMessage: 'Overview',
-          }),
-          order: 0,
-          component: (props) => {
-            const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
-
-            return (
-              <KibanaContextProviderForPlugin>
-                <LogsExplorerControllerProvider controller={controller}>
-                  <LazyCustomFlyoutContent {...props} />
-                </LogsExplorerControllerProvider>
-              </KibanaContextProviderForPlugin>
-            );
-          },
-        });
+        registry.enableById('doc_view_logs_overview');
 
         return registry;
       },

@@ -18,7 +18,7 @@ export function initFileUploadTelemetry(
 ) {
   coreSetup.savedObjects.registerType(telemetryMappingsType);
   registerUsageCollector(usageCollection);
-  coreSetup.getStartServices().then(([core]) => {
+  void coreSetup.getStartServices().then(([core]) => {
     setInternalRepository(core.savedObjects.createInternalRepository);
   });
 }

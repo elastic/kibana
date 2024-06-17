@@ -12,11 +12,13 @@ import {
   APP_ID,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../../../../../common/constants';
-import { AssetCriticalityRecordIdParts } from '../../../../../common/api/entity_analytics/asset_criticality';
+import { DeleteAssetCriticalityRecord } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { AssetCriticalityAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 export const assetCriticalityDeleteRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
@@ -34,22 +36,36 @@ export const assetCriticalityDeleteRoute = (
         version: '1',
         validate: {
           request: {
-            query: buildRouteValidationWithZod(AssetCriticalityRecordIdParts),
+            query: buildRouteValidationWithZod(DeleteAssetCriticalityRecord),
           },
         },
       },
       async (context, request, response) => {
+        const securitySolution = await context.securitySolution;
+
+        securitySolution.getAuditLogger()?.log({
+          message: 'User attempted to un-assign asset criticality from an entity',
+          event: {
+            action: AssetCriticalityAuditActions.ASSET_CRITICALITY_UNASSIGN,
+            category: AUDIT_CATEGORY.DATABASE,
+            type: AUDIT_TYPE.DELETION,
+            outcome: AUDIT_OUTCOME.UNKNOWN,
+          },
+        });
+
         const siemResponse = buildSiemResponse(response);
         try {
           await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
           await checkAndInitAssetCriticalityResources(context, logger);
 
-          const securitySolution = await context.securitySolution;
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
-          await assetCriticalityClient.delete({
-            idField: request.query.id_field,
-            idValue: request.query.id_value,
-          });
+          await assetCriticalityClient.delete(
+            {
+              idField: request.query.id_field,
+              idValue: request.query.id_value,
+            },
+            request.query.refresh
+          );
 
           return response.ok();
         } catch (e) {

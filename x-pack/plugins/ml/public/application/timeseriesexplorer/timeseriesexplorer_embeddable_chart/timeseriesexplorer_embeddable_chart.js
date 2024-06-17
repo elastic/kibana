@@ -79,6 +79,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     bounds: PropTypes.object.isRequired,
     chartWidth: PropTypes.number.isRequired,
     lastRefresh: PropTypes.number.isRequired,
+    onRenderComplete: PropTypes.func,
     previousRefresh: PropTypes.number.isRequired,
     selectedJobId: PropTypes.string.isRequired,
     selectedDetectorIndex: PropTypes.number,
@@ -434,6 +435,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
             }
 
             this.setState(stateUpdate);
+            if (this.props.onRenderComplete !== undefined) {
+              this.props.onRenderComplete();
+            }
           }
         };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -124,7 +124,7 @@ export const ApiLogFlyout: React.FC = () => {
   );
 };
 
-export const ApiLogHeading: React.FC = ({ children }) => (
+export const ApiLogHeading: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiTitle size="xs">
     <h3>{children}</h3>
   </EuiTitle>

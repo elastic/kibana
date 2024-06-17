@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, createElement } from 'react';
+import { useMemo, createElement, FC, PropsWithChildren } from 'react';
 import { KibanaEnvironmentContext, type KibanaEnvContext } from './kibana_environment_context';
 
 export const useKibanaEnvironmentContextProvider = ({
@@ -22,10 +22,11 @@ export const useKibanaEnvironmentContextProvider = ({
     [kibanaVersion, isCloudEnv, isServerlessEnv]
   );
 
-  const Provider: React.FC<{ kibanaEnvironment?: KibanaEnvContext }> = ({
-    kibanaEnvironment = {},
-    children,
-  }) => {
+  const Provider: FC<
+    PropsWithChildren<{
+      kibanaEnvironment?: KibanaEnvContext;
+    }>
+  > = ({ kibanaEnvironment = {}, children }) => {
     const newProvider = createElement(KibanaEnvironmentContext.Provider, {
       value: { ...kibanaEnvironment, ...value },
       children,

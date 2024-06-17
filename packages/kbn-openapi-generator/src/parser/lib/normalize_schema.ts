@@ -20,9 +20,21 @@ const hasRef = (obj: unknown): obj is NormalizedReferenceObject => {
   return typeof obj === 'object' && obj !== null && '$ref' in obj;
 };
 
+const stringIsUrl = (str: string) => {
+  try {
+    new URL(str);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export function normalizeSchema(schema: OpenAPIV3.Document) {
   traverseObject(schema, (element) => {
     if (hasRef(element)) {
+      if (stringIsUrl(element.$ref)) {
+        throw new Error(`URL references are not supported: ${element.$ref}`);
+      }
       const referenceName = element.$ref.split('/').pop();
       if (!referenceName) {
         throw new Error(`Cannot parse reference name: ${element.$ref}`);

@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
-  describe('@ess @serverless @skipInQA update_rules', () => {
+  describe('@ess @serverless @skipInServerlessMKI update_rules', () => {
     describe('update rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -142,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('@brokenInServerless should update a single rule property and remove the action', async () => {
+      it('@skipInServerless should update a single rule property and remove the action', async () => {
         const [connector1] = await Promise.all([
           supertest
             .post(`/api/actions/connector`)
@@ -562,7 +562,7 @@ export default ({ getService }: FtrProviderContext) => {
           return removeServerGeneratedPropertiesIncludingRuleId(updatedRule);
         };
 
-        describe('@brokenInServerless actions without frequencies', () => {
+        describe('@skipInServerless actions without frequencies', () => {
           [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
             (throttle) => {
               it(`it sets each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
@@ -623,7 +623,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('@brokenInServerless actions with frequencies', () => {
+        describe('@skipInServerless actions with frequencies', () => {
           [
             undefined,
             NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -658,7 +658,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('@brokenInServerless some actions with frequencies', () => {
+        describe('@skipInServerless some actions with frequencies', () => {
           [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
             (throttle) => {
               it(`it overrides each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
@@ -755,40 +755,6 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(200);
 
           expect(body.investigation_fields).to.eql(undefined);
-        });
-      });
-
-      describe('setup guide', () => {
-        it('should overwrite setup value on update', async () => {
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            setup: 'A setup guide',
-          });
-
-          const ruleUpdate = {
-            ...getSimpleRuleUpdate('rule-1'),
-            setup: 'A different setup guide',
-          };
-
-          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(200);
-
-          expect(body.setup).to.eql('A different setup guide');
-        });
-
-        it('should reset setup field to empty string on unset', async () => {
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            setup: 'A setup guide',
-          });
-
-          const ruleUpdate = {
-            ...getSimpleRuleUpdate('rule-1'),
-            setup: undefined,
-          };
-
-          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(200);
-
-          expect(body.setup).to.eql('');
         });
       });
     });

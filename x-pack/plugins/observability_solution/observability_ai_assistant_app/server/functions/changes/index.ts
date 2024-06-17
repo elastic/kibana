@@ -17,6 +17,8 @@ import {
 import { getMetricChanges } from './get_metric_changes';
 import { getLogChanges } from './get_log_changes';
 
+export const CHANGES_FUNCTION_NAME = 'changes';
+
 export function registerChangesFunction({
   functions,
   resources: {
@@ -26,9 +28,8 @@ export function registerChangesFunction({
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
-      name: 'changes',
+      name: CHANGES_FUNCTION_NAME,
       description: 'Returns change points like spikes and dips for logs and metrics.',
-      contexts: ['core'],
       parameters: changesFunctionParameters,
     },
     async ({

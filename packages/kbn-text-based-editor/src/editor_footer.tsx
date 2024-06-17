@@ -107,7 +107,7 @@ interface EditorFooterProps {
   updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
-  containerWidth: number;
+  measuredContainerWidth: number;
   hideRunQueryText?: boolean;
   disableSubmitAction?: boolean;
   editorIsInline?: boolean;
@@ -118,6 +118,7 @@ interface EditorFooterProps {
   hideQueryHistory?: boolean;
   refetchHistoryItems?: boolean;
   isInCompactMode?: boolean;
+  queryHasChanged?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -137,11 +138,12 @@ export const EditorFooter = memo(function EditorFooter({
   allowQueryCancellation,
   hideTimeFilterInfo,
   isHistoryOpen,
-  containerWidth,
   setIsHistoryOpen,
   hideQueryHistory,
   refetchHistoryItems,
   isInCompactMode,
+  queryHasChanged,
+  measuredContainerWidth,
 }: EditorFooterProps) {
   const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
@@ -170,7 +172,7 @@ export const EditorFooter = memo(function EditorFooter({
       responsive={false}
       direction="column"
       css={css`
-        width: ${containerWidth}px;
+        width: 100%;
         box-shadow: ${shadowStyle};
       `}
     >
@@ -329,9 +331,15 @@ export const EditorFooter = memo(function EditorFooter({
                     >
                       <EuiButtonIcon
                         display="base"
-                        color="primary"
+                        color={queryHasChanged ? 'success' : 'primary'}
                         onClick={runQuery}
-                        iconType={allowQueryCancellation && isLoading ? 'cross' : 'refresh'}
+                        iconType={
+                          allowQueryCancellation && isLoading
+                            ? 'cross'
+                            : queryHasChanged
+                            ? 'play'
+                            : 'refresh'
+                        }
                         size="s"
                         isLoading={isLoading && !allowQueryCancellation}
                         isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
@@ -365,7 +373,7 @@ export const EditorFooter = memo(function EditorFooter({
           <QueryHistory
             containerCSS={styles.historyContainer}
             onUpdateAndSubmit={onUpdateAndSubmit}
-            containerWidth={containerWidth}
+            containerWidth={measuredContainerWidth}
             refetchHistoryItems={refetchHistoryItems}
             isInCompactMode={isInCompactMode}
           />

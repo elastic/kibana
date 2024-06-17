@@ -11,8 +11,6 @@
       "expressions",
       "presentationUtil"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }

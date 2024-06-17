@@ -397,6 +397,6 @@ export const PaginationEuiFlexItem = styled(EuiFlexItem)`
       right: ${({ theme }) => theme.eui.euiSizeL};
     }
   }
-`;
+` as typeof EuiFlexItem;
 
 PaginationEuiFlexItem.displayName = 'PaginationEuiFlexItem';

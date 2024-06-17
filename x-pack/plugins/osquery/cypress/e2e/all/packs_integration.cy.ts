@@ -104,8 +104,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176543
-  describe.skip('Load prebuilt packs', { tags: ['@ess', '@serverless'] }, () => {
+  describe('Load prebuilt packs', { tags: ['@ess', '@serverless'] }, () => {
     afterEach(() => {
       cleanupAllPrebuiltPacks();
     });
@@ -164,8 +163,10 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains('New live query').click();
         cy.contains('Run a set of queries in a pack.').click();
         cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
-        cy.getBySel('select-live-pack').click().type('osquery-monitoring{downArrow}{enter}');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
         selectAllAgents();
+        cy.getBySel('select-live-pack').click();
+        cy.getBySel('select-live-pack').type('osquery-monitoring{downArrow}{enter}');
         submitQuery();
         cy.getBySel('toggleIcon-events').click();
         checkResults();

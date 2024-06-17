@@ -209,6 +209,9 @@ The default selection in the time filter.
 The maximum height that a cell occupies in a table. Set to 0 to disable
 truncation.
 
+[[enableESQL]]`enableESQL`::
+This setting enables ES|QL in Kibana.
+
 [float]
 [[presentation-labs]]
 ==== Presentation Labs
@@ -289,9 +292,6 @@ in the current data view is used.
 [[defaultcolumns]]`defaultColumns`::
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
-
-[[discover:enableESQL]]`discover:enableESQL`::
-experimental[] Allows ES|QL queries for search.
 
 [[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::
 Specifies the maximum number of fields to show in the document column of the *Discover* table.
@@ -443,6 +443,9 @@ beta:[] Enables faster searching in APM tables by adding a handy search bar with
 
 [[observability-enable-aws-lambda-metrics]]`observability:enableAwsLambdaMetrics`::
 preview:[] Display Amazon Lambda metrics in the service metrics tab.
+
+[[observability-enable-legacy-uptime-app]]`observability:enableLegacyUptimeApp`::
+Shows the Uptime app even if there is no recent Heartbeat data.
 
 [[observability-apm-enable-comparison]]`observability:enableComparisonByDefault`::
 Determines whether the <<service-time-comparison, comparison feature>> is enabled or disabled by default in the APM app.

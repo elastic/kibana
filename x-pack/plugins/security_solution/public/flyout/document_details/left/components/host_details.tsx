@@ -34,7 +34,7 @@ import { DefaultFieldRenderer } from '../../../../timelines/components/field_ren
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { CellActions } from './cell_actions';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
@@ -152,6 +152,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
               idPrefix={''}
               isDraggable={false}
               render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
+              scopeId={scopeId}
             />
           );
         },
@@ -174,7 +175,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized]
+    [isEntityAnalyticsAuthorized, scopeId]
   );
 
   const relatedUsersCount = useMemo(
@@ -278,7 +279,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
                 content={
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersTooltip"
-                    defaultMessage="After this alert was generated, these users logged into {hostName}. Check if this activity is normal."
+                    defaultMessage="After this event, these users logged into {hostName}. Check if this activity is normal."
                     values={{ hostName }}
                   />
                 }

@@ -25,16 +25,17 @@ export function defineGetCurrentUserProfileRoute({
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const authenticationService = await getAuthenticationService();
+      const authenticationService = getAuthenticationService();
       const currentUser = authenticationService.getCurrentUser(request);
       if (!currentUser) {
         return response.notFound();
       }
 
+      const { userProfile } = await context.core;
+
       let profile: UserProfileWithSecurity | null;
       try {
-        profile = await getUserProfileService().getCurrent({
-          request,
+        profile = await userProfile.getCurrent({
           dataPath: request.query.dataPath,
         });
       } catch (error) {

@@ -11,7 +11,6 @@ import { EuiToolTip } from '@elastic/eui';
 
 import { DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY } from '../drag_and_drop/translations';
 import { TestProviders } from '../../mock';
-import '../../mock/match_media';
 import { getEmptyString } from '../empty_value';
 import { useMountAppended } from '../../utils/use_mount_appended';
 

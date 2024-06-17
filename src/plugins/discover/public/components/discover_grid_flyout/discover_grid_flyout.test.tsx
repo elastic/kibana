@@ -25,6 +25,7 @@ import { ReactWrapper } from 'enzyme';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
 import { FlyoutCustomization, useDiscoverCustomization } from '../../customizations';
+import { discoverServiceMock } from '../../__mocks__/services';
 
 const mockFlyoutCustomization: FlyoutCustomization = {
   id: 'flyout',
@@ -49,6 +50,7 @@ jest.mock('@elastic/eui', () => {
 
       return original.useIsWithinBreakpoints(breakpoints);
     }),
+    useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
   };
 });
 
@@ -75,6 +77,7 @@ describe('Discover flyout', function () {
   }) => {
     const onClose = jest.fn();
     const services = {
+      ...discoverServiceMock,
       filterManager: createFilterManagerMock(),
       addBasePath: (path: string) => `/base${path}`,
       history: () => ({ location: {} }),
@@ -251,7 +254,7 @@ describe('Discover flyout', function () {
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
   });
 
-  it('should not render single/surrounding views for text based', async () => {
+  it('should not render single/surrounding views for ES|QL', async () => {
     const { component } = await mountComponent({
       query: { esql: 'FROM indexpattern' },
     });

@@ -80,6 +80,7 @@ export const EditIndexPattern = withRouter(
       IndexPatternEditor,
       savedObjectsManagement,
       application,
+      ...startServices
     } = useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [compositeRuntimeFields, setCompositeRuntimeFields] = useState<
@@ -167,6 +168,7 @@ export const EditIndexPattern = withRouter(
       onDelete: () => {
         history.push('');
       },
+      startServices,
     });
 
     const isRollup =

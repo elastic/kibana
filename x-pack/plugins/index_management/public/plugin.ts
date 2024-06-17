@@ -44,6 +44,9 @@ export class IndexMgmtUIPlugin
     editableIndexSettings: 'all' | 'limited';
     enableDataStreamsStorageColumn: boolean;
     isIndexManagementUiEnabled: boolean;
+    enableMappingsSourceFieldSection: boolean;
+    enableTogglingDataRetention: boolean;
+    enableSemanticText: boolean;
   };
 
   constructor(ctx: PluginInitializerContext) {
@@ -58,6 +61,9 @@ export class IndexMgmtUIPlugin
       enableIndexStats,
       editableIndexSettings,
       enableDataStreamsStorageColumn,
+      enableMappingsSourceFieldSection,
+      enableTogglingDataRetention,
+      dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
     this.config = {
       isIndexManagementUiEnabled,
@@ -66,6 +72,9 @@ export class IndexMgmtUIPlugin
       enableIndexStats: enableIndexStats ?? true,
       editableIndexSettings: editableIndexSettings ?? 'all',
       enableDataStreamsStorageColumn: enableDataStreamsStorageColumn ?? true,
+      enableMappingsSourceFieldSection: enableMappingsSourceFieldSection ?? true,
+      enableTogglingDataRetention: enableTogglingDataRetention ?? true,
+      enableSemanticText: enableSemanticText ?? false,
     };
   }
 

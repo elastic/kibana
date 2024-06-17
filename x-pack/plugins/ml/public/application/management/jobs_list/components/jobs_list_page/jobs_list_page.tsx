@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 
 import {
@@ -23,7 +23,8 @@ import {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -73,8 +74,6 @@ export const JobsListPage: FC<Props> = ({
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
-  const I18nContext = coreStart.i18n.Context;
-  const theme$ = coreStart.theme.theme$;
 
   const mlServices = useMemo(
     () => getMlGlobalServices(coreStart.http, data.dataViews, usageCollection),
@@ -114,21 +113,33 @@ export const JobsListPage: FC<Props> = ({
   }
 
   if (accessDenied) {
-    return <AccessDeniedPage />;
+    return (
+      <I18nProvider>
+        <KibanaRenderContextProvider {...coreStart}>
+          <AccessDeniedPage />
+        </KibanaRenderContextProvider>
+      </I18nProvider>
+    );
   }
 
   if (isPlatinumOrTrialLicense === false) {
-    return <InsufficientLicensePage basePath={coreStart.http.basePath} />;
+    return (
+      <I18nProvider>
+        <KibanaRenderContextProvider {...coreStart}>
+          <InsufficientLicensePage basePath={coreStart.http.basePath} />
+        </KibanaRenderContextProvider>
+      </I18nProvider>
+    );
   }
 
   return (
-    <RedirectAppLinks
-      coreStart={{
-        application: coreStart.application,
-      }}
-    >
-      <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
+    <I18nProvider>
+      <KibanaRenderContextProvider {...coreStart}>
+        <RedirectAppLinks
+          coreStart={{
+            application: coreStart.application,
+          }}
+        >
           <KibanaContextProvider
             services={{
               ...coreStart,
@@ -201,8 +212,8 @@ export const JobsListPage: FC<Props> = ({
               </EnabledFeaturesContextProvider>
             </ContextWrapper>
           </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>
-    </RedirectAppLinks>
+        </RedirectAppLinks>
+      </KibanaRenderContextProvider>
+    </I18nProvider>
   );
 };

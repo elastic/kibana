@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSecurityContract } from '@kbn/core-security-server';
+import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { getDefaultSecurityImplementation } from './default_implementation';
 
 describe('getDefaultSecurityImplementation', () => {
-  let implementation: CoreSecurityContract;
+  let implementation: CoreSecurityDelegateContract;
 
   beforeEach(() => {
     implementation = getDefaultSecurityImplementation();
@@ -20,6 +20,21 @@ describe('getDefaultSecurityImplementation', () => {
     it('returns null', async () => {
       const user = implementation.authc.getCurrentUser({} as any);
       expect(user).toBeNull();
+    });
+  });
+
+  describe('audit.asScoped', () => {
+    it('returns null', async () => {
+      const logger = implementation.audit.asScoped({} as any);
+      expect(logger.log({ message: 'something' })).toBeUndefined();
+    });
+  });
+
+  describe('audit.withoutRequest', () => {
+    it('does not log', async () => {
+      const logger = implementation.audit.withoutRequest;
+      expect(logger.enabled).toBe(false);
+      expect(logger.log({ message: 'no request' })).toBeUndefined();
     });
   });
 });

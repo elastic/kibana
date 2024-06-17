@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
 import { ArgumentFileSelector } from '../../console_argument_selectors';
@@ -16,7 +17,10 @@ import type {
   EndpointCapabilities,
   ResponseActionAgentType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
+  RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import { GetFileActionResult } from '../command_render_components/get_file_action';
 import type { Command, CommandDefinition } from '../../console';
 import { IsolateActionResult } from '../command_render_components/isolate_action';
@@ -38,6 +42,7 @@ import { getCommandAboutInfo } from './get_command_about_info';
 
 import { validateUnitOfTime } from './utils';
 import { CONSOLE_COMMANDS } from '../../../common/translations';
+import { ScanActionResult } from '../command_render_components/scan_action';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -83,14 +88,18 @@ const capabilitiesAndPrivilegesValidator = (
     const responderCapability =
       RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
     let errorMessage = '';
-    if (!responderCapability) {
-      errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
-    }
-    if (responderCapability) {
-      if (!agentCapabilities.includes(responderCapability)) {
+
+    // We only validate Agent capabilities for the command for Endpoint agents
+    if (agentType === 'endpoint') {
+      if (!responderCapability) {
+        errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
+      }
+
+      if (responderCapability && !agentCapabilities.includes(responderCapability)) {
         errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
       }
     }
+
     if (!getRbacControl({ commandName, privileges })) {
       errorMessage = errorMessage.concat(INSUFFICIENT_PRIVILEGES_FOR_COMMAND);
     }
@@ -127,27 +136,37 @@ const COMMENT_ARG_ABOUT = i18n.translate(
   { defaultMessage: 'A comment to go along with the action' }
 );
 
+export interface GetEndpointConsoleCommandsOptions {
+  endpointAgentId: string;
+  agentType: ResponseActionAgentType;
+  endpointCapabilities: ImmutableArray<string>;
+  endpointPrivileges: EndpointPrivileges;
+}
+
 export const getEndpointConsoleCommands = ({
   endpointAgentId,
   agentType,
   endpointCapabilities,
   endpointPrivileges,
-}: {
-  endpointAgentId: string;
-  agentType: ResponseActionAgentType;
-  endpointCapabilities: ImmutableArray<string>;
-  endpointPrivileges: EndpointPrivileges;
-}): CommandDefinition[] => {
+}: GetEndpointConsoleCommandsOptions): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
 
   const isUploadEnabled = featureFlags.responseActionUploadEnabled;
+  const isScanEnabled = featureFlags.responseActionScanEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
+    // Agent capabilities is only validated for Endpoint agent types
+    if (agentType !== 'endpoint') {
+      return true;
+    }
+
     const responderCapability =
       RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+
     if (responderCapability) {
       return endpointCapabilities.includes(responderCapability);
     }
+
     return false;
   };
 
@@ -347,7 +366,7 @@ export const getEndpointConsoleCommands = ({
       name: 'get-file',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.getFile.about,
-        isSupported: doesEndpointSupportCommand('processes'),
+        isSupported: doesEndpointSupportCommand('get-file'),
       }),
       RenderComponent: GetFileActionResult,
       meta: {
@@ -484,5 +503,139 @@ export const getEndpointConsoleCommands = ({
     });
   }
 
-  return consoleCommands;
+  if (isScanEnabled) {
+    consoleCommands.push({
+      name: 'scan',
+      about: getCommandAboutInfo({
+        aboutInfo: CONSOLE_COMMANDS.scan.about,
+        isSupported: doesEndpointSupportCommand('scan'),
+      }),
+      RenderComponent: ScanActionResult,
+      meta: {
+        agentType,
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: 'scan --path "/full/path/to/folder" --comment "Scan folder for malware"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
+      mustHaveArgs: true,
+      args: {
+        path: {
+          required: true,
+          allowMultiples: false,
+          mustHaveValue: 'non-empty-string',
+          about: CONSOLE_COMMANDS.scan.args.path.about,
+        },
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 8,
+      helpDisabled: !doesEndpointSupportCommand('scan'),
+      helpHidden: !getRbacControl({
+        commandName: 'scan',
+        privileges: endpointPrivileges,
+      }),
+    });
+  }
+
+  switch (agentType) {
+    case 'sentinel_one':
+      return adjustCommandsForSentinelOne({ commandList: consoleCommands });
+    case 'crowdstrike':
+      return adjustCommandsForCrowdstrike({ commandList: consoleCommands });
+    default:
+      // agentType === endpoint: just returns the defined command list
+      return consoleCommands;
+  }
+};
+
+/** @private */
+const adjustCommandsForSentinelOne = ({
+  commandList,
+}: {
+  commandList: CommandDefinition[];
+}): CommandDefinition[] => {
+  const featureFlags = ExperimentalFeaturesService.get();
+  const isHostIsolationEnabled = featureFlags.responseActionsSentinelOneV1Enabled;
+  const isGetFileFeatureEnabled = featureFlags.responseActionsSentinelOneGetFileEnabled;
+
+  const disableCommand = (command: CommandDefinition) => {
+    command.helpDisabled = true;
+    command.helpHidden = true;
+    command.validate = () =>
+      UPGRADE_AGENT_FOR_RESPONDER('sentinel_one', command.name as ConsoleResponseActionCommands);
+  };
+
+  return commandList.map((command) => {
+    const agentSupportsResponseAction =
+      command.name === 'status'
+        ? false
+        : isActionSupportedByAgentType(
+            'sentinel_one',
+            RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[
+              command.name as ConsoleResponseActionCommands
+            ],
+            'manual'
+          );
+
+    // If command is not supported by SentinelOne - disable it
+    if (
+      !agentSupportsResponseAction ||
+      (command.name === 'get-file' && !isGetFileFeatureEnabled) ||
+      (command.name === 'isolate' && !isHostIsolationEnabled) ||
+      (command.name === 'release' && !isHostIsolationEnabled)
+    ) {
+      disableCommand(command);
+    }
+
+    return command;
+  });
+};
+
+/** @private */
+const adjustCommandsForCrowdstrike = ({
+  commandList,
+}: {
+  commandList: CommandDefinition[];
+}): CommandDefinition[] => {
+  const featureFlags = ExperimentalFeaturesService.get();
+  const isHostIsolationEnabled = featureFlags.responseActionsCrowdstrikeManualHostIsolationEnabled;
+
+  const disableCommand = (command: CommandDefinition) => {
+    command.helpDisabled = true;
+    command.helpHidden = true;
+    command.validate = () =>
+      UPGRADE_AGENT_FOR_RESPONDER('crowdstrike', command.name as ConsoleResponseActionCommands);
+  };
+
+  return commandList.map((command) => {
+    const agentSupportsResponseAction =
+      command.name === 'status'
+        ? false
+        : isActionSupportedByAgentType(
+            'crowdstrike',
+            RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[
+              command.name as ConsoleResponseActionCommands
+            ],
+            'manual'
+          );
+
+    // If command is not supported by Crowdstrike - disable it
+    if (
+      !agentSupportsResponseAction ||
+      (command.name === 'isolate' && !isHostIsolationEnabled) ||
+      (command.name === 'release' && !isHostIsolationEnabled)
+    ) {
+      disableCommand(command);
+    }
+
+    return command;
+  });
 };

@@ -5685,7 +5685,7 @@
                 "section": "def-common.SavedObjectCreateOptions",
                 "text": "SavedObjectCreateOptions"
               },
-              ", \"references\" | \"overwrite\">>, \"contentTypeId\">) => Promise<{ item: ",
+              ", \"overwrite\" | \"references\">>, \"contentTypeId\">) => Promise<{ item: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "common",
@@ -5723,7 +5723,7 @@
                     "section": "def-common.SavedObjectCreateOptions",
                     "text": "SavedObjectCreateOptions"
                   },
-                  ", \"references\" | \"overwrite\">>, \"contentTypeId\">"
+                  ", \"overwrite\" | \"references\">>, \"contentTypeId\">"
                 ],
                 "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
                 "deprecated": false,
@@ -6872,7 +6872,15 @@
             "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; disabledActionIds: ",
+          "<string | undefined>; defaultPanelDescription: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string | undefined> | undefined; disabledActionIds: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -7000,7 +7008,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; onEdit: () => void; onPhaseChange: ",
+          "[]; onEdit: () => Promise<void>; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -7040,12 +7048,12 @@
             "section": "def-common.ErrorLike",
             "text": "ErrorLike"
           },
-          ", domNode: HTMLElement | Element) => any) | undefined; fatalError?: Error | undefined; getEditHref: () => string | undefined; getAppContext: () => ",
+          ", domNode: HTMLElement | Element) => any) | undefined; fatalError?: Error | undefined; getEditHref: () => Promise<string | undefined>; getAppContext: () => ",
           {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableAppContext",
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.EmbeddableAppContext",
             "text": "EmbeddableAppContext"
           },
           " | undefined; reportsEmbeddableLoad: () => boolean; refreshInputFromParent: () => void; getIsContainer: () => this is ",
@@ -9629,7 +9637,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"custom\" | \"full\" | \"dataBounds\""
+              "\"full\" | \"custom\" | \"dataBounds\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -11527,6 +11535,27 @@
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.LegendConfig.legendStats",
+            "type": "Array",
+            "tags": [],
+            "label": "legendStats",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.XYLegendValue",
+                "text": "XYLegendValue"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12167,13 +12196,20 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-common.PartitionLayerState.showValuesInLegend",
-            "type": "CompoundType",
+            "id": "def-common.PartitionLayerState.legendStats",
+            "type": "Array",
             "tags": [],
-            "label": "showValuesInLegend",
+            "label": "legendStats",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.PartitionLegendValue",
+                "text": "PartitionLegendValue"
+              },
+              "[] | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13977,7 +14013,7 @@
             "label": "yLeftScale",
             "description": [],
             "signature": [
-              "\"log\" | \"sqrt\" | \"time\" | \"linear\" | undefined"
+              "\"log\" | \"time\" | \"linear\" | \"sqrt\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13991,7 +14027,7 @@
             "label": "yRightScale",
             "description": [],
             "signature": [
-              "\"log\" | \"sqrt\" | \"time\" | \"linear\" | undefined"
+              "\"log\" | \"time\" | \"linear\" | \"sqrt\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14136,20 +14172,6 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hideEndzones",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.XYConfiguration.valuesInLegend",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "valuesInLegend",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -16017,7 +16039,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"date_histogram\" | \"percentile\" | \"average\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -16047,7 +16069,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"date_histogram\" | \"percentile\" | \"average\" | \"terms\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"terms\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -16095,6 +16117,18 @@
           "\"treemap\" | \"mosaic\" | \"waffle\" | \"pie\" | \"donut\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.PartitionLegendValue",
+        "type": "string",
+        "tags": [],
+        "label": "PartitionLegendValue",
+        "description": [],
+        "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16607,6 +16641,18 @@
           }
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.XYLegendValue",
+        "type": "string",
+        "tags": [],
+        "label": "XYLegendValue",
+        "description": [],
+        "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

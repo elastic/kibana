@@ -42,6 +42,7 @@ export type {
   ErrorHttpResponseOptions,
   FileHttpResponseOptions,
 } from './response';
+export { isKibanaResponse } from './response';
 export type {
   RouteConfigOptions,
   RouteMethod,
@@ -50,6 +51,7 @@ export type {
   RouteConfigOptionsBody,
   RouteContentType,
   SafeRouteMethod,
+  RouteAccess,
 } from './route';
 export { validBodyOutput } from './route';
 export type {
@@ -62,6 +64,7 @@ export type {
   RouteValidatorOptions,
   RouteValidator,
   RouteValidatorRequestAndResponses,
+  LazyValidator,
 } from './route_validator';
 export { RouteValidationError } from './route_validator';
 export type { IRouter, RouteRegistrar, RouterRoute } from './router';

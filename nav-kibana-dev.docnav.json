@@ -166,6 +166,9 @@
         },
         {
           "id": "kibDevTutorialAdvancedSettings"
+        },
+        {
+          "id": "kibDevTutorialCcsSetup"
         }
       ]
     },

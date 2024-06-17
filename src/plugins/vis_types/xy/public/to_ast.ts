@@ -20,6 +20,7 @@ import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugi
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import type { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import {
   Dimensions,
   Dimension,
@@ -47,6 +48,7 @@ const prepareLengend = (params: VisParams, legendSize?: LegendSize) => {
     shouldTruncate: params.truncateLegend,
     showSingleSeries: true,
     legendSize,
+    legendStats: params.labels.show ? [XYLegendValue.CurrentAndLastValue] : undefined,
   });
 
   return buildExpression([legend]);
@@ -434,7 +436,6 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitColumnAccessor: dimensions.splitColumn?.map(prepareVisDimension),
     splitRowAccessor: dimensions.splitRow?.map(prepareVisDimension),
     valueLabels: vis.params.labels.show ? 'show' : 'hide',
-    valuesInLegend: vis.params.labels.show,
     singleTable: true,
   });
 

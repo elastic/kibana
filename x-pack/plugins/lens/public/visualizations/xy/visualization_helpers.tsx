@@ -13,6 +13,7 @@ import {
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
+  UserMessage,
   VisualizationType,
 } from '../../types';
 import {
@@ -25,16 +26,12 @@ import {
   XYReferenceLineLayerConfig,
   SeriesType,
   XYByReferenceAnnotationLayerConfig,
-  XYPersistedAnnotationLayerConfig,
-  XYPersistedByReferenceAnnotationLayerConfig,
-  XYPersistedLinkedByValueAnnotationLayerConfig,
-  XYPersistedLayerConfig,
-  XYPersistedByValueAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
 import type { ExtraAppendLayerArg } from './visualization';
+import { XY_BREAKDOWN_MISSING_AXIS, XY_Y_MISSING_AXIS } from '../../user_messages_ids';
 
 export function getAxisName(
   axis: 'x' | 'y' | 'yLeft' | 'yRight',
@@ -154,31 +151,10 @@ export const isAnnotationsLayer = (
 ): layer is XYAnnotationLayerConfig =>
   layer.layerType === layerTypes.ANNOTATIONS && 'indexPatternId' in layer;
 
-export const isPersistedAnnotationsLayer = (
-  layer: XYPersistedLayerConfig
-): layer is XYPersistedAnnotationLayerConfig =>
-  layer.layerType === layerTypes.ANNOTATIONS && !('indexPatternId' in layer);
-
-export const isPersistedByValueAnnotationsLayer = (
-  layer: XYPersistedLayerConfig
-): layer is XYPersistedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) &&
-  (layer.persistanceType === 'byValue' || !layer.persistanceType);
-
 export const isByReferenceAnnotationsLayer = (
   layer: XYLayerConfig
 ): layer is XYByReferenceAnnotationLayerConfig =>
   'annotationGroupId' in layer && '__lastSaved' in layer;
-
-export const isPersistedByReferenceAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedByReferenceAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'byReference';
-
-export const isPersistedLinkedByValueAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedLinkedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'linked';
 
 export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
@@ -282,15 +258,19 @@ export const supportedDataLayer = {
 };
 
 // i18n ids cannot be dynamically generated, hence the function below
-export function getMessageIdsForDimension(
-  dimension: string,
+function getMessageIdsForDimension(
+  dimension: 'y' | 'break_down',
   layers: number[],
   isHorizontal: boolean
-) {
+): UserMessage {
   const layersList = layers.map((i: number) => i + 1).join(', ');
   switch (dimension) {
-    case 'Break down':
+    case 'break_down':
       return {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        uniqueId: XY_BREAKDOWN_MISSING_AXIS,
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitShort', {
           defaultMessage: `Missing {axis}.`,
           values: { axis: 'Break down by axis' },
@@ -300,8 +280,12 @@ export function getMessageIdsForDimension(
           values: { layers: layers.length, layersList, axis: 'Break down by axis' },
         }),
       };
-    case 'Y':
+    case 'y':
       return {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        uniqueId: XY_Y_MISSING_AXIS,
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYShort', {
           defaultMessage: `Missing {axis}.`,
           values: { axis: getAxisName('y', { isHorizontal }) },
@@ -312,7 +296,6 @@ export function getMessageIdsForDimension(
         }),
       };
   }
-  return { shortMessage: '', longMessage: '' };
 }
 
 const newLayerFn = {
@@ -394,14 +377,14 @@ export function getLayersByType(state: State, byType?: string) {
 }
 
 export function validateLayersForDimension(
-  dimension: string,
+  dimension: 'y' | 'break_down',
   allLayers: XYLayerConfig[],
   missingCriteria: (layer: XYDataLayerConfig) => boolean
 ):
   | { valid: true }
   | {
       valid: false;
-      payload: { shortMessage: string; longMessage: React.ReactNode };
+      error: UserMessage;
     } {
   const dataLayers = allLayers
     .map((layer, i) => ({ layer, originalIndex: i }))
@@ -437,7 +420,7 @@ export function validateLayersForDimension(
 
   return {
     valid: false,
-    payload: getMessageIdsForDimension(
+    error: getMessageIdsForDimension(
       dimension,
       layerMissingAccessors,
       isHorizontalChart(dataLayers.map(({ layer }) => layer))

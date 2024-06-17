@@ -15,7 +15,8 @@ import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligen
 import { InsightsSummaryRow } from './insights_summary_row';
 import { useRightPanelContext } from '../context';
 import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
-import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 
 /**

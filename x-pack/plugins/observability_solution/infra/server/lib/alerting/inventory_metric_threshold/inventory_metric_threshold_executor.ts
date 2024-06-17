@@ -19,7 +19,7 @@ import {
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { getAlertUrl } from '@kbn/observability-plugin/common';
+import { convertToBuiltInComparators, getAlertUrl } from '@kbn/observability-plugin/common';
 import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
@@ -128,7 +128,6 @@ export const createInventoryMetricThresholdExecutor =
         });
 
         const indexedStartedAt = start ?? startedAt.toISOString();
-
         alertsClient.setAlertData({
           id: UNGROUPED_FACTORY_KEY,
           payload: {
@@ -403,7 +402,9 @@ const buildReasonWithVerboseMetricName = (
         : resultItem.metric),
     currentValue: formatMetric(resultItem.metric, resultItem.currentValue),
     threshold: formatThreshold(resultItem.metric, thresholdToFormat),
-    comparator: useWarningThreshold ? resultItem.warningComparator! : resultItem.comparator,
+    comparator: useWarningThreshold
+      ? convertToBuiltInComparators(resultItem.warningComparator!)
+      : convertToBuiltInComparators(resultItem.comparator),
   };
   return buildReason(resultWithVerboseMetricName);
 };

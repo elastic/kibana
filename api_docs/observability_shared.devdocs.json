@@ -65,7 +65,7 @@
               },
               "<object, unknown>, pluginsSetup: ",
               "ObservabilitySharedSetup",
-              ") => { locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
+              ") => { registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -376,7 +376,7 @@
         "label": "EmbeddableFlamegraph",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "({ height, ...props }: Props) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
         "deprecated": false,
@@ -387,7 +387,7 @@
             "id": "def-public.EmbeddableFlamegraph.$1",
             "type": "Object",
             "tags": [],
-            "label": "props",
+            "label": "{ height, ...props }",
             "description": [],
             "signature": [
               "Props"
@@ -2358,6 +2358,108 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.AssetDetailsLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "AssetDetailsLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityShared",
+            "scope": "public",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-public.AssetDetailsLocatorParams",
+            "text": "AssetDetailsLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AssetDetailsLocatorParams.assetType",
+            "type": "string",
+            "tags": [],
+            "label": "assetType",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AssetDetailsLocatorParams.assetId",
+            "type": "string",
+            "tags": [],
+            "label": "assetId",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AssetDetailsLocatorParams.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AssetDetailsLocatorParams._a",
+            "type": "Object",
+            "tags": [],
+            "label": "_a",
+            "description": [],
+            "signature": [
+              "{ time?: { from?: string | undefined; to?: string | undefined; } | undefined; interval?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AssetDetailsLocatorParams.assetDetails",
+            "type": "Object",
+            "tags": [],
+            "label": "assetDetails",
+            "description": [],
+            "signature": [
+              "{ tabId?: string | undefined; dashboardId?: string | undefined; dateRange?: { from: string; to: string; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.EmbeddableProfilingSearchBarProps",
         "type": "Interface",
         "tags": [],
@@ -3275,6 +3377,36 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.ASSET_DETAILS_FLYOUT_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ASSET_DETAILS_FLYOUT_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"ASSET_DETAILS_FLYOUT_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_flyout_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.ASSET_DETAILS_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ASSET_DETAILS_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"ASSET_DETAILS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.casesFeatureId",
         "type": "string",
         "tags": [],
@@ -3352,6 +3484,21 @@
           "\"EMBEDDABLE_STACK_TRACES\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.INVENTORY_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "INVENTORY_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"INVENTORY_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/inventory_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3454,7 +3601,7 @@
         "label": "ObservabilitySharedPluginSetup",
         "description": [],
         "signature": [
-          "{ locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
+          "{ registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
           "Observable",
           "<",
           {

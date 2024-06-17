@@ -63,6 +63,7 @@ export const CIS_AZURE_OPTION_TEST_SUBJ = 'cisAzureTestId';
 
 export const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
 export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
+export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azure-credentials-type-selector';
 export const CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
   TENANT_ID: 'cisAzureTenantId',
   CLIENT_ID: 'cisAzureClientId',

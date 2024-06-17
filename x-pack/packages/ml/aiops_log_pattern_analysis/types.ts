@@ -13,6 +13,7 @@ export interface Category {
   subTimeRangeCount?: number;
   subFieldCount?: number;
   subFieldExamples?: string[];
+  subFieldSparkline?: Record<number, number>;
   examples: string[];
   sparkline?: Record<number, number>;
   regex: string;
@@ -22,6 +23,10 @@ interface CategoryExamples {
   hits: { hits: Array<{ _source: { message: string } }> };
 }
 
+export interface Sparkline {
+  buckets: Array<{ key_as_string: string; key: number; doc_count: number }>;
+}
+
 export interface CategoriesAgg {
   categories: {
     buckets: Array<{
@@ -29,9 +34,7 @@ export interface CategoriesAgg {
       doc_count: number;
       examples: CategoryExamples;
       regex: string;
-      sparkline: {
-        buckets: Array<{ key_as_string: string; key: number; doc_count: number }>;
-      };
+      sparkline: Sparkline;
       sub_time_range?: {
         buckets: Array<{
           key: number;
@@ -44,6 +47,7 @@ export interface CategoriesAgg {
             doc_count: number;
           };
           examples: CategoryExamples;
+          sparkline: Sparkline;
         }>;
       };
     }>;

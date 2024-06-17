@@ -157,14 +157,37 @@ describe('Presentation panel', () => {
   });
 
   describe('titles', () => {
-    it('renders the panel title from the api', async () => {
+    it('renders the panel title from the api and not the default title', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        defaultPanelTitle: new BehaviorSubject<string | undefined>('SO Title'),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('SUPER TITLE');
+      });
+    });
+
+    it('renders the default title from the api when a panel title is not provided', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        defaultPanelTitle: new BehaviorSubject<string | undefined>('SO Title'),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('SO Title');
+      });
+    });
+
+    it("does not render an info icon when the api doesn't provide a panel description or default description", async () => {
       const api: DefaultPresentationPanelApi = {
         uuid: 'test',
         panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
-        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('SUPER TITLE');
+        expect(screen.queryByTestId('embeddablePanelTitleDescriptionIcon')).toBe(null);
       });
     });
 
@@ -173,6 +196,18 @@ describe('Presentation panel', () => {
         uuid: 'test',
         panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
         panelDescription: new BehaviorSubject<string | undefined>('SUPER DESCRIPTION'),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitleDescriptionIcon')).toBeInTheDocument();
+      });
+    });
+
+    it('renders an info icon when the api provides a default description', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        defaultPanelDescription: new BehaviorSubject<string | undefined>('SO Description'),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {

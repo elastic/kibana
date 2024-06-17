@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+
+import { coreMock } from '@kbn/core/public/mocks';
+import type { HttpSetup } from '@kbn/core/public';
 import { createTransform, deleteTransforms, getTransformState, stopTransforms } from './transforms';
 
 const mockRequest = jest.fn();
@@ -15,14 +17,8 @@ const mockHttp = {
   delete: mockRequest,
 } as unknown as HttpSetup;
 
-const mockAddDanger = jest.fn();
-const mockAddError = jest.fn();
-const mockNotification = {
-  toasts: {
-    addDanger: mockAddDanger,
-    addError: mockAddError,
-  },
-} as unknown as NotificationsStart;
+const startServices = coreMock.createStart();
+const mockAddError = jest.spyOn(startServices.notifications.toasts, 'addError');
 
 const mockRenderDocLink = jest.fn();
 
@@ -37,10 +33,10 @@ describe('createTransform', () => {
     });
     await createTransform({
       http: mockHttp,
-      notifications: mockNotification,
       options: mockOptions,
       renderDocLink: mockRenderDocLink,
       transformId: 'test',
+      startServices,
     });
   });
 
@@ -64,9 +60,9 @@ describe('getTransformState', () => {
     });
     await getTransformState({
       http: mockHttp,
-      notifications: mockNotification,
       renderDocLink: mockRenderDocLink,
       transformId: 'test',
+      startServices,
     });
   });
 
@@ -90,9 +86,9 @@ describe('startTransforms', () => {
     });
     await getTransformState({
       http: mockHttp,
-      notifications: mockNotification,
       renderDocLink: mockRenderDocLink,
       transformId: 'test',
+      startServices,
     });
   });
 
@@ -130,9 +126,9 @@ describe('stopTransforms', () => {
 
     await stopTransforms({
       http: mockHttp,
-      notifications: mockNotification,
       transformIds: ['test'],
       renderDocLink: mockRenderDocLink,
+      startServices,
     });
   });
 
@@ -189,10 +185,10 @@ describe('deleteTransforms', () => {
     });
     await deleteTransforms({
       http: mockHttp,
-      notifications: mockNotification,
       options: mockOptions,
       transformIds: ['test'],
       renderDocLink: mockRenderDocLink,
+      startServices,
     });
   });
 

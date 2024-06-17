@@ -13,6 +13,10 @@ export interface PublishesPanelDescription {
   defaultPanelDescription?: PublishingSubject<string | undefined>;
 }
 
+export function getPanelDescription(api: Partial<PublishesPanelDescription>): string | undefined {
+  return api.panelDescription?.value ?? api.defaultPanelDescription?.value;
+}
+
 export type PublishesWritablePanelDescription = PublishesPanelDescription & {
   setPanelDescription: (newTitle: string | undefined) => void;
 };

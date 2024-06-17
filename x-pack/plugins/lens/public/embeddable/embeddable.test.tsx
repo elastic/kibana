@@ -23,8 +23,8 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { Document } from '../persistence';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
-import { coreMock, httpServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { CoreStart, IBasePath, IUiSettingsClient } from '@kbn/core/public';
+import { coreMock, httpServiceMock } from '@kbn/core/public/mocks';
+import { IBasePath, IUiSettingsClient } from '@kbn/core/public';
 import { AttributeService, ViewMode } from '@kbn/embeddable-plugin/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
@@ -62,21 +62,21 @@ const defaultDatasourceMap = {
 };
 
 const defaultSaveMethod = (
-  testAttributes: LensSavedObjectAttributes,
-  savedObjectId?: string
+  _testAttributes: LensSavedObjectAttributes,
+  _savedObjectId?: string
 ): Promise<{ id: string }> => {
   return new Promise(() => {
     return { id: '123' };
   });
 };
 const defaultUnwrapMethod = (
-  savedObjectId: string
+  _savedObjectId: string
 ): Promise<{ attributes: LensSavedObjectAttributes }> => {
   return new Promise(() => {
     return { attributes: { ...savedVis } };
   });
 };
-const defaultCheckForDuplicateTitle = (props: OnSaveProps): Promise<true> => {
+const defaultCheckForDuplicateTitle = (_props: OnSaveProps): Promise<true> => {
   return new Promise(() => {
     return true;
   });
@@ -87,7 +87,7 @@ const options = {
   checkForDuplicateTitle: defaultCheckForDuplicateTitle,
 };
 
-const mockInjectFilterReferences: FilterManager['inject'] = (filters, references) => {
+const mockInjectFilterReferences: FilterManager['inject'] = (filters, _references) => {
   return filters.map((filter) => ({
     ...filter,
     meta: {
@@ -105,7 +105,7 @@ const attributeServiceMockFromSavedVis = (document: Document): LensAttributeServ
     LensByReferenceInput,
     LensUnwrapMetaInfo
   >('lens', core.notifications.toasts, options);
-  service.unwrapAttributes = jest.fn((input: LensByValueInput | LensByReferenceInput) => {
+  service.unwrapAttributes = jest.fn((_input: LensByValueInput | LensByReferenceInput) => {
     return Promise.resolve({
       attributes: {
         ...document,
@@ -124,6 +124,8 @@ const attributeServiceMockFromSavedVis = (document: Document): LensAttributeServ
 const dataMock = dataPluginMock.createStartContract();
 
 describe('embeddable', () => {
+  const coreStart = coreMock.createStart();
+
   let mountpoint: HTMLDivElement;
   let expressionRenderer: jest.Mock<null, [ReactExpressionRendererProps]>;
   let getTrigger: jest.Mock;
@@ -158,7 +160,7 @@ describe('embeddable', () => {
       uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
       inspector: inspectorPluginMock.createStartContract(),
       expressionRenderer,
-      coreStart: {} as CoreStart,
+      coreStart,
       basePath,
       dataViews: {
         get: (id: string) => Promise.resolve({ id, isTimeBased: () => false }),
@@ -174,7 +176,6 @@ describe('embeddable', () => {
       visualizationMap: defaultVisualizationMap,
       datasourceMap: defaultDatasourceMap,
       injectFilterReferences: jest.fn(mockInjectFilterReferences),
-      theme: themeServiceMock.createStartContract(),
       documentToExpression: () =>
         Promise.resolve({
           ast: {
@@ -240,7 +241,7 @@ describe('embeddable', () => {
         to: 'now',
       },
     } as LensEmbeddableInput);
-    await embeddable.reload();
+    embeddable.reload();
     expect(expressionRenderer).toHaveBeenCalledTimes(0);
     embeddable.render(mountpoint);
     expect(expressionRenderer).toHaveBeenCalledTimes(0);
@@ -256,6 +257,7 @@ describe('embeddable', () => {
 
     jest.spyOn(embeddable, 'getUserMessages').mockReturnValue([
       {
+        uniqueId: 'error',
         severity: 'error',
         fixableInEditor: true,
         displayLocations: [{ id: 'visualization' }],
@@ -272,7 +274,7 @@ describe('embeddable', () => {
 
   it('should not render the vis if loaded saved object conflicts', async () => {
     attributeService.unwrapAttributes = jest.fn(
-      (input: LensByValueInput | LensByReferenceInput) => {
+      (_input: LensByValueInput | LensByReferenceInput) => {
         return Promise.resolve({
           attributes: {
             ...savedVis,
@@ -356,7 +358,7 @@ describe('embeddable', () => {
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
-        coreStart: {} as CoreStart,
+        coreStart,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
         dataViews: {} as DataViewsContract,
@@ -371,7 +373,6 @@ describe('embeddable', () => {
         visualizationMap: defaultVisualizationMap,
         datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
-        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -410,7 +411,7 @@ describe('embeddable', () => {
         data: dataMock,
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
-        coreStart: {} as CoreStart,
+        coreStart,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
         dataViews: {} as DataViewsContract,
@@ -425,7 +426,6 @@ describe('embeddable', () => {
         visualizationMap: defaultVisualizationMap,
         datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
-        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -940,7 +940,7 @@ describe('embeddable', () => {
           attributeService: attributeServiceMockFromSavedVis(savedVis),
           data: dataMock,
           expressionRenderer,
-          coreStart: {} as CoreStart,
+          coreStart,
           basePath,
           dataViews: {} as DataViewsContract,
           capabilities: {
@@ -952,7 +952,6 @@ describe('embeddable', () => {
           },
           inspector: inspectorPluginMock.createStartContract(),
           getTrigger,
-          theme: themeServiceMock.createStartContract(),
           visualizationMap: {
             [savedVis.visualizationType as string]: {
               getDisplayOptions: displayOptions ? () => displayOptions : undefined,
@@ -1040,7 +1039,7 @@ describe('embeddable', () => {
           data: dataMock,
           uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
           expressionRenderer: currentExpressionRenderer,
-          coreStart: {} as CoreStart,
+          coreStart,
           basePath,
           inspector: inspectorPluginMock.createStartContract(),
           dataViews: {} as DataViewsContract,
@@ -1055,7 +1054,6 @@ describe('embeddable', () => {
           visualizationMap: defaultVisualizationMap,
           datasourceMap: defaultDatasourceMap,
           injectFilterReferences: jest.fn(mockInjectFilterReferences),
-          theme: themeServiceMock.createStartContract(),
           documentToExpression: () =>
             Promise.resolve({
               ast: {
@@ -1145,7 +1143,7 @@ describe('embeddable', () => {
           data: dataMock,
           uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
           expressionRenderer: currentExpressionRenderer,
-          coreStart: {} as CoreStart,
+          coreStart,
           basePath,
           inspector: inspectorPluginMock.createStartContract(),
           dataViews: {} as DataViewsContract,
@@ -1160,7 +1158,6 @@ describe('embeddable', () => {
           visualizationMap: defaultVisualizationMap,
           datasourceMap: defaultDatasourceMap,
           injectFilterReferences: jest.fn(mockInjectFilterReferences),
-          theme: themeServiceMock.createStartContract(),
           documentToExpression: () =>
             Promise.resolve({
               ast: {
@@ -1209,7 +1206,7 @@ describe('embeddable', () => {
         attributeService,
         data: dataMock,
         expressionRenderer,
-        coreStart: {} as CoreStart,
+        coreStart,
         basePath,
         dataViews: {} as DataViewsContract,
         capabilities: {
@@ -1221,7 +1218,6 @@ describe('embeddable', () => {
         },
         inspector: inspectorPluginMock.createStartContract(),
         getTrigger,
-        theme: themeServiceMock.createStartContract(),
         visualizationMap: defaultVisualizationMap,
         datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),

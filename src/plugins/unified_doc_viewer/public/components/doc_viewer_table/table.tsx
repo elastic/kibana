@@ -23,7 +23,8 @@ import {
   EuiTablePagination,
   EuiSelectableMessage,
   EuiI18n,
-  useIsWithinBreakpoints,
+  useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -118,7 +119,12 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
+  const { euiTheme } = useEuiTheme();
+  const [ref, setRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
+  const dimensions = useResizeObserver(ref);
+  const showActionsInsideTableCell = dimensions?.width
+    ? dimensions.width > euiTheme.breakpoint.m
+    : false;
 
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
@@ -168,7 +174,7 @@ export const DocViewerTable = ({
   );
 
   const fieldToItem = useCallback(
-    (field: string) => {
+    (field: string, isPinned: boolean) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
       const columnMeta = columnsMeta?.[field];
@@ -196,7 +202,7 @@ export const DocViewerTable = ({
           fieldMapping,
           fieldType,
           scripted: Boolean(fieldMapping?.scripted),
-          pinned: pinnedFields.includes(displayName),
+          pinned: isPinned,
           onTogglePinned,
         },
         value: {
@@ -220,7 +226,6 @@ export const DocViewerTable = ({
       columns,
       columnsMeta,
       flattened,
-      pinnedFields,
       onTogglePinned,
       fieldFormats,
     ]
@@ -250,7 +255,7 @@ export const DocViewerTable = ({
         }
 
         if (pinnedFields.includes(curFieldName)) {
-          acc.pinnedItems.push(fieldToItem(curFieldName));
+          acc.pinnedItems.push(fieldToItem(curFieldName, true));
         } else {
           const fieldMapping = mapping(curFieldName);
           if (
@@ -261,7 +266,7 @@ export const DocViewerTable = ({
             )
           ) {
             // filter only unpinned fields
-            acc.restItems.push(fieldToItem(curFieldName));
+            acc.restItems.push(fieldToItem(curFieldName, false));
           }
         }
 
@@ -407,7 +412,7 @@ export const DocViewerTable = ({
   ];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false} ref={setRef}>
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
       </EuiFlexItem>

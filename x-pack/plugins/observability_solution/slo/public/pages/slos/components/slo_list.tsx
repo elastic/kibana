@@ -7,17 +7,18 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
-import React, { useEffect } from 'react';
 import dedent from 'dedent';
 import { groupBy as _groupBy, mapValues } from 'lodash';
-import { useKibana } from '../../../utils/kibana_react';
+import React, { useEffect } from 'react';
 import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
+import { useKibana } from '../../../utils/kibana_react';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
+import { GroupView } from './grouped_slos/group_view';
 import { SlosView } from './slos_view';
 import { ToggleSLOView } from './toggle_slo_view';
-import { GroupView } from './grouped_slos/group_view';
 
 export function SloList() {
+  const { observabilityAIAssistant } = useKibana().services;
   const { state, onStateChange } = useUrlSearchState();
   const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter, groupBy } = state;
 
@@ -37,8 +38,6 @@ export function SloList() {
     sortDirection: state.sort.direction,
     lastRefresh: state.lastRefresh,
   });
-
-  const { observabilityAIAssistant } = useKibana().services;
   const { results = [], total = 0 } = sloList ?? {};
 
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
@@ -99,7 +98,7 @@ export function SloList() {
             error={isError}
             sloView={view}
           />
-          {total > 0 ? (
+          {total > 0 && total > perPage ? (
             <EuiFlexItem>
               <EuiTablePagination
                 pageCount={Math.ceil(total / perPage)}
@@ -110,7 +109,7 @@ export function SloList() {
                 itemsPerPage={perPage}
                 itemsPerPageOptions={[10, 25, 50, 100]}
                 onChangeItemsPerPage={(newPerPage) => {
-                  onStateChange({ perPage: newPerPage });
+                  onStateChange({ perPage: newPerPage, page: 0 });
                 }}
               />
             </EuiFlexItem>
@@ -124,6 +123,7 @@ export function SloList() {
           kqlQuery={kqlQuery}
           sort={state.sort.by}
           direction={state.sort.direction}
+          filters={filters}
         />
       )}
     </EuiFlexGroup>

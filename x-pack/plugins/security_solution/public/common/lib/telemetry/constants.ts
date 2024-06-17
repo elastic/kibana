@@ -34,6 +34,18 @@ export enum TELEMETRY_EVENT {
   // Landing page - dashboard
   DASHBOARD = 'navigate_to_dashboard',
   CREATE_DASHBOARD = 'create_dashboard',
+
+  // value list
+  OPEN_VALUE_LIST_MODAL = 'open_value_list_modal',
+  CREATE_VALUE_LIST_ITEM = 'create_value_list_item',
+  DELETE_VALUE_LIST_ITEM = 'delete_value_list_item',
+  EDIT_VALUE_LIST_ITEM = 'edit_value_list_item',
+  ADDITIONAL_UPLOAD_VALUE_LIST_ITEM = 'additinonal_upload_value_list_item',
+
+  // Bulk custom highlighted fields action
+  ADD_INVESTIGATION_FIELDS = 'add_investigation_fields',
+  SET_INVESTIGATION_FIELDS = 'set_investigation_fields',
+  DELETE_INVESTIGATION_FIELDS = 'delete_investigation_fields',
 }
 
 export enum TelemetryEventTypes {
@@ -48,7 +60,7 @@ export enum TelemetryEventTypes {
   AssetCriticalityCsvPreviewGenerated = 'Asset Criticality Csv Preview Generated',
   AssetCriticalityFileSelected = 'Asset Criticality File Selected',
   AssetCriticalityCsvImported = 'Asset Criticality CSV Imported',
-  InsightsGenerated = 'Insights Generated',
+  AttackDiscoveriesGenerated = 'Attack Discoveries Generated',
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',

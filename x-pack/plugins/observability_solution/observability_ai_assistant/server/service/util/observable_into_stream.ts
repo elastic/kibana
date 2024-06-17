@@ -13,11 +13,10 @@ import {
   isChatCompletionError,
   StreamingChatResponseEventType,
   StreamingChatResponseEventWithoutError,
-  TokenCountEvent,
 } from '../../../common/conversation_complete';
 
 export function observableIntoStream(
-  source: Observable<StreamingChatResponseEventWithoutError | BufferFlushEvent | TokenCountEvent>
+  source: Observable<StreamingChatResponseEventWithoutError | BufferFlushEvent>
 ) {
   const stream = new PassThrough();
 

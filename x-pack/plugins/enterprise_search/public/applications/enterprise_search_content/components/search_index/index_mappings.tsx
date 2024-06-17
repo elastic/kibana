@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -46,7 +46,9 @@ import './index_mappings.scss';
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { hasDocumentLevelSecurityFeature, isHiddenIndex } = useValues(IndexViewLogic);
-  const { indexMappingComponent: IndexMappingComponent, productFeatures } = useValues(KibanaLogic);
+  const { indexMappingComponent, productFeatures } = useValues(KibanaLogic);
+
+  const IndexMappingComponent = useMemo(() => indexMappingComponent, []);
 
   const [selectedIndexType, setSelectedIndexType] =
     useState<AccessControlSelectorOption['value']>('content-index');
@@ -154,7 +156,12 @@ export const SearchIndexIndexMappings: React.FC = () => {
               </p>
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiLink href={docLinks.connectorsMappings} target="_blank" external>
+            <EuiLink
+              data-test-subj="enterpriseSearchSearchIndexIndexMappingsLearnHowToCustomizeIndexMappingsAndSettingsLink"
+              href={docLinks.connectorsMappings}
+              target="_blank"
+              external
+            >
               {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.docLink', {
                 defaultMessage: 'Learn how to customize index mappings and settings',
               })}
@@ -187,7 +194,12 @@ export const SearchIndexIndexMappings: React.FC = () => {
               </p>
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiLink href={docLinks.ingestPipelines} target="_blank" external>
+            <EuiLink
+              data-test-subj="enterpriseSearchSearchIndexIndexMappingsLearnMoreLink"
+              href={docLinks.ingestPipelines}
+              target="_blank"
+              external
+            >
               {i18n.translate('xpack.enterpriseSearch.content.searchIndex.transform.docLink', {
                 defaultMessage: 'Learn more',
               })}

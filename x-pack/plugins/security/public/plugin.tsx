@@ -36,7 +36,7 @@ import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import { AuthenticationService } from './authentication';
 import { AuthorizationService } from './authorization';
-import { buildSecurityApi } from './build_security_api';
+import { buildSecurityApi, buildUserProfileApi } from './build_delegate_api';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
@@ -115,6 +115,7 @@ export class SecurityPlugin
 
     this.authz = this.authorizationService.setup({
       config: this.config,
+      http: core.http,
     });
 
     this.securityApiClients = {
@@ -143,7 +144,10 @@ export class SecurityPlugin
       securityApiClients: this.securityApiClients,
     });
 
-    core.security.registerSecurityApi(buildSecurityApi({ authc: this.authc }));
+    core.security.registerSecurityDelegate(buildSecurityApi({ authc: this.authc }));
+    core.userProfile.registerUserProfileDelegate(
+      buildUserProfileApi({ userProfile: this.securityApiClients.userProfiles })
+    );
 
     if (management) {
       this.managementService.setup({
@@ -188,7 +192,7 @@ export class SecurityPlugin
     core: CoreStart,
     { management, share }: PluginStartDependencies
   ): SecurityPluginStart {
-    const { application, http, notifications, docLinks } = core;
+    const { application, http, notifications } = core;
     const { anonymousPaths } = http;
 
     const logoutUrl = getLogoutUrl(http);
@@ -199,7 +203,7 @@ export class SecurityPlugin
     this.sessionTimeout = new SessionTimeout(core, notifications, sessionExpired, http, tenant);
 
     this.sessionTimeout.start();
-    this.securityCheckupService.start({ http, notifications, docLinks });
+    this.securityCheckupService.start(core);
     this.securityApiClients.userProfiles.start();
 
     if (management) {

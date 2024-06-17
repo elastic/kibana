@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
+import { fieldSupportsBreakdown } from '@kbn/unified-histogram-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
 import { indexNameToDataStreamParts } from '../../common/utils';
 import { getLensAttributes } from '../components/flyout/degraded_docs_trend/lens_attributes';
 import { useCreateDataView } from './use_create_dataview';
-import { useLinkToLogsExplorer } from './use_link_to_logs_explorer';
+import { useRedirectLink } from './use_redirect_link';
 import { useDatasetQualityFlyout } from './use_dataset_quality_flyout';
 import { useKibanaContextForPlugin } from '../utils';
 
@@ -22,6 +25,13 @@ const exploreDataInLogsExplorerText = i18n.translate(
   'xpack.datasetQuality.flyoutChartExploreDataInLogsExplorerText',
   {
     defaultMessage: 'Explore data in Logs Explorer',
+  }
+);
+
+const exploreDataInDiscoverText = i18n.translate(
+  'xpack.datasetQuality.flyoutChartExploreDataInDiscoverText',
+  {
+    defaultMessage: 'Explore data in Discover',
   }
 );
 
@@ -34,48 +44,63 @@ const ACTION_OPEN_IN_LENS = 'ACTION_OPEN_IN_LENS';
 
 interface DegradedDocsChartDeps {
   dataStream?: string;
-  breakdownDataViewField?: DataViewField;
+  breakdownField?: string;
 }
 
-export const useDegradedDocsChart = ({
-  dataStream,
-  breakdownDataViewField,
-}: DegradedDocsChartDeps) => {
+export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
+  const { euiTheme } = useEuiTheme();
   const {
     services: { lens },
   } = useKibanaContextForPlugin();
-  const { euiTheme } = useEuiTheme();
+  const { service } = useDatasetQualityContext();
 
-  const { dataStreamStat, timeRange } = useDatasetQualityFlyout();
+  const { dataStreamStat, timeRange, breakdownField } = useDatasetQualityFlyout();
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
   const [attributes, setAttributes] = useState<ReturnType<typeof getLensAttributes> | undefined>(
     undefined
   );
 
-  const datasetTypeIndexPattern = dataStream
-    ? `${indexNameToDataStreamParts(dataStream).type}-*-*`
-    : undefined;
   const { dataView } = useCreateDataView({
-    indexPatternString: datasetTypeIndexPattern ?? DEFAULT_LOGS_DATA_VIEW,
+    indexPatternString: getDataViewIndexPattern(dataStream),
   });
-  const filterQuery = `_index: ${dataStream ?? 'match-none'}`;
+
+  const breakdownDataViewField = useMemo(
+    () => getDataViewField(dataView, breakdownField),
+    [breakdownField, dataView]
+  );
 
   const handleChartLoading = (isLoading: boolean) => {
     setIsChartLoading(isLoading);
   };
 
-  useEffect(() => {
-    if (dataView) {
-      const lensAttributes = getLensAttributes({
-        color: euiTheme.colors.danger,
-        dataView,
-        query: filterQuery,
-        breakdownFieldName: breakdownDataViewField?.name,
+  const handleBreakdownFieldChange = useCallback(
+    (field: DataViewField | undefined) => {
+      service.send({
+        type: 'BREAKDOWN_FIELD_CHANGE',
+        breakdownField: field?.name ?? null,
       });
-      setAttributes(lensAttributes);
-    }
-  }, [breakdownDataViewField?.name, dataView, euiTheme.colors.danger, filterQuery, setAttributes]);
+    },
+    [service]
+  );
+
+  useEffect(() => {
+    const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
+
+    const lensAttributes = getLensAttributes({
+      color: euiTheme.colors.danger,
+      dataStream: dataStreamName,
+      datasetTitle: dataStreamStat?.title ?? dataStreamName,
+      breakdownFieldName: breakdownDataViewField?.name,
+    });
+    setAttributes(lensAttributes);
+  }, [
+    breakdownDataViewField?.name,
+    euiTheme.colors.danger,
+    setAttributes,
+    dataStream,
+    dataStreamStat?.title,
+  ]);
 
   const openInLensCallback = useCallback(() => {
     if (attributes) {
@@ -107,10 +132,11 @@ export const useDegradedDocsChart = ({
     };
   }, [openInLensCallback]);
 
-  const logsExplorerLinkProps = useLinkToLogsExplorer({
+  const redirectLinkProps = useRedirectLink({
     dataStreamStat: dataStreamStat!,
     query: { language: 'kuery', query: '_ignored:*' },
     timeRangeConfig: timeRange,
+    breakdownField: breakdownDataViewField?.name,
   });
 
   const getOpenInLogsExplorerAction = useMemo(() => {
@@ -118,10 +144,12 @@ export const useDegradedDocsChart = ({
       id: ACTION_EXPLORE_IN_LOGS_EXPLORER,
       type: 'link',
       getDisplayName(): string {
-        return exploreDataInLogsExplorerText;
+        return redirectLinkProps?.isLogsExplorerAvailable
+          ? exploreDataInLogsExplorerText
+          : exploreDataInDiscoverText;
       },
       getHref: async () => {
-        return logsExplorerLinkProps.href;
+        return redirectLinkProps.href;
       },
       getIconType(): string | undefined {
         return 'popout';
@@ -130,22 +158,38 @@ export const useDegradedDocsChart = ({
         return true;
       },
       async execute(): Promise<void> {
-        return logsExplorerLinkProps.navigate();
+        return redirectLinkProps.navigate();
       },
       order: 18,
     };
-  }, [logsExplorerLinkProps]);
+  }, [redirectLinkProps]);
 
   const extraActions: Action[] = [getOpenInLensAction, getOpenInLogsExplorerAction];
 
   return {
     attributes,
     dataView,
-    filterQuery,
+    breakdown: {
+      dataViewField: breakdownDataViewField,
+      fieldSupportsBreakdown: breakdownDataViewField
+        ? fieldSupportsBreakdown(breakdownDataViewField)
+        : true,
+      onChange: handleBreakdownFieldChange,
+    },
     extraActions,
     isChartLoading,
-    handleChartLoading,
+    onChartLoading: handleChartLoading,
     setAttributes,
     setIsChartLoading,
   };
 };
+
+function getDataViewIndexPattern(dataStream: string | undefined) {
+  return dataStream ? `${indexNameToDataStreamParts(dataStream).type}-*-*` : DEFAULT_LOGS_DATA_VIEW;
+}
+
+function getDataViewField(dataView: DataView | undefined, fieldName: string | undefined) {
+  return fieldName && dataView
+    ? dataView.fields.find((field) => field.name === fieldName)
+    : undefined;
+}

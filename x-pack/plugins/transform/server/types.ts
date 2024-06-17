@@ -32,8 +32,8 @@ export interface PluginStartDependencies {
 
 export interface RouteDependencies {
   router: IRouter;
-  license: License;
-  coreStart: CoreStart;
-  dataViews: DataViewsServerPluginStart;
-  security?: SecurityPluginStart;
+  getLicense: () => Promise<License>;
+  getCoreStart: () => Promise<CoreStart>;
+  getDataViewsStart: () => Promise<DataViewsServerPluginStart>;
+  getSecurity: () => Promise<SecurityPluginStart | undefined>;
 }

@@ -22,6 +22,8 @@ import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import type { InternalI18nServicePreboot } from '@kbn/core-i18n-server-internal';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -42,6 +44,7 @@ export interface RenderingMetadata {
 export interface RenderingPrebootDeps {
   http: InternalHttpServicePreboot;
   uiPlugins: UiPlugins;
+  i18n: InternalI18nServicePreboot;
 }
 
 /** @internal */
@@ -52,6 +55,7 @@ export interface RenderingSetupDeps {
   uiPlugins: UiPlugins;
   customBranding: InternalCustomBrandingSetup;
   userSettings: InternalUserSettingsServiceSetup;
+  i18n: I18nServiceSetup;
 }
 
 /** @internal */

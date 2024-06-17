@@ -7,7 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
 import { TimelineEventsLastEventTimeStrategyResponse } from '../../../../../../common/search_strategy/timeline';
 import { inspectStringifyObject } from '../../../../../utils/build_query';

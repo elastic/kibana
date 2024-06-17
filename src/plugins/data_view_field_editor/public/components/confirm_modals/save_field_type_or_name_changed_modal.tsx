@@ -35,7 +35,7 @@ const geti18nTexts = (fieldName: string) => ({
   titleConfirmChanges: i18n.translate(
     'indexPatternFieldEditor.saveRuntimeField.confirmModal.title',
     {
-      defaultMessage: `Save changes to '{name}'`,
+      defaultMessage: `Save changes to ''{name}''`,
       values: {
         name: fieldName,
       },

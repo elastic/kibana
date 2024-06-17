@@ -10,22 +10,14 @@ import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Dispatch } from 'react';
 
-/**
- * EmbeddableConsoleProps are optional props used when rendering the embeddable developer console.
- */
-export interface EmbeddableConsoleProps {
-  /**
-   * The default height of the content area.
-   */
-  size?: 's' | 'm' | 'l';
-}
-
 export interface EmbeddableConsoleDependencies {
   core: CoreStart;
   usageCollection?: UsageCollectionStart;
   setDispatch: (dispatch: Dispatch<EmbeddedConsoleAction> | null) => void;
   alternateView?: EmbeddedConsoleView;
   isMonacoEnabled: boolean;
+  getConsoleHeight: () => string | undefined;
+  setConsoleHeight: (value: string) => void;
 }
 
 export type EmbeddedConsoleAction =
@@ -39,6 +31,7 @@ export enum EmbeddableConsoleView {
 }
 
 export interface EmbeddedConsoleStore {
+  consoleHasBeenOpened: boolean;
   view: EmbeddableConsoleView;
   loadFromContent?: string;
 }
