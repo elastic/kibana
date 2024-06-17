@@ -176,7 +176,7 @@ describe('useEsqlMode', () => {
     });
   });
 
-  test('changing a text based query with no transformational commands should not change state when loading and finished if index pattern is the same', async () => {
+  test('changing a ES|QL query with no transformational commands should not change state when loading and finished if index pattern is the same', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
