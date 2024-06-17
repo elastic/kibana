@@ -25,6 +25,13 @@ export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
   }
 );
 
+export const NOTES_MANAGEMENT = i18n.translate(
+  'xpack.securitySolution.navigation.notesManagement',
+  {
+    defaultMessage: 'Notes management',
+  }
+);
+
 export const ASSET_CRITICALITY = i18n.translate(
   'xpack.securitySolution.navigation.assetCriticality',
   {
