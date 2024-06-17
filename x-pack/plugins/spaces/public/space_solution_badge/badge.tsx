@@ -10,7 +10,12 @@ import React, { useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-const SolutionOptions = {
+import type { Space } from '../../common';
+
+const SolutionOptions: Record<
+  NonNullable<Space['solution']>,
+  { iconType: string; label: JSX.Element }
+> = {
   search: {
     iconType: 'logoElasticsearch',
     label: (
@@ -44,14 +49,17 @@ const SolutionOptions = {
 };
 
 export type SpaceSolutionBadgeProps = Omit<EuiBadgeProps, 'iconType'> & {
-  solution?: keyof typeof SolutionOptions;
+  solution?: Space['solution'];
 };
 
 export const SpaceSolutionBadge = ({ solution, ...badgeProps }: SpaceSolutionBadgeProps) => {
-  const { iconType, label } = useMemo(
-    () => SolutionOptions[solution as keyof typeof SolutionOptions] ?? SolutionOptions.classic,
-    [solution]
-  );
+  const { iconType, label } = useMemo(() => {
+    if (!solution || !SolutionOptions[solution]) {
+      return SolutionOptions.classic;
+    }
+
+    return SolutionOptions[solution];
+  }, [solution]);
 
   return (
     <EuiBadge {...(badgeProps as EuiBadgeProps)} iconType={iconType} color="hollow">
