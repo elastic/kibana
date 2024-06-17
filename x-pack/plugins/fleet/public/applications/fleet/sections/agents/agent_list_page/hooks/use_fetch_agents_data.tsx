@@ -7,17 +7,14 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { useHistory } from 'react-router-dom';
 
 import { agentStatusesToSummary } from '../../../../../../../common/services';
 
 import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../../types';
 import {
-  usePagination,
   useGetAgentPolicies,
   sendGetAgents,
   sendGetAgentStatus,
-  useUrlParams,
   useStartServices,
   sendGetAgentTags,
   sendGetAgentPolicies,
@@ -29,6 +26,8 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../con
 
 import { getKuery } from '../utils/get_kuery';
 
+import { useTableState } from './use_table_state';
+
 const REFRESH_INTERVAL_MS = 30000;
 const MAX_AGENT_ACTIONS = 100;
 
@@ -38,19 +37,24 @@ export function useFetchAgentsData() {
 
   const { notifications } = useStartServices();
 
-  const history = useHistory();
-  const { urlParams, toUrlParams } = useUrlParams();
-  const defaultKuery: string = (urlParams.kuery as string) || '';
-
-  // Agent data states
-  const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
-
-  // Table and search states
-  const [draftKuery, setDraftKuery] = useState<string>(defaultKuery);
-  const [search, setSearchState] = useState<string>(defaultKuery);
-  const { pagination, pageSizeOptions, setPagination } = usePagination();
-  const [sortField, setSortField] = useState<keyof Agent>('enrolled_at');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const {
+    showInactive,
+    showUpgradeable,
+    setShowUpgradeable,
+    search,
+    setSearch,
+    sortField,
+    setSortField,
+    sortOrder,
+    setSortOrder,
+    selectedStatus,
+    setSelectedStatus,
+    pagination,
+    pageSizeOptions,
+    setPagination,
+    draftKuery,
+    setDraftKuery,
+  } = useTableState();
 
   const VERSION_FIELD = 'local_metadata.elastic.agent.version';
   const HOSTNAME_FIELD = 'local_metadata.host.hostname';
@@ -58,35 +62,7 @@ export function useFetchAgentsData() {
   // Policies state for filtering
   const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<string[]>([]);
 
-  // Status for filtering
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([
-    'healthy',
-    'unhealthy',
-    'updating',
-    'offline',
-  ]);
-
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-  const showInactive = useMemo(() => {
-    return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
-  }, [selectedStatus]);
-
-  const setSearch = useCallback(
-    (newVal: string) => {
-      setSearchState(newVal);
-      if (newVal.trim() === '' && !urlParams.kuery) {
-        return;
-      }
-
-      if (urlParams.kuery !== newVal) {
-        history.replace({
-          search: toUrlParams({ ...urlParams, kuery: newVal === '' ? undefined : newVal }),
-        });
-      }
-    },
-    [urlParams, history, toUrlParams]
-  );
 
   // filters kuery
   const kuery = useMemo(() => {

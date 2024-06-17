@@ -44,7 +44,15 @@ import {
 import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
-export const AgentListPage: React.FunctionComponent<{}> = () => {
+interface Props {
+  showDataGridView: boolean;
+  setDataGridView: (showDataGridView: boolean) => void;
+}
+
+export const AgentListPage: React.FunctionComponent<Props> = ({
+  showDataGridView,
+  setDataGridView,
+}) => {
   const { cloud } = useStartServices();
   useBreadcrumbs('agent_list');
 
@@ -431,6 +439,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onClickAgentActivity={onClickAgentActivity}
         showAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
+        showDataGridView={showDataGridView}
+        setDataGridView={setDataGridView}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

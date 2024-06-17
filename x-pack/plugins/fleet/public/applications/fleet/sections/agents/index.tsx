@@ -16,7 +16,7 @@ import { Loading, Error } from '../../components';
 import { useConfig, useFleetStatus, useBreadcrumbs, useAuthz, useFlyoutContext } from '../../hooks';
 import { DefaultLayout, WithoutHeaderLayout } from '../../layouts';
 
-import { AgentListPage } from './agent_list_page';
+import { AgentsPage } from './agent_list_page/agents_page';
 import { FleetServerRequirementPage, MissingESRequirementsPage } from './agent_requirements_page';
 import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
@@ -95,7 +95,7 @@ export const AgentsApp: React.FunctionComponent = () => {
           {displayInstructions ? (
             <FleetServerRequirementPage showEnrollmentRecommendation={false} />
           ) : (
-            <AgentListPage />
+            <AgentsPage />
           )}
         </DefaultLayout>
       </Route>
