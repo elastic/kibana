@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// import type { StateGraphArgs } from '@langchain/langgraph';
+import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
 import type {
   ActionsClientChatOpenAI,
@@ -20,8 +20,6 @@ import { handleMissingKeys } from './missing';
 import { handleInvalidEcs } from './invalid';
 import { handleValidateMappings } from './validate';
 import type { EcsMappingState } from '../../types';
-
-// @ts-expect-error remove after bump to TS@5
 
 const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
   ecs: {

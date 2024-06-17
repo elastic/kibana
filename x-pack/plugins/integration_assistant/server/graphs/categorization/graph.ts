@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-// import type { StateGraphArgs } from '@langchain/langgraph';
+import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
 import type {
   ActionsClientChatOpenAI,
@@ -22,7 +22,6 @@ import { handleErrors } from './errors';
 import { handleReview } from './review';
 import { CATEGORIZATION_EXAMPLE_ANSWER, ECS_CATEGORIES, ECS_TYPES } from './constants';
 
-// @ts-expect-error remove after bump to TS@5
 const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   lastExecutedChain: {
     value: (x: string, y?: string) => y ?? x,
