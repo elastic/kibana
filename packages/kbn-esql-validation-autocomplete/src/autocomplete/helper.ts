@@ -69,5 +69,5 @@ export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'ind
   const args = (fromCommand?.args ?? []) as ESQLSource[];
   const sources = args.filter((arg) => arg.sourceType === sourceType);
 
-  return sources.length ? sources[0] : undefined;
+  return sources.length === 1 ? sources[0] : undefined;
 }
