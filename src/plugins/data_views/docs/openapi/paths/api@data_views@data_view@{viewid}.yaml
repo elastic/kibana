@@ -1,31 +1,22 @@
 get:
-  summary: Get a runtime field
-  operationId: getRuntimeField
+  summary: Get a data view in the default space
+  operationId: getDataViewDefault
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
   parameters:
-    - $ref: '../components/parameters/field_name.yaml'
     - $ref: '../components/parameters/view_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              data_view:
-                type: object
-              fields:
-                type: array
-                items:
-                  type: object
+            $ref: '../components/schemas/data_view_response_object.yaml'
           examples:
-            getRuntimeFieldResponse:
-              $ref: '../components/examples/get_runtime_field_response.yaml'
+            getDataViewResponse:
+              $ref: '../components/examples/get_data_view_response.yaml'
     '404':
       description: Object is not found.
       content:
@@ -34,18 +25,18 @@ get:
             $ref: '../components/schemas/404_response.yaml'
 
 delete:
-  summary: Delete a runtime field from a data view
-  operationId: deleteRuntimeField
+  summary: Delete a data view from the default space
+  operationId: deleteDataViewDefault
   description: >
+    WARNING: When you delete a data view, it cannot be recovered.
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
   parameters:
-    - $ref: '../components/parameters/field_name.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/view_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
-    '200':
+    '204':
       description: Indicates a successful call.
     '404':
       description: Object is not found.
@@ -55,40 +46,31 @@ delete:
             $ref: '../components/schemas/404_response.yaml'
 
 post:
-  summary: Update a runtime field
-  operationId: updateRuntimeField
+  summary: Update a data view in the default space
+  operationId: updateDataViewDefault
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
   parameters:
-    - $ref: '../components/parameters/field_name.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/view_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   requestBody:
     required: true
     content:
       application/json:
         schema:
-            type: object
-            required:
-              - runtimeField
-            properties:
-              runtimeField:
-                type: object
-                description: |
-                  The runtime field definition object.
-
-                  You can update following fields:
-
-                  - `type`
-                  - `script`
+          $ref: '../components/schemas/update_data_view_request_object.yaml'
         examples:
-          updateRuntimeFieldRequest:
-            $ref: '../components/examples/update_runtime_field_request.yaml'
+          updateDataViewRequest:
+            $ref: '../components/examples/update_data_view_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/data_view_response_object.yaml'
     '400':
       description: Bad request
       content:
