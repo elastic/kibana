@@ -52,7 +52,7 @@ export const RunTestButton = ({
         id: testRun.id,
       });
     }
-  }, [testRun?.id]);
+  }, [testRun?.id, testRun?.monitor]);
 
   const { tooltipContent, isDisabled } = useTooltipContent(formState.isValid, inProgress);
 

@@ -62,11 +62,12 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
     chartProps.dataset,
     searchCriteria.filters,
     searchCriteria.panelFilters,
+    shouldUseSearchCriteria,
   ]);
 
   return (
     <LensChart
-      {...chartProps}
+      lensAttributes={chartProps}
       id={`hostsView-metricChart-${id}`}
       borderRadius="m"
       dateRange={afterLoadedState.dateRange}

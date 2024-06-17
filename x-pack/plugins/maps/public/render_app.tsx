@@ -27,9 +27,9 @@ import {
   getCore,
 } from './kibana_services';
 import { ListPage, MapPage } from './routes';
-import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 import { APP_ID } from '../common/constants';
 import { registerLayerWizards } from './classes/layers/wizards/load_layer_wizards';
+import { MapSerializedState } from './react_embeddable/types';
 
 function setAppChrome() {
   if (!getMapsCapabilities().save) {
@@ -83,19 +83,19 @@ export async function renderApp(
     const { embeddableId, originatingApp, valueInput, originatingPath } =
       stateTransfer.getIncomingEditorState(APP_ID) || {};
 
-    let mapEmbeddableInput;
+    let mapSerializedState: MapSerializedState | undefined;
     if (routeProps.match.params.savedMapId) {
-      mapEmbeddableInput = {
+      mapSerializedState = {
         savedObjectId: routeProps.match.params.savedMapId,
-      } as MapByReferenceInput;
+      };
     } else if (valueInput) {
-      mapEmbeddableInput = valueInput as MapByValueInput;
+      mapSerializedState = valueInput as MapSerializedState;
     }
 
     return (
       <ExitFullScreenButtonKibanaProvider coreStart={getCore()}>
         <MapPage
-          mapEmbeddableInput={mapEmbeddableInput}
+          mapSerializedState={mapSerializedState}
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
           setHeaderActionMenu={setHeaderActionMenu}

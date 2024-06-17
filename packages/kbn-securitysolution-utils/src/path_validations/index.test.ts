@@ -11,10 +11,10 @@ import {
   hasSimpleExecutableName,
   OperatingSystem,
   ConditionEntryField,
+  validateWildcardInput,
   validateHasWildcardWithWrongOperator,
   validatePotentialWildcardInput,
   validateFilePathInput,
-  validateWildcardInput,
   WILDCARD_WARNING,
   FILEPATH_WARNING,
 } from '.';
