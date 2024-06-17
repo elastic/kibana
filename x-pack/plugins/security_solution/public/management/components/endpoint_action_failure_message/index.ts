@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { EndpointActionFailureMessage } from './endpoint_action_failure_message';
+export { EndpointActionFailureMessage, hasKnownErrorCode } from './endpoint_action_failure_message';

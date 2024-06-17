@@ -14,11 +14,24 @@ import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/
 
 interface EndpointActionFailureMessageProps {
   action: MaybeImmutable<ActionDetails>;
+  isConsoleOutput?: boolean;
   'data-test-subj'?: string;
 }
 
+type MandatoryProperty<T, Prop extends keyof T> = T & {
+  [prop in Prop]-?: NonNullable<T[Prop]>;
+};
+
+export const hasKnownErrorCode = (
+  endpointAgentOutput: MandatoryProperty<ActionDetails, 'outputs'>[string]
+): boolean =>
+  endpointAgentOutput &&
+  endpointAgentOutput.type === 'json' &&
+  endpointAgentOutput.content.code &&
+  endpointActionResponseCodes[endpointAgentOutput.content.code];
+
 export const EndpointActionFailureMessage = memo<EndpointActionFailureMessageProps>(
-  ({ action, 'data-test-subj': dataTestSubj }) => {
+  ({ action, isConsoleOutput = true, 'data-test-subj': dataTestSubj }) => {
     return useMemo(() => {
       if (!action.isCompleted || action.wasSuccessful) {
         return null;
@@ -32,12 +45,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
         for (const agent of action.agents) {
           const endpointAgentOutput = action.outputs[agent];
 
-          if (
-            endpointAgentOutput &&
-            endpointAgentOutput.type === 'json' &&
-            endpointAgentOutput.content.code &&
-            endpointActionResponseCodes[endpointAgentOutput.content.code]
-          ) {
+          if (hasKnownErrorCode(endpointAgentOutput)) {
             errors.push(endpointActionResponseCodes[endpointAgentOutput.content.code]);
           }
         }
@@ -57,12 +65,16 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
 
       return (
         <div data-test-subj={dataTestSubj}>
-          <FormattedMessage
-            id="xpack.securitySolution.endpointResponseActions.actionError.errorMessage"
-            defaultMessage="The following { errorCount, plural, =1 {error was} other {errors were}} encountered:"
-            values={{ errorCount: errors.length }}
-          />
-          <EuiSpacer size="s" />
+          {isConsoleOutput && (
+            <>
+              <FormattedMessage
+                id="xpack.securitySolution.endpointResponseActions.actionError.errorMessage"
+                defaultMessage="The following { errorCount, plural, =1 {error was} other {errors were}} encountered:"
+                values={{ errorCount: errors.length }}
+              />
+              <EuiSpacer size="s" />
+            </>
+          )}
           <div>{errors.join(' | ')}</div>
         </div>
       );
@@ -73,6 +85,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
       action.outputs,
       action.wasSuccessful,
       dataTestSubj,
+      isConsoleOutput,
     ]);
   }
 );
