@@ -20,6 +20,7 @@ import { Router } from '@kbn/core-http-router-server-internal';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
+import moment from 'moment';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -770,6 +771,31 @@ describe('Handler', () => {
     await supertest(innerServer.listener).post('/').type('json').send('12').expect(200);
 
     expect(body).toEqual(12);
+  });
+
+  it('passes through the transformed result if using @kbn/config-schema transform', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.post(
+      {
+        path: '/',
+        validate: {
+          body: schema.arrayOf(schema.string().transform((v) => moment.duration(v))),
+        },
+      },
+      (context, req, res) => {
+        return res.ok({ body: req.body.map((v) => moment.isDuration(v)) });
+      }
+    );
+    await server.start();
+
+    const { body } = await supertest(innerServer.listener)
+      .post('/')
+      .send(['1m', '2m', '3m'])
+      .expect(200);
+
+    expect(body).toEqual([true, true, true]);
   });
 });
 

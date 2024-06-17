@@ -15,11 +15,11 @@ export type ArrayOptions<T> = TypeOptions<T[]> & {
   maxSize?: number;
 };
 
-export class ArrayType<T> extends Type<T[]> {
-  private readonly arrayType: Type<T>;
+export class ArrayType<T, R> extends Type<T[], R[]> {
+  private readonly arrayType: Type<T, R>;
   private readonly arrayOptions: ArrayOptions<T>;
 
-  constructor(type: Type<T>, options: ArrayOptions<T> = {}) {
+  constructor(type: Type<T, R>, options: ArrayOptions<T> = {}) {
     let schema = internals.array().items(type.getSchema().optional()).sparse(false);
 
     if (options.minSize !== undefined) {

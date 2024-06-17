@@ -9,7 +9,7 @@
 import { get } from 'lodash';
 import { expectType } from 'tsd';
 import { schema } from '../..';
-import { TypeOf } from './object_type';
+import { TypeOf } from './type';
 
 test('returns value by default', () => {
   const type = schema.object({

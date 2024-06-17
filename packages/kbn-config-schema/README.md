@@ -36,6 +36,8 @@ Kibana configuration entries providing developers with a fully typed model of th
       - [`schema.contextRef()`](#schemacontextref)
       - [`schema.siblingRef()`](#schemasiblingref)
   - [Custom validation](#custom-validation)
+  - [`schema.transform()`](#schematransform)
+    - [Limitations](#limitations)
   - [Default values](#default-values)
 
 ## Why `@kbn/config-schema`?
@@ -578,6 +580,40 @@ const gesSchema = randomRunTimeSeed => schema.string({
 
 const schema = gesSchema('some-random-run-time-data');
 ```
+
+## `schema.transform()`
+
+Often after having validated a value you want to transform it in some way. For example, you may want to convert a
+`string` to a `moment.Duration` and receive _that_ from calls to `validate` instead of a plain `string`. To this end,
+the `transform` method provides a way to localize such common transformation to the code that defines your schema.
+
+```typescript
+const durationSchema = schema
+  .string({
+    maxLength: 3,
+    validate: (v) =>
+      /^\d+(M|w|d|H|m|s|ms)$/.test(v) ? undefined : `expected ${v} to be a duration like '1d'`,
+  })
+  // Here we transform the validated string into a moment.Duration
+  .transform(moment.duration);
+
+const duration = durationSchema.validate('1d');
+
+// We can then use our TypeOf helpers to extract the type and the output type distinctly
+const stringSchema: TypeOf<typeof durationSchema> = '1d';
+const durationOutput: TypeOfOutput<typeof durationSchema> = moment.duration('1d');
+```
+
+### Limitations
+
+Because of TS limitations we cannot easily preserve the original type of the schema after calling `transform` and so
+instead you will receive `TransformedType<T, TT>` from calls to `.transform`. `TransformedType` represents the abstract `Type<V, TV>` interface just named differently for clarity and ensures that uses of `TypeOf` and `TypeOfOutput` work as expected.
+
+Therefore: make sure to only call `.transform` as the last operation when building your schemas in order to avoid losing
+some type information.
+
+__Notes:__
+* Largely inspired by [the interface](https://zod.dev/?id=transform) `zod` uses for the same functionality.
 
 ## Default values
 

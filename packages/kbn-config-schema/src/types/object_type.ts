@@ -9,20 +9,19 @@
 import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions, OptionsForUnknowns } from './type';
+import {
+  Type,
+  TypeOptions,
+  ExtendsDeepOptions,
+  OptionsForUnknowns,
+  TypeOf,
+  TypeOfOutput,
+} from './type';
 import { ValidationError } from '../errors';
 
 export type Props = Record<string, Type<any>>;
 
 export type NullableProps = Record<string, Type<any> | undefined | null>;
-
-export type TypeOrLazyType = Type<any> | (() => Type<any>);
-
-export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any>
-  ? ReturnType<RT>['type']
-  : RT extends Type<any>
-  ? RT['type']
-  : never;
 
 type OptionalProperties<Base extends Props> = Pick<
   Base,
@@ -43,6 +42,11 @@ type RequiredProperties<Base extends Props> = Pick<
 export type ObjectResultType<P extends Props> = Readonly<
   { [K in keyof OptionalProperties<P>]?: TypeOf<P[K]> } & {
     [K in keyof RequiredProperties<P>]: TypeOf<P[K]>;
+  }
+>;
+export type ObjectResultTypeOutput<P extends Props> = Readonly<
+  { [K in keyof OptionalProperties<P>]?: TypeOfOutput<P[K]> } & {
+    [K in keyof RequiredProperties<P>]: TypeOfOutput<P[K]>;
   }
 >;
 
@@ -80,7 +84,10 @@ interface ObjectTypeOptionsMeta {
 export type ObjectTypeOptions<P extends Props = any> = TypeOptions<ObjectResultType<P>> &
   UnknownOptions & { meta?: TypeOptions<ObjectResultType<P>>['meta'] & ObjectTypeOptionsMeta };
 
-export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
+export class ObjectType<P extends Props = any> extends Type<
+  ObjectResultType<P>,
+  ObjectResultTypeOutput<P>
+> {
   private props: P;
   private options: ObjectTypeOptions<P>;
   private propSchemas: Record<string, AnySchema>;

@@ -20,7 +20,7 @@ export const testSchema = schema.object({
     },
   }),
   ipType: schema.ip({ versions: ['ipv4'] }),
-  literalType: schema.literal('literallythis'),
+  literalType: schema.literal('literallythis').transform(() => 1 /* should not affect OAS */),
   neverType: schema.never(),
   map: schema.mapOf(schema.string(), schema.string()),
   record: schema.recordOf(schema.string(), schema.string()),

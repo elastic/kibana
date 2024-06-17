@@ -43,6 +43,8 @@ import {
   StringType,
   Type,
   TypeOf,
+  TypeOfOutput,
+  TransformedType,
   TypeOptions,
   UnionType,
   URIOptions,
@@ -52,7 +54,16 @@ import {
   Lazy,
 } from './src/types';
 
-export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
+export type {
+  AnyType,
+  ConditionalType,
+  TypeOf,
+  TypeOfOutput,
+  Props,
+  SchemaStructureEntry,
+  NullableProps,
+  TransformedType,
+};
 export { ObjectType, Type };
 export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
@@ -110,11 +121,11 @@ function ip(options?: IpOptions): Type<string> {
 /**
  * Create an optional type
  */
-function maybe<V>(type: Type<V>): Type<V | undefined> {
+function maybe<V, R>(type: Type<V, R>): Type<V | undefined, R | undefined> {
   return new MaybeType(type);
 }
 
-function nullable<V>(type: Type<V>): Type<V | null> {
+function nullable<V, R>(type: Type<V, R>): Type<V | null, R | null> {
   return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
 }
 
@@ -122,80 +133,30 @@ function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): Obje
   return new ObjectType(props, options);
 }
 
-function arrayOf<T>(itemType: Type<T>, options?: ArrayOptions<T>): Type<T[]> {
+function arrayOf<T, R = T>(itemType: Type<T, R>, options?: ArrayOptions<T>): Type<T[], R[]> {
   return new ArrayType(itemType, options);
 }
 
-function mapOf<K, V>(
+function mapOf<K, V, R = V>(
   keyType: Type<K>,
-  valueType: Type<V>,
+  valueType: Type<V, R>,
   options?: MapOfOptions<K, V>
-): Type<Map<K, V>> {
+): Type<Map<K, V>, Map<K, R>> {
   return new MapOfType(keyType, valueType, options);
 }
 
-function recordOf<K extends string, V>(
+function recordOf<K extends string, V, R = V>(
   keyType: Type<K>,
-  valueType: Type<V>,
+  valueType: Type<V, R>,
   options?: RecordOfOptions<K, V>
-): Type<Record<K, V>> {
+): Type<Record<K, V>, Record<K, R>> {
   return new RecordOfType(keyType, valueType, options);
 }
 
-function oneOf<A, B, C, D, E, F, G, H, I, J, K>(
-  types: [
-    Type<A>,
-    Type<B>,
-    Type<C>,
-    Type<D>,
-    Type<E>,
-    Type<F>,
-    Type<G>,
-    Type<H>,
-    Type<I>,
-    Type<J>,
-    Type<K>
-  ],
-  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K>
-): Type<A | B | C | D | E | F | G | H | I | J | K>;
-function oneOf<A, B, C, D, E, F, G, H, I, J>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>, Type<J>],
-  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J>
-): Type<A | B | C | D | E | F | G | H | I | J>;
-function oneOf<A, B, C, D, E, F, G, H, I>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>],
-  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I>
-): Type<A | B | C | D | E | F | G | H | I>;
-function oneOf<A, B, C, D, E, F, G, H>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>],
-  options?: UnionTypeOptions<A | B | C | D | E | F | G | H>
-): Type<A | B | C | D | E | F | G | H>;
-function oneOf<A, B, C, D, E, F, G>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>],
-  options?: UnionTypeOptions<A | B | C | D | E | F | G>
-): Type<A | B | C | D | E | F | G>;
-function oneOf<A, B, C, D, E, F>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>],
-  options?: UnionTypeOptions<A | B | C | D | E | F>
-): Type<A | B | C | D | E | F>;
-function oneOf<A, B, C, D, E>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>],
-  options?: UnionTypeOptions<A | B | C | D | E>
-): Type<A | B | C | D | E>;
-function oneOf<A, B, C, D>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>],
-  options?: UnionTypeOptions<A | B | C | D>
-): Type<A | B | C | D>;
-function oneOf<A, B, C>(
-  types: [Type<A>, Type<B>, Type<C>],
-  options?: UnionTypeOptions<A | B | C>
-): Type<A | B | C>;
-function oneOf<A, B>(types: [Type<A>, Type<B>], options?: UnionTypeOptions<A | B>): Type<A | B>;
-function oneOf<A>(types: [Type<A>], options?: UnionTypeOptions<A>): Type<A>;
-function oneOf<RTS extends Array<Type<any>>>(
-  types: RTS,
+function oneOf<RTS extends Array<Type<unknown, unknown>>>(
+  types: [...RTS],
   options?: UnionTypeOptions<any>
-): Type<any> {
+): Type<TypeOf<RTS[number]>, TypeOfOutput<RTS[number]>> {
   return new UnionType(types, options);
 }
 
@@ -207,11 +168,11 @@ function siblingRef<T>(key: string): SiblingReference<T> {
   return new SiblingReference(key);
 }
 
-function conditional<A extends ConditionalTypeValue, B, C>(
+function conditional<A extends ConditionalTypeValue, B, BR, C, CR>(
   leftOperand: Reference<A>,
   rightOperand: Reference<A> | A | Type<unknown>,
-  equalType: Type<B>,
-  notEqualType: Type<C>,
+  equalType: Type<B, BR>,
+  notEqualType: Type<C, CR>,
   options?: TypeOptions<B | C>
 ) {
   return new ConditionalType(leftOperand, rightOperand, equalType, notEqualType, options);
@@ -220,8 +181,8 @@ function conditional<A extends ConditionalTypeValue, B, C>(
 /**
  * Useful for creating recursive schemas.
  */
-function lazy<T>(id: string) {
-  return new Lazy<T>(id);
+function lazy<T, R = T>(id: string) {
+  return new Lazy<T, R>(id);
 }
 
 export const schema = {

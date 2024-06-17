@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-export type { TypeOptions } from './type';
-export type { SchemaStructureEntry } from './type';
+export type {
+  SchemaStructureEntry,
+  TypeOptions,
+  TypeOf,
+  TypeOfOutput,
+  TransformedType,
+} from './type';
 export { Type } from './type';
 export { AnyType } from './any_type';
 export type { ArrayOptions } from './array_type';
@@ -26,7 +31,7 @@ export type { MapOfOptions } from './map_type';
 export { MapOfType } from './map_type';
 export type { NumberOptions } from './number_type';
 export { NumberType } from './number_type';
-export type { ObjectTypeOptions, Props, NullableProps, TypeOf } from './object_type';
+export type { ObjectTypeOptions, Props, NullableProps } from './object_type';
 export { ObjectType } from './object_type';
 export type { RecordOfOptions } from './record_type';
 export { RecordOfType } from './record_type';

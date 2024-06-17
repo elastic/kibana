@@ -13,18 +13,21 @@ import { ExtendsDeepOptions, Type, TypeOptions } from './type';
 
 export type ConditionalTypeValue = string | number | boolean | object | null;
 
-export class ConditionalType<A extends ConditionalTypeValue, B, C> extends Type<B | C> {
+export class ConditionalType<A extends ConditionalTypeValue, B, BR, C, CR> extends Type<
+  B | C,
+  BR | CR
+> {
   private readonly leftOperand: Reference<A>;
   private readonly rightOperand: Reference<A> | A | Type<unknown>;
-  private readonly equalType: Type<B>;
-  private readonly notEqualType: Type<C>;
+  private readonly equalType: Type<B, BR>;
+  private readonly notEqualType: Type<C, CR>;
   private readonly options?: TypeOptions<B | C>;
 
   constructor(
     leftOperand: Reference<A>,
     rightOperand: Reference<A> | A | Type<unknown>,
-    equalType: Type<B>,
-    notEqualType: Type<C>,
+    equalType: Type<B, BR>,
+    notEqualType: Type<C, CR>,
     options?: TypeOptions<B | C>
   ) {
     const schema = internals.when(leftOperand.getSchema(), {
