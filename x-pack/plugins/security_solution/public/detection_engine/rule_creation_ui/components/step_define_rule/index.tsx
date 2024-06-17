@@ -35,7 +35,7 @@ import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
-import { isJobStarted, isMlRule } from '../../../../../common/machine_learning/helpers';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -93,7 +93,7 @@ import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
-import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useMlRuleValidations } from '../../../../common/components/ml/hooks/use_ml_rule_validations';
 import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -204,17 +204,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const license = useLicense();
 
   const mlCapabilities = useMlCapabilities();
-  const installedMlJobs = useInstalledSecurityJobs();
   const [{ machineLearningJobId }] = useFormData<DefineStepRule>({
     form,
     watch: ['machineLearningJobId'],
   });
-  const ruleMlJobs = installedMlJobs.jobs.filter((job) => machineLearningJobId.includes(job.id));
-  const numberOfRuleMlJobsStarted = ruleMlJobs.filter((job) =>
-    isJobStarted(job.jobState, job.datafeedState)
-  ).length;
-  const noMlJobsStarted = numberOfRuleMlJobsStarted === 0;
-  const someMlJobsStarted = !noMlJobsStarted && numberOfRuleMlJobsStarted !== ruleMlJobs.length;
+  const { someJobsStarted: someMlJobsStarted, noJobsStarted: noMlJobsStarted } =
+    useMlRuleValidations({ machineLearningJobId });
   const { loading: mlFieldsLoading, fields: mlFields } = useRuleFields({ machineLearningJobId });
   const mlSuppressionFields = useMemo(
     () => getTermsAggregationFields(mlFields as BrowserField[]),
