@@ -44,6 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('redirects to the correct page', async () => {
       await navigationalSearch.searchFor('type:application discover');
       await navigationalSearch.clickOnOption(0);
+
       expect(await browser.getCurrentUrl()).to.contain('discover');
     });
 
