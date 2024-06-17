@@ -6,3 +6,10 @@
  */
 
 export const BUILT_IN_ID_PREFIX = '__builtin__';
+export const BUILT_IN_ALLOWED_INDICES = [
+  'apm-*',
+  'logs-*',
+  'metrics-*',
+  'filebeat*',
+  'metricbeat*',
+];
