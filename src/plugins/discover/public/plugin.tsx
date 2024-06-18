@@ -56,10 +56,7 @@ import {
   ProfilesManager,
   RootProfileService,
 } from './context_awareness';
-import { createProfileProviderServices } from './context_awareness/profiles/profile_provider_services';
 import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
-import { createLogsDataSourceProfileProvider } from './context_awareness/profile_providers/logs_data_source_profile';
-import { createLogDocumentProfileProvider } from './context_awareness/profile_providers/log_document_profile';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -306,23 +303,15 @@ export class DiscoverPlugin
   }
 
   private async createProfilesManager() {
-    const providerServices = createProfileProviderServices();
-
-    this.dataSourceProfileService.registerProvider(
-      createLogsDataSourceProfileProvider(providerServices)
-    );
-    this.documentProfileService.registerProvider(
-      createLogDocumentProfileProvider(providerServices)
-    );
     if (!this.profileProvidersRegistered) {
       const { registerProfileProviders } = await import('./context_awareness/profile_providers');
-      const enabledProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
+      const experimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
 
       registerProfileProviders({
         rootProfileService: this.rootProfileService,
         dataSourceProfileService: this.dataSourceProfileService,
         documentProfileService: this.documentProfileService,
-        enabledProfileIds,
+        experimentalProfileIds,
       });
 
       this.profileProvidersRegistered = true;

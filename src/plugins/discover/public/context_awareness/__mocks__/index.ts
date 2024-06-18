@@ -19,7 +19,7 @@ import {
   RootProfileService,
   SolutionType,
 } from '../profiles';
-import { createProfileProviderServices } from '../profiles/profile_provider_services';
+import { createProfileProviderServices } from '../profile_providers/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
 
 export const createContextAwarenessMocks = ({

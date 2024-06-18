@@ -45,7 +45,7 @@ describe('registerEnabledProfileProviders', () => {
 });
 
 describe('registerProfileProviders', () => {
-  it('should register enabled profile providers', async () => {
+  it('should register enabled experimental profile providers', async () => {
     const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
       createContextAwarenessMocks({
         shouldRegisterProviders: false,
@@ -54,7 +54,7 @@ describe('registerProfileProviders', () => {
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
-      enabledProfileIds: [
+      experimentalProfileIds: [
         exampleRootProfileProvider.profileId,
         exampleDataSourceProfileProvider.profileId,
         exampleDocumentProfileProvider.profileId,
@@ -81,7 +81,7 @@ describe('registerProfileProviders', () => {
     );
   });
 
-  it('should not register disabled profile providers', async () => {
+  it('should not register disabled experimental profile providers', async () => {
     const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
       createContextAwarenessMocks({
         shouldRegisterProviders: false,
@@ -90,7 +90,7 @@ describe('registerProfileProviders', () => {
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
-      enabledProfileIds: [],
+      experimentalProfileIds: [],
     });
     const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
     const dataSourceContext = await dataSourceProfileServiceMock.resolve({

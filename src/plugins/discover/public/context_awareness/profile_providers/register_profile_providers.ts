@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { uniq } from 'lodash';
 import type {
   DataSourceProfileService,
   DocumentProfileService,
@@ -15,21 +16,35 @@ import type { BaseProfileProvider, BaseProfileService } from '../profile_service
 import { exampleDataSourceProfileProvider } from './example_data_source_profile';
 import { exampleDocumentProfileProvider } from './example_document_profile';
 import { exampleRootProfileProvider } from './example_root_pofile';
+import { createLogsDataSourceProfileProvider } from './logs_data_source_profile';
+import { createLogDocumentProfileProvider } from './log_document_profile';
+import { createProfileProviderServices } from './profile_provider_services';
 
 export const registerProfileProviders = ({
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,
-  enabledProfileIds,
+  experimentalProfileIds,
 }: {
   rootProfileService: RootProfileService;
   dataSourceProfileService: DataSourceProfileService;
   documentProfileService: DocumentProfileService;
-  enabledProfileIds: string[];
+  experimentalProfileIds: string[];
 }) => {
+  const providerServices = createProfileProviderServices();
+  const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(providerServices);
+  const logsDocumentProfileProvider = createLogDocumentProfileProvider(providerServices);
   const rootProfileProviders = [exampleRootProfileProvider];
-  const dataSourceProfileProviders = [exampleDataSourceProfileProvider];
-  const documentProfileProviders = [exampleDocumentProfileProvider];
+  const dataSourceProfileProviders = [
+    exampleDataSourceProfileProvider,
+    logsDataSourceProfileProvider,
+  ];
+  const documentProfileProviders = [exampleDocumentProfileProvider, logsDocumentProfileProvider];
+  const enabledProfileIds = uniq([
+    logsDataSourceProfileProvider.profileId,
+    logsDocumentProfileProvider.profileId,
+    ...experimentalProfileIds,
+  ]);
 
   registerEnabledProfileProviders({
     profileService: rootProfileService,
