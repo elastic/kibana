@@ -30,8 +30,6 @@ info:
     name: Kibana Team
 security:
   - apiKeyAuth: []
-servers:
-  - url: /
 components:
   securitySchemes:
     apiKeyAuth:
