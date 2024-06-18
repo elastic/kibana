@@ -102,6 +102,14 @@ describe('Config schema', () => {
       });
     }).not.toThrow();
   });
+  it('should allow to specify a URL in xpack.fleet.agentless.api.url ', () => {
+    expect(() => {
+      config.schema.validate({
+        agentless: { api: { url: 'https://agentless.api.url' } },
+      });
+    }).not.toThrow();
+  });
+
   describe('deprecations', () => {
     it('should add a depreciations when trying to enable a non existing experimental feature', () => {
       const res = applyConfigDeprecations({

@@ -33,6 +33,7 @@ export const config: PluginConfigDescriptor = {
     agents: {
       enabled: true,
     },
+    agentless: true,
     enableExperimental: true,
     developer: {
       maxAgentPoliciesWithInactivityTimeout: true,
