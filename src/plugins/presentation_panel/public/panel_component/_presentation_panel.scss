@@ -147,6 +147,7 @@
 
 .embPanel--editing {
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+  border: 1px dashed $euiColorLightShade;
 
   .embPanel--dragHandle {
     transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
