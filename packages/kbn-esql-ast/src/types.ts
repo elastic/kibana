@@ -107,7 +107,8 @@ export type ESQLLiteral =
   | ESQLNumberLiteral
   | ESQLBooleanLiteral
   | ESQLNullLiteral
-  | ESQLStringLiteral;
+  | ESQLStringLiteral
+  | ESQLParamLiteral<string>;
 
 // @internal
 export interface ESQLNumberLiteral extends ESQLAstBaseItem {
@@ -138,7 +139,7 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
 }
 
 // @internal
-export interface ESQLParam<ParamType extends string> extends ESQLAstBaseItem {
+export interface ESQLParamLiteral<ParamType extends string> extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'param';
   paramType: ParamType;
@@ -149,14 +150,14 @@ export interface ESQLParam<ParamType extends string> extends ESQLAstBaseItem {
  *
  * @internal
  */
-export type ESQLUnnamedParamLiteral = ESQLParam<'unnamed'>;
+export type ESQLUnnamedParamLiteral = ESQLParamLiteral<'unnamed'>;
 
 /**
  * *Named* parameter is a question mark followed by a name "?name".
  *
  * @internal
  */
-export interface ESQLNamedParamLiteral extends ESQLParam<'named'> {
+export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
   value: string;
 }
 
@@ -165,7 +166,7 @@ export interface ESQLNamedParamLiteral extends ESQLParam<'named'> {
  *
  * @internal
  */
-export interface ESQLMessage extends ESQLParam<'positional'> {
+export interface ESQLPositionalParamLiteral extends ESQLParamLiteral<'positional'> {
   value: number;
 }
 
