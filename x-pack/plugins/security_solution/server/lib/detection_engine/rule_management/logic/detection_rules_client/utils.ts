@@ -13,6 +13,7 @@ import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
 import type { RuleAlertType } from '../../../rule_schema';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 
 export const toggleRuleEnabledOnUpdate = async (
@@ -41,13 +42,15 @@ export class ClientError extends Error {
 
 /**
  * Represents an error that occurred while validating a RuleResponse object.
- * Includes the ruleId of the rule that failed validation.
+ * Includes the ruleId (rule signature id) of the rule that failed validation.
  * Thrown when a rule does not match the RuleResponse schema.
+ * @param message - The error message
+ * @param ruleId - The rule signature id of the rule that failed validation
  * @extends Error
  */
 export class RuleResponseValidationError extends Error {
-  public readonly ruleId: string;
-  constructor({ message, ruleId }: { message: string; ruleId: string }) {
+  public readonly ruleId: RuleSignatureId;
+  constructor({ message, ruleId }: { message: string; ruleId: RuleSignatureId }) {
     super(message);
     this.ruleId = ruleId;
   }
