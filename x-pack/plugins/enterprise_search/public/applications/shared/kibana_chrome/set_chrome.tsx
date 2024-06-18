@@ -19,6 +19,7 @@ import {
   useEnterpriseSearchApplicationsBreadcrumbs,
   useAnalyticsBreadcrumbs,
   useEnterpriseSearchContentBreadcrumbs,
+  useEnterpriseSearchRelevanceBreadcrumbs,
   useAiSearchBreadcrumbs,
   useElasticsearchBreadcrumbs,
   useAppSearchBreadcrumbs,
@@ -172,6 +173,19 @@ export const SetEnterpriseSearchContentChrome: React.FC<SetChromeProps> = ({ tra
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);
     setDocTitle(docTitle);
+  }, [trail]);
+
+  return null;
+};
+
+export const SetEnterpriseSearchRelevanceChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs } = useValues(KibanaLogic);
+
+  const crumbs = useGenerateBreadcrumbs(trail);
+  const breadcrumbs = useEnterpriseSearchRelevanceBreadcrumbs(crumbs);
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
   }, [trail]);
 
   return null;

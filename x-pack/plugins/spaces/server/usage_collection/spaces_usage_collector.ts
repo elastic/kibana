@@ -46,7 +46,7 @@ async function getSpacesUsage(
   }
 
   const knownFeatureIds = features.getKibanaFeatures().map((feature) => feature.id);
-  const knownSolutions = ['classic', 'search', 'observability', 'security', 'unset'];
+  const knownSolutions = ['classic', 'es', 'oblt', 'security', 'unset'];
 
   const resp = (await esClient.search({
     index: kibanaIndex,
@@ -205,13 +205,13 @@ export function getSpacesUsageCollector(
             description: 'The number of spaces which have solution set to classic.',
           },
         },
-        search: {
+        es: {
           type: 'long',
           _meta: {
             description: 'The number of spaces which have solution set to search.',
           },
         },
-        observability: {
+        oblt: {
           type: 'long',
           _meta: {
             description: 'The number of spaces which have solution set to observability.',

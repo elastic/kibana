@@ -67,6 +67,11 @@ export enum ProductFeatureSecurityKey {
    * enables all rule actions
    */
   externalRuleActions = 'external_rule_actions',
+
+  /**
+   * enables Cloud Security Posture - CSPM, KSPM, CNVM
+   */
+  cloudSecurityPosture = 'cloud_security_posture',
 }
 
 export enum ProductFeatureCasesKey {
