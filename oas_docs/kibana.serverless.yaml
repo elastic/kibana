@@ -1941,14 +1941,6 @@ paths:
         - Serverless_saved_objects_apiKeyAuth: []
 components:
   securitySchemes:
-    Kibana_Serverless_APIs_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: >
-        These APIs use key-based authentication. You must create an API key and
-        use the encoded value in the request header. For example:
-        `Authorization: ApiKey base64AccessApiKey`
     Connectors_apiKeyAuth:
       type: apiKey
       in: header
