@@ -16,7 +16,7 @@ import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
-import { FunctionArgSignature } from '../definitions/types';
+import { FunctionParameter } from '../definitions/types';
 import { getParamAtPosition } from './helper';
 import { nonNullable } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
@@ -1182,7 +1182,7 @@ describe('autocomplete', () => {
                 (p) => p.constantOnly || /_literal/.test(p.type)
               );
 
-              const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) =>
+              const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) =>
                 Array.from(new Set(paramDefs.map((p) => p.type)));
 
               const suggestedConstants = param.literalSuggestions || param.literalOptions;
