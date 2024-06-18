@@ -93,7 +93,7 @@ export const LatestVulnerabilitiesTable = ({
       getDefaultQuery,
       nonPersistedFilters,
     });
-
+  const { filters } = cloudPostureDataTable;
   return (
     <>
       {error ? (
