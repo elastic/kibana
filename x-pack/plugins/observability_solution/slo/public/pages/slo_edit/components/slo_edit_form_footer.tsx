@@ -41,7 +41,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
   } = useKibana().services;
   const isEditMode = slo !== undefined;
 
-  const { getValues, trigger, watch } = useFormContext<CreateSLOForm>();
+  const { getValues, trigger } = useFormContext<CreateSLOForm>();
 
   const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
   const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
@@ -56,7 +56,6 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
   const isFlyout = Boolean(onSave);
 
   const handleSubmit = useCallback(async () => {
-    console.dir(watch());
     const isValid = await trigger();
     if (!isValid) {
       return;

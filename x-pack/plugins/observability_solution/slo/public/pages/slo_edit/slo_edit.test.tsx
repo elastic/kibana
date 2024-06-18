@@ -8,6 +8,8 @@
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { useCreateRule, useFetchDataViews } from '@kbn/observability-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
@@ -15,20 +17,18 @@ import Router from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
 import { paths } from '../../../common/locators/paths';
 import { buildSlo } from '../../data/slo/slo';
-import { usePermissions } from '../../hooks/use_permissions';
+import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useFetchApmSuggestions } from '../../hooks/use_fetch_apm_suggestions';
-import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
-import { useUpdateSlo } from '../../hooks/use_update_slo';
-import { useCreateRule, useFetchDataViews } from '@kbn/observability-plugin/public';
-import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
+import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
+import { usePermissions } from '../../hooks/use_permissions';
+import { useUpdateSlo } from '../../hooks/use_update_slo';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
 import { SloEditPage } from './slo_edit';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -84,6 +84,7 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
           useChartsBaseTheme: () => {},
         },
       },
+      dataViewEditor: {},
       data: {
         dataViews: {
           find: jest.fn().mockReturnValue([]),
@@ -176,7 +177,9 @@ describe('SLO Edit Page', () => {
         getName: () => 'dataview',
         getIndexPattern: () => 'some-index',
         getRuntimeMappings: jest.fn().mockReturnValue({}),
+        fields: [{ name: 'custom_timestamp', type: 'date' }],
       },
+      loading: false,
     });
 
     useFetchIndicesMock.mockReturnValue({
@@ -469,9 +472,8 @@ describe('SLO Edit Page', () => {
         await waitFor(() => {
           fireEvent.click(getByTestId('sloFormSubmitButton'));
         });
-        await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
-        });
+
+        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
       });
     });
   });
