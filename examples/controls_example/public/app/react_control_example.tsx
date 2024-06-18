@@ -168,7 +168,7 @@ export const ReactControlExample = ({
         iconType="error"
         color="danger"
         title={<h2>Error</h2>}
-        body={<p>error.message</p>}
+        body={<p>{error.message}</p>}
       />
     );
 

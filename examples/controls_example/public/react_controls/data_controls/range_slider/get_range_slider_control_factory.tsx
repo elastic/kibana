@@ -8,7 +8,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map, switchMap, tap } from 'rxjs';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
@@ -58,6 +58,9 @@ export const getRangesliderControlFactory = (
       );
     },
     buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
+      const loadingMinMax$ = new BehaviorSubject<boolean>(false);
+      const loadingValidation$ = new BehaviorSubject<boolean>(false);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
       const step$ = new BehaviorSubject<number | undefined>(initialState.step);
       const value$ = new BehaviorSubject<RangeValue | undefined>(initialState.value);
       function setValue(nextValue: RangeValue | undefined) {
@@ -85,6 +88,7 @@ export const getRangesliderControlFactory = (
       const api = buildApi(
         {
           ...dataControlApi,
+          dataLoading: dataLoading$,
           getTypeDisplayName: RangeSliderStrings.control.getDisplayName,
           serializeState: () => {
             const { rawState: dataControlState, references } = serializeDataControl();
@@ -107,6 +111,21 @@ export const getRangesliderControlFactory = (
           value: [value$, setValue],
         }
       );
+
+      const dataLoadingSubscription = combineLatest([
+        loadingMinMax$,
+        loadingValidation$
+      ])
+        .pipe(
+          map((values) => {
+            return values.some((value) => {
+              return value;
+            });
+          })
+        )
+        .subscribe(isLoading => {
+          dataLoading$.next(isLoading);
+        });
 
       // Clear state when the field changes
       const fieldChangedSubscription = combineLatest([
@@ -143,7 +162,7 @@ export const getRangesliderControlFactory = (
             }
 
             try {
-              dataControlApi.setDataLoading(true);
+              loadingMinMax$.next(true);
               const abortController = new AbortController();
               prevRequestAbortController = abortController;
               return await getMinMax({
@@ -159,7 +178,7 @@ export const getRangesliderControlFactory = (
           })
         )
         .subscribe((next) => {
-          dataControlApi.setDataLoading(false);
+          loadingMinMax$.next(false);
           max$.next(
             next?.hasOwnProperty('max') ? (next as { max: number | undefined }).max : undefined
           );
@@ -194,6 +213,19 @@ export const getRangesliderControlFactory = (
         api.setOutputFilter(rangeFilter);
       });
 
+      const isInvalidSubscription = combineLatest([
+        dataControlApi.filters$,
+        controlGroupApi.ignoreParentSettings,
+        controlGroupApi.dataControlFetch$,
+      ]).subscribe(([filters, ignoreParentSettings, dataControlFetchContext]) => {
+        /*if (!filters || filters.length === 0 || ignoreParentSettings?.ignoreValidations) {
+          isInvalid$.next(false);
+        }*/
+
+        // TODO fetch validation... that the selected range has results
+
+      });
+
       return {
         api,
         Component: () => {
@@ -210,7 +242,9 @@ export const getRangesliderControlFactory = (
 
           useEffect(() => {
             return () => {
+              dataLoadingSubscription.unsubscribe();
               fieldChangedSubscription.unsubscribe();
+              isInvalidSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
               outputFilterSubscription.unsubscribe();
             };

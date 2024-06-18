@@ -113,6 +113,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       );
       const api = setApi({
         dataControlFetch$: dataControlFetch$(ignoreParentSettings, parentApi ? parentApi : {}),
+        ignoreParentSettings,
         unsavedChanges,
         resetUnsavedChanges: () => {
           // TODO: Implement this

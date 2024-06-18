@@ -59,6 +59,7 @@ export type ControlGroupApi = PresentationContainer &
   PublishesControlGroupDisplaySettings &
   Partial<HasParentApi<PublishesUnifiedSearch>> & {
     dataControlFetch$: Observable<DataControlFetchContext>;
+    ignoreParentSettings: PublishingSubject<ParentIgnoreSettings | undefined>;
   };
 
 export interface ControlGroupRuntimeState {

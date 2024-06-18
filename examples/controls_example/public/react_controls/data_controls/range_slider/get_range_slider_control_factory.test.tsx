@@ -7,7 +7,7 @@
  */
 
 import { TimeRange } from '@kbn/es-query';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, merge, of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ControlGroupApi } from '../../control_group/types';
