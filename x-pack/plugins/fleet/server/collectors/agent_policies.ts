@@ -18,6 +18,8 @@ import type { OutputSOAttributes, AgentPolicy } from '../types';
 export interface AgentPoliciesUsage {
   count: number;
   output_types: string[];
+  count_with_global_data_tags: number;
+  avg_number_global_data_tags_per_policy?: number;
 }
 
 export const getAgentPoliciesUsage = async (
@@ -52,8 +54,26 @@ export const getAgentPoliciesUsage = async (
     })
   );
 
+  const [policiesWithGlobalDataTag, totalNumberOfGlobalDataTagFields] = agentPolicies.reduce(
+    ([policiesNumber, fieldsNumber], agentPolicy) => {
+      if (agentPolicy.attributes.global_data_tags?.length ?? 0 > 0) {
+        return [
+          policiesNumber + 1,
+          fieldsNumber + (agentPolicy.attributes.global_data_tags?.length ?? 0),
+        ];
+      }
+      return [policiesNumber, fieldsNumber];
+    },
+    [0, 0]
+  );
+
   return {
     count: totalAgentPolicies,
     output_types: Array.from(uniqueOutputTypes),
+    count_with_global_data_tags: policiesWithGlobalDataTag,
+    avg_number_global_data_tags_per_policy:
+      policiesWithGlobalDataTag > 0
+        ? Math.round(totalNumberOfGlobalDataTagFields / policiesWithGlobalDataTag)
+        : undefined,
   };
 };

@@ -43,12 +43,7 @@ describe('<CloudPosturePage />', () => {
       })
     );
 
-    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: true,
-      })
-    );
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(undefined);
   });
 
   const renderCloudPosturePage = (
@@ -85,7 +80,10 @@ describe('<CloudPosturePage />', () => {
       })
     );
 
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() => 'http://license-url');
+
     renderCloudPosturePage();
+
     expect(screen.getByTestId('has_locator')).toBeInTheDocument();
   });
 
@@ -97,12 +95,7 @@ describe('<CloudPosturePage />', () => {
       })
     );
 
-    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: undefined,
-      })
-    );
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(undefined);
 
     renderCloudPosturePage();
     expect(screen.getByTestId('no_locator')).toBeInTheDocument();

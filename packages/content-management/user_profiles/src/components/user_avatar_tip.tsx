@@ -8,18 +8,10 @@
 
 import React from 'react';
 import { UserAvatarTip as UserAvatarTipComponent } from '@kbn/user-profile-components';
-import { useQuery } from '@tanstack/react-query';
-import { useServices } from '../services';
+import { useUserProfile } from '../queries';
 
 export function UserAvatarTip(props: { uid: string }) {
-  const { getUserProfile } = useServices();
-  const query = useQuery(
-    ['user-profile', props.uid],
-    async () => {
-      return getUserProfile(props.uid);
-    },
-    { staleTime: Infinity }
-  );
+  const query = useUserProfile(props.uid);
 
   if (query.data) {
     return (

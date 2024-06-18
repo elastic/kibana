@@ -15,7 +15,6 @@ import { SubscriptionNotAllowed } from './subscription_not_allowed';
 import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CspLoadingState } from './csp_loading_state';
-import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
@@ -151,9 +150,9 @@ export const defaultNoDataRenderer = () => (
   </FullSizeCenteredPage>
 );
 
-const subscriptionNotAllowedRenderer = (licenseManagementLocator?: string) => (
+const subscriptionNotAllowedRenderer = () => (
   <FullSizeCenteredPage data-test-subj={SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT}>
-    <SubscriptionNotAllowed licenseManagementLocator={licenseManagementLocator} />
+    <SubscriptionNotAllowed />
   </FullSizeCenteredPage>
 );
 
@@ -173,19 +172,18 @@ export const CloudPosturePage = <TData, TError>({
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
   const subscriptionStatus = useSubscriptionStatus();
-  const getLicenseManagementLocator = useLicenseManagementLocatorApi();
 
   const render = () => {
     if (subscriptionStatus.isError) {
       return defaultErrorRenderer(subscriptionStatus.error);
     }
 
-    if (subscriptionStatus.isLoading || getLicenseManagementLocator.isLoading) {
+    if (subscriptionStatus.isLoading) {
       return defaultLoadingRenderer();
     }
 
     if (!subscriptionStatus.data) {
-      return subscriptionNotAllowedRenderer(getLicenseManagementLocator.data);
+      return subscriptionNotAllowedRenderer();
     }
 
     if (!query) {

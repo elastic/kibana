@@ -427,6 +427,14 @@
       "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
+    },
+    {
+      "groupName": "MSW",
+      "matchPackageNames": ["msw"],
+      "reviewers": ["team:kibana-cloud-security-posture"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team: Cloud Security", "release_note:skip", "backport:skip"],
+      "enabled": true
     }
   ]
 }

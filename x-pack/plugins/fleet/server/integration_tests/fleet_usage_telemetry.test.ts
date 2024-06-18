@@ -428,6 +428,10 @@ describe('fleet usage telemetry', () => {
         schema_version: '1.0.0',
         data_output_id: 'output2',
         monitoring_output_id: 'output3',
+        global_data_tags: [
+          { name: 'test', value: 'test1' },
+          { name: 'test2', value: 'test2' },
+        ],
       },
       { id: 'policy2' }
     );
@@ -446,6 +450,10 @@ describe('fleet usage telemetry', () => {
         schema_version: '1.0.0',
         data_output_id: 'output4',
         monitoring_output_id: 'output4',
+        global_data_tags: [
+          { name: 'test', value: 'test1' },
+          { name: 'test2', value: 'test2' },
+        ],
       },
       { id: 'policy3' }
     );
@@ -566,6 +574,8 @@ describe('fleet usage telemetry', () => {
         agent_policies: {
           count: 3,
           output_types: expect.arrayContaining(['elasticsearch', 'logstash', 'third_type']),
+          count_with_global_data_tags: 2,
+          avg_number_global_data_tags_per_policy: 2,
         },
         agent_logs_panics_last_hour: [
           {
