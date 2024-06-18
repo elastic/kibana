@@ -11,11 +11,13 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { useTableData } from '../../hooks/use_table_data';
+import { FilterOptions } from './types';
 
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
 import { EndpointsTable } from './endpoints_table';
-import { useTableColumns } from './table_columns';
+import { ProviderFilter } from './filter/provider_filter';
 import { TableSearch } from './search/table_search';
+import { useTableColumns } from './table_columns';
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -23,11 +25,20 @@ interface TabularPageProps {
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
   const [searchKey, setSearchKey] = React.useState('');
-  const { queryParams, setQueryParams } = useAllInferenceEndpointsState();
+  const { queryParams, setQueryParams, filterOptions, setFilterOptions } =
+    useAllInferenceEndpointsState();
+
+  const onFilterChangedCallback = useCallback(
+    (newFilterOptions: Partial<FilterOptions>) => {
+      setFilterOptions(newFilterOptions);
+    },
+    [setFilterOptions]
+  );
 
   const { paginatedSortedTableData, pagination, sorting } = useTableData(
     inferenceEndpoints,
     queryParams,
+    filterOptions,
     searchKey
   );
 
@@ -54,7 +65,17 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ProviderFilter
+              optionKeys={filterOptions.provider}
+              onChange={onFilterChangedCallback}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <EndpointsTable

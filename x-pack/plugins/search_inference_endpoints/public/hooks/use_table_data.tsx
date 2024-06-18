@@ -11,10 +11,12 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {
-  InferenceEndpointUI,
+  FilterOptions,
   INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
+  InferenceEndpointUI,
   QueryParams,
   SortOrder,
+  ProviderKeys,
 } from '../components/all_inference_endpoints/types';
 
 interface UseTableDataReturn {
@@ -28,17 +30,25 @@ interface UseTableDataReturn {
 export const useTableData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
   queryParams: QueryParams,
+  filterOptions: FilterOptions,
   searchKey: string
 ): UseTableDataReturn => {
   const tableData: InferenceEndpointUI[] = useMemo(() => {
-    return inferenceEndpoints
-      .filter((endpoint) => endpoint.model_id.startsWith(searchKey))
+    let filteredEndpoints = inferenceEndpoints;
+    if (filterOptions.provider.length > 0) {
+      filteredEndpoints = filteredEndpoints.filter((endpoint) =>
+        filterOptions.provider.includes(ProviderKeys[endpoint.service as keyof typeof ProviderKeys])
+      );
+    }
+
+    return filteredEndpoints
+      .filter((endpoint) => endpoint.model_id.includes(searchKey))
       .map((endpoint) => ({
         endpoint,
         provider: endpoint.service,
         type: endpoint.task_type,
       }));
-  }, [inferenceEndpoints, searchKey]);
+  }, [inferenceEndpoints, searchKey, filterOptions]);
 
   const sortedTableData: InferenceEndpointUI[] = useMemo(() => {
     return [...tableData].sort((a, b) => {
