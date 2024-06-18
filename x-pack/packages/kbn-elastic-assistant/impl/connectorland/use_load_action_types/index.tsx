@@ -27,13 +27,11 @@ export const QUERY_KEY = ['elastic-assistant, load-action-types'];
 export interface Props {
   http: HttpSetup;
   toasts?: IToasts;
-  actionTypeIds?: string[];
 }
 
 export const useLoadActionTypes = ({
   http,
   toasts,
-  actionTypeIds,
 }: Props): UseQueryResult<ActionType[], IHttpFetchError> => {
   return useQuery(
     QUERY_KEY,
@@ -44,10 +42,8 @@ export const useLoadActionTypes = ({
         featureId: GenerativeAIForSecurityConnectorFeatureId,
       });
       const sortedData = queryResult.sort((a, b) => a.name.localeCompare(b.name));
-      if (!actionTypeIds) {
-        return sortedData;
-      }
-      return sortedData.filter((actionType) => actionTypeIds.includes(actionType.id));
+
+      return sortedData;
     },
     {
       retry: false,

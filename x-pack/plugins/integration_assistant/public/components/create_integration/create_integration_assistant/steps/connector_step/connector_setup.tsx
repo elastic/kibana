@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   useEuiTheme,
   EuiFlexGroup,
@@ -56,7 +56,14 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
       onClose?.();
     }, [onClose]);
 
-    const { data: actionTypes } = useLoadActionTypes({ actionTypeIds, http, toasts });
+    const { data } = useLoadActionTypes({ http, toasts });
+
+    const actionTypes = useMemo(() => {
+      if (actionTypeIds && data) {
+        return data.filter((actionType) => actionTypeIds.includes(actionType.id));
+      }
+      return data;
+    }, [data, actionTypeIds]);
 
     if (!actionTypes) {
       return <EuiLoadingSpinner />;
@@ -106,6 +113,7 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
             ))}
           </EuiFlexGroup>
         )}
+
         {selectedActionType && (
           <ConnectorAddModal
             actionTypeRegistry={actionTypeRegistry}
