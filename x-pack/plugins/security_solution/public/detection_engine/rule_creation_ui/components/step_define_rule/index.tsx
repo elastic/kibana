@@ -1097,10 +1097,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                       areSuppressionFieldsDisabledBySequence ||
                       isEsqlSuppressionLoading ||
                       mlFieldsLoading ||
-                      noMlJobsStarted,
+                      (noMlJobsStarted && isMlRule(ruleType)),
                     disabledText: areSuppressionFieldsDisabledBySequence
                       ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
-                      : noMlJobsStarted
+                      : noMlJobsStarted && isMlRule(ruleType)
                       ? i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL
                       : alertSuppressionUpsellingMessage,
                   }}
