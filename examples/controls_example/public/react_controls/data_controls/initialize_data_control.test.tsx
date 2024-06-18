@@ -9,7 +9,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { combineLatest, debounceTime, first, skip } from 'rxjs';
+import { first, skip } from 'rxjs';
 import { ControlGroupApi } from '../control_group/types';
 import { initializeDataControl } from './initialize_data_control';
 
@@ -57,11 +57,9 @@ describe('initializeDataControl', () => {
           services
         );
 
-        combineLatest([dataControl.api.dataViews, dataControl.api.defaultPanelTitle!])
-          .pipe(debounceTime(1), first())
-          .subscribe(() => {
-            done();
-          });
+        dataControl.api.defaultPanelTitle!.pipe(first()).subscribe(() => {
+          done();
+        });
       });
 
       test('should set data view', () => {
