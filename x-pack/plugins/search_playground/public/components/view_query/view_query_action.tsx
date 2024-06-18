@@ -24,6 +24,7 @@ export const ViewQueryAction: React.FC = () => {
         onClick={() => setShowFlyout(true)}
         disabled={selectedIndices?.length === 0}
         data-test-subj="viewQueryActionButton"
+        size="s"
       >
         <FormattedMessage
           id="xpack.searchPlayground.viewQuery.actionButtonLabel"

@@ -5,50 +5,62 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiPageHeaderSection,
+  EuiPageTemplate,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { Toolbar } from './toolbar';
 import { PlaygroundHeaderDocs } from './playground_header_docs';
+import { Toolbar } from './toolbar';
 
 interface HeaderProps {
   showDocs?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ showDocs = false }) => {
-  const sideItems = showDocs ? [<PlaygroundHeaderDocs />, <Toolbar />] : [<Toolbar />];
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiPageTemplate.Header
-      css={{ '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' } }}
-      pageTitle={
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiTitle
-              css={{ whiteSpace: 'nowrap' }}
-              data-test-subj="chat-playground-home-page-title"
-            >
-              <h2>
-                <FormattedMessage
-                  id="xpack.searchPlayground.pageTitle"
-                  defaultMessage="Playground"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate('xpack.searchPlayground.pageTitle.techPreview', {
-                defaultMessage: 'TECH PREVIEW',
-              })}
-              color="hollow"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
+      css={{
+        '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' },
+        backgroundColor: euiTheme.colors.ghost,
+      }}
+      paddingSize="s"
       data-test-subj="chat-playground-home-page"
-      rightSideItems={sideItems}
-    />
+    >
+      <EuiPageHeaderSection>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiTitle
+            css={{ whiteSpace: 'nowrap' }}
+            data-test-subj="chat-playground-home-page-title"
+            size="xs"
+          >
+            <h2>
+              <FormattedMessage id="xpack.searchPlayground.pageTitle" defaultMessage="Playground" />
+            </h2>
+          </EuiTitle>
+          <EuiBetaBadge
+            label={i18n.translate('xpack.searchPlayground.pageTitle.techPreview', {
+              defaultMessage: 'TECH PREVIEW',
+            })}
+            color="hollow"
+            alignment="middle"
+          />
+        </EuiFlexGroup>
+      </EuiPageHeaderSection>
+      <EuiPageHeaderSection>
+        <EuiFlexGroup alignItems="center">
+          <Toolbar />
+          {showDocs && <PlaygroundHeaderDocs />}
+        </EuiFlexGroup>
+      </EuiPageHeaderSection>
+    </EuiPageTemplate.Header>
   );
 };

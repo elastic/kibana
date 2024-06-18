@@ -26,6 +26,7 @@ export const EditContextAction: React.FC = () => {
         onClick={() => setShowFlyout(true)}
         disabled={selectedIndices?.length === 0}
         data-test-subj="editContextActionButton"
+        size="s"
       >
         <FormattedMessage
           id="xpack.searchPlayground.editContext.actionButtonLabel"
