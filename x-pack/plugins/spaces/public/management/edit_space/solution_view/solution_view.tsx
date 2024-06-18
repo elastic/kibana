@@ -26,14 +26,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Space } from '../../../../common';
 import { SectionPanel } from '../section_panel';
 
-type SolutionView = 'search' | 'observability' | 'security' | 'classic';
+type SolutionView = Space['solution'];
 
 const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<SolutionView>> => {
   const iconCss = { marginRight: size.m };
 
   return [
     {
-      value: 'search',
+      value: 'es',
       inputDisplay: (
         <>
           <EuiIcon type="logoElasticsearch" css={iconCss} />
@@ -48,7 +48,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
       'data-test-subj': 'solutionViewSearchOption',
     },
     {
-      value: 'observability',
+      value: 'oblt',
       inputDisplay: (
         <>
           <EuiIcon type="logoObservability" css={iconCss} />
