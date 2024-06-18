@@ -17,7 +17,7 @@ export type {
   InvalidRoleTemplate,
   InlineRoleTemplate,
 } from './model';
-export type { ApiKey, RestApiKey } from '@kbn/security-api-key-management';
+
 export { getUserDisplayName, isRoleReserved, isRoleWithWildcardBasePrivilege } from './model';
 
 // Re-export types from the plugin directly to enhance the developer experience for consumers of the Security plugin.
@@ -42,3 +42,5 @@ export type {
   UserProfileLabels,
   UserProfileUserInfoWithSecurity,
 } from '@kbn/security-plugin-types-common';
+
+export type { ApiKey, RestApiKey } from '@kbn/security-api-key-management';
