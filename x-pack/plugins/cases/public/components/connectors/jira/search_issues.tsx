@@ -17,12 +17,14 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { ActionConnector } from '../../../../common/types/domain';
 import { useGetIssues } from './use_get_issues';
 import * as i18n from './translations';
+import { useGetIssue } from './use_get_issue';
 
 interface Props {
   actionConnector?: ActionConnector;
+  currentParent: string | null;
 }
 
-const SearchIssuesComponent: React.FC<Props> = ({ actionConnector }) => {
+const SearchIssuesComponent: React.FC<Props> = ({ actionConnector, currentParent }) => {
   const [query, setQuery] = useState<string | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []
@@ -35,9 +37,21 @@ const SearchIssuesComponent: React.FC<Props> = ({ actionConnector }) => {
     query,
   });
 
+  const { isFetching: isLoadingIssue, data: issueData } = useGetIssue({
+    http,
+    actionConnector,
+    id: currentParent ?? '',
+  });
+
   const issues = issuesData?.data ?? [];
 
   const options = issues.map((issue) => ({ label: issue.title, value: issue.key }));
+
+  const issue = issueData?.data ?? null;
+
+  if (!isLoadingIssue && issue && !selectedOptions.find((option) => option.value === issue.key)) {
+    setSelectedOptions([{ label: issue.title, value: issue.key }]);
+  }
 
   return (
     <UseField path="fields.parent">

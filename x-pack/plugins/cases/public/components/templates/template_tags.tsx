@@ -12,11 +12,11 @@ import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components'
 import * as i18n from './translations';
 interface Props {
   isLoading: boolean;
-  tags: string[];
+  tagOptions: string[];
 }
 
-const TemplateTagsComponent: React.FC<Props> = ({ isLoading, tags }) => {
-  const options = tags.map((label) => ({
+const TemplateTagsComponent: React.FC<Props> = ({ isLoading, tagOptions }) => {
+  const options = tagOptions.map((label) => ({
     label,
   }));
 
@@ -24,13 +24,12 @@ const TemplateTagsComponent: React.FC<Props> = ({ isLoading, tags }) => {
     <UseField
       path="templateTags"
       component={ComboBoxField}
-      defaultValue={[]}
       componentProps={{
         idAria: 'template-tags',
         'data-test-subj': 'template-tags',
         euiFieldProps: {
-          fullWidth: true,
           placeholder: '',
+          fullWidth: true,
           disabled: isLoading,
           isLoading,
           options,

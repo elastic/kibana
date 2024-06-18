@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 
 import { ConfigureCases } from '.';
 import { noUpdateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
-import { customFieldsConfigurationMock } from '../../containers/mock';
+import { customFieldsConfigurationMock, templatesConfigurationMock } from '../../containers/mock';
 import type { AppMockRenderer } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
@@ -691,7 +691,7 @@ describe('ConfigureCases', () => {
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
       );
 
-      expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
       userEvent.click(screen.getByText('Delete'));
 
@@ -937,6 +937,108 @@ describe('ConfigureCases', () => {
 
       expect(screen.getByTestId('templates-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
+    });
+
+    it('should delete a template', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          templates: templatesConfigurationMock,
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      const list = screen.getByTestId('templates-list');
+
+      userEvent.click(
+        within(list).getByTestId(`${templatesConfigurationMock[0].key}-template-delete`)
+      );
+
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+
+      userEvent.click(screen.getByText('Delete'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: [],
+          templates: [
+            { ...templatesConfigurationMock[1] },
+            { ...templatesConfigurationMock[2] },
+            { ...templatesConfigurationMock[3] },
+          ],
+          id: '',
+          version: '',
+        });
+      });
+    });
+
+    it('should update a template', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          templates: [templatesConfigurationMock[0], templatesConfigurationMock[3]],
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      const list = screen.getByTestId('templates-list');
+
+      userEvent.click(
+        within(list).getByTestId(`${templatesConfigurationMock[0].key}-template-edit`)
+      );
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      userEvent.clear(await screen.findByTestId('template-name-input'));
+      userEvent.paste(await screen.findByTestId('template-name-input'), 'Updated template name');
+
+      userEvent.click(screen.getByTestId('common-flyout-save'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: [],
+          templates: [
+            {
+              ...templatesConfigurationMock[0],
+              name: 'Updated template name',
+              tags: [],
+              caseFields: {
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+                customFields: [],
+                settings: {
+                  syncAlerts: true,
+                },
+              },
+            },
+            { ...templatesConfigurationMock[3] },
+          ],
+          id: '',
+          version: '',
+        });
+      });
     });
   });
 

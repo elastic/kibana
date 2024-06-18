@@ -36,6 +36,20 @@ describe('Create ', () => {
     expect(await screen.findByRole('switch')).toBeChecked(); // defaultValue true
   });
 
+  it('does not render default value when setDefaultValue is false', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Create
+          isLoading={false}
+          customFieldConfiguration={customFieldConfiguration}
+          setDefaultValue={false}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByRole('switch')).not.toBeChecked();
+  });
+
   it('updates the value correctly', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>

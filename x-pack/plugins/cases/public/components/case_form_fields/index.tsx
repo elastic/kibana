@@ -21,12 +21,14 @@ interface Props {
   isLoading: boolean;
   configurationCustomFields: CasesConfigurationUI['customFields'];
   setCustomFieldsOptional?: boolean;
+  isEditMode?: boolean;
 }
 
 const CaseFormFieldsComponent: React.FC<Props> = ({
   isLoading,
   configurationCustomFields,
   setCustomFieldsOptional = false,
+  isEditMode,
 }) => {
   const { caseAssignmentAuthorized } = useCasesFeatures();
 
@@ -42,6 +44,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
         isLoading={isLoading}
         setCustomFieldsOptional={setCustomFieldsOptional}
         configurationCustomFields={configurationCustomFields}
+        isEditMode={isEditMode}
       />
     </EuiFlexGroup>
   );

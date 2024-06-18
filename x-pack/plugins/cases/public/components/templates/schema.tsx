@@ -104,7 +104,6 @@ export const schema: FormSchema<TemplateFormProps> = {
   },
   connectorId: {
     label: i18n.CONNECTORS,
-    defaultValue: 'none',
   },
   fields: {
     defaultValue: null,

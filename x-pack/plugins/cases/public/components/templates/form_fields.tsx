@@ -22,12 +22,14 @@ interface FormFieldsProps {
   isSubmitting?: boolean;
   connectors: ActionConnector[];
   currentConfiguration: CasesConfigurationUI;
+  isEditMode?: boolean;
 }
 
 const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   isSubmitting = false,
   connectors,
   currentConfiguration,
+  isEditMode,
 }) => {
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { customFields: configurationCustomFields, connector, templates } = currentConfiguration;
@@ -56,10 +58,11 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
           configurationCustomFields={configurationCustomFields}
           isLoading={isSubmitting}
           setCustomFieldsOptional={true}
+          isEditMode={isEditMode}
         />
       ),
     }),
-    [isSubmitting, configurationCustomFields]
+    [isSubmitting, configurationCustomFields, isEditMode]
   );
 
   const thirdStep = useMemo(

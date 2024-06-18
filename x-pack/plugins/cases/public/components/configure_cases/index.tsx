@@ -47,6 +47,7 @@ import { Templates } from '../templates';
 import type { TemplateFormProps } from '../templates/types';
 import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
+import { getTemplateSerializedData } from '../templates/utils';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -356,6 +357,42 @@ export const ConfigureCases: React.FC = React.memo(() => {
     ]
   );
 
+  const onDeleteTemplate = useCallback(
+    (key: string) => {
+      const remainingTemplates = templates.filter((field) => field.key !== key);
+
+      persistCaseConfigure({
+        connector,
+        customFields,
+        templates: [...remainingTemplates],
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+      });
+    },
+    [
+      closureType,
+      configurationId,
+      configurationVersion,
+      connector,
+      customFields,
+      templates,
+      persistCaseConfigure,
+    ]
+  );
+
+  const onEditTemplate = useCallback(
+    (key: string) => {
+      const selectedTemplate = templates.find((item) => item.key === key);
+
+      if (selectedTemplate) {
+        setTemplateToEdit(selectedTemplate);
+      }
+      setFlyOutVisibility({ type: 'template', visible: true });
+    },
+    [setFlyOutVisibility, setTemplateToEdit, templates]
+  );
+
   const onCloseTemplateFlyout = useCallback(() => {
     setFlyOutVisibility({ type: 'template', visible: false });
     setTemplateToEdit(null);
@@ -363,6 +400,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   const onTemplateSave = useCallback(
     (data: TemplateFormProps) => {
+      const serializedData = getTemplateSerializedData(data);
       const {
         connectorId,
         fields,
@@ -373,7 +411,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         templateTags,
         templateDescription,
         ...otherCaseFields
-      } = data;
+      } = serializedData;
 
       const transformedCustomFields = templateCustomFields
         ? transformCustomFieldsData(templateCustomFields, customFields)
@@ -457,9 +495,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
         renderHeader={() => <span>{i18n.CREATE_TEMPLATE}</span>}
         renderBody={({ onChange }) => (
           <TemplateForm
-            initialValue={templateToEdit as TemplateFormProps | null}
+            initialValue={templateToEdit}
             connectors={connectors ?? []}
             currentConfiguration={currentConfiguration}
+            isEditMode={Boolean(templateToEdit)}
             onChange={onChange}
           />
         )}
@@ -550,6 +589,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 isLoading={isLoadingCaseConfiguration}
                 disabled={isLoadingCaseConfiguration}
                 onAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
+                onEditTemplate={onEditTemplate}
+                onDeleteTemplate={onDeleteTemplate}
               />
             </EuiFlexItem>
           </div>

@@ -29,7 +29,6 @@ const TagsComponent: React.FC<Props> = ({ isLoading }) => {
     <UseField
       path="tags"
       component={ComboBoxField}
-      defaultValue={[]}
       componentProps={{
         idAria: 'caseTags',
         'data-test-subj': 'caseTags',

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -25,6 +25,8 @@ describe('Templates', () => {
     isLoading: false,
     templates: [],
     onAddTemplate: jest.fn(),
+    onEditTemplate: jest.fn(),
+    onDeleteTemplate: jest.fn(),
   };
 
   beforeEach(() => {
@@ -72,6 +74,40 @@ describe('Templates', () => {
     userEvent.click(await screen.findByTestId('add-template'));
 
     expect(props.onAddTemplate).toBeCalled();
+  });
+
+  it('calls onEditTemplate correctly', async () => {
+    appMockRender.render(<Templates {...{ ...props, templates: templatesConfigurationMock }} />);
+
+    const list = await screen.findByTestId('templates-list');
+
+    expect(list).toBeInTheDocument();
+
+    userEvent.click(
+      await within(list).findByTestId(`${templatesConfigurationMock[0].key}-template-edit`)
+    );
+
+    await waitFor(() => {
+      expect(props.onEditTemplate).toHaveBeenCalledWith(templatesConfigurationMock[0].key);
+    });
+  });
+
+  it('calls onDeleteTemplate correctly', async () => {
+    appMockRender.render(<Templates {...{ ...props, templates: templatesConfigurationMock }} />);
+
+    const list = await screen.findByTestId('templates-list');
+
+    userEvent.click(
+      await within(list).findByTestId(`${templatesConfigurationMock[0].key}-template-delete`)
+    );
+
+    expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+
+    userEvent.click(await screen.findByText('Delete'));
+
+    await waitFor(() => {
+      expect(props.onDeleteTemplate).toHaveBeenCalledWith(templatesConfigurationMock[0].key);
+    });
   });
 
   it('shows the experimental badge', async () => {

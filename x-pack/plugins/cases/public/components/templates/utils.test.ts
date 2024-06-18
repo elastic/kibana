@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { templateSerializer } from './utils';
+import { getTemplateSerializedData } from './utils';
 
 describe('utils', () => {
-  describe('templateSerializer', () => {
+  describe('getTemplateSerializedData', () => {
     it('serializes empty fields correctly', () => {
-      const res = templateSerializer({
+      const res = getTemplateSerializedData({
         key: '',
         name: '',
         templateDescription: '',
@@ -26,7 +26,7 @@ describe('utils', () => {
     });
 
     it('serializes connectors fields correctly', () => {
-      const res = templateSerializer({
+      const res = getTemplateSerializedData({
         key: '',
         name: '',
         templateDescription: '',
@@ -39,7 +39,7 @@ describe('utils', () => {
     });
 
     it('serializes non empty fields correctly', () => {
-      const res = templateSerializer({
+      const res = getTemplateSerializedData({
         key: 'key_1',
         name: 'template 1',
         templateDescription: 'description 1',
@@ -58,7 +58,7 @@ describe('utils', () => {
     });
 
     it('serializes custom fields correctly', () => {
-      const res = templateSerializer({
+      const res = getTemplateSerializedData({
         key: 'key_1',
         name: 'template 1',
         templateDescription: '',
@@ -81,7 +81,7 @@ describe('utils', () => {
     });
 
     it('serializes connector fields correctly', () => {
-      const res = templateSerializer({
+      const res = getTemplateSerializedData({
         key: 'key_1',
         name: 'template 1',
         templateDescription: '',

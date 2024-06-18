@@ -24,6 +24,7 @@ jest.mock('../../containers/user_profiles/api');
 describe('CaseFormFields', () => {
   let appMock: AppMockRenderer;
   const onSubmit = jest.fn();
+  const formDefaultValue = { tags: [] };
   const defaultProps = {
     isLoading: false,
     configurationCustomFields: [],
@@ -36,7 +37,7 @@ describe('CaseFormFields', () => {
 
   it('renders correctly', async () => {
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -46,7 +47,7 @@ describe('CaseFormFields', () => {
 
   it('renders case fields correctly', async () => {
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -60,7 +61,7 @@ describe('CaseFormFields', () => {
 
   it('does not render customFields when empty', () => {
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -70,7 +71,7 @@ describe('CaseFormFields', () => {
 
   it('renders customFields when not empty', async () => {
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields
           isLoading={false}
           configurationCustomFields={customFieldsConfigurationMock}
@@ -83,7 +84,7 @@ describe('CaseFormFields', () => {
 
   it('does not render assignees when no platinum license', () => {
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -99,7 +100,7 @@ describe('CaseFormFields', () => {
     appMock = createAppMockRenderer({ license });
 
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -109,7 +110,7 @@ describe('CaseFormFields', () => {
 
   it('calls onSubmit with case fields', async () => {
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -145,6 +146,36 @@ describe('CaseFormFields', () => {
     });
   });
 
+  it('calls onSubmit with existing case fields', async () => {
+    appMock.render(
+      <FormTestComponent
+        formDefaultValue={{
+          title: 'Case with Template 1',
+          description: 'This is a case description',
+          tags: ['case-tag-1', 'case-tag-2'],
+          category: null,
+        }}
+        onSubmit={onSubmit}
+      >
+        <CaseFormFields {...defaultProps} />
+      </FormTestComponent>
+    );
+
+    userEvent.click(await screen.findByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith(
+        {
+          category: null,
+          tags: ['case-tag-1', 'case-tag-2'],
+          description: 'This is a case description',
+          title: 'Case with Template 1',
+        },
+        true
+      );
+    });
+  });
+
   it('calls onSubmit with custom fields', async () => {
     const newProps = {
       ...defaultProps,
@@ -152,7 +183,7 @@ describe('CaseFormFields', () => {
     };
 
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...newProps} />
       </FormTestComponent>
     );
@@ -191,6 +222,44 @@ describe('CaseFormFields', () => {
     });
   });
 
+  it('calls onSubmit with existing custom fields', async () => {
+    const newProps = {
+      ...defaultProps,
+      configurationCustomFields: customFieldsConfigurationMock,
+    };
+
+    appMock.render(
+      <FormTestComponent
+        formDefaultValue={{
+          customFields: { [customFieldsConfigurationMock[0].key]: 'Test custom filed value' },
+          tags: [],
+        }}
+        onSubmit={onSubmit}
+      >
+        <CaseFormFields {...newProps} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('caseCustomFields')).toBeInTheDocument();
+
+    userEvent.click(await screen.findByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith(
+        {
+          category: null,
+          tags: [],
+          customFields: {
+            test_key_1: 'Test custom filed value',
+            test_key_2: true,
+            test_key_4: false,
+          },
+        },
+        true
+      );
+    });
+  });
+
   it('calls onSubmit with assignees', async () => {
     const license = licensingMock.createLicense({
       license: { type: 'platinum' },
@@ -199,7 +268,7 @@ describe('CaseFormFields', () => {
     appMock = createAppMockRenderer({ license });
 
     appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <CaseFormFields {...defaultProps} />
       </FormTestComponent>
     );
@@ -220,6 +289,39 @@ describe('CaseFormFields', () => {
           category: null,
           tags: [],
           assignees: [{ uid: userProfiles[0].uid }],
+        },
+        true
+      );
+    });
+  });
+
+  it('calls onSubmit with existing assignees', async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+
+    appMock = createAppMockRenderer({ license });
+
+    appMock.render(
+      <FormTestComponent
+        formDefaultValue={{
+          assignees: [{ uid: userProfiles[1].uid }],
+          tags: [],
+        }}
+        onSubmit={onSubmit}
+      >
+        <CaseFormFields {...defaultProps} />
+      </FormTestComponent>
+    );
+
+    userEvent.click(await screen.findByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith(
+        {
+          category: null,
+          tags: [],
+          assignees: [{ uid: userProfiles[1].uid }],
         },
         true
       );
