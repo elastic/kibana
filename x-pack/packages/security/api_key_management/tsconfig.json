@@ -18,7 +18,7 @@
   "kbn_references": [
     "@kbn/i18n-react",
     "@kbn/i18n",
-    "@kbn/security-plugin-form-components",
+    "@kbn/security-form-components",
     "@kbn/code-editor",
     "@kbn/core",
     "@kbn/kibana-react-plugin",

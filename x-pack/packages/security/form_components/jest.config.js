@@ -7,10 +7,10 @@
 
 module.exports = {
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/packages/security/plugin_form_components',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/packages/security/form_components',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/packages/security/plugin_form_components/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/packages/security/form_components/**/*.{ts,tsx}'],
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/security/plugin_form_components'],
+  roots: ['<rootDir>/x-pack/packages/security/form_components'],
 };

@@ -34,7 +34,6 @@ import moment from 'moment-timezone';
 import { FunctionComponent, useRef } from 'react';
 import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { FormField, FormRow } from '@kbn/security-plugin-form-components';
 
 import { CodeEditorField } from '@kbn/code-editor';
 import type { AuthenticatedUser, CoreStart } from '@kbn/core/public';
@@ -44,6 +43,7 @@ import { useDarkMode, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
 import { Role } from '@kbn/security-plugin-types-common';
+import { FormField, FormRow } from '@kbn/security-form-components';
 import { ApiKeyBadge, ApiKeyStatus, TimeToolTip } from '.';
 import type { ApiKeyRoleDescriptors, CategorizedApiKey } from '../api_key';
 import { APIKeysAPIClient } from './api_keys_api_client';

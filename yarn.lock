@@ -6053,7 +6053,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-plugin-form-components@link:x-pack/packages/security/plugin_form_components":
+"@kbn/security-form-components@link:x-pack/packages/security/form_components":
   version "0.0.0"
   uid ""
 
