@@ -192,6 +192,21 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           />
         ) : agentsCount && agentPolicies ? (
           <>
+            {hasMultipleAgentPolicies && (
+              <>
+                <EuiCallOut
+                  color="warning"
+                  iconType="alert"
+                  title={
+                    <FormattedMessage
+                      id="xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies"
+                      defaultMessage="This integration is shared by multiple agent policies."
+                    />
+                  }
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
             <EuiCallOut
               color="danger"
               title={
@@ -202,20 +217,13 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 />
               }
             >
-              {hasMultipleAgentPolicies ? (
-                <FormattedMessage
-                  id="xpack.fleet.deletePackagePolicy.confirmModal.multipleAgentPolicies.affectedAgentsMessage"
-                  defaultMessage="This integration is shared by multiple agent policies that are already in use by some of your agents."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
-                  defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
-                  values={{
-                    agentPolicyName: <strong>{agentPolicies[0]?.name}</strong>,
-                  }}
-                />
-              )}
+              <FormattedMessage
+                id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
+                defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
+                values={{
+                  agentPolicyName: <strong>{agentPolicies[0]?.name}</strong>,
+                }}
+              />
             </EuiCallOut>
             <EuiSpacer size="l" />
           </>
