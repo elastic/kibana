@@ -9,120 +9,32 @@ import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import type { EuiComboBoxOptionOption, EuiSelectableOption } from '@elastic/eui';
-import { EuiFieldSearch, EuiFormRow } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 import { EuiSelectable } from '@elastic/eui';
 import {
   EuiPopoverFooter,
-  EuiButtonGroup,
   useEuiBackgroundColor,
   EuiFilterButton,
   EuiFilterGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInputPopover,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useFieldStatsTrigger } from './use_field_stats_trigger';
 import { useCurrentThemeVars } from '../../contexts/kibana';
+import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 
 const MIN_POPOVER_WIDTH = 300;
-const CHANGE_CHECK_DEBOUNCE = 100;
 
-const OptionsListPopoverActionBar = ({ searchString, updateSearchString, showOnlySelected }) => {
-  return (
-    <div className="optionsList__actions">
-      <EuiFormRow className="optionsList__searchRow" fullWidth>
-        <EuiFieldSearch
-          isInvalid={!searchString.valid}
-          compressed
-          disabled={showOnlySelected}
-          fullWidth
-          onChange={(event) => updateSearchString(event.target.value)}
-          value={searchString.value}
-          data-test-subj="optionsList-control-search-input"
-          // placeholder={OptionsListStrings.popover.getSearchPlaceholder(
-          //   allowExpensiveQueries ? defaultSearchTechnique : 'exact'
-          // )}
-        />
-      </EuiFormRow>
-
-      {/* <EuiFormRow className="optionsList__actionsRow" fullWidth>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-        >
-          {allowExpensiveQueries && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" data-test-subj="optionsList-cardinality-label">
-                {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
-              </EuiText>
-            </EuiFlexItem>
-          )}
-          {invalidSelections && invalidSelections.length > 0 && (
-            <>
-              {allowExpensiveQueries && (
-                <EuiFlexItem grow={false}>
-                  <div className="optionsList__actionBarDivider" />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {OptionsListStrings.popover.getInvalidSelectionsLabel(invalidSelections.length)}
-                </EuiText>
-              </EuiFlexItem>
-            </>
-          )}
-          <EuiFlexItem grow={true}>
-            <EuiFlexGroup
-              gutterSize="xs"
-              alignItems="center"
-              justifyContent="flexEnd"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={
-                    showOnlySelected
-                      ? OptionsListStrings.popover.getAllOptionsButtonTitle()
-                      : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
-                  }
-                >
-                  <EuiButtonIcon
-                    size="xs"
-                    iconType="list"
-                    aria-pressed={showOnlySelected}
-                    color={showOnlySelected ? 'primary' : 'text'}
-                    display={showOnlySelected ? 'base' : 'empty'}
-                    onClick={() => setShowOnlySelected(!showOnlySelected)}
-                    data-test-subj="optionsList-control-show-only-selected"
-                    aria-label={
-                      showOnlySelected
-                        ? OptionsListStrings.popover.getAllOptionsButtonTitle()
-                        : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
-                    }
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              {!hideSort && (
-                <EuiFlexItem grow={false}>
-                  <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow> */}
-    </div>
-  );
-};
-
-const OptionsListPopoverSuggestions = ({
+interface OptionsListPopoverSuggestionsProps {
+  options: EuiSelectableOption[];
+  renderOption: (option: EuiSelectableOption) => React.ReactNode;
+  singleSelection: boolean;
+  onChange: (newSuggestions: EuiSelectableOption[]) => void;
+  setPopoverOpen: (open: boolean) => void;
+}
+const OptionsListPopoverSuggestions: FC<OptionsListPopoverSuggestionsProps> = ({
   options,
   renderOption,
   singleSelection,
@@ -142,7 +54,7 @@ const OptionsListPopoverSuggestions = ({
       };
     });
     setSelectableOptions(_selectableOptions);
-  }, []);
+  }, [options.length]);
 
   return (
     <EuiSelectable
@@ -150,11 +62,6 @@ const OptionsListPopoverSuggestions = ({
       options={selectableOptions}
       renderOption={(option) => renderOption(option)}
       listProps={{ onFocusBadge: false }}
-      // aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
-      //   fieldName,
-      //   selectableOptions.length
-      // )}
-      // emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
       onChange={(newSuggestions, _, changedOption) => {
         if (singleSelection) {
           if (onChange) {
@@ -174,67 +81,47 @@ const OptionsListPopoverSuggestions = ({
   );
 };
 
-const aggregationToggleButtons = [
-  {
-    id: 'optionsList__includeResults',
-    key: 'optionsList__includeResults',
-    label: 'Show all',
-  },
-  {
-    id: 'optionsList__excludeResults',
-    key: 'optionsList__excludeResults',
-    label: 'Hide empty fields',
-  },
-];
-
-const OptionsListPopoverFooter = () => {
-  const [exclude, setExclude] = useState(true);
+const OptionsListPopoverFooter = ({ showEmptyFields, setShowEmptyFields }) => {
   const { euiTheme } = useCurrentThemeVars();
 
   return (
     <>
       <EuiPopoverFooter
         paddingSize="none"
-        css={css`
-          height: ${euiTheme.euiButtonHeight};
-          background-color: ${useEuiBackgroundColor('subdued')};
-        `}
+        css={css({
+          height: euiTheme.euiButtonHeight,
+          backgroundColor: useEuiBackgroundColor('subdued'),
+          alignItems: 'center',
+          display: 'flex',
+          paddingLeft: euiTheme.euiSizeS,
+        })}
       >
-        {/* {isLoading && (
-          <div style={{ position: 'absolute', width: '100%' }}>
-            <EuiProgress
-              data-test-subj="optionsList-control-popover-loading"
-              size="xs"
-              color="accent"
-            />
-          </div>
-        )}
- */}
-        <EuiFlexGroup
-          gutterSize="xs"
-          responsive={false}
-          alignItems="center"
-          css={css`
-            padding: ${euiTheme.euiPaddingSizeS};
-          `}
-          justifyContent={'spaceBetween'}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              legend={'legend'}
-              options={aggregationToggleButtons}
-              idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-              onChange={(optionId) => setExclude(optionId === 'optionsList__excludeResults')}
-              buttonSize="compressed"
-              data-test-subj="optionsList__includeExcludeButtonGroup"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiSwitch
+          label={i18n.translate(
+            'xpack.plugins.ml.controls.optionsList.popover.includeEmptyFieldsLabel',
+            {
+              defaultMessage: 'Include empty fields',
+            }
+          )}
+          checked={showEmptyFields}
+          onChange={(e) => setShowEmptyFields(e.target.checked)}
+        />
       </EuiPopoverFooter>
     </>
   );
 };
 
+interface OptionsListPopoverProps {
+  isLoading: boolean;
+  updateSearchString: (searchString: { value: string; valid: boolean }) => void;
+  loadMoreSuggestions: () => void;
+  options: EuiSelectableOption[];
+  renderOption: (option: EuiSelectableOption) => React.ReactNode;
+  searchString: { value: string; valid: boolean };
+  singleSelection: boolean;
+  onChange: (newSuggestions: EuiSelectableOption[]) => void;
+  setPopoverOpen: (open: boolean) => void;
+}
 const OptionsListPopover = ({
   isLoading,
   updateSearchString,
@@ -246,19 +133,16 @@ const OptionsListPopover = ({
   onChange,
   setPopoverOpen,
 }: OptionsListPopoverProps) => {
-  // const optionsList = useOptionsList();
+  const { populatedFields } = useFieldStatsFlyoutContext();
 
-  // const field = optionsList.select((state) => state.componentState.field);
-  // const availableOptions = optionsList.select((state) => state.componentState.availableOptions);
-  // const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
-
-  // const id = optionsList.select((state) => state.explicitInput.id);
-  // const hideExclude = optionsList.select((state) => state.explicitInput.hideExclude);
-  // const hideActionBar = optionsList.select((state) => state.explicitInput.hideActionBar);
-
-  const [hideExclude, setHideExclude] = useState(false);
-  const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [showEmptyFields, setShowEmptyFields] = useState(false);
   const id = useMemo(() => htmlIdGenerator()(), []);
+
+  const filteredOptions = useMemo(() => {
+    return showEmptyFields
+      ? options
+      : options.filter((option) => populatedFields?.has(option.field.id));
+  }, [options, showEmptyFields, populatedFields]);
 
   return (
     <div
@@ -266,26 +150,22 @@ const OptionsListPopover = ({
       className={'optionsList__popover'}
       data-test-subj={`optionsList-control-popover`}
     >
-      {/* <OptionsListPopoverActionBar
-        searchString={searchString}
-        showOnlySelected={showOnlySelected}
-        updateSearchString={updateSearchString}
-        setShowOnlySelected={setShowOnlySelected}
-      /> */}
       <div
         data-test-subj={`optionsList-control-available-options`}
         css={css({ width: '100%', height: '100%' })}
       >
         <OptionsListPopoverSuggestions
           renderOption={renderOption}
-          options={options}
-          showOnlySelected={showOnlySelected}
+          options={filteredOptions}
           singleSelection={singleSelection}
           onChange={onChange}
           setPopoverOpen={setPopoverOpen}
         />
       </div>
-      {!hideExclude && <OptionsListPopoverFooter isLoading={isLoading} />}
+      <OptionsListPopoverFooter
+        showEmptyFields={showEmptyFields}
+        setShowEmptyFields={setShowEmptyFields}
+      />
     </div>
   );
 };
@@ -306,137 +186,27 @@ const FALLBACK_PLACEHOLDER = i18n.translate('xpack.plugins.ml.selectOption.place
   defaultMessage: 'Any',
 });
 
-export const EuiComboBoxWithFieldStats: FC<
-  EuiComboBoxProps<string | number | string[] | undefined>
-> = ({
+type OptionWithFieldStats = EuiSelectableOption<{ field: { id: string } }>;
+interface EuiComboBoxWithFieldStatsProps
+  extends EuiComboBoxProps<string | number | string[] | undefined> {
+  ariaLabel: string;
+}
+export const EuiComboBoxWithFieldStats: FC<EuiComboBoxWithFieldStatsProps> = ({
   options,
   placeholder,
   singleSelection,
   onChange,
-  ariaLabel,
   selectedOptions,
+  isLoading,
+  ariaLabel,
   ...restProps
 }) => {
   const { euiTheme } = useCurrentThemeVars();
-  const comboBoxStyle = css`
-    margin: 2px;
-    .optionsList--filterGroup {
-      width: 100%;
-      box-shadow: none;
-      background-color: transparent;
-
-      .optionsList__inputButtonOverride {
-        max-inline-size: none;
-      }
-
-      .optionsList--filterBtn {
-        height: ${euiTheme.euiButtonHeight};
-        font-weight: ${euiTheme.euiFontWeightRegular};
-
-        &.optionsList--filterBtnPlaceholder {
-          color: ${euiTheme.euiTextSubduedColor};
-        }
-
-        .optionsList__selections {
-          overflow: hidden !important;
-        }
-
-        .optionsList__filter {
-          font-weight: ${euiTheme.euiFontWeightMedium};
-        }
-
-        .optionsList__filterInvalid {
-          color: ${euiTheme.euiColorWarningText};
-        }
-
-        .optionsList__negateLabel {
-          font-weight: ${euiTheme.euiFontWeightSemiBold};
-          font-size: ${euiTheme.euiSizeM};
-          color: ${euiTheme.euiColorDanger};
-        }
-
-        .optionsList--selectionText {
-          flex-grow: 1;
-          text-align: left;
-        }
-      }
-    }
-
-    .optionsList--sortPopover {
-      width: ${euiTheme.euiSizeXL * 7};
-    }
-
-    .optionsList__existsFilter {
-      font-style: italic;
-      font-weight: ${euiTheme.euiFontWeightMedium};
-    }
-
-    .optionsList__popoverOverride {
-      filter: none;
-    }
-    .optionsList__popover {
-      .optionsList__actions {
-        padding: 0 ${euiTheme.euiSizeS};
-        border-bottom: ${euiTheme.euiBorderThin};
-        border-color: ${euiTheme.euiColorLightestShade};
-
-        .optionsList__searchRow {
-          padding-top: ${euiTheme.euiSizeS};
-        }
-
-        .optionsList__actionsRow {
-          margin: calc(${euiTheme.euiSizeS} / 2) 0 !important;
-
-          .optionsList__actionBarDivider {
-            height: ${euiTheme.euiSize};
-            border-right: ${euiTheme.euiBorderThin};
-          }
-        }
-      }
-
-      .optionsList-control-ignored-selection-title {
-        padding-left: ${euiTheme.euiSizeM};
-      }
-
-      .optionsList__selectionInvalid {
-        color: ${euiTheme.euiColorWarningText};
-      }
-
-      .optionslist--loadingMoreGroupLabel {
-        text-align: center;
-        padding: ${euiTheme.euiSizeM};
-        font-style: italic;
-        height:  ${euiTheme.euiSizeXXL} !important;
-      }
-
-      .optionslist--endOfOptionsGroupLabel {
-        text-align: center;
-        font-size: ${euiTheme.euiSizeM};
-        height:  auto !important;
-        color: ${euiTheme.euiTextSubduedColor};
-        padding: ${euiTheme.euiSizeM};
-      }
-    }
-
-    }
-  `;
-
   const { renderOption } = useFieldStatsTrigger();
   const [searchString, updateSearchString] = useState({ value: '', valid: true });
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
-  // debounce loading state so loading doesn't flash when user types
-  const [debouncedLoading, setDebouncedLoading] = useState(false);
-  const debounceSetLoading = useMemo(
-    () =>
-      debounce((latestLoading: boolean) => {
-        setDebouncedLoading(latestLoading);
-      }, 100),
-    []
-  );
-  // useEffect(() => debounceSetLoading(loading ?? false), [loading, debounceSetLoading]);
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
-  const controlStyle = 'oneLine';
   const comboBoxOptions: EuiComboBoxOptionOption[] = useMemo(
     () =>
       Array.isArray(options)
@@ -458,7 +228,7 @@ export const EuiComboBoxWithFieldStats: FC<
         placeholder={placeholder}
         badgeColor="success"
         iconType="arrowDown"
-        isLoading={debouncedLoading}
+        isLoading={isLoading}
         css={css({
           height: euiTheme.euiButtonHeight,
           fontWeight: euiTheme.euiFontWeightRegular,
@@ -505,7 +275,7 @@ export const EuiComboBoxWithFieldStats: FC<
           }}
         >
           <OptionsListPopover
-            isLoading={debouncedLoading}
+            isLoading={isLoading}
             searchString={searchString}
             updateSearchString={updateSearchString}
             loadMoreSuggestions={loadMoreSuggestions}
