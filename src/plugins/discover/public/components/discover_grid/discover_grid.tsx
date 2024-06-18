@@ -13,6 +13,10 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 
+const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row) => {
+  return 'blue';
+};
+
 /**
  * Customized version of the UnifiedDataTable
  * @param props
@@ -24,6 +28,7 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
       showColumnTokens
       enableComparisonMode
       renderCustomToolbar={renderCustomToolbar}
+      getRowIndicatorColor={getRowIndicatorColor}
       {...props}
     />
   );
