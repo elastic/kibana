@@ -50,9 +50,7 @@ export default function (providerContext: FtrProviderContext) {
         }
       } catch (error) {
         retryCount++;
-        console.error(`Attempt ${retryCount} failed:`, error);
-        // You can add a delay between retries if needed
-        await new Promise((resolve) => setTimeout(resolve, 3000)); // 1 second delay
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 second delay before retry
       }
     }
 
