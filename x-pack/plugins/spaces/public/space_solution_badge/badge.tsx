@@ -16,7 +16,7 @@ const SolutionOptions: Record<
   NonNullable<Space['solution']>,
   { iconType: string; label: JSX.Element }
 > = {
-  search: {
+  es: {
     iconType: 'logoElasticsearch',
     label: (
       <FormattedMessage
@@ -31,7 +31,7 @@ const SolutionOptions: Record<
       <FormattedMessage id="xpack.spaces.spaceSolutionBadge.security" defaultMessage="Security" />
     ),
   },
-  observability: {
+  oblt: {
     iconType: 'logoObservability',
     label: (
       <FormattedMessage
