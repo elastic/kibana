@@ -77,6 +77,11 @@ export enum TelemetryEventTypes {
   OnboardingHubStepOpen = 'Onboarding Hub Step Open',
   OnboardingHubStepFinished = 'Onboarding Hub Step Finished',
   OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked',
+  ManualRuleRunOpenModal = 'Manual Rule Run Open Modal',
+  ManualRuleRunExecute = 'Manual Rule Run Execute',
+  ManualRuleRunCancelJob = 'Manual Rule Cancel Job',
+  EventLogFilterByRunType = 'Event Log Filter By Run Type',
+  EventLogShowSourceEventDateRange = 'Event Log Show Source Event Date Range',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {

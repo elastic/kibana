@@ -59,6 +59,13 @@ import type {
   OnboardingHubStepOpenParams,
   OnboardingHubTelemetryEvent,
 } from './events/onboarding/types';
+import type {
+  ManualRuleRunTelemetryEvent,
+  ReportManualRuleRunOpenModalParams,
+  ReportManualRuleRunExecuteParams,
+  ReportManualRuleRunCancelJobParams,
+  ReportManualRuleRunTelemetryEventParams,
+} from './events/manual_rule_run/types';
 
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
@@ -77,6 +84,7 @@ export type {
   ReportAssetCriticalityCsvImportedParams,
 } from './events/entity_analytics/types';
 export * from './events/document_details/types';
+export * from './events/manual_rule_run/types';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -120,7 +128,8 @@ export type TelemetryEventParams =
   | ReportDocumentDetailsTelemetryEventParams
   | OnboardingHubStepOpenParams
   | OnboardingHubStepFinishedParams
-  | OnboardingHubStepLinkClickedParams;
+  | OnboardingHubStepLinkClickedParams
+  | ReportManualRuleRunTelemetryEventParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
@@ -166,6 +175,11 @@ export interface TelemetryClientStart {
   reportOnboardingHubStepOpen(params: OnboardingHubStepOpenParams): void;
   reportOnboardingHubStepFinished(params: OnboardingHubStepFinishedParams): void;
   reportOnboardingHubStepLinkClicked(params: OnboardingHubStepLinkClickedParams): void;
+
+  // manual rule run
+  reportManualRuleRunOpenModal(params: ReportManualRuleRunOpenModalParams): void;
+  reportManualRuleRunExecute(params: ReportManualRuleRunExecuteParams): void;
+  reportManualRuleRunCancelJob(params: ReportManualRuleRunCancelJobParams): void;
 }
 
 export type TelemetryEvent =
@@ -191,4 +205,5 @@ export type TelemetryEvent =
       eventType: TelemetryEventTypes.BreadcrumbClicked;
       schema: RootSchema<ReportBreadcrumbClickedParams>;
     }
-  | OnboardingHubTelemetryEvent;
+  | OnboardingHubTelemetryEvent
+  | ManualRuleRunTelemetryEvent;

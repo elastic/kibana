@@ -29,7 +29,7 @@ const DEFAULT_PAGE_SIZE = 10;
 
 const getBackfillsTableColumns = (hasCRUDPermissions: boolean) => {
   const stopAction = {
-    render: (item: BackfillRow) => <StopBackfill id={item.id} />,
+    render: (item: BackfillRow) => <StopBackfill backfill={item} />,
     width: '10%',
   };
 

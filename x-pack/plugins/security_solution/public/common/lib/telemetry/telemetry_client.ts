@@ -36,6 +36,9 @@ import type {
   OnboardingHubStepLinkClickedParams,
   OnboardingHubStepOpenParams,
   OnboardingHubStepFinishedParams,
+  ReportManualRuleRunCancelJobParams,
+  ReportManualRuleRunExecuteParams,
+  ReportManualRuleRunOpenModalParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -172,5 +175,17 @@ export class TelemetryClient implements TelemetryClientStart {
 
   public reportOnboardingHubStepLinkClicked = (params: OnboardingHubStepLinkClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.OnboardingHubStepLinkClicked, params);
+  };
+
+  public reportManualRuleRunOpenModal = (params: ReportManualRuleRunOpenModalParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ManualRuleRunOpenModal, params);
+  };
+
+  public reportManualRuleRunExecute = (params: ReportManualRuleRunExecuteParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ManualRuleRunExecute, params);
+  };
+
+  public reportManualRuleRunCancelJob = (params: ReportManualRuleRunCancelJobParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ManualRuleRunCancelJob, params);
   };
 }
