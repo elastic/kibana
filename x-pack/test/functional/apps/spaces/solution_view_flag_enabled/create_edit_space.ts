@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
-  const spaces = getService('spaces');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
