@@ -633,7 +633,10 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     import('./navigation_tree').then(({ getNavigationTreeDefinition }) => {
       return plugins.navigation.addSolutionNavigation(
-        getNavigationTreeDefinition({ dynamicItems$: this.sideNavDynamicItems$ })
+        getNavigationTreeDefinition({
+          dynamicItems$: this.sideNavDynamicItems$,
+          isSearchHomepageEnabled: plugins.searchHomepage?.isHomepageFeatureEnabled() ?? false,
+        })
       );
     });
 
