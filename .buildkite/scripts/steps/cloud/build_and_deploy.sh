@@ -6,8 +6,6 @@ source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 
-set_in_legacy_vault "cloud-deploy/test" username="test"
-
 export KBN_NP_PLUGINS_BUILT=true
 
 VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
