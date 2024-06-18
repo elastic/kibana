@@ -6,6 +6,7 @@
  */
 
 import fs from 'fs/promises';
+import path from 'path';
 
 import apm from 'elastic-apm-node';
 
