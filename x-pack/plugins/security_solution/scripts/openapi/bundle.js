@@ -15,15 +15,15 @@ bundle({
   sourceGlob: join(ROOT, 'common/api/detection_engine/**/*.schema.yaml'),
   outputFilePath: join(
     ROOT,
-    'docs/openapi/serverless/security_solution_detection_engine_{version}.bundled.schema.yaml'
+    'docs/openapi/serverless/security_solution_detections_api_{version}.bundled.schema.yaml'
   ),
-  specInfo: {
-    title: 'Detections API',
-    description:
-      'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
-  },
   options: {
     includeLabels: ['serverless'],
+    specInfo: {
+      title: 'Security Solution Detections API (Elastic Cloud Serverless)',
+      description:
+        'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
+    },
   },
 });
 
@@ -31,14 +31,14 @@ bundle({
   sourceGlob: join(ROOT, 'common/api/detection_engine/**/*.schema.yaml'),
   outputFilePath: join(
     ROOT,
-    'docs/openapi/ess/security_solution_detection_engine_{version}.bundled.schema.yaml'
+    'docs/openapi/ess/security_solution_detections_api_{version}.bundled.schema.yaml'
   ),
-  specInfo: {
-    title: 'Detections API',
-    description:
-      'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
-  },
   options: {
     includeLabels: ['ess'],
+    specInfo: {
+      title: 'Security Solution Detections API (Elastic Cloud and self-hosted)',
+      description:
+        'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
+    },
   },
 });
