@@ -28,6 +28,7 @@ import type { SecurityUsageReportingTaskSetupContract, UsageRecord } from '../ty
 import { SecurityUsageReportingTask } from './usage_reporting_task';
 import { endpointMeteringService } from '../endpoint/services';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { USAGE_SERVICE_USAGE_URL } from '../constants';
 
 describe('SecurityUsageReportingTask', () => {
   const TITLE = 'test-task-title';
@@ -149,6 +150,7 @@ describe('SecurityUsageReportingTask', () => {
           productTypes: [
             { product_line: ProductLine.endpoint, product_tier: ProductTier.complete },
           ],
+          usageReportingApiUrl: USAGE_SERVICE_USAGE_URL,
         } as ServerlessSecurityConfig,
       });
       mockTask = new SecurityUsageReportingTask(taskArgs);
@@ -207,7 +209,8 @@ describe('SecurityUsageReportingTask', () => {
                   id: `endpoint-${_source.agent.id}-2021-09-01T00:00:00.000Z`,
                 })
               )
-            )
+            ),
+            USAGE_SERVICE_USAGE_URL
           );
         });
       });
@@ -222,7 +225,11 @@ describe('SecurityUsageReportingTask', () => {
         records: [usageRecord],
         shouldRunAgain: false,
       });
-      taskArgs = buildTaskArgs();
+      taskArgs = buildTaskArgs({
+        config: {
+          usageReportingApiUrl: USAGE_SERVICE_USAGE_URL,
+        } as ServerlessSecurityConfig,
+      });
       mockTask = new SecurityUsageReportingTask(taskArgs);
     }
 
@@ -279,7 +286,8 @@ describe('SecurityUsageReportingTask', () => {
               usage: { period_seconds: 3600, quantity: 1, type: USAGE_TYPE },
               usage_timestamp: usageRecord.usage_timestamp,
             }),
-          ])
+          ]),
+          USAGE_SERVICE_USAGE_URL
         );
       });
 
