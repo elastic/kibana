@@ -133,6 +133,9 @@ export function SearchEmbeddableGridComponent({
         });
         stateManager.sort.next(sortOrderArr);
       },
+      onUpdateSampleSize: (newSampleSize: number | undefined) => {
+        stateManager.sampleSize.next(newSampleSize);
+      },
     }),
     [stateManager, savedSearch.columns]
   );
@@ -140,10 +143,6 @@ export function SearchEmbeddableGridComponent({
   const fetchedSampleSize = useMemo(() => {
     return getAllowedSampleSize(savedSearch.sampleSize, discoverServices.uiSettings);
   }, [savedSearch.sampleSize, discoverServices]);
-
-  if (!dataView) {
-    return <></>;
-  }
 
   if (useLegacyTable) {
     return (
@@ -158,7 +157,7 @@ export function SearchEmbeddableGridComponent({
         onFilter={onAddFilter}
         rows={rows}
         rowsPerPageState={savedSearch.rowsPerPage}
-        sampleSizeState={savedSearch.sampleSize ?? 0}
+        sampleSizeState={fetchedSampleSize}
         searchDescription={panelDescription || savedSearchDescription}
         sharedItemTitle={panelTitle || savedSearchTitle}
         sort={sort}

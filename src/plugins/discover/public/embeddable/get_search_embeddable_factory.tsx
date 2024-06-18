@@ -12,7 +12,6 @@ import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { KibanaExecutionContext } from '@kbn/core/types';
 import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
@@ -22,9 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import {
-  apiHasAppContext,
-  apiHasExecutionContext,
-  apiHasParentApi,
   FetchContext,
   initializeTimeRange,
   initializeTitles,
@@ -41,6 +37,7 @@ import { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
 import { EDITABLE_PANEL_KEYS, EDITABLE_SAVED_SEARCH_KEYS } from './constants';
+import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import {
@@ -48,7 +45,6 @@ import {
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedState,
 } from './types';
-import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -102,7 +98,7 @@ export const getSearchEmbeddableFactory = ({
         };
       }
     },
-    buildEmbeddable: async (initialState, buildApi, uuid) => {
+    buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
       const {
         serialize: serializeTimeRange,
@@ -188,50 +184,18 @@ export const getSearchEmbeddableFactory = ({
         };
       };
 
-      const getAppTarget = async () => {
-        const savedObjectId = savedObjectId$.getValue();
-        const dataViews = searchEmbeddableApi.dataViews.getValue();
-        const locatorParams = getDiscoverLocatorParams({
-          ...searchEmbeddableApi,
-          savedObjectId: savedObjectId$,
-        });
-
-        // We need to use a redirect URL if this is a by value saved search using
-        // an ad hoc data view to ensure the data view spec gets encoded in the URL
-        const useRedirect = !savedObjectId && !dataViews?.[0]?.isPersisted();
-        const editUrl = useRedirect
-          ? discoverServices.locator.getRedirectUrl(locatorParams)
-          : await discoverServices.locator.getUrl(locatorParams);
-        const editPath = discoverServices.core.http.basePath.remove(editUrl);
-        const editApp = useRedirect ? 'r' : 'discover';
-
-        return { path: editPath, app: editApp, editUrl };
-      };
-
-      const getExecutionContext = async () => {
-        const { editUrl } = await getAppTarget();
-        const childContext: KibanaExecutionContext = {
-          type: SEARCH_EMBEDDABLE_TYPE,
-          name: 'discover',
-          id: savedObjectId$.getValue(),
-          description: api.panelTitle?.getValue() || api.defaultPanelTitle?.getValue() || '',
-          url: editUrl,
-        };
-        const executionContext =
-          apiHasParentApi(api) && apiHasExecutionContext(api.parentApi)
-            ? {
-                ...api.parentApi?.executionContext,
-                child: childContext,
-              }
-            : childContext;
-        return executionContext;
-      };
-
       const api: SearchEmbeddableApi = buildApi(
         {
           ...titlesApi,
           ...searchEmbeddableApi,
           ...timeRangeApi,
+          ...initializeEditApi({
+            uuid,
+            parentApi,
+            partialApi: { ...searchEmbeddableApi, fetchContext$, savedObjectId: savedObjectId$ },
+            discoverServices,
+            isEditable: startServices.isEditable,
+          }),
           dataLoading: dataLoading$,
           blockingError: blockingError$,
           savedObjectId: savedObjectId$,
@@ -300,35 +264,6 @@ export const getSearchEmbeddableFactory = ({
         }
       );
 
-      /**
-       * If the parent is providing context, then the embeddable state transfer service can be used
-       * and editing should be allowed; otherwise, do not provide editing capabilities
-       */
-      const parentApiContext =
-        apiHasParentApi(api) && apiHasAppContext(api.parentApi)
-          ? api.parentApi.getAppContext()
-          : undefined;
-      if (parentApiContext) {
-        api.isEditingEnabled = startServices.isEditable;
-        api.onEdit = async () => {
-          const stateTransfer = discoverServices.embeddable.getStateTransfer();
-          const appTarget = await getAppTarget();
-          await stateTransfer.navigateToEditor(appTarget.app, {
-            path: appTarget.path,
-            state: {
-              embeddableId: uuid,
-              valueInput: api.savedSearch$.getValue(),
-              originatingApp: parentApiContext.currentAppId,
-              searchSessionId: fetchContext$.getValue()?.searchSessionId,
-              originatingPath: parentApiContext.getCurrentPath?.(),
-            },
-          });
-        };
-        api.getEditHref = async () => {
-          return (await getAppTarget())?.path;
-        };
-      }
-
       const unsubscribeFromFetch = initializeFetch({
         api: {
           ...api,
@@ -338,7 +273,6 @@ export const getSearchEmbeddableFactory = ({
           fetchWarnings$,
         },
         discoverServices,
-        getExecutionContext,
         stateManager: searchEmbeddableStateManager,
       });
 
@@ -366,31 +300,6 @@ export const getSearchEmbeddableFactory = ({
             });
           }, [savedSearch]);
 
-          const onAddFilter = useCallback(
-            async (field, value, operator) => {
-              const dataView = dataViews?.[0];
-              if (!dataView) return;
-
-              let newFilters = generateFilters(
-                discoverServices.filterManager,
-                field,
-                value,
-                operator,
-                dataView
-              );
-              newFilters = newFilters.map((filter) => ({
-                ...filter,
-                $state: { store: FilterStateStore.APP_STATE },
-              }));
-
-              await startServices.executeTriggerActions(APPLY_FILTER_TRIGGER, {
-                embeddable: api,
-                filters: newFilters,
-              });
-            },
-            [dataViews]
-          );
-
           const dataView = useMemo(() => {
             const hasDataView = (dataViews ?? []).length > 0;
             if (!hasDataView) {
@@ -411,6 +320,30 @@ export const getSearchEmbeddableFactory = ({
             }
             return dataViews![0];
           }, [dataViews]);
+
+          const onAddFilter = useCallback(
+            async (field, value, operator) => {
+              if (!dataView) return;
+
+              let newFilters = generateFilters(
+                discoverServices.filterManager,
+                field,
+                value,
+                operator,
+                dataView
+              );
+              newFilters = newFilters.map((filter) => ({
+                ...filter,
+                $state: { store: FilterStateStore.APP_STATE },
+              }));
+
+              await startServices.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+                embeddable: api,
+                filters: newFilters,
+              });
+            },
+            [dataView]
+          );
 
           const renderAsFieldStatsTable = useMemo(
             () =>

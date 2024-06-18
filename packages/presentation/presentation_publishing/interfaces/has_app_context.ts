@@ -15,7 +15,7 @@ export interface EmbeddableAppContext {
 }
 
 export interface HasAppContext {
-  getAppContext: () => EmbeddableAppContext | undefined;
+  getAppContext: () => EmbeddableAppContext;
 }
 
 export const apiHasAppContext = (unknownApi: unknown): unknownApi is HasAppContext => {
