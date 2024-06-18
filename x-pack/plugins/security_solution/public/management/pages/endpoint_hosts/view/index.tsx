@@ -40,7 +40,7 @@ import { EndpointListNavLink } from './components/endpoint_list_nav_link';
 import {
   AgentStatus,
   EndpointAgentStatus,
-} from '../../../../common/components/agents/agent_status';
+} from '../../../../common/components/endpoint/agents/agent_status';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { getEndpointPendingActionsCallback, nonExistingPolicies } from '../store/selectors';
