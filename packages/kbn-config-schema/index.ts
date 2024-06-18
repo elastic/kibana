@@ -23,6 +23,8 @@ import {
   ConditionalTypeValue,
   DurationOptions,
   DurationType,
+  IntersectionType,
+  IntersectionTypeOptions,
   IpOptions,
   IpType,
   LiteralType,
@@ -34,6 +36,7 @@ import {
   NumberType,
   ObjectType,
   ObjectTypeOptions,
+  ObjectResultType,
   Props,
   NullableProps,
   RecordOfOptions,
@@ -199,6 +202,164 @@ function oneOf<RTS extends Array<Type<any>>>(
   return new UnionType(types, options);
 }
 
+function allOf<
+  A extends Props,
+  B extends Props,
+  C extends Props,
+  D extends Props,
+  E extends Props,
+  F extends Props,
+  G extends Props,
+  H extends Props,
+  I extends Props,
+  J extends Props,
+  K extends Props
+>(
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>,
+    ObjectType<I>,
+    ObjectType<J>,
+    ObjectType<K>
+  ],
+  options?: UnionTypeOptions<A & B & C & D & E & F & G & H & I & J & K>
+): Type<ObjectResultType<A & B & C & D & E & F & G & H & I & J & K>>;
+function allOf<
+  A extends Props,
+  B extends Props,
+  C extends Props,
+  D extends Props,
+  E extends Props,
+  F extends Props,
+  G extends Props,
+  H extends Props,
+  I extends Props,
+  J extends Props
+>(
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>,
+    ObjectType<I>,
+    ObjectType<J>
+  ],
+  options?: UnionTypeOptions<A & B & C & D & E & F & G & H & I & J>
+): Type<ObjectResultType<A & B & C & D & E & F & G & H & I & J>>;
+function allOf<
+  A extends Props,
+  B extends Props,
+  C extends Props,
+  D extends Props,
+  E extends Props,
+  F extends Props,
+  G extends Props,
+  H extends Props,
+  I extends Props
+>(
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>,
+    ObjectType<I>
+  ],
+  options?: UnionTypeOptions<A & B & C & D & E & F & G & H & I>
+): Type<ObjectResultType<A & B & C & D & E & F & G & H & I>>;
+function allOf<
+  A extends Props,
+  B extends Props,
+  C extends Props,
+  D extends Props,
+  E extends Props,
+  F extends Props,
+  G extends Props,
+  H extends Props
+>(
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>
+  ],
+  options?: UnionTypeOptions<A & B & C & D & E & F & G & H>
+): Type<ObjectResultType<A & B & C & D & E & F & G & H>>;
+function allOf<
+  A extends Props,
+  B extends Props,
+  C extends Props,
+  D extends Props,
+  E extends Props,
+  F extends Props,
+  G extends Props
+>(
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>
+  ],
+  options?: UnionTypeOptions<A & B & C & D & E & F & G>
+): Type<ObjectResultType<A & B & C & D & E & F & G>>;
+function allOf<
+  A extends Props,
+  B extends Props,
+  C extends Props,
+  D extends Props,
+  E extends Props,
+  F extends Props
+>(
+  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>, ObjectType<F>],
+  options?: UnionTypeOptions<A & B & C & D & E & F>
+): Type<ObjectResultType<A & B & C & D & E & F>>;
+function allOf<A extends Props, B extends Props, C extends Props, D extends Props, E extends Props>(
+  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>],
+  options?: UnionTypeOptions<A & B & C & D & E>
+): Type<ObjectResultType<A & B & C & D & E>>;
+function allOf<A extends Props, B extends Props, C extends Props, D extends Props>(
+  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>],
+  options?: UnionTypeOptions<A & B & C & D>
+): Type<ObjectResultType<A & B & C & D>>;
+function allOf<A extends Props, B extends Props, C extends Props>(
+  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>],
+  options?: UnionTypeOptions<A & B & C>
+): Type<ObjectResultType<A & B & C>>;
+function allOf<A extends Props, B extends Props>(
+  types: [ObjectType<A>, ObjectType<B>],
+  options?: UnionTypeOptions<A & B>
+): Type<ObjectResultType<A & B>>;
+function allOf<A extends Props>(
+  types: [ObjectType<A>],
+  options?: UnionTypeOptions<A>
+): Type<ObjectResultType<A>>;
+function allOf<RTS extends Array<ObjectType<any>>>(
+  types: RTS,
+  options?: IntersectionTypeOptions<any>
+): Type<any> {
+  return new IntersectionType(types, options);
+}
+
 function contextRef<T>(key: string): ContextReference<T> {
   return new ContextReference(key);
 }
@@ -225,6 +386,7 @@ function lazy<T>(id: string) {
 }
 
 export const schema = {
+  allOf,
   any,
   arrayOf,
   boolean,
@@ -233,6 +395,7 @@ export const schema = {
   conditional,
   contextRef,
   duration,
+  intersection: allOf,
   ip,
   lazy,
   literal,
