@@ -48,11 +48,11 @@ import {
   getFormattedGroupBy,
 } from '../common/utils';
 import { getEvaluationValues, getThresholds } from '../common/get_values';
-import { Group } from '../common/types';
 
 import { EvaluatedRuleParams, evaluateRule, Evaluation } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
+import { Group } from '../../../../common/alerting/types';
 
 export type MetricThresholdAlert = Omit<
   ObservabilityMetricsAlert,
