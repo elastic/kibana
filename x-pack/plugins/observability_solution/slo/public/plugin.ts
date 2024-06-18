@@ -125,7 +125,7 @@ export class SloPlugin
               './embeddable/slo/alerts/slo_alerts_embeddable_factory'
             );
 
-            return getAlertsEmbeddableFactory(deps, kibanaVersion);
+            return getAlertsEmbeddableFactory(coreSetup.getStartServices, kibanaVersion);
           }
         );
 
