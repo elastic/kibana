@@ -22,7 +22,7 @@ interface ColumnsNumberSettingProps {
    */
   onFloatingColumnsChange?: (value: number) => void;
   /**
-   * Indicates if legend is located outside
+   * Indicates if the component should be hidden
    */
   isHidden: boolean;
 }

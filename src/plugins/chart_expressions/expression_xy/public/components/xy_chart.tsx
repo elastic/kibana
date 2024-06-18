@@ -1057,10 +1057,7 @@ function getLegendTitle(
   if (typeof title === 'string' && title.length > 0) {
     return title;
   }
-  if (!layer) {
-    return defaultLegendTitle;
-  }
-  return layer.splitAccessors?.[0]
+  return layer?.splitAccessors?.[0]
     ? getColumnByAccessor(layer.splitAccessors?.[0], layer?.table.columns)?.name
     : defaultLegendTitle;
 }
