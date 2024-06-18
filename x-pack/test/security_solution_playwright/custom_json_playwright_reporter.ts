@@ -26,6 +26,7 @@ class JSONSummaryReporter implements Reporter, Summary {
   failed: string[] = [];
   warned: string[] = [];
   timedOut: string[] = [];
+  interrupted: string[] = [];
 
   status: Summary['status'] = 'unknown';
   startedAt = 0;
