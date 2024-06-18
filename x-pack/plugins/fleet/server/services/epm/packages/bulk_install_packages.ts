@@ -63,14 +63,6 @@ export async function bulkInstallPackages({
     return pkg.name;
   });
 
-  const forbiddenPackages = uniquePackages
-    .filter((pkg) =>
-      typeof pkg === 'string'
-        ? FORBIDDEN_BULK_INSTALL_PACKAGE_NAMES.includes(pkg)
-        : FORBIDDEN_BULK_INSTALL_PACKAGE_NAMES.includes(pkg.name)
-    )
-    .map((pkg) => (typeof pkg === 'string' ? pkg : pkg.name));
-
   const maxConcurrentInstalls =
     appContextService.getConfig()?.internal?.maxConcurrentBulkInstallations ??
     DEFAULT_MAX_CONCURRENT_INSTALLS;

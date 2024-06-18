@@ -310,6 +310,7 @@ jest.mock('./app_context', () => ({
       agentless: false,
     }),
     getInternalUserSOClientForSpaceId: jest.fn(),
+    getConfig: jest.fn(),
   },
 }));
 

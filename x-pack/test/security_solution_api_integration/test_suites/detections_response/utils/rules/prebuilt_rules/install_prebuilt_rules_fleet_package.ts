@@ -73,11 +73,10 @@ export const installPrebuiltRulesFleetPackage = async ({
       installPrebuiltRulesFleetPackage.name,
       async () => {
         const testResponse = await supertest
-          .post(epmRouteService.getBulkInstallPath())
+          .post(epmRouteService.getInstallPath('security_detection_engine', ''))
           .query({ prerelease: true })
           .set('kbn-xsrf', 'true')
           .send({
-            packages: ['security_detection_engine'],
             force: overrideExistingPackage,
           })
           .expect(200);
