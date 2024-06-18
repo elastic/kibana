@@ -27,7 +27,7 @@ export function initTimeRangePercentage(
     state.timesliceEndAsPercentageOfTimeRange
   );
 
-  // debounce to avoid calling 'resetTimeslice' on each comparitor reset
+  // debounce to avoid calling 'resetTimeslice' on each comparator reset
   const debouncedOnReset = debounce(() => {
     onReset(
       timesliceStartAsPercentageOfTimeRange$.value,
