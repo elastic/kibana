@@ -55,7 +55,6 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            {/* <EuiPanel hasShadow={false} hasBorder={false} paddingSize="l"> */}
             <EuiFlexGroup
               direction="column"
               gutterSize="none"
@@ -94,7 +93,6 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
                 </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {/* </EuiPanel> */}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiImage
