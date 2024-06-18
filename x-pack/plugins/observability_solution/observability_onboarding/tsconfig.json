@@ -36,12 +36,14 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/cloud-experiments-plugin",
     "@kbn/home-sample-data-tab",
-    "@kbn/analytics-client",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
     "@kbn/discover-plugin",
     "@kbn/utility-types",
-    "@kbn/spaces-plugin"
+    "@kbn/spaces-plugin",
+    "@kbn/ebt"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

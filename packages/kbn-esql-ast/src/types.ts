@@ -18,7 +18,9 @@ export type ESQLSingleAstItem =
   | ESQLTimeInterval
   | ESQLList
   | ESQLLiteral
-  | ESQLCommandMode;
+  | ESQLCommandMode
+  | ESQLInlineCast
+  | ESQLUnknownItem;
 
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
@@ -57,6 +59,27 @@ export interface ESQLCommandMode extends ESQLAstBaseItem {
 export interface ESQLFunction extends ESQLAstBaseItem {
   type: 'function';
   args: ESQLAstItem[];
+}
+
+export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem {
+  type: 'inlineCast';
+  value: ValueType;
+  castType: string;
+}
+
+/**
+ * This node represents something the AST generator
+ * didn't recognize in the ANTLR parse tree.
+ *
+ * It can show up if the AST generator code is out of sync
+ * with the ANTLR grammar or if there is some idiosyncrasy
+ * or bug in the parse tree.
+ *
+ * These nodes can be ignored for the purpose of validation
+ * and autocomplete, but they may be helpful in detecting bugs.
+ */
+export interface ESQLUnknownItem extends ESQLAstBaseItem {
+  type: 'unknown';
 }
 
 export interface ESQLTimeInterval extends ESQLAstBaseItem {
