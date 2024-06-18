@@ -55,6 +55,7 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
   try {
     await fs.stat(bundledPackageLocation);
   } catch (error) {
+    const logger = appContextService.getLogger();
     logger.warn(`unable to stat ${bundledPackageLocation}: ${error}`);
     return [];
   }
