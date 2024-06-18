@@ -60,7 +60,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
       const request = await sendGetAgents({
         kuery,
-        showInactive: true,
+        showInactive: false,
       });
       setAgentsCount(request.data?.total || 0);
       setIsLoadingAgentsCount(false);
