@@ -79,7 +79,8 @@ describe(
         it('disables the suppression fields and displays a message', () => {
           cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
           cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).realHover();
-          cy.get(TOOLTIP).contains(
+          cy.get(TOOLTIP).should(
+            'contain.text',
             'To enable alert suppression, start one or more Machine Learning jobs.'
           );
         });
