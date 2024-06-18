@@ -142,7 +142,7 @@ export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
   indexPattern?: DataViewBase;
-  machineLearningJobId: string[] | undefined;
+  machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
   dataViewId?: string;
   dataViewTitle?: string;
