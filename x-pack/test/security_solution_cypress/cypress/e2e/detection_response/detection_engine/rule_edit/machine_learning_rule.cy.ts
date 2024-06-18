@@ -18,6 +18,11 @@ import {
   SUPPRESS_FOR_DETAILS,
   SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
+import {
+  executeSetupModuleRequest,
+  forceStartDatafeeds,
+  stopDatafeeds,
+} from '../../../../support/machine_learning';
 import { editFirstRule } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -50,23 +55,32 @@ describe(
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
-    const suppressByFields = ['agent.name', 'host.name'];
+    const suppressByFields = ['by_field_name', 'by_field_value'];
+    const jobId = 'v3_linux_anomalous_network_activity';
+
+    // ensure no ML datafeeds are started before the test
+    before(() => {
+      stopDatafeeds({ jobIds: [jobId] });
+    });
 
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
+      cy.task('esArchiverLoad', { archiveName: '../auditbeat/hosts', type: 'ftr' });
+      executeSetupModuleRequest({ moduleName: 'security_linux_v3' });
+      forceStartDatafeeds({ jobIds: [jobId] });
+      cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });
     });
 
     describe('without Alert Suppression', () => {
       beforeEach(() => {
-        mlRule = getMachineLearningRule();
+        mlRule = getMachineLearningRule({ machine_learning_job_id: [jobId] });
         createRule(mlRule);
         visit(RULES_MANAGEMENT_URL);
         editFirstRule();
       });
 
-      // TODO: this won't work until https://github.com/elastic/kibana/issues/183100 is addressed
-      it.skip('allows editing of a rule to add suppression configuration', () => {
+      it('allows editing of a rule to add suppression configuration', () => {
         fillAlertSuppressionFields(suppressByFields);
         selectAlertSuppressionPerInterval();
         setAlertSuppressionDuration(2, 'h');
@@ -90,7 +104,7 @@ describe(
     describe('with Alert Suppression', () => {
       beforeEach(() => {
         mlRule = {
-          ...getMachineLearningRule(),
+          ...getMachineLearningRule({ machine_learning_job_id: [jobId] }),
           alert_suppression: {
             group_by: suppressByFields,
             duration: { value: 360, unit: 's' },
