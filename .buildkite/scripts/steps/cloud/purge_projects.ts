@@ -8,8 +8,7 @@
 
 import { execSync } from 'child_process';
 import axios from 'axios';
-
-const secretBasePath = 'secret/kibana-issues/dev';
+import { getKibanaDir } from '#pipeline-utils';
 
 async function getPrProjects() {
   const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability)$/;
@@ -53,7 +52,9 @@ async function deleteProject({
 }) {
   try {
     await projectRequest.delete(`/api/v1/serverless/projects/${type}/${id}`);
-    execSync(`vault delete ${secretBasePath}/cloud-deploy/${name}`, {
+
+    execSync(`.buildkite/scripts/common/deployment_credentials.sh unset ${name}`, {
+      cwd: getKibanaDir(),
       stdio: 'inherit',
     });
   } catch (e) {

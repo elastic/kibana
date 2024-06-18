@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
+# TODO: rewrite after https://github.com/elastic/kibana-operations/issues/15 is done
 export LEGACY_VAULT_ADDR="https://secrets.elastic.co:8200"
 if [[ "${VAULT_ADDR:-}" == "$LEGACY_VAULT_ADDR" ]]; then
   VAULT_PATH_PREFIX="secret/kibana-issues/dev"
@@ -100,5 +100,25 @@ function set_in_legacy_vault() {
   unset VAULT_TOKEN
 
   # shellcheck disable=SC2068
-  VAULT_ADDR=$LEGACY_VAULT_ADDR vault write "secret/kibana-issues/dev/$key_path" ${fields[@]}
+  VAULT_ADDR=$LEGACY_VAULT_ADDR vault write "secret/kibana-issues/dev/cloud-deploy/$key_path" ${fields[@]}
+}
+
+function unset_in_legacy_vault() {
+  key_path=$1
+
+  VAULT_ROLE_ID="$(get_vault_role_id)"
+  VAULT_SECRET_ID="$(get_vault_secret_id)"
+
+  VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+  VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
+  unset VAULT_TOKEN
+
+  # shellcheck disable=SC2068
+  VAULT_ADDR=$LEGACY_VAULT_ADDR vault delete "secret/kibana-issues/dev/cloud-deploy/$key_path"
+}
+
+function print_legacy_vault_read() {
+  key_path=$1
+
+  echo "vault read -address=$LEGACY_VAULT_ADDR secret/kibana-issues/dev/cloud-deploy/$key_path"
 }
