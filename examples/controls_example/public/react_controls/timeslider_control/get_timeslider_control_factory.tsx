@@ -274,6 +274,7 @@ export const getTimesliderControlFactory = (
 
           return (
             <EuiInputPopover
+              {...controlStyleProps}
               className="timeSlider__popoverOverride"
               panelClassName="timeSlider__panelOverride"
               input={
