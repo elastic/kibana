@@ -297,6 +297,7 @@ export function LensEditConfigurationFlyout({
         visualizationMap,
         adHocDataViews,
         setErrors,
+        visualization,
         abortController
       );
       if (attrs) {
@@ -307,6 +308,7 @@ export function LensEditConfigurationFlyout({
       setIsVisualizationLoading(false);
     },
     [
+      visualization,
       startDependencies,
       datasourceMap,
       visualizationMap,
