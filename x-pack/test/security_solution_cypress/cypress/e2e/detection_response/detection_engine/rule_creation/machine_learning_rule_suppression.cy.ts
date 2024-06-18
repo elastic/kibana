@@ -67,7 +67,7 @@ describe(
     describe('with Alert Suppression', () => {
       describe('when no ML jobs have run', () => {
         before(() => {
-          stopDatafeeds({ jobIds: [jobId] });
+          stopDatafeeds({ jobIds: getMachineLearningRule().machine_learning_job_id });
         });
 
         beforeEach(() => {

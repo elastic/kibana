@@ -60,7 +60,7 @@ describe(
 
     // ensure no ML datafeeds are started before the test
     before(() => {
-      stopDatafeeds({ jobIds: [jobId] });
+      stopDatafeeds({ jobIds: getMachineLearningRule().machine_learning_job_id });
     });
 
     beforeEach(() => {
