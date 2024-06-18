@@ -348,7 +348,7 @@ export const RULE_FORM_ROUTE_PARAMS_ERROR_TEXT = i18n.translate(
 );
 
 export const RULE_FORM_RULE_TYPE_NOT_FOUND_ERROR_TITLE = i18n.translate(
-  'alertsUIShared.ruleForm.ruleNotFoundErrorTitle',
+  'alertsUIShared.ruleForm.ruleTypeNotFoundErrorTitle',
   {
     defaultMessage: 'Unable to load rule type.',
   }
@@ -362,7 +362,7 @@ export const RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE = i18n.translate(
 );
 
 export const RULE_FORM_RULE_TYPE_NOT_FOUND_ERROR_TEXT = i18n.translate(
-  'alertsUIShared.ruleForm.ruleNotFoundErrorText',
+  'alertsUIShared.ruleForm.ruleTypeNotFoundErrorText',
   {
     defaultMessage:
       'There was an error loading the rule type. Please ensure you have access to the rule type selected.',
@@ -444,26 +444,26 @@ export const CONFIRM_RULE_SAVE_MESSAGE_TEXT = i18n.translate(
 );
 
 export const RULE_FORM_PAGE_RULE_DEFINITION_TITLE = i18n.translate(
-  'alertsUiShared.ruleForm.ruleDefinitionTitle',
+  'alertsUIShared.ruleForm.ruleDefinitionTitle',
   {
     defaultMessage: 'Rule definition',
   }
 );
 
 export const RULE_FORM_PAGE_RULE_ACTIONS_TITLE = i18n.translate(
-  'alertsUiShared.ruleForm.ruleActionsTitle',
+  'alertsUIShared.ruleForm.ruleActionsTitle',
   {
     defaultMessage: 'Actions',
   }
 );
 
 export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
-  'alertsUiShared.ruleForm.ruleDetailsTitle',
+  'alertsUIShared.ruleForm.ruleDetailsTitle',
   {
     defaultMessage: 'Rule details',
   }
 );
 
-export const RULE_FORM_RETURN_TITLE = i18n.translate('alertsUiShared.ruleForm.returnTitle', {
+export const RULE_FORM_RETURN_TITLE = i18n.translate('alertsUIShared.ruleForm.returnTitle', {
   defaultMessage: 'Return',
 });
