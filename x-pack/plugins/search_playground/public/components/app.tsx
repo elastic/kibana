@@ -5,14 +5,26 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import { StartNewChat } from './start_new_chat';
+import { useFormContext } from 'react-hook-form';
+import { SetupPage } from './setup_page/setup_page';
+import { useLoadConnectors } from '../hooks/use_load_connectors';
+import { ChatForm, ChatFormFields } from '../types';
 import { Chat } from './chat';
 
 export const App: React.FC = () => {
-  const [showStartPage, setShowStartPage] = useState(true);
+  const [showSetupPage, setShowSetupPage] = useState(true);
+  const { watch } = useFormContext<ChatForm>();
+  const { data: connectors } = useLoadConnectors();
+  const hasSelectedIndices = watch(ChatFormFields.indices).length;
+
+  useEffect(() => {
+    if (showSetupPage && connectors?.length && hasSelectedIndices) {
+      setShowSetupPage(false);
+    }
+  }, [connectors, hasSelectedIndices, showSetupPage]);
 
   return (
     <KibanaPageTemplate.Section
@@ -26,7 +38,7 @@ export const App: React.FC = () => {
       paddingSize="none"
       className="eui-fullHeight"
     >
-      {showStartPage ? <StartNewChat onStartClick={() => setShowStartPage(false)} /> : <Chat />}
+      {showSetupPage ? <SetupPage /> : <Chat />}
     </KibanaPageTemplate.Section>
   );
 };

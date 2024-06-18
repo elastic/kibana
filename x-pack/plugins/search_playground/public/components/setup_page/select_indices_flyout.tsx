@@ -1,0 +1,133 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiSelectable,
+  EuiSpacer,
+  EuiTabbedContent,
+  EuiTitle,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
+import { useQueryIndices } from '../../hooks/use_query_indices';
+
+interface SelectIndicesFlyout {
+  onClose: () => void;
+}
+
+export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) => {
+  const { indices: selectedIndices, setIndices: setSelectedIndices } = useSourceIndicesFields();
+  const { indices, isLoading: isIndicesLoading } = useQueryIndices();
+  const [selectedTempIndices, setSelectedTempIndices] = useState<string[]>(selectedIndices);
+  const handleSelectOptions = (options: EuiSelectableOption[]) => {
+    setSelectedTempIndices(
+      options.filter((option) => option.checked === 'on').map((option) => option.label)
+    );
+  };
+
+  const handleSaveQuery = () => {
+    setSelectedIndices(selectedTempIndices);
+    onClose();
+  };
+  const tabs = [
+    {
+      id: 'indices',
+      name: i18n.translate('xpack.searchPlayground.setupPage.addDataSource.flyout.tabName', {
+        defaultMessage: 'Indices',
+      }),
+      content: (
+        <>
+          <EuiSpacer />
+          <EuiSelectable
+            searchable
+            options={[
+              {
+                label: i18n.translate(
+                  'xpack.searchPlayground.setupPage.addDataSource.flyout.groupOption',
+                  {
+                    defaultMessage: 'Available indices',
+                  }
+                ),
+                isGroupLabel: true,
+              },
+              ...indices.map(
+                (index) =>
+                  ({
+                    label: index,
+                    checked: selectedTempIndices.includes(index) ? 'on' : '',
+                  } as EuiSelectableOption)
+              ),
+            ]}
+            onChange={handleSelectOptions}
+            listProps={{
+              showIcons: true,
+              bordered: false,
+            }}
+            isLoading={isIndicesLoading}
+            renderOption={undefined}
+          >
+            {(list, search) => (
+              <>
+                {search}
+                {list}
+              </>
+            )}
+          </EuiSelectable>
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <EuiFlyout size="s" ownFocus onClose={onClose} data-test-subj="selectIndicesFlyout">
+      <EuiFlyoutHeader>
+        <EuiTitle size="m">
+          <h2>
+            <FormattedMessage
+              id="xpack.searchPlayground.setupPage.addDataSource.flyout.title"
+              defaultMessage="Add data to query"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+              <FormattedMessage
+                id="xpack.searchPlayground.setupPage.addDataSource.flyout.closeButton"
+                defaultMessage="Close"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={handleSaveQuery} fill>
+              <FormattedMessage
+                id="xpack.searchPlayground.setupPage.addDataSource.flyout.saveButton"
+                defaultMessage="Save and continue"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+};

@@ -116,12 +116,19 @@ export const useSourceIndicesFields = () => {
     usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
   };
 
+  const setIndices = (indices: IndexName[]) => {
+    setLoading(true);
+    onIndicesChange(indices);
+    usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, indices.length);
+  };
+
   return {
     indices: selectedIndices,
     fields,
     loading,
     addIndex,
     removeIndex,
+    setIndices,
     noFieldsIndicesWarning,
   };
 };

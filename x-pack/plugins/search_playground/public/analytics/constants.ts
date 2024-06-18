@@ -27,7 +27,7 @@ export enum AnalyticsEvents {
   retrievalDocsFlyoutOpened = 'retrieval_docs_flyout_opened',
   sourceFieldsLoaded = 'source_fields_loaded',
   sourceIndexUpdated = 'source_index_updated',
-  startNewChatPageLoaded = 'start_new_chat_page_loaded',
+  setupChatPageLoaded = 'start_new_chat_page_loaded',
   viewQueryFlyoutOpened = 'view_query_flyout_opened',
   viewQueryFieldsUpdated = 'view_query_fields_updated',
   viewQuerySaved = 'view_query_saved',
