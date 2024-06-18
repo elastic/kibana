@@ -19,6 +19,7 @@ import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetRemoteScriptsParams,
   SentinelOneGetRemoteScriptsResponse,
+  SentinelOneExecuteScriptResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
@@ -475,12 +476,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           SentinelOneGetActivitiesResponse<{ commandBatchUuid: string }>
         >(SUB_ACTION.GET_ACTIVITIES, activitySearchCriteria);
 
-        this.log.debug(
-          `Search of activity log with:\n${stringify(
-            activitySearchCriteria
-          )}\n returned:\n${stringify(activityLogSearchResponse.data)}`
-        );
-
         if (activityLogSearchResponse.data?.data.length) {
           const activityLogItem = activityLogSearchResponse.data?.data[0];
 
@@ -669,23 +664,28 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         );
 
         try {
-          const s1Response = await this.sendAction(SUB_ACTION.EXECUTE_SCRIPT, {
-            filter: {
-              uuids: actionRequest.endpoint_ids[0],
-            },
-            script: {
-              scriptId: terminateScriptInfo.scriptId,
-              taskDescription: this.buildExternalComment(reqIndexOptions),
-              requiresApproval: false,
-              outputDestination: 'SentinelCloud',
-              inputParams: terminateScriptInfo.buildScriptArgs({
-                // @ts-expect-error TS2339: Property 'process_name' does not exist (`.validateRequest()` has already validated that `process_name` exists)
-                processName: reqIndexOptions.parameters.process_name,
-              }),
-            },
-          });
+          const s1Response = await this.sendAction<SentinelOneExecuteScriptResponse>(
+            SUB_ACTION.EXECUTE_SCRIPT,
+            {
+              filter: {
+                uuids: actionRequest.endpoint_ids[0],
+              },
+              script: {
+                scriptId: terminateScriptInfo.scriptId,
+                taskDescription: this.buildExternalComment(reqIndexOptions),
+                requiresApproval: false,
+                outputDestination: 'SentinelCloud',
+                inputParams: terminateScriptInfo.buildScriptArgs({
+                  // @ts-expect-error TS2339: Property 'process_name' does not exist (`.validateRequest()` has already validated that `process_name` exists)
+                  processName: reqIndexOptions.parameters.process_name,
+                }),
+              },
+            }
+          );
 
-          reqIndexOptions.meta.parentTaskId = s1Response.data.data.parentTaskId ?? '';
+          reqIndexOptions.meta = {
+            parentTaskId: s1Response.data?.data?.parentTaskId ?? '',
+          };
         } catch (err) {
           error = err;
         }
@@ -786,16 +786,30 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     scriptType: Extract<ResponseActionsApiCommandNames, 'kill-process'>,
     osType: string | 'linux' | 'macos' | 'windows'
   ): Promise<FetchScriptInfoResponse<TScriptOptions>> {
-    const searchQueryParams: Mutable<SentinelOneGetRemoteScriptsParams> = {
+    const searchQueryParams: Mutable<Partial<SentinelOneGetRemoteScriptsParams>> = {
       query: '',
       osTypes: osType,
     };
     let buildScriptArgs = NOOP_THROW as FetchScriptInfoResponse<TScriptOptions>['buildScriptArgs'];
+    let isDesiredScript: (
+      scriptInfo: SentinelOneGetRemoteScriptsResponse['data'][number]
+    ) => boolean = () => false;
 
     // Set the query value for filtering the list of scripts in S1
     switch (scriptType) {
       case 'kill-process':
         searchQueryParams.query = 'terminate';
+        searchQueryParams.scriptType = 'action';
+
+        isDesiredScript = (scriptInfo) => {
+          return (
+            scriptInfo.creator === 'SentinelOne' &&
+            scriptInfo.creatorId === '-1' &&
+            // Using single `-` in match below to ensure both windows and macos/linux are matched
+            /-terminate/i.test(scriptInfo.inputInstructions ?? '') &&
+            /-processes/i.test(scriptInfo.inputInstructions ?? '')
+          );
+        };
         break;
 
       default:
@@ -810,13 +824,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         searchQueryParams
       );
 
-    // We are looking for the script that is provided out of the box by SentinelOne - that script should
-    // have a `creator` of `SentinelOne` with a `creatorId` of `-1`.
-    const terminateScript = (scriptSearchResults?.data ?? []).find((scriptInfo) => {
-      return scriptInfo.creator === 'SentinelOne' && scriptInfo.creatorId === '-1';
-    });
+    const s1Script: SentinelOneGetRemoteScriptsResponse['data'][number] | undefined = (
+      scriptSearchResults?.data ?? []
+    ).find(isDesiredScript);
 
-    if (!terminateScript) {
+    if (!s1Script) {
       throw new ResponseActionsClientError(
         `Did not find a script from SentinelOne to handle ([${scriptType}][${osType}])`
       );
@@ -827,7 +839,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         buildScriptArgs = (args: SentinelOneKillProcessScriptArgs) => {
           if (!args.processName) {
             throw new ResponseActionsClientError(
-              `'processName' missing while building script args for [${terminateScript.scriptName} (id: ${terminateScript.id})] script`
+              `'processName' missing while building script args for [${s1Script.scriptName} (id: ${s1Script.id})] script`
             );
           }
 
@@ -843,8 +855,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
 
     return {
-      scriptId: terminateScript.id,
-      scriptInfo: terminateScript,
+      scriptId: s1Script.id,
+      scriptInfo: s1Script,
       buildScriptArgs,
     } as FetchScriptInfoResponse<TScriptOptions>;
   }
