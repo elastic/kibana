@@ -19,7 +19,18 @@ export interface DocViewerExtensionParams {
   record: DataTableRecord;
 }
 
+export interface DefaultAppStateColumns {
+  name: string;
+  width?: number;
+}
+
+export interface DefaultAppStateExtension {
+  columns?: DefaultAppStateColumns[];
+  rowHeight?: number;
+}
+
 export interface Profile {
   getCellRenderers: () => CustomCellRenderer;
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
+  getDefaultAppState: () => DefaultAppStateExtension;
 }
