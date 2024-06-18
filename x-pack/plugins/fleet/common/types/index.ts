@@ -64,7 +64,7 @@ export interface FleetConfigType {
       };
       excludePackages: string[];
     };
-    maxConcurrentBulkInstallations: number;
+    maxConcurrentBulkInstallations?: number;
   };
   createArtifactsBulkBatchSize?: number;
 }
