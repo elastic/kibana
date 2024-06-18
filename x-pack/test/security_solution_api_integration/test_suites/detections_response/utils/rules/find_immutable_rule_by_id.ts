@@ -28,6 +28,7 @@ export const findImmutableRuleById = async (
 }> => {
   const response = await supertest
     .get(
+      // TODO breaking change?
       `${DETECTION_ENGINE_RULES_URL}/_find?filter=alert.attributes.params.immutable: true AND alert.attributes.params.ruleId: "${ruleId}"`
     )
     .set('kbn-xsrf', 'true')

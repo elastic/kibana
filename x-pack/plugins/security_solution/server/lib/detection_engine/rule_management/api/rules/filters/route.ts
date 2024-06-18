@@ -17,6 +17,10 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
 import { readTags } from '../../tags/read_tags/read_tags';
+import {
+  KQL_FILTER_CUSTOM_RULES,
+  KQL_FILTER_PREBUILT_RULES,
+} from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 
 interface RulesCount {
   prebuilt: number;
@@ -36,12 +40,12 @@ async function fetchRulesCount(rulesClient: RulesClient): Promise<RulesCount> {
     findRules({
       ...DEFAULT_FIND_RULES_COUNT_PARAMS,
       rulesClient,
-      filter: 'alert.attributes.params.immutable: true',
+      filter: KQL_FILTER_PREBUILT_RULES,
     }),
     findRules({
       ...DEFAULT_FIND_RULES_COUNT_PARAMS,
       rulesClient,
-      filter: 'alert.attributes.params.immutable: false',
+      filter: KQL_FILTER_CUSTOM_RULES,
     }),
   ]);
 

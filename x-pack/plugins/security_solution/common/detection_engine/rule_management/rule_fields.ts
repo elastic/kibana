@@ -21,4 +21,5 @@ export const ENABLED_FIELD = 'alert.attributes.enabled';
 export const TAGS_FIELD = 'alert.attributes.tags';
 export const PARAMS_TYPE_FIELD = 'alert.attributes.params.type';
 export const PARAMS_IMMUTABLE_FIELD = 'alert.attributes.params.immutable';
+export const PARAMS_RULE_SOURCE_TYPE_FIELD = 'alert.attributes.params.ruleSource.type';
 export const LAST_RUN_OUTCOME_FIELD = 'alert.attributes.lastRun.outcome';

@@ -223,7 +223,8 @@ describe('Detections Rules API', () => {
         expect.objectContaining({
           method: 'GET',
           query: {
-            filter: 'alert.attributes.params.immutable: false',
+            filter:
+              '(alert.attributes.params.immutable: false OR alert.attributes.params.ruleSource.type: internal)',
             page: 1,
             per_page: 20,
             sort_field: 'enabled',

@@ -13,14 +13,15 @@ import {
   ENABLED_FIELD,
   LAST_RUN_OUTCOME_FIELD,
   PARAMS_IMMUTABLE_FIELD,
+  PARAMS_RULE_SOURCE_TYPE_FIELD,
   PARAMS_TYPE_FIELD,
   RULE_NAME_FIELD,
   RULE_PARAMS_FIELDS,
   TAGS_FIELD,
 } from './rule_fields';
 
-export const KQL_FILTER_IMMUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: true`;
-export const KQL_FILTER_MUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: false`;
+export const KQL_FILTER_PREBUILT_RULES = `(${PARAMS_IMMUTABLE_FIELD}: true OR ${PARAMS_RULE_SOURCE_TYPE_FIELD}: external)`;
+export const KQL_FILTER_CUSTOM_RULES = `(${PARAMS_IMMUTABLE_FIELD}: false OR ${PARAMS_RULE_SOURCE_TYPE_FIELD}: internal)`;
 export const KQL_FILTER_ENABLED_RULES = `${ENABLED_FIELD}: true`;
 export const KQL_FILTER_DISABLED_RULES = `${ENABLED_FIELD}: false`;
 
@@ -59,9 +60,9 @@ export function convertRulesFilterToKQL({
   if (showCustomRules && showElasticRules) {
     // if both showCustomRules && showElasticRules selected we omit filter, as it includes all existing rules
   } else if (showElasticRules) {
-    kql.push(KQL_FILTER_IMMUTABLE_RULES);
+    kql.push(KQL_FILTER_PREBUILT_RULES);
   } else if (showCustomRules) {
-    kql.push(KQL_FILTER_MUTABLE_RULES);
+    kql.push(KQL_FILTER_CUSTOM_RULES);
   }
 
   if (enabled !== undefined) {
