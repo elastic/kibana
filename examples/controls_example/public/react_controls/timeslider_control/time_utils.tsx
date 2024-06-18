@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import moment from 'moment-timezone';
 import { EuiRangeTick } from '@elastic/eui';
 import { calcAutoIntervalNear } from '@kbn/data-plugin/common';
@@ -83,7 +84,17 @@ export function getTicks(min: number, max: number, timezone: string): EuiRangeTi
     tick += interval;
   }
 
-  return ticks;
+  return ticks.length <= 12
+    ? ticks
+    : ticks.map((tick, index) => {
+      return {
+        ...tick,
+        value: tick.value,
+        // to avoid label overlap, only display even tick labels
+        // Passing empty string as tick label results in tick not rendering, so must wrap empty label in react element
+        label: index % 2 === 0 ? tick.label : <span>&nbsp;</span>,
+      };
+    });
 }
 
 export function getStepSize(ticks: EuiRangeTick[]): {

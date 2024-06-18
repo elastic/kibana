@@ -40,12 +40,12 @@ describe('TimesliderControlApi', () => {
     core: coreMock.createStart(),
     data: dataStartServiceMock,
   });
-  let comparitors: StateComparators<TimesliderControlState> | undefined;
+  let comparators: StateComparators<TimesliderControlState> | undefined;
   function buildApiMock(
     api: ControlApiRegistration<TimesliderControlApi>,
-    nextComparitors: StateComparators<TimesliderControlState>
+    nextComparators: StateComparators<TimesliderControlState>
   ) {
-    comparitors = nextComparitors;
+    comparators = nextComparators;
     return {
       ...api,
       uuid,
@@ -79,8 +79,8 @@ describe('TimesliderControlApi', () => {
       controlGroupApi
     );
 
-    expect('2024-06-09T06:00:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
-    expect('2024-06-09T12:00:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
+    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
+    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
   });
 
   test('Should update timeslice when time range changes', async () => {
@@ -103,8 +103,8 @@ describe('TimesliderControlApi', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // update time slice to same percentage in new hour interval
-    expect('2024-06-08T00:15:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
-    expect('2024-06-08T00:30:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
+    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-08T00:15:00.000Z');
+    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-08T00:30:00.000Z');
   });
 
   test('Clicking previous button should advance timeslice backward', async () => {
@@ -125,8 +125,8 @@ describe('TimesliderControlApi', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect('2024-06-09T00:00:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
-    expect('2024-06-09T06:00:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
+    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T00:00:00.000Z');
+    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
   });
 
   test('Clicking previous button should wrap when time range start is reached', async () => {
@@ -148,8 +148,8 @@ describe('TimesliderControlApi', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect('2024-06-09T18:00:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
-    expect('2024-06-10T00:00:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
+    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T18:00:00.000Z');
+    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-10T00:00:00.000Z');
   });
 
   test('Clicking next button should advance timeslice forward', async () => {
@@ -170,8 +170,8 @@ describe('TimesliderControlApi', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect('2024-06-09T12:00:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
-    expect('2024-06-09T18:00:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
+    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
+    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T18:00:00.000Z');
   });
 
   test('Clicking next button should wrap when time range end is reached', async () => {
@@ -194,8 +194,8 @@ describe('TimesliderControlApi', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect('2024-06-09T00:00:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
-    expect('2024-06-09T06:00:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
+    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T00:00:00.000Z');
+    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
   });
 
   test('Resetting state with comparators should reset timeslice', async () => {
@@ -215,14 +215,14 @@ describe('TimesliderControlApi', () => {
     const { findByTestId } = render(<api.CustomPrependComponent />);
     fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect('2024-06-09T12:00:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
-    expect('2024-06-09T18:00:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
+    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
+    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T18:00:00.000Z');
 
-    comparitors!.timesliceStartAsPercentageOfTimeRange[1](0.25);
-    comparitors!.timesliceEndAsPercentageOfTimeRange[1](0.5);
+    comparators!.timesliceStartAsPercentageOfTimeRange[1](0.25);
+    comparators!.timesliceEndAsPercentageOfTimeRange[1](0.5);
 
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect('2024-06-09T06:00:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
-    expect('2024-06-09T12:00:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
+    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
+    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
   });
 });

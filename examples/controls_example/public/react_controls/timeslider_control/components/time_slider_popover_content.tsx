@@ -26,25 +26,12 @@ interface Props {
 }
 
 export function TimeSliderPopoverContent(props: Props) {
-  const ticks =
-    props.ticks.length <= 12
-      ? props.ticks
-      : props.ticks.map((tick, index) => {
-          return {
-            value: tick.value,
-            // to avoid label overlap, only display even tick labels
-            // Passing empty string as tick label results in tick not rendering, so must wrap empty label in react element
-            // Can not store react node in redux state because its not serializable so have to transform into react node here
-            label: index % 2 === 0 ? tick.label : <span>&nbsp;</span>,
-          };
-        });
-
   const rangeInput = props.isAnchored ? (
     <TimeSliderAnchoredRange
       value={props.value}
       onChange={props.onChange}
       stepSize={props.stepSize}
-      ticks={ticks}
+      ticks={props.ticks}
       timeRangeMin={props.timeRangeMin}
       timeRangeMax={props.timeRangeMax}
     />
@@ -53,7 +40,7 @@ export function TimeSliderPopoverContent(props: Props) {
       value={props.value}
       onChange={props.onChange}
       stepSize={props.stepSize}
-      ticks={ticks}
+      ticks={props.ticks}
       timeRangeMin={props.timeRangeMin}
       timeRangeMax={props.timeRangeMax}
     />
