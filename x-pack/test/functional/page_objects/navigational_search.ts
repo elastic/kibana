@@ -16,6 +16,7 @@ export class NavigationalSearchPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly retry = this.ctx.getService('retry');
 
   async focus() {
     const field = await this.testSubjects.find('nav-search-input');
@@ -35,8 +36,10 @@ export class NavigationalSearchPageObject extends FtrService {
     if (clear) {
       await this.clearField();
     }
-    const field = await this.testSubjects.find('nav-search-input');
-    await field.type(term);
+    this.retry.try(async () => {
+      const field = await this.testSubjects.find('nav-search-input');
+      await field.type(term);
+    });
     if (wait) {
       await this.waitForResultsLoaded();
     }
