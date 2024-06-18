@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import { isEmpty } from 'lodash/fp';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { RiskScoresCalculationResponse } from '../../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
 import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
 import { RiskScoresEntityCalculationRequest } from '../../../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_URL } from '../../../../../common/constants';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';

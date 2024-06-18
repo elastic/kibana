@@ -50,7 +50,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('KSPM EKS Direct Access', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186315
+    describe.skip('KSPM EKS Direct Access', async () => {
       it('KSPM EKS Direct Access Workflow', async () => {
         const directAccessKeyId = 'directAccessKeyIdTest';
         const directAccessSecretKey = 'directAccessSecretKeyTest';
