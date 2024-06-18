@@ -114,7 +114,7 @@ export const LatestVulnerabilitiesTable = ({
           title={title}
           customCellRenderer={customCellRenderer}
           groupSelectorComponent={groupSelectorComponent}
-          height={height}
+          height={height ?? `calc(100vh - ${filters?.length > 0 ? 404 : 364}px)`}
           columnHeaders={vulnerabilitiesTableFieldLabels}
         />
       )}
