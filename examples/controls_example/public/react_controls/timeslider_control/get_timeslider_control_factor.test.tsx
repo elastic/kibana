@@ -198,7 +198,7 @@ describe('TimesliderControlApi', () => {
     expect('2024-06-09T06:00:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
   });
 
-  test('Reseting state with comparitors should reset timeslice', async () => {
+  test('Resetting state with comparators should reset timeslice', async () => {
     const { api } = factory.buildControl(
       {
         timesliceStartAsPercentageOfTimeRange: 0.25,
