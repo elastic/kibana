@@ -34,10 +34,12 @@ function bundledPackagesFromCache() {
 }
 
 export async function getBundledPackages(): Promise<BundledPackage[]> {
+  /*
   const config = appContextService.getConfig();
   if (config?.developer?.disableBundledPackagesCache !== true && CACHE_BUNDLED_PACKAGES) {
     return bundledPackagesFromCache();
   }
+  */
 
   // const bundledPackageLocation = config?.developer?.bundledPackageLocation;
   const bundledPackageLocation = path.resolve(__dirname, '../../../../../../..', 'bundle');
@@ -53,6 +55,7 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
   try {
     await fs.stat(bundledPackageLocation);
   } catch (error) {
+    logger.warn(`unable to stat ${bundledPackageLocation}: ${error}`);
     return [];
   }
 

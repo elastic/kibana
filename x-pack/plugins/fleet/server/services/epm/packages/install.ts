@@ -1045,7 +1045,10 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       skipDataStreamRollover,
     } = args;
 
-    const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
+    let matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
+    if (pkgkey.includes('endpoint')) {
+      matchingBundledPackage = await getBundledPackageByPkgKey('endpoint');
+    }
 
     if (matchingBundledPackage) {
       logger.info(
