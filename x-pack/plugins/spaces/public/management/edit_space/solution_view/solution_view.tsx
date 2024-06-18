@@ -108,7 +108,7 @@ export const SolutionView: FunctionComponent<Props> = ({ space, onChange }) => {
       title={i18n.translate('xpack.spaces.management.manageSpacePage.navigationTitle', {
         defaultMessage: 'Navigation',
       })}
-      data-test-subj="navigation-panel"
+      dataTestSubj="navigationPanel"
     >
       <EuiFlexGroup>
         <EuiFlexItem>
