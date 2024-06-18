@@ -10,6 +10,7 @@ import {
   FieldCapsResponse,
   IndicesGetMappingResponse,
   FieldCapsFieldCapability,
+  MappingPropertyBase,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -20,10 +21,12 @@ interface FieldModelId {
   modelId: string | undefined;
 }
 
+type SemanticEmbeddingType = 'sparse_vector' | 'dense_vector';
+
 interface SemanticField {
   field: string;
   inferenceId: string;
-  embeddingType: 'sparse_vector' | 'dense_vector';
+  embeddingType?: SemanticEmbeddingType;
 }
 
 interface IndexFieldModel {
@@ -32,7 +35,20 @@ interface IndexFieldModel {
   semanticTextFields: SemanticField[];
 }
 
-const EMBEDDING_TYPE = { sparse_embedding: 'sparse_vector', text_embedding: 'dense_vector' };
+type TaskType = 'sparse_embedding' | 'text_embedding';
+
+interface MappingSemanticTextProperty extends MappingPropertyBase {
+  type: 'semantic_text';
+  inference_id: string;
+  model_settings?: {
+    task_type: TaskType;
+  };
+}
+
+const EMBEDDING_TYPE: Record<TaskType, SemanticEmbeddingType> = {
+  sparse_embedding: 'sparse_vector',
+  text_embedding: 'dense_vector',
+};
 
 export const getModelIdFields = (fieldCapsResponse: FieldCapsResponse) => {
   const { fields } = fieldCapsResponse;
@@ -181,13 +197,13 @@ export const parseFieldsCapabilities = (
         (field) => mappingProperties[field].type === 'semantic_text'
       )
       .map((field) => {
+        const mapping = mappingProperties[field] as unknown as MappingSemanticTextProperty;
         return {
           field,
-          // @ts-ignore
-          inferenceId: mappingProperties[field]?.inference_id,
-          embeddingType:
-            // @ts-ignore
-            EMBEDDING_TYPE[mappingProperties[field]?.model_settings?.task_type],
+          inferenceId: mapping?.inference_id,
+          embeddingType: mapping?.model_settings?.task_type
+            ? EMBEDDING_TYPE[mapping.model_settings.task_type]
+            : undefined,
         };
       });
 
