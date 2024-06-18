@@ -80,7 +80,7 @@ describe(
           cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
           cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).realHover();
           cy.get(TOOLTIP).contains(
-            'Machine Learning jobs must be running to enable alert suppression.'
+            'To enable alert suppression, start one or more Machine Learning jobs.'
           );
         });
       });
@@ -109,7 +109,7 @@ describe(
             cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
             cy.get(ALERT_SUPPRESSION_FIELDS).should(
               'contain.text',
-              'This list of fields may be incomplete as some Machine Learning jobs are not running.'
+              'This list of fields might be incomplete as some Machine Learning jobs are not running. Start more jobs to add more fields.'
             );
           });
         });
