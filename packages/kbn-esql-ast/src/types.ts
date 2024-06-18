@@ -67,6 +67,29 @@ export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem
   castType: string;
 }
 
+export interface ESQLAstParameter extends ESQLAstBaseNode<'param'>, ESQLAstBaseItem {
+  /**
+   * The flavor of the parameter.
+   *
+   * - `unnamed` - the parameter is not named, just a question mark "?".
+   * - `named` - the parameter is named, like "?name".
+   * - `positional` - the parameter is post-fixed with a number, like "?123".
+   */
+  flavor: 'unnamed' | 'named' | 'positional';
+
+  /**
+   * The identifier of the parameter, in case of a named or positional parameter.
+   * Undefined for unnamed parameters.
+   */
+  identifier?: string | number;
+}
+
+export interface ESQLAstBaseNode<Type extends string> {
+  type: Type;
+  location: ESQLLocation;
+  incomplete: boolean;
+}
+
 /**
  * This node represents something the AST generator
  * didn't recognize in the ANTLR parse tree.
