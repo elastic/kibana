@@ -6,7 +6,7 @@ paths:
   /api/detection_engine/index:
     get:
       x-labels: [ess]
-      operationId: GetAlertIndex
+      operationId: GetAlertsIndex
       x-codegen-enabled: true
       summary: Gets the alert index name if it exists
       tags:
@@ -32,6 +32,11 @@ paths:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         403:
           description: Not enough permissions response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        404:
           content:
             application/json:
               schema:

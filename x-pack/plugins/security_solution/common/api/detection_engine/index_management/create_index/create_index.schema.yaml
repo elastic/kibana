@@ -6,7 +6,7 @@ paths:
   /api/detection_engine/index:
     post:
       x-labels: [ess]
-      operationId: CreateAlertIndex
+      operationId: CreateAlertsIndex
       x-codegen-enabled: true
       summary: Create an alerts index
       tags:

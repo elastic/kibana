@@ -6,7 +6,7 @@ paths:
   /api/detection_engine/index:
     delete:
       x-labels: [ess]
-      operationId: DeleteAlertIndex
+      operationId: DeleteAlertsIndex
       x-codegen-enabled: true
       summary: Delete an alerts index
       tags:
