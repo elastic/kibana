@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-export const finalizeSignalsMigrationSchema = t.exact(
-  t.type({
-    migration_ids: t.array(t.string),
-  })
-);
-
-export type FinalizeSignalsMigrationSchema = t.TypeOf<typeof finalizeSignalsMigrationSchema>;
+export { adHocRunParamsModelVersions } from './ad_hoc_run_params_model_versions';
+export { ruleModelVersions } from './rule_model_versions';
