@@ -131,8 +131,8 @@ export class DataVisualizer {
     nonAggregatableFields: string[],
     samplerShardSize: number,
     timeFieldName: string | undefined,
-    earliestMs: number | string | undefined,
-    latestMs: number | string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     runtimeMappings?: RuntimeMappings
   ) {
     const stats = {
@@ -236,8 +236,8 @@ export class DataVisualizer {
     fields: Field[],
     samplerShardSize: number,
     timeFieldName: string | undefined,
-    earliestMs: number | string | undefined,
-    latestMs: number | string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     intervalMs: number | undefined,
     maxExamples: number,
     runtimeMappings: RuntimeMappings
@@ -507,8 +507,8 @@ export class DataVisualizer {
     query: any,
     field: string,
     timeFieldName: string | undefined,
-    earliestMs: number | string | undefined,
-    latestMs: number | string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
@@ -541,8 +541,8 @@ export class DataVisualizer {
     indexPatternTitle: string,
     query: any,
     timeFieldName: string | undefined,
-    earliestMs: number | string | undefined,
-    latestMs: number | string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     intervalMs: number,
     runtimeMappings: RuntimeMappings
   ): Promise<DocumentCountStats> {
@@ -607,8 +607,8 @@ export class DataVisualizer {
     fields: Field[],
     samplerShardSize: number,
     timeFieldName: string | undefined,
-    earliestMs: number | string | undefined,
-    latestMs: number | string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
@@ -747,8 +747,8 @@ export class DataVisualizer {
     fields: Field[],
     samplerShardSize: number,
     timeFieldName: string | undefined,
-    earliestMs: number | string | undefined,
-    latestMs: number | string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
@@ -829,8 +829,8 @@ export class DataVisualizer {
     fields: Field[],
     samplerShardSize: number,
     timeFieldName: string | undefined,
-    earliestMs: number | string | undefined,
-    latestMs: number | string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
@@ -900,8 +900,8 @@ export class DataVisualizer {
     fields: Field[],
     samplerShardSize: number,
     timeFieldName: string | undefined,
-    earliestMs: number | string | undefined,
-    latestMs: number | string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
@@ -972,8 +972,8 @@ export class DataVisualizer {
     query: any,
     field: string,
     timeFieldName: string | undefined,
-    earliestMs: number | string | undefined,
-    latestMs: number | string | undefined,
+    earliestMs: number | undefined,
+    latestMs: number | undefined,
     maxExamples: number,
     runtimeMappings?: RuntimeMappings
   ): Promise<FieldExamples> {
