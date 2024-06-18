@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiPageHeader,
@@ -23,12 +22,13 @@ import {
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';
-import { getRouterLinkProps, listBreadcrumb } from '../../services';
+import { listBreadcrumb } from '../../services';
 import { documentationLinks } from '../../services/documentation_links';
 
 import { JobTable } from './job_table';
 import { DetailPanel } from './detail_panel';
 import { DeprecationCallout } from '../components';
+import { DeprecatedPrompt } from './deprecated_prompt';
 
 const REFRESH_RATE_MS = 30000;
 
@@ -134,50 +134,6 @@ export class JobListUi extends Component {
     );
   }
 
-  renderEmpty() {
-    return (
-      <EuiPageSection alignment="center" grow={true}>
-        <EuiEmptyPrompt
-          color="subdued"
-          data-test-subj="jobListEmptyPrompt"
-          iconType="indexRollupApp"
-          title={
-            <h1>
-              <FormattedMessage
-                id="xpack.rollupJobs.jobList.emptyPromptTitle"
-                defaultMessage="Create your first rollup job"
-              />
-            </h1>
-          }
-          body={
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.rollupJobs.jobList.emptyPromptDescription"
-                  defaultMessage="Rollup jobs summarize and store historical data in a smaller index
-                  for future analysis."
-                />
-              </p>
-            </Fragment>
-          }
-          actions={
-            <EuiButton
-              data-test-subj="createRollupJobButton"
-              {...getRouterLinkProps('/create')}
-              fill
-              iconType="plusInCircle"
-            >
-              <FormattedMessage
-                id="xpack.rollupJobs.jobList.emptyPrompt.createButtonLabel"
-                defaultMessage="Create rollup job"
-              />
-            </EuiButton>
-          }
-        />
-      </EuiPageSection>
-    );
-  }
-
   renderLoading() {
     return (
       <EuiPageSection alignment="center" grow={true}>
@@ -241,7 +197,7 @@ export class JobListUi extends Component {
         content = this.renderError(jobLoadError);
       }
     } else if (!isLoading && !hasJobs) {
-      content = this.renderEmpty();
+      content = <DeprecatedPrompt />;
     } else if (isLoading) {
       content = this.renderLoading();
     } else {
