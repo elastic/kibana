@@ -14,6 +14,14 @@ export enum ProviderKeys {
   cohere = 'cohere',
   elasticsearch = 'elasticsearch',
   openai = 'openai',
+  azureopenai = 'azureopenai',
+}
+
+export enum TaskTypes {
+  text_embedding = 'text_embedding',
+  sparse_embedding = 'sparse_embedding',
+  completion = 'completion',
+  rerank = 'rerank',
 }
 
 export enum SortFieldInferenceEndpoint {
@@ -36,6 +44,7 @@ export interface QueryParams extends SortingParams {
 
 export interface FilterOptions {
   provider: ProviderKeys[];
+  type: TaskTypes[];
 }
 
 export interface AllInferenceEndpointsTableState {

@@ -16,6 +16,7 @@ import { FilterOptions } from './types';
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
 import { EndpointsTable } from './endpoints_table';
 import { ProviderFilter } from './filter/provider_filter';
+import { TaskTypeFilter } from './filter/task_type_filter';
 import { TableSearch } from './search/table_search';
 import { useTableColumns } from './table_columns';
 
@@ -74,6 +75,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
               optionKeys={filterOptions.provider}
               onChange={onFilterChangedCallback}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <TaskTypeFilter optionKeys={filterOptions.type} onChange={onFilterChangedCallback} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

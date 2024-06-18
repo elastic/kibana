@@ -29,11 +29,14 @@ type FilterOption<T extends string, K extends string = string> = EuiSelectableOp
 
 export type { FilterOption as MultiSelectFilterOption };
 
-export const mapToMultiSelectOption = <T extends string>(options: T[]) => {
+export const mapToMultiSelectOption = <T extends string>(
+  options: T[],
+  labelsMap?: Record<string, string>
+) => {
   return options.map((option) => {
     return {
       key: option,
-      label: option,
+      label: labelsMap ? (labelsMap[option] as T) : option,
     };
   });
 };

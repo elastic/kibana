@@ -17,6 +17,7 @@ import {
   QueryParams,
   SortOrder,
   ProviderKeys,
+  TaskTypes,
 } from '../components/all_inference_endpoints/types';
 
 interface UseTableDataReturn {
@@ -35,9 +36,16 @@ export const useTableData = (
 ): UseTableDataReturn => {
   const tableData: InferenceEndpointUI[] = useMemo(() => {
     let filteredEndpoints = inferenceEndpoints;
+
     if (filterOptions.provider.length > 0) {
       filteredEndpoints = filteredEndpoints.filter((endpoint) =>
         filterOptions.provider.includes(ProviderKeys[endpoint.service as keyof typeof ProviderKeys])
+      );
+    }
+
+    if (filterOptions.type.length > 0) {
+      filteredEndpoints = filteredEndpoints.filter((endpoint) =>
+        filterOptions.type.includes(TaskTypes[endpoint.task_type as keyof typeof TaskTypes])
       );
     }
 
