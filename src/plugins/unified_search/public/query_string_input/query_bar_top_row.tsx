@@ -476,7 +476,7 @@ export const QueryBarTopRow = React.memo(
       let isDisabled: boolean | { display: React.ReactNode } = Boolean(props.isDisabled);
       let enableTooltip = false;
       // On text based mode the datepicker is always on when the user has unsaved changes.
-      // When the user doesn't have any changes it should be disabled if dataview doesn't have @timestamp field and ?latest, ?earliest named params
+      // When the user doesn't have any changes it should be disabled if dataview doesn't have @timestamp field
       if (Boolean(isQueryLangSelected) && !props.isDirty) {
         const adHocDataview = props.indexPatterns?.[0];
         if (adHocDataview && typeof adHocDataview !== 'string') {
