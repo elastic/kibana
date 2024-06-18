@@ -46,6 +46,42 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
+    describe('Without Fleet server setup', () => {
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.savedObjects.cleanStandardList({
+          space: TEST_SPACE_1,
+        });
+        await cleanFleetIndices(esClient);
+      });
+
+      after(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.savedObjects.cleanStandardList({
+          space: TEST_SPACE_1,
+        });
+        await cleanFleetIndices(esClient);
+      });
+
+      setupTestSpaces(providerContext);
+
+      before(async () => {
+        await apiClient.setup();
+      });
+
+      describe('GET /enrollments/settings', () => {
+        it('in default space it should not return an active fleet server', async () => {
+          const res = await apiClient.getEnrollmentSettings();
+          expect(res.fleet_server.has_active).to.be(false);
+        });
+
+        it('in a specific spaceit should not return an active fleet server', async () => {
+          const res = await apiClient.getEnrollmentSettings(TEST_SPACE_1);
+          expect(res.fleet_server.has_active).to.be(false);
+        });
+      });
+    });
+
     describe('With Fleet server setup in a specific space', () => {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
