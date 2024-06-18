@@ -16,7 +16,7 @@ const ROOT = resolve(__dirname, '..');
   await generate({
     title: 'OpenAPI Common Schemas (kbn-openapi-common)',
     rootDir: ROOT,
-    sourceGlob: './**/*.schema.yaml',
+    sourceGlob: './schemas/**/*.schema.yaml',
     templateName: 'zod_operation_schema',
   });
 })();
