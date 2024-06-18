@@ -9,7 +9,6 @@ import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
-import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import {
   IBasePath,
   IUiSettingsClient,
@@ -47,6 +46,7 @@ import {
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUP,
   ALERT_REASON,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
@@ -54,7 +54,7 @@ import { SLODefinition, StoredSLODefinition } from '../../../domain/models';
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { createSLO } from '../../../services/fixtures/slo';
-import { getRuleExecutor } from './executor';
+import { BurnRateAlert, getRuleExecutor } from './executor';
 import {
   generateAboveThresholdKey,
   generateBurnRateKey,
@@ -163,7 +163,7 @@ describe('BurnRateRuleExecutor', () => {
       BurnRateAlertState,
       BurnRateAlertContext,
       BurnRateAllowedActionGroups,
-      ObservabilitySloAlert
+      BurnRateAlert
     >
   >;
 
@@ -338,7 +338,7 @@ describe('BurnRateRuleExecutor', () => {
     });
 
     it('schedules an alert when both windows of first window definition burn rate have reached the threshold', async () => {
-      const slo = createSLO({ objective: { target: 0.9 } });
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
       const buckets = [
@@ -404,6 +404,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'foo',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
@@ -420,6 +426,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'bar',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
@@ -454,7 +466,7 @@ describe('BurnRateRuleExecutor', () => {
     });
 
     it('schedules a suppressed alert when both windows of first window definition burn rate have reached the threshold but the dependency matches', async () => {
-      const slo = createSLO({ objective: { target: 0.9 } });
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
       const dependencyRuleParams = someRuleParamsWithWindows({ sloId: slo.id });
       const ruleParams = someRuleParamsWithWindows({
         sloId: slo.id,
@@ -538,6 +550,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'foo',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
@@ -554,6 +572,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'bar',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
@@ -588,7 +612,7 @@ describe('BurnRateRuleExecutor', () => {
     });
 
     it('schedules an alert when both windows of second window definition burn rate have reached the threshold', async () => {
-      const slo = createSLO({ objective: { target: 0.9 } });
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
       const buckets = [
@@ -653,6 +677,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'foo',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient!.report).toBeCalledWith({
@@ -669,6 +699,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'bar',
+            },
+          ],
         },
       });
 
