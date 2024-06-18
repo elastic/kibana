@@ -16,7 +16,6 @@ import {
   EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
-  EuiPageHeaderSection,
 } from '@elastic/eui';
 
 import { withKibana } from '@kbn/kibana-react-plugin/public';
