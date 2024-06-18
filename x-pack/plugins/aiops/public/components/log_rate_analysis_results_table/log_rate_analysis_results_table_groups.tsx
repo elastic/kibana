@@ -93,7 +93,11 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
 
   const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.pinnedGroup);
   const selectedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.selectedGroup);
-  const { analysisType, windowParameters } = useAppSelector((s) => s.logRateAnalysis);
+  const {
+    analysisType,
+    windowParameters,
+    documentStats: { documentCountStats },
+  } = useAppSelector((s) => s.logRateAnalysis);
   const dispatch = useAppDispatch();
   const isMounted = useMountedState();
 
@@ -150,6 +154,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     {
       'data-test-subj': 'aiopsLogRateAnalysisResultsGroupsTableColumnGroup',
       field: 'group',
+      width: skippedColumns.length < 3 ? '34%' : '50%',
       name: (
         <>
           <FormattedMessage
@@ -241,6 +246,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS,
     analysisType,
     windowParameters,
+    documentCountStats?.interval ?? 0,
     skippedColumns,
     searchQuery,
     barColorOverride,

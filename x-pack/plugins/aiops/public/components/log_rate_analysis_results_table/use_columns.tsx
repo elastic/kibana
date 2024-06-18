@@ -21,11 +21,7 @@ import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
-import {
-  type WindowParameters,
-  LOG_RATE_ANALYSIS_TYPE,
-  getWindowParametersMedianValues,
-} from '@kbn/aiops-log-rate-analysis';
+import { type WindowParameters, LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { FieldStatsPopover } from '../field_stats_popover';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -35,10 +31,9 @@ import { useViewInDiscoverAction } from './use_view_in_discover_action';
 import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_analysis_action';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import { MiniHistogram } from '../mini_histogram';
+import { getBaselineAndDeviationRates, getLogRateChange } from './get_baseline_and_deviation_rates';
 
 const TRUNCATE_TEXT_LINES = 3;
-const ACTIONS_COLUMN_WIDTH = '60px';
-const NARROW_COLUMN_WIDTH = '120px';
 const UNIQUE_COLUMN_WIDTH = '40px';
 const NOT_AVAILABLE = '--';
 
@@ -55,6 +50,18 @@ export const commonColumns = {
   ['Impact']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.impactColumnTitle', {
     defaultMessage: 'Impact',
   }),
+  ['Baseline rate']: i18n.translate(
+    'xpack.aiops.logRateAnalysis.resultsTable.baselineRateColumnTitle',
+    {
+      defaultMessage: 'Baseline rate',
+    }
+  ),
+  ['Deviation rate']: i18n.translate(
+    'xpack.aiops.logRateAnalysis.resultsTable.deviationRateColumnTitle',
+    {
+      defaultMessage: 'Deviation rate',
+    }
+  ),
   ['Log rate change']: i18n.translate(
     'xpack.aiops.logRateAnalysis.resultsTable.logRateChangeColumnTitle',
     {
@@ -121,11 +128,24 @@ const logRateChangeMessage = i18n.translate(
       'The factor by which the log rate changed. This value is normalized to account for differing lengths in baseline and deviation time ranges.',
   }
 );
+const baselineRateMessage = i18n.translate(
+  'xpack.aiops.logRateAnalysis.resultsTableGroups.baselineRateLabelColumnTooltip',
+  {
+    defaultMessage: 'The average number of documents per baseline bucket.',
+  }
+);
+const deviationRateMessage = i18n.translate(
+  'xpack.aiops.logRateAnalysis.resultsTableGroups.deviationRateLabelColumnTooltip',
+  {
+    defaultMessage: 'The average number of documents per deviation bucket.',
+  }
+);
 
 export const useColumns = (
   tableType: LogRateAnalysisResultsTableType,
   analysisType: typeof LOG_RATE_ANALYSIS_TYPE[keyof typeof LOG_RATE_ANALYSIS_TYPE],
   windowParameters: WindowParameters | undefined,
+  interval: number,
   skippedColumns: string[],
   searchQuery: estypes.QueryDslQueryContainer,
   barColorOverride?: string,
@@ -157,11 +177,22 @@ export const useColumns = (
     };
   }, [uiSettings, data, fieldFormats, charts]);
 
+  const buckets = useMemo(() => {
+    if (windowParameters === undefined) return;
+
+    const { baselineMin, baselineMax, deviationMin, deviationMax } = windowParameters;
+    const baselineBuckets = (baselineMax - baselineMin) / interval;
+    const deviationBuckets = (deviationMax - deviationMin) / interval;
+
+    return { baselineBuckets, deviationBuckets };
+  }, [windowParameters, interval]);
+
   const columnsMap: Record<ColumnNames, EuiBasicTableColumn<SignificantItem>> = useMemo(
     () => ({
       ['Field name']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnFieldName',
         field: 'fieldName',
+        width: skippedColumns.length < 3 ? '17%' : '25%',
         name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldNameLabel', {
           defaultMessage: 'Field name',
         }),
@@ -217,6 +248,7 @@ export const useColumns = (
       ['Field value']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnFieldValue',
         field: 'fieldValue',
+        width: skippedColumns.length < 3 ? '17%' : '25%',
         name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldValueLabel', {
           defaultMessage: 'Field value',
         }),
@@ -240,7 +272,7 @@ export const useColumns = (
       },
       ['Log rate']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnLogRate',
-        width: NARROW_COLUMN_WIDTH,
+        width: '8%',
         field: 'pValue',
         name: (
           <>
@@ -273,7 +305,7 @@ export const useColumns = (
       },
       ['Impact']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnImpact',
-        width: NARROW_COLUMN_WIDTH,
+        width: '8%',
         field: 'pValue',
         name: (
           <>
@@ -300,6 +332,88 @@ export const useColumns = (
         sortable: true,
         valign: 'middle',
       },
+      ['Baseline rate']: {
+        'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnBaselineRateChange',
+        field: 'bg_count',
+        name: (
+          <>
+            <FormattedMessage
+              id="xpack.aiops.logRateAnalysis.resultsTable.baselineRateLabel"
+              defaultMessage="Baseline rate"
+            />
+            &nbsp;
+            <EuiIconTip
+              size="s"
+              position="top"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+              content={baselineRateMessage}
+            />
+          </>
+        ),
+        render: (_, { bg_count: bgCount }) => {
+          if (
+            interval === 0 ||
+            windowParameters === undefined ||
+            buckets === undefined ||
+            isGroupsTable
+          )
+            return NOT_AVAILABLE;
+
+          const { baselineBucketRate } = getBaselineAndDeviationRates(
+            buckets.baselineBuckets,
+            buckets.deviationBuckets,
+            undefined,
+            bgCount
+          );
+
+          return <>{baselineBucketRate}</>;
+        },
+        sortable: false,
+        valign: 'middle',
+      },
+      ['Deviation rate']: {
+        'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnDeviationRateChange',
+        field: 'doc_count',
+        name: (
+          <>
+            <FormattedMessage
+              id="xpack.aiops.logRateAnalysis.resultsTable.deviationRateLabel"
+              defaultMessage="Deviation rate"
+            />
+            &nbsp;
+            <EuiIconTip
+              size="s"
+              position="top"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+              content={deviationRateMessage}
+            />
+          </>
+        ),
+        render: (_, { doc_count: docCount }) => {
+          if (
+            interval === 0 ||
+            windowParameters === undefined ||
+            buckets === undefined ||
+            isGroupsTable
+          )
+            return NOT_AVAILABLE;
+
+          const { deviationBucketRate } = getBaselineAndDeviationRates(
+            buckets.baselineBuckets,
+            buckets.deviationBuckets,
+            docCount,
+            undefined
+          );
+
+          return <>{deviationBucketRate}</>;
+        },
+        sortable: false,
+        valign: 'middle',
+      },
       ['Log rate change']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnLogRateChange',
         field: 'histogram',
@@ -320,33 +434,27 @@ export const useColumns = (
             />
           </>
         ),
-        render: (_, { histogram }) => {
-          if (histogram === undefined || windowParameters === undefined) return NOT_AVAILABLE;
-          const { baselineMedian, deviationMedian } = getWindowParametersMedianValues(
-            histogram,
-            windowParameters
+        render: (_, { doc_count: docCount, bg_count: bgCount }) => {
+          if (
+            interval === 0 ||
+            windowParameters === undefined ||
+            buckets === undefined ||
+            isGroupsTable
+          )
+            return NOT_AVAILABLE;
+
+          const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
+            buckets.baselineBuckets,
+            buckets.deviationBuckets,
+            docCount,
+            bgCount
           );
 
-          const logRateChange =
-            baselineMedian > 0
-              ? analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-                ? `${Math.round((deviationMedian / baselineMedian) * 100) / 100}x`
-                : `${Math.round((baselineMedian / deviationMedian) * 100) / 100}x`
-              : analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-              ? i18n.translate(
-                  'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateChangeLabelColumnTooltip',
-                  {
-                    defaultMessage: '{deviationMedian} docs from 0 in baseline',
-                    values: { deviationMedian },
-                  }
-                )
-              : i18n.translate(
-                  'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateChangeLabelColumnTooltip',
-                  {
-                    defaultMessage: '0 docs from ${baselineMedian} in baseline',
-                    values: { baselineMedian },
-                  }
-                );
+          const logRateChange = getLogRateChange(
+            analysisType,
+            baselineBucketRate!,
+            deviationBucketRate!
+          );
 
           return (
             <>
@@ -366,7 +474,6 @@ export const useColumns = (
       },
       ['p-value']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnPValue',
-        width: NARROW_COLUMN_WIDTH,
         field: 'pValue',
         name: (
           <>
@@ -399,7 +506,7 @@ export const useColumns = (
         'data-test-subj': isGroupsTable
           ? 'aiopsLogRateAnalysisResultsGroupsTableColumnDocCount'
           : 'aiopsLogRateAnalysisResultsTableColumnDocCount',
-        width: NARROW_COLUMN_WIDTH,
+        width: '8%',
         field: isGroupsTable ? 'docCount' : 'doc_count',
         name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.docCountLabel', {
           defaultMessage: 'Doc count',
@@ -417,7 +524,7 @@ export const useColumns = (
           ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
           copyToClipBoardAction,
         ],
-        width: ACTIONS_COLUMN_WIDTH,
+        width: '4%',
         valign: 'middle',
       },
       unique: {
