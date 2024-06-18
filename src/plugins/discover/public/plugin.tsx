@@ -6,63 +6,29 @@
  * Side Public License, v 1.
  */
 
-import React, { ComponentType } from 'react';
+import React from 'react';
 import { BehaviorSubject, map, Observable } from 'rxjs';
-
-import { AiopsPluginStart } from '@kbn/aiops-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
-import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import {
-  ObservabilityAIAssistantPublicSetup,
-  ObservabilityAIAssistantPublicStart,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
-import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import {
-  DiscoverAppLocator,
-  DiscoverAppLocatorDefinition,
-  DiscoverESQLLocatorDefinition,
-  PLUGIN_ID,
-} from '../common';
-import { ConfigSchema, ExperimentalFeatures } from '../common/config';
+import { SEARCH_EMBEDDABLE_TYPE, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import { PLUGIN_ID } from '../common';
+import { registerFeature } from './register_feature';
+import { buildServices, UrlTracker } from './build_services';
+import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
+import { injectTruncateStyles } from './utils/truncate_styles';
+import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {
   DiscoverContextAppLocator,
   DiscoverContextAppLocatorDefinition,
@@ -71,154 +37,30 @@ import {
   DiscoverSingleDocLocator,
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
-import { buildServices, UrlTracker } from './build_services';
+import {
+  DiscoverAppLocator,
+  DiscoverAppLocatorDefinition,
+  DiscoverESQLLocatorDefinition,
+} from '../common';
+import { defaultCustomizationContext, DiscoverCustomizationContext } from './customizations';
+import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
 } from './components/discover_container';
+import { getESQLSearchProvider } from './global_search/search_provider';
+import { HistoryService } from './history_service';
+import { ConfigSchema, ExperimentalFeatures } from '../common/config';
 import {
   DataSourceProfileService,
   DocumentProfileService,
   ProfilesManager,
   RootProfileService,
 } from './context_awareness';
-import { defaultCustomizationContext, DiscoverCustomizationContext } from './customizations';
-import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
-import {
-  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER,
-  SEARCH_EMBEDDABLE_TYPE,
-} from './embeddable/constants';
-import { getESQLSearchProvider } from './global_search/search_provider';
-import { HistoryService } from './history_service';
-import { registerFeature } from './register_feature';
-import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
-import { injectTruncateStyles } from './utils/truncate_styles';
-
-/**
- * @public
- */
-export interface DiscoverSetup {
-  /**
-   * `share` plugin URL locator for Discover app. Use it to generate links into
-   * Discover application, for example, navigate:
-   *
-   * ```ts
-   * await plugins.discover.locator.navigate({
-   *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
-   *   timeRange: {
-   *     to: 'now',
-   *     from: 'now-15m',
-   *     mode: 'relative',
-   *   },
-   * });
-   * ```
-   *
-   * Generate a location:
-   *
-   * ```ts
-   * const location = await plugins.discover.locator.getLocation({
-   *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
-   *   timeRange: {
-   *     to: 'now',
-   *     from: 'now-15m',
-   *     mode: 'relative',
-   *   },
-   * });
-   * ```
-   */
-  readonly locator: undefined | DiscoverAppLocator;
-  readonly showInlineTopNav: () => void;
-  readonly configureInlineTopNav: (
-    projectNavId: string,
-    options: DiscoverCustomizationContext['inlineTopNav']
-  ) => void;
-}
-
-export interface DiscoverStart {
-  /**
-   * `share` plugin URL locator for Discover app. Use it to generate links into
-   * Discover application, for example, navigate:
-   *
-   * ```ts
-   * await plugins.discover.locator.navigate({
-   *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
-   *   timeRange: {
-   *     to: 'now',
-   *     from: 'now-15m',
-   *     mode: 'relative',
-   *   },
-   * });
-   * ```
-   *
-   * Generate a location:
-   *
-   * ```ts
-   * const location = await plugins.discover.locator.getLocation({
-   *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
-   *   timeRange: {
-   *     to: 'now',
-   *     from: 'now-15m',
-   *     mode: 'relative',
-   *   },
-   * });
-   * ```
-   */
-  readonly locator: undefined | DiscoverAppLocator;
-  readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
-}
-
-/**
- * @internal
- */
-export interface DiscoverSetupPlugins {
-  dataViews: DataViewsServicePublic;
-  share?: SharePluginSetup;
-  uiActions: UiActionsSetup;
-  embeddable: EmbeddableSetup;
-  urlForwarding: UrlForwardingSetup;
-  home?: HomePublicPluginSetup;
-  data: DataPublicPluginSetup;
-  expressions: ExpressionsSetup;
-  globalSearch?: GlobalSearchPluginSetup;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
-}
-
-/**
- * @internal
- */
-export interface DiscoverStartPlugins {
-  aiops?: AiopsPluginStart;
-  dataViews: DataViewsServicePublic;
-  dataViewEditor: DataViewEditorStart;
-  dataVisualizer?: DataVisualizerPluginStart;
-  uiActions: UiActionsStart;
-  embeddable: EmbeddableStart;
-  navigation: NavigationStart;
-  charts: ChartsPluginStart;
-  data: DataPublicPluginStart;
-  fieldFormats: FieldFormatsStart;
-  share?: SharePluginStart;
-  urlForwarding: UrlForwardingStart;
-  inspector: InspectorPublicPluginStart;
-  usageCollection?: UsageCollectionSetup;
-  dataViewFieldEditor: IndexPatternFieldEditorStart;
-  spaces?: SpacesPluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  expressions: ExpressionsStart;
-  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
-  savedSearch: SavedSearchPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  unifiedDocViewer: UnifiedDocViewerStart;
-  lens: LensPublicStart;
-  contentManagement: ContentManagementPublicStart;
-  noDataPage?: NoDataPagePluginStart;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
-}
+import { createProfileProviderServices } from './context_awareness/profiles/profile_provider_services';
+import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
+import { createLogsDataSourceProfileProvider } from './context_awareness/profile_providers/logs_data_source_profile';
+import { createLogDocumentProfileProvider } from './context_awareness/profile_providers/log_document_profile';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -464,10 +306,14 @@ export class DiscoverPlugin
   }
 
   private registerProfiles() {
-    // TODO: Conditionally register example profiles for functional testing in a follow up PR
-    // this.rootProfileService.registerProvider(o11yRootProfileProvider);
-    // this.dataSourceProfileService.registerProvider(logsDataSourceProfileProvider);
-    // this.documentProfileService.registerProvider(logDocumentProfileProvider);
+    const providerServices = createProfileProviderServices();
+
+    this.dataSourceProfileService.registerProvider(
+      createLogsDataSourceProfileProvider(providerServices)
+    );
+    this.documentProfileService.registerProvider(
+      createLogDocumentProfileProvider(providerServices)
+    );
   }
 
   private createProfilesManager() {
