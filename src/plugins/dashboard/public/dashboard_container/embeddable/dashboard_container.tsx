@@ -768,9 +768,9 @@ export class DashboardContainer
   public scrollToPanel = async (panelRef: HTMLDivElement) => {
     const id = this.getState().componentState.scrollToPanelId;
     if (!id) return;
-    this.setScrollToPanelId(undefined);
 
     this.untilEmbeddableLoaded(id).then(() => {
+      this.setScrollToPanelId(undefined);
       if (this.scrollPosition) {
         panelRef.ontransitionend = () => {
           // Scroll to the last scroll position after the transition ends to ensure the panel is back in the right position before scrolling
