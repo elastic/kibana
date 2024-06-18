@@ -32,7 +32,7 @@ const INITIAL_DATA: MainStatisticsApiResponse & { requestId: string } = {
   services: [],
 };
 
-function useServicesMainStatisticsFetcher() {
+function useServicesEntitiesMainStatisticsFetcher() {
   const {
     query: {
       rangeFrom,
@@ -75,7 +75,7 @@ function useServicesMainStatisticsFetcher() {
 
 export const MultiSignalInventory = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
-  const { mainStatisticsData, mainStatisticsStatus } = useServicesMainStatisticsFetcher();
+  const { mainStatisticsData, mainStatisticsStatus } = useServicesEntitiesMainStatisticsFetcher();
 
   const initialSortField = ServiceInventoryFieldName.Throughput;
 
@@ -88,7 +88,7 @@ export const MultiSignalInventory = () => {
   return (
     <>
       <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow>
           <TableSearchBar
             placeholder={i18n.translate('xpack.apm.servicesTable.filterServicesPlaceholder', {
               defaultMessage: 'Search services by name',

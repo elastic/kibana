@@ -84,7 +84,7 @@ export function getServiceColumns({
         ) : (
           <ListMetric
             isLoading={false}
-            hideSeries={true}
+            hideSeries
             valueLabel={asMillisecondDuration(metrics.latency)}
           />
         );
@@ -104,7 +104,7 @@ export function getServiceColumns({
         ) : (
           <ListMetric
             isLoading={false}
-            hideSeries={true}
+            hideSeries
             valueLabel={asTransactionRate(metrics.throughput)}
           />
         );
@@ -124,7 +124,7 @@ export function getServiceColumns({
         ) : (
           <ListMetric
             isLoading={false}
-            hideSeries={true}
+            hideSeries
             valueLabel={asPercent(metrics.failedTransactionRate, 1)}
           />
         );
@@ -142,7 +142,7 @@ export function getServiceColumns({
         return (
           <ListMetric
             isLoading={false}
-            hideSeries={true}
+            hideSeries
             valueLabel={asDecimalOrInteger(metrics.logRatePerMinute)}
           />
         );
@@ -160,7 +160,7 @@ export function getServiceColumns({
         return (
           <ListMetric
             isLoading={false}
-            hideSeries={true}
+            hideSeries
             valueLabel={asPercent(metrics.logErrorRate, 1)}
           />
         );

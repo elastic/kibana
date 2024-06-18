@@ -9,7 +9,7 @@ import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 export interface EntityMetrics extends TraceMetrics, LogsRatesMetrics {}
 
-interface Entity {
+export interface Entity {
   id: string;
   latestTimestamp: string;
   identityFields: {

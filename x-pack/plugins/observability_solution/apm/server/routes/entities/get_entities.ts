@@ -6,7 +6,13 @@
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { kqlQuery } from '@kbn/observability-plugin/server';
-import { ENTITY_ENVIRONMENT, FIRST_SEEN, LAST_SEEN } from '../../../common/es_fields/entities';
+import { AGENT_NAME, DATA_STEAM_TYPE } from '../../../common/es_fields/apm';
+import {
+  ENTITY_ENVIRONMENT,
+  FIRST_SEEN,
+  LAST_SEEN,
+  ENTITY,
+} from '../../../common/es_fields/entities';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { EntitiesRaw, ServiceEntities } from './types';
@@ -50,7 +56,7 @@ export async function getEntities({
       body: {
         size,
         track_total_hits: false,
-        _source: ['agent.name', 'entity', 'data_stream'],
+        _source: [AGENT_NAME, ENTITY, DATA_STEAM_TYPE],
         query: {
           bool: {
             filter: [

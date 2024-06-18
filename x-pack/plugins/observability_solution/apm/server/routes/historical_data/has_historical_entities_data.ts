@@ -11,7 +11,7 @@ export async function hasEntitiesData(entitiesESClient: EntitiesESClient) {
   const params = {
     body: {
       terminate_after: 1,
-      track_total_hits: 1,
+      track_total_hits: true,
       size: 0,
     },
   };

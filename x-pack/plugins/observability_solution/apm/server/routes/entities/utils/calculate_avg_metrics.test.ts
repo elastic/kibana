@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SignalTypes } from '../types';
+import { EntityMetrics, SignalTypes } from '../types';
 import { calculateAvgMetrics, mergeMetrics } from './calculate_avg_metrics';
 
 describe('calculateAverageMetrics', () => {
@@ -78,7 +78,7 @@ describe('calculateAverageMetrics', () => {
       },
       {
         agentName: 'java',
-        signalTypes: [SignalTypes.LOGS],
+        signalTypes: [SignalTypes.METRICS],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: {
@@ -96,7 +96,7 @@ describe('calculateAverageMetrics', () => {
     const entities = [
       {
         agentName: 'nodejs',
-        signalTypes: [SignalTypes.METRICS, SignalTypes.LOGS],
+        signalTypes: [SignalTypes.METRICS],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: [
@@ -124,12 +124,11 @@ describe('calculateAverageMetrics', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        signalTypes: [SignalTypes.METRICS, SignalTypes.LOGS],
+        signalTypes: [SignalTypes.METRICS],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: {
           failedTransactionRate: 7.5,
-          latency: 0,
           logErrorRate: 7.5,
           logRatePerMinute: 7.5,
           throughput: 7.5,
@@ -171,7 +170,7 @@ describe('mergeMetrics', () => {
   });
 
   it('handles empty metrics array', () => {
-    const metrics: any[] = [];
+    const metrics: EntityMetrics[] = [];
 
     const result = mergeMetrics(metrics);
 

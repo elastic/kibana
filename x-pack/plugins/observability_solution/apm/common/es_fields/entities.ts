@@ -8,4 +8,5 @@
 export const LAST_SEEN = 'entity.lastSeenTimestamp';
 export const FIRST_SEEN = 'entity.firstSeenTimestamp';
 
+export const ENTITY = 'entity';
 export const ENTITY_ENVIRONMENT = 'entity.identityFields.service.environment';

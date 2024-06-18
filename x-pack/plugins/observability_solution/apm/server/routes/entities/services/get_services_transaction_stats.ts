@@ -18,7 +18,7 @@ import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
-import { MAX_NUMBER_OF_SERVICES } from './get_service_assets';
+import { MAX_NUMBER_OF_SERVICES } from './get_service_entities';
 
 export interface TraceMetrics {
   latency: number | null;

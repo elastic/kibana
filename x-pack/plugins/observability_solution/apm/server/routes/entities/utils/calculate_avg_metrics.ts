@@ -24,13 +24,16 @@ export function calculateAvgMetrics(entities: MergedServiceEntities[]) {
 }
 
 export function mergeMetrics(metrics: EntityMetrics[]) {
-  const mergedMetrics: { [key: string]: any[] } = {};
+  const mergedMetrics: { [key: string]: number[] } = {};
   metrics.forEach((metric) => {
     Object.keys(metric).forEach((key) => {
-      if (!mergedMetrics[key]) {
-        mergedMetrics[key] = [];
+      const value = metric[key as keyof EntityMetrics];
+      if (value) {
+        if (!mergedMetrics[key]) {
+          mergedMetrics[key] = [];
+        }
+        mergedMetrics[key].push(value);
       }
-      mergedMetrics[key].push(metric[key]);
     });
   });
 
