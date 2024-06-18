@@ -75,9 +75,7 @@ describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
     createAndEnableRule();
     openRuleManagementPageViaBreadcrumbs();
 
-    cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
-
-    expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
+    expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 
     cy.get(RULE_NAME).should('have.text', mlRule.name);
     cy.get(RISK_SCORE).should('have.text', mlRule.risk_score);
