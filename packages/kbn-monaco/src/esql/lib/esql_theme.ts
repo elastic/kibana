@@ -48,7 +48,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
 
     // source commands
     ...buildRuleGroup(
-      ['from', 'row', 'show'],
+      ['from', 'row', 'show', 'meta'],
       euiThemeVars.euiColorPrimaryText,
       true // isBold
     ),
@@ -77,7 +77,6 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'in',
         'as',
         'expr_ws',
-        'meta',
         'limit',
         'nulls_ordering_direction',
         'nulls_ordering',
@@ -144,6 +143,10 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     'editor.lineHighlightBorder': euiThemeVars.euiColorLightestShade,
     'editor.selectionHighlightBackground': euiThemeVars.euiColorLightestShade,
     'editor.selectionHighlightBorder': euiThemeVars.euiColorLightShade,
-    'editorSuggestWidget.selectedBackground': euiThemeVars.euiColorAccent,
+    'editorSuggestWidget.background': euiThemeVars.euiColorEmptyShade,
+    'editorSuggestWidget.border': euiThemeVars.euiColorEmptyShade,
+    'editorSuggestWidget.foreground': euiThemeVars.euiTextSubduedColor,
+    'editorSuggestWidget.selectedBackground': euiThemeVars.euiColorPrimary,
+    'editorSuggestWidget.selectedForeground': euiThemeVars.euiColorEmptyShade,
   },
 });

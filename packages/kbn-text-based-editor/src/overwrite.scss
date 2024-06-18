@@ -1,4 +1,8 @@
-.TextBasedLangEditor .monaco-editor {
+/* Editor styles for any layout mode */
+/* NOTE: Much of this is overriding Monaco styles so the specificity is intentional */
+
+// Radius for both the main container and the margin (container for line numbers)
+.TextBasedLangEditor .monaco-editor, .TextBasedLangEditor .monaco-editor .margin {
   border-top-left-radius: $euiBorderRadius;
   border-bottom-left-radius: $euiBorderRadius;
 }
@@ -7,38 +11,43 @@
   display: none !important;
 }
 
-.TextBasedLangEditor--expanded .monaco-editor .monaco-hover {
-  display: block !important;
-}
-
-.TextBasedLangEditor .monaco-editor .margin {
-  border-top-left-radius: $euiBorderRadius;
-  border-bottom-left-radius: $euiBorderRadius;
-}
-
-.TextBasedLangEditor--compact .monaco-editor {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.TextBasedLangEditor--compact .monaco-editor .margin {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  color: $euiColorDisabledText;
-}
-
 .TextBasedLangEditor .monaco-editor .margin-view-overlays .line-numbers {
   color: $euiColorDisabledText;
 }
 
+// Currently focused line(s)
 .TextBasedLangEditor .monaco-editor .current-line ~ .line-numbers {
   color: $euiTextSubduedColor;
 }
 
-.TextBasedLangEditor--compact .monaco-editor .monaco-scrollable-element {
-  margin-left: $euiSizeS;
+// Suggest (autocomplete) menu
+.TextBasedLangEditor .monaco-editor .suggest-widget {
+  @include euiBottomShadow;
+  border-radius: $euiBorderRadius;
 }
 
 .TextBasedLangEditor_errorMessage {
   @include euiTextBreakWord;
+}
+
+/* For compact mode */
+
+// All scrollable containers (e.g. main container and suggest menu)
+.TextBasedLangEditor--compact .monaco-editor .monaco-scrollable-element {
+  margin-left: $euiSizeS;
+}
+
+// Suggest menu in compact mode
+.TextBasedLangEditor--compact .monaco-editor .monaco-list .monaco-scrollable-element {
+  margin-left: 0;
+
+  .monaco-list-row.focused {
+    border-radius: $euiBorderRadius;
+  }
+}
+
+/*  For expanded mode */
+
+.TextBasedLangEditor--expanded .monaco-editor .monaco-hover {
+  display: block !important;
 }

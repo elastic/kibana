@@ -1017,6 +1017,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           borderRadius: 0,
                           backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                           border: '1px solid rgb(17 43 134 / 10%) !important',
+                          transform: 'none !important',
                         },
                       }}
                     />
@@ -1046,6 +1047,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                       border: '1px solid rgb(17 43 134 / 10%) !important',
                       borderLeft: 'transparent !important',
+                      transform: 'none !important',
                     }}
                   />
                 </EuiToolTip>

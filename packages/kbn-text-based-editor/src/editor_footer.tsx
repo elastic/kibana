@@ -173,7 +173,6 @@ export const EditorFooter = memo(function EditorFooter({
       direction="column"
       css={css`
         width: 100%;
-        box-shadow: ${shadowStyle};
       `}
     >
       <EuiFlexItem grow={false}>
