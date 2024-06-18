@@ -6,7 +6,7 @@
  */
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 // eslint-disable-next-line no-restricted-imports
 import { Router } from 'react-router-dom';
@@ -30,18 +30,13 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
   params = coreMock.createAppMountParameters(),
   children,
 } = {}) => {
-  const queryClient = useMemo(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-            cacheTime: 0,
-          },
-        },
-      }),
-    []
-  );
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
 
   return (
     <KibanaContextProvider services={{ ...core, ...deps }}>
