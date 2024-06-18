@@ -43,6 +43,10 @@ export const PROVIDERS: Record<string, ProviderRecord> = {
     icon: OpenAIIcon,
     name: 'Open AI',
   },
+  [ProviderKeys.azureopenai]: {
+    icon: OpenAIIcon,
+    name: 'Azure Open AI',
+  },
 };
 
 export const ServiceProvider: React.FC<ServiceProviderProps> = ({ providerKey }) => {

@@ -7,23 +7,19 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { PROVIDERS } from '../service_provider';
-import type { FilterOptions, ProviderKeys } from '../types';
+import { FilterOptions, TaskTypes } from '../types';
 import type { MultiSelectFilterOption } from './multi_select_filter';
 import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {
-  optionKeys: ProviderKeys[];
+  optionKeys: TaskTypes[];
   onChange: (newFilterOptions: Partial<FilterOptions>) => void;
 }
 
-const options = mapToMultiSelectOption(
-  Object.keys(PROVIDERS) as ProviderKeys[],
-  Object.fromEntries(Object.entries(PROVIDERS).map(([key, { name }]) => [key, name]))
-);
+const options = mapToMultiSelectOption(Object.values(TaskTypes));
 
-export const ProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
+export const TaskTypeFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
   const onSystemFilterChange = ({
     filterId,
     selectedOptionKeys,
@@ -35,7 +31,7 @@ export const ProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
       [filterId]: selectedOptionKeys,
     });
   };
-  const renderOption = (option: MultiSelectFilterOption<ProviderKeys>) => {
+  const renderOption = (option: MultiSelectFilterOption<TaskTypes>) => {
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
         <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
@@ -45,9 +41,9 @@ export const ProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
 
   return (
     <>
-      <MultiSelectFilter<ProviderKeys>
-        buttonLabel={i18n.PROVIDER}
-        id={'provider'}
+      <MultiSelectFilter<TaskTypes>
+        buttonLabel={i18n.TASK_TYPE}
+        id={'type'}
         onChange={onSystemFilterChange}
         options={options}
         renderOption={renderOption}
@@ -56,4 +52,4 @@ export const ProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
     </>
   );
 };
-ProviderFilter.displayName = 'ProviderFilter';
+TaskTypeFilter.displayName = 'TaskTypeFilter';

@@ -22,3 +22,7 @@ export const OPTIONS = (totalCount: number) =>
 export const PROVIDER = i18n.translate('xpack.searchInferenceEndpoints.filter.provider', {
   defaultMessage: 'Provider',
 });
+
+export const TASK_TYPE = i18n.translate('xpack.searchInferenceEndpoints.filter.taskType', {
+  defaultMessage: 'Type',
+});
