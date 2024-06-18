@@ -50,8 +50,8 @@ export function CasesTableServiceProvider(
     },
 
     async deleteCase(index: number = 0) {
-      this.openRowActions(index);
       await toasts.dismissAll();
+      this.openRowActions(index);
       await testSubjects.existOrFail('cases-bulk-action-delete');
       await testSubjects.click('cases-bulk-action-delete');
       await testSubjects.existOrFail('confirmModalConfirmButton', {
