@@ -589,7 +589,7 @@ export const query = (specService: SpecDefinitionsService) => {
         tokens_weight_threshold: 0.4,
         only_score_pruned_tokens: false,
       },
-      query_vectors: []
+      query_vector: []
     },
     term: {
       __template: {
