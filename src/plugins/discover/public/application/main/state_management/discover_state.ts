@@ -290,8 +290,8 @@ export function getDiscoverStateContainer({
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
-    getAppState: appStateContainer.getState,
-    getInternalState: internalStateContainer.getState,
+    appStateContainer,
+    internalStateContainer,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
   });
