@@ -8,7 +8,7 @@
 
 import React, { useContext } from 'react';
 import { css } from '@emotion/react';
-import { EuiDataGridControlColumn } from '@elastic/eui';
+import { EuiDataGridControlColumn, useEuiTheme, EuiThemeComputed } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../../../table_context';
 
@@ -16,16 +16,17 @@ const COLOR_INDICATOR_WIDTH = 4;
 
 interface ColorIndicatorCellParams {
   rowIndex: number;
-  getRowIndicatorColor: (row: DataTableRecord) => string;
+  getRowIndicatorColor: (row: DataTableRecord, euiTheme: EuiThemeComputed) => string | undefined;
 }
 
 const ColorIndicatorCell: React.FC<ColorIndicatorCellParams> = ({
   rowIndex,
   getRowIndicatorColor,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { rows } = useContext(UnifiedDataTableContext);
   const row = rows[rowIndex];
-  const color = (row && getRowIndicatorColor(row)) || 'transparent';
+  const color: string = (row && getRowIndicatorColor(row, euiTheme)) || 'transparent';
   return (
     <div
       css={css`
