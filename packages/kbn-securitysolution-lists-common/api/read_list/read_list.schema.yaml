@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  title: Get list API endpoint
+  version: '2023-10-31'
+paths:
+  /api/lists:
+    get:
+      x-labels: [serverless, ess]
+      operationId: GetList
+      x-codegen-enabled: true
+      summary: Retrieves a list using its id field
+      tags:
+        - List API
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: List's `id` value
+          schema:
+            $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../model/list_schemas.schema.yaml#/components/schemas/List'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        404:
+          description: List not found response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
