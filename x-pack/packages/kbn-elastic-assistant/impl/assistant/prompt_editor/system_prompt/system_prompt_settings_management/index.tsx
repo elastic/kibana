@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiBadge,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Conversation, ConversationsBulkActions } from '../../../../..';
@@ -135,12 +136,16 @@ const SystemPromptSettingsManagementComponent = ({
             </EuiBadge>
           )),
       },
+      /* TODO: enable when createdAt is added
       {
         field: 'createdAt',
         name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_CREATED_ON,
       },
+      */
       {
         name: 'Actions',
+        align: 'center',
+        width: '120px',
         render: (prompt: Prompt) => {
           return (
             <RowActions<Prompt>
@@ -178,6 +183,7 @@ const SystemPromptSettingsManagementComponent = ({
           </EuiFlexItem>
         </EuiFlexGroup>
 
+        <EuiSpacer size="s" />
         <EuiInMemoryTable items={systemPromptListItems} columns={columns} />
       </EuiPanel>
       <Flyout

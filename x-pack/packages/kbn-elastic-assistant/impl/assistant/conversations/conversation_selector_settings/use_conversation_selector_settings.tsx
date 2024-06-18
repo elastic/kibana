@@ -20,11 +20,11 @@ export interface UseConversationSelectorSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   connectors: AIConnector[] | undefined;
   conversations: Record<string, Conversation>;
+  defaultConnector?: AIConnector;
 }
 
 export type ConversationTableItem = Conversation & {
   actionType?: string | null;
-  systemPrompt?: string;
 };
 
 export const useConversationsList = ({
@@ -32,17 +32,15 @@ export const useConversationsList = ({
   actionTypeRegistry,
   connectors,
   conversations = emptyConversations,
+  defaultConnector,
 }: UseConversationSelectorSettingsProps) => {
   const conversationOptions = useMemo<ConversationTableItem[]>(() => {
     return Object.values(conversations).map((conversation) => {
       const connector: AIConnector | undefined = connectors?.find(
-        (c) => c.id === conversation.apiConfig?.connectorId
+        (c) => c.id === conversation.apiConfig?.connectorId || defaultConnector?.id
       );
 
       const actionType = getConnectorTypeTitle(connector, actionTypeRegistry);
-      const systemPrompt: Prompt | undefined = allSystemPrompts.find(
-        ({ id }) => id === conversation.apiConfig?.defaultSystemPromptId
-      );
 
       const defaultSystemPrompt = getDefaultSystemPrompt({
         allSystemPrompts,
@@ -51,14 +49,19 @@ export const useConversationsList = ({
       return {
         ...conversation,
         actionType,
-        systemPrompt:
-          systemPrompt?.label ??
-          systemPrompt?.name ??
-          defaultSystemPrompt?.label ??
-          defaultSystemPrompt?.name,
+        ...(defaultConnector
+          ? {
+              apiConfig: {
+                connectorId: defaultConnector.id,
+                actionTypeId: defaultConnector.actionTypeId,
+                provider: defaultConnector.apiProvider,
+                defaultSystemPromptId: defaultSystemPrompt?.id,
+              },
+            }
+          : {}),
       };
     });
-  }, [allSystemPrompts, actionTypeRegistry, connectors, conversations]);
+  }, [conversations, connectors, actionTypeRegistry, allSystemPrompts, defaultConnector]);
 
   return conversationOptions;
 };

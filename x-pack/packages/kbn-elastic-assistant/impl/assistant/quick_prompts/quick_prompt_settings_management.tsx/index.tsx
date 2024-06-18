@@ -14,6 +14,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 import { QuickPrompt } from '../types';
 import { RowActions } from '../../common/components/assisttant_settings_management/row_actions';
@@ -102,12 +103,16 @@ const QuickPromptSettingsManagementComponent = ({
             <EuiLink onClick={() => onEditActionClicked(prompt)}>{prompt?.title}</EuiLink>
           ) : null,
       },
+      /* TODO: enable when createdAt is added
       {
         field: 'createdAt',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CREATED_AT,
       },
+      */
       {
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_ACTIONS,
+        width: '120px',
+        align: 'center',
         render: (prompt: QuickPrompt) => {
           return (
             <RowActions<QuickPrompt>
@@ -139,6 +144,7 @@ const QuickPromptSettingsManagementComponent = ({
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="s" />
         <EuiInMemoryTable pagination columns={columns} items={quickPromptSettings} />
       </EuiPanel>
       <Flyout

@@ -23,6 +23,7 @@ interface Props {
   isDisabled?: boolean;
   isFlyoutMode: boolean;
   conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
   refetchConversationsState: () => Promise<void>;
 }
 
@@ -39,6 +40,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     isFlyoutMode,
     onConversationSelected,
     conversations,
+    conversationsLoaded,
     refetchConversationsState,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
@@ -94,6 +96,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             onSave={handleSave}
             isFlyoutMode={isFlyoutMode}
             conversations={conversations}
+            conversationsLoaded={conversationsLoaded}
           />
         )}
       </>

@@ -16,7 +16,6 @@ import {
   EuiComboBox,
   EuiButton,
   EuiTextArea,
-  EuiTextColor,
   EuiFlexItem,
   EuiFlexGroup,
   EuiLink,
@@ -25,42 +24,37 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PostEvaluateResponse } from '@kbn/elastic-assistant-common';
-import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 
 import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
-import { getApmLink, getDiscoverLink } from './utils';
-import { useRunDetails } from './run_details/use_run_details';
-import { useDataset } from './run_details/use_dataset';
-import { useTraceOptions } from './run_details/use_trace_options';
-import { RunDetailsEditor } from './run_details';
-import { PredictionDetails } from './prediction_details';
-import { usePredictionsDetails } from './prediction_details/use_predictions_details';
-import { useEvaluationDetails } from './evaluation_details/use_evaluation_details';
+import { getApmLink, getDiscoverLink } from '../evaluation_settings/utils';
+import { useEvaluationDetails } from '../evaluation_settings/evaluation_details/use_evaluation_details';
+import { useRunDetails } from '../evaluation_settings/run_details/use_run_details';
+import { useTraceOptions } from '../evaluation_settings/run_details/use_trace_options';
+import { useDataset } from '../evaluation_settings/run_details/use_dataset';
+import { usePredictionsDetails } from '../evaluation_settings/prediction_details/use_predictions_details';
+import * as i18n from '../evaluation_settings/translations';
+import { RunDetailsEditor } from '../evaluation_settings/run_details';
+import { PredictionDetails } from '../evaluation_settings/prediction_details';
+import {
+  EVALUATION_DETAILS_TITLE,
+  PREDICTION_DETAILS_TITLE,
+  RUN_DETAILS_TITLE,
+} from './translations';
 
-const getSection = (title: string, description: string) => (
-  <div>
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h3>{title}</h3>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-
-    <EuiText size="s">
-      <p>
-        <EuiTextColor color="subdued">{description}</EuiTextColor>
-      </p>
-    </EuiText>
-  </div>
+const getSection = (title: string, description?: string) => (
+  <>
+    <EuiTitle size={'s'}>
+      <h2>{title}</h2>
+    </EuiTitle>
+    <EuiSpacer size="xs" />
+    {description && <EuiText size={'s'}>{description}</EuiText>}
+    <EuiSpacer size="xs" />
+  </>
 );
 
-/**
- * Evaluation Settings -- development-only feature for evaluating models
- */
-export const EvaluationSettings: React.FC = React.memo(() => {
+export const EvaluationSettingsManagement: React.FC = React.memo(() => {
   const { actionTypeRegistry, basePath, http, setTraceOptions, traceOptions } =
     useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });
@@ -78,7 +72,6 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   const tracedOptionsSettings = useTraceOptions({ setTraceOptions, traceOptions });
   /** Dataset **/
   const datasetSettings = useDataset();
-
   // Predictions
   const predictionsSettings = usePredictionsDetails({
     http,
@@ -144,17 +137,14 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   );
 
   const runDetailsSection = useMemo(
-    () => getSection(i18n.RUN_DETAILS_TITLE, i18n.RUN_DETAILS_DESCRIPTION),
+    () => getSection(RUN_DETAILS_TITLE, i18n.RUN_DETAILS_DESCRIPTION),
     []
   );
   const predictionDetailsSection = useMemo(
-    () => getSection(i18n.PREDICTION_DETAILS_TITLE, i18n.PREDICTION_DETAILS_DESCRIPTION),
+    () => getSection(PREDICTION_DETAILS_TITLE, i18n.PREDICTION_DETAILS_DESCRIPTION),
     []
   );
-  const evalDetailsSection = useMemo(
-    () => getSection(i18n.EVALUATION_DETAILS_TITLE, i18n.EVALUATION_DETAILS_DESCRIPTION),
-    []
-  );
+  const evalDetailsSection = useMemo(() => getSection(EVALUATION_DETAILS_TITLE), []);
 
   const buttonCss = css`
     &:hover {
@@ -172,13 +162,12 @@ export const EvaluationSettings: React.FC = React.memo(() => {
       <EuiHorizontalRule margin={'s'} />
       {/* Run Details*/}
       <EuiAccordion
-        id={i18n.RUN_DETAILS_TITLE}
+        id={RUN_DETAILS_TITLE}
         arrowDisplay={'right'}
         buttonContent={runDetailsSection}
-        buttonProps={{ paddingSize: 's', css: buttonCss }}
+        buttonProps={{ css: buttonCss }}
         element="fieldset"
         initialIsOpen={true}
-        paddingSize="s"
       >
         <RunDetailsEditor
           runDetailsSettings={runDetailsSettings}
@@ -189,57 +178,25 @@ export const EvaluationSettings: React.FC = React.memo(() => {
       <EuiHorizontalRule margin={'s'} />
       {/* Prediction Details*/}
       <EuiAccordion
-        id={i18n.PREDICTION_DETAILS_TITLE}
+        id={PREDICTION_DETAILS_TITLE}
         arrowDisplay={'right'}
         buttonContent={predictionDetailsSection}
-        buttonProps={{ paddingSize: 's', css: buttonCss }}
+        buttonProps={{ css: buttonCss }}
         element="fieldset"
         initialIsOpen={true}
-        paddingSize="s"
       >
         <PredictionDetails predictionsSettings={predictionsSettings} />
       </EuiAccordion>
       <EuiHorizontalRule margin={'s'} />
       {/* Evaluation Details*/}
       <EuiAccordion
-        id={i18n.EVALUATION_DETAILS_TITLE}
+        id={EVALUATION_DETAILS_TITLE}
         arrowDisplay={'right'}
         element="fieldset"
-        buttonProps={{ paddingSize: 's', css: buttonCss }}
+        buttonProps={{ css: buttonCss }}
         buttonContent={evalDetailsSection}
-        paddingSize="s"
+        initialIsOpen={true}
       >
-        <EuiFormRow
-          display="rowCompressed"
-          label={i18n.EVALUATOR_MODEL_LABEL}
-          helpText={i18n.EVALUATOR_MODEL_DESCRIPTION}
-        >
-          <EuiComboBox
-            aria-label={'evaluation-type-select'}
-            compressed
-            options={predictionsSettings.modelOptions}
-            selectedOptions={selectedEvaluatorModelOptions}
-            singleSelection={{ asPlainText: true }}
-            onChange={onEvaluatorModelOptionsChange}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          display="rowCompressed"
-          label={i18n.EVALUATION_TYPE_LABEL}
-          helpText={i18n.EVALUATION_TYPE_DESCRIPTION}
-        >
-          <EuiComboBox
-            aria-label={'evaluation-type-select'}
-            compressed
-            onChange={onEvaluationTypeChange}
-            onCreateOption={onEvaluationTypeOptionsCreate}
-            options={evaluationTypeOptions}
-            selectedOptions={selectedEvaluationType}
-            singleSelection={{ asPlainText: true }}
-          />
-        </EuiFormRow>
-
         <EuiFormRow
           display="rowCompressed"
           label={i18n.EVALUATION_PROMPT_LABEL}
@@ -259,15 +216,15 @@ export const EvaluationSettings: React.FC = React.memo(() => {
           />
         </EuiFormRow>
       </EuiAccordion>
-      <EuiHorizontalRule />
-      <EuiFlexGroup alignItems="center">
+      <EuiHorizontalRule margin="s" />
+      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiButton
-            size="s"
             type="submit"
             isDisabled={isPerformEvaluationDisabled}
             isLoading={isPerformingEvaluation}
             onClick={handlePerformEvaluation}
+            iconType="plusInCircle"
             fill
           >
             {i18n.PERFORM_EVALUATION}
@@ -277,7 +234,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
           <EuiText color={'subdued'} size={'xs'}>
             <FormattedMessage
               defaultMessage="Fun Facts: Watch the Kibana server logs for progress, and view results in {discover} / {apm} once complete. Will take (many) minutes depending on dataset, and closing this dialog will cancel the evaluation!"
-              id="xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorFunFactText"
+              id="xpack.elasticAssistant.assistant.settings.evaluationSettingsManagement.evaluatorFunFactText"
               values={{
                 discover: (
                   <EuiLink external href={discoverLink} target="_blank">
@@ -293,10 +250,42 @@ export const EvaluationSettings: React.FC = React.memo(() => {
             />
           </EuiText>
         </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            display="rowCompressed"
+            label={i18n.EVALUATOR_MODEL_LABEL}
+            helpText={i18n.EVALUATOR_MODEL_DESCRIPTION}
+          >
+            <EuiComboBox
+              aria-label={'evaluation-type-select'}
+              compressed
+              options={predictionsSettings.modelOptions}
+              selectedOptions={selectedEvaluatorModelOptions}
+              singleSelection={{ asPlainText: true }}
+              onChange={onEvaluatorModelOptionsChange}
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            display="rowCompressed"
+            label={i18n.EVALUATION_TYPE_LABEL}
+            helpText={i18n.EVALUATION_TYPE_DESCRIPTION}
+          >
+            <EuiComboBox
+              aria-label={'evaluation-type-select'}
+              compressed
+              onChange={onEvaluationTypeChange}
+              onCreateOption={onEvaluationTypeOptionsCreate}
+              options={evaluationTypeOptions}
+              selectedOptions={selectedEvaluationType}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
       </EuiFlexGroup>
+
       <EuiSpacer size="s" />
     </>
   );
 });
-
-EvaluationSettings.displayName = 'EvaluationSettings';
+EvaluationSettingsManagement.displayName = 'EvaluationSettingsManagement';

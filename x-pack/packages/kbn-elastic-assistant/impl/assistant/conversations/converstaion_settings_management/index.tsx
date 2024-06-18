@@ -36,14 +36,18 @@ import { useFlyoutModalVisibility } from '../../common/components/assisttant_set
 import { Flyout } from '../../common/components/assisttant_settings_management/flyout';
 import { CANCEL, DELETE } from '../../settings/translations';
 import { ConversationSettingsEditor } from '../conversation_settings/conversation_settings_editor';
+import { useConversationChanged } from '../conversation_settings/use_conversation_changed';
+import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 
 interface Props {
   actionTypeRegistry: ActionTypeRegistryContract;
   allSystemPrompts: Prompt[];
   assistantStreamingEnabled: boolean;
   connectors: AIConnector[] | undefined;
-  conversations: Record<string, Conversation>;
+  conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
+  conversationsLoaded: boolean;
+  defaultConnector?: AIConnector;
   handleSave: () => void;
   isDisabled?: boolean;
   isFlyoutMode: boolean;
@@ -63,8 +67,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   allSystemPrompts,
   assistantStreamingEnabled,
   connectors,
-  conversations,
+  defaultConnector,
+  conversationSettings,
   conversationsSettingsBulkActions,
+  conversationsLoaded,
   handleSave,
   isDisabled,
   isFlyoutMode,
@@ -76,6 +82,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   setConversationSettings,
   setConversationsSettingsBulkActions,
 }) => {
+  console.log('conversationSettings----', conversationSettings);
+  console.log('selectedConversation---', selectedConversation);
   const { http } = useAssistantContext();
   const {
     isFlyoutOpen: editFlyoutVisible,
@@ -90,16 +98,26 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     closeFlyout: closeConfirmModal,
   } = useFlyoutModalVisibility();
 
+  const onConversationSelectionChange = useConversationChanged({
+    allSystemPrompts,
+    conversationSettings,
+    conversationsSettingsBulkActions,
+    defaultConnector,
+    setConversationSettings,
+    setConversationsSettingsBulkActions,
+    onSelectedConversationChange,
+  });
+
   const onEditActionClicked = useCallback(
     (rowItem: ConversationTableItem) => {
       openEditFlyout();
-      onSelectedConversationChange(rowItem);
+      onConversationSelectionChange(rowItem);
     },
-    [onSelectedConversationChange, openEditFlyout]
+    [onConversationSelectionChange, openEditFlyout]
   );
 
   const onConversationDeleted = useConversationDeleted({
-    conversationSettings: conversations,
+    conversationSettings,
     conversationsSettingsBulkActions,
     setConversationSettings,
     setConversationsSettingsBulkActions,
@@ -118,8 +136,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     if (!deleteConversation) return;
     onConversationDeleted(deleteConversation.title);
     closeConfirmModal();
-    refetchConversations();
-  }, [deleteConversation, onConversationDeleted, closeConfirmModal, refetchConversations]);
+  }, [deleteConversation, onConversationDeleted, closeConfirmModal]);
 
   const onDeleteCancelled = useCallback(() => {
     setDeleteConversation(null);
@@ -131,7 +148,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     allSystemPrompts,
     actionTypeRegistry,
     connectors,
-    conversations,
+    conversations: conversationSettings,
+    defaultConnector,
   });
 
   const onEditFlyoutClosed = useCallback(() => {
@@ -142,8 +160,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const onEditFlyoutSaved = useCallback(() => {
     handleSave();
     closeEditFlyout();
-    refetchConversations();
-  }, [closeEditFlyout, handleSave, refetchConversations]);
+  }, [closeEditFlyout, handleSave]);
 
   const columns: Array<EuiBasicTableColumn<ConversationTableItem>> = useMemo(
     () => [
@@ -154,20 +171,38 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         ),
       },
       {
-        field: 'systemPrompt',
         name: i18n.CONVERSATIONS_TABLE_COLUMN_SYSTEM_PROMPT,
-        render: (systemPrompt: ConversationTableItem['systemPrompt']) =>
-          systemPrompt ? <EuiBadge color="hollow">{systemPrompt}</EuiBadge> : null,
+        align: 'center',
+        render: (conversation: ConversationTableItem) => {
+          const systemPrompt: Prompt | undefined = allSystemPrompts.find(
+            ({ id }) => id === conversation.apiConfig?.defaultSystemPromptId
+          );
+
+          const defaultSystemPrompt = getDefaultSystemPrompt({
+            allSystemPrompts,
+            conversation,
+          });
+
+          const systemPromptTitle =
+            systemPrompt?.label ||
+            systemPrompt?.name ||
+            defaultSystemPrompt?.label ||
+            defaultSystemPrompt?.name;
+
+          return systemPromptTitle ? <EuiBadge color="hollow">{systemPromptTitle}</EuiBadge> : null;
+        },
       },
       {
         field: 'actionType',
         name: i18n.CONVERSATIONS_TABLE_COLUMN_CONNECTOR,
+        align: 'center',
         render: (actionType: ConversationTableItem['actionType']) =>
           actionType ? <EuiBadge color="hollow">{actionType}</EuiBadge> : null,
       },
       {
         field: 'updatedAt',
         name: i18n.CONVERSATIONS_TABLE_COLUMN_UPDATED_AT,
+        align: 'center',
         render: (updatedAt: ConversationTableItem['updatedAt']) =>
           updatedAt ? (
             <EuiBadge color="hollow">
@@ -183,23 +218,20 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       },
       {
         name: i18n.CONVERSATIONS_TABLE_COLUMN_ACTIONS,
-        actions: [
-          {
-            name: i18n.CONVERSATIONS_TABLE_COLUMN_ACTIONS,
-            render: (conversation: ConversationTableItem) => {
-              return (
-                <RowActions<ConversationTableItem>
-                  rowItem={conversation}
-                  onEdit={onEditActionClicked}
-                  onDelete={onDeleteActionClicked}
-                />
-              );
-            },
-          },
-        ],
+        width: '120px',
+        align: 'center',
+        render: (prompt: ConversationTableItem) => {
+          return (
+            <RowActions<ConversationTableItem>
+              rowItem={prompt}
+              onDelete={onDeleteActionClicked}
+              onEdit={onEditActionClicked}
+            />
+          );
+        },
       },
     ],
-    [onDeleteActionClicked, onEditActionClicked]
+    [allSystemPrompts, onDeleteActionClicked, onEditActionClicked]
   );
 
   const sorting = useMemo(
@@ -211,6 +243,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     }),
     []
   );
+
+  if (!conversationsLoaded) {
+    return null;
+  }
 
   return (
     <>
@@ -238,7 +274,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         >
           <ConversationSettingsEditor
             allSystemPrompts={allSystemPrompts}
-            conversationSettings={conversations}
+            conversationSettings={conversationSettings}
             conversationsSettingsBulkActions={conversationsSettingsBulkActions}
             http={http}
             isDisabled={isDisabled}

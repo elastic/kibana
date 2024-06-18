@@ -13,7 +13,7 @@ import {
   EuiFormRow,
   EuiSwitch,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 
 import { HttpSetup } from '@kbn/core-http-browser';
 
@@ -24,11 +24,11 @@ import * as i18n from './translations';
 import { AIConnector } from '../../../connectorland/connector_selector';
 
 import { ConversationSelectorSettings } from '../conversation_selector_settings';
-import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 
 import { ConversationsBulkActions } from '../../api';
 import { useConversationDeleted } from './use_conversation_deleted';
 import { ConversationSettingsEditor } from './conversation_settings_editor';
+import { useConversationChanged } from './use_conversation_changed';
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -68,69 +68,15 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     conversationsSettingsBulkActions,
     setConversationsSettingsBulkActions,
   }) => {
-    const defaultSystemPrompt = useMemo(() => {
-      return getDefaultSystemPrompt({ allSystemPrompts, conversation: undefined });
-    }, [allSystemPrompts]);
-
-    // Conversation callbacks
-    // When top level conversation selection changes
-    const onConversationSelectionChange = useCallback(
-      (c?: Conversation | string) => {
-        const isNew = typeof c === 'string';
-
-        const newSelectedConversation: Conversation | undefined = isNew
-          ? {
-              id: '',
-              title: c ?? '',
-              category: 'assistant',
-              messages: [],
-              replacements: {},
-              ...(defaultConnector
-                ? {
-                    apiConfig: {
-                      connectorId: defaultConnector.id,
-                      actionTypeId: defaultConnector.actionTypeId,
-                      provider: defaultConnector.apiProvider,
-                      defaultSystemPromptId: defaultSystemPrompt?.id,
-                    },
-                  }
-                : {}),
-            }
-          : c;
-
-        if (newSelectedConversation && (isNew || newSelectedConversation.id === '')) {
-          setConversationSettings({
-            ...conversationSettings,
-            [isNew ? c : newSelectedConversation.title]: newSelectedConversation,
-          });
-          setConversationsSettingsBulkActions({
-            ...conversationsSettingsBulkActions,
-            create: {
-              ...(conversationsSettingsBulkActions.create ?? {}),
-              [newSelectedConversation.title]: newSelectedConversation,
-            },
-          });
-        } else if (newSelectedConversation != null) {
-          setConversationSettings((prev) => {
-            return {
-              ...prev,
-              [newSelectedConversation.id]: newSelectedConversation,
-            };
-          });
-        }
-
-        onSelectedConversationChange(newSelectedConversation);
-      },
-      [
-        conversationSettings,
-        conversationsSettingsBulkActions,
-        defaultConnector,
-        defaultSystemPrompt?.id,
-        onSelectedConversationChange,
-        setConversationSettings,
-        setConversationsSettingsBulkActions,
-      ]
-    );
+    const onConversationSelectionChange = useConversationChanged({
+      allSystemPrompts,
+      conversationSettings,
+      conversationsSettingsBulkActions,
+      defaultConnector,
+      setConversationSettings,
+      setConversationsSettingsBulkActions,
+      onSelectedConversationChange,
+    });
 
     const onConversationDeleted = useConversationDeleted({
       conversationSettings,

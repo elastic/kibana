@@ -74,6 +74,7 @@ interface Props {
   selectedConversationId?: string;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
 }
 
 /**
@@ -88,6 +89,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     selectedConversationId: defaultSelectedConversationId,
     onConversationSelected,
     conversations,
+    conversationsLoaded,
     isFlyoutMode,
   }) => {
     const {
@@ -126,7 +128,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       anonymizationFieldsBulkActions,
       setAnonymizationFieldsBulkActions,
       setUpdatedAnonymizationData,
-    } = useSettingsUpdater(conversations, anonymizationFields);
+    } = useSettingsUpdater(conversations, conversationsLoaded, anonymizationFields);
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State

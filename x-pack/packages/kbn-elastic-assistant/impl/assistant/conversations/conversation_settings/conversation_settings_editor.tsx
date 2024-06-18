@@ -22,7 +22,6 @@ import { ModelSelector } from '../../../connectorland/models/model_selector/mode
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getGenAiConfig } from '../../../connectorland/helpers';
 import { ConversationsBulkActions } from '../../api';
-import { useConnectorSelector } from './use_connector_selector';
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 
 export interface ConversationSettingsEditorProps {
@@ -73,7 +72,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           };
           setConversationSettings({
             ...conversationSettings,
-            [updatedConversation.id]: updatedConversation,
+            [updatedConversation.id || updatedConversation.title]: updatedConversation,
           });
           if (selectedConversation.id !== '') {
             setConversationsSettingsBulkActions({

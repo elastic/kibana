@@ -13,7 +13,7 @@ import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
-import { EvaluationSettings, KnowledgeBaseSettings } from '.';
+import { KnowledgeBaseSettings } from '.';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
@@ -22,6 +22,7 @@ import { ConversationSettingsManagement } from '../conversations/converstaion_se
 import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management.tsx';
 import { SystemPromptSettingsManagement } from '../prompt_editor/system_prompt/system_prompt_settings_management';
 import { AnonymizationSettingsManagement } from '../../data_anonymization/settings/anonomization_settings_management';
+import { EvaluationSettingsManagement } from './evaluation_settings_management';
 
 export const CONNECTORS_TAB = 'CONNECTORS_TAB' as const;
 export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
@@ -33,6 +34,7 @@ export const EVALUATION_TAB = 'EVALUATION_TAB' as const;
 
 interface Props {
   conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
   selectedConversation: Conversation;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   isFlyoutMode: boolean;
@@ -48,6 +50,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     setSelectedConversationId,
     conversations,
+    conversationsLoaded,
     isFlyoutMode,
     refetchConversations,
   }) => {
@@ -92,6 +95,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       resetSettings,
     } = useSettingsUpdater(
       conversations,
+      conversationsLoaded,
       anonymizationFields ?? { page: 0, perPage: 0, total: 0, data: [] }
     );
 
@@ -109,7 +113,11 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     useEffect(() => {
       if (selectedConversation != null) {
-        setSelectedConversation(conversationSettings[selectedConversation.title]);
+        setSelectedConversation(
+          // conversationSettings has title as key, sometime has id as key
+          conversationSettings[selectedConversation.id] ||
+            conversationSettings[selectedConversation.title]
+        );
       }
     }, [conversationSettings, selectedConversation]);
 
@@ -248,8 +256,10 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               allSystemPrompts={systemPromptSettings}
               assistantStreamingEnabled={assistantStreamingEnabled}
               connectors={connectors}
-              conversations={conversations}
+              conversationSettings={conversationSettings}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
+              conversationsLoaded={conversationsLoaded}
+              defaultConnector={defaultConnector}
               handleSave={handleSave}
               isFlyoutMode={isFlyoutMode}
               refetchConversations={refetchConversations}
@@ -306,37 +316,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               setUpdatedKnowledgeBaseSettings={handleChange(setUpdatedKnowledgeBaseSettings)}
             />
           )}
-          {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
+          {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettingsManagement />}
         </EuiPageTemplate.Section>
-        {/* {hasPendingChanges && (
-          <EuiPageTemplate.BottomBar paddingSize="s" position="fixed">
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  color="text"
-                  iconType="cross"
-                  data-test-subj="cancel-button"
-                  onClick={onCancelClick}
-                >
-                  {i18n.CANCEL}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  type="submit"
-                  data-test-subj="save-button"
-                  onClick={handleSave}
-                  iconType="check"
-                  fill
-                >
-                  {i18n.SAVE}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageTemplate.BottomBar>
-        )} */}
       </>
     );
   }

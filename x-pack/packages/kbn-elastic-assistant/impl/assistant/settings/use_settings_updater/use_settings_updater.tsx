@@ -46,6 +46,7 @@ interface UseSettingsUpdater {
 
 export const useSettingsUpdater = (
   conversations: Record<string, Conversation>,
+  conversationsLoaded: boolean,
   anonymizationFields: FindAnonymizationFieldsResponse
 ): UseSettingsUpdater => {
   // Initial state from assistant context
@@ -187,6 +188,12 @@ export const useSettingsUpdater = (
     anonymizationFieldsBulkActions.delete?.ids?.length,
     anonymizationFieldsBulkActions.update?.length,
   ]);
+
+  useEffect(() => {
+    if (conversationsLoaded) {
+      setConversationSettings(conversations);
+    }
+  }, [conversations, conversationsLoaded]);
 
   return {
     conversationSettings,
