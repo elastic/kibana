@@ -6,7 +6,11 @@
  */
 import React, { useState, useMemo } from 'react';
 import _ from 'lodash';
-import { UnifiedDataTableSettings, UnifiedDataTableSettingsColumn, useColumns } from '@kbn/unified-data-table';
+import {
+  UnifiedDataTableSettings,
+  UnifiedDataTableSettingsColumn,
+  useColumns,
+} from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { HttpSetup } from '@kbn/core-http-browser';
@@ -142,16 +146,16 @@ export const CloudSecurityDataTable = ({
     }
   );
 
-    const settings: UnifiedDataTableSettings = {
-        columns: defaultColumns.reduce((prev, curr) => {
-          const newColumn: UnifiedDataTableSettingsColumn = {
-            ..._.pick(localSettings?.columns?.[curr.id], ['width']),
-            display: columnHeaders?.[curr.id]
-          };
-    
-          return { ...prev, ...{ [curr.id]: newColumn }};
-        }, {} as UnifiedDataTableSettings['columns']),
+  const settings: UnifiedDataTableSettings = {
+    columns: defaultColumns.reduce((prev, curr) => {
+      const newColumn: UnifiedDataTableSettingsColumn = {
+        ..._.pick(localSettings?.columns?.[curr.id], ['width']),
+        display: columnHeaders?.[curr.id],
       };
+
+      return { ...prev, ...{ [curr.id]: newColumn } };
+    }, {} as UnifiedDataTableSettings['columns']),
+  };
 
   const { dataView, dataViewIsRefetching, dataViewRefetch } = useDataViewContext();
 
