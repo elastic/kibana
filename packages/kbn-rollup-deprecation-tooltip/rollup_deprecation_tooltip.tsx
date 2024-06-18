@@ -11,7 +11,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface RollupDeprecationTooltipProps {
-  /** The item wrapped around the deprecation tooltip.  */
+  /** The item wrapped by the deprecation tooltip.  */
   children: ReactElement;
 }
 
