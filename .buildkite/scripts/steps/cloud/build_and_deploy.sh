@@ -130,8 +130,6 @@ Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
 Credentials: \`$VAULT_READ_COMMAND\`
 
-(Use this vault: VAULT_ADDR=https://secrets.elastic.co:8200)
-
 Kibana image: \`$KIBANA_CLOUD_IMAGE\`
 
 Elasticsearch image: \`$ELASTICSEARCH_CLOUD_IMAGE\`

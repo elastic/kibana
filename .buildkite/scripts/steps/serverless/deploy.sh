@@ -123,8 +123,6 @@ Elasticsearch: $PROJECT_ELASTICSEARCH_URL
 
 Credentials: \`$VAULT_READ_COMMAND\`
 
-(Use this vault: VAULT_ADDR=https://secrets.elastic.co:8200)
-
 Kibana image: \`$KIBANA_IMAGE\`
 EOF
 
