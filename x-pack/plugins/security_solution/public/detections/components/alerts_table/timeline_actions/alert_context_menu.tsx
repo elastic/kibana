@@ -152,8 +152,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       refetchQuery([timelineQuery]);
     } else {
       refetchQuery(globalQuery);
-      if (refetch) refetch();
     }
+
+    if (refetch) refetch();
   }, [scopeId, globalQuery, timelineQuery, refetch]);
 
   const ruleIndex =
