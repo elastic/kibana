@@ -375,7 +375,7 @@ export const XyToolbar = memo(function XyToolbar(
   );
   const nonOrdinalXAxis = dataLayers.every(
     (layer) =>
-      !layer.xAccessor ||
+      layer.xAccessor &&
       getScaleType(
         props.frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(layer.xAccessor) ??
           null,
