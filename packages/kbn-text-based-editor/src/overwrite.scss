@@ -2,7 +2,7 @@
 /* NOTE: Much of this is overriding Monaco styles so the specificity is intentional */
 
 // Radius for both the main container and the margin (container for line numbers)
-.TextBasedLangEditor .monaco-editor, .TextBasedLangEditor .monaco-editor .margin {
+.TextBasedLangEditor .monaco-editor, .TextBasedLangEditor .monaco-editor .margin, .TextBasedLangEditor .monaco-editor .overflow-guard {
   border-top-left-radius: $euiBorderRadius;
   border-bottom-left-radius: $euiBorderRadius;
 }
@@ -50,4 +50,9 @@
 
 .TextBasedLangEditor--expanded .monaco-editor .monaco-hover {
   display: block !important;
+}
+
+.TextBasedLangEditor--expanded .monaco-editor, .TextBasedLangEditor--expanded .monaco-editor .margin, .TextBasedLangEditor--expanded .monaco-editor .overflow-guard {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }

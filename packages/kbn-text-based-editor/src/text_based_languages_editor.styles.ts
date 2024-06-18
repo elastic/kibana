@@ -102,7 +102,7 @@ export const textBasedLanguageEditorStyles = (
     },
     historyContainer: {
       border: euiTheme.border.thin,
-      borderTop: `2px solid ${euiTheme.colors.lightShade}`,
+      borderTop: 'none',
       borderLeft: editorIsInline ? 'none' : euiTheme.border.thin,
       borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
       backgroundColor: euiTheme.colors.lightestShade,
