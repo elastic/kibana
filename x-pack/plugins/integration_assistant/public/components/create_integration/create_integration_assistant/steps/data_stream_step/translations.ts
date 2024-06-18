@@ -17,7 +17,7 @@ export const INTEGRATION_NAME_DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.integrationNameDescription',
   {
     defaultMessage:
-      'Name will be used in the Elastic ingest pipeline to organize and manage your data streams efficiently',
+      "The package name is used to refer to the integration in Elastic's ingest pipeline",
   }
 );
 export const DATA_STREAM_TITLE = i18n.translate(
@@ -30,7 +30,7 @@ export const DATA_STREAM_DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.dataStreamDescription',
   {
     defaultMessage:
-      'The logs will be analyzed to map ECS fields and create an ingestion pipeline in Elastic',
+      'Logs are analyzed to automatically map ECS fields and help create the ingestion pipeline',
   }
 );
 
@@ -43,7 +43,7 @@ export const INTEGRATION_NAME_LABEL = i18n.translate(
 export const NO_SPACES_HELP = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.noSpacesHelpText',
   {
-    defaultMessage: 'It can not contain spaces, only lowercase letters, numbers and underscore (_)',
+    defaultMessage: 'Name can only contain lowercase letters, numbers, and underscore (_)',
   }
 );
 export const NAME_ALREADY_EXISTS_ERROR = i18n.translate(
@@ -84,7 +84,7 @@ export const DATA_COLLECTION_METHOD_LABEL = i18n.translate(
 export const LOGS_SAMPLE_LABEL = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.logsSample.label',
   {
-    defaultMessage: 'Logs sample upload',
+    defaultMessage: 'Logs',
   }
 );
 
@@ -92,7 +92,20 @@ export const LOGS_SAMPLE_WARNING = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.logsSample.warning',
   {
     defaultMessage:
-      'Please be aware that this data will be analyzed by a third-party AI tool. Ensure that your data complies with privacy and security guidelines.',
+      'Please note that this data will be analyzed by a third-party AI tool. Ensure that you comply with privacy and security guidelines when selecting data.',
+  }
+);
+
+export const LOGS_SAMPLE_DESCRIPTION = i18n.translate(
+  'xpack.integrationAssistant.step.dataStream.logsSample.description',
+  {
+    defaultMessage: 'Drag and drop a file or Browse files.',
+  }
+);
+export const LOGS_SAMPLE_DESCRIPTION_2 = i18n.translate(
+  'xpack.integrationAssistant.step.dataStream.logsSample.description2',
+  {
+    defaultMessage: 'JSON/NDJSON format',
   }
 );
 

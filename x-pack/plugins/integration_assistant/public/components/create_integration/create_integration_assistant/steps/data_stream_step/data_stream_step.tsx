@@ -16,7 +16,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import type { InputType } from '../../../../../../common/types';
-import type { Actions, State } from '../../state';
+import { useActions, type State } from '../../state';
 import type { IntegrationSettings } from '../../types';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { SampleLogsInput } from './sample_logs_input';
@@ -48,21 +48,10 @@ interface DataStreamStepProps {
   integrationSettings: State['integrationSettings'];
   connectorId: State['connectorId'];
   isGenerating: State['isGenerating'];
-  setIntegrationSettings: Actions['setIntegrationSettings'];
-  setIsGenerating: Actions['setIsGenerating'];
-  setStep: Actions['setStep'];
-  setResult: Actions['setResult'];
 }
 export const DataStreamStep = React.memo<DataStreamStepProps>(
-  ({
-    integrationSettings,
-    connectorId,
-    isGenerating,
-    setIntegrationSettings,
-    setIsGenerating,
-    setStep,
-    setResult,
-  }) => {
+  ({ integrationSettings, connectorId, isGenerating }) => {
+    const { setIntegrationSettings, setIsGenerating, setStep, setResult } = useActions();
     const { isLoading: isLoadingPackageNames, packageNames } = useLoadPackageNames();
 
     const [name, setName] = useState<string>(integrationSettings?.name ?? '');
@@ -142,7 +131,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
 
     const nameInputError = useMemo(() => {
       if (packageNames && name && packageNames.has(name)) {
-        return [i18n.NAME_ALREADY_EXISTS_ERROR];
+        return i18n.NAME_ALREADY_EXISTS_ERROR;
       }
     }, [packageNames, name]);
 
@@ -157,9 +146,11 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
               <EuiForm component="form" fullWidth>
                 <EuiFormRow
                   label={i18n.INTEGRATION_NAME_LABEL}
-                  helpText={i18n.NO_SPACES_HELP}
-                  isInvalid={!!nameInputError}
-                  error={nameInputError}
+                  helpText={
+                    !nameInputError && !invalidFields.name ? i18n.NO_SPACES_HELP : undefined
+                  }
+                  isInvalid={!!nameInputError || invalidFields.name}
+                  error={[nameInputError ?? i18n.NO_SPACES_HELP]}
                 >
                   <EuiFieldText
                     name="name"
@@ -196,7 +187,12 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                     onChange={onChange.dataStreamDescription}
                   />
                 </EuiFormRow>
-                <EuiFormRow label={i18n.DATA_STREAM_NAME_LABEL} helpText={i18n.NO_SPACES_HELP}>
+                <EuiFormRow
+                  label={i18n.DATA_STREAM_NAME_LABEL}
+                  helpText={!invalidFields.dataStreamName ? i18n.NO_SPACES_HELP : undefined}
+                  isInvalid={invalidFields.dataStreamName}
+                  error={[i18n.NO_SPACES_HELP]}
+                >
                   <EuiFieldText
                     name="dataStreamName"
                     value={dataStreamName}

@@ -13,18 +13,19 @@ import { noop } from 'lodash/fp';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { ConnectorSelector } from './connector_selector';
-import * as i18n from './translations';
 import type { AIConnector } from '../../types';
+import { useActions } from '../../state';
+import * as i18n from './translations';
 
-const AllowedActionTypeIds = ['.bedrock', '.openai'];
+const AllowedActionTypeIds = ['.bedrock'];
 
 interface ConnectorStepProps {
   connectorId: string | undefined;
-  setConnectorId: (connectorId: string) => void;
 }
 
-export const ConnectorStep = React.memo<ConnectorStepProps>(({ connectorId, setConnectorId }) => {
+export const ConnectorStep = React.memo<ConnectorStepProps>(({ connectorId }) => {
   const { http, notifications } = useKibana().services;
+  const { setConnectorId } = useActions();
   const [connectors, setConnectors] = useState<AIConnector[]>();
   const { data, isLoading } = useLoadConnectors({ http, toasts: notifications?.toasts });
 

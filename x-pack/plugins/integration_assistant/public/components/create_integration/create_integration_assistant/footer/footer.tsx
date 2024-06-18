@@ -9,7 +9,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { ButtonsFooter } from '../../../../common/components/buttons_footer';
 import { useNavigate, Page } from '../../../../common/hooks/use_navigate';
-import type { State, Actions } from '../state';
+import { useActions, type State } from '../state';
 import * as i18n from './translations';
 
 // Generation button for Step 3
@@ -26,16 +26,16 @@ const AnalyzeButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating 
 });
 AnalyzeButtonText.displayName = 'AnalyzeButtonText';
 
-interface BottomBarProps {
+interface FooterProps {
   currentStep: State['step'];
   isGenerating: State['isGenerating'];
-  setStep: Actions['setStep'];
   onGenerate: () => void;
   isNextStepEnabled?: boolean;
 }
 
-export const BottomBar = React.memo<BottomBarProps>(
-  ({ currentStep, setStep, onGenerate, isGenerating, isNextStepEnabled = false }) => {
+export const Footer = React.memo<FooterProps>(
+  ({ currentStep, onGenerate, isGenerating, isNextStepEnabled = false }) => {
+    const { setStep } = useActions();
     const navigate = useNavigate();
 
     const onBack = useCallback(() => {
@@ -76,4 +76,4 @@ export const BottomBar = React.memo<BottomBarProps>(
     );
   }
 );
-BottomBar.displayName = 'BottomBar';
+Footer.displayName = 'Footer';

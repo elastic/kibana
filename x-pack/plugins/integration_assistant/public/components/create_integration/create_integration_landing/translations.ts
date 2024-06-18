@@ -46,14 +46,14 @@ export const PACKAGE_UPLOAD_BUTTON = i18n.translate(
 export const ASSISTANT_TITLE = i18n.translate(
   'xpack.integrationAssistant.createIntegrationLanding.assistant.title',
   {
-    defaultMessage: 'AI driven creation',
+    defaultMessage: 'Create custom integration',
   }
 );
 
 export const ASSISTANT_DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.createIntegrationLanding.assistant.description',
   {
-    defaultMessage: 'Build your integration using our AI-driven process from scratch',
+    defaultMessage: 'Use our AI-driven process to build your custom integration',
   }
 );
 

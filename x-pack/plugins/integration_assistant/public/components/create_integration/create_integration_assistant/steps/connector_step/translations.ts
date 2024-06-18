@@ -14,7 +14,7 @@ export const TITLE = i18n.translate('xpack.integrationAssistant.steps.connector.
 export const DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.steps.connector.description',
   {
-    defaultMessage: 'Select the AI connector that best fits your data analysis needs',
+    defaultMessage: 'Select an AI connector to help you create your custom integration',
   }
 );
 

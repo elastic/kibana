@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { createContext, useContext } from 'react';
 import type { Pipeline } from '../../../../common/types';
-// import { initialState as dummyInitialState } from './dummy_data'; // don't forget to remove this
+import { initialState as dummyInitialState } from './dummy_data'; // don't forget to remove this
 import type { AIConnector, IntegrationSettings } from './types';
 
 export interface State {
@@ -20,14 +20,14 @@ export interface State {
   };
 }
 
-// export const initialState = { ...dummyInitialState, step: 4 };
-export const initialState: State = {
-  step: 1,
-  connectorId: undefined,
-  integrationSettings: undefined,
-  isGenerating: false,
-  result: undefined,
-};
+export const initialState = { ...dummyInitialState };
+// export const initialState: State = {
+//   step: 1,
+//   connectorId: undefined,
+//   integrationSettings: undefined,
+//   isGenerating: false,
+//   result: undefined,
+// };
 
 type Action =
   | { type: 'SET_STEP'; payload: State['step'] }
@@ -65,3 +65,13 @@ export interface Actions {
   setIsGenerating: (payload: State['isGenerating']) => void;
   setResult: (payload: State['result']) => void;
 }
+
+const ActionsContext = createContext<Actions | undefined>(undefined);
+export const ActionsProvider = ActionsContext.Provider;
+export const useActions = () => {
+  const actions = useContext(ActionsContext);
+  if (!actions) {
+    throw new Error('useActions must be used within a ActionsProvider');
+  }
+  return actions;
+};

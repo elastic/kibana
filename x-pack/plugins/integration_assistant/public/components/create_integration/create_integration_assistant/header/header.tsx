@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
+import { useActions } from '../state';
 import { Steps } from './steps';
 import * as i18n from './translations';
 
@@ -35,10 +36,10 @@ const contentCss = css`
 
 interface HeaderProps {
   currentStep: number;
-  setStep: (step: number) => void;
   isGenerating: boolean;
 }
-export const Header = React.memo<HeaderProps>(({ currentStep, setStep, isGenerating }) => {
+export const Header = React.memo<HeaderProps>(({ currentStep, isGenerating }) => {
+  const { setStep } = useActions();
   const avatarCss = useAvatarCss();
   return (
     <KibanaPageTemplate.Header>

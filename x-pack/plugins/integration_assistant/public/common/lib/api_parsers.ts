@@ -15,7 +15,7 @@ import type { InstallPackageResponse } from '../../../common/types';
 export const getIntegrationNameFromResponse = (response: InstallPackageResponse) => {
   const ingestPipelineName = response.response?.[0]?.id;
   if (ingestPipelineName) {
-    const match = ingestPipelineName.match(/^.*-([a-z_]+)\..*-([\d\.]+)$/);
+    const match = ingestPipelineName.match(/^.*-([a-z\d_]+)\..*-([\d\.]+)$/);
     const integrationName = match?.at(1);
     const version = match?.at(2);
     if (integrationName && version) {

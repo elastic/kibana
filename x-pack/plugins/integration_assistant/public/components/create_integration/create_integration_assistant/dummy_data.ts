@@ -403,8 +403,8 @@ export const initialState: State = {
   connectorId: 'claudeV3OpusUsWest2',
   integrationSettings: {
     title: 'Teleport',
-    name: 'teleport',
-    logo,
+    name: 'teleport_default_logo',
+    // logo,
     description: 'Teleport integration for MyCompany TM',
     dataStreamTitle: 'Audit',
     dataStreamName: 'audit',

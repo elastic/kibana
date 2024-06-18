@@ -7,6 +7,7 @@
 import React from 'react';
 import { useEuiTheme, EuiCard, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { defaultLogoEncoded } from '../default_logo';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 
@@ -49,11 +50,7 @@ export const PackageCardPreview = React.memo<PackageCardPreviewProps>(({ integra
       icon={
         <EuiIcon
           size={'xl'}
-          type={
-            integrationSettings?.logo
-              ? `data:image/svg+xml;base64,${integrationSettings.logo}`
-              : '--no-image--'
-          }
+          type={`data:image/svg+xml;base64,${integrationSettings?.logo ?? defaultLogoEncoded}`}
         />
       }
       betaBadgeProps={{

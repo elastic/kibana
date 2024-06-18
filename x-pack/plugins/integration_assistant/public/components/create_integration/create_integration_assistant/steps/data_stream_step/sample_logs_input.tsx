@@ -126,7 +126,16 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(
 
           <EuiFilePicker
             id="logsSampleFilePicker"
-            initialPromptText="json/ndjson format"
+            initialPromptText={
+              <>
+                <EuiText size="s" textAlign="center">
+                  {i18n.LOGS_SAMPLE_DESCRIPTION}
+                </EuiText>
+                <EuiText size="xs" color="subdued" textAlign="center">
+                  {i18n.LOGS_SAMPLE_DESCRIPTION_2}
+                </EuiText>
+              </>
+            }
             onChange={onChangeLogsSample}
             display="large"
             aria-label="Upload logs sample file"

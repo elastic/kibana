@@ -11,6 +11,7 @@ import {
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiProgress,
@@ -118,12 +119,18 @@ export const useGeneration = ({
   };
 };
 
-const useModalBodyCss = () => {
+const useModalCss = () => {
   const { euiTheme } = useEuiTheme();
-  return css`
-    padding: ${euiTheme.size.l};
-    min-width: 600px;
-  `;
+  return {
+    headerCss: css`
+      justify-content: center;
+      margin-top: ${euiTheme.size.m};
+    `,
+    bodyCss: css`
+      padding: ${euiTheme.size.xxxxl};
+      min-width: 600px;
+    `,
+  };
 };
 
 interface GenerationModalProps {
@@ -134,7 +141,7 @@ interface GenerationModalProps {
 }
 export const GenerationModal = React.memo<GenerationModalProps>(
   ({ integrationSettings, connectorId, onComplete, onClose }) => {
-    const modalBodyCss = useModalBodyCss();
+    const { headerCss, bodyCss } = useModalCss();
     const { progress, error } = useGeneration({
       integrationSettings,
       connectorId,
@@ -148,11 +155,10 @@ export const GenerationModal = React.memo<GenerationModalProps>(
 
     return (
       <EuiModal onClose={onClose}>
-        <EuiModalHeader>
+        <EuiModalHeader css={headerCss}>
           <EuiModalHeaderTitle>{i18n.ANALYZING}</EuiModalHeaderTitle>
         </EuiModalHeader>
-        <EuiModalBody css={modalBodyCss}>
-          <EuiSpacer size="l" />
+        <EuiModalBody css={bodyCss}>
           <EuiFlexGroup direction="column" gutterSize="l" justifyContent="center">
             {progress && (
               <>
@@ -168,7 +174,11 @@ export const GenerationModal = React.memo<GenerationModalProps>(
                         <EuiLoadingSpinner size="s" />
                       </EuiFlexItem>
                     )}
-                    <EuiFlexItem grow={false}>{progressText[progress]}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {progressText[progress]}
+                      </EuiText>
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -176,7 +186,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
                 </EuiFlexItem>
                 {error && (
                   <EuiFlexItem>
-                    <EuiText color="danger" size="s">
+                    <EuiText color="danger" size="xs">
                       {error}
                     </EuiText>
                   </EuiFlexItem>
@@ -184,8 +194,10 @@ export const GenerationModal = React.memo<GenerationModalProps>(
               </>
             )}
           </EuiFlexGroup>
-          <EuiSpacer size="xxl" />
         </EuiModalBody>
+        <EuiModalFooter>
+          <EuiSpacer size="xl" />
+        </EuiModalFooter>
       </EuiModal>
     );
   }

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { BottomBar } from './bottom_bar';
+export { Footer } from './footer';

@@ -22,21 +22,11 @@ import { CodeEditor } from '@kbn/code-editor';
 import { XJsonLang } from '@kbn/monaco';
 import React, { useCallback, useState } from 'react';
 import type { Pipeline } from '../../../../../../common';
-import type { Actions, State } from '../../state';
+import type { State } from '../../state';
 import { FieldsTable } from './fields_table';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { useCheckPipeline } from './use_check_pipeline';
 import * as i18n from './translations';
-
-interface ReviewStepProps {
-  integrationSettings: State['integrationSettings'];
-  connectorId: State['connectorId'];
-  result: State['result'];
-  isGenerating: State['isGenerating'];
-  setIntegrationSettings: Actions['setIntegrationSettings'];
-  setIsGenerating: Actions['setIsGenerating'];
-  setResult: Actions['setResult'];
-}
 
 const flyoutBodyCss = css`
   height: 100%;
@@ -46,15 +36,19 @@ const flyoutBodyCss = css`
   }
 `;
 
+interface ReviewStepProps {
+  integrationSettings: State['integrationSettings'];
+  connectorId: State['connectorId'];
+  result: State['result'];
+  isGenerating: State['isGenerating'];
+}
 export const ReviewStep = React.memo<ReviewStepProps>(
-  ({ integrationSettings, connectorId, isGenerating, result, setIsGenerating, setResult }) => {
+  ({ integrationSettings, connectorId, isGenerating, result }) => {
     const [customPipeline, setCustomPipeline] = useState<Pipeline>();
     const { error: checkPipelineError } = useCheckPipeline({
       customPipeline,
       integrationSettings,
       connectorId,
-      setResult,
-      setIsGenerating,
     });
 
     const [isPipelineEditionVisible, setIsPipelineEditionVisible] = useState(false);
@@ -103,7 +97,7 @@ export const ReviewStep = React.memo<ReviewStepProps>(
             <EuiFlyout onClose={() => setIsPipelineEditionVisible(false)}>
               <EuiFlyoutHeader hasBorder>
                 <EuiTitle size="s">
-                  <h2>{'Ingest Pipeline'}</h2>
+                  <h2>{i18n.INGEST_PIPELINE_TITLE}</h2>
                 </EuiTitle>
               </EuiFlyoutHeader>
               <EuiFlyoutBody css={flyoutBodyCss}>

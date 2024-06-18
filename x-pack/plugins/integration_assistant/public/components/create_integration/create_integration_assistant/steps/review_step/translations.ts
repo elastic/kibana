@@ -21,6 +21,12 @@ export const EDIT_PIPELINE_BUTTON = i18n.translate(
     defaultMessage: 'Edit pipeline',
   }
 );
+export const INGEST_PIPELINE_TITLE = i18n.translate(
+  'xpack.integrationAssistant.step.review.ingestPipelineTitle',
+  {
+    defaultMessage: 'Ingest pipeline',
+  }
+);
 
 export const SAVE_BUTTON = i18n.translate('xpack.integrationAssistant.step.review.save', {
   defaultMessage: 'Save',

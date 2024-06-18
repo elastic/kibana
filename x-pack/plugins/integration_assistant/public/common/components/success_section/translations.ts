@@ -31,8 +31,7 @@ export const ADD_TO_AGENT_TITLE = i18n.translate(
 export const ADD_TO_AGENT_DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.createIntegrationSuccess.addToAgent.description',
   {
-    defaultMessage:
-      'Consolidated view of security and compliance issues identified within your environment',
+    defaultMessage: 'Add your new integration to an agent to start collecting data',
   }
 );
 
@@ -53,7 +52,7 @@ export const VIEW_INTEGRATION_TITLE = i18n.translate(
 export const VIEW_INTEGRATION_DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.createIntegrationSuccess.viewIntegration.description',
   {
-    defaultMessage: 'Key metrics, trends, and alerts to understand your current security posture',
+    defaultMessage: 'See detailed information about your new custom integration',
   }
 );
 

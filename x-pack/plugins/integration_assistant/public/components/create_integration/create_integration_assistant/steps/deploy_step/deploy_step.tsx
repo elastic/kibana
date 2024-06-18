@@ -62,20 +62,26 @@ export const DeployStep = React.memo<DeployStepProps>(
       return (
         <SuccessSection integrationName={integrationName}>
           <EuiSpacer size="m" />
-          <EuiPanel hasShadow={false} hasBorder>
+          <EuiPanel hasShadow={false} hasBorder paddingSize="l">
             <EuiFlexGroup direction="row" alignItems="center">
               <EuiFlexItem>
                 <EuiFlexGroup direction="row" alignItems="flexStart" justifyContent="flexStart">
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem grow={false} css={{ marginTop: '3px' }}>
                     <EuiIcon type="download" color="primary" size="m" />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiText>
-                      <h4>{i18n.DOWNLOAD_ZIP_TITLE}</h4>
-                    </EuiText>
-                    <EuiText color="subdued" size="s">
-                      {i18n.DOWNLOAD_ZIP_DESCRIPTION}
-                    </EuiText>
+                    <EuiFlexGroup direction="column" gutterSize="xs">
+                      <EuiFlexItem>
+                        <EuiText>
+                          <h4>{i18n.DOWNLOAD_ZIP_TITLE}</h4>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText color="subdued" size="s">
+                          {i18n.DOWNLOAD_ZIP_DESCRIPTION}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

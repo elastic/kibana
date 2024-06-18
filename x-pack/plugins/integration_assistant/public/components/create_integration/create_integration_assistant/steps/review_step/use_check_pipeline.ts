@@ -9,25 +9,22 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEmpty } from 'lodash/fp';
 import { useState, useEffect } from 'react';
 import type { CheckPipelineApiRequest, Pipeline } from '../../../../../../common';
-import type { Actions, State } from '../../state';
+import { useActions, type State } from '../../state';
 import { runCheckPipelineResults } from '../../../../../common/lib/api';
 
 interface CheckPipelineProps {
   integrationSettings: State['integrationSettings'];
   connectorId: State['connectorId'];
   customPipeline: Pipeline | undefined;
-  setIsGenerating: Actions['setIsGenerating'];
-  setResult: Actions['setResult'];
 }
 
 export const useCheckPipeline = ({
   integrationSettings,
   connectorId,
   customPipeline,
-  setIsGenerating,
-  setResult,
 }: CheckPipelineProps) => {
   const { http, notifications } = useKibana().services;
+  const { setIsGenerating, setResult } = useActions();
   const [error, setError] = useState<null | string>(null);
 
   useEffect(() => {

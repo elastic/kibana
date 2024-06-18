@@ -10,6 +10,7 @@ import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { BuildIntegrationApiRequest } from '../../../../../../common';
 import type { State } from '../../state';
 import { runBuildIntegration, runInstallPackage } from '../../../../../common/lib/api';
+import { defaultLogoEncoded } from '../default_logo';
 import { getIntegrationNameFromResponse } from '../../../../../common/lib/api_parsers';
 
 interface PipelineGenerationProps {
@@ -46,7 +47,7 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
             title: integrationSettings.title ?? '',
             description: integrationSettings.description ?? '',
             name: integrationSettings.name ?? '',
-            logo: integrationSettings.logo ?? '',
+            logo: integrationSettings.logo ?? defaultLogoEncoded,
             dataStreams: [
               {
                 title: integrationSettings.dataStreamTitle ?? '',
@@ -82,7 +83,7 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
         }
       } catch (e) {
         if (abortController.signal.aborted) return;
-        setError(`Error: ${e.body.message}`);
+        setError(`Error: ${e.body?.message ?? e.message}`);
       } finally {
         setIsLoading(false);
       }

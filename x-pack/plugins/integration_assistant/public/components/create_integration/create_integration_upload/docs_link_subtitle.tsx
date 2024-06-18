@@ -13,16 +13,16 @@ import { EuiText, EuiLink } from '@elastic/eui';
 export const DocsLinkSubtitle = React.memo(() => {
   const { docLinks } = useKibana().services;
   return (
-    <EuiText size="xs" color="subdued">
+    <EuiText size="s" color="subdued">
       <FormattedMessage
         id="xpack.integrationAssistant.createIntegrationUpload.uploadHelpText"
-        defaultMessage="Have some issues? Please read the {link}"
+        defaultMessage="For more information, refer to {link}"
         values={{
           link: (
             <EuiLink href={docLinks?.links.integrationDeveloper.upload} target="_blank">
               <FormattedMessage
                 id="xpack.integrationAssistant.createIntegrationUpload.documentation"
-                defaultMessage="documentation"
+                defaultMessage="Upload an Integration"
               />
             </EuiLink>
           ),

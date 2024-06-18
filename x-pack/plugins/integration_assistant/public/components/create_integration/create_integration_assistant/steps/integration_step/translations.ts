@@ -13,8 +13,7 @@ export const TITLE = i18n.translate('xpack.integrationAssistant.step.integration
 export const DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.step.integration.description',
   {
-    defaultMessage:
-      'Fill out the form in the UI to name your integration and provide a brief description',
+    defaultMessage: 'Name your integration, give it a description, and (optional) add a logo',
   }
 );
 

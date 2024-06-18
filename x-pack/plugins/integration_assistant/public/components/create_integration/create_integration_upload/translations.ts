@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const UPLOAD_TITLE = i18n.translate(
   'xpack.integrationAssistant.createIntegrationUpload.title',
   {
-    defaultMessage: 'Upload .zip file',
+    defaultMessage: 'Upload integration package',
   }
 );
 

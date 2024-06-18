@@ -47,7 +47,7 @@ export const CreateIntegrationLanding = React.memo(() => {
           <EuiFlexGroup
             direction="column"
             gutterSize="l"
-            alignItems="flexStart"
+            alignItems="center"
             justifyContent="flexStart"
           >
             <EuiFlexItem>
@@ -64,7 +64,7 @@ export const CreateIntegrationLanding = React.memo(() => {
               >
                 <EuiFlexGroup
                   direction="row"
-                  gutterSize="m"
+                  gutterSize="l"
                   alignItems="center"
                   justifyContent="center"
                   css={assistantCardCss}
@@ -110,7 +110,7 @@ export const CreateIntegrationLanding = React.memo(() => {
                   <EuiIcon type="package" size="l" />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiText size="s">
+                  <EuiText size="s" color="subdued">
                     <FormattedMessage
                       id="xpack.integrationAssistant.createIntegrationLanding.uploadPackageDescription"
                       defaultMessage="If you have an existing integration package, {link}"
