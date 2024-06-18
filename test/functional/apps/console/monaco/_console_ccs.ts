@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console']);
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
 
@@ -21,6 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await remoteEsArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/logstash_functional'
       );
+      // resize the editor to allow the whole of the response to be displayed
+      await browser.setWindowSize(1200, 1800);
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       await retry.try(async () => {
