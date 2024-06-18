@@ -12,6 +12,7 @@ import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import React, { useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { useKibana } from '../../hooks/use_kibana';
 import { createEmbeddableWidget } from '../../widgets/embeddable_widget/create_embeddable_widget';
 import { InvestigateTextButton } from '../investigate_text_button';
 
@@ -21,6 +22,12 @@ interface AddFromLibraryButtonProps {
 
 export function AddFromLibraryButton({ onWidgetAdd }: AddFromLibraryButtonProps) {
   const children$ = useMemo(() => new BehaviorSubject({}), []);
+
+  const {
+    dependencies: {
+      start: { contentManagement },
+    },
+  } = useKibana();
 
   const onWidgetAddRef = useRef(onWidgetAdd);
 
@@ -37,9 +44,55 @@ export function AddFromLibraryButton({ onWidgetAdd }: AddFromLibraryButtonProps)
       ) => Promise<{ id: undefined }>;
     }
   >(() => {
+    function addEmbeddable({
+      type,
+      title,
+      description,
+      attributes,
+      savedObjectId,
+    }: {
+      type: string;
+      title: string;
+      description?: string;
+      attributes: Record<string, any>;
+      savedObjectId: string;
+    }) {
+      const widget = createEmbeddableWidget({
+        title,
+        description,
+        parameters: {
+          savedObjectId,
+          config: attributes,
+          type,
+        },
+      });
+
+      onWidgetAddRef.current(widget).then(() => {
+        if (panelRef.current) {
+          panelRef.current.close();
+        }
+      });
+    }
     return {
-      addNewPanel: async (...args) => {
-        throw new Error('addNewPanel not supported in this context');
+      addNewPanel: async (panel, displaySuccessMessage) => {
+        const state = panel.initialState! as {
+          savedObjectId: string;
+        };
+
+        const savedObject = (await contentManagement.client.get({
+          contentTypeId: panel.panelType,
+          id: state.savedObjectId,
+        })) as { item: { attributes: { title: string } } };
+
+        addEmbeddable({
+          type: panel.panelType,
+          savedObjectId: state.savedObjectId,
+          attributes: {},
+          title: savedObject.item.attributes.title,
+          description: '',
+        });
+
+        return undefined;
       },
       removePanel: async (...args) => {
         throw new Error('removePanel not supported in this context');
@@ -51,30 +104,21 @@ export function AddFromLibraryButton({ onWidgetAdd }: AddFromLibraryButtonProps)
         return 0;
       },
       addNewEmbeddable: async (type, explicitInput, attributes) => {
-        const widget = createEmbeddableWidget({
+        addEmbeddable({
+          type,
           title: attributes.title ?? '',
           description:
             'description' in attributes && typeof attributes.description === 'string'
               ? attributes.description
               : '',
-          parameters: {
-            savedObjectId: explicitInput.savedObjectId,
-            config: attributes,
-            type,
-          },
+          savedObjectId: explicitInput.savedObjectId,
+          attributes,
         });
-
-        onWidgetAddRef.current(widget).then(() => {
-          if (panelRef.current) {
-            panelRef.current.close();
-          }
-        });
-
         return undefined as any; // { id: undefined };
       },
       children$,
     };
-  }, [children$]);
+  }, [children$, contentManagement]);
 
   return (
     <InvestigateTextButton
