@@ -11,8 +11,8 @@ import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
 export interface DocViewerExtension {
-  title: string;
-  docViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
+  title: string | undefined;
+  docViewsRegistry: ((prevRegistry: DocViewsRegistry) => DocViewsRegistry) | undefined;
 }
 
 export interface DocViewerExtensionParams {

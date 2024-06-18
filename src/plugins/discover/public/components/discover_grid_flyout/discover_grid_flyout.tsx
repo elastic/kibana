@@ -59,31 +59,33 @@ export function DiscoverGridFlyout({
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
   const isESQLQuery = isOfAggregateQueryType(query);
+  // Get actual hit with updated highlighted searches
+  const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
 
   const { flyoutActions } = useFlyoutActions({
     actions: flyoutCustomization?.actions,
     dataView,
-    rowIndex: hit.raw._index,
-    rowId: hit.raw._id,
+    rowIndex: actualHit.raw._index,
+    rowId: actualHit.raw._id,
     columns,
     filters,
     savedSearchId,
   });
 
   const getDocViewerAccessor = useProfileAccessor('getDocViewer', {
-    record: hit, // TODO: or `actualHit`?
+    record: actualHit,
   });
   const docViewer = useMemo(() => {
     const getDocViewer = getDocViewerAccessor(() => ({
-      title: flyoutCustomization?.title || '', // TODO: fix the fallback
+      title: flyoutCustomization?.title,
       docViewsRegistry: (registry: DocViewsRegistry) =>
         typeof flyoutCustomization?.docViewsRegistry === 'function'
           ? flyoutCustomization.docViewsRegistry(registry)
           : registry,
     }));
 
-    return getDocViewer({ record: hit });
-  }, [flyoutCustomization, getDocViewerAccessor, hit]);
+    return getDocViewer({ record: actualHit });
+  }, [flyoutCustomization, getDocViewerAccessor, actualHit]);
 
   return (
     <UnifiedDocViewerFlyout
