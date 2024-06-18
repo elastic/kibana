@@ -79,10 +79,6 @@ export interface CloudSecurityDataTableProps {
   height?: number | string;
   /* Optional props passed to Columns to display Provided Labels as Column name instead of field name */
   columnHeaders?: Record<string, string>;
-  /**
-   * Specify if distribution bar is shown on data table, used to calculate height of data table in virtualized mode
-   */
-  hasDistributionBar?: boolean;
 }
 
 export const CloudSecurityDataTable = ({
@@ -98,7 +94,6 @@ export const CloudSecurityDataTable = ({
   groupSelectorComponent,
   height,
   columnHeaders,
-  hasDistributionBar = true,
   ...rest
 }: CloudSecurityDataTableProps) => {
   const {
