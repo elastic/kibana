@@ -19,7 +19,6 @@ import type {
 import type {
   BulkEditActionResponse,
   BulkScheduleBackfillActionResponse,
-  BulkScheduleBackfillActionSummary,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
@@ -119,9 +118,10 @@ export const buildBulkScheduleBackfillResponse = (
   const numSucceeded = backfilled.length;
   const numFailed = errors.length;
 
-  const summary: BulkScheduleBackfillActionSummary = {
+  const summary: BulkEditActionSummary = {
     failed: numFailed,
     succeeded: numSucceeded,
+    skipped: 0,
     total: numSucceeded + numFailed,
   };
 
