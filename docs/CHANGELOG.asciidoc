@@ -13,6 +13,7 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.22>>
 * <<release-notes-7.17.21>>
 * <<release-notes-7.17.20>>
 * <<release-notes-7.17.19>>
@@ -91,6 +92,14 @@ Review important information about the {kib} 7.17.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.17.22]]
+== {kib} 7.17.22
+
+[float]
+[[fixes-v7.17.22]]
+=== Bug fixes and enhancements
+There are no user-facing changes in the 7.17.22 release.
+
 [[release-notes-7.17.21]]
 == {kib} 7.17.21
 
