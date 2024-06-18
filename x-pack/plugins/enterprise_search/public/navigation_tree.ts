@@ -21,6 +21,7 @@ import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import { SEARCH_INDICES_PATH } from './applications/enterprise_search_content/routes';
 
 export interface DynamicSideNavItems {
+  appSearch?: Array<EuiSideNavItemType<unknown>>;
   collections?: Array<EuiSideNavItemType<unknown>>;
   indices?: Array<EuiSideNavItemType<unknown>>;
   searchApps?: Array<EuiSideNavItemType<unknown>>;
@@ -79,7 +80,7 @@ export const getNavigationTreeDefinition = ({
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
       debounceTime(10),
-      map(({ indices, searchApps, collections }) => {
+      map(({ appSearch, indices, searchApps, collections }) => {
         const navTree: NavigationTreeDefinition = {
           body: [
             {
@@ -218,11 +219,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return pathNameSerialized.startsWith(
-                          prepend('/app/enterprise_search/app_search')
-                        );
-                      },
+                      getIsActive: () => false,
                       link: 'appSearch:engines',
                       title: i18n.translate(
                         'xpack.enterpriseSearch.searchNav.entsearch.appSearch',
@@ -230,6 +227,13 @@ export const getNavigationTreeDefinition = ({
                           defaultMessage: 'App Search',
                         }
                       ),
+                      ...(appSearch
+                        ? {
+                            children: appSearch.map(euiItemTypeToNodeDefinition),
+                            isCollapsible: false,
+                            renderAs: 'accordion',
+                          }
+                        : {}),
                     },
                     {
                       link: 'workplaceSearch',
