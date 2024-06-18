@@ -673,7 +673,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     fixedOverflowWidgets: true,
     folding: false,
     fontSize: 14,
-    fontFamily: 'Inter',
     hideCursorInOverviewRuler: true,
     // this becomes confusing with multiple markers, so quick fixes
     // will be proposed only within the tooltip
