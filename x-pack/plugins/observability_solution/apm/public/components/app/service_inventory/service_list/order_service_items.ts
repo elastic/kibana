@@ -37,17 +37,17 @@ function reverseSortDirection(sortDirection: 'asc' | 'desc') {
   return sortDirection === 'asc' ? 'desc' : 'asc';
 }
 
-export function orderServiceItems({
+export function orderServiceItems<T extends ServiceListItem>({
   items,
   primarySortField,
   tiebreakerField,
   sortDirection,
 }: {
-  items: ServiceListItem[];
+  items: T[];
   primarySortField: string;
   tiebreakerField: ServiceInventoryFieldName;
   sortDirection: 'asc' | 'desc';
-}): ServiceListItem[] {
+}): T[] {
   // For healthStatus, sort items by healthStatus first, then by tie-breaker
 
   const sortFn = sorts[primarySortField as ServiceInventoryFieldName];

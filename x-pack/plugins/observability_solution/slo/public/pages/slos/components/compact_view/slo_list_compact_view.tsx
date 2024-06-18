@@ -8,6 +8,7 @@ import {
   DefaultItemAction,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiBasicTableProps,
   EuiFlexGroup,
   EuiIcon,
   EuiText,
@@ -20,13 +21,16 @@ import { RulesParams } from '@kbn/observability-plugin/public';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { paths } from '../../../../../common/locators/paths';
 import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
-import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
+import {
+  navigateToAlertsForSlo,
+  SloActiveAlertsBadgeWithoutRouting,
+} from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { sloKeys } from '../../../../hooks/query_key_factory';
 import { useCapabilities } from '../../../../hooks/use_capabilities';
 import { useCloneSlo } from '../../../../hooks/use_clone_slo';
@@ -40,10 +44,11 @@ import { useKibana } from '../../../../utils/kibana_react';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import {
   createRemoteSloDeleteUrl,
+  createRemoteSloDetailsUrl,
   createRemoteSloEditUrl,
   createRemoteSloResetUrl,
 } from '../../../../utils/slo/remote_slo_urls';
-import { SloRemoteBadge } from '../badges/slo_remote_badge';
+import { SloRemoteBadgeWithoutRouterContext } from '../badges/slo_remote_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SLOGroupings } from '../common/slo_groupings';
 import { SloTagsList } from '../common/slo_tags_list';
@@ -51,30 +56,308 @@ import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
 import { SloSparkline } from '../slo_sparkline';
 
+export type InteractiveSLOItem = SLOWithSummaryResponse & {
+  interactions: {
+    remote: {
+      onClick?: (event: React.MouseEvent) => void;
+    };
+    detail: {
+      onClick?: (event: React.MouseEvent) => void;
+    };
+    rules: {
+      onClick?: (event: React.MouseEvent | React.KeyboardEvent) => void;
+    };
+    activeAlerts: {
+      onClick: (activeAlerts?: number) => void;
+    };
+  };
+};
+
 export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
 }
 
-export function SloListCompactView({ sloList, loading, error }: Props) {
+export function SloListCompactViewWithoutRouterContext({
+  items,
+  loading,
+  error,
+  actions,
+  ...rest
+}: {
+  items: InteractiveSLOItem[];
+  loading: boolean;
+  error: boolean;
+  actions: Array<DefaultItemAction<SLOWithSummaryResponse>>;
+} & (
+  | {}
+  | {
+      onChange: EuiBasicTableProps<InteractiveSLOItem>['onChange'];
+      sorting: EuiBasicTableProps<InteractiveSLOItem>['sorting'];
+      pagination: Required<EuiBasicTableProps<InteractiveSLOItem>>['pagination'];
+    }
+)) {
+  const {
+    http: { basePath },
+    uiSettings,
+  } = useKibana().services;
+
+  const percentFormat = uiSettings.get('format:percent:defaultPattern');
+  const sloIdsAndInstanceIds = items.map(
+    (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
+  );
+
+  const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
+  const { data: rulesBySlo } = useFetchRulesForSlo({
+    sloIds: sloIdsAndInstanceIds.map((item) => item[0]),
+  });
+  const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
+    useFetchHistoricalSummary({
+      sloList: items,
+    });
+
+  const spaceId = useSpace();
+
+  const columns: Array<EuiBasicTableColumn<InteractiveSLOItem>> = [
+    {
+      field: 'status',
+      name: 'Status',
+      render: (_, slo) => (
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <SloStatusBadge slo={slo} />
+          {slo.remote && (
+            <SloRemoteBadgeWithoutRouterContext
+              remote={slo.remote}
+              href={createRemoteSloDetailsUrl(slo, spaceId)!}
+              {...(slo.interactions.remote.onClick
+                ? {
+                    onClick: slo.interactions.remote.onClick,
+                  }
+                : {})}
+            />
+          )}
+        </EuiFlexGroup>
+      ),
+    },
+    {
+      field: 'alerts',
+      name: 'Alerts',
+      truncateText: true,
+      width: '5%',
+      render: (_, slo) => (
+        <>
+          <SloRulesBadge
+            rules={rulesBySlo?.[slo.id]}
+            onClick={(event) => {
+              slo.interactions.rules.onClick?.(event);
+            }}
+            isRemote={!!slo.remote}
+          />
+          <SloActiveAlertsBadgeWithoutRouting
+            activeAlerts={activeAlertsBySlo.get(slo)}
+            viewMode="compact"
+            handleActiveAlertsClick={() => {
+              slo.interactions.activeAlerts.onClick(activeAlertsBySlo.get(slo));
+            }}
+          />
+        </>
+      ),
+    },
+    {
+      field: 'name',
+      name: 'Name',
+      width: '15%',
+      truncateText: { lines: 2 },
+      'data-test-subj': 'sloItem',
+      render: (_, slo) => {
+        const sloDetailsUrl = basePath.prepend(
+          paths.sloDetails(
+            slo.id,
+            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
+              ? slo.instanceId
+              : undefined,
+            slo.remote?.remoteName
+          )
+        );
+        return (
+          <EuiToolTip position="top" content={slo.name} display="block">
+            <EuiText size="s">
+              <a
+                data-test-subj="o11ySloListItemLink"
+                href={sloDetailsUrl}
+                onClick={slo.interactions.detail.onClick}
+              >
+                {slo.name}
+              </a>
+            </EuiText>
+          </EuiToolTip>
+        );
+      },
+    },
+    {
+      field: 'tags',
+      name: 'Tags',
+      render: (tags: string[]) => <SloTagsList tags={tags} color="default" />,
+    },
+    {
+      field: 'instance',
+      name: 'Instance',
+      render: (_, slo) => {
+        const groups = [slo.groupBy].flat();
+        return !groups.includes(ALL_VALUE) ? (
+          <SLOGroupings slo={slo} direction="column" gutterSize={'none'} />
+        ) : (
+          <span>{NOT_AVAILABLE_LABEL}</span>
+        );
+      },
+    },
+    {
+      field: 'objective',
+      name: 'Objective',
+      render: (_, slo) => numeral(slo.objective.target).format('0.00%'),
+    },
+    {
+      field: 'sli',
+      name: 'SLI value',
+      truncateText: true,
+      render: (_, slo) =>
+        slo.summary.status === 'NO_DATA'
+          ? NOT_AVAILABLE_LABEL
+          : numeral(slo.summary.sliValue).format(percentFormat),
+    },
+    {
+      field: 'historicalSli',
+      name: 'Historical SLI',
+      render: (_, slo) => {
+        const isSloFailed = ['VIOLATED', 'DEGRADING'].includes(slo.summary.status);
+        const historicalSliData = formatHistoricalData(
+          historicalSummaries.find(
+            (historicalSummary) =>
+              historicalSummary.sloId === slo.id &&
+              historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+          )?.data,
+          'sli_value'
+        );
+        return (
+          <SloSparkline
+            chart="line"
+            id="sli_history"
+            size="compact"
+            state={isSloFailed ? 'error' : 'success'}
+            data={historicalSliData}
+            isLoading={historicalSummaryLoading}
+          />
+        );
+      },
+    },
+    {
+      field: 'errorBudgetRemaining',
+      name: 'Budget remaining',
+      truncateText: true,
+      render: (_, slo) =>
+        slo.summary.status === 'NO_DATA'
+          ? NOT_AVAILABLE_LABEL
+          : numeral(slo.summary.errorBudget.remaining).format(percentFormat),
+    },
+    {
+      field: 'historicalErrorBudgetRemaining',
+      name: 'Historical budget remaining',
+      render: (_, slo) => {
+        const isSloFailed = ['VIOLATED', 'DEGRADING'].includes(slo.summary.status);
+        const errorBudgetBurnDownData = formatHistoricalData(
+          historicalSummaries.find(
+            (historicalSummary) =>
+              historicalSummary.sloId === slo.id &&
+              historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+          )?.data,
+          'error_budget_remaining'
+        );
+        return (
+          <SloSparkline
+            chart="area"
+            id="error_budget_burn_down"
+            state={isSloFailed ? 'error' : 'success'}
+            size="compact"
+            data={errorBudgetBurnDownData}
+            isLoading={historicalSummaryLoading}
+          />
+        );
+      },
+    },
+
+    ...(actions.length
+      ? [
+          {
+            name: 'Actions',
+            actions,
+            width: '5%',
+          },
+        ]
+      : []),
+  ];
+
+  if (!loading && !error && items.length === 0) {
+    return <SloListEmpty />;
+  }
+
+  if (!loading && error) {
+    return <SloListError />;
+  }
+
+  return (
+    <>
+      <EuiBasicTable<InteractiveSLOItem>
+        items={items}
+        columns={columns}
+        loading={loading}
+        noItemsMessage={loading ? LOADING_SLOS_LABEL : NO_SLOS_FOUND}
+        tableLayout="auto"
+        {...('onChange' in rest
+          ? { onChange: rest.onChange, pagination: rest.pagination, sorting: rest.sorting }
+          : ({} as never))}
+      />
+    </>
+  );
+}
+
+export function SloListCompactView({ error, loading, sloList }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
-    uiSettings,
     share: {
       url: { locators },
     },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
-  const spaceId = useSpace();
 
-  const percentFormat = uiSettings.get('format:percent:defaultPattern');
-  const sloIdsAndInstanceIds = sloList.map(
-    (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
-  );
+  const navigateToClone = useCloneSlo();
+
+  const isRemote = (slo: SLOWithSummaryResponse) => !!slo.remote;
+
+  const hasRemoteKibanaUrl = (slo: SLOWithSummaryResponse) =>
+    !!slo.remote && slo.remote.kibanaUrl !== '';
+
+  const buildActionName = (actionName: string) => (slo: SLOWithSummaryResponse) =>
+    isRemote(slo) ? (
+      <>
+        {actionName}
+        <EuiIcon
+          type="popout"
+          size="s"
+          css={{
+            marginLeft: '10px',
+          }}
+        />
+      </>
+    ) : (
+      actionName
+    );
 
   const { hasWriteCapabilities } = useCapabilities();
+
+  const spaceId = useSpace();
+
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const queryClient = useQueryClient();
 
@@ -107,36 +390,32 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
   };
 
-  const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
-  const { data: rulesBySlo } = useFetchRulesForSlo({
-    sloIds: sloIdsAndInstanceIds.map((item) => item[0]),
-  });
-  const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
-    useFetchHistoricalSummary({
-      sloList,
+  const itemsWithInteractivity = useMemo(() => {
+    return sloList.map((item): InteractiveSLOItem => {
+      return {
+        ...item,
+        interactions: {
+          remote: {},
+          detail: {},
+          rules: {
+            onClick: () => {
+              setSloToAddRule(item);
+            },
+          },
+          activeAlerts: {
+            onClick: (activeAlerts) => {
+              navigateToAlertsForSlo({
+                basePath,
+                navigateToUrl,
+                activeAlerts,
+                slo: item,
+              });
+            },
+          },
+        },
+      };
     });
-
-  const navigateToClone = useCloneSlo();
-
-  const isRemote = (slo: SLOWithSummaryResponse) => !!slo.remote;
-  const hasRemoteKibanaUrl = (slo: SLOWithSummaryResponse) =>
-    !!slo.remote && slo.remote.kibanaUrl !== '';
-
-  const buildActionName = (actionName: string) => (slo: SLOWithSummaryResponse) =>
-    isRemote(slo) ? (
-      <>
-        {actionName}
-        <EuiIcon
-          type="popout"
-          size="s"
-          css={{
-            marginLeft: '10px',
-          }}
-        />
-      </>
-    ) : (
-      actionName
-    );
+  }, [sloList, basePath, navigateToUrl]);
 
   const actions: Array<DefaultItemAction<SLOWithSummaryResponse>> = [
     {
@@ -280,179 +559,15 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     },
   ];
 
-  const columns: Array<EuiBasicTableColumn<SLOWithSummaryResponse>> = [
-    {
-      field: 'status',
-      name: 'Status',
-      render: (_, slo: SLOWithSummaryResponse) => (
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <SloStatusBadge slo={slo} />
-          <SloRemoteBadge slo={slo} />
-        </EuiFlexGroup>
-      ),
-    },
-    {
-      field: 'alerts',
-      name: 'Alerts',
-      truncateText: true,
-      width: '5%',
-      render: (_, slo: SLOWithSummaryResponse) => (
-        <>
-          <SloRulesBadge
-            rules={rulesBySlo?.[slo.id]}
-            onClick={() => setSloToAddRule(slo)}
-            isRemote={!!slo.remote}
-          />
-          <SloActiveAlertsBadge
-            slo={slo}
-            activeAlerts={activeAlertsBySlo.get(slo)}
-            viewMode="compact"
-          />
-        </>
-      ),
-    },
-    {
-      field: 'name',
-      name: 'Name',
-      width: '15%',
-      truncateText: { lines: 2 },
-      'data-test-subj': 'sloItem',
-      render: (_, slo: SLOWithSummaryResponse) => {
-        const sloDetailsUrl = basePath.prepend(
-          paths.sloDetails(
-            slo.id,
-            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
-              ? slo.instanceId
-              : undefined,
-            slo.remote?.remoteName
-          )
-        );
-        return (
-          <EuiToolTip position="top" content={slo.name} display="block">
-            <EuiText size="s">
-              <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
-                {slo.name}
-              </a>
-            </EuiText>
-          </EuiToolTip>
-        );
-      },
-    },
-    {
-      field: 'tags',
-      name: 'Tags',
-      render: (tags: string[]) => <SloTagsList tags={tags} color="default" />,
-    },
-    {
-      field: 'instance',
-      name: 'Instance',
-      render: (_, slo: SLOWithSummaryResponse) => {
-        const groups = [slo.groupBy].flat();
-        return !groups.includes(ALL_VALUE) ? (
-          <SLOGroupings slo={slo} direction="column" gutterSize={'none'} />
-        ) : (
-          <span>{NOT_AVAILABLE_LABEL}</span>
-        );
-      },
-    },
-    {
-      field: 'objective',
-      name: 'Objective',
-      render: (_, slo: SLOWithSummaryResponse) => numeral(slo.objective.target).format('0.00%'),
-    },
-    {
-      field: 'sli',
-      name: 'SLI value',
-      truncateText: true,
-      render: (_, slo: SLOWithSummaryResponse) =>
-        slo.summary.status === 'NO_DATA'
-          ? NOT_AVAILABLE_LABEL
-          : numeral(slo.summary.sliValue).format(percentFormat),
-    },
-    {
-      field: 'historicalSli',
-      name: 'Historical SLI',
-      render: (_, slo: SLOWithSummaryResponse) => {
-        const isSloFailed = ['VIOLATED', 'DEGRADING'].includes(slo.summary.status);
-        const historicalSliData = formatHistoricalData(
-          historicalSummaries.find(
-            (historicalSummary) =>
-              historicalSummary.sloId === slo.id &&
-              historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
-          )?.data,
-          'sli_value'
-        );
-        return (
-          <SloSparkline
-            chart="line"
-            id="sli_history"
-            size="compact"
-            state={isSloFailed ? 'error' : 'success'}
-            data={historicalSliData}
-            isLoading={historicalSummaryLoading}
-          />
-        );
-      },
-    },
-    {
-      field: 'errorBudgetRemaining',
-      name: 'Budget remaining',
-      truncateText: true,
-      render: (_, slo: SLOWithSummaryResponse) =>
-        slo.summary.status === 'NO_DATA'
-          ? NOT_AVAILABLE_LABEL
-          : numeral(slo.summary.errorBudget.remaining).format(percentFormat),
-    },
-    {
-      field: 'historicalErrorBudgetRemaining',
-      name: 'Historical budget remaining',
-      render: (_, slo: SLOWithSummaryResponse) => {
-        const isSloFailed = ['VIOLATED', 'DEGRADING'].includes(slo.summary.status);
-        const errorBudgetBurnDownData = formatHistoricalData(
-          historicalSummaries.find(
-            (historicalSummary) =>
-              historicalSummary.sloId === slo.id &&
-              historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
-          )?.data,
-          'error_budget_remaining'
-        );
-        return (
-          <SloSparkline
-            chart="area"
-            id="error_budget_burn_down"
-            state={isSloFailed ? 'error' : 'success'}
-            size="compact"
-            data={errorBudgetBurnDownData}
-            isLoading={historicalSummaryLoading}
-          />
-        );
-      },
-    },
-
-    {
-      name: 'Actions',
-      actions,
-      width: '5%',
-    },
-  ];
-
-  if (!loading && !error && sloList.length === 0) {
-    return <SloListEmpty />;
-  }
-
-  if (!loading && error) {
-    return <SloListError />;
-  }
-
   return (
     <>
-      <EuiBasicTable<SLOWithSummaryResponse>
-        items={sloList}
-        columns={columns}
+      <SloListCompactViewWithoutRouterContext
+        error={error}
         loading={loading}
-        noItemsMessage={loading ? LOADING_SLOS_LABEL : NO_SLOS_FOUND}
-        tableLayout="auto"
+        items={itemsWithInteractivity}
+        actions={actions}
       />
+
       {sloToAddRule ? (
         <AddRuleFlyout
           consumer={sloFeatureId}

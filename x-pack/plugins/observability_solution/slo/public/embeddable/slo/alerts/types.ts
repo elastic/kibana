@@ -4,26 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DefaultEmbeddableApi, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import {
-  type CoreStart,
-  IUiSettingsClient,
-  ApplicationStart,
-  NotificationsStart,
-} from '@kbn/core/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
-import {
-  SerializedTitles,
-  PublishesWritablePanelTitle,
-  PublishesPanelTitle,
+import type { DefaultEmbeddableApi, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import type {
   EmbeddableApiContext,
+  PublishesPanelTitle,
+  PublishesWritablePanelTitle,
+  SerializedTitles,
 } from '@kbn/presentation-publishing';
 
 export interface SloItem {
@@ -63,19 +49,3 @@ export const apiHasSloAlertsConfig = (api: unknown | null): api is HasSloAlertsC
 export type SloAlertsEmbeddableActionContext = EmbeddableApiContext & {
   embeddable: SloAlertsApi;
 };
-
-export interface SloEmbeddableDeps {
-  uiSettings: IUiSettingsClient;
-  http: CoreStart['http'];
-  i18n: CoreStart['i18n'];
-  application: ApplicationStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  data: DataPublicPluginStart;
-  notifications: NotificationsStart;
-  cases: CasesPublicStart;
-  settings: SettingsStart;
-  security: SecurityPluginStart;
-  charts: ChartsPluginStart;
-  uiActions: UiActionsStart;
-  serverless?: ServerlessPluginStart;
-}

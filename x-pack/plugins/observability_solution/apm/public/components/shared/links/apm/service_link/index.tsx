@@ -31,15 +31,17 @@ interface ServiceLinkProps {
   agentName?: AgentName;
   query: TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
   serviceName: string;
-  serviceOverflowCount?: number;
 }
-export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps) {
-  const { link } = useApmRouter();
 
-  const serviceLink = isMobileAgentName(agentName)
-    ? '/mobile-services/{serviceName}/overview'
-    : '/services/{serviceName}/overview';
-
+export function ServiceLinkBase({
+  serviceName,
+  agentName,
+  href,
+  onClick,
+}: Omit<ServiceLinkProps, 'query'> & {
+  href: string;
+  onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+}) {
   if (serviceName === OTHER_SERVICE_NAME) {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -72,13 +74,7 @@ export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps)
       data-test-subj="apmServiceListAppLink"
       text={formatString(serviceName)}
       content={
-        <StyledLink
-          data-test-subj={`serviceLink_${agentName}`}
-          href={link(serviceLink, {
-            path: { serviceName },
-            query,
-          })}
-        >
+        <StyledLink data-test-subj={`serviceLink_${agentName}`} href={href} onClick={onClick}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <AgentIcon agentName={agentName} size="l" />
@@ -91,4 +87,18 @@ export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps)
       }
     />
   );
+}
+export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps) {
+  const { link } = useApmRouter();
+
+  const serviceOverviewLink = isMobileAgentName(agentName)
+    ? '/mobile-services/{serviceName}/overview'
+    : '/services/{serviceName}/overview';
+
+  const href = link(serviceOverviewLink, {
+    path: { serviceName },
+    query,
+  });
+
+  return <ServiceLinkBase agentName={agentName} serviceName={serviceName} href={href} />;
 }

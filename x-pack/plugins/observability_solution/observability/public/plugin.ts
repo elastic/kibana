@@ -69,6 +69,10 @@ import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/publ
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type {
+  InvestigatePublicStart,
+  InvestigatePublicSetup,
+} from '@kbn/investigate-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -126,6 +130,7 @@ export interface ObservabilityPublicPluginsSetup {
   licensing: LicensingPluginSetup;
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
+  investigate?: InvestigatePublicSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -162,6 +167,7 @@ export interface ObservabilityPublicPluginsStart {
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
+  investigate?: InvestigatePublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -269,7 +275,6 @@ export class Plugin
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         usageCollection: pluginsSetup.usageCollection,
-        isServerless: !!pluginsStart.serverless,
       });
     };
 
@@ -314,6 +319,20 @@ export class Plugin
       logsExplorerLocator
     );
 
+    pluginsSetup.investigate?.register(async (registerWidget) => {
+      return import('./investigate/register_investigate_widgets').then((m) => {
+        m.registerInvestigateWidgets({
+          coreSetup,
+          pluginsSetup,
+          kibanaVersion,
+          isDev: this.initContext.env.mode.dev,
+          observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+          config,
+          registerWidget,
+        });
+      });
+    });
+
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
         id: observabilityFeatureId,
@@ -356,6 +375,16 @@ export class Plugin
                     },
                   ]
                 : [];
+
+              const investigateLink = [
+                {
+                  label: i18n.translate('xpack.observability.investigateLinkTitle', {
+                    defaultMessage: 'Investigate',
+                  }),
+                  app: 'investigate',
+                  path: '/new',
+                },
+              ];
 
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
@@ -420,6 +449,7 @@ export class Plugin
                   sortKey: 100,
                   entries: [
                     ...overviewLink,
+                    ...investigateLink,
                     ...alertsLink,
                     ...sloLink,
                     ...casesLink,

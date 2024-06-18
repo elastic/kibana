@@ -141,3 +141,8 @@ export interface ObservabilityAIAssistantScreenContext {
   actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
 }
+
+export interface RecallQuery {
+  text: string;
+  boost: number;
+}

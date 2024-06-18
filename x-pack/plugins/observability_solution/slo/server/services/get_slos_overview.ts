@@ -45,7 +45,7 @@ export class GetSLOsOverview {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
-            getElasticsearchQueryOrThrow(kqlQuery),
+            ...(kqlQuery ? [getElasticsearchQueryOrThrow(kqlQuery)] : []),
             ...(parsedFilters.filter ?? []),
           ],
           must_not: [...(parsedFilters.must_not ?? [])],

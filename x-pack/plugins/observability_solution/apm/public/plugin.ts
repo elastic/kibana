@@ -51,18 +51,22 @@ import type {
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
 import { METRIC_TYPE } from '@kbn/observability-shared-plugin/public';
-import { ProfilingPluginSetup, ProfilingPluginStart } from '@kbn/profiling-plugin/public';
+import type { ProfilingPluginSetup, ProfilingPluginStart } from '@kbn/profiling-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type {
+  InvestigatePublicStart,
+  InvestigatePublicSetup,
+} from '@kbn/investigate-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { from } from 'rxjs';
 import { map } from 'rxjs';
@@ -80,9 +84,12 @@ import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/la
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { ITelemetryClient, TelemetryService } from './services/telemetry';
+import { APMClient, callApmApi } from './services/rest/create_call_apm_api';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
-export type ApmPluginStart = void;
+export interface ApmPluginStart {
+  apiClient: APMClient;
+}
 
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
@@ -104,6 +111,7 @@ export interface ApmPluginSetupDeps {
   uiActions: UiActionsSetup;
   profiling?: ProfilingPluginSetup;
   cloud?: CloudSetup;
+  investigate?: InvestigatePublicSetup;
 }
 
 export interface ApmServices {
@@ -138,6 +146,7 @@ export interface ApmPluginStartDeps {
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;
+  investigate?: InvestigatePublicStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -171,7 +180,9 @@ const apmTutorialTitle = i18n.translate('xpack.apm.navigation.apmTutorialTitle',
   defaultMessage: 'Tutorial',
 });
 
-export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
+export class ApmPlugin
+  implements Plugin<ApmPluginSetup, ApmPluginStart, ApmPluginSetupDeps, ApmPluginStartDeps>
+{
   private telemetry: TelemetryService;
   private kibanaVersion: string;
   private isServerlessEnv: boolean;
@@ -182,7 +193,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     this.isServerlessEnv = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
+  public setup(core: CoreSetup<ApmPluginStartDeps>, plugins: ApmPluginSetupDeps) {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
     const { featureFlags } = config;
@@ -253,7 +264,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
       const { createCallApmApi } = await import('./services/rest/create_call_apm_api');
 
-      // have to do this here as well in case app isn't mounted yet
       createCallApmApi(core);
 
       return {
@@ -396,7 +406,23 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    registerApmRuleTypes(observabilityRuleTypeRegistry);
+    registerApmRuleTypes({
+      observabilityRuleTypeRegistry,
+      coreSetup: core,
+    });
+
+    plugins.investigate?.register(async (registerWidget) => {
+      await import('./investigate').then((m) => {
+        m.registerInvestigateWidgets({
+          core,
+          pluginsSetup: plugins,
+          registerWidget,
+        });
+      });
+    });
+
+    import('./services/rest/create_call_apm_api').then((m) => m.createCallApmApi(core));
+
     registerEmbeddables({
       coreSetup: core,
       pluginsSetup: plugins,
@@ -412,7 +438,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     };
   }
 
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {
+  public start(core: CoreStart, plugins: ApmPluginStartDeps): ApmPluginStart {
     const { fleet } = plugins;
 
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
@@ -458,5 +484,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         tabs: [{ title: 'APM Agents', Component: getLazyApmAgentsTabExtension() }],
       });
     }
+
+    return {
+      apiClient: callApmApi,
+    };
   }
 }

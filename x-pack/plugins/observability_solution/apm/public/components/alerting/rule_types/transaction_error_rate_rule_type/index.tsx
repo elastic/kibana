@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ForLastExpression, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ForLastExpression,
+  RuleTypeParams,
+  TIME_UNITS,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
@@ -43,7 +47,7 @@ import {
 } from '../../ui_components/chart_preview/chart_preview_helper';
 import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
 
-export interface ErrorRateRuleParams {
+export interface ErrorRateRuleParams extends RuleTypeParams {
   windowSize?: number;
   windowUnit?: string;
   threshold?: number;

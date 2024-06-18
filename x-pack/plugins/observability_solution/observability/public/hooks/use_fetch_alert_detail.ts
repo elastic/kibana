@@ -37,10 +37,14 @@ export const useFetchAlertDetail = (id: string): [boolean, AlertData | null] => 
     []
   );
 
+  const fetchAlertAndCatchError = useCallback((...rest: Parameters<typeof fetchAlert>) => {
+    return fetchAlert(...rest).catch(() => null);
+  }, []);
+
   const { loading, data: rawAlert } = useDataFetcher<AlertDetailParams, EcsFieldsResponse | null>({
     paramsForApiCall: params,
     initialDataState: null,
-    executeApiCall: fetchAlert,
+    executeApiCall: fetchAlertAndCatchError,
     shouldExecuteApiCall,
   });
 
@@ -56,20 +60,15 @@ export const useFetchAlertDetail = (id: string): [boolean, AlertData | null] => 
   return [loading, data];
 };
 
-const fetchAlert = async (
+export const fetchAlert = async (
   { id }: AlertDetailParams,
   abortController: AbortController,
   http: HttpSetup
 ) => {
-  return http
-    .get<EcsFieldsResponse>(BASE_RAC_ALERTS_API_PATH, {
-      query: {
-        id,
-      },
-      signal: abortController.signal,
-    })
-    .catch(() => {
-      // ignore error for retrieving alert
-      return null;
-    });
+  return http.get<EcsFieldsResponse>(BASE_RAC_ALERTS_API_PATH, {
+    query: {
+      id,
+    },
+    signal: abortController.signal,
+  });
 };

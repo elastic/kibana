@@ -18,11 +18,11 @@ import { FetchContext } from '@kbn/presentation-publishing';
 import { SloIncludedCount } from './components/slo_included_count';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
-import type { SloItem, SloEmbeddableDeps } from './types';
+import type { SloItem } from './types';
 import { EDIT_SLO_ALERTS_ACTION } from '../../../ui_actions/edit_slo_alerts_panel';
+import { useKibana } from '../../../utils/kibana_react';
 
 interface Props {
-  deps: SloEmbeddableDeps;
   slos: SloItem[];
   timeRange: TimeRange;
   embeddable: any;
@@ -34,7 +34,6 @@ interface Props {
 export function SloAlertsWrapper({
   embeddable,
   slos,
-  deps,
   timeRange: initialTimeRange,
   onRenderComplete,
   reloadSubject,
@@ -43,7 +42,8 @@ export function SloAlertsWrapper({
   const {
     application: { navigateToUrl },
     http: { basePath },
-  } = deps;
+    uiActions,
+  } = useKibana().services;
 
   const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
@@ -102,8 +102,8 @@ export function SloAlertsWrapper({
         <EuiFlexItem grow={false}>
           <EuiLink
             onClick={() => {
-              const trigger = deps.uiActions.getTrigger(CONTEXT_MENU_TRIGGER);
-              deps.uiActions.getAction(EDIT_SLO_ALERTS_ACTION).execute({
+              const trigger = uiActions.getTrigger(CONTEXT_MENU_TRIGGER);
+              uiActions.getAction(EDIT_SLO_ALERTS_ACTION).execute({
                 trigger,
                 embeddable,
               } as ActionExecutionContext);
@@ -140,7 +140,6 @@ export function SloAlertsWrapper({
         <EuiFlexItem>
           <SloAlertsSummary
             slos={slos}
-            deps={deps}
             timeRange={timeRange}
             onLoaded={() => setIsSummaryLoaded(true)}
             showAllGroupByInstances={showAllGroupByInstances}
@@ -149,7 +148,6 @@ export function SloAlertsWrapper({
         <EuiFlexItem grow={true}>
           <SloAlertsTable
             slos={slos}
-            deps={deps}
             timeRange={timeRange}
             onLoaded={() => setIsTableLoaded(true)}
             lastReloadRequestTime={lastRefreshTime}

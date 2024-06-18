@@ -13,6 +13,8 @@ import type {
   SloPublicPluginsStart,
 } from './types';
 
+export { createInvestigateSloInventoryWidget } from './investigate/investigate_slo_inventory/create_investigate_slo_overview_widget';
+
 export const plugin: PluginInitializer<
   SloPublicSetup,
   SloPublicStart,

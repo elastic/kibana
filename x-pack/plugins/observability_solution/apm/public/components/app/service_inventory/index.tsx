@@ -9,9 +9,9 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
 import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
+import { omit } from 'lodash';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { ServiceInventoryFieldName, ServiceListItem } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
@@ -23,101 +23,28 @@ import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { SortFunction } from '../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ServiceList } from './service_list';
 import { orderServiceItems } from './service_list/order_service_items';
-
-type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
+import {
+  MainStatisticsFetch,
+  useServicesMainStatisticsFetcher,
+} from './use_services_main_statistics_fetcher';
+import { InteractiveServiceListItem } from './service_list/types';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { isMobileAgentName } from '../../../../common/agent_name';
+import { ServiceLink } from '../../shared/links/apm/service_link';
 
 const INITIAL_PAGE_SIZE = 25;
-const INITIAL_DATA: MainStatisticsApiResponse & { requestId: string } = {
-  requestId: '',
-  items: [],
-  serviceOverflowCount: 0,
-  maxCountExceeded: false,
-};
-
-function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
-  const {
-    query: {
-      rangeFrom,
-      rangeTo,
-      environment,
-      kuery,
-      serviceGroup,
-      page = 0,
-      pageSize = INITIAL_PAGE_SIZE,
-      sortDirection,
-      sortField,
-    },
-  } = useApmParams('/services');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const preferred = usePreferredDataSourceAndBucketSize({
-    start,
-    end,
-    kuery,
-    type: ApmDocumentType.ServiceTransactionMetric,
-    numBuckets: 20,
-  });
-
-  const shouldUseDurationSummary = !!preferred?.source?.hasDurationSummaryField;
-
-  const { data = INITIAL_DATA, status } = useProgressiveFetcher(
-    (callApmApi) => {
-      if (preferred) {
-        return callApmApi('GET /internal/apm/services', {
-          params: {
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              serviceGroup,
-              useDurationSummary: shouldUseDurationSummary,
-              documentType: preferred.source.documentType,
-              rollupInterval: preferred.source.rollupInterval,
-              searchQuery,
-            },
-          },
-        }).then((mainStatisticsData) => {
-          return {
-            requestId: uuidv4(),
-            ...mainStatisticsData,
-          };
-        });
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      environment,
-      kuery,
-      start,
-      end,
-      serviceGroup,
-      preferred,
-      searchQuery,
-      // not used, but needed to update the requestId to call the details statistics API when table options are updated
-      page,
-      pageSize,
-      sortField,
-      sortDirection,
-    ]
-  );
-
-  return { mainStatisticsData: data, mainStatisticsStatus: status };
-}
 
 function useServicesDetailedStatisticsFetcher({
   mainStatisticsFetch,
   renderedItems,
 }: {
-  mainStatisticsFetch: ReturnType<typeof useServicesMainStatisticsFetcher>;
+  mainStatisticsFetch: MainStatisticsFetch;
   renderedItems: ServiceListItem[];
 }) {
   const {
@@ -182,12 +109,13 @@ export function ServiceInventory() {
 
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
 
-  const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
+  const mainStatisticsFetch = useServicesMainStatisticsFetcher({
+    searchQuery: debouncedSearchQuery,
+    initialPageSize: INITIAL_PAGE_SIZE,
+  });
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
 
   const displayHealthStatus = mainStatisticsData.items.some((item) => 'healthStatus' in item);
-
-  const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
   const displayAlerts = mainStatisticsData.items.some(
     (item) => ServiceInventoryFieldName.AlertsCount in item
@@ -241,7 +169,7 @@ export function ServiceInventory() {
     </EuiFlexItem>
   );
 
-  const sortFn: SortFunction<ServiceListItem> = useCallback(
+  const sortFn: SortFunction<InteractiveServiceListItem> = useCallback(
     (itemsToSort, sortField, sortDirection) => {
       return orderServiceItems({
         items: itemsToSort,
@@ -300,6 +228,41 @@ export function ServiceInventory() {
   const isTableSearchBarEnabled =
     Boolean(settingsField?.savedValue ?? settingsField?.defaultValue) ?? false;
 
+  const apmRouter = useApmRouter();
+
+  const { query } = useApmParams('/services');
+
+  const interactiveItems = useMemo(() => {
+    return mainStatisticsData.items.map((item): InteractiveServiceListItem => {
+      const { serviceName, agentName } = item;
+      const isMobile = isMobileAgentName(agentName);
+
+      const queryForServiceDetailLink = omit(
+        query,
+        'page',
+        'pageSize',
+        'sortDirection',
+        'sortField'
+      );
+
+      return {
+        ...item,
+        alerts: {
+          href: isMobile
+            ? apmRouter.link(`/mobile-services/{serviceName}/alerts`, {
+                path: { serviceName },
+                query: queryForServiceDetailLink,
+              })
+            : apmRouter.link(`/services/{serviceName}/alerts`, {
+                path: { serviceName },
+                query: queryForServiceDetailLink,
+              }),
+        },
+        serviceLink: <ServiceLink serviceName={serviceName} agentName={agentName} query={query} />,
+      };
+    });
+  }, [mainStatisticsData.items, query, apmRouter]);
+
   return (
     <>
       {/* keep this div as we're collecting telemetry to track the usage of the table fast search vs KQL bar */}
@@ -311,7 +274,7 @@ export function ServiceInventory() {
         <EuiFlexItem>
           <ServiceList
             status={mainStatisticsStatus}
-            items={mainStatisticsData.items}
+            items={interactiveItems}
             comparisonDataLoading={comparisonFetch.status === FETCH_STATUS.LOADING}
             displayHealthStatus={displayHealthStatus}
             displayAlerts={displayAlerts}
@@ -321,7 +284,6 @@ export function ServiceInventory() {
             comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
             initialPageSize={INITIAL_PAGE_SIZE}
-            serviceOverflowCount={serviceOverflowCount}
             onChangeSearchQuery={setDebouncedSearchQuery}
             maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
             onChangeRenderedItems={setRenderedItems}

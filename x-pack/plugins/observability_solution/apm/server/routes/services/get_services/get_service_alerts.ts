@@ -10,6 +10,7 @@ import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_TIME_RANGE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
@@ -53,7 +54,7 @@ export async function getServicesAlerts({
         filter: [
           ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-          ...rangeQuery(start, end),
+          ...rangeQuery(start, end, ALERT_TIME_RANGE),
           ...kqlQuery(kuery),
           ...serviceGroupWithOverflowQuery(serviceGroup),
           ...termQuery(SERVICE_NAME, serviceName),

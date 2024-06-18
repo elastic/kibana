@@ -121,6 +121,7 @@
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
+    "@kbn/investigate-plugin",
     "@kbn/test-jest-helpers"
   ],
   "exclude": ["target/**/*"]

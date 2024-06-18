@@ -31,6 +31,7 @@ interface Props {
   environment: string;
   start: string;
   end: string;
+  iconSize?: 's' | 'm' | 'l';
 }
 
 function getServerlessTitle(serverlessType?: ServerlessType): string {
@@ -78,7 +79,7 @@ export interface PopoverItem {
   component: ReactChild;
 }
 
-export function ServiceIcons({ start, end, serviceName, environment }: Props) {
+export function ServiceIcons({ start, end, serviceName, environment, iconSize }: Props) {
   const [selectedIconPopover, setSelectedIconPopover] = useState<Icons | null>();
 
   const theme = useTheme();
@@ -123,6 +124,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
       key: 'service',
       icon: {
         type: getAgentIcon(icons?.agentName, theme.darkMode) || 'node',
+        size: iconSize,
       },
       isVisible: !!icons?.agentName,
       title: i18n.translate('xpack.apm.serviceIcons.service', {
@@ -134,6 +136,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
       key: 'opentelemetry',
       icon: {
         type: getAgentIcon('opentelemetry', theme.darkMode),
+        size: iconSize,
       },
       isVisible: !!icons?.agentName && isOpenTelemetryAgentName(icons.agentName),
       title: i18n.translate('xpack.apm.serviceIcons.opentelemetry', {
@@ -147,6 +150,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
       key: 'container',
       icon: {
         type: getContainerIcon(icons?.containerType),
+        size: iconSize,
       },
       isVisible: !!icons?.containerType,
       title: i18n.translate('xpack.apm.serviceIcons.container', {
@@ -160,6 +164,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
       key: 'serverless',
       icon: {
         type: getServerlessIcon(icons?.serverlessType) || 'node',
+        size: iconSize,
       },
       isVisible: !!icons?.serverlessType,
       title: getServerlessTitle(icons?.serverlessType),
@@ -169,6 +174,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
       key: 'cloud',
       icon: {
         type: getCloudProviderIcon(icons?.cloudProvider as CloudProvider),
+        size: iconSize,
       },
       isVisible: !!icons?.cloudProvider,
       title: i18n.translate('xpack.apm.serviceIcons.cloud', {

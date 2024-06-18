@@ -27,6 +27,7 @@ import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
@@ -87,7 +88,16 @@ export function ErrorGroupDetails() {
 
   const {
     path: { groupId },
-    query: { rangeFrom, rangeTo, environment, kuery, serviceGroup, comparisonEnabled, errorId },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      serviceGroup,
+      comparisonEnabled,
+      errorId,
+      offset,
+    },
   } = useApmParams('/services/{serviceName}/errors/{groupId}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -151,6 +161,10 @@ export function ErrorGroupDetails() {
     groupId,
     environment,
     kuery,
+    comparisonEnabled,
+    offset,
+    start,
+    end,
   });
 
   useEffect(() => {
@@ -183,6 +197,8 @@ export function ErrorGroupDetails() {
     });
   }, [observabilityAIAssistant, errorSamplesData.occurrencesCount, groupId]);
 
+  const previousPeriodLabel = usePreviousPeriodLabel();
+
   return (
     <>
       <EuiSpacer size={'s'} />
@@ -199,6 +215,8 @@ export function ErrorGroupDetails() {
               title={i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
                 defaultMessage: 'Error occurrences',
               })}
+              previousPeriodLabel={previousPeriodLabel}
+              comparisonEnabled={comparisonEnabled}
             />
           </EuiPanel>
         </EuiFlexItem>

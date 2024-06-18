@@ -20,8 +20,31 @@ const EuiSelectWithWidth = styled(EuiSelect)`
   min-width: 200px;
 `;
 
-export function TransactionTypeSelect() {
+export function TransactionTypeSelectBase({
+  transactionTypes,
+  selectedTransactionType,
+  onChange,
+}: {
+  transactionTypes: string[];
+  selectedTransactionType: string | undefined;
+  onChange: React.ChangeEventHandler<HTMLSelectElement>;
+}) {
   const { isSmall } = useBreakpoints();
+
+  const options = transactionTypes.map((t) => ({ text: t, value: t }));
+
+  return (
+    <EuiSelectWithWidth
+      fullWidth={isSmall}
+      data-test-subj="headerFilterTransactionType"
+      onChange={onChange}
+      options={options}
+      value={selectedTransactionType}
+    />
+  );
+}
+
+export function TransactionTypeSelect() {
   const { transactionTypes, transactionType } = useApmServiceContext();
   const history = useHistory();
 
@@ -35,17 +58,11 @@ export function TransactionTypeSelect() {
     [history]
   );
 
-  const options = transactionTypes.map((t) => ({ text: t, value: t }));
-
   return (
-    <>
-      <EuiSelectWithWidth
-        fullWidth={isSmall}
-        data-test-subj="headerFilterTransactionType"
-        onChange={handleChange}
-        options={options}
-        value={transactionType}
-      />
-    </>
+    <TransactionTypeSelectBase
+      transactionTypes={transactionTypes}
+      selectedTransactionType={transactionType}
+      onChange={handleChange}
+    />
   );
 }

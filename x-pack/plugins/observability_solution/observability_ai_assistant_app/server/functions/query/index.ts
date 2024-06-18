@@ -22,6 +22,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
@@ -71,9 +72,11 @@ const loadEsqlDocs = once(async () => {
 });
 
 export function registerQueryFunction({ functions, resources }: FunctionRegistrationParameters) {
-  functions.registerInstruction(({ availableFunctionNames }) =>
-    availableFunctionNames.includes(QUERY_FUNCTION_NAME)
-      ? `You MUST use the "${QUERY_FUNCTION_NAME}" function when the user wants to:
+  functions.registerInstruction(({ availableFunctionNames }) => {
+    let message = '';
+
+    if (availableFunctionNames.includes(QUERY_FUNCTION_NAME)) {
+      message += `You MUST use the "${QUERY_FUNCTION_NAME}" function when the user wants to:
   - visualize data
   - run any arbitrary query
   - breakdown or filter ES|QL queries that are displayed on the current page
@@ -85,13 +88,16 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
 
   If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.
 
-  Even if the "${QUERY_FUNCTION_NAME}" function was used before that, follow it up with the "${QUERY_FUNCTION_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${QUERY_FUNCTION_NAME}" function,
-  even if it has been called before.
+  Even if the "${CONTEXT_FUNCTION_NAME}" function was used before that, follow it up with the "${QUERY_FUNCTION_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${QUERY_FUNCTION_NAME}" function,
+  even if it has been called before.`;
+    }
 
-  When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
-  If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
-      : undefined
-  );
+    if (availableFunctionNames.includes('visualize_query')) {
+      message += `When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
+      If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.`;
+    }
+    return message;
+  });
 
   functions.registerFunction(
     {

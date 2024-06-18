@@ -67,6 +67,7 @@ export {
   KnowledgeBaseEntryRole,
   concatenateChatCompletionChunks,
   StreamingChatResponseEventType,
+  ShortIdTable,
 } from '../common';
 export type {
   CompatibleJSONSchema,
@@ -75,7 +76,6 @@ export type {
   KnowledgeBaseEntry,
   FunctionDefinition,
   ChatCompletionChunkEvent,
-  ShortIdTable,
 } from '../common';
 
 export type { TelemetryEventTypeWithPayload } from './analytics';

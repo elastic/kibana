@@ -12,6 +12,7 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
@@ -20,14 +21,20 @@ export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: { environment, kuery, comparisonEnabled },
+    query: { environment, kuery, comparisonEnabled, rangeFrom, rangeTo, offset },
   } = useApmParams('/services/{serviceName}/errors');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { errorDistributionData, errorDistributionStatus } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
     environment,
     kuery,
+    start,
+    end,
+    comparisonEnabled,
+    offset,
   });
 
   return (
@@ -44,6 +51,8 @@ export function ErrorGroupOverview() {
                     'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
                     { defaultMessage: 'Error occurrences' }
                   )}
+                  comparisonEnabled={comparisonEnabled}
+                  previousPeriodLabel=""
                 />
               </EuiPanel>
             </EuiFlexItem>

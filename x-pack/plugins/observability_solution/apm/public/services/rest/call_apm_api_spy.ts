@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { once } from 'lodash';
-import { createCallApmApi, callApmApi } from './create_call_apm_api';
+import * as createCallApmApiModule from './create_call_apm_api';
 import type {
   AbstractAPMClient,
   APIClientRequestParamsOf,
@@ -13,13 +13,15 @@ import type {
 } from './create_call_apm_api';
 import { type APIEndpoint } from '../../../server';
 
-const spyObj = { createCallApmApi, callApmApi };
+jest.spyOn(createCallApmApiModule, 'createCallApmApi');
+
+jest.spyOn(createCallApmApiModule, 'callApmApi');
 
 export type CallApmApiSpy = jest.SpyInstance<Promise<any>, Parameters<AbstractAPMClient>>;
 
 export type CreateCallApmApiSpy = jest.SpyInstance<AbstractAPMClient>;
 
-export const getCallApmApiSpy = () => jest.spyOn(spyObj, 'callApmApi') as unknown as CallApmApiSpy;
+export const getCallApmApiSpy = () => jest.mocked(createCallApmApiModule.callApmApi);
 
 type MockApmApiCall = <TEndpoint extends APIEndpoint>(
   endpoint: TEndpoint,

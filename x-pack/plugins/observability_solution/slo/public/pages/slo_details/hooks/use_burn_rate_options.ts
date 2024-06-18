@@ -8,6 +8,7 @@
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useMemo } from 'react';
 import { BurnRateOption } from '../../../components/slo/burn_rate/burn_rates';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
 
@@ -56,17 +57,20 @@ export const DEFAULT_BURN_RATE_OPTIONS: BurnRateOption[] = [
 
 export const useBurnRateOptions = (slo: SLOWithSummaryResponse) => {
   const { data: rules } = useFetchRulesForSlo({ sloIds: [slo.id] });
-  const burnRateOptions =
-    rules?.[slo.id]?.[0]?.params?.windows?.map((window) => ({
-      id: htmlIdGenerator()(),
-      label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
-        defaultMessage: '{duration}h',
-        values: { duration: window.longWindow.value },
-      }),
-      windowName: window.actionGroup,
-      threshold: window.burnRateThreshold,
-      duration: window.longWindow.value,
-    })) ?? DEFAULT_BURN_RATE_OPTIONS;
+  const burnRateOptions = useMemo(() => {
+    return (
+      rules?.[slo.id]?.[0]?.params?.windows?.map((window) => ({
+        id: htmlIdGenerator()(),
+        label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
+          defaultMessage: '{duration}h',
+          values: { duration: window.longWindow.value },
+        }),
+        windowName: window.actionGroup,
+        threshold: window.burnRateThreshold,
+        duration: window.longWindow.value,
+      })) ?? DEFAULT_BURN_RATE_OPTIONS
+    );
+  }, [rules, slo.id]);
 
   return { burnRateOptions };
 };

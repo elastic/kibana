@@ -50,7 +50,7 @@ import {
 } from '../../ui_components/chart_preview/chart_preview_helper';
 import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
 
-export interface TransactionDurationRuleParams {
+export interface TransactionDurationRuleParams extends Record<string, unknown> {
   aggregationType: AggregationType;
   environment: string;
   threshold: number;

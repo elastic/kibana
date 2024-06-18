@@ -21,10 +21,8 @@ import {
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
+import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ChartContainer } from '../../../shared/charts/chart_container';
@@ -38,16 +36,23 @@ interface Props {
   fetchStatus: FETCH_STATUS;
   distribution?: ErrorDistributionAPIResponse;
   title: React.ReactNode;
+  comparisonEnabled: boolean;
+  previousPeriodLabel: string;
 }
 
-export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
-  const { core } = useApmPluginContext();
+export function ErrorDistribution({
+  distribution,
+  title,
+  fetchStatus,
+  comparisonEnabled,
+  previousPeriodLabel,
+}: Props) {
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
   const theme = useTheme();
 
-  const { urlParams } = useLegacyUrlParams();
-  const { comparisonEnabled } = urlParams;
-
-  const previousPeriodLabel = usePreviousPeriodLabel();
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
     ChartType.ERROR_OCCURRENCES
   );
@@ -77,7 +82,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const timeZone = getTimeZone(core.uiSettings);
+  const timeZone = getTimeZone(uiSettings);
 
   return (
     <>

@@ -22,13 +22,15 @@ export interface Props {
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function HistoricalDataCharts({
+export function useHistoricalData({
   slo,
-  range,
   isAutoRefreshing,
-  selectedTabId,
-  onBrushed,
-}: Props) {
+  range,
+}: {
+  slo: SLOWithSummaryResponse;
+  isAutoRefreshing: boolean;
+  range?: { from: Date; to: Date };
+}) {
   const { data: historicalSummaries = [], isLoading: historicalSummaryLoading } =
     useFetchHistoricalSummary({
       sloList: [slo],
@@ -47,6 +49,27 @@ export function HistoricalDataCharts({
     'error_budget_remaining'
   );
   const historicalSliData = formatHistoricalData(sloHistoricalSummary?.data, 'sli_value');
+
+  return {
+    historicalSummaryLoading,
+    errorBudgetBurnDownData,
+    historicalSliData,
+  };
+}
+
+export function HistoricalDataCharts({
+  slo,
+  range,
+  isAutoRefreshing,
+  selectedTabId,
+  onBrushed,
+}: Props) {
+  const { errorBudgetBurnDownData, historicalSliData, historicalSummaryLoading } =
+    useHistoricalData({
+      slo,
+      range,
+      isAutoRefreshing,
+    });
 
   return (
     <>

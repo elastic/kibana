@@ -8,32 +8,15 @@
 import { useMemo } from 'react';
 import { ApmDataSourceWithSummary } from '../../common/data_source';
 import { ApmDocumentType } from '../../common/document_type';
+import { TimeRangeMetadata } from '../../common/time_range_metadata';
 import { getBucketSize } from '../../common/utils/get_bucket_size';
 import { getPreferredBucketSizeAndDataSource } from '../../common/utils/get_preferred_bucket_size_and_data_source';
 import { useTimeRangeMetadata } from '../context/time_range_metadata/use_time_range_metadata_context';
+import { FetcherResult } from './use_fetcher';
 
-/**
- * Hook to get the source and interval based on Time Range Metadata API
- *
- * @param {number} numBuckets - The number of buckets. Should be 20 for SparkPlots or 100 for Other charts.
-
- */
-
-export function usePreferredDataSourceAndBucketSize<
+export type PreferredDataSourceAndBucketSize<
   TDocumentType extends ApmDocumentType.ServiceTransactionMetric | ApmDocumentType.TransactionMetric
->({
-  start,
-  end,
-  kuery,
-  numBuckets,
-  type,
-}: {
-  start: string;
-  end: string;
-  kuery: string;
-  numBuckets: 20 | 100;
-  type: TDocumentType;
-}): {
+> = {
   bucketSizeInSeconds: number;
   source: ApmDataSourceWithSummary<
     TDocumentType extends ApmDocumentType.ServiceTransactionMetric
@@ -43,13 +26,23 @@ export function usePreferredDataSourceAndBucketSize<
           | ApmDocumentType.TransactionEvent
       : ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
-} | null {
-  const timeRangeMetadataFetch = useTimeRangeMetadata({
-    start,
-    end,
-    kuery,
-  });
+} | null;
 
+export function usePreferredDataSourceAndBucketSizeWithoutContext<
+  TDocumentType extends ApmDocumentType.ServiceTransactionMetric | ApmDocumentType.TransactionMetric
+>({
+  start,
+  end,
+  numBuckets,
+  type,
+  timeRangeMetadataFetch,
+}: {
+  start: string;
+  end: string;
+  numBuckets: 20 | 100;
+  type: TDocumentType;
+  timeRangeMetadataFetch: FetcherResult<TimeRangeMetadata>;
+}): PreferredDataSourceAndBucketSize<TDocumentType> {
   const sources = timeRangeMetadataFetch.data?.sources;
 
   return useMemo(() => {
@@ -83,4 +76,41 @@ export function usePreferredDataSourceAndBucketSize<
       source: source as ApmDataSourceWithSummary<any>,
     };
   }, [type, start, end, sources, numBuckets]);
+}
+
+/**
+ * Hook to get the source and interval based on Time Range Metadata API
+ *
+ * @param {number} numBuckets - The number of buckets. Should be 20 for SparkPlots or 100 for Other charts.
+
+ */
+
+export function usePreferredDataSourceAndBucketSize<
+  TDocumentType extends ApmDocumentType.ServiceTransactionMetric | ApmDocumentType.TransactionMetric
+>({
+  start,
+  end,
+  kuery,
+  numBuckets,
+  type,
+}: {
+  start: string;
+  end: string;
+  kuery: string;
+  numBuckets: 20 | 100;
+  type: TDocumentType;
+}): PreferredDataSourceAndBucketSize<TDocumentType> {
+  const timeRangeMetadataFetch = useTimeRangeMetadata({
+    start,
+    end,
+    kuery,
+  });
+
+  return usePreferredDataSourceAndBucketSizeWithoutContext({
+    start,
+    end,
+    numBuckets,
+    type,
+    timeRangeMetadataFetch,
+  });
 }

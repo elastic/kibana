@@ -22,6 +22,7 @@ export type CompatibleJSONSchema = {
   items?: CompatibleJSONSchema[] | CompatibleJSONSchema;
   required?: string[] | readonly string[] | undefined;
   properties?: Record<string, CompatibleJSONSchema>;
+  patternProperties?: Record<string, CompatibleJSONSchema>;
   allOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;
   anyOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;
   oneOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;

@@ -9,6 +9,7 @@ import {
   BarSeries,
   Chart,
   ElementClickListener,
+  LegendPositionConfig,
   Position,
   ScaleType,
   Settings,
@@ -27,6 +28,7 @@ import { TimeBounds } from '../../../slo_details/types';
 import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import { useKibana } from '../../../../utils/kibana_react';
 import { openInDiscover } from '../../../../utils/slo/get_discover_link';
+import { useChartsBaseTheme } from '../../hooks/use_charts_base_theme';
 
 export interface Props {
   data: GetPreviewDataResponse;
@@ -35,6 +37,7 @@ export interface Props {
   isLoading?: boolean;
   bottomTitle?: string;
   onBrushed?: (timeBounds: TimeBounds) => void;
+  legendPosition?: Position | LegendPositionConfig;
 }
 
 export function GoodBadEventsChart({
@@ -44,10 +47,13 @@ export function GoodBadEventsChart({
   slo,
   onBrushed,
   isLoading = false,
+  legendPosition,
 }: Props) {
   const { charts, uiSettings, discover } = useKibana().services;
   const { euiTheme } = useEuiTheme();
-  const baseTheme = charts.theme.useChartsBaseTheme();
+
+  const { baseTheme, theme } = useChartsBaseTheme();
+
   const chartRef = useRef(null);
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
     isDateHistogram: true,
@@ -98,8 +104,9 @@ export function GoodBadEventsChart({
           <Tooltip type={TooltipType.VerticalCursor} />
           <Settings
             baseTheme={baseTheme}
+            theme={theme}
             showLegend={true}
-            legendPosition={Position.Left}
+            legendPosition={legendPosition}
             noResults={
               <EuiIcon
                 type="visualizeApp"
