@@ -284,13 +284,14 @@ describe('SecurityUsageReportingTask', () => {
       });
 
       it('should do nothing if task instance id is outdated', async () => {
-      const result = await runTask({ ...buildMockTaskInstance(), id: 'old-id' });
+        const result = await runTask({ ...buildMockTaskInstance(), id: 'old-id' });
 
-      expect(result).toEqual(getDeleteTaskRunResult());
+        expect(result).toEqual(getDeleteTaskRunResult());
 
-      expect(reportUsageSpy).not.toHaveBeenCalled();
-      expect(meteringCallbackMock).not.toHaveBeenCalled();
-    });describe('lastSuccessfulReport', () => {
+        expect(reportUsageSpy).not.toHaveBeenCalled();
+        expect(meteringCallbackMock).not.toHaveBeenCalled();
+      });
+      describe('lastSuccessfulReport', () => {
         it('should set lastSuccessfulReport correctly if report success', async () => {
           reportUsageSpy.mockResolvedValueOnce({ status: 201 });
           const taskInstance = buildMockTaskInstance();
