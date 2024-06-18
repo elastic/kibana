@@ -28,5 +28,5 @@ paths:
                   type: string
                   nullable: true
       responses:
-        200:
+        '200':
           description: Indicates the note was successfully deleted.

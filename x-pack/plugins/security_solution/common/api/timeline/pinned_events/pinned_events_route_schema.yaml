@@ -34,7 +34,7 @@ paths:
                 timelineId:
                   type: string
       responses:
-        200:
+        '200':
           description: Indicate the event was successfully pinned in the timeline.
           content:
             application/json:

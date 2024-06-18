@@ -39,14 +39,14 @@ paths:
                   items:
                     type: string
       responses:
-        200:
+        '200':
           description: Indicates the timelines were successfully exported
           content:
             application/ndjson:
               schema:
                 type: string
                 description: NDJSON of the exported timelines
-        400:
+        '400':
           description: Indicates that the export size limit was exceeded
           content:
             application/ndjson:

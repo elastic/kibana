@@ -38,7 +38,7 @@ paths:
                     - $ref: '../model/components.yaml#/components/schemas/TimelineType'
                     - nullable: true
       responses:
-        200:
+        '200':
           description: Indicates the favorite status was successfully updated.
           content:
             application/json:
@@ -52,7 +52,7 @@ paths:
                         $ref: '../model/components.yaml#/components/schemas/FavoriteTimelineResponse'
                 required:
                   - data
-        403:
+        '403':
           description: Indicates the user does not have the required permissions to persist the favorite status.
           content:
             application:json:

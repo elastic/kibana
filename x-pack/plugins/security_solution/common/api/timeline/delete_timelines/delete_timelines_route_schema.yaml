@@ -38,7 +38,7 @@ paths:
                   items:
                     type: string
       responses:
-        200:
+        '200':
           description: Indicates the timeline was successfully deleted.
           content:
             application/json:
