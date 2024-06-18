@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
@@ -37,16 +37,11 @@ import { useLicense } from '../../../../hooks/use_license';
 
 const formatThreshold = (threshold: number) => String(threshold);
 
-const AlertDetailsAppSection = ({
-  rule,
-  alert,
-  setAlertSummaryFields,
-}: AlertDetailsAppSectionProps) => {
+const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
   const { logsShared } = useKibanaContextForPlugin().services;
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
-  const alertContext = alert.fields[ALERT_CONTEXT];
   const interval = `${rule.params.timeSize}${rule.params.timeUnit}`;
   const thresholdFill = convertComparatorToFill(rule.params.count.comparator);
   const filter = rule.params.groupBy
@@ -70,33 +65,6 @@ const AlertDetailsAppSection = ({
 
   const { hasAtLeast } = useLicense();
   const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
-
-  useEffect(() => {
-    /**
-     * The `CriterionPreview` chart shows all the series/data stacked when there is a GroupBy in the rule parameters.
-     * e.g., `host.name`, the chart will show stacks of data by hostname.
-     * We only need the chart to show the series that is related to the selected alert.
-     * The chart series are built based on the GroupBy in the rule params
-     * Each series have an id which is the just a joining of fields value of the GroupBy `getChartGroupNames`
-     * We filter down the series using this group name
-     */
-    const alertFieldsFromGroupBy =
-      rule.params.groupBy?.reduce(
-        (selectedFields: Record<string, any>, field) => ({
-          ...selectedFields,
-          ...{
-            [field]: get(alertContext, ['groupByKeys', ...field.split('.')], null),
-          },
-        }),
-        {}
-      ) || {};
-
-    const alertSummaryFields = Object.entries(alertFieldsFromGroupBy).map(([label, value]) => ({
-      label,
-      value,
-    }));
-    setAlertSummaryFields(alertSummaryFields);
-  }, [alertContext, rule.params.groupBy, setAlertSummaryFields]);
 
   const getLogRatioChart = () => {
     if (isRatioRule(rule.params.criteria)) {

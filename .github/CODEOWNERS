@@ -35,14 +35,9 @@ packages/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core
-packages/analytics/client @elastic/kibana-core
 packages/analytics/utils/analytics_collection_utils @elastic/kibana-core
 test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
-packages/analytics/shippers/elastic_v3/browser @elastic/kibana-core
-packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
-packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
-packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 x-pack/plugins/observability_solution/apm_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 packages/kbn-apm-data-view @elastic/obs-ux-infra_services-team
@@ -378,6 +373,7 @@ packages/kbn-discover-utils @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
+packages/analytics/ebt @elastic/kibana-core
 packages/kbn-ebt-tools @elastic/kibana-core
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
@@ -1513,6 +1509,8 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/plugins/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/plugins/stack_connectors/common/sentinelone @elastic/security-defend-workflows
+/x-pack/plugins/stack_connectors/server/connector_types/crowdstrike @elastic/security-defend-workflows
+/x-pack/plugins/stack_connectors/common/crowdstrike @elastic/security-defend-workflows
 
 ## Security Solution shared OAS schemas
 /x-pack/plugins/security_solution/common/api/model @elastic/security-detection-rule-management @elastic/security-detection-engine
@@ -1596,12 +1594,14 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 
 ## Security Solution sub teams - security-defend-workflows
 /x-pack/plugins/security_solution/public/management/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/public/common/lib/endpoint*/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/public/common/components/agents/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/common/lib/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/common/hooks/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/common/mock/endpoint @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/flyout/document_details/isolate_host/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/common/endpoint/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution/server/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/common/api/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/server/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lists_integration/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/license/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
@@ -1636,6 +1636,7 @@ x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-e
 x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
 
 # Security Defend Workflows - OSQuery Ownership
+x-pack/plugins/osquery @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
@@ -1651,7 +1652,8 @@ x-pack/test/security_solution_api_integration/test_suites/genai @elastic/securit
 /x-pack/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
 /x-pack/test/cloud_security_posture_api/ @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/ @elastic/kibana-cloud-security-posture
-/x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts @elastic/kibana-cloud-security-posture
+/x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.basic.ts @elastic/kibana-cloud-security-posture
+/x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.essentials.ts @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/plugins/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
 /x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
