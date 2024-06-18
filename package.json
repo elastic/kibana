@@ -123,7 +123,7 @@
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@faker-js/faker": "^8.3.1",
-    "@grpc/grpc-js": "^1.6.8",
+    "@grpc/grpc-js": "^1.8.22",
     "@hapi/accept": "^5.0.2",
     "@hapi/boom": "^9.1.4",
     "@hapi/cookie": "^11.0.2",
