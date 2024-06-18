@@ -8,7 +8,7 @@
 
 import { Position } from '@elastic/charts';
 import { ArgTypes } from '@storybook/addons';
-import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
+import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { EmptySizeRatios, LegendDisplay } from '../../../common';
 import { ChartTypes } from '../../../common/types';
 
@@ -212,7 +212,7 @@ export const waffleArgTypes: ArgTypes = {
     description: 'Legend stats',
     type: { name: 'string', required: false },
     table: { type: { summary: 'string' }, defaultValue: { summary: undefined } },
-    options: [LegendStats.values],
+    options: [PartitionLegendValue.Value],
     control: { type: 'select' },
   },
 };

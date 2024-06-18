@@ -84,6 +84,9 @@ const appDependencies = {
     enableIndexStats: true,
     editableIndexSettings: 'all',
     enableDataStreamsStorageColumn: true,
+    enableMappingsSourceFieldSection: true,
+    enableTogglingDataRetention: true,
+    enableSemanticText: false,
   },
 } as any;
 

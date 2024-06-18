@@ -302,6 +302,20 @@ describe('SavedObjectsRepository Security Extension', () => {
         })
       );
     });
+
+    test(`adds updated_by to the saved object when the current user is available`, async () => {
+      const profileUid = 'profileUid';
+      mockSecurityExt.getCurrentUser.mockImplementationOnce(() =>
+        mockAuthenticatedUser({ profile_uid: profileUid })
+      );
+
+      const result = await updateSuccess(client, repository, registry, type, id, attributes, {
+        namespace,
+      });
+
+      expect(result).not.toHaveProperty('created_by');
+      expect(result.updated_by).toBe(profileUid);
+    });
   });
 
   describe('#create', () => {
@@ -425,7 +439,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       );
     });
 
-    test(`adds created_by to the saved object when the current user is available`, async () => {
+    test(`adds created_by, updated_by to the saved object when the current user is available`, async () => {
       const profileUid = 'profileUid';
       mockSecurityExt.getCurrentUser.mockImplementationOnce(() =>
         mockAuthenticatedUser({ profile_uid: profileUid })
@@ -434,14 +448,16 @@ describe('SavedObjectsRepository Security Extension', () => {
         namespace,
       });
       expect(response.created_by).toBe(profileUid);
+      expect(response.updated_by).toBe(profileUid);
     });
 
-    test(`keeps created_by empty if the current user is not available`, async () => {
+    test(`keeps created_by, updated_by empty if the current user is not available`, async () => {
       mockSecurityExt.getCurrentUser.mockImplementationOnce(() => null);
       const response = await repository.create(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, attributes, {
         namespace,
       });
       expect(response).not.toHaveProperty('created_by');
+      expect(response).not.toHaveProperty('updated_by');
     });
   });
 
@@ -1345,7 +1361,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
     });
 
-    test(`adds created_by to the saved object when the current user is available`, async () => {
+    test(`adds created_by, updated_by to the saved object when the current user is available`, async () => {
       const profileUid = 'profileUid';
       mockSecurityExt.getCurrentUser.mockImplementationOnce(() =>
         mockAuthenticatedUser({ profile_uid: profileUid })
@@ -1353,13 +1369,19 @@ describe('SavedObjectsRepository Security Extension', () => {
       const response = await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace });
       expect(response.saved_objects[0].created_by).toBe(profileUid);
       expect(response.saved_objects[1].created_by).toBe(profileUid);
+
+      expect(response.saved_objects[0].updated_by).toBe(profileUid);
+      expect(response.saved_objects[1].updated_by).toBe(profileUid);
     });
 
-    test(`keeps created_by empty if the current user is not available`, async () => {
+    test(`keeps created_by, updated_by empty if the current user is not available`, async () => {
       mockSecurityExt.getCurrentUser.mockImplementationOnce(() => null);
       const response = await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace });
       expect(response.saved_objects[0]).not.toHaveProperty('created_by');
       expect(response.saved_objects[1]).not.toHaveProperty('created_by');
+
+      expect(response.saved_objects[0]).not.toHaveProperty('updated_by');
+      expect(response.saved_objects[1]).not.toHaveProperty('updated_by');
     });
   });
 
@@ -1511,6 +1533,19 @@ describe('SavedObjectsRepository Security Extension', () => {
         );
         expect(typeMap).toBe(authMap);
       });
+    });
+
+    test(`adds updated_by to the saved object when the current user is available`, async () => {
+      const profileUid = 'profileUid';
+      mockSecurityExt.getCurrentUser.mockImplementationOnce(() =>
+        mockAuthenticatedUser({ profile_uid: profileUid })
+      );
+
+      const objects = [obj1, obj2];
+      const result = await bulkUpdateSuccess(client, repository, registry, objects, { namespace });
+
+      expect(result.saved_objects[0].updated_by).toBe(profileUid);
+      expect(result.saved_objects[1].updated_by).toBe(profileUid);
     });
   });
 

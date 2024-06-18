@@ -435,7 +435,13 @@
                     "description": [],
                     "signature": [
                       "{ comparator: ",
-                      "Comparator",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; filter: string; aggType: ",
                       "Aggregators",
                       "; }[]; }[]"
@@ -598,7 +604,13 @@
                     "description": [],
                     "signature": [
                       "{ comparator: ",
-                      "Comparator",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; filter: string; aggType: ",
                       "Aggregators",
                       "; }[]; }[]"
@@ -775,7 +787,13 @@
                     "description": [],
                     "signature": [
                       "{ comparator: ",
-                      "Comparator",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; filter: string; aggType: ",
                       "Aggregators",
                       "; }[]; }[]"
@@ -938,7 +956,13 @@
                     "description": [],
                     "signature": [
                       "{ comparator: ",
-                      "Comparator",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; field: string; aggType: ",
                       "Aggregators",
                       "; }[]; }[]"
@@ -1101,7 +1125,13 @@
                     "description": [],
                     "signature": [
                       "{ comparator: ",
-                      "Comparator",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; field: string; aggType: ",
                       "Aggregators",
                       "; }[]; }[]"
@@ -1278,7 +1308,13 @@
                     "description": [],
                     "signature": [
                       "{ comparator: ",
-                      "Comparator",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; field: string; aggType: ",
                       "Aggregators",
                       "; }[]; }[]"

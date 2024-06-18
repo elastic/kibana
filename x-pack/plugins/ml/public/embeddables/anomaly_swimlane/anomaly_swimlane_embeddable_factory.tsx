@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
@@ -42,7 +43,11 @@ import { buildDataViewPublishingApi } from '../common/anomaly_detection_embeddab
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { initializeSwimLaneControls } from './initialize_swim_lane_controls';
 import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';
-import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
+import type {
+  AnomalySwimLaneEmbeddableApi,
+  AnomalySwimLaneEmbeddableState,
+  AnomalySwimlaneRuntimeState,
+} from './types';
 
 /**
  * Provides the services required by the Anomaly Swimlane Embeddable.
@@ -84,12 +89,11 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 ) => {
   const factory: ReactEmbeddableFactory<
     AnomalySwimLaneEmbeddableState,
-    AnomalySwimLaneEmbeddableApi
+    AnomalySwimLaneEmbeddableApi,
+    AnomalySwimlaneRuntimeState
   > = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-    deserializeState: (state) => {
-      return state.rawState as AnomalySwimLaneEmbeddableState;
-    },
+    deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       if (!apiHasExecutionContext(parentApi)) {
         throw new Error('Parent API does not have execution context');
@@ -135,6 +139,32 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
       const api = buildApi(
         {
+          isEditingEnabled: () => true,
+          getTypeDisplayName: () =>
+            i18n.translate('xpack.ml.swimlaneEmbeddable.typeDisplayName', {
+              defaultMessage: 'swim lane',
+            }),
+          onEdit: async () => {
+            try {
+              const { resolveAnomalySwimlaneUserInput } = await import(
+                './anomaly_swimlane_setup_flyout'
+              );
+
+              const result = await resolveAnomalySwimlaneUserInput(
+                { ...coreStartServices, ...pluginsStartServices },
+                parentApi,
+                uuid,
+                {
+                  ...serializeTitles(),
+                  ...serializeSwimLaneState(),
+                }
+              );
+
+              swimLaneControlsApi.updateUserInput(result);
+            } catch (e) {
+              return Promise.reject();
+            }
+          },
           ...titlesApi,
           ...timeRangeApi,
           ...swimLaneControlsApi,
@@ -154,6 +184,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           serializeState: () => {
             return {
               rawState: {
+                timeRange: undefined,
                 ...serializeTitles(),
                 ...serializeTimeRange(),
                 ...serializeSwimLaneState(),
@@ -168,7 +199,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           ...swimLaneComparators,
         }
       );
-
       const appliedTimeRange$: Observable<TimeRange | undefined> = combineLatest([
         api.timeRange$,
         apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)

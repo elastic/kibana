@@ -18,6 +18,7 @@ import { emptySloList, sloList } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/use_capabilities';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
+import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
@@ -26,6 +27,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SlosPage } from './slos';
 import { useGetSettings } from '../slo_settings/use_get_settings';
+import { useCreateDataView } from '../../hooks/use_create_data_view';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -39,8 +41,10 @@ jest.mock('../../hooks/use_fetch_slo_list');
 jest.mock('../../hooks/use_create_slo');
 jest.mock('../slo_settings/use_get_settings');
 jest.mock('../../hooks/use_delete_slo');
+jest.mock('../../hooks/use_delete_slo_instance');
 jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_capabilities');
+jest.mock('../../hooks/use_create_data_view');
 
 const useGetSettingsMock = useGetSettings as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
@@ -48,9 +52,12 @@ const useLicenseMock = useLicense as jest.Mock;
 const useFetchSloListMock = useFetchSloList as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
+const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
+const useCreateDataViewMock = useCreateDataView as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
+
 TagsListMock.mockReturnValue(<div>Tags list</div>);
 
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
@@ -58,9 +65,12 @@ HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
 const mockCreateSlo = jest.fn();
 const mockDeleteSlo = jest.fn();
+const mockDeleteInstance = jest.fn();
 
 useCreateSloMock.mockReturnValue({ mutate: mockCreateSlo });
-useDeleteSloMock.mockReturnValue({ mutate: mockDeleteSlo });
+useDeleteSloMock.mockReturnValue({ mutateAsync: mockDeleteSlo });
+useDeleteSloInstanceMock.mockReturnValue({ mutateAsync: mockDeleteInstance });
+useCreateDataViewMock.mockReturnValue({});
 
 const mockNavigate = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -337,7 +347,7 @@ describe('SLOs Page', () => {
 
         button.click();
 
-        screen.getByTestId('confirmModalConfirmButton').click();
+        screen.getByTestId('observabilitySolutionSloDeleteModalConfirmButton').click();
 
         expect(mockDeleteSlo).toBeCalledWith({
           id: sloList.results.at(0)?.id,

@@ -27,7 +27,7 @@ import { routeWithNamespace } from '../route_with_namespace';
  * @param rule The rule to create
  */
 export const createRule = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   rule: RuleCreateProps,
   namespace?: string

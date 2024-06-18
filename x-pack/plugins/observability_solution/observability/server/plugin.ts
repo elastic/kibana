@@ -36,6 +36,7 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId } from '../common';
 import {
@@ -52,6 +53,7 @@ import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { registerRoutes } from './routes/register_routes';
 import { threshold } from './saved_objects/threshold';
+import { AlertDetailsContextualInsightsService } from './services';
 import { uiSettings } from './ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -70,6 +72,7 @@ interface PluginSetup {
 interface PluginStart {
   alerting: PluginStartContract;
   spaces?: SpacesPluginStart;
+  dataViews: DataViewsServerPluginStart;
 }
 
 const o11yRuleTypes = [
@@ -98,6 +101,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
     const logsExplorerLocator =
       plugins.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
+
+    const alertDetailsContextualInsightsService = new AlertDetailsContextualInsightsService();
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
@@ -282,7 +287,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       logsExplorerLocator,
     });
 
-    core.getStartServices().then(([coreStart, pluginStart]) => {
+    void core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({
         core,
         config,
@@ -291,8 +296,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             ...plugins,
             core,
           },
+          dataViews: pluginStart.dataViews,
           spaces: pluginStart.spaces,
           ruleDataService,
+          assistant: {
+            alertDetailsContextualInsightsService,
+          },
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
         },
         logger: this.logger,
@@ -312,6 +321,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
       },
+      alertDetailsContextualInsightsService,
       alertsLocator,
     };
   }

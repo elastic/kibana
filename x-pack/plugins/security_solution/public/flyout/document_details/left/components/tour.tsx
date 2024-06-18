@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
@@ -17,7 +16,7 @@ import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyo
 /**
  * Guided tour for the left panel in details flyout
  */
-export const LeftPanelTour: FC = memo(() => {
+export const LeftPanelTour = memo(() => {
   const { getFieldsData, isPreview } = useLeftPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
   const isAlert = eventKind === EventKind.signal;

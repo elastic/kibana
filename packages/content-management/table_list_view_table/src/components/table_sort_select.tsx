@@ -177,3 +177,40 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
     </EuiPopover>
   );
 }
+
+const sortStorageKey = (tableId: string) => `tableSort:${tableId}`;
+export function getInitialSorting(tableId: string): {
+  isDefault: boolean;
+  tableSort: {
+    field: SortColumnField;
+    direction: Direction;
+  };
+} {
+  try {
+    const storedSorting = localStorage.getItem(sortStorageKey(tableId));
+    if (storedSorting) {
+      const tableSort = JSON.parse(storedSorting);
+      return { isDefault: false, tableSort };
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  return {
+    isDefault: true,
+    tableSort: {
+      field: 'attributes.title' as const,
+      direction: 'asc',
+    },
+  };
+}
+export function saveSorting(
+  tableId: string,
+  tableSort: { field: SortColumnField; direction: Direction }
+) {
+  try {
+    localStorage.setItem(sortStorageKey(tableId), JSON.stringify(tableSort));
+  } catch (e) {
+    /* empty */
+  }
+}

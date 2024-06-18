@@ -28,9 +28,12 @@ export const initSideNavigation = async (services: Services) => {
   const essNavigationTree$ = navigationTree$.pipe(
     map((navigationTree) =>
       produce(navigationTree, (draft) => {
+        if (draft.footer) {
+          draft.footer.unshift({ type: 'recentlyAccessed' });
+        }
         const footerGroup: GroupDefinition | undefined = draft.footer?.find(
-          ({ type }) => type === 'navGroup'
-        ) as GroupDefinition;
+          (node): node is GroupDefinition => node.type === 'navGroup'
+        );
         const management = footerGroup?.children.find((child) => child.link === 'management');
         if (management) {
           management.renderAs = 'panelOpener';
@@ -101,6 +104,7 @@ const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>>
       { link: 'management:objects' },
       { link: 'management:tags' },
       { link: 'management:search_sessions' },
+      { link: 'management:aiAssistantManagementSelection' },
       { link: 'management:spaces' },
       { link: 'management:settings' },
     ],

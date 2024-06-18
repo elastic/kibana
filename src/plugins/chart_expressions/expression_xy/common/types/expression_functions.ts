@@ -14,9 +14,12 @@ import type {
   DatatableColumnMeta,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import { LegendSize, LegendStats } from '@kbn/visualizations-plugin/common';
+import {
+  LegendSize,
+  ExpressionValueVisDimension,
+  XYLegendValue,
+} from '@kbn/visualizations-plugin/common';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
 import { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import {
@@ -217,7 +220,7 @@ export interface LegendConfig {
   /**
    * metrics to display in the legend
    */
-  legendStats?: LegendStats[];
+  legendStats?: XYLegendValue[];
 }
 
 // Arguments to XY chart expression, with computed properties

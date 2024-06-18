@@ -7,6 +7,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
+import { sendMessageEvent } from './analytics/events';
 import {
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginStart,
@@ -37,11 +38,17 @@ export class SearchPlaygroundPlugin
 
     defineRoutes({ router, logger: this.logger, getStartServices: core.getStartServices });
 
+    this.registerAnalyticsEvents(core);
+
     return {};
   }
 
   public start(core: CoreStart) {
     return {};
+  }
+
+  private registerAnalyticsEvents(core: CoreSetup) {
+    core.analytics.registerEventType(sendMessageEvent);
   }
 
   public stop() {}

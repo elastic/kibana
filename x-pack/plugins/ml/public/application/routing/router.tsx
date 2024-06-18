@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { RouteProps } from 'react-router-dom';
 import { type Location } from 'history';
@@ -60,7 +60,10 @@ export interface PageDependencies {
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 
-export const PageLoader: FC<{ context: RouteResolverContext }> = ({ context, children }) => {
+export const PageLoader: FC<PropsWithChildren<{ context: RouteResolverContext }>> = ({
+  context,
+  children,
+}) => {
   const isLoading = !context.initialized;
 
   if (context?.resolvedComponent) {

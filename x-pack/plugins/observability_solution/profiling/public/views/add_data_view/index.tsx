@@ -112,7 +112,7 @@ export function AddDataView() {
 --set "projectID=1,secretToken=${secretToken}" \\
 --set "collectionAgentHostPort=${collectionAgentHost}" \\
 --version=${stackVersion} \\
-elastic/pf-host-agent`}
+elastic/profiling-agent`}
               </EuiCodeBlock>
             ),
           },

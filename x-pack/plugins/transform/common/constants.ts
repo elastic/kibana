@@ -37,6 +37,7 @@ export const addExternalBasePath = (uri: string): string => `${EXTERNAL_API_BASE
 export const TRANSFORM_REACT_QUERY_KEYS = {
   DATA_SEARCH: 'transform.data_search',
   DATA_VIEW_EXISTS: 'transform.data_view_exists',
+  GET_DATA_VIEW_IDS_WITH_TITLE: 'transform.get_data_view_ids_with_title',
   GET_DATA_VIEW_TITLES: 'transform.get_data_view_titles',
   GET_ES_INDICES: 'transform.get_es_indices',
   GET_ES_INGEST_PIPELINES: 'transform.get_es_ingest_pipelines',

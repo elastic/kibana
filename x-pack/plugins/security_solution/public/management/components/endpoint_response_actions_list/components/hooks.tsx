@@ -320,6 +320,7 @@ export const useActionsLogFilter = ({
               status={getActionStatus(statusName)}
             />
           ) as unknown as string,
+          searchableLabel: statusName,
           checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
           'data-test-subj': `${filterName}-filter-option`,
         }))
@@ -330,6 +331,11 @@ export const useActionsLogFilter = ({
 
           // upload - v8.9
           if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
+            return false;
+          }
+
+          // `scan` - v8.15
+          if (commandName === 'scan' && !featureFlags.responseActionScanEnabled) {
             return false;
           }
 

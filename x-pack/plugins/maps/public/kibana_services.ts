@@ -8,8 +8,22 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/common/ems_settings';
 import { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
+
+const servicesReady$ = new BehaviorSubject(false);
+export const untilPluginStartServicesReady = () => {
+  if (servicesReady$.value) return Promise.resolve();
+  return new Promise<void>((resolve) => {
+    const subscription = servicesReady$.subscribe((isInitialized) => {
+      if (isInitialized) {
+        subscription.unsubscribe();
+        resolve();
+      }
+    });
+  });
+};
 
 let isDarkMode = false;
 let coreStart: CoreStart;
@@ -25,6 +39,8 @@ export function setStartServices(core: CoreStart, plugins: MapsPluginStartDepend
   core.theme.theme$.subscribe(({ darkMode }) => {
     isDarkMode = darkMode;
   });
+
+  servicesReady$.next(true);
 }
 
 let isCloudEnabled = false;
@@ -66,6 +82,7 @@ export const getUiActions = () => pluginsStart.uiActions;
 export const getCore = () => coreStart;
 export const getNavigation = () => pluginsStart.navigation;
 export const getCoreI18n = () => coreStart.i18n;
+export const getAnalytics = () => coreStart.analytics;
 export const getSearchService = () => pluginsStart.data.search;
 export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
@@ -83,6 +100,7 @@ export const isScreenshotMode = () => {
   return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
 };
 export const getServerless = () => pluginsStart.serverless;
+export const getEmbeddableEnhanced = () => pluginsStart.embeddableEnhanced;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
@@ -103,6 +121,3 @@ export const getEMSSettings: () => EMSSettings = () => {
 export const getEmsTileLayerId = () => mapsEms.config.emsTileLayerId;
 
 export const getShareService = () => pluginsStart.share;
-
-export const getIsAllowByValueEmbeddables = () =>
-  pluginsStart.dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;

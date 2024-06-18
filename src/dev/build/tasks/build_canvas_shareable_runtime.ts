@@ -13,6 +13,11 @@ export const BuildCanvasShareableRuntime: Task = {
   description: 'Build Canvas shareable runtime',
 
   async run(config, log, build) {
+    const onlyServerless = config.getTargetPlatforms().every((platform) => platform.isServerless());
+    if (onlyServerless) {
+      log.info('Skipping Canvas shareable runtime for serverless builds');
+      return;
+    }
     await del(config.resolveFromRepo('x-pack/plugins/canvas/shareable_runtime/build'));
 
     await exec(log, process.execPath, ['plugins/canvas/scripts/shareable_runtime'], {

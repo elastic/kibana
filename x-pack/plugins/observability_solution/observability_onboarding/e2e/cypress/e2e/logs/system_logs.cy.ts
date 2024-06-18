@@ -18,7 +18,7 @@ describe('[Logs onboarding] System logs', () => {
       });
 
       it('navigates to observability logs onboarding page', () => {
-        cy.getByTestSubj('observabilityOnboardingBackButtonBackButton').click();
+        cy.getByTestSubj('observabilityOnboardingFlowBackToSelectionButton').click();
 
         cy.url().should('include', '/app/observabilityOnboarding');
       });

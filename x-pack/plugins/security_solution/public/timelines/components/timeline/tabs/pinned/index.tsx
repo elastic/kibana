@@ -6,13 +6,13 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, memo } from 'react';
 import styled from 'styled-components';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
-
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../../store';
@@ -23,9 +23,10 @@ import { StatefulBody } from '../../body';
 import { Footer, footerHeight } from '../../footer';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
@@ -34,9 +35,7 @@ import type { ToggleDetailPanel } from '../../../../../../common/types/timeline'
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DetailsPanel } from '../../../side_panel';
 import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
-import { getDefaultControlColumn } from '../../body/control_columns';
-import { useLicense } from '../../../../../common/hooks/use_license';
-import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
+import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import {
   FullWidthFlexGroup,
   ScrollableFlexItem,
@@ -45,10 +44,13 @@ import {
   VerticalRule,
 } from '../shared/layout';
 import type { TimelineTabCommonProps } from '../shared/types';
+import { useTimelineColumns } from '../shared/use_timeline_columns';
+import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 
 const ExitFullScreenContainer = styled.div`
   width: 180px;
 `;
+
 interface PinnedFilter {
   bool: {
     should: Array<{ match_phrase: { _id: string } }>;
@@ -59,6 +61,16 @@ interface PinnedFilter {
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
+
+const rowDetailColumn = [
+  {
+    id: 'row-details',
+    columnHeaderType: 'not-filtered',
+    width: 0,
+    headerCellRender: () => null,
+    rowCellRender: () => null,
+  },
+];
 
 export const PinnedTabContentComponent: React.FC<Props> = ({
   columns,
@@ -71,6 +83,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   rowRenderers,
   showExpandedDetails,
   sort,
+  expandedDetail,
+  eventIdToNoteIds,
 }) => {
   const {
     browserFields,
@@ -80,8 +94,9 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
-  const isEnterprisePlus = useLicense().isEnterprise();
-  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -138,6 +153,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       })),
     [sort]
   );
+  const { augmentedColumnHeaders } = useTimelineColumns(columns);
 
   const [queryLoadingState, { events, totalCount, pageInfo, loadPage, refreshedAt, refetch }] =
     useTimelineEvents({
@@ -155,6 +171,14 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       timerangeKind: undefined,
     });
 
+  const leadingControlColumns = useTimelineControlColumn({
+    columns,
+    sort,
+    timelineId,
+    activeTab: TimelineTabs.pinned,
+    refetch,
+  });
+
   const isQueryLoading = useMemo(
     () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(queryLoadingState),
     [queryLoadingState]
@@ -164,14 +188,35 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     onEventClosed({ tabType: TimelineTabs.pinned, id: timelineId });
   }, [timelineId, onEventClosed]);
 
-  const leadingControlColumns = useMemo(
-    () =>
-      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
-        ...x,
-        headerCellRender: HeaderActions,
-      })),
-    [ACTION_BUTTON_COUNT]
-  );
+  if (unifiedComponentsInTimelineEnabled) {
+    return (
+      <UnifiedTimelineBody
+        header={<></>}
+        columns={augmentedColumnHeaders}
+        rowRenderers={rowRenderers}
+        timelineId={timelineId}
+        itemsPerPage={itemsPerPage}
+        itemsPerPageOptions={itemsPerPageOptions}
+        sort={sort}
+        events={events}
+        refetch={refetch}
+        dataLoadingState={queryLoadingState}
+        pinnedEventIds={pinnedEventIds}
+        totalCount={events.length}
+        onEventClosed={onEventClosed}
+        expandedDetail={expandedDetail}
+        eventIdToNoteIds={eventIdToNoteIds}
+        showExpandedDetails={showExpandedDetails}
+        onChangePage={loadPage}
+        activeTab={TimelineTabs.pinned}
+        updatedAt={refreshedAt}
+        isTextBasedQuery={false}
+        pageInfo={pageInfo}
+        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+        trailingControlColumns={rowDetailColumn}
+      />
+    );
+  }
 
   return (
     <>
@@ -204,7 +249,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
-                leadingControlColumns={leadingControlColumns}
+                leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
                 trailingControlColumns={trailingControlColumns}
               />
             </StyledEuiFlyoutBody>
@@ -252,8 +297,15 @@ const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { timelineId }: TimelineTabCommonProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
-    const { columns, expandedDetail, itemsPerPage, itemsPerPageOptions, pinnedEventIds, sort } =
-      timeline;
+    const {
+      columns,
+      expandedDetail,
+      itemsPerPage,
+      itemsPerPageOptions,
+      pinnedEventIds,
+      sort,
+      eventIdToNoteIds,
+    } = timeline;
 
     return {
       columns,
@@ -264,6 +316,8 @@ const makeMapStateToProps = () => {
       showExpandedDetails:
         !!expandedDetail[TimelineTabs.pinned] && !!expandedDetail[TimelineTabs.pinned]?.panelView,
       sort,
+      expandedDetail,
+      eventIdToNoteIds,
     };
   };
   return mapStateToProps;
@@ -280,7 +334,7 @@ const connector = connect(makeMapStateToProps, mapDispatchToProps);
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
 const PinnedTabContent = connector(
-  React.memo(
+  memo(
     PinnedTabContentComponent,
     (prevProps, nextProps) =>
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
@@ -288,6 +342,7 @@ const PinnedTabContent = connector(
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
+      deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
       deepEqual(prevProps.sort, nextProps.sort)

@@ -47,7 +47,7 @@ const panelViewStyle = css`
 /**
  * Rule summary on a preview panel on top of the right section of expandable flyout
  */
-export const RulePreview: React.FC = memo(() => {
+export const RulePreview = memo(() => {
   const { ruleId } = usePreviewPanelContext();
   const [rule, setRule] = useState<RuleResponse | null>(null);
   const {

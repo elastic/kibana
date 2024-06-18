@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, MouseEventHandler, useContext } from 'react';
+import React, { FC, PropsWithChildren, MouseEventHandler, useContext } from 'react';
 import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 
 import { SAMPLE_DATA_API } from './constants';
@@ -41,7 +41,10 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const SampleDataCardProvider: FC<Services> = ({ children, ...services }) => {
+export const SampleDataCardProvider: FC<PropsWithChildren<Services>> = ({
+  children,
+  ...services
+}) => {
   const {
     addBasePath,
     getAppNavigationHandler,
@@ -99,7 +102,7 @@ export interface KibanaDependencies {
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const SampleDataCardKibanaProvider: FC<KibanaDependencies> = ({
+export const SampleDataCardKibanaProvider: FC<PropsWithChildren<KibanaDependencies>> = ({
   children,
   ...dependencies
 }) => {

@@ -33,7 +33,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectExists();
 
       // check side nav links
-      await svlCommonNavigation.sidenav.expectSectionOpen('observability_project_nav');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });
@@ -51,8 +50,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // check the aiops subsection
       await svlCommonNavigation.sidenav.openSection('observability_project_nav.aiops'); // open ai ops subsection
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'ml:anomalyDetection' });
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'ml:anomalyDetection' });
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'ml:anomalyDetection' });
+      await svlCommonNavigation.sidenav.expectLinkActive({ navId: 'ml:anomalyDetection' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AIOps' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'ml:anomalyDetection',

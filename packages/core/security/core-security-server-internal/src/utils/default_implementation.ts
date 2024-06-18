@@ -13,5 +13,14 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
     authc: {
       getCurrentUser: () => null,
     },
+    audit: {
+      asScoped: () => {
+        return { log: () => undefined, enabled: false };
+      },
+      withoutRequest: {
+        log: () => undefined,
+        enabled: false,
+      },
+    },
   };
 };

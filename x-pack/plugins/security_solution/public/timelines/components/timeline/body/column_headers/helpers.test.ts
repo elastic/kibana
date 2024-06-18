@@ -6,7 +6,6 @@
  */
 
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import '../../../../../common/mock/match_media';
 import type { BrowserFields } from '../../../../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';

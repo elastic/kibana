@@ -14,6 +14,9 @@ import {
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
   EnabledTask,
+  InactiveTasks,
+  RecognizedTask,
+  OneOfTaskTypes,
 } from './mark_available_tasks_as_claimed';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -170,6 +173,57 @@ if (doc['task.runAt'].size()!=0) {
     });
   });
 
+  test('generates InactiveTasks clause as expected', () => {
+    expect(InactiveTasks).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "must_not": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "must": Object {
+                  "range": Object {
+                    "task.retryAt": Object {
+                      "gt": "now",
+                    },
+                  },
+                },
+                "should": Array [
+                  Object {
+                    "term": Object {
+                      "task.status": "running",
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "task.status": "claiming",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  test('generates RecognizedTask clause as expected', () => {
+    expect(RecognizedTask).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "must_not": Array [
+            Object {
+              "term": Object {
+                "task.status": "unrecognized",
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
   describe(`script`, () => {
     test('it marks the update as a noop if the type is skipped', async () => {
       const taskManagerId = '3478fg6-82374f6-83467gf5-384g6f';
@@ -192,5 +246,24 @@ if (doc['task.runAt'].size()!=0) {
         }).source
       ).toMatch(/ctx.op = "noop"/);
     });
+  });
+
+  test('generates OneOfTaskTypes clause as expected', () => {
+    expect(OneOfTaskTypes('field-name', ['type-a', 'type-b'])).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "must": Array [
+            Object {
+              "terms": Object {
+                "field-name": Array [
+                  "type-a",
+                  "type-b",
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
   });
 });

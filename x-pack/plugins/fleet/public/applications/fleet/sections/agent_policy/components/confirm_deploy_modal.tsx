@@ -16,8 +16,19 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   onConfirm: () => void;
   onCancel: () => void;
   agentCount: number;
-  agentPolicy: AgentPolicy;
-}> = ({ onConfirm, onCancel, agentCount, agentPolicy }) => {
+  agentPolicies: AgentPolicy[];
+  showUnprivilegedAgentsCallout?: boolean;
+  unprivilegedAgentsCount?: number;
+  dataStreams?: Array<{ name: string; title: string }>;
+}> = ({
+  onConfirm,
+  onCancel,
+  agentCount,
+  agentPolicies,
+  showUnprivilegedAgentsCallout = false,
+  unprivilegedAgentsCount = 0,
+  dataStreams,
+}) => {
   return (
     <EuiConfirmModal
       title={
@@ -55,11 +66,11 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
         <div className="eui-textBreakWord">
           <FormattedMessage
             id="xpack.fleet.agentPolicy.confirmModalCalloutDescription"
-            defaultMessage="Fleet has detected that the selected agent policy, {policyName}, is already in use by
+            defaultMessage="Fleet has detected that the selected agent policies, {policyNames}, are already in use by
             some of your agents. As a result of this action, Fleet will deploy updates to all agents
-            that use this policy."
+            that use these policies."
             values={{
-              policyName: <b>{agentPolicy.name}</b>,
+              policyNames: <b>{agentPolicies.map((policy) => policy.name).join(', ')}</b>,
             }}
           />
         </div>

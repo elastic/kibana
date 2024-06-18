@@ -12,12 +12,12 @@ import { rangeQuery, typedSearch } from '@kbn/observability-plugin/server/utils/
 import * as t from 'io-ts';
 import moment from 'moment';
 import { ESSearchRequest } from '@kbn/es-types';
+import { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   APMEventClient,
   APMEventESSearchRequest,
 } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { observabilityAlertDetailsContextRt } from '.';
 import { RollupInterval } from '../../../../common/rollup';
 
 export async function getContainerIdFromSignals({
@@ -26,9 +26,9 @@ export async function getContainerIdFromSignals({
   coreContext,
   apmEventClient,
 }: {
-  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
+  query: t.TypeOf<typeof alertDetailsContextRt>;
   esClient: ElasticsearchClient;
-  coreContext: CoreRequestHandlerContext;
+  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
   apmEventClient: APMEventClient;
 }) {
   if (query['container.id']) {
@@ -76,7 +76,7 @@ async function getContainerIdFromLogs({
 }: {
   params: ESSearchRequest['body'];
   esClient: ElasticsearchClient;
-  coreContext: CoreRequestHandlerContext;
+  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
 }) {
   const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
   const res = await typedSearch<{ container: { id: string } }, any>(esClient, {

@@ -26,35 +26,25 @@ export class UncompressedResponseStream extends Stream.PassThrough {}
 
 const DELIMITER = '\n';
 
-type StreamType = 'string' | 'ndjson';
+type StreamTypeUnion = string | object;
+type StreamType<T extends StreamTypeUnion> = T extends string
+  ? string
+  : T extends object
+  ? T
+  : never;
 
-export interface StreamFactoryReturnType<T = unknown> {
-  DELIMITER: string;
-  end: () => void;
-  push: (d: T, drain?: boolean) => void;
-  responseWithHeaders: {
-    body: zlib.Gzip | UncompressedResponseStream;
-    headers?: ResponseHeaders;
-  };
+export interface StreamResponseWithHeaders {
+  body: zlib.Gzip | UncompressedResponseStream;
+  headers?: ResponseHeaders;
 }
 
-/**
- * Overload to set up a string based response stream with support
- * for gzip compression depending on provided request headers.
- *
- * @param headers - Request headers.
- * @param logger - Kibana logger.
- * @param compressOverride - Optional flag to override header based compression setting.
- * @param flushFix - Adds an attribute with a random string payload to overcome buffer flushing with certain proxy configurations.
- *
- * @returns An object with stream attributes and methods.
- */
-export function streamFactory<T = string>(
-  headers: Headers,
-  logger: Logger,
-  compressOverride?: boolean,
-  flushFix?: boolean
-): StreamFactoryReturnType<T>;
+export interface StreamFactoryReturnType<T extends StreamTypeUnion> {
+  DELIMITER: string;
+  end: () => void;
+  push: (d: StreamType<T>, drain?: boolean) => void;
+  responseWithHeaders: StreamResponseWithHeaders;
+}
+
 /**
  * Sets up a response stream with support for gzip compression depending on provided
  * request headers. Any non-string data pushed to the stream will be streamed as NDJSON.
@@ -66,13 +56,13 @@ export function streamFactory<T = string>(
  *
  * @returns An object with stream attributes and methods.
  */
-export function streamFactory<T = unknown>(
+export function streamFactory<T extends StreamTypeUnion>(
   headers: Headers,
   logger: Logger,
   compressOverride: boolean = true,
   flushFix: boolean = false
 ): StreamFactoryReturnType<T> {
-  let streamType: StreamType;
+  let streamType: 'string' | 'ndjson';
   const isCompressed = compressOverride && acceptCompression(headers);
   const flushPayload = flushFix
     ? crypto.randomBytes(FLUSH_PAYLOAD_SIZE).toString('hex')
@@ -82,7 +72,7 @@ export function streamFactory<T = unknown>(
   const stream = isCompressed ? zlib.createGzip() : new UncompressedResponseStream();
 
   // If waiting for draining of the stream, items will be added to this buffer.
-  const backPressureBuffer: T[] = [];
+  const backPressureBuffer: Array<StreamType<T>> = [];
 
   // Flag will be set when the "drain" listener is active so we can avoid setting multiple listeners.
   let waitForDrain = false;
@@ -120,7 +110,7 @@ export function streamFactory<T = unknown>(
     }
   }
 
-  function push(d: T, drain = false) {
+  function push(d: StreamType<T>, drain = false) {
     logDebugMessage(
       `Push to stream. Current backPressure buffer size: ${backPressureBuffer.length}, drain flag: ${drain}`
     );
@@ -144,7 +134,7 @@ export function streamFactory<T = unknown>(
         function repeat() {
           if (!tryToEnd) {
             if (responseSizeSinceLastKeepAlive < FLUSH_PAYLOAD_SIZE) {
-              push({ flushPayload } as unknown as T);
+              push({ flushPayload, type: 'flushPayload' } as StreamType<T>);
             }
             responseSizeSinceLastKeepAlive = 0;
             setTimeout(repeat, FLUSH_KEEP_ALIVE_INTERVAL_MS);
@@ -222,7 +212,7 @@ export function streamFactory<T = unknown>(
     }
   }
 
-  const responseWithHeaders: StreamFactoryReturnType['responseWithHeaders'] = {
+  const responseWithHeaders: StreamResponseWithHeaders = {
     body: stream,
     headers: {
       ...(isCompressed ? { 'content-encoding': 'gzip' } : {}),

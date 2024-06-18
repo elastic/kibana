@@ -458,7 +458,7 @@ export class AlertingPlugin {
       },
       getConfig: () => {
         return {
-          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute']),
+          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute', 'run']),
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },
@@ -556,6 +556,7 @@ export class AlertingPlugin {
       logger: this.logger,
       savedObjectsService: core.savedObjects,
       securityPluginStart: plugins.security,
+      uiSettings: core.uiSettings,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {
@@ -617,12 +618,16 @@ export class AlertingPlugin {
           : Promise.resolve([]);
     });
 
-    this.eventLogService!.isEsContextReady().then(() => {
-      scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
-    });
+    this.eventLogService!.isEsContextReady()
+      .then(() => {
+        scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
+      })
+      .catch(() => {}); // it shouldn't reject, but just in case
 
-    scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager);
-    scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager);
+    scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager).catch(() => {}); // it shouldn't reject, but just in case
+    scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager).catch(
+      () => {}
+    ); // it shouldn't reject, but just in case
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),

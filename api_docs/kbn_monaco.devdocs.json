@@ -504,20 +504,6 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getMetaFields",
-            "type": "Function",
-            "tags": [],
-            "label": "getMetaFields",
-            "description": [],
-            "signature": [
-              "CallbackFn<{}, string> | undefined"
-            ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
             "id": "def-common.ESQLCallbacks.getPolicies",
             "type": "Function",
             "tags": [],
@@ -1171,6 +1157,9 @@
             "tags": [],
             "label": "endOffset",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-monaco/src/console/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1337,21 +1326,6 @@
         "description": [],
         "signature": [
           "\"consoleOutput\""
-        ],
-        "path": "packages/kbn-monaco/src/console/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/monaco",
-        "id": "def-common.CONSOLE_OUTPUT_THEME_ID",
-        "type": "string",
-        "tags": [],
-        "label": "CONSOLE_OUTPUT_THEME_ID",
-        "description": [],
-        "signature": [
-          "\"consoleOutputTheme\""
         ],
         "path": "packages/kbn-monaco/src/console/constants.ts",
         "deprecated": false,

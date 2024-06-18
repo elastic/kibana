@@ -105,7 +105,8 @@ const assertFilterControlsWithFilterObject = (
   });
 };
 
-describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/167914
+describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     createRule(getNewRule());
@@ -217,7 +218,8 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  context('with data modification', () => {
+  // Flaky: https://github.com/elastic/kibana/issues/181977
+  context.skip('with data modification', () => {
     /*
      *
      * default scrollBehavior is true, which scrolls the element into view automatically without any scroll Margin

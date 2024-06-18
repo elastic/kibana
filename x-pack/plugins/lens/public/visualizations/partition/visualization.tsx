@@ -53,11 +53,12 @@ import { checkTableForContainsSmallValues } from './render_helpers';
 import { DatasourcePublicAPI } from '../..';
 import { nonNullable, getColorMappingDefaults } from '../../utils';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { PersistedPieVisualizationState, convertToRuntime } from './persistence';
 import {
-  PersistedPieVisualizationState,
-  convertToPersistable,
-  convertToRuntime,
-} from './persistence';
+  PIE_RENDER_ARRAY_VALUES,
+  PIE_TOO_MANY_DIMENSIONS,
+  WAFFLE_SMALL_VALUES,
+} from '../../user_messages_ids';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -181,10 +182,6 @@ export const getPieVisualization = ({
       ],
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
-  },
-
-  getPersistableState(state) {
-    return { savedObjectReferences: [], state: convertToPersistable(state) };
   },
 
   getMainPalette: (state) => {
@@ -585,6 +582,7 @@ export const getPieVisualization = ({
     const errors: UserMessage[] = hasTooManyBucketDimensions
       ? [
           {
+            uniqueId: PIE_TOO_MANY_DIMENSIONS,
             severity: 'error',
             fixableInEditor: true,
             displayLocations: [{ id: 'visualization' }],
@@ -627,6 +625,7 @@ export const getPieVisualization = ({
           checkTableForContainsSmallValues(frame.activeData[layerId], numericColumn.id, 1)
         ) {
           warningMessages.push({
+            uniqueId: WAFFLE_SMALL_VALUES,
             severity: 'warning',
             fixableInEditor: true,
             displayLocations: [{ id: 'toolbar' }],
@@ -654,6 +653,7 @@ export const getPieVisualization = ({
               frame.datasourceLayers[layerId]?.getOperationForColumnId(colId)?.label || colId
           );
           warningMessages.push({
+            uniqueId: PIE_RENDER_ARRAY_VALUES,
             severity: 'warning',
             fixableInEditor: true,
             displayLocations: [{ id: 'toolbar' }],

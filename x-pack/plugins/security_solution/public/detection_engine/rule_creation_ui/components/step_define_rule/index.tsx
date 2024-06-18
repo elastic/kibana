@@ -23,11 +23,12 @@ import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from '
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
-import { isEqual, isEmpty, omit } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { useQueryClient } from '@tanstack/react-query';
 
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
@@ -90,6 +91,7 @@ import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
+import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
@@ -98,7 +100,9 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
+import { useAllEsqlRuleFields } from '../../hooks';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
+import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -189,6 +193,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   thresholdFields,
   enableThresholdSuppression,
 }) => {
+  const queryClient = useQueryClient();
+
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -451,6 +457,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const [{ queryBar }] = useFormData<DefineStepRule>({ form, watch: ['queryBar'] });
+
+  const { fields: esqlSuppressionFields, isLoading: isEsqlSuppressionLoading } =
+    useAllEsqlRuleFields({
+      esqlQuery: isEsqlRule(ruleType) ? (queryBar?.query?.query as string) : undefined,
+      indexPatternsFields: indexPattern.fields,
+    });
+
   const areSuppressionFieldsDisabledBySequence =
     isEqlRule(ruleType) &&
     isEqlSequenceQuery(queryBar?.query?.query as string) &&
@@ -681,7 +694,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <CommonUseField
                 path="index"
                 config={{
-                  ...omit(schema.index, 'label'),
+                  ...schema.index,
                   labelAppend: indexModified ? (
                     <MyLabelButton onClick={handleResetIndices} iconType="refresh">
                       {i18n.RESET_DEFAULT_INDEX}
@@ -743,6 +756,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         path="queryBar"
         config={esqlQueryBarConfig}
         component={QueryBarDefineRule}
+        validationData={{ queryClient }}
         componentProps={{
           ...queryBarProps,
           dataTestSubj: 'detectionEngineStepDefineRuleEsqlQueryBar',
@@ -750,7 +764,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         }}
       />
     ),
-    [queryBarProps, esqlQueryBarConfig]
+    [queryBarProps, esqlQueryBarConfig, queryClient]
   );
 
   const QueryBarMemo = useMemo(
@@ -914,7 +928,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               )}
             </>
           </RuleTypeEuiFormRow>
-
           {isQueryRule(ruleType) && (
             <>
               <EuiSpacer size="s" />
@@ -939,7 +952,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </RuleTypeEuiFormRow>
             </>
           )}
-
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
               <UseField
@@ -1025,7 +1037,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </RuleTypeEuiFormRow>
-
           <EuiSpacer size="m" />
 
           <>
@@ -1061,9 +1072,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 path="groupByFields"
                 component={MultiSelectFieldsAutocomplete}
                 componentProps={{
-                  browserFields: termsAggregationFields,
+                  browserFields: isEsqlRule(ruleType)
+                    ? esqlSuppressionFields
+                    : termsAggregationFields,
                   isDisabled:
-                    !isAlertSuppressionLicenseValid || areSuppressionFieldsDisabledBySequence,
+                    !isAlertSuppressionLicenseValid ||
+                    areSuppressionFieldsDisabledBySequence ||
+                    isEsqlSuppressionLoading,
                   disabledText: areSuppressionFieldsDisabledBySequence
                     ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
                     : alertSuppressionUpsellingMessage,
@@ -1114,6 +1129,22 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </IntendedRuleTypeEuiFormRow>
           </>
+
+          <EuiSpacer size="l" />
+
+          {!isMlRule(ruleType) && (
+            <>
+              <RequiredFields
+                path="requiredFields"
+                indexPatternFields={indexPattern.fields}
+                isIndexPatternLoading={isIndexPatternLoading}
+              />
+              <EuiSpacer size="l" />
+            </>
+          )}
+
+          <RelatedIntegrations path="relatedIntegrations" dataTestSubj="relatedIntegrations" />
+
           <UseField
             path="timeline"
             component={PickTimeline}

@@ -4,28 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   ALL_VALUE,
-  SyntheticsAvailabilityIndicator,
+  FiltersSchema,
   QuerySchema,
-  kqlQuerySchema,
-  kqlWithFiltersSchema,
+  SyntheticsAvailabilityIndicator,
 } from '@kbn/slo-schema';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import moment from 'moment';
+import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { FieldSelector } from '../synthetics_common/field_selector';
+import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
+import { formatAllFilters } from '../../helpers/format_filters';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
-import { QueryBuilder } from '../common/query_builder';
 import { GroupByCardinality } from '../common/group_by_cardinality';
-
-const ONE_DAY_IN_MILLISECONDS = 1 * 60 * 60 * 1000 * 24;
+import { QueryBuilder } from '../common/query_builder';
+import { FieldSelector } from '../synthetics_common/field_selector';
 
 export function SyntheticsAvailabilityIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
+  const dataViewId = watch(DATA_VIEW_FIELD);
 
   const [monitorIds = [], projects = [], tags = [], index, globalFilters] = watch([
     'indicator.params.monitorIds',
@@ -35,9 +37,14 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
     'indicator.params.filter',
   ]);
 
+  const { dataView } = useCreateDataView({
+    indexPatternString: index,
+    dataViewId,
+  });
+
   const [range, _] = useState({
-    start: new Date().getTime() - ONE_DAY_IN_MILLISECONDS,
-    end: new Date().getTime(),
+    from: moment().subtract(1, 'day').toDate(),
+    to: new Date(),
   });
 
   const filters = {
@@ -45,7 +52,7 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
     projects: projects.map((project) => project.value).filter((id) => id !== ALL_VALUE),
     tags: tags.map((tag) => tag.value).filter((id) => id !== ALL_VALUE),
   };
-  const groupByCardinalityFilters: Filter[] = getGroupByCardinalityFilters(
+  const groupByCardinalityFilters = getGroupByCardinalityFilters(
     filters.monitorIds,
     filters.projects,
     filters.tags
@@ -113,7 +120,7 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
         <EuiFlexItem>
           <QueryBuilder
             dataTestSubj="syntheticsAvailabilityFilterInput"
-            indexPatternString={index}
+            dataView={dataView}
             label={i18n.translate('xpack.slo.sloEdit.syntheticsAvailability.filter', {
               defaultMessage: 'Query filter',
             })}
@@ -156,7 +163,7 @@ export const getGroupByCardinalityFilters = (
   monitorIds: string[],
   projects: string[],
   tags: string[]
-): Filter[] => {
+): FiltersSchema => {
   const monitorIdFilters = monitorIds.length
     ? {
         meta: {
@@ -235,19 +242,5 @@ export const getGroupByCardinalityFilters = (
       }
     : null;
 
-  return [monitorIdFilters, projectFilters, tagFilters].filter((value) => !!value) as Filter[];
-};
-
-export const formatAllFilters = (
-  globalFilters: QuerySchema = '',
-  groupByCardinalityFilters: Filter[]
-) => {
-  if (kqlQuerySchema.is(globalFilters)) {
-    return { kqlQuery: globalFilters, filters: groupByCardinalityFilters };
-  } else if (kqlWithFiltersSchema) {
-    return {
-      kqlQuery: globalFilters.kqlQuery,
-      filters: [...globalFilters.filters, ...groupByCardinalityFilters],
-    };
-  }
+  return [monitorIdFilters, projectFilters, tagFilters].filter((value) => !!value) as FiltersSchema;
 };

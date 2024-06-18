@@ -26,6 +26,7 @@ export const plugin: PluginInitializer<
 > = (initializerContext: PluginInitializerContext) => new MlPlugin(initializerContext);
 
 export type { MlPluginSetup, MlPluginStart };
+export type { TrainedModelConfigResponse } from '../common/types/trained_models';
 
 export type { MlCapabilitiesResponse } from '../common/types/capabilities';
 export type { MlSummaryJob } from '../common/types/anomaly_detection_jobs';

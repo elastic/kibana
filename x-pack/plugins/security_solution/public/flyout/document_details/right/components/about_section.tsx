@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandSection } from '../hooks/use_expand_section';
@@ -30,7 +29,7 @@ const KEY = 'about';
  * For generic events (event.kind is event), it shows the event category description and event renderer.
  * For all other events, it shows the event kind description, a list of event categories and event renderer.
  */
-export const AboutSection: FC = memo(() => {
+export const AboutSection = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
   const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);

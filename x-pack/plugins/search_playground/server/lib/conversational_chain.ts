@@ -16,11 +16,13 @@ import {
   Message as VercelChatMessage,
 } from 'ai';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
+import { BaseMessage } from '@langchain/core/messages';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from '../utils/render_template';
 
 import { AssistClient } from '../utils/assist';
 import { getCitations } from '../utils/get_citations';
+import { getTokenEstimate, getTokenEstimateFromMessages } from './token_tracking';
 
 interface RAGOptions {
   index: string;
@@ -29,12 +31,19 @@ interface RAGOptions {
   hit_doc_mapper?: (hit: SearchHit) => Document;
   content_field: string | Record<string, string>;
   size?: number;
+  inputTokensLimit?: number;
 }
 
 interface ConversationalChainOptions {
   model: BaseLanguageModel;
   prompt: string;
   rag?: RAGOptions;
+}
+
+interface ContextInputs {
+  context: string;
+  chat_history: string;
+  question: string;
 }
 
 const CONDENSE_QUESTION_TEMPLATE = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language. Be verbose in your answer.
@@ -60,6 +69,66 @@ const formatVercelMessages = (chatHistory: VercelChatMessage[]) => {
   return formattedDialogueTurns.join('\n');
 };
 
+const buildContext = (docs: Document[]) => {
+  const serializedDocs = docs.map((doc, i) =>
+    renderTemplate(
+      `
+position: ${i + 1}
+{pageContent}`,
+      {
+        pageContent: doc.pageContent,
+        ...doc.metadata,
+      }
+    )
+  );
+  return serializedDocs.join('\n');
+};
+
+export function clipContext(
+  modelLimit: number | undefined,
+  prompt: ChatPromptTemplate,
+  data: experimental_StreamData
+): (input: ContextInputs) => Promise<ContextInputs> {
+  return async (input) => {
+    if (!modelLimit) return input;
+    let context = input.context;
+    const clippedContext = [];
+
+    while (
+      getTokenEstimate(await prompt.format({ ...input, context })) > modelLimit &&
+      context.length > 0
+    ) {
+      // remove the last paragraph
+      const lines = context.split('\n');
+      clippedContext.push(lines.pop());
+      context = lines.join('\n');
+    }
+
+    if (clippedContext.length > 0) {
+      data.appendMessageAnnotation({
+        type: 'context_clipped',
+        count: getTokenEstimate(clippedContext.join('\n')),
+      });
+    }
+
+    return {
+      ...input,
+      context,
+    };
+  };
+}
+
+export function registerContextTokenCounts(data: experimental_StreamData) {
+  return (input: ContextInputs) => {
+    data.appendMessageAnnotation({
+      type: 'context_token_count',
+      count: getTokenEstimate(input.context),
+    });
+
+    return input;
+  };
+}
+
 class ConversationalChainFn {
   options: ConversationalChainOptions;
 
@@ -76,6 +145,7 @@ class ConversationalChainFn {
     const retrievedDocs: Document[] = [];
 
     let retrievalChain: Runnable = RunnableLambda.from(() => '');
+    const chatHistory = formatVercelMessages(previousMessages);
 
     if (this.options.rag) {
       const retriever = new ElasticsearchRetriever({
@@ -87,23 +157,6 @@ class ConversationalChainFn {
         k: this.options.rag.size ?? 3,
       });
 
-      const buildContext = (docs: Document[]) => {
-        const template = this.options.rag?.doc_context ?? `{pageContent}`;
-
-        const serializedDocs = docs.map((doc, i) =>
-          renderTemplate(
-            `
-  position: ${i + 1}
-  ${template}`,
-            {
-              pageContent: doc.pageContent,
-              ...doc.metadata,
-            }
-          )
-        );
-        return serializedDocs.join('\n');
-      };
-
       retrievalChain = retriever.pipe(buildContext);
     }
 
@@ -114,7 +167,11 @@ class ConversationalChainFn {
         condenseQuestionPrompt,
         this.options.model,
         new StringOutputParser(),
-      ]);
+      ]).withConfig({
+        metadata: {
+          type: 'standalone_question',
+        },
+      });
     }
 
     const prompt = ChatPromptTemplate.fromTemplate(this.options.prompt);
@@ -125,8 +182,10 @@ class ConversationalChainFn {
         chat_history: (input) => input.chat_history,
         question: (input) => input.question,
       },
+      RunnableLambda.from(clipContext(this.options?.rag?.inputTokensLimit, prompt, data)),
+      RunnableLambda.from(registerContextTokenCounts(data)),
       prompt,
-      this.options.model,
+      this.options.model.withConfig({ metadata: { type: 'question_answer_qa' } }),
     ]);
 
     const conversationalRetrievalQAChain = RunnableSequence.from([
@@ -141,11 +200,37 @@ class ConversationalChainFn {
     const stream = await conversationalRetrievalQAChain.stream(
       {
         question,
-        chat_history: formatVercelMessages(previousMessages),
+        chat_history: chatHistory,
       },
       {
         callbacks: [
           {
+            // callback for chat based models (OpenAI)
+            handleChatModelStart(
+              llm,
+              msg: BaseMessage[][],
+              runId,
+              parentRunId,
+              extraParams,
+              tags,
+              metadata: Record<string, string>
+            ) {
+              if (metadata?.type === 'question_answer_qa') {
+                data.appendMessageAnnotation({
+                  type: 'prompt_token_count',
+                  count: getTokenEstimateFromMessages(msg),
+                });
+              }
+            },
+            // callback for prompt based models (Bedrock uses ActionsClientLlm)
+            handleLLMStart(llm, input, runId, parentRunId, extraParams, tags, metadata) {
+              if (metadata?.type === 'question_answer_qa') {
+                data.appendMessageAnnotation({
+                  type: 'prompt_token_count',
+                  count: getTokenEstimate(input[0]),
+                });
+              }
+            },
             handleRetrieverEnd(documents) {
               retrievedDocs.push(...documents);
               data.appendMessageAnnotation({
@@ -167,7 +252,7 @@ class ConversationalChainFn {
 
               // check that main chain (without parent) is finished:
               if (parentRunId == null) {
-                data.close();
+                data.close().catch(() => {});
               }
             },
           },

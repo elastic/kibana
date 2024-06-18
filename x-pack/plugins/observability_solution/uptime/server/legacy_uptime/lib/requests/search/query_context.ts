@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { ESFilter } from '@kbn/es-types';
-import type { SearchRequest } from '@kbn/data-plugin/common';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
 import { UptimeEsClient } from '../../lib';

@@ -11,6 +11,7 @@ import {
   savedObjectSchema,
   objectTypeToGetResultSchema,
   createOptionsSchemas,
+  updateOptionsSchema,
   createResultSchema,
 } from '@kbn/content-management-utils';
 
@@ -76,6 +77,11 @@ const createOptionsSchema = schema.object({
   references: schema.maybe(createOptionsSchemas.references),
 });
 
+const dashboardUpdateOptionsSchema = schema.object({
+  references: schema.maybe(updateOptionsSchema.references),
+  mergeAttributes: schema.maybe(updateOptionsSchema.mergeAttributes),
+});
+
 // Content management service definition.
 // We need it for BWC support between different versions of the content
 export const serviceDefinition: ServicesDefinition = {
@@ -104,7 +110,7 @@ export const serviceDefinition: ServicesDefinition = {
   update: {
     in: {
       options: {
-        schema: createOptionsSchema, // same schema as "create"
+        schema: dashboardUpdateOptionsSchema,
       },
       data: {
         schema: dashboardAttributesSchema,

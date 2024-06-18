@@ -170,7 +170,6 @@ export const searchAfterAndBulkCreateFactory = async ({
         // if there is a sort id to continue the search_after with.
         if (includedEvents.length !== 0) {
           const enrichedEvents = await enrichment(includedEvents);
-
           const bulkCreateResult = await bulkCreateExecutor({
             enrichedEvents,
             toReturn,

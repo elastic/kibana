@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { fromKueryExpression } from '@kbn/es-query';
+import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
@@ -54,7 +54,6 @@ import {
   SavedServiceGroup,
 } from '../../../../common/service_groups';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
@@ -230,10 +229,9 @@ export const tasks: TelemetryTask[] = [
         {
           terms: {
             script: `
-              if (doc['transaction.type'].value == 'page-load' && doc['user_agent.name'].size() > 0) {
-                return doc['user_agent.name'].value;
+              if ($('transaction.type', '') == 'page-load') {
+                return $('user_agent.name', null);
               }
-
               return null;
             `,
             missing_bucket: true,
@@ -242,7 +240,7 @@ export const tasks: TelemetryTask[] = [
         // transaction.root
         {
           terms: {
-            script: `return doc['parent.id'].size() == 0`,
+            script: `return $('parent.id', '') == ''`,
             missing_bucket: true,
           },
         },
@@ -259,8 +257,8 @@ export const tasks: TelemetryTask[] = [
           {
             terms: {
               script: `
-                if (doc['transaction.type'].value == 'page-load' && doc['client.geo.country_iso_code'].size() > 0) {
-                  return doc['client.geo.country_iso_code'].value;
+                if ($('transaction.type', '') == 'page-load') {
+                  return $('client.geo.country_iso_code', null);
                 }
                 return null;
               `,
@@ -1410,11 +1408,10 @@ export const tasks: TelemetryTask[] = [
         namespaces: ['*'],
       });
 
-      const kueryNodes = response.saved_objects.map(({ attributes: { kuery } }) =>
-        fromKueryExpression(kuery)
-      );
-
-      const kueryFields = getKueryFields(kueryNodes);
+      const kueryExpressions = response.saved_objects.map(({ attributes: { kuery } }) => kuery);
+      const kueryFields = kueryExpressions
+        .map(getKqlFieldNamesFromExpression)
+        .reduce((a, b) => a.concat(b), []);
 
       return {
         service_groups: {
@@ -1436,11 +1433,12 @@ export const tasks: TelemetryTask[] = [
         namespaces: ['*'],
       });
 
-      const kueryNodes = response.saved_objects.map(({ attributes: { kuery } }) =>
-        fromKueryExpression(kuery ?? '')
+      const kueryExpressions = response.saved_objects.map(
+        ({ attributes: { kuery } }) => kuery ?? ''
       );
-
-      const kueryFields = getKueryFields(kueryNodes);
+      const kueryFields = kueryExpressions
+        .map(getKqlFieldNamesFromExpression)
+        .reduce((a, b) => a.concat(b), []);
 
       return {
         custom_dashboards: {

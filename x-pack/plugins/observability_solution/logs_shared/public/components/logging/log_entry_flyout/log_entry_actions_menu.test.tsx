@@ -6,20 +6,21 @@
  */
 
 import { subj as testSubject } from '@kbn/test-subj-selector';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { mount } from 'enzyme';
+// import { mount } from 'enzyme';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 
 const coreStartMock = coreMock.createStart();
 coreStartMock.application.getUrlForApp.mockImplementation((app, options) => {
   return `/test-basepath/s/test-space/app/${app}${options?.path}`;
 });
 
-const ProviderWrapper: React.FC = ({ children }) => {
+const ProviderWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return <KibanaContextProvider services={{ ...coreStartMock }}>{children}</KibanaContextProvider>;
 };
 

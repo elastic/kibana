@@ -7,14 +7,15 @@
 
 import { EuiCodeBlock, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { KQLSyntaxError } from '@kbn/es-query';
 import { RenderErrorFunc, ResettableErrorBoundary } from '../resettable_error_boundary';
 
-export const LogStreamErrorBoundary: React.FC<{ resetOnChange: any }> = ({
-  children,
-  resetOnChange = null,
-}) => {
+export const LogStreamErrorBoundary: FC<
+  PropsWithChildren<{
+    resetOnChange: any;
+  }>
+> = ({ children, resetOnChange = null }) => {
   return (
     <ResettableErrorBoundary
       renderError={renderLogStreamErrorContent}

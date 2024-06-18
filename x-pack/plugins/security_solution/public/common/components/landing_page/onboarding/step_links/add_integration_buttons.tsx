@@ -9,7 +9,7 @@ import React, { useCallback, type SVGProps } from 'react';
 import { i18n } from '@kbn/i18n';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
 import type { IconType } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { AddIntegrationsSteps } from '../types';
 import { useStepContext } from '../context/step_context';
 import { IntegrationsPageName } from './types';
@@ -135,7 +135,9 @@ const AddIntegrationPanel: React.FC<{
           <EuiIcon type={icon} size="xl" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <h4>{title}</h4>
+          <EuiTitle size="xs">
+            <h3>{title}</h3>
+          </EuiTitle>
           <EuiText color="subdued" size="xs">
             {description}
           </EuiText>

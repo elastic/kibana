@@ -12,7 +12,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiText } from '@elastic/eui';
 
-import '../../common/mock/match_media';
 import type { ConfigureCaseButtonProps, CaseDetailsLinkProps } from '.';
 import { ConfigureCaseButton, CaseDetailsLink } from '.';
 import { TestProviders } from '../../common/mock';

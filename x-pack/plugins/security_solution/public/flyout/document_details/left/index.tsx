@@ -27,7 +27,7 @@ export const LeftPanelInvestigationTab: LeftPanelPaths = 'investigation';
 export const LeftPanelResponseTab: LeftPanelPaths = 'response';
 
 export interface LeftPanelProps extends FlyoutPanelProps {
-  key: 'document-details-left';
+  key: typeof DocumentDetailsLeftPanelKey;
   path?: PanelPath;
   params?: {
     id: string;

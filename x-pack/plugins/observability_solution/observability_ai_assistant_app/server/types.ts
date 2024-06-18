@@ -37,6 +37,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppServerStart {}
@@ -67,6 +68,7 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   dataViews: DataViewsServerPluginSetup;
+  observability: ObservabilityPluginSetup;
   cloud?: CloudSetup;
   serverless?: ServerlessPluginSetup;
 }

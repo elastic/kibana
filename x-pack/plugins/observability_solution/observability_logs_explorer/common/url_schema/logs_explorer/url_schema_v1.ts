@@ -102,9 +102,6 @@ export const queryRT = rt.union([
     query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
   }),
   rt.strict({
-    sql: rt.string,
-  }),
-  rt.strict({
     esql: rt.string,
   }),
 ]);

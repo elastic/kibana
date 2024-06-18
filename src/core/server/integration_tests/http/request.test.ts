@@ -427,6 +427,7 @@ describe('KibanaRequest', () => {
       expect(resp3.body).toEqual({ requestId: 'gamma' });
     });
   });
+
   describe('request uuid', () => {
     it('generates a UUID', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
@@ -440,6 +441,25 @@ describe('KibanaRequest', () => {
 
       const resp1 = await st.get('/').expect(200);
       expect(resp1.body.requestUuid).toBe('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+    });
+  });
+
+  describe('httpVersion and protocol', () => {
+    it('returns the correct values', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        return res.ok({ body: { httpVersion: req.httpVersion, protocol: req.protocol } });
+      });
+      await server.start();
+
+      const st = supertest(innerServer.listener);
+
+      const resp1 = await st.get('/').expect(200);
+      expect(resp1.body).toEqual({
+        httpVersion: '1.1',
+        protocol: 'http1',
+      });
     });
   });
 });

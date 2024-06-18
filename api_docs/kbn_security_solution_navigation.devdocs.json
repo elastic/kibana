@@ -230,7 +230,7 @@
         "label": "NavigationProvider",
         "description": [],
         "signature": [
-          "({ core, children }: React.PropsWithChildren<{ core: ",
+          "({ core, children, }: React.PropsWithChildren<React.PropsWithChildren<{ core: ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
             "scope": "common",
@@ -238,7 +238,7 @@
             "section": "def-common.CoreStart",
             "text": "CoreStart"
           },
-          "; }>) => JSX.Element"
+          "; }>>) => JSX.Element"
         ],
         "path": "x-pack/packages/security-solution/navigation/src/context.tsx",
         "deprecated": false,
@@ -249,10 +249,10 @@
             "id": "def-common.NavigationProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ core, children }",
+            "label": "{\n  core,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<{ core: ",
+              "React.PropsWithChildren<React.PropsWithChildren<{ core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "common",
@@ -260,7 +260,7 @@
                 "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
-              "; }>"
+              "; }>>"
             ],
             "path": "x-pack/packages/security-solution/navigation/src/context.tsx",
             "deprecated": false,

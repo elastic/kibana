@@ -979,6 +979,13 @@ exports[`XYChart component it renders area 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -1077,6 +1084,12 @@ exports[`XYChart component it renders area 1`] = `
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
             },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
+            },
             "scales": Object {
               "barsPadding": 0.25,
               "histogramPadding": 0.05,
@@ -1117,6 +1130,7 @@ exports[`XYChart component it renders area 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -1129,9 +1143,9 @@ exports[`XYChart component it renders area 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -2515,6 +2529,13 @@ exports[`XYChart component it renders bar 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -2613,6 +2634,12 @@ exports[`XYChart component it renders bar 1`] = `
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
             },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
+            },
             "scales": Object {
               "barsPadding": 0.25,
               "histogramPadding": 0.05,
@@ -2653,6 +2680,7 @@ exports[`XYChart component it renders bar 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -2665,9 +2693,9 @@ exports[`XYChart component it renders bar 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -4051,6 +4079,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -4149,6 +4184,12 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
             },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
+            },
             "scales": Object {
               "barsPadding": 0.25,
               "histogramPadding": 0.05,
@@ -4189,6 +4230,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -4201,9 +4243,9 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        pointerUpdateDebounce={0}
         rotation={90}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -5587,6 +5629,13 @@ exports[`XYChart component it renders line 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -5685,6 +5734,12 @@ exports[`XYChart component it renders line 1`] = `
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
             },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
+            },
             "scales": Object {
               "barsPadding": 0.25,
               "histogramPadding": 0.05,
@@ -5725,6 +5780,7 @@ exports[`XYChart component it renders line 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -5737,9 +5793,9 @@ exports[`XYChart component it renders line 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -7123,6 +7179,13 @@ exports[`XYChart component it renders stacked area 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -7221,6 +7284,12 @@ exports[`XYChart component it renders stacked area 1`] = `
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
             },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
+            },
             "scales": Object {
               "barsPadding": 0.25,
               "histogramPadding": 0.05,
@@ -7261,6 +7330,7 @@ exports[`XYChart component it renders stacked area 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -7273,9 +7343,9 @@ exports[`XYChart component it renders stacked area 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -8659,6 +8729,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -8757,6 +8834,12 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
             },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
+            },
             "scales": Object {
               "barsPadding": 0.25,
               "histogramPadding": 0.05,
@@ -8797,6 +8880,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -8809,9 +8893,9 @@ exports[`XYChart component it renders stacked bar 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -10195,6 +10279,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -10293,6 +10384,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
             },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
+            },
             "scales": Object {
               "barsPadding": 0.25,
               "histogramPadding": 0.05,
@@ -10333,6 +10430,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -10345,9 +10443,9 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        pointerUpdateDebounce={0}
         rotation={90}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -11761,6 +11859,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -11859,6 +11964,12 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
             },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
+            },
             "scales": Object {
               "barsPadding": 0.25,
               "histogramPadding": 0.05,
@@ -11899,6 +12010,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -11911,9 +12023,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -13535,6 +13647,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -13633,6 +13752,12 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
             },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
+            },
             "scales": Object {
               "barsPadding": 0.25,
               "histogramPadding": 0.05,
@@ -13673,6 +13798,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -13685,9 +13811,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {
@@ -15302,6 +15428,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -15400,6 +15533,12 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
             },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
+            },
             "scales": Object {
               "barsPadding": 0.25,
               "histogramPadding": 0.05,
@@ -15440,6 +15579,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         }
         legendPosition="top"
         legendSize={130}
+        legendValues={Array []}
         locale="en"
         noResults={
           <EmptyPlaceholder
@@ -15452,9 +15592,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        pointerUpdateDebounce={0}
         rotation={0}
         showLegend={false}
-        showLegendExtra={false}
         theme={
           Array [
             Object {

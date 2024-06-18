@@ -27,7 +27,8 @@ import { addNameToTimelineAndSave, populateTimeline, saveTimeline } from '../../
 
 import { hostsUrl } from '../../../urls/navigation';
 
-describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/182021
+describe.skip('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteTimelines();
     login();

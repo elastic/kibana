@@ -50,7 +50,7 @@ export const SUPPRESSED_PRIORITY_ACTION = {
 };
 
 export const SLO_MODEL_VERSION = 2;
-export const SLO_RESOURCES_VERSION = 3.2;
+export const SLO_RESOURCES_VERSION = 3.3;
 export const SLO_RESOURCES_VERSION_MAJOR = 3;
 
 export const SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME = '.slo-observability.sli-mappings';
@@ -88,3 +88,6 @@ export const getSLOSummaryPipelineId = (sloId: string, sloRevision: number) =>
 
 export const SYNTHETICS_INDEX_PATTERN = 'synthetics-*';
 export const SYNTHETICS_DEFAULT_GROUPINGS = ['monitor.name', 'observer.geo.name', 'monitor.id'];
+
+// in hours
+export const DEFAULT_STALE_SLO_THRESHOLD_HOURS = 48;

@@ -14,7 +14,8 @@ import React, {
   useCallback,
   useEffect,
   useRef,
-  FunctionComponent,
+  FC,
+  PropsWithChildren,
 } from 'react';
 import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -64,10 +65,11 @@ const documentsSelector = (state: PreviewState) => {
   };
 };
 
-export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
-  controller,
-  children,
-}) => {
+export const FieldPreviewProvider: FC<
+  PropsWithChildren<{
+    controller: PreviewController;
+  }>
+> = ({ controller, children }) => {
   const {
     dataView,
     services: {

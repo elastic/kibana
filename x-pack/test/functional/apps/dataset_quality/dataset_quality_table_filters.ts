@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('shows full dataset names when toggled', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(datasetNames);
 
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('searches the datasets', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(datasetNames);
 
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       );
 
       const colsAfterSearch = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameColAfterSearch = colsAfterSearch['Dataset Name'];
+      const datasetNameColAfterSearch = colsAfterSearch['Data Set Name'];
       const datasetNameColCellTextsAfterSearch = await datasetNameColAfterSearch.getCellTexts();
       expect(datasetNameColCellTextsAfterSearch).to.eql([datasetNames[2]]);
       await testSubjects.setValue(
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await PageObjects.datasetQuality.navigateTo();
 
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql([apacheAccessDatasetHumanName, ...datasetNames]);
 
@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await PageObjects.datasetQuality.filterForIntegrations([apacheIntegrationName]);
 
       const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameColAfterFilter = colsAfterFilter['Dataset Name'];
+      const datasetNameColAfterFilter = colsAfterFilter['Data Set Name'];
       const datasetNameColCellTextsAfterFilter = await datasetNameColAfterFilter.getCellTexts();
       expect(datasetNameColCellTextsAfterFilter).to.eql([apacheAccessDatasetHumanName]);
     });
@@ -151,6 +151,41 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const namespaceColCellTextsAfterFilter = await namespaceColAfterFilter.getCellTexts();
 
       expect(namespaceColCellTextsAfterFilter).to.eql([datasetNamespace]);
+    });
+
+    it('filters for quality', async () => {
+      const apacheAccessDatasetName = 'apache.access';
+      const expectedQuality = 'Poor';
+
+      // Add initial integrations
+      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+
+      // Index 10 logs for `logs-apache.access` dataset
+      await synthtrace.index(
+        getLogsForDataset({
+          to: new Date().toISOString(),
+          count: 10,
+          dataset: apacheAccessDatasetName,
+          isMalformed: true,
+        })
+      );
+
+      await PageObjects.datasetQuality.navigateTo();
+
+      // Get default quality
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+      const datasetQuality = cols['Data Set Quality'];
+      const datasetQualityCellTexts = await datasetQuality.getCellTexts();
+      expect(datasetQualityCellTexts).to.contain(expectedQuality);
+
+      // Filter for Poor quality
+      await PageObjects.datasetQuality.filterForQualities([expectedQuality]);
+
+      const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
+      const datasetQualityAfterFilter = colsAfterFilter['Data Set Quality'];
+      const datasetQualityCellTextsAfterFilter = await datasetQualityAfterFilter.getCellTexts();
+
+      expect(datasetQualityCellTextsAfterFilter).to.eql([expectedQuality]);
     });
   });
 }

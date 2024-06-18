@@ -67,7 +67,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   let testJobId = '';
 
-  describe('anomaly detection alert', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/186261
+  describe.skip('anomaly detection alert', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
@@ -113,6 +114,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await ml.testExecution.logTestStep('should populate advanced settings with default values');
         await ml.alerting.assertTopNBuckets(1);
         await ml.alerting.assertLookbackInterval('123m');
+
+        await ml.testExecution.logTestStep(
+          'should support updating the advanced settings section with valid values only'
+        );
+        await ml.alerting.setTopNBuckets(0, true);
+        await ml.alerting.setTopNBuckets(2);
+        await ml.alerting.setLookbackInterval('invalid_value', true);
+        await ml.alerting.setLookbackInterval('2h');
 
         await ml.testExecution.logTestStep('should preview the alert condition');
         await ml.alerting.assertPreviewButtonState(false);

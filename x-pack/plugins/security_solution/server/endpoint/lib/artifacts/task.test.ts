@@ -89,7 +89,7 @@ describe('Endpoint artifact packager task', () => {
         endpointAppContext: mockContext,
         taskManager: mockTaskManager,
       });
-      manifestTaskInstance.start({ taskManager: taskManagerMock.createStart() });
+      void manifestTaskInstance.start({ taskManager: taskManagerMock.createStart() });
 
       mockContext.service.getManifestManager = jest.fn().mockReturnValue(manifestManager);
 

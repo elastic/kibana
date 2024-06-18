@@ -6,6 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import {
   KibanaContextProvider,
@@ -16,9 +17,11 @@ import type { SecuritySolutionEssPluginStartDeps } from '../types';
 
 export type Services = CoreStart & SecuritySolutionEssPluginStartDeps;
 
-export const KibanaServicesProvider: React.FC<{
-  services: Services;
-}> = ({ services, children }) => {
+export const KibanaServicesProvider: FC<
+  PropsWithChildren<{
+    services: Services;
+  }>
+> = ({ services, children }) => {
   return (
     <KibanaContextProvider services={services}>
       <NavigationProvider core={services}>{children}</NavigationProvider>
