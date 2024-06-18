@@ -828,8 +828,6 @@ export function XYChart({
             showLegend={showLegend}
             legendPosition={legend?.isInside ? legendInsideParams : legend.position}
             legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
-            // TODO: use legendLayout when list is implemented
-            // legendLayout={legend.layout}
             legendValues={isHistogramViz ? legend.legendStats : []}
             legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
             theme={[
