@@ -43,7 +43,12 @@ Change the settings that apply only to {kib} spaces.
 [[auto-complete-use-time-tange]]`autocomplete:useTimeRange`::
 When disabled, autocompletes the suggestions from your data set instead of the time range.
 
+[[bfetch-disable]]`bfetch:disable`::
+**This setting is deprecated and will not be supported in a future version.**
+When disabled, search requests from Kibana will be made in individual HTTP requests rather than bundled together.  
+
 [[bfetch-disable-compression]]`bfetch:disableCompression`::
+**This setting is deprecated and will not be supported in a future version.**
 When disabled, allows you to debug individual requests, but increases the response size.
 
 [[csv-quotevalues]]`csv:quoteValues`::
