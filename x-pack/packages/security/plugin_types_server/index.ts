@@ -25,6 +25,11 @@ export type {
   InvalidateAPIKeyResult,
   APIKeys,
   AuthenticationServiceStart,
+  UpdateAPIKeyParams,
+  UpdateAPIKeyResult,
+  UpdateCrossClusterAPIKeyParams,
+  UpdateRestAPIKeyParams,
+  UpdateRestAPIKeyWithKibanaPrivilegesParams,
 } from './src/authentication';
 export type {
   PrivilegeDeprecationsService,
@@ -69,6 +74,7 @@ export type {
 export {
   restApiKeySchema,
   getRestApiKeyWithKibanaPrivilegesSchema,
+  getUpdateRestApiKeyWithKibanaPrivilegesSchema,
   crossClusterApiKeySchema,
 } from './src/authentication';
 export { GLOBAL_RESOURCE, elasticsearchRoleSchema, getKibanaRoleSchema } from './src/authorization';
