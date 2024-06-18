@@ -18,20 +18,6 @@ export const DESCRIPTION = i18n.translate(
   }
 );
 
-export const TITLE_NO_CONNECTORS = i18n.translate(
-  'xpack.integrationAssistant.steps.connector.titleNoConnectors',
-  {
-    defaultMessage: 'Create an AI connector',
-  }
-);
-
-export const DESCRIPTION_NO_CONNECTORS = i18n.translate(
-  'xpack.integrationAssistant.steps.connector.descriptionNoConnectors',
-  {
-    defaultMessage: 'First, set up a generative AI connector',
-  }
-);
-
 export const CREATE_CONNECTOR = i18n.translate(
   'xpack.integrationAssistant.steps.connector.createConnectorLabel',
   {

@@ -7,81 +7,76 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
-import { useConnectorSetup } from '@kbn/elastic-assistant/impl/connectorland/connector_setup';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPopover, EuiLink } from '@elastic/eui';
-import { noop } from 'lodash/fp';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { ConnectorSelector } from './connector_selector';
+import { ConnectorSetup } from './connector_setup';
 import type { AIConnector } from '../../types';
 import { useActions } from '../../state';
 import * as i18n from './translations';
 
+/**
+ * List of allowed action type IDs for the integrations assistant.
+ * Replace by ['.bedrock', '.gen-ai'] to allow OpenAI connectors.
+ */
 const AllowedActionTypeIds = ['.bedrock'];
 
 interface ConnectorStepProps {
   connectorId: string | undefined;
 }
-
 export const ConnectorStep = React.memo<ConnectorStepProps>(({ connectorId }) => {
-  const { http, notifications } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const { setConnectorId } = useActions();
   const [connectors, setConnectors] = useState<AIConnector[]>();
-  const { data, isLoading } = useLoadConnectors({ http, toasts: notifications?.toasts });
+  const {
+    isLoading,
+    data: aiConnectors,
+    refetch: refetchConnectors,
+  } = useLoadConnectors({ http, toasts });
 
   useEffect(() => {
-    if (data != null) {
-      // filter out connectors that are not Bedrock, this is temporary until we have support for openAi
-      const aiConnectors = data.filter(({ actionTypeId }) =>
+    if (aiConnectors != null) {
+      // filter out connectors, this is temporary until we add support for more models
+      const filteredAiConnectors = aiConnectors.filter(({ actionTypeId }) =>
         AllowedActionTypeIds.includes(actionTypeId)
       );
-      setConnectors(aiConnectors);
-
-      if (aiConnectors.length === 1) {
-        setConnectorId(aiConnectors[0].id);
+      setConnectors(filteredAiConnectors);
+      if (filteredAiConnectors && filteredAiConnectors.length === 1) {
+        // pre-select the connector if there is only one
+        setConnectorId(filteredAiConnectors[0].id);
       }
     }
-  }, [data, setConnectorId]);
+  }, [aiConnectors, setConnectorId]);
 
-  // TODO: import an isolated component instead of using this (and remove the ai assistant context dependency)
-  const { prompt: connectorPrompt } = useConnectorSetup({
-    isFlyoutMode: true, // prevents the "Click to skip" button from showing
-    actionTypeIds: AllowedActionTypeIds,
-    onConversationUpdate: async () => {},
-    onSetupComplete: noop,
-    updateConversationsOnSaveConnector: false, // no conversation to update
-  });
+  const onConnectorSaved = useCallback(() => refetchConnectors(), [refetchConnectors]);
 
   const hasConnectors = !isLoading && connectors?.length;
 
   return (
     <StepContentWrapper
-      title={hasConnectors ? i18n.TITLE : i18n.TITLE_NO_CONNECTORS}
-      subtitle={hasConnectors ? i18n.DESCRIPTION : i18n.DESCRIPTION_NO_CONNECTORS}
-      right={hasConnectors ? <CreateConnectorPopover connectorPrompt={connectorPrompt} /> : null}
+      title={i18n.TITLE}
+      subtitle={i18n.DESCRIPTION}
+      right={hasConnectors ? <CreateConnectorPopover onConnectorSaved={onConnectorSaved} /> : null}
     >
       <EuiFlexGroup direction="column" alignItems="stretch">
         <EuiFlexItem>
           {isLoading ? (
-            <EuiFlexItem>
-              <EuiLoadingSpinner />
-            </EuiFlexItem>
+            <EuiLoadingSpinner />
           ) : (
             <>
               {hasConnectors ? (
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="stretch" direction="column" gutterSize="s">
-                    <ConnectorSelector
-                      connectors={connectors}
-                      selectedConnectorId={connectorId}
-                      setConnectorId={setConnectorId}
-                    />
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              ) : (
-                <EuiFlexGroup alignItems="flexStart">
-                  <EuiFlexItem grow={false}>{connectorPrompt}</EuiFlexItem>
+                <EuiFlexGroup alignItems="stretch" direction="column" gutterSize="s">
+                  <ConnectorSelector connectors={connectors} selectedConnectorId={connectorId} />
                 </EuiFlexGroup>
+              ) : (
+                <ConnectorSetup
+                  actionTypeIds={AllowedActionTypeIds}
+                  onConnectorSaved={onConnectorSaved}
+                />
               )}
             </>
           )}
@@ -92,13 +87,19 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connectorId }) =>
 });
 ConnectorStep.displayName = 'ConnectorStep';
 
-interface ConnectorSelectorProps {
-  connectorPrompt: React.ReactNode;
+interface CreateConnectorPopoverProps {
+  onConnectorSaved: () => void;
 }
-const CreateConnectorPopover = React.memo<ConnectorSelectorProps>(({ connectorPrompt }) => {
+const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(({ onConnectorSaved }) => {
   const [isOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+
+  const onConnectorSavedAndClose = useCallback(() => {
+    onConnectorSaved();
+    closePopover();
+  }, [onConnectorSaved, closePopover]);
+
   return (
     <EuiPopover
       button={<EuiLink onClick={openPopover}>{i18n.CREATE_CONNECTOR}</EuiLink>}
@@ -106,7 +107,14 @@ const CreateConnectorPopover = React.memo<ConnectorSelectorProps>(({ connectorPr
       closePopover={closePopover}
     >
       <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={false}>{connectorPrompt}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ConnectorSetup
+            actionTypeIds={AllowedActionTypeIds}
+            onConnectorSaved={onConnectorSavedAndClose}
+            onClose={closePopover}
+            compressed
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopover>
   );

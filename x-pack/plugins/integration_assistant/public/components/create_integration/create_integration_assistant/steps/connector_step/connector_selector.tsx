@@ -9,7 +9,9 @@ import React from 'react';
 import { useEuiTheme, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiRadio } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import { css } from '@emotion/react';
+import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { AIConnector } from '../../types';
+import { useActions } from '../../state';
 
 const useRowCss = () => {
   const { euiTheme } = useEuiTheme();
@@ -33,11 +35,14 @@ const useRowCss = () => {
 
 interface ConnectorSelectorProps {
   connectors: AIConnector[];
-  setConnectorId: (connectorId: string) => void;
   selectedConnectorId: string | undefined;
 }
 export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
-  ({ connectors, selectedConnectorId, setConnectorId }) => {
+  ({ connectors, selectedConnectorId }) => {
+    const {
+      triggersActionsUi: { actionTypeRegistry },
+    } = useKibana().services;
+    const { setConnectorId } = useActions();
     const rowCss = useRowCss();
     return (
       <>
@@ -45,10 +50,10 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
           <EuiFlexItem key={connector.id}>
             <EuiPanel
               key={connector.id}
+              onClick={() => setConnectorId(connector.id)}
               hasShadow={false}
               hasBorder
               paddingSize="l"
-              onClick={() => setConnectorId(connector.id)}
               css={rowCss}
             >
               <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
@@ -57,13 +62,12 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
                     label={connector.name}
                     id={connector.id}
                     checked={selectedConnectorId === connector.id}
-                    color="primary"
                     onChange={noop}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">
-                    {connector.apiProvider ? connector.apiProvider : 'Bedrock'}
+                    {actionTypeRegistry.get(connector.actionTypeId).actionTypeTitle}
                   </EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>

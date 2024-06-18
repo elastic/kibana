@@ -14,19 +14,12 @@ const CreateIntegration = React.lazy(() =>
     default: module.CreateIntegration,
   }))
 );
-const CreateIntegrationContext = React.lazy(() =>
-  import('./create_integration_context').then((module) => ({
-    default: module.CreateIntegrationContext,
-  }))
-);
 
 export const getCreateIntegrationLazy = (services: CreateIntegrationServices) =>
   React.memo(function CreateIntegrationLazy() {
     return (
       <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-        <CreateIntegrationContext services={services}>
-          <CreateIntegration />
-        </CreateIntegrationContext>
+        <CreateIntegration services={services} />
       </Suspense>
     );
   });
