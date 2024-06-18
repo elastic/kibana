@@ -6,11 +6,20 @@
  */
 
 import useInterval from 'react-use/lib/useInterval';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useAsync from 'react-use/lib/useAsync';
+import { type AssetSOObject, type GetBulkAssetsResponse } from '@kbn/fleet-plugin/common';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getOnboardingStatus } from './get_onboarding_status';
 import { getInstalledIntegrations } from './get_installed_integrations';
+import { type ObservabilityOnboardingContextValue } from '../../../plugin';
 
 export function useOnboardingFlow() {
+  const {
+    services: { fleet },
+  } = useKibana<ObservabilityOnboardingContextValue>();
+
+  // Create onboarding session
   const { data, error, refetch } = useFetcher(
     (callApi) =>
       callApi('POST /internal/observability_onboarding/flow', {
@@ -26,6 +35,7 @@ export function useOnboardingFlow() {
 
   const onboardingId = data?.onboardingFlow.id;
 
+  // Fetch onboarding progress
   const {
     data: progressData,
     status: progressStatus,
@@ -44,6 +54,34 @@ export function useOnboardingFlow() {
   const status = getOnboardingStatus(progressData);
   const installedIntegrations = getInstalledIntegrations(progressData);
 
+  // Fetch metadata for installed Kibana assets
+  const assetsState = useAsync(async () => {
+    if (installedIntegrations.length === 0) {
+      return [];
+    }
+    const assetsMetadata = await fleet.hooks.epm.getBulkAssets({
+      assetIds: installedIntegrations
+        .map((integration) => integration.kibanaAssets)
+        .flat() as AssetSOObject[],
+    });
+    return installedIntegrations.map((integration) => {
+      return {
+        ...integration,
+        // Enrich installed Kibana assets with metadata from Fleet API (e.g. title, description, etc.)
+        kibanaAssets: integration.kibanaAssets.reduce<GetBulkAssetsResponse['items']>(
+          (acc, asset) => {
+            const assetWithMetadata = assetsMetadata.data?.items.find(({ id }) => id === asset.id);
+            if (assetWithMetadata) {
+              acc.push(assetWithMetadata);
+            }
+            return acc;
+          },
+          []
+        ),
+      };
+    });
+  }, [installedIntegrations.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useInterval(
     refetchProgress,
     progressStatus === FETCH_STATUS.SUCCESS && status !== 'dataReceived' ? 3000 : null
@@ -54,6 +92,6 @@ export function useOnboardingFlow() {
     error,
     refetch,
     status,
-    installedIntegrations,
+    installedIntegrations: assetsState.value ?? [],
   };
 }

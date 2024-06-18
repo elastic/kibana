@@ -9,6 +9,7 @@ import React, { type AnchorHTMLAttributes } from 'react';
 import { EuiButtonEmpty, type EuiButtonEmptyProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { type LocatorPublic } from '@kbn/share-plugin/common';
 import { type ObservabilityOnboardingContextValue } from '../../../plugin';
 
 type EuiButtonEmptyPropsForAnchor = Extract<
@@ -18,7 +19,7 @@ type EuiButtonEmptyPropsForAnchor = Extract<
 
 export interface LocatorButtonEmptyProps<Params extends SerializableRecord>
   extends Omit<EuiButtonEmptyPropsForAnchor, 'href'> {
-  locatorId: string;
+  locator: string | LocatorPublic<Params>;
   params: Params;
 }
 
@@ -26,29 +27,37 @@ export interface LocatorButtonEmptyProps<Params extends SerializableRecord>
  * Same as `EuiButtonEmpty` but uses locators to navigate instead of URLs.
  *
  * Accepts the following props instead of an `href`:
- * - `locatorId`: The id of the locator to use.
+ * - `locator`: Either the URL locator public contract or the ID of the locator if previously registered.
  * - `params`: The params to pass to the locator.
  *
  * Get type safety for `params` by passing the correct type to the generic component.
  *
- * Example:
+ * Example 1:
+ *
+ * ```ts
+ * <LocatorButtonEmpty locator={dashboardStart.locator} params={{ dashboardId: 'abc' }}>
+ *   View dashboard
+ * </LocatorButtonEmpty>
+ * ```
+ *
+ * Example 2:
  *
  * ```ts
  * import { type SingleDatasetLocatorParams, SINGLE_DATASET_LOCATOR_ID } from '@kbn/deeplinks-observability/locators';
  *
  * <LocatorButtonEmpty<SingleDatasetLocatorParams>
- *   locatorId={SINGLE_DATASET_LOCATOR_ID}
+ *   locator={SINGLE_DATASET_LOCATOR_ID}
  *   params={{
  *     integration: 'system',
  *     dataset: 'system.syslog',
  *   }}
  * >
- *   Go to Logs Explorer
+ *   View in Logs Explorer
  * </LocatorButtonEmpty>
  * ```
  */
 export const LocatorButtonEmpty = <Params extends SerializableRecord>({
-  locatorId,
+  locator,
   params,
   ...rest
 }: LocatorButtonEmptyProps<Params>) => {
@@ -56,12 +65,13 @@ export const LocatorButtonEmpty = <Params extends SerializableRecord>({
     services: { share },
   } = useKibana<ObservabilityOnboardingContextValue>();
 
-  const locator = share.url.locators.get<Params>(locatorId);
+  const locatorObj =
+    typeof locator === 'string' ? share.url.locators.get<Params>(locator) : locator;
 
   return (
     <EuiButtonEmpty
       data-test-subj="observabilityOnboardingLocatorButtonEmptyButton"
-      href={locator?.useUrl(params)}
+      href={locatorObj?.useUrl(params)}
       {...rest}
     />
   );

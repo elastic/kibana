@@ -26,13 +26,14 @@ import {
   type SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
+import { type DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from './progress_indicator';
 import { AccordionWithIcon } from './accordion_with_icon';
 import { type ObservabilityOnboardingContextValue } from '../../../plugin';
 import { EmptyPrompt } from './empty_prompt';
-import { isRegistryIntegration, isCustomIntegration } from './get_installed_integrations';
 import { CopyToClipboardButton } from './copy_to_clipboard_button';
 import { LocatorButtonEmpty } from './locator_button_empty';
 
@@ -48,8 +49,12 @@ export const AutoDetectPanel: FunctionComponent = () => {
     return <EmptyPrompt error={error} onRetryClick={refetch} />;
   }
 
-  const registryIntegrations = installedIntegrations.filter(isRegistryIntegration);
-  const customIntegrations = installedIntegrations.filter(isCustomIntegration);
+  const registryIntegrations = installedIntegrations.filter(
+    (integration) => integration.installSource === 'registry'
+  );
+  const customIntegrations = installedIntegrations.filter(
+    (integration) => integration.installSource === 'custom'
+  );
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
@@ -168,20 +173,25 @@ export const AutoDetectPanel: FunctionComponent = () => {
                             )}
                           </EuiFlexItem>
                           <EuiFlexItem>
-                            <div>
-                              <LocatorButtonEmpty<SingleDatasetLocatorParams>
-                                locatorId={SINGLE_DATASET_LOCATOR_ID}
-                                params={{
-                                  integration: integration.pkgName,
-                                  dataset: `${integration.pkgName}.${integration.pkgName}`,
-                                }}
-                                target="_blank"
-                                isDisabled={status !== 'dataReceived'}
-                                flush="both"
-                              >
-                                {integration.pkgName}
-                              </LocatorButtonEmpty>
-                            </div>
+                            <ul>
+                              {integration.kibanaAssets
+                                .filter((asset) => asset.type === 'dashboard')
+                                .map((dashboard) => (
+                                  <li key={dashboard.id}>
+                                    <LocatorButtonEmpty<DashboardLocatorParams>
+                                      locator={DASHBOARD_APP_LOCATOR}
+                                      params={{ dashboardId: dashboard.id }}
+                                      target="_blank"
+                                      iconType="dashboardApp"
+                                      isDisabled={status !== 'dataReceived'}
+                                      flush="left"
+                                      size="s"
+                                    >
+                                      {dashboard.attributes.title}
+                                    </LocatorButtonEmpty>
+                                  </li>
+                                ))}
+                            </ul>
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </AccordionWithIcon>
@@ -198,24 +208,26 @@ export const AutoDetectPanel: FunctionComponent = () => {
                         initialIsOpen
                       >
                         <ul>
-                          {customIntegrations.map((integration) => (
-                            <li key={integration.pkgName}>
-                              <LocatorButtonEmpty<SingleDatasetLocatorParams>
-                                locatorId={SINGLE_DATASET_LOCATOR_ID}
-                                params={{
-                                  integration: integration.pkgName,
-                                  dataset: integration.pkgName,
-                                }}
-                                target="_blank"
-                                iconType="document"
-                                isDisabled={status !== 'dataReceived'}
-                                flush="both"
-                                size="s"
-                              >
-                                {integration.pkgName}
-                              </LocatorButtonEmpty>
-                            </li>
-                          ))}
+                          {customIntegrations.map((integration) =>
+                            integration.dataStreams.map((datastream) => (
+                              <li key={`${integration.pkgName}/${datastream.dataset}`}>
+                                <LocatorButtonEmpty<SingleDatasetLocatorParams>
+                                  locator={SINGLE_DATASET_LOCATOR_ID}
+                                  params={{
+                                    integration: integration.pkgName,
+                                    dataset: datastream.dataset,
+                                  }}
+                                  target="_blank"
+                                  iconType="document"
+                                  isDisabled={status !== 'dataReceived'}
+                                  flush="left"
+                                  size="s"
+                                >
+                                  {integration.pkgName}
+                                </LocatorButtonEmpty>
+                              </li>
+                            ))
+                          )}
                         </ul>
                       </AccordionWithIcon>
                     )}

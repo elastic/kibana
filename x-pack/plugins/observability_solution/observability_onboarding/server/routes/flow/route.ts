@@ -12,8 +12,8 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import type { TemplateAgentPolicyInput } from '@kbn/fleet-plugin/common';
 import { dump } from 'js-yaml';
+import { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
@@ -24,9 +24,8 @@ import { hasLogMonitoringPrivileges } from '../logs/api_key/has_log_monitoring_p
 import { createShipperApiKey } from '../logs/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../logs/api_key/create_install_api_key';
 import { getAgentVersion } from '../../lib/get_agent_version';
-
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
-import { ElasticAgentStepPayload, Integration, StepProgressPayloadRT } from '../types';
+import { ElasticAgentStepPayload, InstalledIntegration, StepProgressPayloadRT } from '../types';
 
 const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}',
@@ -315,9 +314,12 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       });
     }
 
-    let agentPolicyInputs: TemplateAgentPolicyInput[] = [];
+    let installedIntegrations: InstalledIntegration[] = [];
     try {
-      agentPolicyInputs = await ensureInstalledIntegrations(integrationsToInstall, packageClient);
+      installedIntegrations = await ensureInstalledIntegrations(
+        integrationsToInstall,
+        packageClient
+      );
     } catch (error) {
       if (error instanceof FleetUnauthorizedError) {
         return response.forbidden({
@@ -338,7 +340,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
           ...savedObservabilityOnboardingState.progress,
           'install-integrations': {
             status: 'complete',
-            payload: integrationsToInstall,
+            payload: installedIntegrations,
           },
         },
       },
@@ -354,57 +356,87 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       },
       body: generateAgentConfig({
         esHost: elasticsearchUrl,
-        inputs: agentPolicyInputs,
+        inputs: installedIntegrations.map(({ inputs }) => inputs).flat(),
       }),
     });
   },
 });
 
+export interface RegistryIntegrationToInstall {
+  pkgName: string;
+  installSource: 'registry';
+}
+export interface CustomIntegrationToInstall {
+  pkgName: string;
+  installSource: 'custom';
+  logFilePaths: string[];
+}
+export type IntegrationToInstall = RegistryIntegrationToInstall | CustomIntegrationToInstall;
+
 async function ensureInstalledIntegrations(
-  integrationsToInstall: Integration[],
+  integrationsToInstall: IntegrationToInstall[],
   packageClient: PackageClient
-) {
-  const returnValues = await Promise.all(
+): Promise<InstalledIntegration[]> {
+  return Promise.all(
     integrationsToInstall.map(async (integration) => {
       const { pkgName, installSource } = integration;
 
       if (installSource === 'registry') {
         const pkg = await packageClient.ensureInstalledPackage({ pkgName });
         const inputs = await packageClient.getAgentPolicyInputs(pkg.name, pkg.version);
-        return inputs.filter((input) => input.type !== 'httpjson');
+        const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
+
+        return {
+          installSource,
+          pkgName: pkg.name,
+          pkgVersion: pkg.version,
+          inputs: inputs.filter((input) => input.type !== 'httpjson'),
+          dataStreams:
+            packageInfo.data_streams?.map(({ type, dataset }) => ({ type, dataset })) ?? [],
+          kibanaAssets: pkg.installed_kibana,
+        };
       }
 
-      const input: TemplateAgentPolicyInput = {
-        id: `filestream-${pkgName}`,
-        type: 'filestream',
-        streams: [
+      const dataStream = {
+        type: 'logs',
+        dataset: pkgName,
+      };
+      const installed: InstalledIntegration = {
+        installSource,
+        pkgName,
+        pkgVersion: '1.0.0', // Custom integrations are always installed as version `1.0.0`
+        inputs: [
           {
             id: `filestream-${pkgName}`,
-            data_stream: {
-              type: 'logs',
-              dataset: pkgName,
-            },
-            paths: integration.logFilePaths,
+            type: 'filestream',
+            streams: [
+              {
+                id: `filestream-${pkgName}`,
+                data_stream: dataStream,
+                paths: integration.logFilePaths,
+              },
+            ],
           },
         ],
+        dataStreams: [dataStream],
+        kibanaAssets: [],
       };
       try {
         await packageClient.installCustomIntegration({
           pkgName,
-          datasets: [{ name: pkgName, type: 'logs' }],
+          datasets: [{ name: dataStream.dataset, type: dataStream.type as PackageDataStreamTypes }],
         });
-        return [input];
+        return installed;
       } catch (error) {
         // If the error is a naming collision, we can assume the integration is already installed and treat this step as successful
         if (error instanceof NamingCollisionError) {
-          return [input];
+          return installed;
         } else {
           throw error;
         }
       }
     })
   );
-  return returnValues.flat();
 }
 
 /**
@@ -428,46 +460,43 @@ function parseIntegrationsTSV(tsv: string) {
       .trim()
       .split('\n')
       .map((line) => line.split('\t', 3))
-      .reduce<Record<string, Integration>>((acc, [pkgName, installSource, logFilePath]) => {
-        const key = `${pkgName}-${installSource}`;
-        if (installSource === 'registry') {
-          if (logFilePath) {
-            throw new Error(`Integration '${pkgName}' does not support a file path`);
-          }
-          acc[key] = {
-            pkgName,
-            installSource,
-          };
-          return acc;
-        } else if (installSource === 'custom') {
-          if (!logFilePath) {
-            throw new Error(`Missing file path for integration: ${pkgName}`);
-          }
-          // Append file path if integration is already in the list
-          const existing = acc[key];
-          if (existing && existing.installSource === 'custom') {
-            existing.logFilePaths.push(logFilePath);
+      .reduce<Record<string, IntegrationToInstall>>(
+        (acc, [pkgName, installSource, logFilePath]) => {
+          const key = `${pkgName}-${installSource}`;
+          if (installSource === 'registry') {
+            if (logFilePath) {
+              throw new Error(`Integration '${pkgName}' does not support a file path`);
+            }
+            acc[key] = {
+              pkgName,
+              installSource,
+            };
+            return acc;
+          } else if (installSource === 'custom') {
+            if (!logFilePath) {
+              throw new Error(`Missing file path for integration: ${pkgName}`);
+            }
+            // Append file path if integration is already in the list
+            const existing = acc[key];
+            if (existing && existing.installSource === 'custom') {
+              existing.logFilePaths.push(logFilePath);
+              return acc;
+            }
+            acc[key] = {
+              pkgName,
+              installSource,
+              logFilePaths: [logFilePath],
+            };
             return acc;
           }
-          acc[key] = {
-            pkgName,
-            installSource,
-            logFilePaths: [logFilePath],
-          };
-          return acc;
-        }
-        throw new Error(`Invalid install source: ${installSource}`);
-      }, {})
+          throw new Error(`Invalid install source: ${installSource}`);
+        },
+        {}
+      )
   );
 }
 
-const generateAgentConfig = ({
-  esHost,
-  inputs = [],
-}: {
-  esHost: string[];
-  inputs: TemplateAgentPolicyInput[];
-}) => {
+const generateAgentConfig = ({ esHost, inputs = [] }: { esHost: string[]; inputs: unknown[] }) => {
   return dump({
     outputs: {
       default: {

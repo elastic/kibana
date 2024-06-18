@@ -7,24 +7,10 @@
 
 import type { InstallIntegrationsStepPayload } from '../../../../server/routes/types';
 import type { ObservabilityOnboardingFlow } from '../../../../server/saved_objects/observability_onboarding_status';
-import type {
-  Integration,
-  RegistryIntegration,
-  CustomIntegration,
-} from '../../../../server/routes/types';
+import type { InstalledIntegration } from '../../../../server/routes/types';
 
 export function getInstalledIntegrations(
   data: Pick<ObservabilityOnboardingFlow, 'progress'> | undefined
-): Integration[] {
+): InstalledIntegration[] {
   return (data?.progress['install-integrations']?.payload as InstallIntegrationsStepPayload) ?? [];
-}
-
-export function isRegistryIntegration(
-  integration: Integration
-): integration is RegistryIntegration {
-  return integration.installSource === 'registry';
-}
-
-export function isCustomIntegration(integration: Integration): integration is CustomIntegration {
-  return integration.installSource === 'custom';
 }
