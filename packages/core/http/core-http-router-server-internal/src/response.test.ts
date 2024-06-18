@@ -6,13 +6,79 @@
  * Side Public License, v 1.
  */
 
-import { fileResponseFactory } from './response';
+import { kibanaResponseFactory } from './response';
 
-describe('fileResponseFactory', () => {
+describe('kibanaResponseFactory', () => {
+  describe('status codes', () => {
+    const tests = [
+      { name: 'ok', expectedStatusCode: 200, response: kibanaResponseFactory.ok() },
+      { name: 'created', expectedStatusCode: 201, response: kibanaResponseFactory.created() },
+      { name: 'accepted', expectedStatusCode: 202, response: kibanaResponseFactory.accepted() },
+      { name: 'noContent', expectedStatusCode: 204, response: kibanaResponseFactory.noContent() },
+      {
+        name: 'multiStatus',
+        expectedStatusCode: 207,
+        response: kibanaResponseFactory.multiStatus(),
+      },
+      {
+        name: 'redirected',
+        expectedStatusCode: 302,
+        response: kibanaResponseFactory.redirected({}),
+      },
+      {
+        name: 'notModified',
+        expectedStatusCode: 304,
+        response: kibanaResponseFactory.notModified({}),
+      },
+      { name: 'badRequest', expectedStatusCode: 400, response: kibanaResponseFactory.badRequest() },
+      {
+        name: 'unauthorized',
+        expectedStatusCode: 401,
+        response: kibanaResponseFactory.unauthorized(),
+      },
+      { name: 'forbidden', expectedStatusCode: 403, response: kibanaResponseFactory.forbidden() },
+      { name: 'notFound', expectedStatusCode: 404, response: kibanaResponseFactory.notFound() },
+      { name: 'conflict', expectedStatusCode: 409, response: kibanaResponseFactory.conflict() },
+      {
+        name: 'unprocessableContent',
+        expectedStatusCode: 422,
+        response: kibanaResponseFactory.unprocessableContent(),
+      },
+      {
+        name: 'file',
+        expectedStatusCode: 200,
+        response: kibanaResponseFactory.file({
+          filename: 'test.txt',
+          body: 'content',
+        }),
+      },
+      {
+        name: 'custom 205',
+        expectedStatusCode: 205,
+        response: kibanaResponseFactory.custom({
+          statusCode: 205,
+        }),
+      },
+      {
+        name: 'customError 505',
+        expectedStatusCode: 505,
+        response: kibanaResponseFactory.customError({
+          statusCode: 505,
+        }),
+      },
+    ];
+
+    tests.forEach(({ name, expectedStatusCode, response }) => {
+      it(`.${name} produces a response with status code ${expectedStatusCode}`, () => {
+        expect(response.status).toEqual(expectedStatusCode);
+      });
+    });
+  });
+
   describe('res.file', () => {
     it('returns a kibana response with attachment', () => {
       const body = Buffer.from('Attachment content');
-      const result = fileResponseFactory.file({
+      const result = kibanaResponseFactory.file({
         body,
         filename: 'myfile.test',
         fileContentSize: 30,
@@ -31,7 +97,7 @@ describe('fileResponseFactory', () => {
 
     it('converts string body content to buffer in response', () => {
       const body = 'I am a string';
-      const result = fileResponseFactory.file({ body, filename: 'myfile.test' });
+      const result = kibanaResponseFactory.file({ body, filename: 'myfile.test' });
       expect(result.payload?.toString()).toBe(body);
     });
 
@@ -39,7 +105,7 @@ describe('fileResponseFactory', () => {
       const isMultiByte = (str: string) => [...str].some((c) => (c.codePointAt(0) || 0) > 255);
       const multuByteCharacters = '日本語ダッシュボード.pdf';
 
-      const result = fileResponseFactory.file({
+      const result = kibanaResponseFactory.file({
         body: 'content',
         filename: multuByteCharacters,
       });
@@ -72,7 +138,7 @@ describe('fileResponseFactory', () => {
       };
       const filename = 'myfile.test';
       const fileContent = 'content';
-      const result = fileResponseFactory.file({
+      const result = kibanaResponseFactory.file({
         body: fileContent,
         filename,
         headers: { ...extraHeaders, ...overrideHeaders },
@@ -88,15 +154,15 @@ describe('fileResponseFactory', () => {
 
     describe('content-type', () => {
       it('default mime type octet-stream', () => {
-        const result = fileResponseFactory.file({ body: 'content', filename: 'myfile.unknown' });
+        const result = kibanaResponseFactory.file({ body: 'content', filename: 'myfile.unknown' });
         expect(result.options.headers).toHaveProperty('content-type', 'application/octet-stream');
       });
       it('gets mime type from filename', () => {
-        const result = fileResponseFactory.file({ body: 'content', filename: 'myfile.mp4' });
+        const result = kibanaResponseFactory.file({ body: 'content', filename: 'myfile.mp4' });
         expect(result.options.headers).toHaveProperty('content-type', 'video/mp4');
       });
       it('gets accepts contentType override', () => {
-        const result = fileResponseFactory.file({
+        const result = kibanaResponseFactory.file({
           body: 'content',
           filename: 'myfile.mp4',
           fileContentType: 'custom',
