@@ -18,4 +18,3 @@ declare module 'react-syntax-highlighter/dist/cjs/prism-light';
 
 declare module 'find-cypress-specs';
 declare module '@cypress/grep/src/plugin';
-declare module '@cypress/debugging-proxy';
