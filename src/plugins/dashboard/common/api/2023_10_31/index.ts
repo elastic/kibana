@@ -107,13 +107,14 @@ export const dashboardCreate = baseDashboard.extends(
   }
 );
 
-export const dashboard = baseDashboard.extends(
-  {
-    id: schema.string({ meta: { description: 'The ID of the dashboard' } }),
-  },
-  {
-    meta: { id: 'dashboard' },
-  }
-);
+export const dashboard = () =>
+  baseDashboard.extends(
+    {
+      id: schema.string({ meta: { description: 'The ID of the dashboard' } }),
+    },
+    {
+      meta: { id: 'dashboard' },
+    }
+  );
 
 export type Dashboard = TypeOf<typeof dashboard>;

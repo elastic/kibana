@@ -41,13 +41,28 @@ export function registerCreate(
           .for<Dashboard>(CONTENT_ID);
         let result: Dashboard;
         try {
-          const cmResult = await client.create(req.body);
-          result = cmResult.result as unknown as Dashboard;
+          ({
+            result: { item: result },
+          } = await client.create(req.body));
         } catch (e) {
           // do some handling;
           throw e;
         }
-        return res.ok({ body: result });
+        // This is the translation layer from storage to public endpoint
+        const body: Dashboard = {
+          id: result.id,
+          description: result.description,
+          title: result.title,
+          kibanaSavedObjectMeta: result.kibanaSavedObjectMeta,
+          timeRestore: result.timeRestore,
+          timeFrom: result.timeFrom,
+          optionsJSON: result.optionsJSON,
+          panelsJSON: result.panelsJSON,
+          controlGroupInput: result.controlGroupInput,
+          refreshInterval: result.refreshInterval,
+          timeTo: result.timeTo,
+        };
+        return res.ok({ body });
       }
     );
 }
