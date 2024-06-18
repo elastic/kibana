@@ -384,7 +384,7 @@ export function formatNonFatalErrors(
  */
 export async function ensureFleetDirectories() {
   const logger = appContextService.getLogger();
-  const config = appContextService.getConfig();
+  // const config = appContextService.getConfig();
 
   // const bundledPackageLocation = config?.developer?.bundledPackageLocation;
   const bundledPackageLocation = path.resolve(

@@ -18,15 +18,13 @@ run(async ({ log }) => {
     cwd: REPO_ROOT,
     onlyFiles: true,
     gitignore: true,
-    ignoreFiles: [
+    ignore: [
       // the gitignore: true option makes sure that we don't
       // include files from node_modules in the result, but it still
       // loads all of the files from node_modules before filtering
       // so it's still super slow. This prevents loading the files
       // and still relies on gitignore to final ignores
       '**/node_modules',
-      '**/bundle',
-      '**/endpoint-9.0.0.zip',
     ],
   });
 
