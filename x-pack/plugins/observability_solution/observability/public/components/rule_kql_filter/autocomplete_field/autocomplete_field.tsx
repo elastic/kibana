@@ -91,11 +91,11 @@ export class AutocompleteField extends React.Component<
             placeholder={placeholder}
             value={value}
             aria-label={ariaLabel}
-            data-test-subj="ruleKqlFilterSearchField"
+            data-test-subj="o11ySearchField"
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
             <EuiPanel
-              data-test-subj="ruleKqlFilterSuggestionsPanel"
+              data-test-subj="o11ySuggestionsPanel"
               paddingSize="none"
               hasShadow={true}
               css={css`
