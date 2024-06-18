@@ -36,7 +36,7 @@ export const TimeSliderStrings = {
       }),
     getPlayButtonDisabledTooltip: () =>
       i18n.translate('controls.timeSlider.playButtonTooltip.disabled', {
-        defaultMessage: 'To enable, turn on Control setting "Apply selections automatically".',
+        defaultMessage: '"Apply selections automatically" is disabled in Control Settings.',
       }),
   },
 };
