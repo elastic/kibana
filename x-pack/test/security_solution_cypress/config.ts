@@ -48,6 +48,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'alertSuppressionForEsqlRuleEnabled',
           'bulkCustomHighlightedFieldsEnabled',
           'alertSuppressionForMachineLearningRuleEnabled',
+          'manualRuleRunEnabled',
         ])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',
