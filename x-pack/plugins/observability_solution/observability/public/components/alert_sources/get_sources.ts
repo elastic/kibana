@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { ALERT_GROUP_FIELD, ALERT_GROUP_VALUE } from '@kbn/rule-data-utils';
-import {
-  apmSources,
-  infraSources,
-} from '../../../../common/custom_threshold_rule/helpers/get_alert_source_links';
-import { TopAlert } from '../../..';
+import { ALERT_GROUP_FIELD, ALERT_GROUP_VALUE, ALERT_GROUP } from '@kbn/rule-data-utils';
+import { TopAlert } from '../../typings/alerts';
+import { apmSources, infraSources } from './get_alert_source_links';
 
 interface AlertFields {
   [key: string]: any;
 }
 
 export const getSources = (alert: TopAlert) => {
+  // when `kibana.alert.group` is not flattened (for alert detail pages)
+  if (alert.fields[ALERT_GROUP]) return alert.fields[ALERT_GROUP];
+
+  // when `kibana.alert.group` is flattened (for alert flyout)
   const groupsFromGroupFields = alert.fields[ALERT_GROUP_FIELD]?.map((field, index) => {
     const values = alert.fields[ALERT_GROUP_VALUE];
     if (values?.length && values[index]) {

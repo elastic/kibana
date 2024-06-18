@@ -8,10 +8,10 @@
 import { EuiLink } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
-import { useKibana } from '../../../../utils/kibana_react';
-import { TimeRange, Group } from '../../../../../common/custom_threshold_rule/types';
-import { generateSourceLink } from '../../../../../common/custom_threshold_rule/helpers/get_alert_source_links';
-import { APM_APP_LOCATOR_ID } from '../../../../../common/custom_threshold_rule/get_apm_app_url';
+import { useKibana } from '../../utils/kibana_react';
+import { APM_APP_LOCATOR_ID } from './get_apm_app_url';
+import { Group, TimeRange } from '../../../common/typings';
+import { generateSourceLink } from './get_alert_source_links';
 
 export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: TimeRange }) {
   const {
@@ -57,10 +57,7 @@ export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: Time
             <span key={group.field}>
               {group.field}:{' '}
               {sourceLinks[group.field] ? (
-                <EuiLink
-                  data-test-subj="o11yCustomThresholdAlertSourceLink"
-                  href={sourceLinks[group.field]}
-                >
+                <EuiLink data-test-subj="o11yAlertSourceLink" href={sourceLinks[group.field]}>
                   {group.value}
                 </EuiLink>
               ) : (

@@ -19,14 +19,14 @@ export function Tags({ tags }: { tags: string[] }) {
       key="more"
       onClick={onMoreTagsClick}
       onClickAriaLabel={i18n.translate(
-        'xpack.infra.metrics.alertDetailsAppSection.summaryField.moreTags.ariaLabel',
+        'xpack.observability.alertDetails.alertSummaryField.moreTags.ariaLabel',
         {
           defaultMessage: 'more tags badge',
         }
       )}
     >
       <FormattedMessage
-        id="xpack.infra.metrics.alertDetailsAppSection.summaryField.moreTags"
+        id="xpack.observability.alertDetails.alertSummaryField.moreTags"
         defaultMessage="+{number} more"
         values={{ number: tags.length - 3 }}
       />
