@@ -45,8 +45,8 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
   const tabsDisplayed = useMemo(
     () =>
       eventKind === EventKind.signal
-        ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
-        : [tabs.insightsTab],
+        ? [tabs.visualizeTab, tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
+        : [tabs.visualizeTab, tabs.insightsTab],
     [eventKind]
   );
 

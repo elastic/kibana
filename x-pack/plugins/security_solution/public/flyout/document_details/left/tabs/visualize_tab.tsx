@@ -21,10 +21,21 @@ import {
 } from './test_ids';
 import { ANALYZE_GRAPH_ID, AnalyzeGraph } from '../components/analyze_graph';
 import { SESSION_VIEW_ID, SessionView } from '../components/session_view';
+import { GRAPH_ID, Graph } from '../components/graph/graph';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
+  {
+    id: GRAPH_ID,
+    label: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.visualize.graphLabel"
+        defaultMessage="Graph"
+      />
+    ),
+    'data-test-subj': VISUALIZE_TAB_SESSION_VIEW_BUTTON_TEST_ID,
+  },
   {
     id: SESSION_VIEW_ID,
     label: (
@@ -55,7 +66,7 @@ export const VisualizeTab = memo(() => {
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
   const [activeVisualizationId, setActiveVisualizationId] = useState(
-    panels.left?.path?.subTab ?? SESSION_VIEW_ID
+    panels.left?.path?.subTab ?? GRAPH_ID
   );
   const { startTransaction } = useStartTransaction();
   const onChangeCompressed = useCallback(
@@ -107,6 +118,7 @@ export const VisualizeTab = memo(() => {
       <EuiSpacer size="m" />
       {activeVisualizationId === SESSION_VIEW_ID && <SessionView />}
       {activeVisualizationId === ANALYZE_GRAPH_ID && <AnalyzeGraph />}
+      {activeVisualizationId === GRAPH_ID && <Graph />}
     </>
   );
 });
