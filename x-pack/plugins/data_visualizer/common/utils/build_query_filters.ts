@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Query } from '@kbn/es-query';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 
 export const buildFilterCriteria = (

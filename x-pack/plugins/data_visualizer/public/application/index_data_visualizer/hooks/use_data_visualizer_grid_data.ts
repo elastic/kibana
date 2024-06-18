@@ -207,7 +207,7 @@ export const useDataVisualizerGridData = (
 
       const tf = timefilter;
 
-      if (!buckets || !tf || !currentDataView) return;
+      if (!buckets || !tf || !currentDataView || lastRefresh === 0) return;
 
       const activeBounds = tf.getActiveBounds();
       let earliest: number | string | undefined;
@@ -220,7 +220,6 @@ export const useDataVisualizerGridData = (
         earliest = input.timeRange.from;
         latest = input.timeRange.to;
       }
-
       const bounds = tf.getActiveBounds();
       const barTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET) ?? DEFAULT_BAR_TARGET;
       buckets.setInterval('auto');
@@ -267,13 +266,13 @@ export const useDataVisualizerGridData = (
         nonAggregatableFields,
         browserSessionSeed,
         samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
+        embeddableExecutionContext: componentExecutionContext,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      _timeBuckets,
-      timefilter,
       currentDataView.id,
+      lastRefresh,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify({ searchQuery, samplingOption, fieldsToFetch }),
       searchSessionId,

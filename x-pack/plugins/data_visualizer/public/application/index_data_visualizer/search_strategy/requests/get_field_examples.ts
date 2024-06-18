@@ -26,6 +26,7 @@ import type {
 } from '../../../../../common/types/field_stats';
 import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { MAX_EXAMPLES_DEFAULT } from './constants';
+import { buildFilterCriteria } from '../../../../../common/utils/build_query_filters';
 
 export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, field: Field) => {
   const { index, timeFieldName, earliestMs, latestMs, query, runtimeFieldMap, maxExamples } =
