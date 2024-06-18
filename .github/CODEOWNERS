@@ -101,6 +101,7 @@ packages/content-management/tabbed_table_list_view @elastic/appex-sharedux
 packages/content-management/table_list_view @elastic/appex-sharedux
 packages/content-management/table_list_view_common @elastic/appex-sharedux
 packages/content-management/table_list_view_table @elastic/appex-sharedux
+packages/content-management/user_profiles @elastic/appex-sharedux
 packages/kbn-content-management-utils @elastic/kibana-data-discovery
 examples/controls_example @elastic/kibana-presentation
 src/plugins/controls @elastic/kibana-presentation

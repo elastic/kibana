@@ -10,10 +10,16 @@ import React from 'react';
 import { EuiAvatar, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export function ManagedAvatarTip({ entityName }: { entityName: string }) {
+export function ManagedAvatarTip({
+  entityName = i18n.translate('contentManagement.userProfiles.managedAvatarTip.defaultEntityName', {
+    defaultMessage: 'object',
+  }),
+}: {
+  entityName?: string;
+}) {
   return (
     <EuiToolTip
-      content={i18n.translate('contentManagement.tableList.managedAvatarTip.avatarTooltip', {
+      content={i18n.translate('contentManagement.userProfiles.managedAvatarTip.avatarTooltip', {
         defaultMessage:
           'This {entityName} is created and managed by Elastic. Clone it to make changes.',
         values: {
@@ -22,7 +28,7 @@ export function ManagedAvatarTip({ entityName }: { entityName: string }) {
       })}
     >
       <EuiAvatar
-        name={i18n.translate('contentManagement.tableList.managedAvatarTip.avatarLabel', {
+        name={i18n.translate('contentManagement.userProfiles.managedAvatarTip.avatarLabel', {
           defaultMessage: 'Managed',
         })}
         iconType={'logoElastic'}
