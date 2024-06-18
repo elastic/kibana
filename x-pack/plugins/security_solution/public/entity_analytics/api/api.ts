@@ -31,12 +31,13 @@ import {
   RISK_ENGINE_DISABLE_URL,
   RISK_ENGINE_INIT_URL,
   RISK_ENGINE_PRIVILEGES_URL,
-  ASSET_CRITICALITY_PRIVILEGES_URL,
-  ASSET_CRITICALITY_URL,
+  ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
+  ASSET_CRITICALITY_PUBLIC_URL,
   RISK_SCORE_INDEX_STATUS_API_URL,
   RISK_ENGINE_SETTINGS_URL,
-  ASSET_CRITICALITY_CSV_UPLOAD_URL,
+  ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   RISK_SCORE_ENTITY_CALCULATION_URL,
+  API_VERSIONS,
 } from '../../../common/constants';
 import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 import type { SnakeToCamelCase } from '../common/utils';
@@ -127,7 +128,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Get asset criticality privileges
      */
     const fetchAssetCriticalityPrivileges = () =>
-      http.fetch<EntityAnalyticsPrivileges>(ASSET_CRITICALITY_PRIVILEGES_URL, {
+      http.fetch<EntityAnalyticsPrivileges>(ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL, {
         version: '1',
         method: 'GET',
       });
@@ -140,8 +141,8 @@ export const useEntityAnalyticsRoutes = () => {
         refresh?: 'wait_for';
       }
     ): Promise<AssetCriticalityRecord> =>
-      http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_URL, {
-        version: '1',
+      http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_PUBLIC_URL, {
+        version: API_VERSIONS.public.v1,
         method: 'POST',
         body: JSON.stringify({
           id_value: params.idValue,
@@ -154,8 +155,8 @@ export const useEntityAnalyticsRoutes = () => {
     const deleteAssetCriticality = async (
       params: Pick<AssetCriticality, 'idField' | 'idValue'> & { refresh?: 'wait_for' }
     ): Promise<{ deleted: true }> => {
-      await http.fetch(ASSET_CRITICALITY_URL, {
-        version: '1',
+      await http.fetch(ASSET_CRITICALITY_PUBLIC_URL, {
+        version: API_VERSIONS.public.v1,
         method: 'DELETE',
         query: { id_value: params.idValue, id_field: params.idField, refresh: params.refresh },
       });
@@ -170,8 +171,8 @@ export const useEntityAnalyticsRoutes = () => {
     const fetchAssetCriticality = async (
       params: Pick<AssetCriticality, 'idField' | 'idValue'>
     ): Promise<AssetCriticalityRecord> => {
-      return http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_URL, {
-        version: '1',
+      return http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_PUBLIC_URL, {
+        version: API_VERSIONS.public.v1,
         method: 'GET',
         query: { id_value: params.idValue, id_field: params.idField },
       });
@@ -185,14 +186,17 @@ export const useEntityAnalyticsRoutes = () => {
       const body = new FormData();
       body.append('file', file);
 
-      return http.fetch<AssetCriticalityCsvUploadResponse>(ASSET_CRITICALITY_CSV_UPLOAD_URL, {
-        version: '1',
-        method: 'POST',
-        headers: {
-          'Content-Type': undefined, // Lets the browser set the appropriate content type
-        },
-        body,
-      });
+      return http.fetch<AssetCriticalityCsvUploadResponse>(
+        ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'POST',
+          headers: {
+            'Content-Type': undefined, // Lets the browser set the appropriate content type
+          },
+          body,
+        }
+      );
     };
 
     const getRiskScoreIndexStatus = ({
