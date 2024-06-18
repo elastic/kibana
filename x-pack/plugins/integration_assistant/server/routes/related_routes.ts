@@ -69,13 +69,13 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
           });
 
           const graph = await getRelatedGraph(client, model);
-          const results: RelatedResponse = await graph.invoke({
+          const results = await graph.invoke({
             packageName,
             datastreamName,
             rawSamples,
             currentPipeline,
           });
-          return res.ok({ body: results });
+          return res.ok({ body: RelatedResponse.parse(results) });
         } catch (e) {
           return res.badRequest({ body: e });
         }

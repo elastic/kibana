@@ -76,13 +76,13 @@ export function registerCategorizationRoutes(
           });
 
           const graph = await getCategorizationGraph(client, model);
-          const results: CategorizationResponse = await graph.invoke({
+          const results = await graph.invoke({
             packageName,
             datastreamName,
             rawSamples,
             currentPipeline,
           });
-          return res.ok({ body: results });
+          return res.ok({ body: CategorizationResponse.parse(results) });
         } catch (e) {
           return res.badRequest({ body: e });
         }

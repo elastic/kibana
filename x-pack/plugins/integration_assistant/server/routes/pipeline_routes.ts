@@ -37,11 +37,11 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
         try {
-          const results: CheckPipelineResponse = await testPipeline(rawSamples, pipeline, client);
+          const results = await testPipeline(rawSamples, pipeline, client);
           if (results?.errors && results.errors.length > 0) {
             return res.badRequest({ body: JSON.stringify(results.errors) });
           }
-          return res.ok({ body: results });
+          return res.ok({ body: CheckPipelineResponse.parse(results) });
         } catch (e) {
           return res.badRequest({ body: e });
         }

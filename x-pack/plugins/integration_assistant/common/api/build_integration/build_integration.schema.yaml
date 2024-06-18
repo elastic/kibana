@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
   title: Integration Assistatnt Build Integrarion API endpoint
   version: "1"
