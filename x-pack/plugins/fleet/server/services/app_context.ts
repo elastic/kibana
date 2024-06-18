@@ -22,6 +22,7 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -47,14 +48,16 @@ import type {
 } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
+import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../constants';
 import type { MessageSigningServiceInterface } from '..';
 
-import type { BulkActionsResolver } from './agents';
-import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
+import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
+import { type UninstallTokenServiceInterface } from './security/uninstall_token_service';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
+  private encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart | undefined;
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
   private experimentalFeatures?: ExperimentalFeatures;
@@ -80,6 +83,7 @@ class AppContextService {
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
     this.esClient = appContext.elasticsearch.client.asInternalUser;
+    this.encryptedSavedObjectsStart = appContext.encryptedSavedObjectsStart;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
     this.securitySetup = appContext.securitySetup;
@@ -190,6 +194,7 @@ class AppContextService {
 
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
+      includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }
@@ -209,6 +214,7 @@ class AppContextService {
 
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
+      includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }
@@ -251,6 +257,10 @@ class AppContextService {
 
   public getEncryptedSavedObjectsSetup() {
     return this.encryptedSavedObjectsSetup;
+  }
+
+  public getEncryptedSavedObjectsStart() {
+    return this.encryptedSavedObjectsStart;
   }
 
   public getKibanaVersion() {

@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Filter, Query, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
 import { useDiscoverCustomization } from '../../customizations';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
+import { useProfileAccessor } from '../../context_awareness';
 
 export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 
@@ -68,9 +70,24 @@ export function DiscoverGridFlyout({
     savedSearchId,
   });
 
+  const getDocViewerAccessor = useProfileAccessor('getDocViewer', {
+    record: hit, // TODO: or `actualHit`?
+  });
+  const docViewer = useMemo(() => {
+    const getDocViewer = getDocViewerAccessor(() => ({
+      title: flyoutCustomization?.title || '', // TODO: fix the fallback
+      docViewsRegistry: (registry: DocViewsRegistry) =>
+        typeof flyoutCustomization?.docViewsRegistry === 'function'
+          ? flyoutCustomization.docViewsRegistry(registry)
+          : registry,
+    }));
+
+    return getDocViewer({ record: hit });
+  }, [flyoutCustomization, getDocViewerAccessor, hit]);
+
   return (
     <UnifiedDocViewerFlyout
-      flyoutTitle={flyoutCustomization?.title}
+      flyoutTitle={docViewer.title}
       flyoutDefaultWidth={flyoutCustomization?.size}
       flyoutActions={
         !isESQLQuery && flyoutActions.length > 0 ? (
@@ -80,7 +97,7 @@ export function DiscoverGridFlyout({
       flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
       FlyoutCustomBody={flyoutCustomization?.Content}
       services={services}
-      docViewsRegistry={flyoutCustomization?.docViewsRegistry}
+      docViewsRegistry={docViewer.docViewsRegistry}
       isEsqlQuery={isESQLQuery}
       hit={hit}
       hits={hits}
