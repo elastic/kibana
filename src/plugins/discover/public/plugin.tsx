@@ -21,6 +21,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import { once } from 'lodash';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
@@ -65,9 +66,6 @@ import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugin
 export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
 {
-  private readonly rootProfileService = new RootProfileService();
-  private readonly dataSourceProfileService = new DataSourceProfileService();
-  private readonly documentProfileService = new DocumentProfileService();
   private readonly appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly historyService = new HistoryService();
   private readonly inlineTopNav: Map<string | null, DiscoverCustomizationContext['inlineTopNav']> =
@@ -80,7 +78,6 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
-  private profileProvidersRegistered = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     const experimental = this.initializerContext.config.get().experimental;
@@ -302,25 +299,31 @@ export class DiscoverPlugin
     }
   }
 
+  private createProfileServices = once(async () => {
+    const { registerProfileProviders } = await import('./context_awareness/profile_providers');
+    const rootProfileService = new RootProfileService();
+    const dataSourceProfileService = new DataSourceProfileService();
+    const documentProfileService = new DocumentProfileService();
+    const experimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
+
+    registerProfileProviders({
+      rootProfileService,
+      dataSourceProfileService,
+      documentProfileService,
+      experimentalProfileIds,
+    });
+
+    return { rootProfileService, dataSourceProfileService, documentProfileService };
+  });
+
   private async createProfilesManager() {
-    if (!this.profileProvidersRegistered) {
-      const { registerProfileProviders } = await import('./context_awareness/profile_providers');
-      const experimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
-
-      registerProfileProviders({
-        rootProfileService: this.rootProfileService,
-        dataSourceProfileService: this.dataSourceProfileService,
-        documentProfileService: this.documentProfileService,
-        experimentalProfileIds,
-      });
-
-      this.profileProvidersRegistered = true;
-    }
+    const { rootProfileService, dataSourceProfileService, documentProfileService } =
+      await this.createProfileServices();
 
     return new ProfilesManager(
-      this.rootProfileService,
-      this.dataSourceProfileService,
-      this.documentProfileService
+      rootProfileService,
+      dataSourceProfileService,
+      documentProfileService
     );
   }
 
