@@ -90,8 +90,12 @@ import {
 import { FunctionArgSignature } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
-type GetDataSourcesFn = () => Promise<
-  Array<{ name: string; dataStreams?: Array<{ name: string; title?: string }> }>
+type GetDataSourceFn = (sourceName: string) => Promise<
+  | {
+      name: string;
+      dataStreams?: Array<{ name: string; title?: string }>;
+    }
+  | undefined
 >;
 type GetFieldsByTypeFn = (
   type: string | string[],
@@ -207,7 +211,7 @@ export async function suggest(
     resourceRetriever
   );
   const getSources = getSourcesRetriever(resourceRetriever);
-  const getDataSourcesList = getDataSourcesListRetriever(resourceRetriever);
+  const getDatastreamsForIntegration = getDatastreamsForIntegrationRetriever(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
   if (astContext.type === 'newCommand') {
@@ -228,7 +232,7 @@ export async function suggest(
       ast,
       astContext,
       getSources,
-      getDataSourcesList,
+      getDatastreamsForIntegration,
       getFieldsByType,
       getFieldsMap,
       getPolicies,
@@ -319,14 +323,11 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
   };
 }
 
-function getDataSourcesListRetriever(resourceRetriever?: ESQLCallbacks) {
+function getDatastreamsForIntegrationRetriever(resourceRetriever?: ESQLCallbacks) {
   const helper = getSourcesHelper(resourceRetriever);
-  return async () => {
+  return async (sourceName: string) => {
     const list = (await helper()) || [];
-    return list.map(({ name, dataStreams }) => ({
-      name,
-      dataStreams,
-    }));
+    return list.find(({ name }) => name === sourceName);
   };
 }
 
@@ -498,7 +499,7 @@ async function getExpressionSuggestionsByType(
     node: ESQLSingleAstItem | undefined;
   },
   getSources: GetSourceFn,
-  getDataSourcesList: GetDataSourcesFn,
+  getDatastreamsForIntegration: GetDataSourceFn,
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
@@ -857,8 +858,7 @@ async function getExpressionSuggestionsByType(
         // This is going to be empty for simple indices, and not empty for integrations
         if (index && index.text) {
           const source = index.text.replace(EDITOR_MARKER, '');
-          const dataSourcesList = await getDataSourcesList();
-          const dataSource = dataSourcesList.find(({ name }) => name === source);
+          const dataSource = await getDatastreamsForIntegration(source);
           const newDefinitions = buildSourcesDefinitions(
             dataSource?.dataStreams?.map(({ name }) => ({ name, isIntegration: false })) || []
           );
