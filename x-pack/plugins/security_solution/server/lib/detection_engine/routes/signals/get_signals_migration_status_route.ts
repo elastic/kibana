@@ -6,10 +6,10 @@
  */
 
 import { transformError, getIndexAliases } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { GetAlertsMigrationStatusRequestQuery } from '../../../../../common/api/detection_engine/signals_migration';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '../../../../../common/constants';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
 import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
 import { getSignalsIndicesInRange } from '../../migrations/get_signals_indices_in_range';
