@@ -90,16 +90,25 @@ const anomalyGrayScale = d3.scale
   .domain([3, 25, 50, 75, 100])
   .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
 
-function getSvgHeight(showAnnotations) {
+function getSvgHeight(showAnnotations, heights) {
+  const {
+    chartSpacing: chartSpacingIncoming,
+    contextChartHeight: contextChartIncoming,
+    focusHeight: focusHeightIncoming,
+    marginTop: marginTopIncoming,
+    marginBottom: marginBottomIncoming,
+  } = heights ?? {};
+
   const adjustedAnnotationHeight = showAnnotations ? annotationHeight : 0;
+
   return (
-    focusHeight +
-    contextChartHeight +
+    (focusHeightIncoming ?? focusHeight) +
+    (contextChartIncoming ?? contextChartHeight) +
     swimlaneHeight +
     adjustedAnnotationHeight +
-    chartSpacing +
-    margin.top +
-    margin.bottom
+    (chartSpacingIncoming ?? chartSpacing) +
+    (marginTopIncoming ?? margin.top) +
+    (marginBottomIncoming ?? margin.bottom)
   );
 }
 
@@ -125,7 +134,6 @@ class TimeseriesChartIntl extends Component {
     showForecast: PropTypes.bool.isRequired,
     showModelBounds: PropTypes.bool.isRequired,
     svgWidth: PropTypes.number.isRequired,
-    svgHeight: PropTypes.number,
     swimlaneData: PropTypes.array,
     zoomFrom: PropTypes.object,
     zoomTo: PropTypes.object,
@@ -307,7 +315,6 @@ class TimeseriesChartIntl extends Component {
       modelPlotEnabled,
       selectedJob,
       svgWidth,
-      svgHeight: incomingSvgHeight,
       showAnnotations,
     } = this.props;
 
@@ -315,7 +322,7 @@ class TimeseriesChartIntl extends Component {
       chartSpacing: chartSpacingIncoming,
       contextChartHeight: contextChartIncoming,
       focusHeight: focusHeightIncoming,
-      margintTopHeight: marginTopIncoming,
+      marginTop: marginTopIncoming,
     } = heights ?? {};
 
     const createFocusChart = this.createFocusChart.bind(this);
@@ -324,9 +331,7 @@ class TimeseriesChartIntl extends Component {
     const focusYAxis = this.focusYAxis;
     const focusYScale = this.focusYScale;
 
-    const svgHeight =
-      (incomingSvgHeight && incomingSvgHeight + (showAnnotations ? annotationHeight : 0)) ??
-      getSvgHeight(showAnnotations);
+    const svgHeight = getSvgHeight(showAnnotations, heights);
 
     // Clear any existing elements from the visualization,
     // then build the svg elements for the bubble chart.

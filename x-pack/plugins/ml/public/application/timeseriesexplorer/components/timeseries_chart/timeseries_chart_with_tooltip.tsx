@@ -25,9 +25,9 @@ const percentFocusZoomPanelHeight = 0.051;
 const percentFocusChartHeight = 0.634;
 const percentContextChartHeight = 0.122;
 const percentContextChartLineTopMargin = 0.006;
-const percentChartSpacing = 0.051;
-const percentMarginTop = 0.02;
-const percentMarginBottom = 0.0306;
+const chartSpacing = 25;
+const marginTop = 10;
+const marginBottom = 15;
 const minSvgHeight = 470;
 
 interface Heights {
@@ -52,9 +52,9 @@ function getChartHeights(height: number) {
     focusHeight: focusZoomPanelHeight + focusChartHeight,
     contextChartHeight: Math.round(actualHeight * percentContextChartHeight),
     contextChartLineTopMargin: Math.round(actualHeight * percentContextChartLineTopMargin),
-    chartSpacing: Math.round(actualHeight * percentChartSpacing),
-    marginTop: Math.round(actualHeight * percentMarginTop),
-    marginBottom: Math.round(actualHeight * percentMarginBottom),
+    chartSpacing,
+    marginTop,
+    marginBottom,
   };
   return heights;
 }
@@ -178,9 +178,8 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
   let heights: Heights | undefined;
 
   if (chartProps.svgHeight) {
-    heights = getChartHeights(chartProps.svgHeight);
-    const actualHeight = chartProps.svgHeight < minSvgHeight ? minSvgHeight : chartProps.svgHeight;
-    chartProps.svgHeight = actualHeight + heights.marginBottom;
+    // 32 accounts for the height of the chart title
+    heights = getChartHeights(chartProps.svgHeight - 32);
   }
 
   return (
