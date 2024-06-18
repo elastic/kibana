@@ -57,6 +57,7 @@ import {
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
   IndexIdentifierContext,
+  InlineCastContext,
 } from './antlr/esql_parser';
 import {
   createSource,
@@ -76,6 +77,8 @@ import {
   createPolicy,
   createSetting,
   textExistsAndIsValid,
+  createInlineCast,
+  createUnknownItem,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -84,6 +87,7 @@ import type {
   ESQLFunction,
   ESQLCommandOption,
   ESQLAstItem,
+  ESQLInlineCast,
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
@@ -292,7 +296,7 @@ function getBooleanValue(ctx: BooleanLiteralContext | BooleanValueContext) {
   return createLiteral('boolean', booleanTerminalNode!);
 }
 
-function getConstant(ctx: ConstantContext | undefined): ESQLAstItem | undefined {
+function getConstant(ctx: ConstantContext): ESQLAstItem {
   if (ctx instanceof NullLiteralContext) {
     return createLiteral('null', ctx.NULL());
   }
@@ -334,6 +338,8 @@ function getConstant(ctx: ConstantContext | undefined): ESQLAstItem | undefined 
     }
     return createList(ctx, values);
   }
+
+  return createUnknownItem(ctx);
 }
 
 export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstItem[] {
@@ -355,9 +361,7 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
     .filter(nonNullable);
 }
 
-export function visitPrimaryExpression(
-  ctx: PrimaryExpressionContext
-): ESQLAstItem | ESQLAstItem[] | undefined {
+export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstItem | ESQLAstItem[] {
   if (ctx instanceof ConstantDefaultContext) {
     return getConstant(ctx.constant());
   }
@@ -385,6 +389,18 @@ export function visitPrimaryExpression(
     }
     return fn;
   }
+  if (ctx instanceof InlineCastContext) {
+    return collectInlineCast(ctx);
+  }
+  return createUnknownItem(ctx);
+}
+
+function collectInlineCast(ctx: InlineCastContext): ESQLInlineCast {
+  const primaryExpression = visitPrimaryExpression(ctx.primaryExpression());
+  return {
+    ...createInlineCast(ctx),
+    value: primaryExpression,
+  };
 }
 
 export function collectLogicalExpression(ctx: BooleanExpressionContext) {
@@ -512,7 +528,7 @@ export function visitOrderExpression(ctx: OrderExpressionContext[]) {
     }
     if (orderCtx.NULLS()) {
       expression.push(createLiteral('string', orderCtx.NULLS()!)!);
-      if (orderCtx._nullOrdering) {
+      if (orderCtx._nullOrdering && orderCtx._nullOrdering.text !== '<first missing>') {
         const innerTerminalNode =
           orderCtx.getToken(esql_parser.FIRST, 0) || orderCtx.getToken(esql_parser.LAST, 0);
         const literal = createLiteral('string', innerTerminalNode);

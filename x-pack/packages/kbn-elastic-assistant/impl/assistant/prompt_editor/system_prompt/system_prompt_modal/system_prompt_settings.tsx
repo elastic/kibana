@@ -340,7 +340,6 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
             }
             checked={isNewConversationDefault}
             onChange={handleNewConversationDefaultChange}
-            compressed
           />
         </EuiFormRow>
       </>
