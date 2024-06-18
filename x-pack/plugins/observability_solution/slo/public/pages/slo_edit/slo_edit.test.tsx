@@ -36,12 +36,12 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('@kbn/observability-plugin/public');
 jest.mock('../../hooks/use_fetch_indices');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/use_fetch_slo_details');
 jest.mock('../../hooks/use_create_slo');
 jest.mock('../../hooks/use_update_slo');
-jest.mock('@kbn/observability-plugin/public');
 jest.mock('../../hooks/use_fetch_apm_suggestions');
 jest.mock('../../hooks/use_permissions');
 
@@ -54,7 +54,7 @@ jest.mock('../../utils/kibana_react', () => ({
 const useKibanaMock = useKibana as jest.Mock;
 const useFetchIndicesMock = useFetchIndices as jest.Mock;
 const useFetchDataViewsMock = useFetchDataViews as jest.Mock;
-const useCreateDataViewsMock = useCreateDataView as jest.Mock;
+const useCreateDataViewMock = useCreateDataView as jest.Mock;
 const useFetchSloMock = useFetchSloDetails as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
@@ -77,6 +77,7 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
       theme: {},
       application: {
         navigateToUrl: mockNavigate,
+        capabilities: {},
       },
       charts: {
         theme: {
@@ -164,16 +165,16 @@ describe('SLO Edit Page', () => {
       data: [
         {
           getName: () => 'dataview',
-          getIndexPattern: () => '.dataview-index',
+          getIndexPattern: () => 'some-index',
           getRuntimeMappings: jest.fn().mockReturnValue({}),
         },
       ],
     });
 
-    useCreateDataViewsMock.mockReturnValue({
+    useCreateDataViewMock.mockReturnValue({
       dataView: {
         getName: () => 'dataview',
-        getIndexPattern: () => '.dataview-index',
+        getIndexPattern: () => 'some-index',
         getRuntimeMappings: jest.fn().mockReturnValue({}),
       },
     });
@@ -203,19 +204,21 @@ describe('SLO Edit Page', () => {
       isError: false,
       mutateAsync: mockUpdate,
     });
+
+    usePermissionsMock.mockReturnValue({
+      isLoading: false,
+      data: {
+        hasAllWriteRequested: true,
+        hasAllReadRequested: true,
+      },
+    });
+    licenseMock.hasAtLeast.mockReturnValue(true);
   });
 
   afterEach(cleanup);
 
   describe('when the incorrect license is found', () => {
     beforeEach(() => {
-      usePermissionsMock.mockReturnValue({
-        isLoading: false,
-        data: {
-          hasAllWriteRequested: true,
-          hasAllReadRequested: true,
-        },
-      });
       licenseMock.hasAtLeast.mockReturnValue(false);
     });
 
@@ -235,13 +238,6 @@ describe('SLO Edit Page', () => {
 
   describe('when the license is null', () => {
     beforeEach(() => {
-      usePermissionsMock.mockReturnValue({
-        isLoading: false,
-        data: {
-          hasAllWriteRequested: true,
-          hasAllReadRequested: true,
-        },
-      });
       mockKibana(null);
     });
 
@@ -261,13 +257,6 @@ describe('SLO Edit Page', () => {
 
   describe('when the correct license is found', () => {
     beforeEach(() => {
-      usePermissionsMock.mockReturnValue({
-        isLoading: false,
-        data: {
-          hasAllWriteRequested: true,
-          hasAllReadRequested: true,
-        },
-      });
       licenseMock.hasAtLeast.mockReturnValue(true);
     });
 
@@ -382,7 +371,7 @@ describe('SLO Edit Page', () => {
     describe('when a sloId route param is provided', () => {
       it('prefills the form with the SLO values', async () => {
         const slo = buildSlo({ id: '123Foo' });
-        useFetchSloMock.mockReturnValue({ isLoading: false, isInitialLoading: false, data: slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123Foo' });
 
         jest
@@ -466,7 +455,6 @@ describe('SLO Edit Page', () => {
     describe('when submitting has completed successfully', () => {
       it('navigates to the SLO List page', async () => {
         const slo = buildSlo();
-
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
         jest
           .spyOn(Router, 'useLocation')
