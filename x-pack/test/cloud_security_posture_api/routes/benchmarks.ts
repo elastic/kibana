@@ -10,16 +10,13 @@ import {
 } from '@kbn/core-http-common';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { FtrProviderContext } from '../ftr_provider_context';
-import {
-  benchmarkRulesMockDataCSPM,
-  benchmarkRulesMockDataKSPM,
-} from './mocks/benchmark_rules_mocks';
 
 const chance = new Chance();
 
@@ -32,6 +29,35 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const log = getService('log');
+
+const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
+  let retryCount = 0;
+
+  while (retryCount < 10) {
+    try {
+      const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
+        type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
+      });
+
+      const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
+        (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
+      );
+
+      if (requestedBenchmarkRules.length > 0) {
+        return requestedBenchmarkRules.map((item) => item.attributes);
+      } else {
+        throw new Error(`No benchmark rules found for benchmark ID: ${benchmarkId}`);
+      }
+    } catch (error) {
+      retryCount++;
+      console.error(`Attempt ${retryCount} failed:`, error);
+      // You can add a delay between retries if needed
+      await new Promise(resolve => setTimeout(resolve, 3000)); // 1 second delay
+    }
+  }
+
+  throw new Error(`Failed to retrieve benchmark rules after ${retryCount} attempts`);
+};
 
   const getMockFinding = (rule: CspBenchmarkRule, evaluation: string) => ({
     '@timestamp': '2023-06-29T02:08:44.993Z',
@@ -134,7 +160,6 @@ export default function (providerContext: FtrProviderContext) {
     },
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/179815
   describe('GET /internal/cloud_security_posture/benchmarks', () => {
     describe('Get Benchmark API', async () => {
       beforeEach(async () => {
@@ -147,9 +172,10 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Verify cspm benchmark score is updated when muting rules', async () => {
         const benchmark = 'cis_aws';
+        const benchmarkRules = await getCspBenchmarkRules(benchmark);
 
-        const cspmFinding1 = getMockFinding(benchmarkRulesMockDataCSPM[0], 'passed');
-        const cspmFinding2 = getMockFinding(benchmarkRulesMockDataCSPM[1], 'failed');
+        const cspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
+        const cspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
 
         await index.addFindings([cspmFinding1, cspmFinding2]);
 
@@ -200,9 +226,10 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Verify kspm benchmark score is updated when muting rules', async () => {
         const benchmark = 'cis_k8s';
+        const benchmarkRules = await getCspBenchmarkRules(benchmark);
 
-        const kspmFinding1 = getMockFinding(benchmarkRulesMockDataKSPM[0], 'passed');
-        const kspmFinding2 = getMockFinding(benchmarkRulesMockDataKSPM[1], 'failed');
+        const kspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
+        const kspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
 
         await index.addFindings([kspmFinding1, kspmFinding2]);
         const { body: benchmarksBeforeMute } = await supertest
