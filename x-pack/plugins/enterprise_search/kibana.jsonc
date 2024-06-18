@@ -31,6 +31,7 @@
       "console",
       "searchConnectors",
       "searchPlayground",
+      "searchInferenceEndpoints",
       "embeddable",
       "discover",
       "charts",

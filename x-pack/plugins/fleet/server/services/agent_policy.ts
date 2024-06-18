@@ -38,8 +38,6 @@ import {
   policyHasSyntheticsIntegration,
 } from '../../common/services';
 
-import { populateAssignedAgentsCount } from '../routes/agent_policy/handlers';
-
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
@@ -349,7 +347,10 @@ class AgentPolicyService {
       options
     );
 
-    await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
+    await appContextService
+      .getUninstallTokenService()
+      ?.scoped(soClient.getCurrentNamespace())
+      ?.generateTokenForPolicyId(newSo.id);
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'created', newSo.id, {
       skipDeploy: options.skipDeploy,
       spaceId: soClient.getCurrentNamespace(),
@@ -485,8 +486,6 @@ class AgentPolicyService {
       kuery,
       withPackagePolicies = false,
       fields,
-      esClient,
-      withAgentCount = false,
     } = options;
 
     const baseFindParams = {
@@ -526,6 +525,21 @@ class AgentPolicyService {
           agentPolicy.package_policies =
             (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
         }
+        if (options.withAgentCount) {
+          await getAgentsByKuery(
+            appContextService.getInternalUserESClient(),
+            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_id),
+            {
+              showInactive: true,
+              perPage: 0,
+              page: 1,
+              kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+            }
+          ).then(({ total }) => (agentPolicy.agents = total));
+        } else {
+          agentPolicy.agents = 0;
+        }
+
         return agentPolicy;
       },
       { concurrency: 50 }
@@ -537,11 +551,6 @@ class AgentPolicyService {
         id: agentPolicy.id,
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
-    }
-    if (esClient && withAgentCount) {
-      await populateAssignedAgentsCount(esClient, soClient, agentPolicies);
-    } else {
-      agentPolicies.forEach((item) => (item.agents = 0));
     }
 
     return {
@@ -689,7 +698,7 @@ class AgentPolicyService {
         esClient,
         newPackagePolicies.map((newPackagePolicy) => ({
           ...newPackagePolicy,
-          policy_id: newAgentPolicy.id,
+          policy_ids: [newAgentPolicy.id],
         })),
         {
           ...options,
