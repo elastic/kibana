@@ -47,7 +47,7 @@ export const getTimesliderControlFactory = (
     getIconType: () => 'search',
     getDisplayName: () =>
       i18n.translate('controlsExamples.timesliderControl.displayName', {
-        defaultMessage: 'Timeslider',
+        defaultMessage: 'Time slider',
       }),
     buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
