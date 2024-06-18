@@ -60,6 +60,10 @@ describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
   const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');
   const expectedTags = (getMachineLearningRule().tags ?? []).join('');
   const expectedMitre = formatMitreAttackDescription(getMachineLearningRule().threat ?? []);
+  const expectedJobText = [
+    'Unusual Linux Network Activity',
+    'Anomalous Process for a Linux Population',
+  ].join('');
 
   const machineLearningJobIds = ([] as string[]).concat(
     getMachineLearningRule().machine_learning_job_id
@@ -116,7 +120,7 @@ describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
       // Thus, we disable next check till we fix the issue with enabling jobs in cypress.
       // Relevant ticket: https://github.com/elastic/security-team/issues/5389
       // cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'StoppedStopped');
-      cy.get(MACHINE_LEARNING_JOB_ID).should('have.text', machineLearningJobIds.join(''));
+      cy.get(MACHINE_LEARNING_JOB_ID).should('have.text', expectedJobText);
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
       getDetails(RUNS_EVERY_DETAILS)
