@@ -5680,6 +5680,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/openapi-common@link:packages/kbn-openapi-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/openapi-generator@link:packages/kbn-openapi-generator":
   version "0.0.0"
   uid ""
@@ -6197,6 +6201,10 @@
   uid ""
 
 "@kbn/securitysolution-list-utils@link:packages/kbn-securitysolution-list-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-lists-common@link:packages/kbn-securitysolution-lists-common":
   version "0.0.0"
   uid ""
 
