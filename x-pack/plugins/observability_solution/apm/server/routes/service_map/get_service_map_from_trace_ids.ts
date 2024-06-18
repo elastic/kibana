@@ -46,6 +46,7 @@ export async function getServiceMapFromTraceIds({
   start,
   end,
   terminateAfter,
+  serverlessServiceMapMaxAvailableBytes,
   logger,
 }: {
   apmEventClient: APMEventClient;
@@ -53,6 +54,7 @@ export async function getServiceMapFromTraceIds({
   start: number;
   end: number;
   terminateAfter: number;
+  serverlessServiceMapMaxAvailableBytes: number;
   logger: Logger;
 }) {
   const serviceMapFromTraceIdsScriptResponse = await fetchServicePathsFromTraceIds({
@@ -61,6 +63,7 @@ export async function getServiceMapFromTraceIds({
     start,
     end,
     terminateAfter,
+    serverlessServiceMapMaxAvailableBytes,
   });
 
   logger.debug('Received scripted metric agg response');
