@@ -24,14 +24,10 @@ export function getCircularRefs(document: OpenApiDocument): Set<string> {
   // In general references represent a disconnected graph. To find
   // all references cycles we need to check each reference.
   for (const startRef of new Set(localRefs)) {
-    if (circularRefs.has(startRef)) {
-      // We already found a cycle with the current startRef
-      // continue to the next one
-      continue;
-    }
+    const cycleHeadRef = findCycleHeadRef(startRef, resolveLocalRef);
 
-    for (const circularRef of findCycle(startRef, resolveLocalRef)) {
-      circularRefs.add(circularRef);
+    if (cycleHeadRef) {
+      circularRefs.add(cycleHeadRef);
     }
   }
 
@@ -39,22 +35,36 @@ export function getCircularRefs(document: OpenApiDocument): Set<string> {
 }
 
 /**
- * Searches for a reference cycle starting from `startRef` reference.
+ * Searches for a cycle head. A search starts from `startRef` reference.
+ *
+ * A cycle head is a first ref in a cycle. If `startRef` inside a cycle
+ * a cycle head is the starting ref. It can be illustrated as
+ *
+ *                        c1 - c2 - c3
+ *                      /            |
+ * r1 -> r2 -> r3 -> head            c4
+ *                      \            |
+ *                        c7 - c6 - c5
+ *
+ * On the schema above references `r1`, `r2` and `r3` depend on the cycle but
+ * aren't part of the cycle. When search is started from them `head` is
+ * returned. If a search starts from `c3` then `c3` will be returned.
  *
  * @param startRef A starting point to find a cycle
  * @param resolveRef A callback function to resolve an encountered reference.
  *                   It should return a document node the provided ref resolves to.
  * @returns a Set representing a cycle or an empty set if a cycle is not found
  */
-function findCycle(startRef: string, resolveRef: (ref: string) => PlainObject): Set<string> {
-  let result = new Set<string>();
+function findCycleHeadRef(
+  startRef: string,
+  resolveRef: (ref: string) => PlainObject
+): string | undefined {
+  let result: string | undefined;
 
   const visitedRefs = new Set<string>();
   const search = (ref: string): void => {
     if (visitedRefs.has(ref)) {
-      // Need to make a copy due to deletion of the current ref
-      // in the recursion chain via `visitedRefs.delete(ref);`
-      result = new Set(visitedRefs);
+      result = ref;
       return;
     }
 
