@@ -56,7 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Flyout', function () {
     before(async () => {
-      await synthtrace.clean();
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
 
