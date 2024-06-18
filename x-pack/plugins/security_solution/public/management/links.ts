@@ -40,7 +40,7 @@ import {
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
   ASSET_CRITICALITY,
-  NOTES_MANAGEMENT,
+  NOTES,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -58,12 +58,6 @@ import { HostIsolationExceptionsApiClient } from './pages/host_isolation_excepti
 import { IconAssetCriticality } from '../common/icons/asset_criticality';
 
 const categories = [
-  {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
-      defaultMessage: 'Investigations',
-    }),
-    linkIds: [SecurityPageName.notesManagement],
-  },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
       defaultMessage: 'Entity Analytics',
@@ -92,6 +86,12 @@ const categories = [
       defaultMessage: 'Cloud Security',
     }),
     linkIds: [SecurityPageName.cloudDefendPolicies],
+  },
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
+      defaultMessage: 'Investigations',
+    }),
+    linkIds: [SecurityPageName.notesManagement],
   },
 ];
 
@@ -225,7 +225,7 @@ export const links: LinkItem = {
     cloudDefendLink,
     {
       id: SecurityPageName.notesManagement,
-      title: NOTES_MANAGEMENT,
+      title: NOTES,
       description: i18n.translate('xpack.securitySolution.appLinks.notesManagementDescription', {
         defaultMessage: 'Visualize and delete notes.',
       }),

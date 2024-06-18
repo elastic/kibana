@@ -46,14 +46,14 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
   const notesEnabled = useIsExperimentalFeatureEnabled('notesEnabled');
 
   const tabsDisplayed = useMemo(() => {
-    const t =
+    const tabList =
       eventKind === EventKind.signal
         ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
         : [tabs.insightsTab];
     if (notesEnabled) {
-      t.push(tabs.notesTab);
+      tabList.push(tabs.notesTab);
     }
-    return t;
+    return tabList;
   }, [eventKind, notesEnabled]);
 
   const selectedTabId = useMemo(() => {
