@@ -53,13 +53,22 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
+import { stopDatafeeds } from '../../../../support/machine_learning';
 
 describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
   const expectedUrls = (getMachineLearningRule().references ?? []).join('');
   const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');
   const expectedTags = (getMachineLearningRule().tags ?? []).join('');
   const expectedMitre = formatMitreAttackDescription(getMachineLearningRule().threat ?? []);
-  const expectedNumberOfRules = 1;
+
+  const machineLearningJobIds = ([] as string[]).concat(
+    getMachineLearningRule().machine_learning_job_id
+  );
+
+  // ensure no ML datafeeds are started before the test
+  before(() => {
+    stopDatafeeds({ jobIds: machineLearningJobIds });
+  });
 
   beforeEach(() => {
     login();
@@ -102,15 +111,12 @@ describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
       getDetails(ANOMALY_SCORE_DETAILS).should('have.text', mlRule.anomaly_threshold);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Machine Learning');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
-      const machineLearningJobsArray = isArray(mlRule.machine_learning_job_id)
-        ? mlRule.machine_learning_job_id
-        : [mlRule.machine_learning_job_id];
       // With the #1912 ML rule improvement changes we enable jobs on rule creation.
       // Though, in cypress jobs enabling does not work reliably and job can be started or stopped.
       // Thus, we disable next check till we fix the issue with enabling jobs in cypress.
       // Relevant ticket: https://github.com/elastic/security-team/issues/5389
       // cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'StoppedStopped');
-      cy.get(MACHINE_LEARNING_JOB_ID).should('have.text', machineLearningJobsArray.join(''));
+      cy.get(MACHINE_LEARNING_JOB_ID).should('have.text', machineLearningJobIds.join(''));
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
       getDetails(RUNS_EVERY_DETAILS)
