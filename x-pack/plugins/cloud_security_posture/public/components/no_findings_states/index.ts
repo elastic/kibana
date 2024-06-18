@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-export const deleteSignalsMigrationSchema = t.exact(
-  t.type({
-    migration_ids: t.array(t.string),
-  })
-);
+export * from './no_findings_states';

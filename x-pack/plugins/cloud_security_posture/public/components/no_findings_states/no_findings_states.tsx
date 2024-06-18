@@ -20,21 +20,21 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../common/constants';
-import { FullSizeCenteredPage } from './full_size_centered_page';
-import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
+import { FullSizeCenteredPage } from '../full_size_centered_page';
+import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import {
   CSPM_NOT_INSTALLED_ACTION_SUBJ,
   KSPM_NOT_INSTALLED_ACTION_SUBJ,
   NO_FINDINGS_STATUS_TEST_SUBJ,
-} from './test_subjects';
-import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from './cloud_posture_page';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import type { IndexDetails, PostureTypes, CspStatusCode } from '../../common/types_old';
-import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
-import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
-import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../common/constants';
-import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
+} from '../test_subjects';
+import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../cloud_posture_page';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import type { IndexDetails, PostureTypes, CspStatusCode } from '../../../common/types_old';
+import noDataIllustration from '../../assets/illustrations/no_data_illustration.svg';
+import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
+import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
+import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
 
 const NotDeployed = ({ postureType }: { postureType: PostureTypes }) => {
   const integrationPoliciesLink = useCISIntegrationPoliciesLink({
@@ -169,13 +169,10 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
   />
 );
 
-const EmptySecurityFindingsPrompt = ({
-  kspmIntegrationLink,
-  cspmIntegrationLink,
-}: {
-  kspmIntegrationLink?: string;
-  cspmIntegrationLink?: string;
-}) => {
+const EmptySecurityFindingsPrompt = () => {
+  const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
+  const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
+
   return (
     <EuiEmptyPrompt
       data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
@@ -215,6 +212,7 @@ const EmptySecurityFindingsPrompt = ({
               color="primary"
               fill
               href={cspmIntegrationLink}
+              isDisabled={!cspmIntegrationLink}
               data-test-subj={CSPM_NOT_INSTALLED_ACTION_SUBJ}
             >
               <FormattedMessage
@@ -228,6 +226,7 @@ const EmptySecurityFindingsPrompt = ({
               color="primary"
               fill
               href={kspmIntegrationLink}
+              isDisabled={!kspmIntegrationLink}
               data-test-subj={KSPM_NOT_INSTALLED_ACTION_SUBJ}
             >
               <FormattedMessage
@@ -253,9 +252,6 @@ const NoFindingsStatesNotification = ({
   indicesStatus?: IndexDetails[];
   isNotInstalled: boolean;
 }) => {
-  const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
-  const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
-
   const unprivilegedIndices =
     indicesStatus &&
     indicesStatus
@@ -267,13 +263,7 @@ const NoFindingsStatesNotification = ({
     return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />;
   if (status === 'indexing' || status === 'waiting_for_results') return <Indexing />;
   if (status === 'index-timeout') return <IndexTimeout />;
-  if (isNotInstalled)
-    return (
-      <EmptySecurityFindingsPrompt
-        kspmIntegrationLink={kspmIntegrationLink}
-        cspmIntegrationLink={cspmIntegrationLink}
-      />
-    );
+  if (isNotInstalled) return <EmptySecurityFindingsPrompt />;
   if (status === 'not-deployed') return <NotDeployed postureType={postureType} />;
 
   return null;
