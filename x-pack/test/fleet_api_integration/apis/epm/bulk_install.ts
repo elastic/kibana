@@ -94,8 +94,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
       expect(response.body.items.length).equal(1);
-      expect(response.body.items[0].statusCode).equal(200);
-      expect(response.body.items[0].status).equal('not_installed');
+      expect(response.body.items[0].statusCode).equal(422);
     });
   });
 }

@@ -10,6 +10,8 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import pLimit from 'p-limit';
 import { uniqBy } from 'lodash';
 
+import { PackageBulkInstallForbiddenError } from '../../../errors';
+
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 
 import { appContextService } from '../../app_context';
@@ -69,16 +71,6 @@ export async function bulkInstallPackages({
     )
     .map((pkg) => (typeof pkg === 'string' ? pkg : pkg.name));
 
-  if (forbiddenPackages.length > 0) {
-    logger.warn(
-      `Package(s) cannot be bulk installed and will be ignored: ${forbiddenPackages.join(',')}`
-    );
-  }
-
-  const filteredPackagesToInstall = uniquePackages.filter(
-    (pkg) => !forbiddenPackages.includes(typeof pkg === 'string' ? pkg : pkg.name)
-  );
-
   const maxConcurrentInstalls =
     appContextService.getConfig()?.internal?.maxConcurrentBulkInstallations ??
     DEFAULT_MAX_CONCURRENT_INSTALLS;
@@ -92,7 +84,7 @@ export async function bulkInstallPackages({
     skipDataStreamRollover?: boolean;
     forbidden?: boolean;
   }>(
-    filteredPackagesToInstall.map(async (pkg) => {
+    uniquePackages.map(async (pkg) => {
       return limiter(async () => {
         const packageName = typeof pkg === 'string' ? pkg : pkg.name;
         const isPackageForbidden = FORBIDDEN_BULK_INSTALL_PACKAGE_NAMES.includes(packageName);
@@ -153,7 +145,7 @@ export async function bulkInstallPackages({
         return {
           name: packageName,
           status: 'not_installed',
-          error: new Error(
+          error: new PackageBulkInstallForbiddenError(
             `Bulk installation of ${packageName} is forbidden. Please install it via the single package installation API.`
           ),
         };
@@ -243,7 +235,11 @@ export async function bulkInstallPackages({
 export function isBulkInstallError(
   installResponse: any
 ): installResponse is IBulkInstallPackageError {
-  return 'error' in installResponse && installResponse.error instanceof Error;
+  return (
+    'error' in installResponse &&
+    installResponse.error instanceof Error &&
+    installResponse.status !== 'not_installed'
+  );
 }
 
 function getNameFromPackagesToInstall(

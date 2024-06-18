@@ -44,6 +44,7 @@ import {
   FleetNotFoundError,
   PackageSavedObjectConflictError,
   FleetTooManyRequestsError,
+  PackageBulkInstallForbiddenError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -110,6 +111,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
   }
   if (error instanceof PackageAlreadyInstalledError) {
     return 409;
+  }
+  if (error instanceof PackageBulkInstallForbiddenError) {
+    return 422;
   }
   // Unsupported Media Type
   if (error instanceof PackageUnsupportedMediaTypeError) {
