@@ -217,6 +217,7 @@
     "@kbn/content-management-table-list-view": "link:packages/content-management/table_list_view",
     "@kbn/content-management-table-list-view-common": "link:packages/content-management/table_list_view_common",
     "@kbn/content-management-table-list-view-table": "link:packages/content-management/table_list_view_table",
+    "@kbn/content-management-user-profiles": "link:packages/content-management/user_profiles",
     "@kbn/content-management-utils": "link:packages/kbn-content-management-utils",
     "@kbn/controls-example-plugin": "link:examples/controls_example",
     "@kbn/controls-plugin": "link:src/plugins/controls",
