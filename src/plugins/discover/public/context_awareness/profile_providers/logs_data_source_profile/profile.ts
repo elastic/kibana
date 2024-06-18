@@ -20,7 +20,20 @@ export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
-  profile: {},
+  profile: {
+    getDefaultAppState: (prev) => () => {
+      const prevState = prev();
+
+      return {
+        columns: [
+          ...(prevState?.columns ?? []),
+          { name: 'log.level', width: 100 },
+          { name: 'message' },
+        ],
+        rowHeight: 1,
+      };
+    },
+  },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
 

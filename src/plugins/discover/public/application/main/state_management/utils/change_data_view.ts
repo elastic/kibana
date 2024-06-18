@@ -35,10 +35,12 @@ export async function changeDataView(
   }
 ) {
   addLog('[ui] changeDataView', { id });
+
   const { dataViews, uiSettings } = services;
   const dataView = internalState.getState().dataView;
   const state = appState.getState();
   let nextDataView: DataView | null = null;
+
   internalState.transitions.setIsDataViewLoading(true);
 
   try {
@@ -60,9 +62,12 @@ export async function changeDataView(
     );
 
     appState.update(nextAppState);
+
     if (internalState.getState().expandedDoc) {
       internalState.transitions.setExpandedDoc(undefined);
     }
   }
+
   internalState.transitions.setIsDataViewLoading(false);
+  internalState.transitions.setShouldUseDefaultProfileState(true);
 }
