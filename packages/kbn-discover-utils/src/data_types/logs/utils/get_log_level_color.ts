@@ -15,9 +15,9 @@ export const getLogLevelColor = (
 ): string | undefined => {
   switch (logLevelCoalescedValue) {
     case LogLevelCoalescedValue.trace:
-      return euiTheme.colors.lightestShade;
-    case LogLevelCoalescedValue.debug:
       return euiTheme.colors.lightShade;
+    case LogLevelCoalescedValue.debug:
+      return euiTheme.colors.mediumShade;
     case LogLevelCoalescedValue.info:
       return euiTheme.colors.primary;
     case LogLevelCoalescedValue.warning:
