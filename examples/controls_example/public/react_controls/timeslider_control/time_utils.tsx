@@ -74,14 +74,14 @@ export function getTicks(min: number, max: number, timezone: string): EuiRangeTi
   const interval = getInterval(min, max);
   const format = getScaledDateFormat(interval);
 
-  let tick = Math.ceil(min / interval) * interval;
+  let tickValue = Math.ceil(min / interval) * interval;
   const ticks: EuiRangeTick[] = [];
-  while (tick <= max) {
+  while (tickValue <= max) {
     ticks.push({
-      value: tick,
-      label: moment.tz(tick, getMomentTimezone(timezone)).format(format),
+      value: tickValue,
+      label: moment.tz(tickValue, getMomentTimezone(timezone)).format(format),
     });
-    tick += interval;
+    tickValue += interval;
   }
 
   return ticks.length <= 12
