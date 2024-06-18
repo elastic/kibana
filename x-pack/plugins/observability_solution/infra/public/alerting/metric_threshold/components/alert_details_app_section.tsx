@@ -7,25 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
-import React, { useEffect } from 'react';
+import React from 'react';
 import moment from 'moment';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { AlertSummaryField, TopAlert } from '@kbn/observability-plugin/public';
-import {
-  ALERT_END,
-  ALERT_START,
-  ALERT_EVALUATION_VALUES,
-  ALERT_GROUP,
-  TAGS,
-} from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
@@ -37,8 +30,6 @@ import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explore
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricThresholdRuleTypeParams } from '..';
 import { ExpressionChart } from './expression_chart';
-import { Groups } from './groups';
-import { Tags } from './tags';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type MetricThresholdRule = Rule<
@@ -67,21 +58,13 @@ const ALERT_TIME_RANGE_ANNOTATION_ID = 'alert_time_range_annotation';
 interface AppSectionProps {
   alert: MetricThresholdAlert;
   rule: MetricThresholdRule;
-  ruleLink: string;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
-export function AlertDetailsAppSection({
-  alert,
-  rule,
-  ruleLink,
-  setAlertSummaryFields,
-}: AppSectionProps) {
+export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
   const { uiSettings, charts } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
   const groupInstance = alert.fields[ALERT_GROUP]?.map((group: Group) => group.value);
-  const groups = alert.fields[ALERT_GROUP];
-  const tags = alert.fields[TAGS];
 
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
@@ -103,37 +86,6 @@ export function AlertDetailsAppSection({
       key={ALERT_TIME_RANGE_ANNOTATION_ID}
     />,
   ];
-  useEffect(() => {
-    const alertSummaryFields = [];
-    if (groups) {
-      alertSummaryFields.push({
-        label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.source', {
-          defaultMessage: 'Source',
-        }),
-        value: <Groups groups={groups} />,
-      });
-    }
-    if (tags && tags.length > 0) {
-      alertSummaryFields.push({
-        label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.tags', {
-          defaultMessage: 'Tags',
-        }),
-        value: <Tags tags={tags} />,
-      });
-    }
-    alertSummaryFields.push({
-      label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.rule', {
-        defaultMessage: 'Rule',
-      }),
-      value: (
-        <EuiLink data-test-subj="metricsRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
-          {rule.name}
-        </EuiLink>
-      ),
-    });
-
-    setAlertSummaryFields(alertSummaryFields);
-  }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
 
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
