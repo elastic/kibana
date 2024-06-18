@@ -36,6 +36,7 @@ export interface MappingsConfiguration {
   };
   _meta?: string;
   _size?: { enabled: boolean };
+  subobjects?: boolean;
 }
 
 export interface MappingsTemplates {
