@@ -8,6 +8,7 @@
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
@@ -46,6 +47,7 @@ export interface PluginsSetup {
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginsStart {
@@ -161,6 +163,7 @@ export class SpacesPlugin
       license$: plugins.licensing.license$,
       spacesLicense: license,
       logger: this.log,
+      solution: plugins.cloud?.onboarding?.defaultSolution,
     });
 
     initSpacesViewsRoutes({

@@ -124,7 +124,6 @@
     "@kbn/core-deprecations-common",
     "@kbn/core-status-server",
     "@kbn/core-doc-links-server",
-    "@kbn/analytics-client",
     "@kbn/core-analytics-server",
     "@kbn/core-lifecycle-server",
     "@kbn/core-doc-links-browser",

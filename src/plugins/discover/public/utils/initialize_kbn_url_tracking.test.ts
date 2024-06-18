@@ -8,7 +8,7 @@
 import { AppUpdater } from '@kbn/core/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { DiscoverSetupPlugins } from '../plugin';
+import { DiscoverSetupPlugins } from '../types';
 import { initializeKbnUrlTracking } from './initialize_kbn_url_tracking';
 
 describe('initializeKbnUrlTracking', () => {

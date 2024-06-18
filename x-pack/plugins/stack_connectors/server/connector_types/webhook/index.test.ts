@@ -12,18 +12,14 @@ import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/action
 import { Logger } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import axios from 'axios';
-import {
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
-  getConnectorType,
-  WebhookConnectorType,
-  WebhookMethods,
-} from '.';
+import { ConnectorTypeConfigType, ConnectorTypeSecretsType, WebhookConnectorType } from './types';
+
+import { getConnectorType } from '.';
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SSLCertType, WebhookAuthType } from '../../../common/webhook/constants';
-import { PFX_FILE, CRT_FILE, KEY_FILE } from './mocks';
+import { AuthType, SSLCertType, WebhookMethods } from '../../../common/auth/constants';
+import { PFX_FILE, CRT_FILE, KEY_FILE } from '../../../common/auth/mocks';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -157,7 +153,7 @@ describe('config validation', () => {
   test('config validation passes when only required fields are provided', () => {
     const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
-      authType: WebhookAuthType.Basic,
+      authType: AuthType.Basic,
       hasAuth: true,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
@@ -171,7 +167,7 @@ describe('config validation', () => {
       const config: Record<string, string | boolean> = {
         url: 'http://mylisteningserver:9200/endpoint',
         method,
-        authType: WebhookAuthType.Basic,
+        authType: AuthType.Basic,
         hasAuth: true,
       };
       expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
@@ -198,7 +194,7 @@ describe('config validation', () => {
   test('config validation passes when a url is specified', () => {
     const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
-      authType: WebhookAuthType.Basic,
+      authType: AuthType.Basic,
       hasAuth: true,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
@@ -226,7 +222,7 @@ describe('config validation', () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      authType: WebhookAuthType.Basic,
+      authType: AuthType.Basic,
       hasAuth: true,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
@@ -257,7 +253,7 @@ describe('config validation', () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      authType: WebhookAuthType.Basic,
+      authType: AuthType.Basic,
       hasAuth: true,
     };
 
@@ -332,7 +328,7 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
-      authType: WebhookAuthType.Basic,
+      authType: AuthType.Basic,
       hasAuth: true,
     };
     await connectorType.executor({
@@ -392,7 +388,7 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
-      authType: WebhookAuthType.SSL,
+      authType: AuthType.SSL,
       certType: SSLCertType.CRT,
       hasAuth: true,
     };
@@ -575,7 +571,7 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
-      authType: WebhookAuthType.Basic,
+      authType: AuthType.Basic,
       hasAuth: true,
     };
     requestMock.mockReset();

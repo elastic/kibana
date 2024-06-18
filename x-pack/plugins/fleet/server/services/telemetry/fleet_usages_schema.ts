@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
+import type { RootSchema } from '@kbn/core/server';
 
 export const fleetAgentsSchema: RootSchema<any> = {
   agents_per_version: {

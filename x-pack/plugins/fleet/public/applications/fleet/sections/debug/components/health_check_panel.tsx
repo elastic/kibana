@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
 
 import { sendPostHealthCheck, useGetFleetServerHosts } from '../../../hooks';
-import type { FleetServerHost } from '../../../types';
+import type { FleetServerHost, PostHealthCheckResponse } from '../../../types';
 
 const POLLING_INTERVAL_S = 10; // 10 sec
 const POLLING_INTERVAL_MS = POLLING_INTERVAL_S * 1000;
@@ -40,20 +40,21 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
     }
   }, [fleetServerHosts]);
 
-  const hostName = useMemo(
-    () => selectedFleetServerHost?.host_urls[0] || '',
-    [selectedFleetServerHost?.host_urls]
-  );
+  const id = useMemo(() => selectedFleetServerHost?.id || '', [selectedFleetServerHost?.id]);
 
-  const [healthData, setHealthData] = useState<any>();
+  const [healthData, setHealthData] = useState<PostHealthCheckResponse | undefined | null>();
+  const [error, setError] = useState<any>();
 
   const { data: healthCheckResponse } = useQuery(
-    ['fleetServerHealth', hostName],
-    () => sendPostHealthCheck({ host: hostName }),
-    { refetchInterval: POLLING_INTERVAL_MS }
+    ['fleetServerHealth', id],
+    () => sendPostHealthCheck({ id }),
+    { refetchInterval: POLLING_INTERVAL_MS, enabled: !!id }
   );
   useEffect(() => {
-    setHealthData(healthCheckResponse);
+    setHealthData(healthCheckResponse?.data);
+    if (healthCheckResponse?.error) {
+      setError(healthCheckResponse.error);
+    }
   }, [healthCheckResponse]);
 
   const fleetServerHostsOptions = useMemo(
@@ -133,7 +134,7 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {healthData?.data?.status && hostName === healthData?.data?.host ? (
+          {healthData?.status && id === healthData?.host_id ? (
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem>
                 <FormattedMessage
@@ -141,21 +142,21 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
                   defaultMessage="Status:"
                 />
               </EuiFlexItem>
-              <EuiFlexItem>{healthStatus(healthData?.data?.status)}</EuiFlexItem>
+              <EuiFlexItem>{healthStatus(healthData?.status)}</EuiFlexItem>
             </EuiFlexGroup>
           ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
-      {healthData?.error && (
+      {error && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut title="Error" color="danger">
-            {healthData?.error?.message ?? (
+            {error?.message ?? (
               <FormattedMessage
                 id="xpack.fleet.debug.healthCheckPanel.fetchError"
                 defaultMessage="Message: {errorMessage}"
                 values={{
-                  errorMessage: healthData?.error?.message,
+                  errorMessage: error?.message,
                 }}
               />
             )}

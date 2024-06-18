@@ -40,6 +40,7 @@ export function useAbortableAsync<T>(
 
     if (clearValueOnNext) {
       setValue(undefined);
+      setError(undefined);
     }
 
     try {
@@ -47,7 +48,10 @@ export function useAbortableAsync<T>(
       if (isPromise(response)) {
         setLoading(true);
         response
-          .then(setValue)
+          .then((nextValue) => {
+            setError(undefined);
+            setValue(nextValue);
+          })
           .catch((err) => {
             setValue(undefined);
             setError(err);

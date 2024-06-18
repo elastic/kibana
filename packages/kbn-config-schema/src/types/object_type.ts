@@ -223,6 +223,15 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     }
   }
 
+  /**
+   * Return the schema for this object's underlying properties
+   *
+   * @internal should only be used internal for type reflection
+   */
+  public getPropSchemas(): P {
+    return this.props;
+  }
+
   validateKey(key: string, value: any) {
     if (!this.propSchemas[key]) {
       throw new Error(`${key} is not a valid part of this schema`);

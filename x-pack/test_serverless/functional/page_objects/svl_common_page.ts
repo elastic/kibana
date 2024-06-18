@@ -100,14 +100,14 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
             .set(svlCommonApi.getInternalRequestHeader())
             .set({ Cookie: `sid=${browserCookies[0].value}` });
 
-          const userData = await svlUserManager.getUserData(role);
+          const email = await svlUserManager.getEmail(role);
           // email returned from API call must match the email for the specified role
-          if (body.email === userData.email) {
+          if (body.email === email) {
             log.debug(`The new cookie is properly set for  '${role}' role`);
           } else {
             log.debug(`API response body: ${JSON.stringify(body)}`);
             throw new Error(
-              `Cookie is not set properly, expected email is '${userData.email}', but found '${body.email}'`
+              `Cookie is not set properly, expected email is '${email}', but found '${body.email}'`
             );
           }
           // Verifying that we are logged in

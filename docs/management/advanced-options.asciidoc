@@ -268,7 +268,8 @@ the `xpack.banners.backgroundColor` configuration property.
 
 [horizontal]
 [[xpackdashboardmode-roles]]`xpackDashboardMode:roles`::
-**Deprecated. Use <<kibana-feature-privileges,feature privileges>> instead.**
+deprecated:[7.7.0]
+Deprecated; use <<kibana-feature-privileges,feature privileges>> instead.
 The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
 
 [float]
@@ -545,7 +546,7 @@ because requests can be spread across all shard copies. However, results might
 be inconsistent because different shards might be in different refresh states.
 
 [[search-includefrozen]]`search:includeFrozen`::
-**This setting is deprecated and will not be supported as of 9.0.**
+deprecated:[7.16.0]
 Includes {ref}/frozen-indices.html[frozen indices] in results. Searching through
 frozen indices might increase the search time. This setting is off by default.
 Users must opt-in to include frozen indices.
@@ -622,11 +623,11 @@ of buckets to try to represent.
 
 [horizontal]
 [[visualization-colormapping]]`visualization:colorMapping`::
-**This setting is deprecated and will not be supported in a future version.**
+deprecated:[7.11.0]
 Maps values to specific colors in charts using the *Compatibility* palette.
 
 [[visualization-uselegacytimeaxis]]`visualization:useLegacyTimeAxis`::
-**This setting is deprecated and will not be supported in a future version.**
+deprecated:[8.10.0]
 Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::

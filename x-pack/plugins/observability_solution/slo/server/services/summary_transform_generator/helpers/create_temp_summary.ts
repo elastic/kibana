@@ -63,6 +63,22 @@ export interface EsSummaryDocument {
   kibanaUrl?: string; // >= 8.14
   summaryUpdatedAt: string | null;
   latestSliTimestamp: string | null;
+  // >= 8.15
+  fiveMinuteBurnRate?: {
+    totalEvents: number;
+    goodEvents: number;
+    value: number;
+  };
+  oneHourBurnRate?: {
+    totalEvents: number;
+    goodEvents: number;
+    value: number;
+  };
+  oneDayBurnRate?: {
+    totalEvents: number;
+    goodEvents: number;
+    value: number;
+  };
 }
 
 export function createTempSummaryDocument(
@@ -131,6 +147,22 @@ export function createTempSummaryDocument(
     kibanaUrl: basePath.publicBaseUrl ?? '', // added in 8.14, i.e. might be undefined
     summaryUpdatedAt: null,
     latestSliTimestamp: null,
+    // Added in 8.15
+    fiveMinuteBurnRate: {
+      totalEvents: 0,
+      goodEvents: 0,
+      value: 0,
+    },
+    oneHourBurnRate: {
+      totalEvents: 0,
+      goodEvents: 0,
+      value: 0,
+    },
+    oneDayBurnRate: {
+      totalEvents: 0,
+      goodEvents: 0,
+      value: 0,
+    },
   };
 
   return doc;

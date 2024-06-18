@@ -250,7 +250,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.enableInfrastructureContainerAssetView', {
       defaultMessage: 'Container view',
     }),
-    value: false,
+    value: true,
     description: i18n.translate(
       'xpack.observability.enableInfrastructureContainerAssetViewDescription',
       {

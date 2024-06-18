@@ -24,13 +24,11 @@ import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
 export { partiallyUpdateRule } from './partially_update_rule';
-export { getLatestRuleVersion, getMinimumCompatibleVersion } from './rule_model_versions';
 import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../common';
-import { ruleModelVersions } from './rule_model_versions';
-import { adHocRunParamsModelVersions } from './ad_hoc_run_params_model_versions';
+import { ruleModelVersions, adHocRunParamsModelVersions } from './model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';

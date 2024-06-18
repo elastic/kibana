@@ -7,8 +7,7 @@
  */
 
 import { Subject } from 'rxjs';
-import type { AnalyticsClientInitContext } from '@kbn/analytics-client';
-import type { Event, IShipper } from '@kbn/core/public';
+import type { AnalyticsClientInitContext, Event, IShipper } from '@kbn/core/public';
 
 export class CustomShipper implements IShipper {
   public static shipperName = 'FTR-helpers-shipper';

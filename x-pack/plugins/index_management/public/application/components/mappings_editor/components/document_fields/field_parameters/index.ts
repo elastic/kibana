@@ -74,6 +74,8 @@ export * from './meta_parameter';
 
 export * from './ignore_above_parameter';
 
+export * from './subobjects_parameter';
+
 export const PARAMETER_SERIALIZERS = [relationsSerializer, dynamicSerializer];
 
 export const PARAMETER_DESERIALIZERS = [relationsDeserializer, dynamicDeserializer];

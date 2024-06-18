@@ -163,14 +163,14 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
             <EuiFlexItem grow={6}>
               <SearchBar
                 value={draftKuery}
+                fieldPrefix={AGENTS_PREFIX}
+                indexPattern={AGENTS_INDEX}
                 onChange={(newSearch, submit) => {
                   onDraftKueryChange(newSearch);
                   if (submit) {
                     onSubmitSearch(newSearch);
                   }
                 }}
-                fieldPrefix={AGENTS_PREFIX}
-                indexPattern={AGENTS_INDEX}
                 dataTestSubj="agentList.queryInput"
               />
             </EuiFlexItem>

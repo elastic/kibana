@@ -65,7 +65,7 @@
               },
               "<object, unknown>, pluginsSetup: ",
               "ObservabilitySharedSetup",
-              ") => { locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
+              ") => { registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -376,7 +376,7 @@
         "label": "EmbeddableFlamegraph",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "({ height, ...props }: Props) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
         "deprecated": false,
@@ -387,7 +387,7 @@
             "id": "def-public.EmbeddableFlamegraph.$1",
             "type": "Object",
             "tags": [],
-            "label": "props",
+            "label": "{ height, ...props }",
             "description": [],
             "signature": [
               "Props"
@@ -3601,7 +3601,7 @@
         "label": "ObservabilitySharedPluginSetup",
         "description": [],
         "signature": [
-          "{ locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
+          "{ registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
           "Observable",
           "<",
           {

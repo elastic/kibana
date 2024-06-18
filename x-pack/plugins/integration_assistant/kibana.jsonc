@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/integration-assistant-plugin",
+  "owner": "@elastic/security-solution",
+  "description": "A simple example of how to use core's routing services test",
+  "plugin": {
+    "id": "integrationAssistant",
+    "server": true,
+    "browser": false,
+    "configPath": ["xpack", "integration_assistant"],
+    "requiredPlugins": ["actions", "licensing", "management", "features", "share", "fileUpload"],
+    "optionalPlugins": ["security", "usageCollection", "console"],
+    "extraPublicDirs": ["common"]
+  }
+}

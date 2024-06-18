@@ -13,7 +13,7 @@ export const HOST_DETAILS_LINK = getDataTestSubjectSelector('host-details-button
 
 export const USER_DETAILS_LINK = getDataTestSubjectSelector('users-link-anchor');
 
-export const TIMELINE_DETAILS_FLYOUT = getDataTestSubjectSelector('timeline:details-panel:flyout');
+export const TIMELINE_DETAILS_FLYOUT = getDataTestSubjectSelector('securitySolutionFlyoutBody');
 
 export const HOST_DETAILS_FLYOUT = getDataTestSubjectSelector('host-panel-header');
 

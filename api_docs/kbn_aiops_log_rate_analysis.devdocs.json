@@ -579,6 +579,138 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.DocumentCountStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocumentCountStats",
+        "description": [
+          "\nRepresents the document count statistics for a given time range."
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentCountStats.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "The time interval in milliseconds."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentCountStats.buckets",
+            "type": "Object",
+            "tags": [],
+            "label": "buckets",
+            "description": [
+              "The document count per time bucket."
+            ],
+            "signature": [
+              "{ [key: string]: number; } | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentCountStats.changePoint",
+            "type": "Object",
+            "tags": [],
+            "label": "changePoint",
+            "description": [
+              "The change point in the document count statistics."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.DocumentCountStatsChangePoint",
+                "text": "DocumentCountStatsChangePoint"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentCountStats.timeRangeEarliest",
+            "type": "number",
+            "tags": [],
+            "label": "timeRangeEarliest",
+            "description": [
+              "The earliest timestamp in the time range."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentCountStats.timeRangeLatest",
+            "type": "number",
+            "tags": [],
+            "label": "timeRangeLatest",
+            "description": [
+              "The latest timestamp in the time range."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentCountStats.totalCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalCount",
+            "description": [
+              "The total document count."
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentCountStats.lastDocTimeStampMs",
+            "type": "number",
+            "tags": [],
+            "label": "lastDocTimeStampMs",
+            "description": [
+              "The timestamp of the last document in the time range."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
         "id": "def-common.DocumentCountStatsChangePoint",
         "type": "Interface",
         "tags": [],
@@ -637,6 +769,94 @@
             "label": "type",
             "description": [
               "The type of change point."
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.DocumentStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocumentStats",
+        "description": [
+          "\nRepresents the overall document stats."
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentStats.sampleProbability",
+            "type": "number",
+            "tags": [],
+            "label": "sampleProbability",
+            "description": [
+              "The probability of sampling."
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentStats.totalCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalCount",
+            "description": [
+              "The total document count."
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentStats.documentCountStats",
+            "type": "Object",
+            "tags": [],
+            "label": "documentCountStats",
+            "description": [
+              "The document count statistics."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.DocumentCountStats",
+                "text": "DocumentCountStats"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentStats.documentCountStatsCompare",
+            "type": "Object",
+            "tags": [],
+            "label": "documentCountStatsCompare",
+            "description": [
+              "The document count statistics for comparison."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.DocumentCountStats",
+                "text": "DocumentCountStats"
+              },
+              " | undefined"
             ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
             "deprecated": false,

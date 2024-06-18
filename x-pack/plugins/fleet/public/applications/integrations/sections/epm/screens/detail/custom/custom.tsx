@@ -25,7 +25,7 @@ export const CustomViewPage: React.FC<Props> = memo(({ packageInfo }) => {
   return customViewExtension ? (
     <EuiFlexGroup alignItems="flexStart">
       <EuiFlexItem grow={1} />
-      <EuiFlexItem grow={6}>
+      <EuiFlexItem grow={7}>
         <ExtensionWrapper>
           <customViewExtension.Component pkgkey={pkgkey} packageInfo={packageInfo} />
         </ExtensionWrapper>

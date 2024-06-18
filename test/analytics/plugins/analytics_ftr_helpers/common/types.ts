@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Event, EventType } from '@kbn/analytics-client';
+import type { Event, EventType } from '@kbn/ebt/client';
 
 export type FiltersOptions = {
   [key in 'eq' | 'gte' | 'gt' | 'lte' | 'lt']?: unknown;

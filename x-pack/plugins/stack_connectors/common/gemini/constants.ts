@@ -18,6 +18,8 @@ export enum SUB_ACTION {
   RUN = 'run',
   DASHBOARD = 'getDashboard',
   TEST = 'test',
+  INVOKE_AI = 'invokeAI',
+  INVOKE_STREAM = 'invokeStream',
 }
 
 export const DEFAULT_TOKEN_LIMIT = 8192;

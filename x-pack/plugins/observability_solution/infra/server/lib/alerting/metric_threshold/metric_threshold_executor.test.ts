@@ -30,7 +30,7 @@ import {
   ALERT_REASON,
   ALERT_GROUP,
 } from '@kbn/rule-data-utils';
-import { Group } from '../common/types';
+import { Group } from '../../../../common/alerting/types';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 

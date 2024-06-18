@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { EventTypeOpts } from '@kbn/analytics-client';
-import type { AnalyticsServiceSetup as CoreAnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type {
+  AnalyticsServiceSetup as CoreAnalyticsServiceSetup,
+  EventTypeOpts,
+  Logger,
+} from '@kbn/core/server';
 
 import type {
   CSPViolationReport,

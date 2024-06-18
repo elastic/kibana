@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
-import { EndpointAgentStatus } from '../../../../../../common/components/agents/agent_status';
+import { EndpointAgentStatus } from '../../../../../../common/components/endpoint/agents/agent_status';
 import { HeaderAgentInfo } from '../header_agent_info';
 import { useGetEndpointDetails } from '../../../../../hooks';
 import type { Platform } from '../platforms';

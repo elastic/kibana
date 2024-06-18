@@ -21,7 +21,11 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { i18n } from '@kbn/i18n';
 import { getLlmType } from './utils';
-import { StaticReturnType } from '../lib/langchain/executors/types';
+import {
+  AgentExecutorParams,
+  AssistantDataClients,
+  StaticReturnType,
+} from '../lib/langchain/executors/types';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
@@ -42,6 +46,7 @@ import { getLangSmithTracer } from './evaluate/utils';
 import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../ai_assistant_data_clients/anonymization_fields/helpers';
 import { ElasticsearchStore } from '../lib/langchain/elasticsearch_store/elasticsearch_store';
+import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -325,7 +330,7 @@ export const postActionsConnectorExecuteRoute = (
             });
 
           // Create an ElasticsearchStore for KB interactions
-          // Setup with kbDataClient if `enableKnowledgeBaseByDefault` FF is enabled
+          // Setup with kbDataClient if `assistantKnowledgeBaseByDefault` FF is enabled
           const enableKnowledgeBaseByDefault =
             assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
           const kbDataClient = enableKnowledgeBaseByDefault
@@ -345,7 +350,14 @@ export const postActionsConnectorExecuteRoute = (
             kbDataClient
           );
 
-          const result: StreamResponseWithHeaders | StaticReturnType = await callAgentExecutor({
+          const dataClients: AssistantDataClients = {
+            anonymizationFieldsDataClient: anonymizationFieldsDataClient ?? undefined,
+            conversationsDataClient: conversationsDataClient ?? undefined,
+            kbDataClient,
+          };
+
+          // Shared executor params
+          const executorParams: AgentExecutorParams<boolean> = {
             abortSignal,
             alertsIndexPattern: request.body.alertsIndexPattern,
             anonymizationFields: anonymizationFieldsRes
@@ -355,6 +367,8 @@ export const postActionsConnectorExecuteRoute = (
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
             assistantTools,
             connectorId,
+            conversationId,
+            dataClients,
             esClient,
             esStore,
             isStream: request.body.subAction !== 'invokeAI',
@@ -364,6 +378,7 @@ export const postActionsConnectorExecuteRoute = (
             onNewReplacements,
             onLlmResponse,
             request,
+            response,
             replacements: request.body.replacements,
             size: request.body.size,
             traceOptions: {
@@ -374,7 +389,15 @@ export const postActionsConnectorExecuteRoute = (
                 logger,
               }),
             },
-          });
+          };
+
+          // New code path for LangGraph implementation, behind `assistantKnowledgeBaseByDefault` FF
+          let result: StreamResponseWithHeaders | StaticReturnType;
+          if (enableKnowledgeBaseByDefault) {
+            result = await callAssistantGraph(executorParams);
+          } else {
+            result = await callAgentExecutor(executorParams);
+          }
 
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
             actionTypeId,

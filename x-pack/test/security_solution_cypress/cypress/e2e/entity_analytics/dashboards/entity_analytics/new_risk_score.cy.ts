@@ -103,6 +103,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
 
       describe('With host risk data', () => {
         before(() => {
+          cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
           cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
         });
 
@@ -145,6 +146,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
 
         describe('With alerts data', () => {
           before(() => {
+            deleteAlertsAndRules();
             createRule(getNewRule());
           });
 
