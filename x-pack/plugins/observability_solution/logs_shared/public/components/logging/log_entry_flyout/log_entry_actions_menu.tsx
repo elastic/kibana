@@ -130,9 +130,7 @@ const getUptimeLink =
     // Coercing the return value to ContextRouterLinkProps because
     // EuiContextMenuItem defines a too broad type for onClick
     return getRouterLinkProps({
-      // We can't provide href here because the Uptime app doesn't register its
-      // locator in time for the generated URL to be correct. This is probably a
-      // consequence of the advanced settings flag that guards its registration.
+      href: uptimeLocator.getRedirectUrl(uptimeLocatorParams),
       onClick: () => uptimeLocator.navigate(uptimeLocatorParams),
     }) as ContextRouterLinkProps;
   };
