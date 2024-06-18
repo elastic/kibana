@@ -391,13 +391,34 @@ export const getSearchEmbeddableFactory = ({
             [dataViews]
           );
 
+          const dataView = useMemo(() => {
+            const hasDataView = (dataViews ?? []).length > 0;
+            if (!hasDataView) {
+              blockingError$.next(
+                new Error(
+                  i18n.translate('discover.embeddable.search.dataViewError', {
+                    defaultMessage: 'Missing data view {indexPatternId}',
+                    values: {
+                      indexPatternId:
+                        typeof initialState.serializedSearchSource?.index === 'string'
+                          ? initialState.serializedSearchSource.index
+                          : initialState.serializedSearchSource?.index?.id ?? '',
+                    },
+                  })
+                )
+              );
+              return;
+            }
+            return dataViews![0];
+          }, [dataViews]);
+
           const renderAsFieldStatsTable = useMemo(
             () =>
               discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS) &&
               viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
-              dataViews?.[0] &&
+              dataView &&
               Array.isArray(columns),
-            [dataViews, columns, viewMode]
+            [columns, dataView, viewMode]
           );
 
           return (
@@ -409,6 +430,7 @@ export const getSearchEmbeddableFactory = ({
                       ...api,
                       fetchContext$,
                     }}
+                    dataView={dataView!}
                     onAddFilter={onAddFilter}
                     stateManager={searchEmbeddableStateManager}
                   />
@@ -420,6 +442,7 @@ export const getSearchEmbeddableFactory = ({
                   >
                     <SearchEmbeddableGridComponent
                       api={{ ...api, fetchWarnings$ }}
+                      dataView={dataView!}
                       onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
                       stateManager={searchEmbeddableStateManager}
                     />

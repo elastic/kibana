@@ -33,6 +33,7 @@ export interface SavedSearchPublicSetupDependencies {
 export interface SavedSearchServerStartDeps {
   data: DataPluginStart;
 }
+
 export class SavedSearchServerPlugin
   implements Plugin<object, object, object, SavedSearchServerStartDeps>
 {
@@ -52,19 +53,25 @@ export class SavedSearchServerPlugin
         latest: LATEST_VERSION,
       },
     });
+
     const searchSource = data.search.searchSource;
+
     const getSearchSourceMigrations = searchSource.getAllMigrations.bind(searchSource);
     core.savedObjects.registerType(getSavedSearchObjectType(getSearchSourceMigrations));
+
     expressions.registerType(kibanaContext);
     expressions.registerFunction(
       getKibanaContext(core.getStartServices as StartServicesAccessor<SavedSearchServerStartDeps>)
     );
+
     return {};
   }
+
   public start(core: CoreStart) {
     return {
       getSavedSearch,
     };
   }
+
   public stop() {}
 }

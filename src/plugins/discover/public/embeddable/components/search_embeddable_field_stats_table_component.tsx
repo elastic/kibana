@@ -9,40 +9,37 @@
 import React, { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { FetchContext, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 
 import { FieldStatisticsTable } from '../../application/main/components/field_stats_table';
-import type { SearchEmbeddableStateManager, SearchEmbeddableApi } from '../types';
 import { isEsqlMode } from '../initialize_fetch';
+import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
   };
+  dataView: DataView;
   onAddFilter: DocViewFilterFn;
   stateManager: SearchEmbeddableStateManager;
 }
 
 export function SearchEmbeddablFieldStatsTableComponent({
   api,
+  dataView,
   onAddFilter,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
-  const [fetchContext, dataViews, savedSearch, columns] = useBatchedPublishingSubjects(
+  const [fetchContext, savedSearch, columns] = useBatchedPublishingSubjects(
     api.fetchContext$,
-    api.dataViews,
     api.savedSearch$,
     stateManager.columns
   );
 
-  const dataView = useMemo(() => {
-    return dataViews?.[0];
-  }, [dataViews]);
-
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
 
-  if (!dataView) return <></>;
   return (
     <FieldStatisticsTable
       dataView={dataView}

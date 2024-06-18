@@ -177,25 +177,17 @@ export function initializeFetch({
     )
     .subscribe((next) => {
       api.dataLoading.next(false);
-      if (next) {
-        if (next.hasOwnProperty('rows')) {
-          stateManager.rows.next(next.rows ?? []);
-        }
-        if (next.hasOwnProperty('hitCount')) {
-          stateManager.totalHitCount.next(next.hitCount);
-        }
-        if (next.hasOwnProperty('columnsMeta')) {
-          stateManager.columnsMeta.next(next.columnsMeta);
-        }
-        if (next.hasOwnProperty('fetchContext') && next.fetchContext !== undefined) {
-          api.fetchContext$.next(next.fetchContext);
-        }
-        if (next.hasOwnProperty('warnings')) {
-          api.fetchWarnings$.next(next.warnings ?? []);
-        }
-        if (next.hasOwnProperty('error')) {
-          api.blockingError.next(next.error);
-        }
+      if (!next || next.hasOwnProperty('error')) {
+        api.blockingError.next(next?.error);
+        return;
+      }
+
+      stateManager.rows.next(next.rows ?? []);
+      stateManager.totalHitCount.next(next.hitCount);
+      api.fetchWarnings$.next(next.warnings ?? []);
+      api.fetchContext$.next(next.fetchContext);
+      if (next.hasOwnProperty('columnsMeta')) {
+        stateManager.columnsMeta.next(next.columnsMeta);
       }
     });
 

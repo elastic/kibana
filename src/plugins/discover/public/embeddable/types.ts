@@ -20,14 +20,9 @@ import {
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import { SavedSearch, SerializableSavedSearch } from '@kbn/saved-search-plugin/common/types';
 import { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { BehaviorSubject } from 'rxjs';
-
-import type { DiscoverServices } from '../build_services';
-import type { DocTableEmbeddableSearchProps } from '../components/doc_table/doc_table_embeddable';
-import type { DiscoverGridEmbeddableSearchProps } from './components/saved_search_grid';
 
 export type SearchEmbeddableState = Pick<
   SerializableSavedSearch,
@@ -82,7 +77,6 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
   PublishesDataViews &
   HasInPlaceLibraryTransforms &
   HasTimeRange &
-  PublishesWritableTimeRange &
   Partial<HasEditCapabilities & PublishesSavedObjectId>;
 
 export interface PublishesSavedSearch {
@@ -99,12 +93,3 @@ export const apiPublishesSavedSearch = (
 export interface HasTimeRange {
   hasTimeRange(): boolean;
 }
-
-export type EmbeddableComponentSearchProps = DiscoverGridEmbeddableSearchProps &
-  DocTableEmbeddableSearchProps;
-
-export type SearchProps = EmbeddableComponentSearchProps & {
-  sampleSizeState: number | undefined;
-  sharedItemTitle?: string;
-  services: DiscoverServices;
-};
