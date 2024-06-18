@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body).toEqual({
           error: 'Bad Request',
-          message: expect.any(String),
+          message: '[request query]: list_id: Required',
           statusCode: 400,
         });
       });
