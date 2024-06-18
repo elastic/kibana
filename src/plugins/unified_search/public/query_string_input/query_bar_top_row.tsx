@@ -18,7 +18,6 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
-import { hasTimeNamedParams } from '@kbn/esql-utils';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs';
@@ -481,11 +480,7 @@ export const QueryBarTopRow = React.memo(
       if (Boolean(isQueryLangSelected) && !props.isDirty) {
         const adHocDataview = props.indexPatterns?.[0];
         if (adHocDataview && typeof adHocDataview !== 'string') {
-          const hasTimeParams =
-            props.query && isOfAggregateQueryType(props.query)
-              ? hasTimeNamedParams(props.query.esql)
-              : false;
-          if (!adHocDataview.timeFieldName && !hasTimeParams) {
+          if (!adHocDataview.timeFieldName) {
             isDisabled = {
               display: (
                 <span data-test-subj="kbnQueryBar-datePicker-disabled">
@@ -494,7 +489,7 @@ export const QueryBarTopRow = React.memo(
               ),
             };
           }
-          enableTooltip = !Boolean(adHocDataview.timeFieldName) && !hasTimeParams;
+          enableTooltip = !Boolean(adHocDataview.timeFieldName);
         }
       }
 
