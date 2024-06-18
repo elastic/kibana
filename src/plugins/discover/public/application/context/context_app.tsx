@@ -124,24 +124,29 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     const doFetch = async () => {
       const startTime = window.performance.now();
       let fetchType = '';
+      let fetchExecuted = false;
       if (!prevAppState.current) {
         fetchType = 'all';
         await fetchAllRows();
+        fetchExecuted = true;
       } else if (prevAppState.current.predecessorCount !== appState.predecessorCount) {
         fetchType = 'predecessors';
         await fetchSurroundingRows(SurrDocType.PREDECESSORS);
+        fetchExecuted = true;
       } else if (prevAppState.current.successorCount !== appState.successorCount) {
         fetchType = 'successors';
         await fetchSurroundingRows(SurrDocType.SUCCESSORS);
+        fetchExecuted = true;
       } else if (
         !isEqualFilters(prevAppState.current.filters, appState.filters) ||
         !isEqualFilters(prevGlobalState.current.filters, globalState.filters)
       ) {
         fetchType = 'context';
         await fetchContextRows();
+        fetchExecuted = true;
       }
 
-      if (analytics) {
+      if (analytics && fetchExecuted) {
         const fetchDuration = window.performance.now() - startTime;
         reportPerformanceMetricEvent(analytics, {
           eventName: 'discoverSurroundingDocsFetch',
