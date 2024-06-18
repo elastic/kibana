@@ -46,48 +46,44 @@ export const DefaultLayout: React.FC<Props> = memo(
       },
     ];
 
+    const CreateIntegrationCardButton = integrationAssistant?.CreateIntegrationCardButton;
+
     return (
       <WithHeaderLayout
         leftColumn={
-          <EuiFlexGroup direction="row" gutterSize="none" justifyContent="center">
-            <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
-              <EuiText>
-                <h1>
+          <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+            <EuiText>
+              <h1>
+                <FormattedMessage
+                  id="xpack.fleet.integrationsHeaderTitle"
+                  defaultMessage="Integrations"
+                />
+              </h1>
+            </EuiText>
+
+            <EuiSpacer size="s" />
+
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <p>
                   <FormattedMessage
-                    id="xpack.fleet.integrationsHeaderTitle"
-                    defaultMessage="Integrations"
+                    id="xpack.fleet.epm.pageSubtitle"
+                    defaultMessage="Choose an integration to start collecting and analyzing your data."
                   />
-                </h1>
+                </p>
               </EuiText>
+            </EuiFlexItem>
 
-              <EuiSpacer size="s" />
-
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.fleet.epm.pageSubtitle"
-                      defaultMessage="Choose an integration to start collecting and analyzing your data."
-                    />
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-
-              <EuiSpacer size="s" />
-            </EuiFlexGroup>
+            <EuiSpacer size="s" />
           </EuiFlexGroup>
         }
         rightColumnGrow={false}
         rightColumn={
-          <>
-            {integrationAssistant && (
-              <EuiFlexItem grow={false}>
-                <integrationAssistant.CreateIntegrationCardButton
-                  href={getHref('integration_create')}
-                />
-              </EuiFlexItem>
-            )}
-          </>
+          CreateIntegrationCardButton ? (
+            <EuiFlexItem grow={false}>
+              <CreateIntegrationCardButton href={getHref('integration_create')} />
+            </EuiFlexItem>
+          ) : undefined
         }
         tabs={tabs.map((tab) => {
           const notificationCount = notificationsBySection?.[tab.section];
