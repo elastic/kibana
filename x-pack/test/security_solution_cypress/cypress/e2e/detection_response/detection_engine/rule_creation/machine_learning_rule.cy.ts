@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isArray } from 'lodash';
 
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../../helpers/rules';
 import { getMachineLearningRule } from '../../../../objects/rule';
 
 import {
-  CUSTOM_RULES_BTN,
   RISK_SCORE,
   RULES_MANAGEMENT_TABLE,
   RULE_NAME,
