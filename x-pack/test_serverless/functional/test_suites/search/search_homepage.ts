@@ -17,7 +17,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   let roleAuthc: RoleCredentials;
 
   const HOMEPAGE_FF_UI_SETTING = 'searchHomepage:homepageEnabled';
-  describe('Search Homepage', () => {
+  describe('Search Homepage', function () {
+    this.tags('skipMKI');
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       // Enable Homepage Feature Flag
