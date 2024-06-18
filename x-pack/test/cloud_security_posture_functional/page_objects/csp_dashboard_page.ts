@@ -96,9 +96,24 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
       return await testSubjects.find('dashboard-summary-section');
     },
 
+    getAllCloudComplianceScores: async () => {
+      await dashboard.getCloudDashboard();
+      return await testSubjects.findAll('dashboard-summary-section-compliance-score');
+    },
+
     getCloudComplianceScore: async () => {
       await dashboard.getCloudSummarySection();
       return await testSubjects.find('dashboard-summary-section-compliance-score');
+    },
+
+    getCloudResourcesEvaluatedCard: async () => {
+      await dashboard.getCloudDashboard();
+      return await testSubjects.find('dashboard-counter-card-resources-evaluated');
+    },
+
+    getCloudResourcesEvaluated: async () => {
+      const resourcesEvaluatedCard = await dashboard.getCloudResourcesEvaluatedCard();
+      return await resourcesEvaluatedCard.findByXpath('//div/p/span');
     },
 
     // Kubernetes Dashboard
@@ -120,6 +135,16 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
       );
 
       return await testSubjects.find('dashboard-summary-section-compliance-score');
+    },
+
+    getKubernetesResourcesEvaluatedCard: async () => {
+      await dashboard.getKubernetesDashboard();
+      return await testSubjects.find('dashboard-counter-card-resources-evaluated');
+    },
+
+    getKubernetesResourcesEvaluated: async () => {
+      const resourcesEvaluatedCard = await dashboard.getKubernetesResourcesEvaluatedCard();
+      return await resourcesEvaluatedCard.findByXpath('//div/p/span');
     },
   };
 

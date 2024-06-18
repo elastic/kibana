@@ -3095,6 +3095,7 @@ describe('IndexPattern Data Source', () => {
               "longMessage": "error 1",
               "severity": "error",
               "shortMessage": "",
+              "uniqueId": "error 1",
             },
             Object {
               "displayLocations": Array [
@@ -3106,6 +3107,7 @@ describe('IndexPattern Data Source', () => {
               "longMessage": "error 2",
               "severity": "error",
               "shortMessage": "",
+              "uniqueId": "error 2",
             },
           ]
         `);
@@ -3160,6 +3162,7 @@ describe('IndexPattern Data Source', () => {
               />,
               "severity": "error",
               "shortMessage": "Layer 1 error: ",
+              "uniqueId": "error 1",
             },
             Object {
               "displayLocations": Array [
@@ -3182,6 +3185,7 @@ describe('IndexPattern Data Source', () => {
               />,
               "severity": "error",
               "shortMessage": "Layer 1 error: ",
+              "uniqueId": "error 2",
             },
           ]
         `);
@@ -3248,6 +3252,7 @@ describe('IndexPattern Data Source', () => {
                 </p>,
                 "severity": "error",
                 "shortMessage": "",
+                "uniqueId": "editor_invalid_dimension",
               },
             ]
           `);
@@ -3286,6 +3291,7 @@ describe('IndexPattern Data Source', () => {
                 </React.Fragment>,
                 "severity": "error",
                 "shortMessage": "",
+                "uniqueId": undefined,
               },
             ]
           `);
