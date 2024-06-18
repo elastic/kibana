@@ -170,6 +170,13 @@ export interface ESQLPositionalParamLiteral extends ESQLParamLiteral<'positional
   value: number;
 }
 
+export interface ESQLMessage {
+  type: 'error' | 'warning';
+  text: string;
+  location: ESQLLocation;
+  code: string;
+}
+
 export type AstProviderFn = (text: string | undefined) =>
   | Promise<{
       ast: ESQLAst;
