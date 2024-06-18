@@ -7,8 +7,6 @@
 
 export type {
   GetUserProfileResponse,
-  ApiKey,
-  RestApiKey,
   GetUserDisplayNameParams,
   EditUser,
   BuiltinESPrivileges,
