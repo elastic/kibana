@@ -216,12 +216,12 @@ export type UpdateAPIKeyParams =
   | UpdateCrossClusterAPIKeyParams
   | UpdateRestAPIKeyWithKibanaPrivilegesParams;
 
-const updateRestApiKeySchema = restApiKeySchema.extends({
+export const updateRestApiKeySchema = restApiKeySchema.extends({
   name: null,
   id: schema.string(),
 });
 
-const updateCrossClusterApiKeySchema = crossClusterApiKeySchema.extends({
+export const updateCrossClusterApiKeySchema = crossClusterApiKeySchema.extends({
   name: null,
   id: schema.string(),
 });

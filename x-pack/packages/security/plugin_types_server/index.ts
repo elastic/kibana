@@ -76,5 +76,7 @@ export {
   getRestApiKeyWithKibanaPrivilegesSchema,
   getUpdateRestApiKeyWithKibanaPrivilegesSchema,
   crossClusterApiKeySchema,
+  updateRestApiKeySchema,
+  updateCrossClusterApiKeySchema,
 } from './src/authentication';
 export { GLOBAL_RESOURCE, elasticsearchRoleSchema, getKibanaRoleSchema } from './src/authorization';

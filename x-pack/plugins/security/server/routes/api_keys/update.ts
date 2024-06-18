@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { UpdateAPIKeyResult } from '@kbn/security-plugin-types-server';
-import { getUpdateRestApiKeyWithKibanaPrivilegesSchema } from '@kbn/security-plugin-types-server';
+import {
+  getRestApiKeyWithKibanaPrivilegesSchema,
+  updateCrossClusterApiKeySchema,
+  updateRestApiKeySchema,
+} from '@kbn/security-plugin-types-server';
 
 import type { RouteDefinitionParams } from '..';
 import { UpdateApiKeyValidationError } from '../../authentication/api_keys/api_keys';
@@ -19,7 +23,7 @@ export function defineUpdateApiKeyRoutes({
   authz,
   getAuthenticationService,
 }: RouteDefinitionParams) {
-  const bodySchemaWithKibanaPrivileges = getUpdateRestApiKeyWithKibanaPrivilegesSchema(() => {
+  const bodySchemaWithKibanaPrivileges = getRestApiKeyWithKibanaPrivilegesSchema(() => {
     const privileges = authz.privileges.get();
     return {
       global: Object.keys(privileges.global),
