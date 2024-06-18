@@ -92,9 +92,6 @@ function set_in_legacy_vault() {
   shift
   fields=("$@")
 
-  echo "VAULT STATUS BEFORE"
-  vault status
-
   VAULT_ROLE_ID="$(get_vault_role_id)"
   VAULT_SECRET_ID="$(get_vault_secret_id)"
 
@@ -102,11 +99,6 @@ function set_in_legacy_vault() {
   VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
   unset VAULT_TOKEN
 
-  echo "VAULT STATUS AFTER LOGIN"
-  VAULT_ADDR=$LEGACY_VAULT_ADDR vault status
-
-  # shellcheck disable=SC2068
-  VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -output-policy "secret/kibana-issues/dev/$key_path" ${fields[@]}
   # shellcheck disable=SC2068
   VAULT_ADDR=$LEGACY_VAULT_ADDR vault write "secret/kibana-issues/dev/$key_path" ${fields[@]}
 }
