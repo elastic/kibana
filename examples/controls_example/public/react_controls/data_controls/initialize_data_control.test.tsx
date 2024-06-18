@@ -57,7 +57,7 @@ describe('initializeDataControl', () => {
           services
         );
 
-        dataControl.api.defaultPanelTitle!.pipe(first()).subscribe(() => {
+        dataControl.api.defaultPanelTitle!.pipe(skip(1), first()).subscribe(() => {
           done();
         });
       });
