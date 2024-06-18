@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
-import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
+import _ from 'lodash';
+import { UnifiedDataTableSettings, UnifiedDataTableSettingsColumn, useColumns } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { HttpSetup } from '@kbn/core-http-browser';
@@ -130,18 +131,27 @@ export const CloudSecurityDataTable = ({
     columnsLocalStorageKey,
     defaultColumns.map((c) => c.id)
   );
-  const [settings, setSettings] = useLocalStorage<UnifiedDataTableSettings>(
+  const [localSettings, setLocalSettings] = useLocalStorage<UnifiedDataTableSettings>(
     `${columnsLocalStorageKey}:settings`,
     {
       columns: defaultColumns.reduce((prev, curr) => {
-        const columnDefaultSettings = curr.width
-          ? { width: curr.width, display: columnHeaders?.[curr.id] }
-          : { display: columnHeaders?.[curr.id] };
+        const columnDefaultSettings = curr.width ? { width: curr.width } : {};
         const newColumn = { [curr.id]: columnDefaultSettings };
         return { ...prev, ...newColumn };
       }, {} as UnifiedDataTableSettings['columns']),
     }
   );
+
+    const settings: UnifiedDataTableSettings = {
+        columns: defaultColumns.reduce((prev, curr) => {
+          const newColumn: UnifiedDataTableSettingsColumn = {
+            ..._.pick(localSettings?.columns?.[curr.id], ['width']),
+            display: columnHeaders?.[curr.id]
+          };
+    
+          return { ...prev, ...{ [curr.id]: newColumn }};
+        }, {} as UnifiedDataTableSettings['columns']),
+      };
 
   const { dataView, dataViewIsRefetching, dataViewRefetch } = useDataViewContext();
 
@@ -242,14 +252,14 @@ export const CloudSecurityDataTable = ({
   );
 
   const onResize = (colSettings: { columnId: string; width: number }) => {
-    const grid = settings || {};
+    const grid = localSettings || {};
     const newColumns = { ...(grid.columns || {}) };
     newColumns[colSettings.columnId] = {
+      ...newColumns[colSettings.columnId],
       width: Math.round(colSettings.width),
-      display: columnHeaders?.[colSettings.columnId],
     };
     const newGrid = { ...grid, columns: newColumns };
-    setSettings(newGrid);
+    setLocalSettings(newGrid);
   };
 
   const externalCustomRenderers = useMemo(() => {
