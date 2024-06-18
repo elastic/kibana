@@ -103,7 +103,7 @@ export const dashboardCreate = baseDashboard.extends(
     id: schema.maybe(schema.string({ meta: { description: 'The ID of the dashboard' } })),
   },
   {
-    meta: { id: 'dashboard.create' },
+    meta: { id: 'dashboard_create' },
   }
 );
 
