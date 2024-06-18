@@ -7,8 +7,8 @@
  */
 
 import { AggregateQuery } from '@kbn/es-query';
-import { hasTransformationalCommand, hasTimeNamedParams } from '@kbn/esql-utils';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 
 export const shouldDisplayHistogram = (query: AggregateQuery) => {
-  return !hasTransformationalCommand(query.esql) || !hasTimeNamedParams(query.esql);
+  return !hasTransformationalCommand(query.esql);
 };

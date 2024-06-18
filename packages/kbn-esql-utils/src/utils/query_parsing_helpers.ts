@@ -55,18 +55,8 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
   return pipes.filter((statement) => !/DROP\s/i.test(statement)).join('|');
 }
 
-/**
- * The ?latest and ?earliest named parameters are used to pass the timepicker time range to the ESQL query.
- * @param esql:string
- * @returns boolean
- */
-export const hasTimeNamedParams = (esql: string) => {
-  // should fetch from the AST
-  return /\?earliest/i.test(esql) && /\?latest/i.test(esql);
-};
-
 // should use here the new walk function, hasnt been merged yet
-function findInAst(astItem: ESQLFunction, variable: string): string | undefined {
+function findDateFieldInAst(astItem: ESQLFunction, variable: string): string | undefined {
   const singleAstItem = astItem as ESQLFunction;
   const args = singleAstItem.args;
   const isLastNode = args?.some((a) => 'type' in a && a.type === 'column');
@@ -81,7 +71,7 @@ function findInAst(astItem: ESQLFunction, variable: string): string | undefined 
   } else {
     const functions = args?.filter((item) => 'type' in item && item.type === 'function');
     for (const functionAstItem of functions) {
-      const item = findInAst(functionAstItem as ESQLFunction, variable);
+      const item = findDateFieldInAst(functionAstItem as ESQLFunction, variable);
       if (item) {
         return item;
       }
@@ -102,7 +92,7 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
     return;
   }
   return (
-    findInAst(whereCommand as unknown as ESQLFunction, '?earliest') ??
-    findInAst(whereCommand as unknown as ESQLFunction, '?latest')
+    findDateFieldInAst(whereCommand as unknown as ESQLFunction, '?earliest') ??
+    findDateFieldInAst(whereCommand as unknown as ESQLFunction, '?latest')
   );
 };

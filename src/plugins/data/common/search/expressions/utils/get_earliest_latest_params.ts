@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { hasTimeNamedParams } from '@kbn/esql-utils';
 import dateMath from '@kbn/datemath';
 import type { TimeRange } from '../../../types';
 
-export const getEarliestLatestParams = (queryString: string, time?: TimeRange) => {
+export const getEarliestLatestParams = (timeField?: string, time?: TimeRange) => {
   let earliest = '';
   let latest = '';
-  if (time && hasTimeNamedParams(queryString)) {
+  if (time && timeField && timeField !== '@timestamp') {
     earliest = time.from;
     latest = time.to;
   }
