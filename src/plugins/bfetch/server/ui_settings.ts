@@ -24,7 +24,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
       deprecation: {
-        message: i18n.translate('data.advancedSettings.bfetch.disableBfetchDeprecation', {
+        message: i18n.translate('bfetch.advancedSettings.disableBfetchDeprecation', {
           defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
         }),
         docLinksKey: 'generalSettings',
@@ -43,12 +43,9 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
       deprecation: {
-        message: i18n.translate(
-          'data.advancedSettings.bfetch.disableBfetchCompressionDeprecation',
-          {
-            defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
-          }
-        ),
+        message: i18n.translate('bfetch.advancedSettings.disableBfetchCompressionDeprecation', {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+        }),
         docLinksKey: 'generalSettings',
       },
       category: [],
