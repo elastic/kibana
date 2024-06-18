@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '../..';
+import { schema, TypeOf } from '../..';
 
 describe('schema.allOf', () => {
   it('validates all parts of the intersection', () => {
@@ -45,5 +45,23 @@ describe('schema.allOf', () => {
         schema.object({ foo: schema.literal('bar') }),
       ])
     ).toThrowErrorMatchingInlineSnapshot(`"Duplicate key found in intersection: 'foo'"`);
+  });
+
+  it('has the right type inference', () => {
+    const resultingSchema = schema.object({
+      foo: schema.string(),
+      bar: schema.string(),
+    });
+    type ResultingType = TypeOf<typeof resultingSchema>;
+
+    const type = schema.allOf([
+      schema.object({ foo: schema.string() }),
+      schema.object({ bar: schema.string() }),
+    ]);
+
+    // asserting the type is the expected one
+    const output: ResultingType = type.validate({ foo: 'hello', bar: 'dolly' });
+    // required to make TS happy
+    expect(output).toEqual({ foo: 'hello', bar: 'dolly' });
   });
 });
