@@ -19,7 +19,7 @@ export const apiCanDuplicatePanels = (
 };
 
 export interface CanExpandPanels {
-  expandPanel: (panelId?: string, previousPanelId?: string) => void;
+  expandPanel: (panelId: string) => void;
   expandedPanelId: PublishingSubject<string | undefined>;
 }
 

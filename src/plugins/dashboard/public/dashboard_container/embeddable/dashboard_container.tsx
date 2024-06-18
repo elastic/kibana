@@ -586,16 +586,18 @@ export class DashboardContainer
     return panel;
   };
 
-  public expandPanel = (panelId?: string, previousPanelId?: string) => {
-    this.setExpandedPanelId(panelId);
+  public expandPanel = (panelId: string) => {
+    const isPanelExpanded = Boolean(this.getExpandedPanelId());
 
-    if (panelId && window.scrollY > 0) {
-      this.scrollPosition = window.scrollY;
+    if (isPanelExpanded) {
+      this.setExpandedPanelId(undefined);
+      this.setScrollToPanelId(panelId);
       return;
     }
 
-    if (!panelId && previousPanelId) {
-      this.setScrollToPanelId(previousPanelId);
+    this.setExpandedPanelId(panelId);
+    if (window.scrollY > 0) {
+      this.scrollPosition = window.scrollY;
     }
   };
 
