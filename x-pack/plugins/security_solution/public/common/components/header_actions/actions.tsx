@@ -11,6 +11,8 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { NotesFlyoutKey } from '../../../flyout/notes/right';
 import { selectTimelineById } from '../../../timelines/store/selectors';
 import {
   eventHasNotes,
@@ -217,6 +219,23 @@ const ActionsComponent: React.FC<ActionProps> = ({
     [isEventViewer, unifiedComponentsInTimelineEnabled]
   );
 
+  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
+
+  const toggleNotes = useCallback(() => {
+    toggleShowNotes?.();
+    openFlyout({
+      right: {
+        id: NotesFlyoutKey,
+        params: {
+          eventId,
+          refetch,
+          eventIdToNoteIds,
+          onToggleShowNotes: closeFlyout,
+        },
+      },
+    });
+  }, [refetch, eventIdToNoteIds, openFlyout, toggleShowNotes, eventId, closeFlyout]);
+
   return (
     <ActionsContainer>
       <>
@@ -257,7 +276,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
               ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
               key="add-event-note"
               showNotes={showNotes ?? false}
-              toggleShowNotes={toggleShowNotes}
+              toggleShowNotes={toggleNotes}
               timelineType={timelineType}
               eventId={eventId}
             />

@@ -458,8 +458,12 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
-            renderCustomGridBody={renderCustomBodyCallback}
-            trailingControlColumns={trailingControlColumns}
+            renderCustomGridBody={
+              enabledRowRenderers.length > 0 ? renderCustomBodyCallback : undefined
+            }
+            trailingControlColumns={
+              enabledRowRenderers.length > 0 ? trailingControlColumns : undefined
+            }
             externalControlColumns={leadingControlColumns}
             cellContext={cellContext}
           />

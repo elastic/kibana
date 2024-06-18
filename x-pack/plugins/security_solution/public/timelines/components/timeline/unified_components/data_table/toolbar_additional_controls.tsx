@@ -4,9 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import React, { useMemo, useCallback, useRef } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiFlexItem,
+  EuiText,
+  EuiFlexGroup,
+  EuiSwitch,
+} from '@elastic/eui';
+import React, { useMemo, useCallback, useRef, useState, useEffect } from 'react';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { selectExcludedRowRendererIds } from '../../../../store/selectors';
+import type { State } from '../../../../../common/store';
+import { setExcludedRowRendererIds } from '../../../../store/actions';
+import { RowRendererId } from '../../../../../../common/api/timeline';
 import { isActiveTimeline } from '../../../../../helpers';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import {
@@ -33,6 +46,74 @@ interface Props {
   timelineId: string;
   updatedAt: number;
 }
+
+interface RowRendererSwitchProps {
+  timelineId: string;
+}
+
+export const RowRendererSwitch = React.memo(function RowRendererSwitch(
+  props: RowRendererSwitchProps
+) {
+  const { timelineId } = props;
+
+  const excludedRowRendererIds = useSelector((state: State) =>
+    selectExcludedRowRendererIds(state, timelineId)
+  );
+
+  const [checked, setChecked] = useState(
+    Object.values(RowRendererId).every((id) => excludedRowRendererIds.includes(id))
+  );
+
+  const dispatch = useDispatch();
+
+  const updateExcludedRowRenderers = useCallback(
+    (payload) =>
+      dispatch(
+        setExcludedRowRendererIds({
+          id: timelineId,
+          excludedRowRendererIds: payload,
+        })
+      ),
+    [dispatch, timelineId]
+  );
+
+  const handleDisableAll = useCallback(() => {
+    updateExcludedRowRenderers(Object.values(RowRendererId));
+  }, [updateExcludedRowRenderers]);
+
+  const handleEnableAll = useCallback(() => {
+    updateExcludedRowRenderers([]);
+  }, [updateExcludedRowRenderers]);
+
+  const onChange = (e: EuiSwitchEvent) => {
+    setChecked(e.target.checked);
+  };
+
+  useEffect(() => {
+    if (checked) {
+      handleDisableAll();
+    } else {
+      handleEnableAll();
+    }
+  }, [checked, handleDisableAll, handleEnableAll]);
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">{'Row Renderer'}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          label=""
+          checked={checked}
+          onChange={onChange}
+          data-test-subj="row-renderer-switch"
+          compressed
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
 
 export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId, updatedAt }) => {
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
@@ -69,6 +150,7 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
   return (
     <>
       <StatefulRowRenderersBrowser timelineId={timelineId} />
+      <RowRendererSwitch timelineId={timelineId} />
       <LastUpdatedContainer updatedAt={updatedAt} />
       <span className="rightPosition">
         <EuiToolTip

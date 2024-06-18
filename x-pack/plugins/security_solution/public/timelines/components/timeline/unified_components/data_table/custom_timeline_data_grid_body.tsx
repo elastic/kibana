@@ -18,7 +18,6 @@ import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { appSelectors } from '../../../../../common/store';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { timelineActions } from '../../../../store';
-import { NoteCards } from '../../../notes/note_cards';
 import type { TimelineResultNote } from '../../../open_timeline/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
@@ -268,18 +267,18 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
           return null;
         })}
       </CustomGridRowCellWrapper>
-      {renderNotesContainer && (
-        <NoteCards
-          ariaRowindex={rowIndex}
-          associateNote={associateNote}
-          className="udt--customRow"
-          data-test-subj="note-cards"
-          notes={notes ?? []}
-          showAddNote={eventIdsAddingNotes?.has(eventId) ?? false}
-          toggleShowAddNote={onToggleShowNotes}
-          eventId={eventId}
-        />
-      )}
+      {/* {renderNotesContainer && ( */}
+      {/*   <NoteCards */}
+      {/*     ariaRowindex={rowIndex} */}
+      {/*     associateNote={associateNote} */}
+      {/*     className="udt--customRow" */}
+      {/*     data-test-subj="note-cards" */}
+      {/*     notes={notes ?? []} */}
+      {/*     showAddNote={eventIdsAddingNotes?.has(eventId) ?? false} */}
+      {/*     toggleShowAddNote={onToggleShowNotes} */}
+      {/*     eventId={eventId} */}
+      {/*   /> */}
+      {/* )} */}
 
       {/* Timeline Expanded Row */}
       {canShowRowRenderer ? (
