@@ -79,7 +79,24 @@ export const OtelLogsPanel: React.FC = () => {
     {
       id: 'kubernetes',
       name: 'Kubernetes',
-      prompt: 'Install the collector via kubectl apply -f otel-collector-k8s.yml.',
+      prompt: (
+        <>
+          <EuiText>
+            <p>
+              {i18n.translate(
+                'xpack.observability_onboarding.otelLogsPanel.kubernetesApplyCommandPromptLabel',
+                {
+                  defaultMessage:
+                    'From the directory where the manifest is downloaded, run the apply command:',
+                }
+              )}
+            </p>
+          </EuiText>
+          <EuiCodeBlock language="yaml" isCopyable>
+            {'kubectl apply -f otel-collector-k8s.yml'}
+          </EuiCodeBlock>
+        </>
+      ),
       content: `apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -342,17 +359,6 @@ subjects:
       fileName: 'otel-collector-k8s.yml',
     },
     {
-      id: 'mac',
-      name: 'Mac',
-      content: `arch=$(if [[ $(arch) == "arm64" ]]; then echo "aarch64"; else echo $(arch); fi)
-
-curl --output elastic-distro-${AGENT_VERSION}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${AGENT_VERSION}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir "elastic-distro-${AGENT_VERSION}-darwin-$arch" && tar -xvf elastic-distro-${AGENT_VERSION}-darwin-$arch.tar.gz -C "elastic-distro-${AGENT_VERSION}-darwin-$arch" --strip-components=1 && cd elastic-distro-${AGENT_VERSION}-darwin-$arch 
-      
-rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i '' 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
-      check: './otelcol --config otel.yml',
-      type: 'copy',
-    },
-    {
       id: 'linux',
       name: 'Linux',
       content: `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
@@ -360,6 +366,17 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && se
 curl --output elastic-distro-${AGENT_VERSION}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${AGENT_VERSION}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir elastic-distro-${AGENT_VERSION}-linux-$arch && tar -xvf elastic-distro-${AGENT_VERSION}-linux-$arch.tar.gz -C "elastic-distro-${AGENT_VERSION}-linux-$arch" --strip-components=1 && cd elastic-distro-${AGENT_VERSION}-linux-$arch 
         
 rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+      check: './otelcol --config otel.yml',
+      type: 'copy',
+    },
+    {
+      id: 'mac',
+      name: 'Mac',
+      content: `arch=$(if [[ $(arch) == "arm64" ]]; then echo "aarch64"; else echo $(arch); fi)
+
+curl --output elastic-distro-${AGENT_VERSION}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${AGENT_VERSION}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir "elastic-distro-${AGENT_VERSION}-darwin-$arch" && tar -xvf elastic-distro-${AGENT_VERSION}-darwin-$arch.tar.gz -C "elastic-distro-${AGENT_VERSION}-darwin-$arch" --strip-components=1 && cd elastic-distro-${AGENT_VERSION}-darwin-$arch 
+      
+rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i '' 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       check: './otelcol --config otel.yml',
       type: 'copy',
     },
@@ -486,13 +503,6 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
                         {selectedContent.content}
                       </EuiCodeBlock>
                     </EuiFlexItem>
-                    {selectedContent.prompt && (
-                      <EuiFlexItem>
-                        <EuiText>
-                          <p>{selectedContent.prompt}</p>
-                        </EuiText>
-                      </EuiFlexItem>
-                    )}
                     <EuiFlexItem align="left">
                       <EuiFlexGroup>
                         {selectedContent.type === 'download' ? (
@@ -533,7 +543,7 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
                         )}
                       </EuiFlexGroup>
                     </EuiFlexItem>
-                    <EuiSpacer />
+                    {selectedContent.prompt}
                     <EuiText>
                       <p>
                         {selectedTab === 'kubernetes'
@@ -541,7 +551,7 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
                               'xpack.observability_onboarding.otelLogsPanel.p.checkTheCollectorLabel',
                               {
                                 defaultMessage:
-                                  'Run the following command to check whether the collector is running correctly.',
+                                  'Run the following command to check whether the collector is running correctly:',
                               }
                             )
                           : i18n.translate(
