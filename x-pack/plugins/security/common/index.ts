@@ -42,5 +42,3 @@ export type {
   UserProfileLabels,
   UserProfileUserInfoWithSecurity,
 } from '@kbn/security-plugin-types-common';
-
-export type { ApiKey, RestApiKey } from '@kbn/security-api-key-management';
