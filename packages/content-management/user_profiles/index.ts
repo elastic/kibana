@@ -6,18 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsReference } from './services';
+export { UserAvatarTip, NoUpdaterTip, NoCreatorTip, ManagedAvatarTip } from './src/components';
 
-export interface Item {
-  id: string;
-  title: string;
-  description?: string;
-  tags: SavedObjectsReference[];
+export { useUserProfile, useUserProfiles } from './src/queries';
 
-  createdAt?: string;
-  createdBy?: string;
-  updatedAt?: string;
-  updatedBy?: string;
-
-  managed?: boolean;
-}
+export {
+  UserProfilesKibanaProvider,
+  type UserProfilesKibanaDependencies,
+  UserProfilesProvider,
+  type UserProfilesServices,
+  useUserProfilesServices,
+} from './src/services';
