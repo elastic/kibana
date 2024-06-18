@@ -12,9 +12,17 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import { getLogLevelColor, getLogLevelCoalescedValue } from '@kbn/discover-utils';
 
-const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row) => {
-  return 'blue';
+const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row, euiTheme) => {
+  const logLevel = row.flattened['log.level'];
+  const logLevelCoalescedValue = getLogLevelCoalescedValue(logLevel);
+
+  if (logLevelCoalescedValue) {
+    return getLogLevelColor(logLevelCoalescedValue, euiTheme);
+  }
+
+  return undefined;
 };
 
 /**
