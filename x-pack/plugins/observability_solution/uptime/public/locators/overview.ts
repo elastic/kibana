@@ -13,7 +13,7 @@ import {
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import { OVERVIEW_ROUTE } from '../../common/constants';
 
-export { UptimeOverviewLocatorInfraParams, UptimeOverviewLocatorParams };
+export type { UptimeOverviewLocatorInfraParams, UptimeOverviewLocatorParams };
 
 const formatSearchKey = (key: string, value: string) => `${key}: "${value}"`;
 
