@@ -9,15 +9,18 @@
 import type {
   ESQLAstCommand,
   ESQLAstItem,
-  ESQLAstMetricsCommand,
   ESQLAstNode,
+  ESQLColumn,
   ESQLFunction,
+  ESQLLiteral,
   ESQLSingleAstItem,
-} from '../..';
+} from '../types';
 
 export interface WalkerOptions {
   visitSingleAstItem?: (node: ESQLSingleAstItem) => void;
   visitFunction?: (node: ESQLFunction) => void;
+  visitColumn?: (node: ESQLColumn) => void;
+  visitLiteral?: (node: ESQLLiteral) => void;
 }
 
 export class Walker {
@@ -45,13 +48,6 @@ export class Walker {
 
   public walkCommand(node: ESQLAstCommand): void {
     switch (node.name) {
-      case 'metrics': {
-        const metrics = node as ESQLAstMetricsCommand;
-        this.walk(metrics.sources);
-        this.walk(metrics.aggregates);
-        this.walk(metrics.grouping);
-        break;
-      }
       default: {
         this.walk(node.args);
         break;
@@ -70,10 +66,19 @@ export class Walker {
   }
 
   public walkSingleAstItem(node: ESQLSingleAstItem): void {
-    this.options.visitSingleAstItem?.(node);
+    const { options } = this;
+    options.visitSingleAstItem?.(node);
     switch (node.type) {
       case 'function': {
         this.walkFunction(node as ESQLFunction);
+        break;
+      }
+      case 'column': {
+        options.visitColumn?.(node);
+        break;
+      }
+      case 'literal': {
+        options.visitLiteral?.(node);
         break;
       }
     }

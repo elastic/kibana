@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAstAndSyntaxErrors } from '../..';
+import { ESQLColumn, ESQLLiteral, getAstAndSyntaxErrors } from '../..';
 import { walk } from './walker';
 
 test('can walk all functions', () => {
@@ -18,4 +18,38 @@ test('can walk all functions', () => {
   });
 
   expect(functions.sort()).toStrictEqual(['a', 'b', 'c']);
+});
+
+test('can walk "columns"', () => {
+  const query = 'ROW x = 1';
+  const { ast } = getAstAndSyntaxErrors(query);
+  const columns: ESQLColumn[] = [];
+
+  walk(ast, {
+    visitColumn: (node) => columns.push(node),
+  });
+
+  expect(columns).toMatchObject([
+    {
+      type: 'column',
+      name: 'x',
+    },
+  ]);
+});
+
+test('can walk literals', () => {
+  const query = 'ROW x = 1';
+  const { ast } = getAstAndSyntaxErrors(query);
+  const columns: ESQLLiteral[] = [];
+
+  walk(ast, {
+    visitLiteral: (node) => columns.push(node),
+  });
+
+  expect(columns).toMatchObject([
+    {
+      type: 'literal',
+      name: '1',
+    },
+  ]);
 });
