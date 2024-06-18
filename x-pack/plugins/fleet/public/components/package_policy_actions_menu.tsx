@@ -19,7 +19,7 @@ import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
-  agentPolicies?: AgentPolicy[];
+  agentPolicies: AgentPolicy[];
   packagePolicy: InMemoryPackagePolicy;
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
@@ -37,7 +37,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const { getHref } = useLink();
   const authz = useAuthz();
 
-  const agentPolicy = agentPolicies && agentPolicies[0]; // TODO: handle multiple agent policies
+  const agentPolicy = agentPolicies.length > 0 ? agentPolicies[0] : undefined; // TODO: handle multiple agent policies
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
   const isFleetServerPolicy = agentPolicy && policyHasFleetServer(agentPolicy);
 
