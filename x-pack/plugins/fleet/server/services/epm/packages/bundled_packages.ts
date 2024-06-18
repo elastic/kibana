@@ -42,11 +42,7 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
   */
 
   // const bundledPackageLocation = config?.developer?.bundledPackageLocation;
-  const bundledPackageLocation = path.resolve(
-    path.dirname(__filename),
-    '../../../../../../..',
-    'bundle'
-  );
+  const bundledPackageLocation = path.resolve(path.dirname(__filename), 'bundle');
 
   if (!bundledPackageLocation) {
     throw new BundledPackageLocationNotFoundError(
