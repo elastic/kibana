@@ -680,7 +680,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       enabled: false,
     },
     lineDecorationsWidth: 12,
-    lineHeight: !isCodeEditorExpanded ? 21 : 24,
     lineNumbers: showLineNumbers ? 'on' : 'off',
     lineNumbersMinChars: 3,
     minimap: { enabled: false },
