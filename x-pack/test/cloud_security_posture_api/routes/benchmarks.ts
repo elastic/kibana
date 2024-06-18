@@ -30,34 +30,34 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
-const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
-  let retryCount = 0;
+  const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
+    let retryCount = 0;
 
-  while (retryCount < 10) {
-    try {
-      const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
-        type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-      });
+    while (retryCount < 10) {
+      try {
+        const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
+          type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
+        });
 
-      const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
-        (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
-      );
+        const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
+          (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
+        );
 
-      if (requestedBenchmarkRules.length > 0) {
-        return requestedBenchmarkRules.map((item) => item.attributes);
-      } else {
-        throw new Error(`No benchmark rules found for benchmark ID: ${benchmarkId}`);
+        if (requestedBenchmarkRules.length > 0) {
+          return requestedBenchmarkRules.map((item) => item.attributes);
+        } else {
+          throw new Error(`No benchmark rules found for benchmark ID: ${benchmarkId}`);
+        }
+      } catch (error) {
+        retryCount++;
+        console.error(`Attempt ${retryCount} failed:`, error);
+        // You can add a delay between retries if needed
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // 1 second delay
       }
-    } catch (error) {
-      retryCount++;
-      console.error(`Attempt ${retryCount} failed:`, error);
-      // You can add a delay between retries if needed
-      await new Promise(resolve => setTimeout(resolve, 3000)); // 1 second delay
     }
-  }
 
-  throw new Error(`Failed to retrieve benchmark rules after ${retryCount} attempts`);
-};
+    throw new Error(`Failed to retrieve benchmark rules after ${retryCount} attempts`);
+  };
 
   const getMockFinding = (rule: CspBenchmarkRule, evaluation: string) => ({
     '@timestamp': '2023-06-29T02:08:44.993Z',
