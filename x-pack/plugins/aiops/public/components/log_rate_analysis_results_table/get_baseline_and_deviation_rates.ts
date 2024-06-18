@@ -20,14 +20,14 @@ export function getLogRateChange(
         : `${Math.round((baselineBucketRate / deviationBucketRate) * 100) / 100}x lower`
       : analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
       ? i18n.translate(
-          'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateChangeLabelColumnTooltip',
+          'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateIncreaseLabelColumnTooltip',
           {
             defaultMessage: '{deviationBucketRate} docs from 0 in baseline',
             values: { deviationBucketRate },
           }
         )
       : i18n.translate(
-          'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateChangeLabelColumnTooltip',
+          'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateDecreaseLabelColumnTooltip',
           {
             defaultMessage: '0 docs from ${baselineBucketRate} in baseline',
             values: { baselineBucketRate },
