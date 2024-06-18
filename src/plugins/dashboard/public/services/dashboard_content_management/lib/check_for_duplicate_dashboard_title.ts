@@ -20,7 +20,6 @@ export interface DashboardDuplicateTitleCheckProps {
    */
   onTitleDuplicate?: (speculativeSuggestion: string) => void;
   isTitleDuplicateConfirmed: boolean;
-  searchLimit?: number;
 }
 
 /**
@@ -35,10 +34,14 @@ export async function checkForDuplicateDashboardTitle(
     lastSavedTitle,
     onTitleDuplicate,
     isTitleDuplicateConfirmed,
-    searchLimit = 20,
   }: DashboardDuplicateTitleCheckProps,
   contentManagement: DashboardStartDependencies['contentManagement']
 ): Promise<boolean> {
+  // Don't check if the title is an empty string
+  if (!title) {
+    return true;
+  }
+
   // Don't check for duplicates if user has already confirmed save with duplicate title
   if (isTitleDuplicateConfirmed) {
     return true;
@@ -50,7 +53,7 @@ export async function checkForDuplicateDashboardTitle(
     return true;
   }
 
-  const [baseDashboardName, duplicationId] = extractTitleAndCount(title);
+  const [baseDashboardName] = extractTitleAndCount(title);
 
   const { hits } = await contentManagement.client.search<
     DashboardCrudTypes['SearchIn'],
@@ -58,9 +61,8 @@ export async function checkForDuplicateDashboardTitle(
   >({
     contentTypeId: DASHBOARD_CONTENT_ID,
     query: {
-      text: title ? `${baseDashboardName}*` : undefined,
-      limit: searchLimit,
-      cursor: String(duplicationId ? Math.ceil(duplicationId / searchLimit) : 1),
+      text: `${baseDashboardName}*`,
+      limit: 20,
     },
     options: {
       onlyTitle: true,
