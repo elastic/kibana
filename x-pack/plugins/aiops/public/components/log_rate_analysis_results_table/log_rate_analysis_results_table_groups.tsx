@@ -27,16 +27,21 @@ import {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantItem } from '@kbn/ml-agg-utils';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { type SignificantItem } from '@kbn/ml-agg-utils';
+import {
+  setPinnedGroup,
+  setSelectedGroup,
+  useAppDispatch,
+  useAppSelector,
+  type GroupTableItem,
+} from '@kbn/aiops-log-rate-analysis/state';
 import { stringHash } from '@kbn/ml-string-hash';
-import { useLogRateAnalysisStateContext, type GroupTableItem } from '@kbn/aiops-components';
 
 import usePrevious from 'react-use/lib/usePrevious';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { LogRateAnalysisResultsTable } from './log_rate_analysis_results_table';
-import { GROUPS_TABLE, useColumns } from './use_columns';
+import { LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE, useColumns } from './use_columns';
 
 const EXPAND_COLUMN_WIDTH = '40px';
 const MAX_GROUP_BADGES = 5;
@@ -51,28 +56,24 @@ interface LogRateAnalysisResultsTableProps {
   skippedColumns: string[];
   significantItems: SignificantItem[];
   groupTableItems: GroupTableItem[];
-  loading: boolean;
   searchQuery: estypes.QueryDslQueryContainer;
-  timeRangeMs: TimeRangeMs;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  zeroDocsFallback?: boolean;
 }
 
 export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTableProps> = ({
   skippedColumns,
   significantItems,
   groupTableItems,
-  loading,
-  timeRangeMs,
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
-  zeroDocsFallback = false,
 }) => {
   const prevSkippedColumns = usePrevious(skippedColumns);
+
+  const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -90,8 +91,9 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   const visColors = euiPaletteColorBlind();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
-    useLogRateAnalysisStateContext();
+  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.selectedGroup);
+  const dispatch = useAppDispatch();
   const isMounted = useMountedState();
 
   const toggleDetails = (item: GroupTableItem) => {
@@ -102,26 +104,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       itemIdToExpandedRowMapValues[item.id] = (
         <LogRateAnalysisResultsTable
           skippedColumns={skippedColumns}
-          significantItems={item.groupItemsSortedByUniqueness.reduce<SignificantItem[]>(
-            (p, groupItem) => {
-              const st = significantItems.find(
-                (d) => d.fieldName === groupItem.fieldName && d.fieldValue === groupItem.fieldValue
-              );
-
-              if (st !== undefined) {
-                p.push({
-                  ...st,
-                  unique: (groupItem.duplicate ?? 0) <= 1,
-                });
-              }
-
-              return p;
-            },
-            []
-          )}
-          loading={loading}
-          isExpandedRow
-          timeRangeMs={timeRangeMs}
+          groupFilter={item.groupItemsSortedByUniqueness}
           searchQuery={searchQuery}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
@@ -254,12 +237,9 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   ];
 
   const columns = useColumns(
-    GROUPS_TABLE,
+    LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS,
     skippedColumns,
     searchQuery,
-    timeRangeMs,
-    loading,
-    zeroDocsFallback,
     barColorOverride,
     barHighlightColorOverride
   ) as Array<EuiBasicTableColumn<GroupTableItem>>;
@@ -331,22 +311,22 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       pinnedGroup === null &&
       pageOfItems.length > 0
     ) {
-      setSelectedGroup(pageOfItems[0]);
+      dispatch(setSelectedGroup(pageOfItems[0]));
     }
 
     // If a user switched pages and a pinned row is no longer visible
     // on the current page, set the status of pinned rows back to `null`.
     if (pinnedGroup !== null && !pageOfItems.some((item) => isEqual(item, pinnedGroup))) {
-      setPinnedGroup(null);
+      dispatch(setPinnedGroup(null));
     }
-  }, [selectedGroup, setSelectedGroup, setPinnedGroup, pageOfItems, pinnedGroup]);
+  }, [dispatch, selectedGroup, pageOfItems, pinnedGroup]);
 
   // When the analysis results table unmounts,
   // make sure to reset any hovered or pinned rows.
   useEffect(
     () => () => {
-      setSelectedGroup(null);
-      setPinnedGroup(null);
+      dispatch(setSelectedGroup(null));
+      dispatch(setPinnedGroup(null));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -413,18 +393,18 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
           'data-test-subj': `aiopsLogRateAnalysisResultsGroupsTableRow row-${group.id}`,
           onClick: () => {
             if (group.id === pinnedGroup?.id) {
-              setPinnedGroup(null);
+              dispatch(setPinnedGroup(null));
             } else {
-              setPinnedGroup(group);
+              dispatch(setPinnedGroup(group));
             }
           },
           onMouseEnter: () => {
             if (pinnedGroup === null) {
-              setSelectedGroup(group);
+              dispatch(setSelectedGroup(group));
             }
           },
           onMouseLeave: () => {
-            setSelectedGroup(null);
+            dispatch(setSelectedGroup(null));
           },
           style: getRowStyle(group),
         };
