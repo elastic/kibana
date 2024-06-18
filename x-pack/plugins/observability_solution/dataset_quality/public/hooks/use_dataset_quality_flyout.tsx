@@ -33,6 +33,16 @@ export const useDatasetQualityFlyout = () => {
     datasetIntegrationsLoading: state.matches('flyout.initializing.integrationDashboards.fetching'),
   }));
 
+  const canUserAccessDashboards = useSelector(
+    service,
+    (state) => !state.matches('flyout.initializing.integrationDashboards.unauthorized')
+  );
+
+  const canUserViewIntegrations = useSelector(
+    service,
+    (state) => state.context.datasetUserPrivileges.canViewIntegrations
+  );
+
   return {
     dataStreamStat,
     dataStreamSettings,
@@ -43,5 +53,7 @@ export const useDatasetQualityFlyout = () => {
     breakdownField,
     loadingState,
     flyoutLoading: !dataStreamStat,
+    canUserAccessDashboards,
+    canUserViewIntegrations,
   };
 };
