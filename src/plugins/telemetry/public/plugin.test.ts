@@ -7,7 +7,7 @@
  */
 
 import { of } from 'rxjs';
-import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
+import { ElasticV3BrowserShipper } from '@kbn/ebt/shippers/elastic_v3/browser';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
