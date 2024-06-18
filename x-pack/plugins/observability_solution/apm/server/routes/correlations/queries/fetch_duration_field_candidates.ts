@@ -53,7 +53,10 @@ export async function fetchDurationFieldCandidates({
       events: [eventType],
     },
     fields: '*',
-    filters: '-metadata',
+    // We exclude metadata and parent fields as they are not useful for correlations.
+    // There's an issue in ES (https://github.com/elastic/elasticsearch/issues/109797)
+    // that describes why we need to add -parent in addition to the types option.
+    filters: '-metadata,-parent',
     include_empty_fields: false,
     index_filter: rangeQuery(start, end)[0],
     types: SUPPORTED_ES_FIELD_TYPES,
