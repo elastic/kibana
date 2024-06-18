@@ -166,16 +166,14 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
             daemonsets.push(daemonset)
           } else {
               const message = `${resource} ${daemonsetName} has no pods or it does not exist`
-              return response.ok({
-                body: {
-                  time: time,
-                  message: message,
-                  name: request.query.name,
-                  namespace: request.query.namespace,
-                  reason: "Not found or has no pods",
-                  daemonsets: [],
-                },
-              });
+              const daemonset = {
+                'name': daemonsetName,
+                'pods': [],
+                'namespace': namespace,
+                'message': message,
+                'reason': '',
+              };
+              daemonsets.push(daemonset)
           }
         }
         return response.ok({

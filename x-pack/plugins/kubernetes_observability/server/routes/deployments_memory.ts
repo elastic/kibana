@@ -152,17 +152,19 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
 
             deployments.push(deployment)
           } else {
-              const message = `Deployment ${deploy} has no pods or it does not exist`
-              return response.ok({
-                body: {
-                  time: time,
-                  message: message,
-                  name: request.query.name,
-                  namespace: request.query.namespace,
-                  reason: "Not found or has no pods",
-                  deployments: [],
-                },
-              });
+              if (request.query.name !== undefined) {
+                const message = `Deployment ${deploy} has no pods or it does not exist`
+                return response.ok({
+                    body: {
+                      time: time,
+                      message: message,
+                      name: request.query.name,
+                      namespace: request.query.namespace,
+                      reason: "Not found or has no pods",
+                      deployments: [],
+                    },
+                  });
+              }
           }
         }
         return response.ok({

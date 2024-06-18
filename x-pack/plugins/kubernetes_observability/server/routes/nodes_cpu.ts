@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue, Limits, NodeCpu, round, toPct } from '../lib/utils';
+import { extractFieldValue, Limits, NodeCpu, round, toPct, checkDefaultPeriod } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   NODE_CPU_ROUTE
@@ -34,12 +34,14 @@ export const registerNodesCpuRoute = (router: IRouter, logger: Logger) => {
           request: {
             query: schema.object({
               name: schema.maybe(schema.string()),
+              period: schema.maybe(schema.string())
             }),
           },
         },
       },
       async (context, request, response: any) => {
         const client = (await context.core).elasticsearch.client.asCurrentUser;
+        const period = checkDefaultPeriod(request.query.period);
         var musts = new Array();
         musts.push(
             { exists: { field: 'metrics.k8s.node.cpu.utilization' } },
@@ -48,7 +50,7 @@ export const registerNodesCpuRoute = (router: IRouter, logger: Logger) => {
             {
                 range: {
                     "@timestamp": {
-                        "gte": "now-5m"
+                        "gte": period
                     }
                 }
             }

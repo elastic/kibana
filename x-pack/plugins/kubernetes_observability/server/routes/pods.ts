@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import {extractFieldValue, phaseToState, conStatusToState, Event, Pod, checkDefaultNamespace } from '../lib/utils';
+import {extractFieldValue, phaseToState, conStatusToState, Event, Pod, checkDefaultPeriod } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
     POD_STATUS_ROUTE,
@@ -30,13 +30,13 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
               namespace: schema.maybe(schema.string()),
               deployment: schema.maybe(schema.string()),
               daemonset: schema.maybe(schema.string()),
+              period: schema.maybe(schema.string()),
             }),
           },
         },
       },
       async (context, request, response) => {
-        var namespace = checkDefaultNamespace(request.query.namespace);
-        console.log("namespace:"+namespace)
+        const period = checkDefaultPeriod(request.query.period);
         var podNames = new Array();
         if (request.query.name !== undefined) {
           podNames.push(request.query.name);
@@ -78,7 +78,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
             {
                 range: {
                     "@timestamp": {
-                        "gte": "now-5m"
+                        "gte": period
                     }
                 }
             }
@@ -129,7 +129,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
         }
 
         if (podNames.length === 1) {
-          const podObject = await getPodStatus(client, podNames[0], request.query.namespace);
+          const podObject = await getPodStatus(client, podNames[0], period, request.query.namespace);
           if (Object.keys(podObject).length === 0) {
             var fullName = podNames[0];
             if (request.query.namespace !== undefined) {
@@ -169,7 +169,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
     );
 };
 
-export async function getPodEvents(client: any, podName: string, namespace?: string): Promise<Event>{
+export async function getPodEvents(client: any, podName: string, period: string, namespace?: string): Promise<Event>{
   const musts = [
     {
         term: {
@@ -196,6 +196,16 @@ export async function getPodEvents(client: any, podName: string, namespace?: str
     }
   ];
 
+  const filter = [
+    {
+        range: {
+            "@timestamp": {
+                "gte": period
+            }
+        }
+    }
+  ]
+
   const dsl: estypes.SearchRequest = {
     index: ["logs-generic-*"],
     size: 1,
@@ -209,6 +219,7 @@ export async function getPodEvents(client: any, podName: string, namespace?: str
       bool: {
         must: musts,
         must_not: must_not,
+        filter: filter
       },
     },
   };
@@ -235,7 +246,7 @@ export async function getPodEvents(client: any, podName: string, namespace?: str
 }
 
 
-export async function getPodStatus(client: any, podName: string, namespace?: string): Promise<Pod>{
+export async function getPodStatus(client: any, podName: string, period: string, namespace?: string): Promise<Pod>{
 
   var musts = new Array();
   musts.push(
@@ -255,6 +266,16 @@ export async function getPodStatus(client: any, podName: string, namespace?: str
       }
     )
   }
+
+  const filter = [
+    {
+        range: {
+            "@timestamp": {
+                "gte": period
+            }
+        }
+    }
+  ]
  
   const dsl: estypes.SearchRequest = {
     index: ["metrics-otel.*"],
@@ -269,6 +290,7 @@ export async function getPodStatus(client: any, podName: string, namespace?: str
     query: {
       bool: {
         must: musts,
+        filter: filter
       },
     },
   };
@@ -290,12 +312,12 @@ export async function getPodStatus(client: any, podName: string, namespace?: str
     var failingReason = {} as Event;
     message = "Pod " + podNamespace + "/" + podName + " is in " + state + " state";
     if (state !== 'Succeeded' && state !== 'Running') {
-      const event = await getPodEvents(client, podName, podNamespace);
+      const event = await getPodEvents(client, podName, period, podNamespace);
       if (event.note != '') {
         failingReason = event;
       }
     } else {
-      const [podContainerStatus, container, contTime] = await getPodContainersStatus(client, podName, podNamespace);
+      const [podContainerStatus, container, contTime] = await getPodContainersStatus(client, podName, period, podNamespace);
       state = podContainerStatus === 'Not Ready' ? 'Failed' : state;
       if (podContainerStatus === 'Not Ready') {
         const failingMessage = `Pod ${podNamespace}/${podName} is in ${state} state because container ${container} is not Ready. Check the container's logs for more details`
@@ -324,7 +346,7 @@ export async function getPodStatus(client: any, podName: string, namespace?: str
   return pod;
 }
 
-export async function getPodContainersStatus(client: any, podName: string, namespace?: string){
+export async function getPodContainersStatus(client: any, podName: string, period: string, namespace?: string){
 
   var musts = new Array();
   musts.push(
@@ -344,6 +366,16 @@ export async function getPodContainersStatus(client: any, podName: string, names
       }
     )
   }
+
+  const filter = [
+    {
+        range: {
+            "@timestamp": {
+                "gte": period
+            }
+        }
+    }
+  ]
  
   const dsl: estypes.SearchRequest = {
     index: ["metrics-otel.*"],
@@ -358,6 +390,7 @@ export async function getPodContainersStatus(client: any, podName: string, names
     query: {
       bool: {
         must: musts,
+        filter: filter
       },
     },
   };

@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue, Event, toEntries, capitalizeFirstLetter } from '../lib/utils';
+import { extractFieldValue, Event, toEntries, capitalizeFirstLetter, checkDefaultPeriod } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
     EVENTS_ROUTE,
@@ -28,6 +28,7 @@ export const registerEventsRoute = (router: IRouter, logger: Logger) => {
                         query: schema.object({
                             object: schema.maybe(schema.string()),
                             namespace: schema.maybe(schema.string()),
+                            period: schema.maybe(schema.string())
                         }),
                     },
                 },
@@ -35,6 +36,7 @@ export const registerEventsRoute = (router: IRouter, logger: Logger) => {
             async (context, request, response) => {
 
                 const client = (await context.core).elasticsearch.client.asCurrentUser;
+                const period = checkDefaultPeriod(request.query.period);
                 var musts = new Array();
                 musts.push(
                     {
@@ -90,7 +92,7 @@ export const registerEventsRoute = (router: IRouter, logger: Logger) => {
                     {
                         range: {
                             "@timestamp": {
-                                "gte": "now-5m"
+                                "gte": period
                             }
                         }
                     }

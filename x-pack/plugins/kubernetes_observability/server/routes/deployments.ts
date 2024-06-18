@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue, phaseToState, Event, Deployment, checkDefaultNamespace } from '../lib/utils';
+import { extractFieldValue, phaseToState, Event, Deployment, checkDefaultPeriod } from '../lib/utils';
 import { getPodEvents, getPodContainersStatus } from './pods';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
@@ -29,13 +29,13 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
             query: schema.object({
               name: schema.maybe(schema.string()),
               namespace: schema.maybe(schema.string()),
+              period: schema.maybe(schema.string())
             }),
           },
         },
       },
       async (context, request, response) => {
-        var namespace = checkDefaultNamespace(request.query.namespace);
-
+        const period = checkDefaultPeriod(request.query.period);
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         var deployNames = new Array();
         if (request.query.name !== undefined) {
@@ -59,7 +59,7 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
             {
                 range: {
                     "@timestamp": {
-                        "gte": "now-5m"
+                        "gte": period
                     }
                 }
             }
@@ -109,7 +109,7 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
         }
 
         if (deployNames.length === 1) {
-            const deployObject = await getDeployStatus(client, deployNames[0], request.query.namespace);
+            const deployObject = await getDeployStatus(client, deployNames[0], period, request.query.namespace);
             if (Object.keys(deployObject).length === 0) {
               var fullName = deployNames[0];
               if (request.query.namespace !== undefined) {
@@ -137,7 +137,7 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
 
         var deployObjects = new Array();
         for (const name of deployNames) {
-           const deployObject = await getDeployStatus(client, name, request.query.namespace);
+           const deployObject = await getDeployStatus(client, name, period, request.query.namespace);
            deployObjects.push(deployObject);
         }
         return response.ok({
@@ -150,7 +150,7 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
     );
 };
 
-export async function getDeployStatus(client: any, deployName: string, namespace?: string): Promise<Deployment>{
+export async function getDeployStatus(client: any, deployName: string, period: string, namespace?: string): Promise<Deployment>{
   var musts = new Array();
   musts.push(
     {
@@ -170,6 +170,16 @@ export async function getDeployStatus(client: any, deployName: string, namespace
     )
   }
 
+  const filter = [
+    {
+        range: {
+            "@timestamp": {
+                "gte": period
+            }
+        }
+    }
+  ]
+
   const dsl: estypes.SearchRequest = {
     index: ["metrics-otel.*"],
     size: 1,
@@ -184,6 +194,7 @@ export async function getDeployStatus(client: any, deployName: string, namespace
     query: {
       bool: {
         must: musts,
+        filter: filter
       },
     },
   };
@@ -213,7 +224,7 @@ export async function getDeployStatus(client: any, deployName: string, namespace
         }
     } else {
       console.log("replicas desired not equal to available");
-      deploy = await getDeployPods(client, deployName, deployNamespace, replicasAvailable, replicasdesired)
+      deploy = await getDeployPods(client, deployName, deployNamespace, replicasAvailable, replicasdesired, period)
       deploy.time = time;
       return deploy;
     }
@@ -222,7 +233,7 @@ export async function getDeployStatus(client: any, deployName: string, namespace
 
 }
 
-export async function getDeployPods(client: any, deployName: string, namespace: string, replicasAvailable: string, replicasdesired: string): Promise<Deployment>{
+export async function getDeployPods(client: any, deployName: string, namespace: string, replicasAvailable: string, replicasdesired: string, period: string): Promise<Deployment>{
   const musts = [
     {
       term: {
@@ -237,6 +248,15 @@ export async function getDeployPods(client: any, deployName: string, namespace: 
     { exists: { field: 'metrics.k8s.pod.phase' } }
   ];
   var size: number = +replicasdesired;
+  const filter = [
+    {
+        range: {
+            "@timestamp": {
+                "gte": period
+            }
+        }
+    }
+  ]
   const dslPods: estypes.SearchRequest = {
     index: ["metrics-otel.*"],
     size: size,
@@ -250,6 +270,7 @@ export async function getDeployPods(client: any, deployName: string, namespace: 
     query: {
       bool: {
         must: musts,
+        filter: filter
       },
     },
     aggs: {
@@ -273,7 +294,7 @@ export async function getDeployPods(client: any, deployName: string, namespace: 
     if (podPhase !== 2 && podPhase !== 3) {
       reason = `Pod ${namespace}/${podName} is in ${state} state`;
       var failingReason = {} as Event;
-      const event = await getPodEvents(client, podName, namespace);
+      const event = await getPodEvents(client, podName, period, namespace);
       if (event.note != '') {
         failingReason = event;
       }
@@ -284,7 +305,7 @@ export async function getDeployPods(client: any, deployName: string, namespace: 
       };
       notRunningPods.push(pod);
     } else {
-        const [podContainerStatus, container, conTime] = await getPodContainersStatus(client, podName, namespace);
+        const [podContainerStatus, container, conTime] = await getPodContainersStatus(client, podName, period, namespace);
         state = podContainerStatus === 'Not Ready' ? 'Not Ready' : state;
         if (podContainerStatus === 'Not Ready') {
           const failingMessage = `Pod ${namespace}/${podName} is in ${state} state because container ${container} is not Ready. Check the container's logs for more details`

@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import {extractFieldValue, phaseToState, Event, Daemonset, checkDefaultNamespace} from '../lib/utils';
+import {extractFieldValue, phaseToState, Event, Daemonset, checkDefaultPeriod} from '../lib/utils';
 import {getPodEvents, getPodContainersStatus} from './pods';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
@@ -29,14 +29,14 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
             query: schema.object({
               name: schema.maybe(schema.string()),
               namespace: schema.maybe(schema.string()),
+              period: schema.maybe(schema.string())
             }),
           },
         },
       },
       async (context, request, response) => {
-        var namespace = checkDefaultNamespace(request.query.namespace);
+        const period = checkDefaultPeriod(request.query.period);
         const client = (await context.core).elasticsearch.client.asCurrentUser;
-
         var daemonsetNames = new Array();
         if (request.query.name !== undefined) {
           daemonsetNames.push(request.query.name);
@@ -59,7 +59,7 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
             {
                 range: {
                     "@timestamp": {
-                        "gte": "now-5m"
+                        "gte": period
                     }
                 }
             }
@@ -108,7 +108,7 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
         }
 
         if (daemonsetNames.length === 1) {
-          const daemonObject = await getDaemonStatus(client, daemonsetNames[0], request.query.namespace);
+          const daemonObject = await getDaemonStatus(client, period, daemonsetNames[0], request.query.namespace);
           if (Object.keys(daemonObject).length === 0) {
             var fullName = daemonsetNames[0];
             if (request.query.namespace !== undefined) {
@@ -136,7 +136,7 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
 
         var daemonObjects = new Array();
         for (const name of daemonsetNames) {
-           const daemonObject = await getDaemonStatus(client, name, request.query.namespace);
+           const daemonObject = await getDaemonStatus(client, period, name, request.query.namespace);
            daemonObjects.push(daemonObject);
         }
         return response.ok({
@@ -151,7 +151,7 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
 
 
 
-export async function getDaemonStatus(client: any, daemonName: string, namespace?: string): Promise<Daemonset>{
+export async function getDaemonStatus(client: any, period: string, daemonName: string, namespace?: string): Promise<Daemonset>{
   var musts = new Array();
   musts.push(
     {
@@ -174,7 +174,7 @@ export async function getDaemonStatus(client: any, daemonName: string, namespace
     {
         range: {
             "@timestamp": {
-                "gte": "now-5m"
+                "gte": period
             }
         }
     }
@@ -223,7 +223,7 @@ export async function getDaemonStatus(client: any, daemonName: string, namespace
         }
     } else {
         console.log("replicas desired not equal to available");
-        daemonset = await getDaemonPods(client, daemonName, daemonNamespace, readyNodes, desiredNodes)
+        daemonset = await getDaemonPods(client, period, daemonName, daemonNamespace, readyNodes, desiredNodes)
         daemonset.time = time;
         return daemonset;
     }
@@ -232,7 +232,7 @@ export async function getDaemonStatus(client: any, daemonName: string, namespace
 
 }
 
-export async function getDaemonPods(client: any, daemonName: string, namespace: string, readyNodes: string, desiredNodes: string): Promise<Daemonset>{
+export async function getDaemonPods(client: any, period: string, daemonName: string, namespace: string, readyNodes: string, desiredNodes: string): Promise<Daemonset>{
   const musts = [
     {
       term: {
@@ -247,6 +247,15 @@ export async function getDaemonPods(client: any, daemonName: string, namespace: 
     { exists: { field: 'metrics.k8s.pod.phase' } }
   ];
   var size: number = +desiredNodes;
+  const filter = [
+    {
+        range: {
+            "@timestamp": {
+                "gte": period
+            }
+        }
+    }
+  ]
   const dslPods: estypes.SearchRequest = {
     index: ["metrics-otel.*"],
     size: size,
@@ -260,6 +269,7 @@ export async function getDaemonPods(client: any, daemonName: string, namespace: 
     query: {
       bool: {
         must: musts,
+        filter: filter
       },
     },
     aggs: {

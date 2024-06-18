@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue, Limits, NodeMem, round, toPct } from '../lib/utils';
+import { extractFieldValue, Limits, NodeMem, round, toPct, checkDefaultPeriod } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   NODE_MEMORY_ROUTE
@@ -35,12 +35,14 @@ export const registerNodesMemoryRoute = (router: IRouter, logger: Logger) => {
           request: {
             query: schema.object({
               name: schema.maybe(schema.string()),
+              period: schema.maybe(schema.string())
             }),
           },
         },
       },
       async (context, request, response:MaybePromise<any>) => {
         const client = (await context.core).elasticsearch.client.asCurrentUser;
+        const period = checkDefaultPeriod(request.query.period);
         var musts = new Array();
         musts.push(
             { exists: { field: 'metrics.k8s.node.memory.usage' } },
@@ -50,7 +52,7 @@ export const registerNodesMemoryRoute = (router: IRouter, logger: Logger) => {
             {
                 range: {
                     "@timestamp": {
-                        "gte": "now-5m"
+                        "gte": period
                     }
                 }
             }
@@ -119,7 +121,7 @@ export const registerNodesMemoryRoute = (router: IRouter, logger: Logger) => {
             var nodes = new Array();
             const getNodes =  buckets.map(async (bucket: any) => {
               const name = bucket.key;
-              const [memoryAlloc, _] = await getNodeAllocMemCpu(client, name);
+              const [memoryAlloc, _] = await getNodeAllocMemCpu(client, name, period);
               console.log("Each bucket");
               var nodeMem = {} as NodeMem;
               var alarm = '';
@@ -183,7 +185,7 @@ export const registerNodesMemoryRoute = (router: IRouter, logger: Logger) => {
 };
 
 
-export async function getNodeAllocMemCpu(client: any, node: string): Promise<[any, any]>{
+export async function getNodeAllocMemCpu(client: any, node: string, period: string): Promise<[any, any]>{
 
     const musts = [
         {
@@ -195,7 +197,15 @@ export async function getNodeAllocMemCpu(client: any, node: string): Promise<[an
         { exists: { field: 'metrics.k8s.node.allocatable_cpu' } },
     ];
   
-
+    const filter = [
+      {
+          range: {
+              "@timestamp": {
+                  "gte": period
+              }
+          }
+      }
+    ]
     const dsl: estypes.SearchRequest = {
       index: ["metrics-otel.*"],
       size: 1,
@@ -208,6 +218,7 @@ export async function getNodeAllocMemCpu(client: any, node: string): Promise<[an
       query: {
         bool: {
           must: musts,
+          filter: filter
         },
       },
     };

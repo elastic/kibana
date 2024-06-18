@@ -74,6 +74,7 @@ export type Query = {
   name: string;
   deployment: string;
   daemonset: string;
+  period: string;
 };
 
 export const NAMESPACE_OPTIONS = [
@@ -109,19 +110,65 @@ export const NAMESPACE_SELECT_OPTIONS = [
   },
 ];
 
+export const PERIODS_SELECT_OPTIONS = [
+  {
+    value: 'now-5m',
+    inputDisplay: 'now-5m',
+    disabled: false
+  },
+  {
+    value: 'now-1h',
+    inputDisplay: 'now-1h',
+    disabled: false
+  },
+  {
+    value: 'now-4h',
+    inputDisplay: 'now-4h',
+    disabled: false
+  },
+  {
+    value: 'now-8h',
+    inputDisplay: 'now-8h',
+    disabled: false
+  },
+  {
+    value: 'now-24h',
+    inputDisplay: 'now-24h',
+    disabled: false
+  },
+  {
+    value: 'now-2d',
+    inputDisplay: 'now-2d',
+    disabled: false
+  },
+  {
+    value: 'now-1w',
+    inputDisplay: 'now-1w',
+    disabled: false
+  },
+];
+
 export class PublicKubernetesObservabilityClient {
     constructor(private readonly http: HttpStart) {}
   
-    async getNodesMemory() {
+    async getNodesMemory(period: string) {
       console.log("CALLED TO GET NODES MEM")
-      const results = await this.http.get('/api/kubernetes/nodes/memory', {version: '1',});
+      var query = {} as Query;
+      if (period !== undefined) {
+        query['period'] = period
+      }
+      const results = await this.http.get('/api/kubernetes/nodes/memory', {version: '1', query});
       console.log(results);
       return results;
     }
 
-    async getNodesCpu() {
+    async getNodesCpu(period: string) {
       console.log("CALLED TO GET NODES CPU")
-      const results = await this.http.get('/api/kubernetes/nodes/cpu', {version: '1',});
+      var query = {} as Query;
+      if (period !== undefined) {
+        query['period'] = period
+      }
+      const results = await this.http.get('/api/kubernetes/nodes/cpu', {version: '1', query});
       console.log(results);
       return results;
     }
@@ -324,6 +371,7 @@ const  KubernetesObservabilityComp = ({
   const [triggerPodStatus, setTriggerPodStatus] = useState(true);
   const [triggerPodCpu, setTriggerPodCpu] = useState(true);
   const [triggerPodMem, setTriggerPodMem] = useState(true);
+  const [period, setPeriod] = useState('now-5m');
   // useEffect(() => {
   //   const timer = setInterval(() => {
   //     console.log('This will run after 10 second!')
@@ -335,9 +383,9 @@ const  KubernetesObservabilityComp = ({
   
   useEffect(() => {
     if (hasTimeElapsed) {
-      client.getNodesMemory().then(data => {
+      client.getNodesMemory(period).then(data => {
         console.log(data);
-        console.log("AAAAAAAAA DUE TO TIMEOUT NODES")
+        console.log("AAAAAAAAA DUE TO period change")
         setNodeMemTime(data.time);
         const nodesArray = data.nodes;
         const keys = ['name', 'memory_utilization', 'message', 'alarm'];
@@ -349,11 +397,11 @@ const  KubernetesObservabilityComp = ({
             console.log(error)
         });
     }
-  }, [client, hasTimeElapsed]); // *** Note the dependency
+  }, [client, hasTimeElapsed, period]); // *** Note the dependency
   
   useEffect(() => {
     if (hasTimeElapsed) {
-      client.getNodesCpu().then(data => {
+      client.getNodesCpu(period).then(data => {
         console.log(data);
         setNodeCpuTime(data.time);
         const nodesArray = data.nodes;
@@ -366,7 +414,7 @@ const  KubernetesObservabilityComp = ({
             console.log(error)
       });
     }
-  }, [client, hasTimeElapsed]); // *** Note the dependency
+  }, [client, hasTimeElapsed, period]); // *** Note the dependency
 
   useEffect(() => {
     console.log("CALLED DUE TO CHANGE");
@@ -1600,7 +1648,7 @@ const  KubernetesObservabilityComp = ({
             description={
               <FormattedMessage
                 id="xpack.k8sobservability.namespaces.selectNamespaceDesc"
-                defaultMessage="Select namespace to filter upon."
+                defaultMessage="Select namespace to filter upon"
               />
             }
           >
@@ -1626,14 +1674,14 @@ const  KubernetesObservabilityComp = ({
               <h4>
                 <FormattedMessage
                   id="xpack.k8sobservability.services.selectServiceTitle"
-                  defaultMessage="Service"
+                  defaultMessage="Application"
                 />
               </h4>
             }
             description={
               <FormattedMessage
                 id="xpack.k8sobservability.services.selectServiceDesc"
-                defaultMessage="Select service to filter upon."
+                defaultMessage="Select application to filter upon"
               />
             }
           >
@@ -1651,6 +1699,39 @@ const  KubernetesObservabilityComp = ({
                   value: service,
                   inputDisplay: service,
                 }))}
+              />
+              </EuiFormRow>
+          </EuiDescribedFormGroup>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiDescribedFormGroup
+            title={
+              <h4>
+                <FormattedMessage
+                  id="xpack.k8sobservability.services.selectPeriodTitle"
+                  defaultMessage="Time period"
+                />
+              </h4>
+            }
+            description={
+              <FormattedMessage
+                id="xpack.k8sobservability.services.selectPeriodDesc"
+                defaultMessage="Select time range"
+              />
+            }
+          >
+            <EuiFormRow
+              fullWidth
+              isDisabled={false}
+              isInvalid={false}
+            >
+              <EuiSuperSelect
+                disabled={false}
+                valueOfSelected={period}
+                fullWidth
+                onChange={(id) => setPeriod(id)}
+                options={PERIODS_SELECT_OPTIONS}
               />
               </EuiFormRow>
           </EuiDescribedFormGroup>

@@ -35,7 +35,7 @@ export const registerPodsMemoryRoute = (router: IRouter, logger: Logger) => {
       },
       async (context, request, response) => {
         var namespace = checkDefaultNamespace(request.query.namespace);
-        var period = checkDefaultPeriod(request.query.period);
+        const period = checkDefaultPeriod(request.query.period);
         try {
           const client = (await context.core).elasticsearch.client.asCurrentUser;
           const podObjects = await getPodsMemory(client, period, request.query.name, request.query.namespace, request.query.deployment, request.query.daemonset);
