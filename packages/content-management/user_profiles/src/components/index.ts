@@ -6,18 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsReference } from './services';
-
-export interface Item {
-  id: string;
-  title: string;
-  description?: string;
-  tags: SavedObjectsReference[];
-
-  createdAt?: string;
-  createdBy?: string;
-  updatedAt?: string;
-  updatedBy?: string;
-
-  managed?: boolean;
-}
+export { UserAvatarTip } from './user_avatar_tip';
+export { NoUpdaterTip, NoCreatorTip } from './user_missing_tip';
+export { ManagedAvatarTip } from './managed_avatar_tip';
