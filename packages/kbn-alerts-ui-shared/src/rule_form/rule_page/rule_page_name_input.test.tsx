@@ -41,9 +41,9 @@ describe('rulePageNameInput', () => {
   test('should become an input if the edit button is pressed', () => {
     render(<RulePageNameInput />);
 
-    fireEvent.click(screen.getByTestId('rulePageNameInput'));
+    fireEvent.click(screen.getByTestId('rulePageNameInputButton'));
 
-    fireEvent.change(screen.getByTestId('rulePageNameInput'), {
+    fireEvent.change(screen.getByTestId('rulePageNameInputField'), {
       target: {
         value: 'hello',
       },
@@ -67,9 +67,9 @@ describe('rulePageNameInput', () => {
 
     render(<RulePageNameInput />);
 
-    fireEvent.click(screen.getByTestId('rulePageNameInput'));
+    fireEvent.click(screen.getByTestId('rulePageNameInputButton'));
 
-    expect(screen.getByTestId('rulePageNameInput')).toBeInvalid();
+    expect(screen.getByTestId('rulePageNameInputField')).toBeInvalid();
     expect(screen.getByText('Invalid name')).toBeInTheDocument();
   });
 });

@@ -107,7 +107,7 @@ const ShowRequestModalWithProviders: React.FunctionComponent<ShowRequestModalPro
   </IntlProvider>
 );
 
-describe('rules_settings_modal', () => {
+describe('showRequestModal', () => {
   afterEach(() => {
     jest.clearAllMocks();
     cleanup();

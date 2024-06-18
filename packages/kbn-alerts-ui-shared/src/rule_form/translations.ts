@@ -318,7 +318,7 @@ export const HEALTH_CHECK_API_KEY_ENCRYPTION_ERROR_TEXT = i18n.translate(
 export const HEALTH_CHECK_API_KEY_DISABLED_ERROR_TITLE = i18n.translate(
   'alertsUIShared.healthCheck.apiKeysDisabledErrorTitle',
   {
-    defaultMessage: 'You must enable API keys to use Alerting.',
+    defaultMessage: 'Additional setup required',
   }
 );
 

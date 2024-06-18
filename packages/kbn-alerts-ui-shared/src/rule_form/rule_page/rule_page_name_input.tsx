@@ -99,7 +99,7 @@ export const RulePageNameInput = () => {
                 <EuiFieldText
                   autoFocus
                   fullWidth
-                  data-test-subj="rulePageNameInput"
+                  data-test-subj="rulePageNameInputField"
                   placeholder={RULE_NAME_INPUT_TITLE}
                   style={inputStyles}
                   value={name}
@@ -132,7 +132,7 @@ export const RulePageNameInput = () => {
       color="text"
       style={buttonStyles}
       onClick={onEdit}
-      data-test-subj="rulePageNameInput"
+      data-test-subj="rulePageNameInputButton"
       aria-label={RULE_NAME_ARIA_LABEL_TEXT}
     >
       <EuiTitle size="l" className="eui-textTruncate">

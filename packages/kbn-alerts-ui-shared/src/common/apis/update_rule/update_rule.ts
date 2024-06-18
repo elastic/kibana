@@ -23,6 +23,15 @@ export const UPDATE_FIELDS: Array<keyof UpdateRuleBody> = [
   'alertDelay',
 ];
 
+export const UPDATE_FIELDS_WITH_ACTIONS: Array<keyof UpdateRuleBody> = [
+  'name',
+  'tags',
+  'schedule',
+  'params',
+  'alertDelay',
+  'actions',
+];
+
 export async function updateRule({
   http,
   rule,
