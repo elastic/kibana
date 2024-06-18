@@ -18,7 +18,6 @@ export type {
   APIKeys,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
-  UpdateAPIKeyValidationError,
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
