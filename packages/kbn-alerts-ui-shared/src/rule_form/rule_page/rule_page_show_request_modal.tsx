@@ -69,7 +69,11 @@ export const RulePageShowRequestModal = (props: RulePageShowRequestModalProps) =
   }, [formData, isEdit, multiConsumerSelection]);
 
   return (
-    <EuiModal aria-labelledby="showRequestModal" onClose={onClose}>
+    <EuiModal
+      data-test-subj="rulePageShowRequestModal"
+      aria-labelledby="showRequestModal"
+      onClose={onClose}
+    >
       <EuiModalHeader>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>

@@ -28,9 +28,18 @@ export const RuleFormCircuitBreakerError: FC<{}> = ({ children }) => {
           <EuiSpacer />
         </>
       )}
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+        gutterSize="s"
+        data-test-subj="ruleFormCircuitBreakerError"
+      >
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" color="danger" onClick={onToggleShowDetails}>
+          <EuiButton
+            size="s"
+            color="danger"
+            onClick={onToggleShowDetails}
+            data-test-subj="ruleFormCircuitBreakerErrorToggleButton"
+          >
             {showDetails
               ? CIRCUIT_BREAKER_HIDE_FULL_ERROR_TEXT
               : CIRCUIT_BREAKER_SEE_FULL_ERROR_TEXT}

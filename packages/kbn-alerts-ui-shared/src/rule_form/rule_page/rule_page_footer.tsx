@@ -15,7 +15,7 @@ import {
   RULE_PAGE_FOOTER_SAVE_TEXT,
 } from '../translations';
 import { useRuleFormState } from '../hooks';
-import { isValidRule } from '../validation';
+import { hasRuleErrors } from '../validation';
 import { RulePageShowRequestModal } from './rule_page_show_request_modal';
 import { RulePageConfirmCreateRule } from './rule_page_confirm_create_rule';
 
@@ -35,7 +35,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
   const { baseErrors, paramsErrors } = useRuleFormState();
 
   const hasErrors = useMemo(() => {
-    return !isValidRule({
+    return hasRuleErrors({
       baseErrors: baseErrors || {},
       paramsErrors: paramsErrors || {},
     });
@@ -75,9 +75,14 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup data-test-subj="rulePageFooter" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} disabled={isSaving} isLoading={isSaving}>
+          <EuiButtonEmpty
+            data-test-subj="rulePageFooterCancelButton"
+            onClick={onCancel}
+            disabled={isSaving}
+            isLoading={isSaving}
+          >
             {RULE_PAGE_FOOTER_CANCEL_TEXT}
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -85,6 +90,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="rulePageFooterShowRequestButton"
                 onClick={onOpenShowRequestModalClick}
                 disabled={isSaving || hasErrors}
                 isLoading={isSaving}
@@ -95,6 +101,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
+                data-test-subj="rulePageFooterSaveButton"
                 onClick={onSaveClick}
                 disabled={isSaving || hasErrors}
                 isLoading={isSaving}

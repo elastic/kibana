@@ -93,7 +93,7 @@ describe('RuleAlertDelay', () => {
           active: -5,
         },
       },
-      errors: {
+      baseErrors: {
         alertDelay: 'Alert delay must be greater than 1.',
       },
     });

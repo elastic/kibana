@@ -67,7 +67,7 @@ describe('RuleDetails', () => {
         name: 'test',
         tags: [],
       },
-      errors: {
+      baseErrors: {
         name: 'name is invalid',
         tags: 'tags is invalid',
       },

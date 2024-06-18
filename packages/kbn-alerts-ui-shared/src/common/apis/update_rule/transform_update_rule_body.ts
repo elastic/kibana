@@ -10,7 +10,7 @@ import { RewriteResponseCase } from '@kbn/actions-types';
 import { UpdateRuleBody } from './types';
 
 export const transformUpdateRuleBody: RewriteResponseCase<UpdateRuleBody> = ({
-  actions,
+  actions = [],
   alertDelay,
   ...res
 }): any => ({

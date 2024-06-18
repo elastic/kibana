@@ -283,7 +283,7 @@ export const HEALTH_CHECK_ALERTS_ERROR_TITLE = i18n.translate(
 export const HEALTH_CHECK_ALERTS_ERROR_TEXT = i18n.translate(
   'alertsUIShared.healthCheck.alertsErrorText',
   {
-    defaultMessage: 'To create a rule, you must enable the alerting and actions plugins. ',
+    defaultMessage: 'To create a rule, you must enable the alerting and actions plugins.',
   }
 );
 
@@ -318,14 +318,14 @@ export const HEALTH_CHECK_API_KEY_ENCRYPTION_ERROR_TEXT = i18n.translate(
 export const HEALTH_CHECK_API_KEY_DISABLED_ERROR_TITLE = i18n.translate(
   'alertsUIShared.healthCheck.apiKeysDisabledErrorTitle',
   {
-    defaultMessage: 'You must enable API keys to use Alerting. ',
+    defaultMessage: 'You must enable API keys to use Alerting.',
   }
 );
 
 export const HEALTH_CHECK_API_KEY_DISABLED_ERROR_TEXT = i18n.translate(
   'alertsUIShared.healthCheck.apiKeysDisabledErrorText',
   {
-    defaultMessage: 'You must enable API keys to use Alerting. ',
+    defaultMessage: 'You must enable API keys to use Alerting.',
   }
 );
 
@@ -347,10 +347,25 @@ export const RULE_FORM_ROUTE_PARAMS_ERROR_TEXT = i18n.translate(
   }
 );
 
+export const RULE_FORM_RULE_TYPE_NOT_FOUND_ERROR_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.ruleNotFoundErrorTitle',
+  {
+    defaultMessage: 'Unable to load rule type.',
+  }
+);
+
 export const RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE = i18n.translate(
   'alertsUIShared.ruleForm.ruleNotFoundErrorTitle',
   {
-    defaultMessage: 'Unable to load rule or rule type.',
+    defaultMessage: 'Unable to load rule',
+  }
+);
+
+export const RULE_FORM_RULE_TYPE_NOT_FOUND_ERROR_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.ruleNotFoundErrorText',
+  {
+    defaultMessage:
+      'There was an error loading the rule type. Please ensure you have access to the rule type selected.',
   }
 );
 
@@ -358,7 +373,7 @@ export const RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT = i18n.translate(
   'alertsUIShared.ruleForm.ruleNotFoundErrorText',
   {
     defaultMessage:
-      'There was an error loading the rule or rule type. Please ensure you have access to the rule or rule type selected.',
+      'There was an error loading the rule. Please ensure you have access to the rule selected.',
   }
 );
 
@@ -427,3 +442,28 @@ export const CONFIRM_RULE_SAVE_MESSAGE_TEXT = i18n.translate(
     defaultMessage: 'You can add an action at anytime.',
   }
 );
+
+export const RULE_FORM_PAGE_RULE_DEFINITION_TITLE = i18n.translate(
+  'alertsUiShared.ruleForm.ruleDefinitionTitle',
+  {
+    defaultMessage: 'Rule definition',
+  }
+);
+
+export const RULE_FORM_PAGE_RULE_ACTIONS_TITLE = i18n.translate(
+  'alertsUiShared.ruleForm.ruleActionsTitle',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
+  'alertsUiShared.ruleForm.ruleDetailsTitle',
+  {
+    defaultMessage: 'Rule details',
+  }
+);
+
+export const RULE_FORM_RETURN_TITLE = i18n.translate('alertsUiShared.ruleForm.returnTitle', {
+  defaultMessage: 'Return',
+});

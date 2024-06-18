@@ -42,14 +42,30 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     filteredRuleTypes = [],
   } = props;
 
-  const { data: uiConfig, isLoading: isLoadingUiConfig } = useLoadUiConfig({ http });
-
-  const { error: healthCheckError, isLoading: isLoadingHealthCheck } = useHealthCheck({ http });
-
-  const { data: fetchedFormData, isLoading: isLoadingRule } = useResolveRule({ http, id });
+  const {
+    data: uiConfig,
+    isLoading: isLoadingUiConfig,
+    isInitialLoading: isInitialLoadingUiConfig,
+  } = useLoadUiConfig({ http });
 
   const {
-    ruleTypesState: { data: ruleTypeIndex, isLoading: isLoadingRuleTypes },
+    error: healthCheckError,
+    isLoading: isLoadingHealthCheck,
+    isInitialLoading: isInitialLoadingHealthCheck,
+  } = useHealthCheck({ http });
+
+  const {
+    data: fetchedFormData,
+    isLoading: isLoadingRule,
+    isInitialLoading: isInitialLoadingRule,
+  } = useResolveRule({ http, id });
+
+  const {
+    ruleTypesState: {
+      data: ruleTypeIndex,
+      isLoading: isLoadingRuleTypes,
+      isInitialLoad: isInitialLoadingRuleTypes,
+    },
   } = useLoadRuleTypesQuery({
     http,
     toasts,
@@ -88,8 +104,27 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     return isLoadingUiConfig || isLoadingHealthCheck || isLoadingRule || isLoadingRuleTypes;
   }, [id, isLoadingUiConfig, isLoadingHealthCheck, isLoadingRule, isLoadingRuleTypes]);
 
+  const isInitialLoading = useMemo(() => {
+    if (id === undefined) {
+      return isInitialLoadingUiConfig || isInitialLoadingHealthCheck || isInitialLoadingRuleTypes;
+    }
+    return (
+      isInitialLoadingUiConfig ||
+      isInitialLoadingHealthCheck ||
+      isInitialLoadingRule ||
+      isInitialLoadingRuleTypes
+    );
+  }, [
+    id,
+    isInitialLoadingUiConfig,
+    isInitialLoadingHealthCheck,
+    isInitialLoadingRule,
+    isInitialLoadingRuleTypes,
+  ]);
+
   return {
     isLoading,
+    isInitialLoading: !!isInitialLoading,
     ruleType,
     ruleTypeModel,
     uiConfig,

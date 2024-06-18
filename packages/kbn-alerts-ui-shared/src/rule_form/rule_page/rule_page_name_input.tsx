@@ -91,8 +91,8 @@ export const RulePageNameInput = () => {
 
   if (isEditing) {
     return (
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={10}>
+      <EuiFlexGroup data-test-subj="rulePageNameInput" gutterSize="s" responsive={false}>
+        <EuiFlexItem className="eui-fullWidth">
           <EuiFormRow fullWidth isInvalid={isNameInvalid} error={baseErrors?.name}>
             <EuiTitle size="l">
               <h1>
@@ -112,7 +112,7 @@ export const RulePageNameInput = () => {
             </EuiTitle>
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiButtonIcon
             color="success"
             iconType="check"
@@ -135,7 +135,7 @@ export const RulePageNameInput = () => {
       data-test-subj="rulePageNameInput"
       aria-label={RULE_NAME_ARIA_LABEL_TEXT}
     >
-      <EuiTitle size="l">
+      <EuiTitle size="l" className="eui-textTruncate">
         <h1>{name}</h1>
       </EuiTitle>
     </EuiButtonEmpty>

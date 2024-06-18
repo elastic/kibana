@@ -77,7 +77,7 @@ describe('RuleConsumerSelection', () => {
   it('should be able to show errors when there is one', () => {
     useRuleFormState.mockReturnValue({
       multiConsumerSelection: null,
-      errors: { consumer: ['Scope is required'] },
+      baseErrors: { consumer: ['Scope is required'] },
     });
     render(<RuleConsumerSelection validConsumers={mockConsumers} />);
     expect(screen.queryAllByText('Scope is required')).toHaveLength(1);

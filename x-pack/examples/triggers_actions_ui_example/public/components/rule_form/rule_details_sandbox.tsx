@@ -9,7 +9,5 @@ import React from 'react';
 import { RuleDetails } from '@kbn/alerts-ui-shared/src/rule_form';
 
 export const RuleDetailsSandbox = () => {
-  return (
-    <RuleDetails />
-  );
+  return <RuleDetails />;
 };

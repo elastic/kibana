@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData, RuleFormPlugins } from './types';
@@ -17,8 +17,9 @@ import { useCreateRule } from '../common/hooks';
 import { RulePage } from './rule_page';
 import {
   RuleFormCircuitBreakerError,
+  RuleFormErrorPromptWrapper,
   RuleFormHealthCheckError,
-  RuleFormRuleOrRuleTypeError,
+  RuleFormRuleTypeError,
 } from './rule_form_errors';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
 import {
@@ -37,6 +38,7 @@ export interface CreateRuleFormProps {
   validConsumers?: RuleCreationValidConsumer[];
   filteredRuleTypes?: string[];
   useRuleProducer?: boolean;
+  returnUrl: string;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -47,6 +49,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     multiConsumerSelection,
     validConsumers = DEFAULT_VALID_CONSUMERS,
     filteredRuleTypes = [],
+    returnUrl,
   } = props;
 
   const { http, docLinks, notification, ruleTypeRegistry, i18n, theme } = plugins;
@@ -73,15 +76,16 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     },
   });
 
-  const { isLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError } = useLoadDependencies({
-    http,
-    toasts: notification.toasts,
-    ruleTypeRegistry,
-    ruleTypeId,
-    consumer,
-    validConsumers,
-    filteredRuleTypes,
-  });
+  const { isInitialLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError } =
+    useLoadDependencies({
+      http,
+      toasts: notification.toasts,
+      ruleTypeRegistry,
+      ruleTypeId,
+      consumer,
+      validConsumers,
+      filteredRuleTypes,
+    });
 
   const onSave = useCallback(
     (newFormData: RuleFormData) => {
@@ -104,47 +108,57 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     [mutate]
   );
 
-  if (isLoading) {
-    return <EuiLoadingSpinner />;
+  if (isInitialLoading) {
+    return (
+      <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
+        <EuiLoadingElastic size="xl" />
+      </RuleFormErrorPromptWrapper>
+    );
   }
 
   if (!ruleType || !ruleTypeModel) {
-    return <RuleFormRuleOrRuleTypeError />;
+    return (
+      <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
+        <RuleFormRuleTypeError />
+      </RuleFormErrorPromptWrapper>
+    );
   }
 
   if (healthCheckError) {
-    return <RuleFormHealthCheckError error={healthCheckError} docLinks={docLinks} />;
+    return (
+      <RuleFormErrorPromptWrapper>
+        <RuleFormHealthCheckError error={healthCheckError} docLinks={docLinks} />
+      </RuleFormErrorPromptWrapper>
+    );
   }
 
   return (
-    <RuleFormStateProvider
-      initialRuleFormState={{
-        formData: GET_DEFAULT_FORM_DATA({
-          ruleTypeId,
-          name: `${ruleType.name} rule`,
-          consumer,
-          schedule: getInitialSchedule({
-            ruleType,
-            minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
+    <div data-test-subj="createRuleForm">
+      <RuleFormStateProvider
+        initialRuleFormState={{
+          formData: GET_DEFAULT_FORM_DATA({
+            ruleTypeId,
+            name: `${ruleType.name} rule`,
+            consumer,
+            schedule: getInitialSchedule({
+              ruleType,
+              minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
+            }),
           }),
-        }),
-        plugins,
-        minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
-        selectedRuleTypeModel: ruleTypeModel,
-        selectedRuleType: ruleType,
-        multiConsumerSelection: getInitialMultiConsumer({
-          multiConsumerSelection,
+          plugins,
+          minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
+          selectedRuleTypeModel: ruleTypeModel,
+          selectedRuleType: ruleType,
           validConsumers,
-          ruleType,
-        }),
-      }}
-    >
-      <RulePage
-        canShowConsumerSelection
-        validConsumers={validConsumers}
-        isSaving={isSaving}
-        onSave={onSave}
-      />
-    </RuleFormStateProvider>
+          multiConsumerSelection: getInitialMultiConsumer({
+            multiConsumerSelection,
+            validConsumers,
+            ruleType,
+          }),
+        }}
+      >
+        <RulePage isEdit={false} isSaving={isSaving} returnUrl={returnUrl} onSave={onSave} />
+      </RuleFormStateProvider>
+    </div>
   );
 };

@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { HealthCheckErrors, healthCheckErrors } from '../../common/apis';
 
@@ -82,15 +82,24 @@ export const RuleFormHealthCheckError = (props: RuleFormHealthCheckErrorProps) =
 
   return (
     <EuiEmptyPrompt
-      iconType="watchesApp"
       data-test-subj="ruleFormHealthCheckError"
+      iconType="watchesApp"
       titleSize="xs"
-      title={<h2>{errorTitle}</h2>}
+      title={
+        <EuiText color="default">
+          <h2>{errorTitle}</h2>
+        </EuiText>
+      }
       body={
         <div>
           <p role="banner">
-            {errorBodyText}
-            <EuiLink external href={errorDocLink} target="_blank">
+            {errorBodyText}&nbsp;
+            <EuiLink
+              data-test-subj="ruleFormHealthCheckErrorLink"
+              external
+              href={errorDocLink}
+              target="_blank"
+            >
               {HEALTH_CHECK_ACTION_TEXT}
             </EuiLink>
           </p>

@@ -65,7 +65,11 @@ export function validateRuleBase({
     errors.ruleTypeId.push(RULE_TYPE_REQUIRED_TEXT);
   }
 
-  if (formData.alertDelay?.active && formData.alertDelay?.active < 1) {
+  if (
+    formData.alertDelay &&
+    !isNaN(formData.alertDelay?.active) &&
+    formData.alertDelay?.active < 1
+  ) {
     errors.alertDelay.push(RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT);
   }
 
@@ -84,32 +88,33 @@ export const validateRuleParams = ({
   return ruleTypeModel.validate(formData.params, isServerless).errors;
 };
 
-const hasBaseErrors = (errors: RuleFormBaseErrors) => {
+const hasRuleBaseErrors = (errors: RuleFormBaseErrors) => {
   return Object.values(errors).some((error: string[]) => error.length > 0);
 };
 
-const hasParamsErrors = (errors: RuleFormParamsErrors): boolean => {
+const hasRuleParamsErrors = (errors: RuleFormParamsErrors): boolean => {
   const values = Object.values(errors);
+  let hasError = false;
   for (const value of values) {
-    if (Array.isArray(value)) {
-      return value.length > 0;
+    if (Array.isArray(value) && value.length > 0) {
+      return true;
     }
-    if (typeof value === 'string') {
-      return !!value.trim();
+    if (typeof value === 'string' && value.trim() !== '') {
+      return true;
     }
     if (isObject(value)) {
-      return hasParamsErrors(value);
+      hasError = hasRuleParamsErrors(value as RuleFormParamsErrors);
     }
   }
-  return false;
+  return hasError;
 };
 
-export const isValidRule = ({
+export const hasRuleErrors = ({
   baseErrors,
   paramsErrors,
 }: {
   baseErrors: RuleFormBaseErrors;
   paramsErrors: RuleFormParamsErrors;
 }): boolean => {
-  return hasBaseErrors(baseErrors) || hasParamsErrors(paramsErrors);
+  return hasRuleBaseErrors(baseErrors) || hasRuleParamsErrors(paramsErrors);
 };

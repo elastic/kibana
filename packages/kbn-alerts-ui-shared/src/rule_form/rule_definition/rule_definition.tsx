@@ -22,7 +22,6 @@ import {
   EuiSpacer,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
   DOC_LINK_TITLE,
   LOADING_RULE_TYPE_PARAMS_TITLE,
@@ -43,16 +42,18 @@ import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { getAuthorizedConsumers } from '../utils';
 
-interface RuleDefinitionProps {
-  canShowConsumerSelection?: boolean;
-  validConsumers?: RuleCreationValidConsumer[];
-}
-
-export const RuleDefinition = (props: RuleDefinitionProps) => {
-  const { canShowConsumerSelection = false, validConsumers } = props;
-
-  const { formData, plugins, paramsErrors, metadata, id, selectedRuleType, selectedRuleTypeModel } =
-    useRuleFormState();
+export const RuleDefinition = () => {
+  const {
+    id,
+    formData,
+    plugins,
+    paramsErrors,
+    metadata,
+    selectedRuleType,
+    selectedRuleTypeModel,
+    validConsumers,
+    canShowConsumerSelection = false,
+  } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 

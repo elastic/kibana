@@ -104,9 +104,11 @@ describe('Rule Definition', () => {
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
+      canShowConsumerSelection: true,
+      validConsumers: ['logs', 'stackAlerts'],
     });
 
-    render(<RuleDefinition canShowConsumerSelection validConsumers={['logs', 'stackAlerts']} />);
+    render(<RuleDefinition />);
     expect(screen.getByTestId('ruleDefinition')).toBeInTheDocument();
     expect(screen.getByTestId('ruleSchedule')).toBeInTheDocument();
     expect(screen.getByTestId('ruleConsumerSelection')).toBeInTheDocument();
@@ -137,7 +139,7 @@ describe('Rule Definition', () => {
         documentationUrl: null,
       },
     });
-    render(<RuleDefinition canShowConsumerSelection validConsumers={['logs', 'stackAlerts']} />);
+    render(<RuleDefinition />);
 
     expect(screen.queryByTestId('ruleDefinitionHeaderDocsLink')).not.toBeInTheDocument();
   });
@@ -161,7 +163,7 @@ describe('Rule Definition', () => {
       selectedRuleTypeModel: ruleModel,
     });
 
-    render(<RuleDefinition validConsumers={['logs', 'stackAlerts']} />);
+    render(<RuleDefinition />);
 
     expect(screen.queryByTestId('ruleConsumerSelection')).not.toBeInTheDocument();
   });
@@ -185,7 +187,7 @@ describe('Rule Definition', () => {
       selectedRuleTypeModel: ruleModel,
     });
 
-    render(<RuleDefinition validConsumers={['logs', 'stackAlerts']} />);
+    render(<RuleDefinition />);
 
     fireEvent.click(screen.getByTestId('advancedOptionsAccordionButton'));
     expect(screen.getByTestId('alertDelay')).toBeVisible();
@@ -210,7 +212,7 @@ describe('Rule Definition', () => {
       selectedRuleTypeModel: ruleModel,
     });
 
-    render(<RuleDefinition validConsumers={['logs', 'stackAlerts']} />);
+    render(<RuleDefinition />);
 
     fireEvent.change(screen.getByTestId('ruleScheduleNumberInput'), {
       target: {

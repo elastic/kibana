@@ -111,7 +111,7 @@ describe('RuleSchedule', () => {
           interval: '5m',
         },
       },
-      errors: {
+      baseErrors: {
         interval: 'something went wrong!',
       },
     });

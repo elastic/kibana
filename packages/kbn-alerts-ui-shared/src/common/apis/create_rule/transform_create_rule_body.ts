@@ -11,7 +11,7 @@ import { CreateRuleBody } from './types';
 
 export const transformCreateRuleBody: RewriteResponseCase<CreateRuleBody> = ({
   ruleTypeId,
-  actions,
+  actions = [],
   alertDelay,
   ...res
 }): any => ({

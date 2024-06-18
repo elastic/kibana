@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
 
-export const Sidebar = () => {
-  const history = useHistory();
+export const Sidebar = ({ history }: { history: ScopedHistory }) => {
   return (
     <EuiPageSidebar>
       <EuiSideNav

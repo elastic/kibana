@@ -43,11 +43,8 @@ export type {
   SanitizedAlertsFilter,
   SanitizedRuleAction,
   AlertsHealth,
-<<<<<<< HEAD
-=======
   AlertingFrameworkHealth,
   ResolvedSanitizedRule,
->>>>>>> main
 } from '@kbn/alerting-types';
 
 export {

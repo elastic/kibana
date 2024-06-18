@@ -65,6 +65,7 @@ export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   metadata?: Record<string, unknown>;
   minimumScheduleInterval?: MinimumScheduleInterval;
   canShowConsumerSelection?: boolean;
+  validConsumers?: RuleCreationValidConsumer[];
 }
 
 export type InitialRule = Partial<Rule> &

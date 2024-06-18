@@ -9,16 +9,20 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import {
-  RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT,
   RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE,
+  RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT,
 } from '../translations';
 
-export const RuleFormRuleOrRuleTypeError = () => {
+export const RuleFormResolveRuleError = () => {
   return (
     <EuiEmptyPrompt
-      color="danger"
       iconType="error"
-      title={<h2>{RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE}</h2>}
+      color="danger"
+      title={
+        <EuiText color="default">
+          <h2>{RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE}</h2>
+        </EuiText>
+      }
       body={
         <EuiText>
           <p>{RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT}</p>

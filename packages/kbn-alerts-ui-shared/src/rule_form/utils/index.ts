@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './get_errors';
 export * from './get_time_options';
 export * from './parse_duration';
 export * from './parse_rule_circuit_breaker_error_message';

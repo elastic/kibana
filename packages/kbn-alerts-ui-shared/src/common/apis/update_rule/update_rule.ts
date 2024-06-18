@@ -21,7 +21,6 @@ export const UPDATE_FIELDS: Array<keyof UpdateRuleBody> = [
   'schedule',
   'params',
   'alertDelay',
-  'actions',
 ];
 
 export async function updateRule({

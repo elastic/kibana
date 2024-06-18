@@ -18,7 +18,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
   RuleDefinition,
   RuleActions,
@@ -28,23 +27,22 @@ import {
   RuleFormData,
 } from '..';
 import { useRuleFormState } from '../hooks';
+import {
+  RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
+  RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
+  RULE_FORM_PAGE_RULE_DETAILS_TITLE,
+  RULE_FORM_RETURN_TITLE,
+} from '../translations';
 
 export interface RulePageProps {
-  canShowConsumerSelection?: boolean;
-  validConsumers?: RuleCreationValidConsumer[];
   isEdit?: boolean;
   isSaving?: boolean;
+  returnUrl: string;
   onSave: (formData: RuleFormData) => void;
 }
 
 export const RulePage = (props: RulePageProps) => {
-  const {
-    canShowConsumerSelection = false,
-    validConsumers,
-    isEdit = false,
-    isSaving = false,
-    onSave,
-  } = props;
+  const { isEdit = false, isSaving = false, returnUrl, onSave } = props;
 
   const {
     plugins: { application },
@@ -55,10 +53,8 @@ export const RulePage = (props: RulePageProps) => {
   const styles = useEuiBackgroundColorCSS().transparent;
 
   const onCancel = useCallback(() => {
-    application.navigateToUrl(window.location.pathname.split('rule')[0], {
-      forceRedirect: true,
-    });
-  }, [application]);
+    application.navigateToUrl(returnUrl);
+  }, [application, returnUrl]);
 
   const onSaveInternal = useCallback(() => {
     onSave({
@@ -70,16 +66,11 @@ export const RulePage = (props: RulePageProps) => {
   const steps: EuiStepsProps['steps'] = useMemo(() => {
     return [
       {
-        title: 'Rule definition',
-        children: (
-          <RuleDefinition
-            canShowConsumerSelection={canShowConsumerSelection}
-            validConsumers={validConsumers}
-          />
-        ),
+        title: RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
+        children: <RuleDefinition />,
       },
       {
-        title: 'Actions',
+        title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
         children: (
           <>
             <RuleActions onClick={() => {}} />
@@ -89,7 +80,7 @@ export const RulePage = (props: RulePageProps) => {
         ),
       },
       {
-        title: 'Rule details',
+        title: RULE_FORM_PAGE_RULE_DETAILS_TITLE,
         children: (
           <>
             <RuleDetails />
@@ -99,25 +90,31 @@ export const RulePage = (props: RulePageProps) => {
         ),
       },
     ];
-  }, [canShowConsumerSelection, validConsumers]);
+  }, []);
 
   return (
     <EuiPageTemplate grow bottomBorder offset={0} css={styles}>
       <EuiPageTemplate.Header>
-        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-          <EuiFlexItem>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          alignItems="flexStart"
+          className="eui-fullWidth"
+        >
+          <EuiFlexItem grow={false} style={{ alignItems: 'start' }}>
             <EuiButtonEmpty
-              href={window.location.pathname.split('rule')[0]}
+              data-test-subj="rulePageReturnButton"
+              onClick={onCancel}
               style={{ padding: 0 }}
               iconType="arrowLeft"
               iconSide="left"
               aria-label="Return link"
             >
-              Return
+              {RULE_FORM_RETURN_TITLE}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiSpacer />
-          <EuiFlexItem grow={10}>
+          <EuiFlexItem grow={false} className="eui-fullWidth">
             <RulePageNameInput />
           </EuiFlexItem>
         </EuiFlexGroup>

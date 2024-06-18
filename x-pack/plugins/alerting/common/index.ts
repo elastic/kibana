@@ -7,10 +7,6 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
-<<<<<<< HEAD
-
-=======
->>>>>>> main
 export * from './rule';
 export * from './rules_settings';
 export * from './rule_type';

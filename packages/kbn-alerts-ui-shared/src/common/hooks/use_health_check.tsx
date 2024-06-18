@@ -30,17 +30,28 @@ export interface HealthStatus {
 export const useHealthCheck = (props: UseHealthCheckProps) => {
   const { http } = props;
 
-  const { data: uiHealth, isLoading: isLoadingUiHealth } = useLoadUiHealth({ http });
+  const {
+    data: uiHealth,
+    isLoading: isLoadingUiHealth,
+    isInitialLoading: isInitialLoadingUiHealth,
+  } = useLoadUiHealth({ http });
 
-  const { data: alertingFrameworkHealth, isLoading: isLoadingAlertingFrameworkHealth } =
-    useLoadAlertingFrameworkHealth({ http });
+  const {
+    data: alertingFrameworkHealth,
+    isLoading: isLoadingAlertingFrameworkHealth,
+    isInitialLoading: isInitialLoadingAlertingFrameworkHealth,
+  } = useLoadAlertingFrameworkHealth({ http });
 
   const isLoading = useMemo(() => {
     return isLoadingUiHealth || isLoadingAlertingFrameworkHealth;
   }, [isLoadingUiHealth, isLoadingAlertingFrameworkHealth]);
 
+  const isInitialLoading = useMemo(() => {
+    return isInitialLoadingUiHealth || isInitialLoadingAlertingFrameworkHealth;
+  }, [isInitialLoadingUiHealth, isInitialLoadingAlertingFrameworkHealth]);
+
   const alertingHealth: HealthStatus | null = useMemo(() => {
-    if (isLoading || !uiHealth) {
+    if (isLoading || isInitialLoading || !uiHealth) {
       return null;
     }
     if (!uiHealth.isRulesAvailable) {
@@ -62,7 +73,7 @@ export const useHealthCheck = (props: UseHealthCheckProps) => {
       isSufficientlySecure: true,
       hasPermanentEncryptionKey: true,
     };
-  }, [isLoading, uiHealth, alertingFrameworkHealth]);
+  }, [isLoading, isInitialLoading, uiHealth, alertingFrameworkHealth]);
 
   const error = useMemo(() => {
     const {
@@ -71,7 +82,7 @@ export const useHealthCheck = (props: UseHealthCheckProps) => {
       hasPermanentEncryptionKey = false,
     } = alertingHealth || {};
 
-    if (isLoading || !alertingHealth) {
+    if (isLoading || isInitialLoading || !alertingHealth) {
       return null;
     }
     if (isSufficientlySecure && hasPermanentEncryptionKey) {
@@ -87,10 +98,11 @@ export const useHealthCheck = (props: UseHealthCheckProps) => {
       return healthCheckErrors.ENCRYPTION_ERROR;
     }
     return healthCheckErrors.API_KEYS_DISABLED_ERROR;
-  }, [isLoading, alertingHealth]);
+  }, [isLoading, isInitialLoading, alertingHealth]);
 
   return {
     isLoading,
+    isInitialLoading,
     error,
   };
 };

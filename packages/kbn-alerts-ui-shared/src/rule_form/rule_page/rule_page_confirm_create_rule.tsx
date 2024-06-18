@@ -25,13 +25,13 @@ export const RulePageConfirmCreateRule = (props: RulePageConfirmCreateRuleProps)
 
   return (
     <EuiConfirmModal
+      data-test-subj="rulePageConfirmCreateRule"
       title={CONFIRMATION_RULE_SAVE_TITLE}
       onCancel={onCancel}
       onConfirm={onConfirm}
       confirmButtonText={CONFIRM_RULE_SAVE_CONFIRM_BUTTON_TEXT}
       cancelButtonText={CONFIRM_RULE_SAVE_CANCEL_BUTTON_TEXT}
       defaultFocusedButton="confirm"
-      data-test-subj="confirmRuleSaveModal"
     >
       <EuiText>
         <p>{CONFIRM_RULE_SAVE_MESSAGE_TEXT}</p>

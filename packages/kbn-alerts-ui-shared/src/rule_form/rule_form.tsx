@@ -22,10 +22,11 @@ const queryClient = new QueryClient();
 
 export interface RuleFormProps {
   plugins: RuleFormPlugins;
+  returnUrl: string;
 }
 
 export const RuleForm = (props: RuleFormProps) => {
-  const { plugins } = props;
+  const { plugins, returnUrl } = props;
   const { id, ruleTypeId } = useParams<{
     id?: string;
     ruleTypeId?: string;
@@ -33,10 +34,10 @@ export const RuleForm = (props: RuleFormProps) => {
 
   const ruleFormComponent = useMemo(() => {
     if (id) {
-      return <EditRuleForm id={id} plugins={plugins} />;
+      return <EditRuleForm id={id} plugins={plugins} returnUrl={returnUrl} />;
     }
     if (ruleTypeId) {
-      return <CreateRuleForm ruleTypeId={ruleTypeId} plugins={plugins} />;
+      return <CreateRuleForm ruleTypeId={ruleTypeId} plugins={plugins} returnUrl={returnUrl} />;
     }
     return (
       <EuiEmptyPrompt
@@ -49,7 +50,7 @@ export const RuleForm = (props: RuleFormProps) => {
         </EuiText>
       </EuiEmptyPrompt>
     );
-  }, [id, ruleTypeId, plugins]);
+  }, [id, ruleTypeId, plugins, returnUrl]);
 
   return <QueryClientProvider client={queryClient}>{ruleFormComponent}</QueryClientProvider>;
 };
