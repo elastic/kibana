@@ -1,20 +1,21 @@
-[role="xpack"]
 [[xpack-security-fips-140-2]]
 === FIPS 140-2
 
-experimental[] The Federal Information Processing Standard (FIPS) Publication 140-2, (FIPS PUB 140-2), 
+experimental::[]
+
+The Federal Information Processing Standard (FIPS) Publication 140-2, (FIPS PUB 140-2), 
 titled "Security Requirements for Cryptographic Modules" is a U.S. government computer security standard
 used to approve cryptographic modules.
 
 {kib} offers a FIPS 140-2 compliant mode and as such can run in a Node.js environment configured with a FIPS 
 140-2 compliant OpenSSL3 provider.
 
-To run {kib} in FIPS mode, your cluster must be have a Platinum or Enterprise license.
+To run {kib} in FIPS mode, you must have the appropriate {subscriptions}[subscription].
 
 [IMPORTANT]
 ============================================================================
 The Node bundled with {kib} is not configured for FIPS 140-2. You must configure a FIPS 140-2 compliant OpenSSL3 
-provider. Please consult the Node.js documentation to learn how to configure your environment.
+provider. Consult the Node.js documentation to learn how to configure your environment.
 ============================================================================
 
 For {kib}, adherence to FIPS 140-2 is ensured by:
@@ -39,7 +40,7 @@ strength of 112 bits. As such, the Kibana keystore that stores the applicationâ€
 password protected with a password that satisfies this requirement. This means that the password needs to be 14 bytes 
 long which is equivalent to a 14 character ASCII encoded password, or a 7 character UTF-8 encoded password.
 
-For more information on how to set this password, please see the <<change-password,keystore documentation>>.
+For more information on how to set this password, refer to the <<change-password,keystore documentation>>.
 
 ===== TLS keystore and keys
 
