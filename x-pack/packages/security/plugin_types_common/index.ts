@@ -40,4 +40,5 @@ export type {
   ApiKeyToInvalidate,
   QueryApiKeyResult,
   CategorizedApiKey,
+  ApiKeyAggregations,
 } from './src/api_keys/api_key';

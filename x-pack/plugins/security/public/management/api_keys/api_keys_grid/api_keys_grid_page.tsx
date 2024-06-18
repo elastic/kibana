@@ -17,16 +17,13 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import type {
-  CategorizedApiKey,
-  CreateAPIKeyResult,
-  QueryApiKeySortOptions,
-} from '@kbn/security-api-key-management';
+import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '@kbn/security-api-key-management';
 import {
   ApiKeyCreatedCallout,
   ApiKeyFlyout,
   APIKeysAPIClient,
 } from '@kbn/security-api-key-management';
+import type { CategorizedApiKey } from '@kbn/security-plugin-types-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Route } from '@kbn/shared-ux-router';
 

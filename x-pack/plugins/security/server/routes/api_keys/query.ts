@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { QueryApiKeyResult } from '@kbn/security-api-key-management';
+import type { QueryApiKeyResult } from '@kbn/security-plugin-types-common';
 
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';

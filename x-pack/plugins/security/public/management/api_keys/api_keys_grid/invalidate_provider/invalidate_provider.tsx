@@ -10,7 +10,8 @@ import React, { Fragment, useRef, useState } from 'react';
 
 import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { APIKeysAPIClient, ApiKeyToInvalidate } from '@kbn/security-api-key-management';
+import type { APIKeysAPIClient } from '@kbn/security-api-key-management';
+import type { ApiKeyToInvalidate } from '@kbn/security-plugin-types-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 interface Props {

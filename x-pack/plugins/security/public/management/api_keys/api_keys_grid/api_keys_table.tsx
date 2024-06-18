@@ -30,13 +30,9 @@ import React, { createContext, useContext, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  ApiKeyAggregations,
-  CategorizedApiKey,
-  CreateAPIKeyResult,
-  QueryApiKeySortOptions,
-} from '@kbn/security-api-key-management';
+import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '@kbn/security-api-key-management';
 import { ApiKeyBadge, ApiKeyStatus, TimeToolTip } from '@kbn/security-api-key-management';
+import type { ApiKeyAggregations, CategorizedApiKey } from '@kbn/security-plugin-types-common';
 import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 
 import { ApiKeysEmptyPrompt, doesErrorIndicateBadQuery } from './api_keys_empty_prompt';
