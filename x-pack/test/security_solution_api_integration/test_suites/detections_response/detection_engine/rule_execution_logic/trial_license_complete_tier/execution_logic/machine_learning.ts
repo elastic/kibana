@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/171426
+  // TODO FLAKY: https://github.com/elastic/kibana/issues/171426
   describe('@ess @serverless @serverlessQA Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // First test creates a real rule - remaining tests use preview API
-    it.only('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
+    it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toBe(1);
