@@ -7,11 +7,7 @@
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import {
-  hasTimeNamedParams,
-  getTimeFieldFromESQLQuery,
-  getIndexPatternFromESQLQuery,
-} from './query_parsing_helpers';
+import { getTimeFieldFromESQLQuery, getIndexPatternFromESQLQuery } from './query_parsing_helpers';
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
@@ -36,6 +32,7 @@ export async function getESQLAdHocDataview(
   query: string,
   dataViewsService: DataViewsPublicPluginStart
 ) {
+  const timeField = getTimeFieldFromESQLQuery(query);
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const dataView = await dataViewsService.create({
     title: indexPattern,
@@ -43,15 +40,12 @@ export async function getESQLAdHocDataview(
     id: await sha256(`esql-${indexPattern}`),
   });
 
+  dataView.timeFieldName = timeField;
+
   // If the indexPattern is empty string means that the user used either the ROW or META FUNCTIONS / SHOW INFO commands
   // we don't want to add the @timestamp field in this case https://github.com/elastic/kibana/issues/163417
-  if (indexPattern && dataView?.fields?.getByName?.('@timestamp')?.type === 'date') {
+  if (!timeField && indexPattern && dataView?.fields?.getByName?.('@timestamp')?.type === 'date') {
     dataView.timeFieldName = '@timestamp';
-  }
-
-  if (hasTimeNamedParams(query)) {
-    const timeField = getTimeFieldFromESQLQuery(query);
-    dataView.timeFieldName = timeField;
   }
 
   return dataView;

@@ -20,6 +20,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
+import { getEarliestLatestParams } from './utils/get_earliest_latest_params';
 import { getTime } from '../../query';
 import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext, ESQL_TABLE_TYPE } from '..';
 import { UiSettingsCommon } from '../..';
@@ -41,8 +42,6 @@ interface Arguments {
    */
   titleForInspector?: string;
   descriptionForInspector?: string;
-  earliest?: string;
-  latest?: string;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -125,32 +124,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The description to show in Inspector.',
         }),
       },
-      earliest: {
-        aliases: ['earliest'],
-        types: ['string'],
-        help: i18n.translate('data.search.esql.earliest.help', {
-          defaultMessage: 'Earliest time param.',
-        }),
-      },
-      latest: {
-        aliases: ['latest'],
-        types: ['string'],
-        help: i18n.translate('data.search.esql.latest.help', {
-          defaultMessage: 'Latest time param.',
-        }),
-      },
     },
     fn(
       input,
-      {
-        query,
-        /* timezone, */ timeField,
-        locale,
-        titleForInspector,
-        descriptionForInspector,
-        earliest,
-        latest,
-      },
+      { query, /* timezone, */ timeField, locale, titleForInspector, descriptionForInspector },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -171,7 +148,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             query,
             // time_zone: timezone,
             locale,
-            ...(earliest && latest ? { params: [{ earliest }, { latest }] } : {}),
+            // ...(earliest && latest ? { params: [{ earliest }, { latest }] } : {}),
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(
@@ -182,6 +159,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               getTime(undefined, input.timeRange, {
                 fieldName: timeField,
               });
+
+            const timeParams = getEarliestLatestParams(query, input.timeRange);
+            if (timeParams.earliest && timeParams.latest) {
+              params.params = [{ earliest: timeParams.earliest }, { latest: timeParams.latest }];
+            }
 
             params.filter = buildEsQuery(
               undefined,

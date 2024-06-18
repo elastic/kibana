@@ -7,7 +7,6 @@
  */
 import { isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { getEarliestLatestParams } from './get_earliest_latest_params';
 import {
   ExpressionFunctionKibana,
   ExpressionFunctionKibanaContext,
@@ -57,14 +56,11 @@ export function textBasedQueryStateToExpressionAst({
   const ast = buildExpression([kibana, kibanaContext]).toAst();
 
   if (query && isOfAggregateQueryType(query)) {
-    const timeParams = getEarliestLatestParams(query.esql, time);
     const esql = aggregateQueryToAst({
       query,
       timeField: timeFieldName,
       titleForInspector,
       descriptionForInspector,
-      earliest: timeParams.earliest,
-      latest: timeParams.latest,
     });
 
     if (esql) {

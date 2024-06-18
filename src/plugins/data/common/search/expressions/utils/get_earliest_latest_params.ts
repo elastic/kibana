@@ -7,7 +7,7 @@
  */
 import { hasTimeNamedParams } from '@kbn/esql-utils';
 import dateMath from '@kbn/datemath';
-import type { TimeRange } from '..';
+import type { TimeRange } from '../../../types';
 
 export const getEarliestLatestParams = (queryString: string, time?: TimeRange) => {
   let earliest = '';

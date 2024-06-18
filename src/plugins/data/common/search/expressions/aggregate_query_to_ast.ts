@@ -15,8 +15,6 @@ export const aggregateQueryToAst = ({
   timeField,
   titleForInspector,
   descriptionForInspector,
-  earliest,
-  latest,
 }: {
   query: AggregateQuery;
   timeField?: string;
@@ -31,7 +29,5 @@ export const aggregateQueryToAst = ({
     locale: i18n.getLocale(),
     titleForInspector,
     descriptionForInspector,
-    earliest,
-    latest,
   }).toAst();
 };

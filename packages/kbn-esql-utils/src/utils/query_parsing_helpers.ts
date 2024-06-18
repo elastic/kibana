@@ -61,6 +61,7 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
  * @returns boolean
  */
 export const hasTimeNamedParams = (esql: string) => {
+  // should fetch from the AST
   return /\?earliest/i.test(esql) && /\?latest/i.test(esql);
 };
 
