@@ -26,6 +26,8 @@ import {
   type EuiFlyoutProps,
   EuiListGroup,
   EuiListGroupItem,
+  EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pluginServices } from '../../services/plugin_services';
@@ -141,7 +143,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFlexGroup direction="column" responsive={false}>
+        <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
           <EuiFlexItem
             grow={false}
             css={{
@@ -169,7 +171,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
             </EuiForm>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column">
+            <EuiFlexGroup direction="column" gutterSize="m">
               {Object.values(panelsSearchResult).map(
                 ({ id, title, items, isDisabled, ['data-test-subj']: dataTestSubj }) => (
                   <EuiFlexItem key={id} data-test-subj={dataTestSubj}>
@@ -192,27 +194,30 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
                           <EuiListGroupItem
                             key={`${id}.${idx}`}
                             label={
-                              !item.isDeprecated ? (
-                                item.name
-                              ) : (
-                                <EuiFlexGroup wrap responsive={false} gutterSize="s">
-                                  <EuiFlexItem grow={false}>{item.name}</EuiFlexItem>
-                                  <EuiFlexItem grow={false}>
-                                    <EuiBadge color="warning">
-                                      <FormattedMessage
-                                        id="dashboard.editorMenu.deprecatedTag"
-                                        defaultMessage="Deprecated"
-                                      />
-                                    </EuiBadge>
-                                  </EuiFlexItem>
-                                </EuiFlexGroup>
-                              )
+                              <EuiToolTip position="right" content={item.description}>
+                                {!item.isDeprecated ? (
+                                  <EuiText size="s">{item.name}</EuiText>
+                                ) : (
+                                  <EuiFlexGroup wrap responsive={false} gutterSize="s">
+                                    <EuiFlexItem grow={false}>
+                                      <EuiText size="s">{item.name}</EuiText>
+                                    </EuiFlexItem>
+                                    <EuiFlexItem grow={false}>
+                                      <EuiBadge color="warning">
+                                        <FormattedMessage
+                                          id="dashboard.editorMenu.deprecatedTag"
+                                          defaultMessage="Deprecated"
+                                        />
+                                      </EuiBadge>
+                                    </EuiFlexItem>
+                                  </EuiFlexGroup>
+                                )}
+                              </EuiToolTip>
                             }
                             onClick={item?.onClick}
                             iconType={item.icon}
                             data-test-subj={item['data-test-subj']}
                             isDisabled={item.isDisabled}
-                            title={item.description}
                           />
                         );
                       })}

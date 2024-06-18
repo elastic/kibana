@@ -4,9 +4,3 @@
   max-height: 60vh;
   overflow-y: scroll;
 }
-
-.nsPanelSelectionFlyout {
-  &__searchInput {
-    @include euiBottomShadow;
-  }
-}
