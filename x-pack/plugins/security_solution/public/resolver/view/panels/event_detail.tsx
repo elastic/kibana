@@ -11,7 +11,7 @@ import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBreadcrumb, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
-import { EuiSpacer, EuiText, EuiInMemoryTable } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiInMemoryTable, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { StyledPanel } from '../styles';
@@ -72,10 +72,12 @@ export const EventDetail = memo(function EventDetail({
     selectors.currentRelatedEventData(state.analyzer[id])
   );
 
+  const PanelWrapper = id.startsWith('flyout') ? EuiPanel : StyledPanel;
+
   return isLoading ? (
-    <StyledPanel hasBorder>
+    <PanelWrapper hasBorder>
       <PanelLoading id={id} />
-    </StyledPanel>
+    </PanelWrapper>
   ) : event ? (
     <EventDetailContents
       id={id}
@@ -85,9 +87,9 @@ export const EventDetail = memo(function EventDetail({
       eventType={eventType}
     />
   ) : (
-    <StyledPanel hasBorder>
+    <PanelWrapper hasBorder>
       <PanelContentError id={id} translatedErrorMessage={eventDetailRequestError} />
-    </StyledPanel>
+    </PanelWrapper>
   );
 });
 
@@ -120,9 +122,10 @@ const EventDetailContents = memo(function ({
     });
 
   const nodeName = processEvent ? eventModel.processNameSafeVersion(processEvent) : null;
+  const PanelWrapper = id.startsWith('flyout') ? EuiPanel : StyledPanel;
 
   return (
-    <StyledPanel hasBorder data-test-subj="resolver:panel:event-detail">
+    <PanelWrapper hasBorder={!id.startsWith('flyout')} data-test-subj="resolver:panel:event-detail">
       <EventDetailBreadcrumbs
         id={id}
         nodeID={nodeID}
@@ -158,7 +161,7 @@ const EventDetailContents = memo(function ({
       </StyledDescriptiveName>
       <EuiSpacer size="l" />
       <EventDetailFields event={event} id={id} />
-    </StyledPanel>
+    </PanelWrapper>
   );
 });
 

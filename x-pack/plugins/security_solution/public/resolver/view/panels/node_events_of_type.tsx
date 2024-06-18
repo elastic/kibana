@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiCallOut,
+  EuiPanel,
 } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -52,15 +53,18 @@ export const NodeEventsInCategory = memo(function ({
   const hasError = useSelector((state: State) =>
     selectors.hadErrorLoadingNodeEventsInCategory(state.analyzer[id])
   );
-
+  const PanelWrapper = id.startsWith('flyout') ? EuiPanel : StyledPanel;
   return (
     <>
       {isLoading ? (
-        <StyledPanel hasBorder>
+        <PanelWrapper hasBorder={!id.startsWith('flyout')}>
           <PanelLoading id={id} />
-        </StyledPanel>
+        </PanelWrapper>
       ) : (
-        <StyledPanel hasBorder data-test-subj="resolver:panel:events-in-category">
+        <PanelWrapper
+          hasBorder={!id.startsWith('flyout')}
+          data-test-subj="resolver:panel:events-in-category"
+        >
           {hasError || !node ? (
             <EuiCallOut
               title={i18n.translate(
@@ -92,7 +96,7 @@ export const NodeEventsInCategory = memo(function ({
               <NodeEventList id={id} eventCategory={eventCategory} nodeID={nodeID} />
             </>
           )}
-        </StyledPanel>
+        </PanelWrapper>
       )}
     </>
   );

@@ -10,6 +10,7 @@ import { AlertReasonPreview } from './components/alert_reason_preview';
 import type { PreviewPanelPaths } from '.';
 import { RulePreview } from './components/rule_preview';
 import { RulePreviewFooter } from './components/rule_preview_footer';
+import { AnalyzerPanel } from './components/analyzer_panel';
 
 export type PreviewPanelType = Array<{
   /**
@@ -38,5 +39,9 @@ export const panels: PreviewPanelType = [
   {
     id: 'alert-reason-preview',
     content: <AlertReasonPreview />,
+  },
+  {
+    id: 'analyzer-panel',
+    content: <AnalyzerPanel />,
   },
 ];

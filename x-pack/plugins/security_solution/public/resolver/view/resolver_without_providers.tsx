@@ -162,12 +162,14 @@ export const ResolverWithoutProviders = React.memo(
                 );
               })}
             </GraphContainer>
-            <PanelRouter id={resolverComponentInstanceID} />
+            {!resolverComponentInstanceID.startsWith('flyout') && (
+              <PanelRouter id={resolverComponentInstanceID} />
+            )}
           </>
         ) : (
           <ResolverNoProcessEvents />
         )}
-        <GraphControls id={resolverComponentInstanceID} />
+        <GraphControls id={resolverComponentInstanceID} databaseDocumentID={databaseDocumentID} />
         <SymbolDefinitions id={resolverComponentInstanceID} />
       </StyledMapContainer>
     );

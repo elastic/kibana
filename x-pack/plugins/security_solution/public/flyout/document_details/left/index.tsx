@@ -19,6 +19,7 @@ import { getField } from '../shared/utils';
 import { EventKind } from '../shared/constants/event_kinds';
 import { useLeftPanelContext } from './context';
 import { LeftPanelTour } from './components/tour';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response';
 export const LeftPanelVisualizeTab: LeftPanelPaths = 'visualize';
@@ -35,6 +36,8 @@ export interface LeftPanelProps extends FlyoutPanelProps {
     scopeId: string;
   };
 }
+const EVENT_TABS = [tabs.insightsTab];
+const ALERT_TABS = [tabs.insightsTab, tabs.investigationTab, tabs.responseTab];
 
 export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
   const { telemetry } = useKibana().services;
@@ -42,13 +45,17 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
   const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
-  const tabsDisplayed = useMemo(
-    () =>
-      eventKind === EventKind.signal
-        ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
-        : [tabs.insightsTab],
-    [eventKind]
+  const visualizationInFlyoutEnabled = useIsExperimentalFeatureEnabled(
+    'visualizationInFlyoutEnabled'
   );
+
+  const tabsDisplayed = useMemo(() => {
+    return eventKind !== EventKind.signal
+      ? EVENT_TABS
+      : visualizationInFlyoutEnabled
+      ? [tabs.visualizeTab, ...ALERT_TABS]
+      : ALERT_TABS;
+  }, [eventKind, visualizationInFlyoutEnabled]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;

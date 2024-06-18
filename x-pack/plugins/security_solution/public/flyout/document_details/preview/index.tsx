@@ -11,9 +11,10 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DocumentDetailsPreviewPanelKey } from '../shared/constants/panel_keys';
 import { panels } from './panels';
 
-export type PreviewPanelPaths = 'rule-preview' | 'alert-reason-preview';
+export type PreviewPanelPaths = 'rule-preview' | 'alert-reason-preview' | 'analyzer-panel';
 export const RulePreviewPanel: PreviewPanelPaths = 'rule-preview';
 export const AlertReasonPreviewPanel: PreviewPanelPaths = 'alert-reason-preview';
+export const AnalyzerPanel: PreviewPanelPaths = 'analyzer-panel';
 
 export interface PreviewPanelProps extends FlyoutPanelProps {
   key: typeof DocumentDetailsPreviewPanelKey;

@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable, EuiToolTip, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from 'react-redux';
 import { FormattedCount } from '../../../common/components/formatted_number';
@@ -27,16 +27,17 @@ export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
     nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
   );
   const nodeStats = useSelector((state: State) => selectors.nodeStats(state.analyzer[id])(nodeID));
+  const PanelWrapper = id.startsWith('flyout') ? EuiPanel : StyledPanel;
 
   if (processEvent === undefined || nodeStats === undefined) {
     return (
-      <StyledPanel hasBorder>
+      <PanelWrapper hasBorder={!id.startsWith('flyout')}>
         <PanelLoading id={id} />
-      </StyledPanel>
+      </PanelWrapper>
     );
   } else {
     return (
-      <StyledPanel hasBorder>
+      <PanelWrapper hasBorder={!id.startsWith('flyout')}>
         <NodeEventsBreadcrumbs
           id={id}
           nodeName={event.processNameSafeVersion(processEvent)}
@@ -45,7 +46,7 @@ export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
         />
         <EuiSpacer size="l" />
         <EventCategoryLinks id={id} nodeID={nodeID} relatedStats={nodeStats} />
-      </StyledPanel>
+      </PanelWrapper>
     );
   }
 }
