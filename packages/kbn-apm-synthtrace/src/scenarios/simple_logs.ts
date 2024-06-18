@@ -54,6 +54,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .service(serviceName)
                 .defaults({
                   'trace.id': generateShortId(),
+                  'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
                   'orchestrator.namespace': CLUSTER[index].namespace,
@@ -84,6 +85,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .defaults({
                   'trace.id': generateShortId(),
                   'error.message': MESSAGE_LOG_LEVELS[index].message,
+                  'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
                   'orchestrator.resource.id': generateShortId(),
@@ -116,6 +118,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                   'trace.id': generateShortId(),
                   'error.message': MESSAGE_LOG_LEVELS[index].message,
                   'error.exception.stacktrace': 'Error message in error.exception.stacktrace',
+                  'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
                   'orchestrator.resource.id': generateShortId(),
@@ -148,6 +151,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                   'trace.id': generateShortId(),
                   'event.original': MESSAGE_LOG_LEVELS[index].message,
                   'error.log.stacktrace': 'Error message in error.log.stacktrace',
+                  'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
                   'orchestrator.resource.id': generateShortId(),
@@ -178,6 +182,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .service(SERVICE_NAMES[index])
                 .defaults({
                   'trace.id': generateShortId(),
+                  'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
                   'orchestrator.resource.id': generateShortId(),
@@ -210,6 +215,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .service(SERVICE_NAMES[index])
                 .defaults({
                   'trace.id': generateShortId(),
+                  'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
                   'orchestrator.namespace': CLUSTER[index].namespace,
