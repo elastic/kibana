@@ -16,25 +16,29 @@ A component for displaying a deprecation warning.
  */
 export const DeprecationCallout = () => {
   return (
-    <EuiCallOut title="Deprecated in 8.11.0" color="warning" iconType="warning">
+    <EuiCallOut
+      title="Deprecated in 8.11.0"
+      color="warning"
+      iconType="warning"
+      data-test-subj="rollupDeprecationCallout"
+    >
       <FormattedMessage
-        id="xpack.rollupJobs.deprecationWarning"
+        id="xpack.rollupJobs.deprecationCalloutMessage"
         defaultMessage="Rollups are deprecated and will be removed in a future version. Check our {migrationGuideLink} and use {downsamplingLink} instead."
         values={{
           migrationGuideLink: (
-            // TODO: Update doc link once we merge https://github.com/elastic/kibana/pull/185896
-            <EuiLink href={documentationLinks.fleet.datastreamsTSDS} target="_blank">
-              {i18n.translate('xpack.rollupJobs.create.steps.stepDateHistogramTitle', {
+            <EuiLink
+              href={documentationLinks.elasticsearch.rollupMigratingToDownsampling}
+              target="_blank"
+            >
+              {i18n.translate('xpack.rollupJobs.deprecationCallout.migrationGuideLink', {
                 defaultMessage: 'migration guide',
               })}
             </EuiLink>
           ),
           downsamplingLink: (
-            <EuiLink
-              href={documentationLinks.elasticsearch.rollupMigratingToDownsampling}
-              target="_blank"
-            >
-              {i18n.translate('xpack.rollupJobs.create.steps.stepDateHistogramTitle', {
+            <EuiLink href={documentationLinks.fleet.datastreamsDownsampling} target="_blank">
+              {i18n.translate('xpack.rollupJobs.deprecationCallout.downsamplingLink', {
                 defaultMessage: 'downsampling',
               })}
             </EuiLink>
