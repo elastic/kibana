@@ -167,6 +167,7 @@ describe('index table', () => {
         enableLegacyTemplates: true,
         enableIndexActions: true,
         enableIndexStats: true,
+        enableDataStreamStats: true,
       },
     };
 

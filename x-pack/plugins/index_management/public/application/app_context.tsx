@@ -60,8 +60,8 @@ export interface AppDependencies {
     enableIndexActions: boolean;
     enableLegacyTemplates: boolean;
     enableIndexStats: boolean;
+    enableDataStreamStats: boolean;
     editableIndexSettings: 'all' | 'limited';
-    enableDataStreamsStorageColumn: boolean;
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
     enableSemanticText: boolean;

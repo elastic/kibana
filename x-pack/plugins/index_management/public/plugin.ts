@@ -41,8 +41,8 @@ export class IndexMgmtUIPlugin
     enableIndexActions: boolean;
     enableLegacyTemplates: boolean;
     enableIndexStats: boolean;
+    enableDataStreamStats: boolean;
     editableIndexSettings: 'all' | 'limited';
-    enableDataStreamsStorageColumn: boolean;
     isIndexManagementUiEnabled: boolean;
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
@@ -59,8 +59,8 @@ export class IndexMgmtUIPlugin
       enableIndexActions,
       enableLegacyTemplates,
       enableIndexStats,
+      enableDataStreamStats,
       editableIndexSettings,
-      enableDataStreamsStorageColumn,
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
       dev: { enableSemanticText },
@@ -70,8 +70,8 @@ export class IndexMgmtUIPlugin
       enableIndexActions: enableIndexActions ?? true,
       enableLegacyTemplates: enableLegacyTemplates ?? true,
       enableIndexStats: enableIndexStats ?? true,
+      enableDataStreamStats: enableDataStreamStats ?? true,
       editableIndexSettings: editableIndexSettings ?? 'all',
-      enableDataStreamsStorageColumn: enableDataStreamsStorageColumn ?? true,
       enableMappingsSourceFieldSection: enableMappingsSourceFieldSection ?? true,
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
       enableSemanticText: enableSemanticText ?? false,
