@@ -40,8 +40,8 @@
  * Shifting the rendered panels offscreen prevents a quick flash when redrawing the panels on minimize
  */
 .dshDashboardGrid__item--hidden {
-  left: -9999px;
   top: -9999px;
+  left: -9999px;
 }
 
 /**
