@@ -24,3 +24,4 @@ export {
   migratePackagePolicyEnableCapsToV8140,
   migratePackagePolicyAddAntivirusRegistrationModeToV8140,
 } from './to_v8_14_0';
+export { migratePackagePolicyToV8150 } from './to_v8_15_0';

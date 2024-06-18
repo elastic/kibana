@@ -26,6 +26,8 @@ import {
   FLEET_SETUP_LOCK_TYPE,
 } from '../constants';
 
+import { migratePackagePolicyToV8150 } from './migrations/security_solution/to_v8_15_0';
+
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
 import {
@@ -608,6 +610,14 @@ export const getSavedObjectTypes = (
             {
               type: 'data_backfill',
               backfillFn: migratePackagePolicyIdsToV8150,
+            },
+          ],
+        },
+        '13': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: migratePackagePolicyToV8150,
             },
           ],
         },
