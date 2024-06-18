@@ -18,8 +18,7 @@ import type {
 import { partition } from 'lodash';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
-  columnExists,
-  getColumnHit,
+  lookupColumn,
   getCommandDefinition,
   getCommandOption,
   getFunctionDefinition,
@@ -42,6 +41,7 @@ import {
   getAllFunctions,
   isSingleItem,
   nonNullable,
+  getColumnExists,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -87,7 +87,7 @@ import {
   getSourcesFromCommands,
   isAggFunctionUsedAlready,
 } from './helper';
-import { FunctionArgSignature } from '../definitions/types';
+import { FunctionParameter } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetDataSourceFn = (sourceName: string) => Promise<
@@ -345,7 +345,9 @@ function workoutBuiltinOptions(
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): { skipAssign: boolean } {
   // skip assign operator if it's a function or an existing field to avoid promoting shadowing
-  return { skipAssign: Boolean(!isColumnItem(nodeArg) || getColumnHit(nodeArg.name, references)) };
+  return {
+    skipAssign: Boolean(!isColumnItem(nodeArg) || lookupColumn(nodeArg, references)),
+  };
 }
 
 function areCurrentArgsValid(
@@ -412,7 +414,7 @@ function extractFinalTypeFromArg(
       return arg.literalType;
     }
     if (isColumnItem(arg)) {
-      const hit = getColumnHit(arg.name, references);
+      const hit = lookupColumn(arg, references);
       if (hit) {
         return hit.type;
       }
@@ -1166,10 +1168,10 @@ async function getFunctionArgsSuggestions(
   const isUnknownColumn =
     arg &&
     isColumnItem(arg) &&
-    !columnExists(arg, {
+    !getColumnExists(arg, {
       fields: fieldsMap,
       variables: variablesExcludingCurrentCommandOnes,
-    }).hit;
+    });
   if (noArgDefined || isUnknownColumn) {
     // ... | EVAL fn( <suggest>)
     // ... | EVAL fn( field, <suggest>)
@@ -1243,7 +1245,7 @@ async function getFunctionArgsSuggestions(
       (paramDef) => paramDef.constantOnly || /_literal$/.test(paramDef.type)
     );
 
-    const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) => {
+    const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
       return Array.from(new Set(paramDefs.map(({ type }) => type)));
     };
 
@@ -1517,7 +1519,10 @@ async function getOptionArgsSuggestions(
   }
 
   if (command.name === 'dissect') {
-    if (option.args.length < 1 && optionDef) {
+    if (
+      option.args.filter((arg) => !(isSingleItem(arg) && arg.type === 'unknown')).length < 1 &&
+      optionDef
+    ) {
       suggestions.push(colonCompleteItem, semiColonCompleteItem);
     }
   }
