@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { APIKeysAPIClient } from '@kbn/security-api-key-management/src/components/api_keys_api_client';
+import type { APIKeysAPIClient } from '@kbn/security-api-key-management';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 export const apiKeysAPIClientMock = {

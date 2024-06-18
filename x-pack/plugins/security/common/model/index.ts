@@ -5,17 +5,6 @@
  * 2.0.
  */
 
-export type {
-  ApiKey,
-  RestApiKey,
-  BaseApiKey,
-  CrossClusterApiKey,
-  ApiKeyToInvalidate,
-  ApiKeyRoleDescriptors,
-  CrossClusterApiKeyAccess,
-  ApiKeyAggregations,
-  QueryApiKeyResult,
-} from '@kbn/security-api-key-management';
 export type { EditUser, GetUserDisplayNameParams } from './user';
 export type { GetUserProfileResponse } from './user_profile';
 export {

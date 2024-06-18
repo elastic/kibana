@@ -31,6 +31,7 @@ import React, { createContext, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
+  ApiKeyAggregations,
   CategorizedApiKey,
   CreateAPIKeyResult,
   QueryApiKeySortOptions,
@@ -40,7 +41,6 @@ import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 
 import { ApiKeysEmptyPrompt, doesErrorIndicateBadQuery } from './api_keys_empty_prompt';
 import type { AuthenticatedUser } from '../../../../common';
-import type { ApiKeyAggregations } from '../../../../common/model';
 
 export interface TablePagination {
   pageIndex: number;
