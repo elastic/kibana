@@ -58,7 +58,7 @@ export type { SlackApiActionParams as SlackApiActionParams } from '../../common/
 export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
 export type { ActionParamsType as TeamsActionParams } from './teams';
 export { ConnectorTypeId as WebhookConnectorTypeId } from './webhook';
-export type { ActionParamsType as WebhookActionParams } from './webhook';
+export type { ActionParamsType as WebhookActionParams } from './webhook/types';
 export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
 
