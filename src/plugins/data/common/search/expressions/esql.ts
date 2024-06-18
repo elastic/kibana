@@ -148,7 +148,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             query,
             // time_zone: timezone,
             locale,
-            // ...(earliest && latest ? { params: [{ earliest }, { latest }] } : {}),
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(
