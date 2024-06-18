@@ -22,9 +22,7 @@ describe('initializeDataControl', () => {
   const controlGroupApi = {} as unknown as ControlGroupApi;
   const mockDataViews = dataViewPluginMocks.createStartContract();
   // @ts-ignore
-  mockDataViews.get = async (
-    id: string,
-  ): Promise<DataView> => {
+  mockDataViews.get = async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
       throw new Error(`Simulated error: no data view found for id ${id}`);
     }
@@ -47,26 +45,37 @@ describe('initializeDataControl', () => {
   };
 
   describe('dataViewId subscription', () => {
-    test('should set data view and default panel title', (done) => {
-      const dataControl = initializeDataControl(
-        'myControlId',
-        'myControlType',
-        dataControlState,
-        editorStateManager,
-        controlGroupApi,
-        services
-      );
+    describe('no blocking errors', () => {
+      let dataControl: undefined | ReturnType<typeof initializeDataControl>;
+      beforeAll((done) => {
+        dataControl = initializeDataControl(
+          'myControlId',
+          'myControlType',
+          dataControlState,
+          editorStateManager,
+          controlGroupApi,
+          services
+        );
 
-      combineLatest([dataControl.api.dataViews, dataControl.api.defaultPanelTitle!])
-        .pipe(debounceTime(0), first())
-        .subscribe(([dataViews, defaultPanelTitle]) => {
-          expect(dataViews).not.toBeUndefined();
-          expect(dataViews!.length).toBe(1);
-          expect(dataViews![0].id).toBe('myDataViewId');
-          expect(defaultPanelTitle).not.toBeUndefined();
-          expect(defaultPanelTitle).toBe('My field name');
-          done();
-        });
+        combineLatest([dataControl.api.dataViews, dataControl.api.defaultPanelTitle!])
+          .pipe(debounceTime(1), first())
+          .subscribe(() => {
+            done();
+          });
+      });
+
+      test('should set data view', () => {
+        const dataViews = dataControl!.api.dataViews.value;
+        expect(dataViews).not.toBeUndefined();
+        expect(dataViews!.length).toBe(1);
+        expect(dataViews![0].id).toBe('myDataViewId');
+      });
+
+      test('should set default panel title', () => {
+        const defaultPanelTitle = dataControl!.api.defaultPanelTitle!.value;
+        expect(defaultPanelTitle).not.toBeUndefined();
+        expect(defaultPanelTitle).toBe('My field name');
+      });
     });
 
     describe('data view does not exist', () => {
@@ -122,7 +131,7 @@ describe('initializeDataControl', () => {
           services
         );
 
-        dataControl.api.dataViews.pipe(skip(1), first()).subscribe(() => {
+        dataControl.api.defaultPanelTitle!.pipe(skip(1), first()).subscribe(() => {
           done();
         });
       });
