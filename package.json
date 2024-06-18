@@ -756,7 +756,7 @@
     "listr2": "^8.2.1",
     "lmdb": "^2.9.2",
     "marge": "^1.0.1",
-    "micromatch": "3.1.10",
+    "micromatch": "^4.0.7",
     "minimist": "^1.2.6",
     "mkdirp": "^0.5.6",
     "mocha": "^10.1.0",
