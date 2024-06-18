@@ -45,7 +45,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
           )}
         </>
       ),
-      'data-test-subj': 'solutionViewSearchOption',
+      'data-test-subj': 'solutionViewEsOption',
     },
     {
       value: 'oblt',
