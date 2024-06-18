@@ -9,7 +9,7 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
 
 export enum ProviderKeys {
-  huggingFace = 'hugging_face',
+  hugging_face = 'hugging_face',
   elser = 'elser',
   cohere = 'cohere',
   elasticsearch = 'elasticsearch',
@@ -34,7 +34,12 @@ export interface QueryParams extends SortingParams {
   perPage: number;
 }
 
-export interface AlInferenceEndpointsTableState {
+export interface FilterOptions {
+  provider: ProviderKeys[];
+}
+
+export interface AllInferenceEndpointsTableState {
+  filterOptions: FilterOptions;
   queryParams: QueryParams;
 }
 

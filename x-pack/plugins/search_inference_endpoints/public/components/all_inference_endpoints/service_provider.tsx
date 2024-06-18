@@ -22,8 +22,8 @@ interface ProviderRecord {
   name: string;
 }
 
-const PROVIDERS: Record<string, ProviderRecord> = {
-  [ProviderKeys.huggingFace]: {
+export const PROVIDERS: Record<string, ProviderRecord> = {
+  [ProviderKeys.hugging_face]: {
     icon: huggingFaceIcon,
     name: 'Hugging Face',
   },
