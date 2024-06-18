@@ -683,6 +683,5 @@ function someBulkActionResults() {
     deleted: expect.any(Array),
     updated: expect.any(Array),
     skipped: expect.any(Array),
-    backfilled: expect.any(Array),
   };
 }

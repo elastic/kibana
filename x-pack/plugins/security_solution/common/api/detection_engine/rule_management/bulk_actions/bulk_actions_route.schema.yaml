@@ -39,6 +39,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/BulkEditActionResponse'
                   - $ref: '#/components/schemas/BulkExportActionResponse'
+                  - $ref: '#/components/schemas/BulkScheduleBackfillActionResponse'
 
 components:
   schemas:
@@ -117,10 +118,6 @@ components:
           type: array
           items:
             $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
-        backfilled:
-          type: array
-          items:
-            $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
         skipped:
           type: array
           items:
@@ -130,7 +127,6 @@ components:
         - created
         - deleted
         - skipped
-        - backfilled
 
     BulkEditActionSummary:
       type: object
@@ -179,6 +175,31 @@ components:
 
     BulkExportActionResponse:
       type: string
+
+    BulkScheduleBackfillActionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status_code:
+          type: integer
+        message:
+          type: string
+        rules_count:
+          type: integer
+        attributes:
+          type: object
+          properties:
+            summary:
+              $ref: '#/components/schemas/BulkEditActionSummary'
+            errors:
+              type: array
+              items:
+                $ref: '#/components/schemas/NormalizedRuleError'
+          required:
+            - summary
+      required:
+        - attributes
 
     BulkActionBase:
       x-inline: true

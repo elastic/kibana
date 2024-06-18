@@ -38,6 +38,7 @@ import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/u
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { BulkScheduleLimitErrorModal } from './bulk_actions/bulk_schedule_limit_error_modal';
+import { useBulkScheduleBackfillActionDryRun } from './bulk_actions/use_bulk_schedule_backfill_action_dry_run';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -133,6 +134,10 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   } = useBulkEditFormFlyout();
 
   const { isBulkActionsDryRunLoading, executeBulkActionsDryRun } = useBulkActionsDryRun();
+  const {
+    isBulkScheduleBackfillActionsDryRunLoading,
+    executeBulkBulkScheduleBackfillActionsDryRun,
+  } = useBulkScheduleBackfillActionDryRun();
 
   const getBulkItemsPopoverContent = useBulkActions({
     filterOptions,
@@ -143,6 +148,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     showScheduleBackfillLimitError,
     completeBulkEditForm,
     executeBulkActionsDryRun,
+    executeBulkBulkScheduleBackfillActionsDryRun,
   });
 
   const paginationMemo = useMemo(() => {
@@ -318,7 +324,11 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
             canBulkEdit={hasPermissions}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
             onToggleSelectAll={toggleSelectAll}
-            isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
+            isBulkActionInProgress={
+              isBulkActionsDryRunLoading ||
+              isBulkScheduleBackfillActionsDryRunLoading ||
+              loadingRulesAction != null
+            }
           />
           <EuiBasicTable
             itemId="id"

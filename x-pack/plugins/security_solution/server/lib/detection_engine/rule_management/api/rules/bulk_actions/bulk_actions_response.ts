@@ -16,10 +16,10 @@ import type {
   NormalizedRuleError,
   RuleDetailsInError,
 } from '../../../../../../../common/api/detection_engine';
-import { BulkActionTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import type {
-  BulkActionType,
   BulkEditActionResponse,
+  BulkScheduleBackfillActionResponse,
+  BulkScheduleBackfillActionSummary,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
@@ -36,7 +36,6 @@ export type BulkActionError =
 
 export const buildBulkResponse = (
   response: KibanaResponseFactory,
-  action: Exclude<BulkActionType, BulkActionTypeEnum['export']>,
   {
     isDryRun = false,
     errors = [],
@@ -44,18 +43,16 @@ export const buildBulkResponse = (
     created = [],
     deleted = [],
     skipped = [],
-    backfilled = [],
   }: {
     isDryRun?: boolean;
     errors?: BulkActionError[];
     updated?: RuleAlertType[];
     created?: RuleAlertType[];
     deleted?: RuleAlertType[];
-    backfilled?: RuleAlertType[];
     skipped?: BulkActionSkipResult[];
   }
 ): IKibanaResponse<BulkEditActionResponse> => {
-  const numSucceeded = updated.length + created.length + deleted.length + backfilled.length;
+  const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
   const numFailed = errors.length;
 
@@ -74,30 +71,19 @@ export const buildBulkResponse = (
         created: [],
         deleted: [],
         skipped: [],
-        backfilled: [],
       }
     : {
         updated: updated.map((rule) => internalRuleToAPIResponse(rule)),
         created: created.map((rule) => internalRuleToAPIResponse(rule)),
         deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
-        backfilled: backfilled.map((rule) => internalRuleToAPIResponse(rule)),
         skipped,
       };
 
   if (numFailed > 0) {
-    let message = '';
-    if (action === BulkActionTypeEnum.backfill) {
-      message =
-        summary.succeeded > 0
-          ? 'Bulk schedule backfill partially failed'
-          : 'Bulk schedule backfill failed';
-    } else {
-      message = summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed';
-    }
     return response.custom<BulkEditActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
-        message,
+        message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
         status_code: 500,
         attributes: {
           errors: normalizeErrorResponse(errors),
@@ -113,6 +99,54 @@ export const buildBulkResponse = (
     success: true,
     rules_count: summary.total,
     attributes: { results, summary },
+  };
+
+  return response.ok({ body: responseBody });
+};
+
+export const buildBulkScheduleBackfillResponse = (
+  response: KibanaResponseFactory,
+  {
+    isDryRun = false,
+    errors = [],
+    backfilled = [],
+  }: {
+    isDryRun?: boolean;
+    errors?: BulkActionError[];
+    backfilled?: RuleAlertType[];
+  }
+): IKibanaResponse<BulkScheduleBackfillActionResponse> => {
+  const numSucceeded = backfilled.length;
+  const numFailed = errors.length;
+
+  const summary: BulkScheduleBackfillActionSummary = {
+    failed: numFailed,
+    succeeded: numSucceeded,
+    total: numSucceeded + numFailed,
+  };
+
+  if (numFailed > 0) {
+    return response.custom<BulkScheduleBackfillActionResponse>({
+      headers: { 'content-type': 'application/json' },
+      body: {
+        message:
+          summary.succeeded > 0
+            ? 'Bulk schedule backfill partially failed'
+            : 'Bulk schedule backfill failed',
+        status_code: 500,
+        attributes: {
+          errors: normalizeErrorResponse(errors),
+          summary,
+        },
+      },
+      statusCode: 500,
+    });
+  }
+
+  const responseBody: BulkScheduleBackfillActionResponse = {
+    success: true,
+    rules_count: summary.total,
+    attributes: { summary },
   };
 
   return response.ok({ body: responseBody });

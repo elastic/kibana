@@ -38,7 +38,7 @@ import {
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
 import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 import type { BulkActionError } from './bulk_actions_response';
-import { buildBulkResponse } from './bulk_actions_response';
+import { buildBulkResponse, buildBulkScheduleBackfillResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
@@ -149,7 +149,7 @@ export const performBulkActionRoute = (
               experimentalFeatures: config.experimentalFeatures,
             });
 
-            return buildBulkResponse(response, body.action, {
+            return buildBulkResponse(response, {
               updated: rules,
               skipped,
               errors,
@@ -168,7 +168,6 @@ export const performBulkActionRoute = (
           let updated: RuleAlertType[] = [];
           let created: RuleAlertType[] = [];
           let deleted: RuleAlertType[] = [];
-          let backfilled: RuleAlertType[] = [];
 
           switch (body.action) {
             case BulkActionTypeEnum.enable: {
@@ -326,7 +325,7 @@ export const performBulkActionRoute = (
             }
 
             case BulkActionTypeEnum.backfill: {
-              const { scheduled, errors: bulkActionErrors } = await bulkScheduleBackfill({
+              const { backfilled, errors: bulkActionErrors } = await bulkScheduleBackfill({
                 rules,
                 isDryRun,
                 rulesClient,
@@ -335,7 +334,11 @@ export const performBulkActionRoute = (
                 experimentalFeatures: config.experimentalFeatures,
               });
               errors.push(...bulkActionErrors);
-              backfilled = scheduled;
+              return buildBulkScheduleBackfillResponse(response, {
+                errors,
+                isDryRun,
+                backfilled,
+              });
             }
           }
 
@@ -343,11 +346,10 @@ export const performBulkActionRoute = (
             throw new AbortError('Bulk action was aborted');
           }
 
-          return buildBulkResponse(response, body.action, {
+          return buildBulkResponse(response, {
             updated,
             deleted,
             created,
-            backfilled,
             errors,
             isDryRun,
           });

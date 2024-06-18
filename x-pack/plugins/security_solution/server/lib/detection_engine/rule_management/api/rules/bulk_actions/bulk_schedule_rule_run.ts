@@ -24,7 +24,7 @@ interface BulkScheduleBackfillArgs {
 }
 
 interface BulkScheduleBackfillOutcome {
-  scheduled: RuleAlertType[];
+  backfilled: RuleAlertType[];
   errors: Array<PromisePoolError<RuleAlertType, Error>>;
 }
 
@@ -58,7 +58,7 @@ export const bulkScheduleBackfill = async ({
 
   if (isDryRun || validatedRules.length === 0) {
     return {
-      scheduled: validatedRules,
+      backfilled: validatedRules,
       errors,
     };
   }
@@ -74,7 +74,7 @@ export const bulkScheduleBackfill = async ({
   await rulesClient.scheduleBackfill(params);
 
   return {
-    scheduled: validatedRules,
+    backfilled: validatedRules,
     errors,
   };
 };

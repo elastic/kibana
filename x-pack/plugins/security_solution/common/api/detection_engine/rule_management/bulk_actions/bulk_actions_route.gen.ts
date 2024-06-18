@@ -76,7 +76,6 @@ export const BulkEditActionResults = z.object({
   updated: z.array(RuleResponse),
   created: z.array(RuleResponse),
   deleted: z.array(RuleResponse),
-  backfilled: z.array(RuleResponse),
   skipped: z.array(BulkActionSkipResult),
 });
 
@@ -103,6 +102,18 @@ export const BulkEditActionResponse = z.object({
 
 export type BulkExportActionResponse = z.infer<typeof BulkExportActionResponse>;
 export const BulkExportActionResponse = z.string();
+
+export type BulkScheduleBackfillActionResponse = z.infer<typeof BulkScheduleBackfillActionResponse>;
+export const BulkScheduleBackfillActionResponse = z.object({
+  success: z.boolean().optional(),
+  status_code: z.number().int().optional(),
+  message: z.string().optional(),
+  rules_count: z.number().int().optional(),
+  attributes: z.object({
+    summary: BulkEditActionSummary,
+    errors: z.array(NormalizedRuleError).optional(),
+  }),
+});
 
 export type BulkActionBase = z.infer<typeof BulkActionBase>;
 export const BulkActionBase = z.object({
@@ -335,4 +346,5 @@ export type PerformBulkActionResponse = z.infer<typeof PerformBulkActionResponse
 export const PerformBulkActionResponse = z.union([
   BulkEditActionResponse,
   BulkExportActionResponse,
+  BulkScheduleBackfillActionResponse,
 ]);

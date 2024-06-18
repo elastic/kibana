@@ -12,6 +12,7 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
+import { useBulkScheduleBackfill } from '../../../../rule_management/logic/bulk_actions/use_bulk_schedule_backfill';
 import { MAX_SCHEDULE_BACKFILL_BULK_SIZE } from '../../../../../../common/constants';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -46,6 +47,7 @@ import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
 import { computeDryRunEditPayload } from './utils/compute_dry_run_edit_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
+import type { ExecuteBulkBulkScheduleBackfillActionsDryRun } from './use_bulk_schedule_backfill_action_dry_run';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -61,6 +63,7 @@ interface UseBulkActionsArgs {
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
   executeBulkActionsDryRun: ExecuteBulkActionsDryRun;
+  executeBulkBulkScheduleBackfillActionsDryRun: ExecuteBulkBulkScheduleBackfillActionsDryRun;
 }
 
 export const useBulkActions = ({
@@ -72,6 +75,7 @@ export const useBulkActions = ({
   showScheduleBackfillLimitError,
   completeBulkEditForm,
   executeBulkActionsDryRun,
+  executeBulkBulkScheduleBackfillActionsDryRun,
 }: UseBulkActionsArgs) => {
   const { services: startServices } = useKibana();
   const hasMlPermissions = useHasMlPermissions();
@@ -82,6 +86,7 @@ export const useBulkActions = ({
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
+  const { bulkScheduleBackfill } = useBulkScheduleBackfill();
   const downloadExportedRules = useDownloadExportedRules();
 
   const {
@@ -214,7 +219,7 @@ export const useBulkActions = ({
 
         setIsPreflightInProgress(true);
 
-        const dryRunResult = await executeBulkActionsDryRun({
+        const dryRunResult = await executeBulkBulkScheduleBackfillActionsDryRun({
           type: BulkActionTypeEnum.backfill,
           ...(isAllSelected
             ? { query: convertRulesFilterToKQL(filterOptions) }
@@ -245,7 +250,7 @@ export const useBulkActions = ({
 
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
 
-        await executeBulkAction({
+        await bulkScheduleBackfill({
           type: BulkActionTypeEnum.backfill,
           ...(isAllSelected ? { query: kql } : { ids: enabledIds }),
           backfillPayload: {
@@ -586,10 +591,12 @@ export const useBulkActions = ({
       clearRulesSelection,
       confirmDeletion,
       bulkExport,
+      bulkScheduleBackfill,
       showBulkActionConfirmation,
       downloadExportedRules,
       setIsPreflightInProgress,
       executeBulkActionsDryRun,
+      executeBulkBulkScheduleBackfillActionsDryRun,
       filterOptions,
       completeBulkEditForm,
       startServices,

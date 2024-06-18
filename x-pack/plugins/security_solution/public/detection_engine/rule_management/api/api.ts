@@ -328,6 +328,23 @@ export interface BulkActionErrorResponse {
   attributes?: BulkActionAttributes;
 }
 
+export interface BulkScheduleBackfillActionAttributes {
+  summary: BulkActionSummary;
+  errors?: BulkActionAggregatedError[];
+}
+
+export interface BulkScheduleBackfillActionResponse {
+  success?: boolean;
+  rules_count?: number;
+  attributes: BulkScheduleBackfillActionAttributes;
+}
+
+export interface BulkScheduleBackfillActionErrorResponse {
+  message: string;
+  status_code: number;
+  attributes?: BulkScheduleBackfillActionAttributes;
+}
+
 export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefined; ids: string[] };
 type PlainBulkAction = {
   type: Exclude<
@@ -349,19 +366,20 @@ type DuplicateBulkAction = {
   duplicatePayload?: BulkDuplicateRules['duplicate'];
 } & QueryOrIds;
 
-type ScheduleBackfillBulkAction = {
+export type ScheduleBackfillBulkAction = {
   type: BulkActionTypeEnum['backfill'];
   backfillPayload: BulkScheduleBackfill['backfill'];
 } & QueryOrIds;
 
-export type BulkAction =
-  | PlainBulkAction
-  | EditBulkAction
-  | DuplicateBulkAction
-  | ScheduleBackfillBulkAction;
+export type BulkAction = PlainBulkAction | EditBulkAction | DuplicateBulkAction;
 
 export interface PerformBulkActionProps {
   bulkAction: BulkAction;
+  dryRun?: boolean;
+}
+
+export interface PerformBulkScheduleBackfillActionProps {
+  bulkAction: ScheduleBackfillBulkAction;
   dryRun?: boolean;
 }
 
@@ -384,8 +402,6 @@ export async function performBulkAction({
     edit: bulkAction.type === BulkActionTypeEnum.edit ? bulkAction.editPayload : undefined,
     duplicate:
       bulkAction.type === BulkActionTypeEnum.duplicate ? bulkAction.duplicatePayload : undefined,
-    backfill:
-      bulkAction.type === BulkActionTypeEnum.backfill ? bulkAction.backfillPayload : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
@@ -394,6 +410,35 @@ export async function performBulkAction({
     body: JSON.stringify(params),
     query: { dry_run: dryRun },
   });
+}
+
+/**
+ * Perform bulk schedule backfill action with rules selected by a filter query
+ *
+ * @param dryRun enables dry run mode for bulk actions
+ *
+ * @throws An error if response is not OK
+ */
+export async function performBulkScheduleBackfillAction({
+  bulkAction,
+  dryRun = false,
+}: PerformBulkScheduleBackfillActionProps): Promise<BulkScheduleBackfillActionResponse> {
+  const params = {
+    action: bulkAction.type,
+    query: bulkAction.query,
+    ids: bulkAction.ids,
+    backfill: bulkAction.backfillPayload,
+  };
+
+  return KibanaServices.get().http.fetch<BulkScheduleBackfillActionResponse>(
+    DETECTION_ENGINE_RULES_BULK_ACTION,
+    {
+      method: 'POST',
+      version: '2023-10-31',
+      body: JSON.stringify(params),
+      query: { dry_run: dryRun },
+    }
+  );
 }
 
 export type BulkExportResponse = Blob;
