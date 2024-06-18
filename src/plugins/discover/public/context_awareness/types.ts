@@ -12,7 +12,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 
 export interface DocViewerExtension {
   title: string | undefined;
-  docViewsRegistry: ((prevRegistry: DocViewsRegistry) => DocViewsRegistry) | undefined;
+  docViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
 }
 
 export interface DocViewerExtensionParams {
