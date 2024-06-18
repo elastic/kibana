@@ -192,7 +192,7 @@ interface ResponseActionParametersWithEntityId {
   entity_id: string;
 }
 
-interface ResponseActionParametersWithProcessName {
+export interface ResponseActionParametersWithProcessName {
   pid?: never;
   entity_id?: never;
   process_name: string;

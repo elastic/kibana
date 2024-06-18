@@ -27,6 +27,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
 import type { Mutable } from 'utility-types';
+import type { SentinelOneKillProcessScriptArgs, SentinelOneScriptArgs } from './types';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 import type {
   NormalizedExternalConnectorClient,
@@ -66,6 +67,7 @@ import type {
   SentinelOneIsolationResponseMeta,
   SentinelOneKillProcessRequestMeta,
   UploadedFileInfo,
+  ResponseActionParametersWithProcessName,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -79,9 +81,22 @@ import type {
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 
+const NOOP_THROW = () => {
+  throw new ResponseActionsClientError('not implemented!');
+};
+
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
 };
+
+interface FetchScriptInfoResponse<
+  TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
+> {
+  scriptId: string;
+  scriptInfo: SentinelOneGetRemoteScriptsResponse['data'][number];
+  /** A helper method that will build the arguments for the given script */
+  buildScriptArgs: (options: TScriptOptions) => string;
+}
 
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'sentinel_one';
@@ -631,7 +646,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-      ResponseActionParametersWithProcessData,
+      ResponseActionParametersWithProcessName,
       KillProcessActionOutputContent,
       Partial<SentinelOneKillProcessRequestMeta>
     > = {
@@ -648,8 +663,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
       if (!error) {
         const s1AgentDetails = await this.getAgentDetails(reqIndexOptions.endpoint_ids[0]);
-        const terminateScriptInfo = await this.fetchScriptInfo(
-          'killProcess',
+        const terminateScriptInfo = await this.fetchScriptInfo<SentinelOneKillProcessScriptArgs>(
+          'kill-process',
           s1AgentDetails.osType
         );
 
@@ -659,17 +674,16 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               uuids: actionRequest.endpoint_ids[0],
             },
             script: {
-              scriptId: terminateScriptInfo.id,
+              scriptId: terminateScriptInfo.scriptId,
               taskDescription: this.buildExternalComment(reqIndexOptions),
               requiresApproval: false,
-              // TODO:PT test if `process_name` should be quoted to avoid issues
-              // TODO:PT check to see if the input args are different for Windows
-              inputParams: `--terminate --processes ${actionRequest.parameters.process_name} --force`,
               outputDestination: 'SentinelCloud',
+              inputParams: terminateScriptInfo.buildScriptArgs({
+                // @ts-expect-error TS2339: Property 'process_name' does not exist (`.validateRequest()` has already validated that `process_name` exists)
+                processName: reqIndexOptions.parameters.process_name,
+              }),
             },
           });
-
-          this.log.debug(`Response for kill-process:\n${stringify(s1Response.data)}`);
 
           reqIndexOptions.meta.parentTaskId = s1Response.data.data.parentTaskId ?? '';
         } catch (err) {
@@ -761,26 +775,26 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   /**
-   * retrieve script info. for scripts that are used to handle our response actions
+   * retrieve script info. for scripts that are used to handle Elastic response actions
    * @param scriptType
    * @param osType
    * @private
    */
-  private async fetchScriptInfo(
-    scriptType: 'killProcess',
-    osType: string
-  ): Promise<{
-    scriptId: string;
-    buildScriptArgs: (options: object) => string;
-    scriptInfo: SentinelOneGetRemoteScriptsResponse['data'][number];
-  }> {
+  private async fetchScriptInfo<
+    TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
+  >(
+    scriptType: Extract<ResponseActionsApiCommandNames, 'kill-process'>,
+    osType: string | 'linux' | 'macos' | 'windows'
+  ): Promise<FetchScriptInfoResponse<TScriptOptions>> {
     const searchQueryParams: Mutable<SentinelOneGetRemoteScriptsParams> = {
       query: '',
       osTypes: osType,
     };
+    let buildScriptArgs = NOOP_THROW as FetchScriptInfoResponse<TScriptOptions>['buildScriptArgs'];
 
+    // Set the query value for filtering the list of scripts in S1
     switch (scriptType) {
-      case 'killProcess':
+      case 'kill-process':
         searchQueryParams.query = 'terminate';
         break;
 
@@ -804,13 +818,35 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!terminateScript) {
       throw new ResponseActionsClientError(
-        `Unable to retrieve Terminate Script info. from SentinelOne ([${scriptType}][${osType}])`
+        `Did not find a script from SentinelOne to handle ([${scriptType}][${osType}])`
       );
     }
 
-    // FIXME:PT create return type based on script type and OS
+    switch (scriptType) {
+      case 'kill-process':
+        buildScriptArgs = (args: SentinelOneKillProcessScriptArgs) => {
+          if (!args.processName) {
+            throw new ResponseActionsClientError(
+              `'processName' missing while building script args for [${terminateScript.scriptName} (id: ${terminateScript.id})] script`
+            );
+          }
 
-    return terminateScript;
+          if (osType === 'windows') {
+            return `-Terminate -Processes "${args.processName}" -Force`;
+          }
+
+          // Linux + Macos
+          return `--terminate --processes "${args.processName}" --force`;
+        };
+
+        break;
+    }
+
+    return {
+      scriptId: terminateScript.id,
+      scriptInfo: terminateScript,
+      buildScriptArgs,
+    } as FetchScriptInfoResponse<TScriptOptions>;
   }
 
   private async fetchGetFileResponseEsDocForAgentId(
