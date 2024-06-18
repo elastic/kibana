@@ -15,7 +15,7 @@ import type {
   UpdateAPIKeyResult,
 } from '@kbn/security-plugin-types-server';
 
-import type { ApiKeyToInvalidate, QueryApiKeyResult } from '../api_key';
+import type { ApiKeyToInvalidate, QueryApiKeyResult } from '@kbn/security-plugin-types-common';
 
 export type { CreateAPIKeyParams, CreateAPIKeyResult, UpdateAPIKeyParams, UpdateAPIKeyResult };
 

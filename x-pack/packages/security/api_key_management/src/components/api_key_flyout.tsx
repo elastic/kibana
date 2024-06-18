@@ -44,8 +44,8 @@ import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
 import { Role } from '@kbn/security-plugin-types-common';
 import { FormField, FormRow } from '@kbn/security-form-components';
+import type { ApiKeyRoleDescriptors, CategorizedApiKey } from '@kbn/security-plugin-types-common';
 import { ApiKeyBadge, ApiKeyStatus, TimeToolTip } from '.';
-import type { ApiKeyRoleDescriptors, CategorizedApiKey } from '../api_key';
 import { APIKeysAPIClient } from './api_keys_api_client';
 import type {
   CreateAPIKeyParams,

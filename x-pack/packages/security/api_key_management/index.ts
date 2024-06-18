@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './src/api_key';
 export * from './src/components';
