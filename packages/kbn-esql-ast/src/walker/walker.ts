@@ -13,6 +13,7 @@ import type {
   ESQLColumn,
   ESQLFunction,
   ESQLLiteral,
+  ESQLParamLiteral,
   ESQLSingleAstItem,
 } from '../types';
 
@@ -24,6 +25,35 @@ export interface WalkerOptions {
 }
 
 export class Walker {
+  /**
+   * Walks the AST and calls the appropriate visitor functions.
+   */
+  public static readonly walk = (
+    node: ESQLAstNode | ESQLAstNode[],
+    options: WalkerOptions
+  ): Walker => {
+    const walker = new Walker(options);
+    walker.walk(node);
+    return walker;
+  };
+
+  /**
+   * Walks the AST and extracts all parameter literals.
+   *
+   * @param node AST node to extract parameters from.
+   */
+  public static readonly params = (node: ESQLAstNode | ESQLAstNode[]): ESQLParamLiteral[] => {
+    const params: ESQLParamLiteral[] = [];
+    Walker.walk(node, {
+      visitLiteral: (param) => {
+        if (param.literalType === 'param') {
+          params.push(param);
+        }
+      },
+    });
+    return params;
+  };
+
   constructor(protected readonly options: WalkerOptions) {}
 
   public walk(node: undefined | ESQLAstNode | ESQLAstNode[]): void {
@@ -95,8 +125,4 @@ export class Walker {
   }
 }
 
-export const walk = (node: ESQLAstNode | ESQLAstNode[], options: WalkerOptions): Walker => {
-  const walker = new Walker(options);
-  walker.walk(node);
-  return walker;
-};
+export const walk = Walker.walk;

@@ -7,7 +7,7 @@
  */
 
 import { ESQLColumn, ESQLLiteral, getAstAndSyntaxErrors } from '../..';
-import { walk } from './walker';
+import { walk, Walker } from './walker';
 
 test('can walk all functions', () => {
   const { ast } = getAstAndSyntaxErrors('METRICS index a(b(c(foo)))');
@@ -50,6 +50,20 @@ test('can walk literals', () => {
     {
       type: 'literal',
       name: '1',
+    },
+  ]);
+});
+
+test('can collect all params', () => {
+  const query = 'ROW x = ?';
+  const { ast } = getAstAndSyntaxErrors(query);
+  const params = Walker.params(ast);
+
+  expect(params).toMatchObject([
+    {
+      type: 'literal',
+      literalType: 'param',
+      paramType: 'unnamed',
     },
   ]);
 });

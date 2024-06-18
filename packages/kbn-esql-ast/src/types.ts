@@ -143,7 +143,7 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
 }
 
 // @internal
-export interface ESQLParamLiteral<ParamType extends string> extends ESQLAstBaseItem {
+export interface ESQLParamLiteral<ParamType extends string = string> extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'param';
   paramType: ParamType;
