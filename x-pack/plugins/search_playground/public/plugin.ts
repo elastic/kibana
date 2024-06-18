@@ -15,7 +15,7 @@ import {
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { docLinks } from '../common/doc_links';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
-import { PlaygroundToolbar, Playground, getPlaygroundProvider } from './embeddable';
+import { Playground, getPlaygroundProvider } from './embeddable';
 import {
   AppPluginStartDependencies,
   SearchPlaygroundConfigType,
@@ -60,7 +60,6 @@ export class SearchPlaygroundPlugin
     docLinks.setDocLinks(core.docLinks.links);
     return {
       PlaygroundProvider: getPlaygroundProvider(core, deps),
-      PlaygroundToolbar,
       Playground,
       PlaygroundHeaderDocs,
     };

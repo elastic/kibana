@@ -15,10 +15,6 @@ export const Playground = dynamic(async () => ({
   default: (await import('./components/app')).App,
 }));
 
-export const PlaygroundToolbar = dynamic(async () => ({
-  default: (await import('./components/toolbar')).Toolbar,
-}));
-
 export const PlaygroundProvider = dynamic(async () => ({
   default: (await import('./providers/playground_provider')).PlaygroundProvider,
 }));

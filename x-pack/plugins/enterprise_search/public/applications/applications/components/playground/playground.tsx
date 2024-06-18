@@ -9,10 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
@@ -31,32 +28,9 @@ export const Playground: React.FC = () => {
             defaultMessage: 'Playground',
           }),
         ]}
-        pageHeader={{
-          pageTitle: (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.content.playground.headerTitle"
-                  defaultMessage="Playground"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  label={i18n.translate(
-                    'xpack.enterpriseSearch.content.playground.headerTitle.techPreview',
-                    {
-                      defaultMessage: 'TECH PREVIEW',
-                    }
-                  )}
-                  color="hollow"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          rightSideItems: [<searchPlayground.PlaygroundToolbar />],
-        }}
         pageViewTelemetry="Playground"
         restrictWidth={false}
+        panelled={false}
         customPageSections
         bottomBorder="extended"
         docLink="playground"

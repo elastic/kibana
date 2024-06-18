@@ -25,7 +25,6 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { ChatRequestData } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
-import type { Toolbar } from './components/toolbar';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export * from '../common/types';
@@ -34,7 +33,6 @@ export * from '../common/types';
 export interface SearchPlaygroundPluginSetup {}
 export interface SearchPlaygroundPluginStart {
   PlaygroundProvider: React.FC<React.ComponentProps<typeof PlaygroundProviderComponent>>;
-  PlaygroundToolbar: React.FC<React.ComponentProps<typeof Toolbar>>;
   Playground: React.FC<React.ComponentProps<typeof App>>;
   PlaygroundHeaderDocs: React.FC<React.ComponentProps<typeof PlaygroundHeaderDocs>>;
 }

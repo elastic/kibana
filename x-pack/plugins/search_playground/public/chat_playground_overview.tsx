@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPageTemplate } from '@elastic/eui';
 import { PlaygroundProvider } from './providers/playground_provider';
 
 import { App } from './components/app';
-import { PlaygroundToolbar } from './embeddable';
-import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 import { useKibana } from './hooks/use_kibana';
 
 export const ChatPlaygroundOverview: React.FC = () => {
@@ -34,37 +30,7 @@ export const ChatPlaygroundOverview: React.FC = () => {
         data-test-subj="svlPlaygroundPage"
         grow={false}
       >
-        <EuiPageTemplate.Header
-          css={{ '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' } }}
-          pageTitle={
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiTitle
-                  css={{ whiteSpace: 'nowrap' }}
-                  data-test-subj="chat-playground-home-page-title"
-                >
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.searchPlayground.pageTitle"
-                      defaultMessage="Playground"
-                    />
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  label={i18n.translate('xpack.searchPlayground.pageTitle.techPreview', {
-                    defaultMessage: 'TECH PREVIEW',
-                  })}
-                  color="hollow"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          data-test-subj="chat-playground-home-page"
-          rightSideItems={[<PlaygroundHeaderDocs />, <PlaygroundToolbar />]}
-        />
-        <App />
+        <App showDocs />
         {embeddableConsole}
       </EuiPageTemplate>
     </PlaygroundProvider>
