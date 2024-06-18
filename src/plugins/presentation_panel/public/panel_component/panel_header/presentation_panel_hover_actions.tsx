@@ -388,8 +388,7 @@ export const PresentationPanelHoverActions = ({
 
   const dragHandle = (
     <EuiIcon
-      // TODO: switch to move icon when it's available
-      type="grabOmnidirectional"
+      type="move"
       color="text"
       className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
       aria-label={i18n.translate('presentationPanel.dragHandle', {
