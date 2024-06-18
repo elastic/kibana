@@ -77,46 +77,6 @@ export const OtelLogsPanel: React.FC = () => {
 
   const installTabContents = [
     {
-      id: 'mac',
-      name: 'Mac',
-      prompt:
-        'Run the following commands in your terminal to download the collector and prepare the configuration.',
-      content: `arch=$(if [[ $(arch) == "arm64" ]]; then echo "aarch64"; else echo $(arch); fi)
-
-curl --output elastic-distro-${AGENT_VERSION}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${AGENT_VERSION}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir "elastic-distro-${AGENT_VERSION}-darwin-$arch" && tar -xvf elastic-distro-${AGENT_VERSION}-darwin-$arch.tar.gz -C "elastic-distro-${AGENT_VERSION}-darwin-$arch" --strip-components=1 && cd elastic-distro-${AGENT_VERSION}-darwin-$arch 
-      
-rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i '' 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
-      check: './otelcol --config otel.yml',
-      type: 'copy',
-    },
-    {
-      id: 'linux',
-      name: 'Linux',
-      prompt:
-        'Run the following commands in your terminal to download the collector and prepare the configuration.',
-      content: `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
-
-curl --output elastic-distro-${AGENT_VERSION}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${AGENT_VERSION}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir elastic-distro-${AGENT_VERSION}-linux-$arch && tar -xvf elastic-distro-${AGENT_VERSION}-linux-$arch.tar.gz -C "elastic-distro-${AGENT_VERSION}-linux-$arch" --strip-components=1 && cd elastic-distro-${AGENT_VERSION}-linux-$arch 
-        
-rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
-      check: './otelcol --config otel.yml',
-      type: 'copy',
-    },
-    {
-      id: 'windows',
-      name: 'Windows',
-      prompt:
-        'Run the following commands in your terminal to download the collector and prepare the configuration.',
-      content: `$ProgressPreference = 'SilentlyContinue'
-
-Invoke-WebRequest -OutFile elastic-distro-${AGENT_VERSION}-windows-x86_64.zip -Uri https://${AGENT_CDN_BASE_URL}/elastic-agent-${AGENT_VERSION}-windows-x86_64.zip
-Expand-Archive .\\elastic-distro-${AGENT_VERSION}-windows-x86_64.zip -DestinationPath .; Move-Item .\elastic-agent-${AGENT_VERSION}-windows-x86_64 .\\elastic-distro-${AGENT_VERSION}-windows-x86_64; Set-Location elastic-distro-${AGENT_VERSION}-windows-x86_64
-
-remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((Get-Content ./otel.yml) -replace '<<ES_ENDPOINT>>', '${setup?.elasticsearchUrl}') -replace '<<ES_API_KEY>>', '${apiKeyData?.apiKeyEncoded}' | Set-Content ./otel.yml`,
-      check: '.\\otelcol.exe --config .\\otel.yml',
-      type: 'copy',
-    },
-    {
       id: 'kubernetes',
       name: 'Kubernetes',
       prompt: 'Install the collector via kubectl apply -f otel-collector-k8s.yml.',
@@ -381,6 +341,40 @@ subjects:
       check: 'kubectl get pods -l app=nginx',
       fileName: 'otel-collector-k8s.yml',
     },
+    {
+      id: 'mac',
+      name: 'Mac',
+      content: `arch=$(if [[ $(arch) == "arm64" ]]; then echo "aarch64"; else echo $(arch); fi)
+
+curl --output elastic-distro-${AGENT_VERSION}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${AGENT_VERSION}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir "elastic-distro-${AGENT_VERSION}-darwin-$arch" && tar -xvf elastic-distro-${AGENT_VERSION}-darwin-$arch.tar.gz -C "elastic-distro-${AGENT_VERSION}-darwin-$arch" --strip-components=1 && cd elastic-distro-${AGENT_VERSION}-darwin-$arch 
+      
+rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i '' 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+      check: './otelcol --config otel.yml',
+      type: 'copy',
+    },
+    {
+      id: 'linux',
+      name: 'Linux',
+      content: `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
+
+curl --output elastic-distro-${AGENT_VERSION}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${AGENT_VERSION}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir elastic-distro-${AGENT_VERSION}-linux-$arch && tar -xvf elastic-distro-${AGENT_VERSION}-linux-$arch.tar.gz -C "elastic-distro-${AGENT_VERSION}-linux-$arch" --strip-components=1 && cd elastic-distro-${AGENT_VERSION}-linux-$arch 
+        
+rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+      check: './otelcol --config otel.yml',
+      type: 'copy',
+    },
+    {
+      id: 'windows',
+      name: 'Windows',
+      content: `$ProgressPreference = 'SilentlyContinue'
+
+Invoke-WebRequest -OutFile elastic-distro-${AGENT_VERSION}-windows-x86_64.zip -Uri https://${AGENT_CDN_BASE_URL}/elastic-agent-${AGENT_VERSION}-windows-x86_64.zip
+Expand-Archive .\\elastic-distro-${AGENT_VERSION}-windows-x86_64.zip -DestinationPath .; Move-Item .\elastic-agent-${AGENT_VERSION}-windows-x86_64 .\\elastic-distro-${AGENT_VERSION}-windows-x86_64; Set-Location elastic-distro-${AGENT_VERSION}-windows-x86_64
+
+remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((Get-Content ./otel.yml) -replace '<<ES_ENDPOINT>>', '${setup?.elasticsearchUrl}') -replace '<<ES_API_KEY>>', '${apiKeyData?.apiKeyEncoded}' | Set-Content ./otel.yml`,
+      check: '.\\otelcol.exe --config .\\otel.yml',
+      type: 'copy',
+    },
   ];
 
   const [selectedTab, setSelectedTab] = React.useState(installTabContents[0].id);
@@ -457,7 +451,7 @@ subjects:
           <EuiSteps
             steps={[
               {
-                title: 'Install and run the collector',
+                title: 'Download and run the collector',
                 children: (
                   <EuiFlexGroup direction="column">
                     <EuiText>
@@ -492,11 +486,13 @@ subjects:
                         {selectedContent.content}
                       </EuiCodeBlock>
                     </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText>
-                        <p>{selectedContent.prompt}</p>
-                      </EuiText>
-                    </EuiFlexItem>
+                    {selectedContent.prompt && (
+                      <EuiFlexItem>
+                        <EuiText>
+                          <p>{selectedContent.prompt}</p>
+                        </EuiText>
+                      </EuiFlexItem>
+                    )}
                     <EuiFlexItem align="left">
                       <EuiFlexGroup>
                         {selectedContent.type === 'download' ? (
