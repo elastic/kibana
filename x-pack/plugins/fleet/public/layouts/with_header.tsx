@@ -18,6 +18,7 @@ export interface WithHeaderLayoutProps extends HeaderProps {
   restrictHeaderWidth?: number;
   'data-test-subj'?: string;
   children?: React.ReactNode;
+  isReadOnly?: boolean;
 }
 
 export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
@@ -25,6 +26,7 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
   restrictHeaderWidth,
   children,
   'data-test-subj': dataTestSubj,
+  isReadOnly,
   ...rest
 }) => {
   const isBiggerScreen = useIsWithinMinBreakpoint('xxl');

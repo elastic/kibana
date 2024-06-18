@@ -64,13 +64,7 @@ export const fetchConnectorExecuteAction = async ({
   traceOptions,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
   // TODO add streaming support for gemini with langchain on
-  const isStream =
-    assistantStreamingEnabled &&
-    (apiConfig.actionTypeId === '.gen-ai' ||
-      apiConfig.actionTypeId === '.bedrock' ||
-      // TODO add streaming support for gemini with langchain on
-      // tracked here: https://github.com/elastic/security-team/issues/7363
-      (apiConfig.actionTypeId === '.gemini' && !isEnabledRAGAlerts && !isEnabledKnowledgeBase));
+  const isStream = assistantStreamingEnabled;
 
   const optionalRequestParams = getOptionalRequestParams({
     isEnabledRAGAlerts,
