@@ -70,6 +70,7 @@
     "@kbn/es-errors",
     "@kbn/search-connectors-plugin",
     "@kbn/search-playground",
+    "@kbn/search-inference-endpoints",
     "@kbn/utility-types",
     "@kbn/index-management",
     "@kbn/deeplinks-search",
