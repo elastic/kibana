@@ -15,8 +15,8 @@ servers:
 paths:
   /api/note:
     patch:
-      operationId: persistNoteroute
-      description: Persists a note to a timeline.
+      operationId: persistNoteRoute
+      summary: Persists a note to a timeline.
       tags:
         - access:securitySolution
       requestBody:

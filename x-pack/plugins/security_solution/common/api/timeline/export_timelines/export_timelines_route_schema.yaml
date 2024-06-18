@@ -16,7 +16,7 @@ paths:
   /api/timeline/_export:
     post:
       operationId: exportTimelines
-      description: Exports timelines as an NDJSON file
+      summary: Exports timelines as an NDJSON file
       tags:
         - access:securitySolution
       parameters:

@@ -13,7 +13,7 @@ paths:
   /api/timeline/_prepackaged:
     post:
       operationId: installPrepackedTimelines
-      description: Installs prepackaged timelines.
+      summary: Installs prepackaged timelines.
       tags:
         - access:securitySolution
       requestBody:

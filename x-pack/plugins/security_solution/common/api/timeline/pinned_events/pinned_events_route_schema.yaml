@@ -13,7 +13,7 @@ paths:
   /api/pinned_event:
     patch:
       operationId: persistPinnedEventRoute
-      description: Persists a pinned event to a timeline.
+      summary: Persists a pinned event to a timeline.
       tags:
         - access:securitySolution
       requestBody:

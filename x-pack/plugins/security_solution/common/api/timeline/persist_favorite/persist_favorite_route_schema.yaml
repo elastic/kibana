@@ -13,7 +13,7 @@ paths:
   /api/timeline/_favorite:
     patch:
       operationId: persistFavoriteRoute
-      description: Persists a given users favorite status of a timeline.
+      summary: Persists a given users favorite status of a timeline.
       tags:
         - access:securitySolution
       requestBody:

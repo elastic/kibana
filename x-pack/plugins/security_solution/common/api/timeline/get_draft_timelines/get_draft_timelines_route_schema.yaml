@@ -16,7 +16,7 @@ paths:
   /api/timeline/_draft:
     get:
       operationId: getDraftTimelines
-      description: Retrieves the draft timeline for the current user. If the user does not have a draft timeline, an empty timeline is returned.
+      summary: Retrieves the draft timeline for the current user. If the user does not have a draft timeline, an empty timeline is returned.
       tags:
         - access:securitySolution
       parameters:

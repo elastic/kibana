@@ -16,7 +16,7 @@ paths:
   /api/timeline/_import:
     post:
       operationId: importTimelines
-      description: Imports timelines.
+      summary: Imports timelines.
       tags:
         - access:securitySolution
       requestBody:

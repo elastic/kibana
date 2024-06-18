@@ -16,7 +16,7 @@ paths:
   /api/timelines:
     get:
       operationId: getTimelines
-      description: This API is used to retrieve a list of existing saved timelines or timeline templates.
+      summary: This API is used to retrieve a list of existing saved timelines or timeline templates.
       tags:
         - access:securitySolution
       parameters:

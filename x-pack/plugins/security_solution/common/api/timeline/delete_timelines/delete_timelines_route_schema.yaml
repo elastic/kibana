@@ -16,7 +16,7 @@ paths:
   /api/timeline:
     delete:
       operationId: deleteTimelines
-      description: Deletes one or more timelines or timeline templates.
+      summary: Deletes one or more timelines or timeline templates.
       tags:
         - access:securitySolution
       requestBody:

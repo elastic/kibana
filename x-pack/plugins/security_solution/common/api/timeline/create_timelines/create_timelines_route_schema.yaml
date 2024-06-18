@@ -16,7 +16,7 @@ paths:
   /api/timeline:
     post:
       operationId: createTimelines
-      description: Creates a new timeline.
+      summary: Creates a new timeline.
       tags:
         - access:securitySolution
       requestBody:
