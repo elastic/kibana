@@ -41,12 +41,13 @@ export const determineDiffOutcome = <TValue>(
   if (baseVersion === MissingVersion) {
     /**
      * We couldn't find the base version of the rule in the package so further
-     * version comparison is not possible. We assume that the rule is not
-     * customized and the value can be updated if there's an update.
+     * version comparison is not possible. We assume that the rule is not customized
+     * if both current and target versions are the same and customized if they
+     * are different.
      */
     return currentEqlTarget
       ? ThreeWayDiffOutcome.StockValueNoUpdate
-      : ThreeWayDiffOutcome.StockValueCanUpdate;
+      : ThreeWayDiffOutcome.CustomizedValueCanUpdate;
   }
 
   if (baseEqlCurrent) {

@@ -11,6 +11,7 @@ import type {
   ThreeWayDiff,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
+  MissingVersion,
   determineDiffOutcome,
   determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
@@ -34,7 +35,8 @@ export const simpleDiffAlgorithm = <TValue>(
   const diffOutcome = determineDiffOutcome(baseVersion, currentVersion, targetVersion);
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
-  const { mergeOutcome, mergedVersion } = mergeVersions({
+  const { mergeOutcome, mergedVersion, hasConflict } = mergeVersions({
+    baseVersion,
     currentVersion,
     targetVersion,
     diffOutcome,
@@ -49,22 +51,25 @@ export const simpleDiffAlgorithm = <TValue>(
     diff_outcome: diffOutcome,
     merge_outcome: mergeOutcome,
     has_update: valueCanUpdate,
-    has_conflict: mergeOutcome === ThreeWayMergeOutcome.Conflict,
+    has_conflict: hasConflict,
   };
 };
 
 interface MergeResult<TValue> {
   mergeOutcome: ThreeWayMergeOutcome;
   mergedVersion: TValue;
+  hasConflict: boolean;
 }
 
 interface MergeArgs<TValue> {
+  baseVersion: TValue | MissingVersion;
   currentVersion: TValue;
   targetVersion: TValue;
   diffOutcome: ThreeWayDiffOutcome;
 }
 
 const mergeVersions = <TValue>({
+  baseVersion,
   currentVersion,
   targetVersion,
   diffOutcome,
@@ -76,18 +81,29 @@ const mergeVersions = <TValue>({
       return {
         mergeOutcome: ThreeWayMergeOutcome.Current,
         mergedVersion: currentVersion,
+        hasConflict: false,
       };
     }
     case ThreeWayDiffOutcome.StockValueCanUpdate: {
       return {
         mergeOutcome: ThreeWayMergeOutcome.Target,
         mergedVersion: targetVersion,
+        hasConflict: false,
       };
     }
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
+      // Case for -AB scenario
+      if (baseVersion === MissingVersion) {
+        return {
+          mergeOutcome: ThreeWayMergeOutcome.Merged,
+          mergedVersion: targetVersion,
+          hasConflict: false,
+        };
+      }
       return {
         mergeOutcome: ThreeWayMergeOutcome.Conflict,
         mergedVersion: currentVersion,
+        hasConflict: true,
       };
     }
     default:
