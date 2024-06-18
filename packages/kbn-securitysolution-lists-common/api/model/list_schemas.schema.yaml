@@ -95,6 +95,7 @@ components:
         - id
         - type
         - list_id
+        - value
         - tie_breaker_id
         - created_at
         - created_by

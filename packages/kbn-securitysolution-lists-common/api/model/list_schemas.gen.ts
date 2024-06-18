@@ -53,7 +53,7 @@ export const ListItem = z.object({
   id: ListItemId,
   type: ListType,
   list_id: ListId,
-  value: ListItemValue.optional(),
+  value: ListItemValue,
   serializer: z.string().optional(),
   deserializer: z.string().optional(),
   meta: ListItemMetadata.optional(),
