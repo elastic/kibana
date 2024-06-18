@@ -7,23 +7,37 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError, Method } from 'axios';
+import { PassThrough } from 'stream';
+import { IncomingMessage } from 'http';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { getGoogleOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token';
 import { Logger } from '@kbn/core/server';
 import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { RunActionParamsSchema, RunApiResponseSchema } from '../../../common/gemini/schema';
+import {
+  RunActionParamsSchema,
+  RunApiResponseSchema,
+  InvokeAIActionParamsSchema,
+  StreamingResponseSchema,
+} from '../../../common/gemini/schema';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-
 import {
   Config,
   Secrets,
   RunActionParams,
   RunActionResponse,
   RunApiResponse,
+  DashboardActionParams,
+  DashboardActionResponse,
+  StreamingResponse,
+  InvokeAIActionParams,
+  InvokeAIActionResponse,
 } from '../../../common/gemini/types';
-import { SUB_ACTION, DEFAULT_TIMEOUT_MS } from '../../../common/gemini/constants';
-import { DashboardActionParams, DashboardActionResponse } from '../../../common/gemini/types';
+import {
+  SUB_ACTION,
+  DEFAULT_TIMEOUT_MS,
+  DEFAULT_TOKEN_LIMIT,
+} from '../../../common/gemini/constants';
 import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
 
 export interface GetAxiosInstanceOpts {
@@ -33,6 +47,25 @@ export interface GetAxiosInstanceOpts {
   snServiceUrl: string;
   connectorTokenClient: ConnectorTokenClientContract;
   configurationUtilities: ActionsConfigurationUtilities;
+}
+
+/** Interfaces to define Gemini model response type */
+
+interface MessagePart {
+  text: string;
+}
+
+interface MessageContent {
+  role: string;
+  parts: MessagePart[];
+}
+
+interface Payload {
+  contents: MessageContent[];
+  generation_config: {
+    temperature: number;
+    maxOutputTokens: number;
+  };
 }
 
 export class GeminiConnector extends SubActionConnector<Config, Secrets> {
@@ -73,6 +106,18 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.TEST,
       method: 'runApi',
       schema: RunActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_AI,
+      method: 'invokeAI',
+      schema: InvokeAIActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_STREAM,
+      method: 'invokeStream',
+      schema: InvokeAIActionParamsSchema,
     });
   }
 
@@ -185,4 +230,111 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
     return { completion: completionText, usageMetadata };
   }
+
+  private async streamAPI({
+    body,
+    model: reqModel,
+    signal,
+    timeout,
+  }: RunActionParams): Promise<StreamingResponse> {
+    const currentModel = reqModel ?? this.model;
+    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
+    const token = await this.getAccessToken();
+
+    const response = await this.request({
+      url: `${this.url}${path}`,
+      method: 'post',
+      responseSchema: StreamingResponseSchema,
+      data: body,
+      responseType: 'stream',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      signal,
+      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+    });
+
+    return response.data.pipe(new PassThrough());
+  }
+
+  public async invokeAI({
+    messages,
+    model,
+    temperature = 0,
+    signal,
+    timeout,
+  }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
+    const res = await this.runApi({
+      body: JSON.stringify(formatGeminiPayload(messages, temperature)),
+      model,
+      signal,
+      timeout,
+    });
+
+    return { message: res.completion, usageMetadata: res.usageMetadata };
+  }
+
+  /**
+   *  takes in an array of messages and a model as inputs. It calls the streamApi method to make a
+   *  request to the Gemini API with the formatted messages and model. It then returns a Transform stream
+   *  that pipes the response from the API through the transformToString function,
+   *  which parses the proprietary response into a string of the response text alone
+   * @param messages An array of messages to be sent to the API
+   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   */
+  public async invokeStream({
+    messages,
+    model,
+    stopSequences,
+    temperature = 0,
+    signal,
+    timeout,
+  }: InvokeAIActionParams): Promise<IncomingMessage> {
+    const res = (await this.streamAPI({
+      body: JSON.stringify(formatGeminiPayload(messages, temperature)),
+      model,
+      stopSequences,
+      signal,
+      timeout,
+    })) as unknown as IncomingMessage;
+    return res;
+  }
 }
+
+/** Format the json body to meet Gemini payload requirements */
+const formatGeminiPayload = (
+  data: Array<{ role: string; content: string }>,
+  temperature: number
+): Payload => {
+  const payload: Payload = {
+    contents: [],
+    generation_config: {
+      temperature,
+      maxOutputTokens: DEFAULT_TOKEN_LIMIT,
+    },
+  };
+  let previousRole: string | null = null;
+
+  for (const row of data) {
+    const correctRole = row.role === 'assistant' ? 'model' : 'user';
+    if (correctRole === 'user' && previousRole === 'user') {
+      /** Append to the previous 'user' content
+       * This is to ensure that multiturn requests alternate between user and model
+       */
+      payload.contents[payload.contents.length - 1].parts[0].text += ` ${row.content}`;
+    } else {
+      // Add a new entry
+      payload.contents.push({
+        role: correctRole,
+        parts: [
+          {
+            text: row.content,
+          },
+        ],
+      });
+    }
+    previousRole = correctRole;
+  }
+  return payload;
+};
