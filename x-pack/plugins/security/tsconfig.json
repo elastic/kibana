@@ -82,7 +82,8 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-user-profile-server",
     "@kbn/core-user-profile-browser",
-    "@kbn/security-api-key-management"
+    "@kbn/security-api-key-management",
+    "@kbn/security-form-components"
   ],
   "exclude": [
     "target/**/*",
