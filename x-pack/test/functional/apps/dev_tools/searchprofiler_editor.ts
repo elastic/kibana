@@ -22,8 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/186126
-  describe.skip('Search Profiler Editor', () => {
+  describe('Search Profiler Editor', () => {
     before(async () => {
       await security.testUser.setRoles(['global_devtools_read']);
       await PageObjects.common.navigateToApp('searchProfiler');
