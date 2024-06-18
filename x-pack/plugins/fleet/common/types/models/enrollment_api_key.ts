@@ -42,4 +42,5 @@ export interface FleetServerEnrollmentAPIKey {
   expire_at?: string;
   created_at?: string;
   updated_at?: string;
+  namespaces?: string[];
 }

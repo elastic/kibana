@@ -104,7 +104,7 @@ describe('Navigation Plugin', () => {
 
       spaces.getActiveSpace$ = jest
         .fn()
-        .mockReturnValue(of({ solution: 'search' } as Pick<Space, 'solution'>));
+        .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
 
       plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments, spaces });
       await new Promise((resolve) => setTimeout(resolve));
@@ -201,7 +201,7 @@ describe('Navigation Plugin', () => {
           featureOn: true,
         });
 
-        for (const solution of ['search', 'observability', 'security']) {
+        for (const solution of ['es', 'oblt', 'security']) {
           spaces.getActiveSpace$ = jest
             .fn()
             .mockReturnValue(of({ solution } as Pick<Space, 'solution'>));
