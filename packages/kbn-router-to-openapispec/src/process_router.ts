@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Router } from '@kbn/core-http-router-server-internal';
+import type { Router } from '@kbn/core-http-router-server-internal';
 import { getResponseValidation } from '@kbn/core-http-server';
 import { ALLOWED_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
