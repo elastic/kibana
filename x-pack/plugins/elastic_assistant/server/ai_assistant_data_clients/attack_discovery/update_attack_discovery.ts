@@ -44,6 +44,7 @@ export interface UpdateAttackDiscoverySchema {
   replacements?: EsReplacementSchema[];
   status: AttackDiscoveryStatus;
   updated_at?: string;
+  last_viewed_at?: string;
   failure_reason?: string;
 }
 
@@ -97,6 +98,7 @@ export const transformToUpdateScheme = (
     generationIntervals,
     id,
     replacements,
+    lastViewedAt,
     status,
   }: AttackDiscoveryUpdateProps
 ): UpdateAttackDiscoverySchema => {
@@ -150,6 +152,7 @@ export const transformToUpdateScheme = (
       : undefined,
     status,
     updated_at: updatedAt,
+    ...(lastViewedAt ? { last_viewed_at: lastViewedAt } : {}),
     ...averageIntervalMsObj,
   };
 };

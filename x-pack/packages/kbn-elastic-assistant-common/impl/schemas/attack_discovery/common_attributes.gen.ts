@@ -94,7 +94,11 @@ export const AttackDiscoveryResponse = z.object({
   /**
    * The last time attack discovery was updated.
    */
-  updatedAt: z.string().optional(),
+  updatedAt: z.string(),
+  /**
+   * The last time attack discovery was viewed in the browser.
+   */
+  lastViewedAt: z.string(),
   /**
    * The number of alerts in the context.
    */
@@ -171,6 +175,10 @@ export const AttackDiscoveryUpdateProps = z.object({
    * The reason for a status of failed.
    */
   failureReason: z.string().optional(),
+  /**
+   * The last time attack discovery was viewed in the browser.
+   */
+  lastViewedAt: z.string().optional(),
 });
 
 export type AttackDiscoveryCreateProps = z.infer<typeof AttackDiscoveryCreateProps>;

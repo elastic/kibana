@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 
+import { getAllAttackDiscoveriesRoute } from './attack_discovery/get_attack_discovery_stats';
 import { cancelAttackDiscoveryRoute } from './attack_discovery/cancel_attack_discovery';
 import { getAttackDiscoveryRoute } from './attack_discovery/get_attack_discovery';
 import { postAttackDiscoveryRoute } from './attack_discovery/post_attack_discovery';
@@ -75,4 +76,5 @@ export const registerRoutes = (
   getAttackDiscoveryRoute(router);
   postAttackDiscoveryRoute(router);
   cancelAttackDiscoveryRoute(router);
+  getAllAttackDiscoveriesRoute(router);
 };

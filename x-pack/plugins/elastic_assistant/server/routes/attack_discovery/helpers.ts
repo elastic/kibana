@@ -468,3 +468,85 @@ export const getAssistantTool = (getRegisteredTools: GetRegisteredTools, pluginN
   const assistantTools = getRegisteredTools(pluginName);
   return assistantTools.find((tool) => tool.id === 'attack-discovery');
 };
+
+export const findAttackDiscoveryByConnectorId = async ({
+  connectorId,
+  authenticatedUser,
+  dataClient,
+}: {
+  connectorId: string;
+  authenticatedUser: AuthenticatedUser;
+  dataClient: AttackDiscoveryDataClient;
+}): Promise<AttackDiscoveryResponse | null> => {
+  const attackDiscovery = await dataClient.findAttackDiscoveryByConnectorId({
+    connectorId,
+    authenticatedUser,
+  });
+
+  if (attackDiscovery == null) {
+    return null;
+  }
+
+  return dataClient.updateAttackDiscovery({
+    attackDiscoveryUpdateProps: {
+      status: attackDiscovery.status,
+      id: attackDiscovery.id,
+      lastViewedAt: new Date().toISOString(),
+      backingIndex: attackDiscovery.backingIndex,
+    },
+    authenticatedUser,
+  });
+};
+interface DiscoveryStat {
+  hasViewed: boolean;
+  status: AttackDiscoveryStatus;
+  count: number;
+}
+export const getAttackDiscoveryStats = async ({
+  authenticatedUser,
+  dataClient,
+}: {
+  authenticatedUser: AuthenticatedUser;
+  dataClient: AttackDiscoveryDataClient;
+}): Promise<{
+  newDiscoveriesCount: number;
+  newConnectorResultsCount: number;
+  [id: string]:
+    | DiscoveryStat
+    // when the key is the id, we always expect the DiscoveryStat object
+    // by creating a dynamic type, we allow for the property newDiscoveriesCount to be a number
+    | number;
+}> => {
+  const attackDiscoveries = await dataClient.findAllAttackDiscoveries({
+    authenticatedUser,
+  });
+
+  const discoveryStats = attackDiscoveries.reduce(
+    (acc, ad) => {
+      const updatedAt = moment(ad.updatedAt);
+      const lastViewedAt = moment(ad.lastViewedAt);
+      const timeSinceLastViewed = updatedAt.diff(lastViewedAt);
+      const hasViewed = timeSinceLastViewed <= 0;
+      const discoveryCount = ad.attackDiscoveries.length;
+      return {
+        ...acc,
+        [ad.id]: {
+          hasViewed,
+          status: ad.status,
+          count: discoveryCount,
+        },
+        newConnectorResultsCount:
+          !hasViewed && (ad.status === 'succeeded' || ad.status === 'failed')
+            ? acc.newConnectorResultsCount + 1
+            : acc.newConnectorResultsCount,
+        newDiscoveriesCount:
+          !hasViewed && ad.status === 'succeeded'
+            ? acc.newDiscoveriesCount + discoveryCount
+            : acc.newDiscoveriesCount,
+      };
+    },
+    { newDiscoveriesCount: 0, newConnectorResultsCount: 0 }
+  );
+
+  return discoveryStats;
+};

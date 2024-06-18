@@ -93,13 +93,11 @@ export const usePollApi = ({
         throw new Error('Invalid connector id');
       }
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-      const rawResponse = await http.fetch(
-        `/internal/elastic_assistant/attack_discovery/cancel/${connectorId}`,
-        {
-          method: 'PUT',
-          version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-        }
-      );
+      // temporary to test stats API, revert to cancel API
+      const rawResponse = await http.fetch(`/internal/elastic_assistant/attack_discovery`, {
+        method: 'GET',
+        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+      });
       const parsedResponse = AttackDiscoveryCancelResponse.safeParse(rawResponse);
       if (!parsedResponse.success) {
         throw new Error('Failed to parse the attack discovery cancel response');

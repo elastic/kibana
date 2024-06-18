@@ -81,6 +81,8 @@ components:
         - apiConfig
         - id
         - createdAt
+        - updatedAt
+        - lastViewedAt
         - users
         - namespace
         - attackDiscoveries
@@ -95,6 +97,9 @@ components:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         updatedAt:
           description: The last time attack discovery was updated.
+          type: string
+        lastViewedAt:
+          description: The last time attack discovery was viewed in the browser.
           type: string
         alertsContextCount:
             type: integer
@@ -169,6 +174,9 @@ components:
         failureReason:
           type: string
           description: The reason for a status of failed.
+        lastViewedAt:
+          description: The last time attack discovery was viewed in the browser.
+          type: string
 
     AttackDiscoveryCreateProps:
       type: object

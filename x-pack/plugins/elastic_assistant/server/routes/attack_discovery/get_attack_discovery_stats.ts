@@ -7,23 +7,22 @@
 
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
-import {
-  AttackDiscoveryGetResponse,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-  AttackDiscoveryGetRequestParams,
-} from '@kbn/elastic-assistant-common';
+import { ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { findAttackDiscoveryByConnectorId } from './helpers';
-import { ATTACK_DISCOVERY_BY_CONNECTOR_ID } from '../../../common/constants';
+import { z } from 'zod';
+import { getAttackDiscoveryStats } from './helpers';
+import { ATTACK_DISCOVERY } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 
-export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
+export const getAllAttackDiscoveriesRoute = (
+  router: IRouter<ElasticAssistantRequestHandlerContext>
+) => {
   router.versioned
     .get({
       access: 'internal',
-      path: ATTACK_DISCOVERY_BY_CONNECTOR_ID,
+      path: ATTACK_DISCOVERY,
       options: {
         tags: ['access:elasticAssistant'],
       },
@@ -32,17 +31,14 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
       {
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         validate: {
-          request: {
-            params: buildRouteValidationWithZod(AttackDiscoveryGetRequestParams),
-          },
           response: {
             200: {
-              body: { custom: buildRouteValidationWithZod(AttackDiscoveryGetResponse) },
+              body: { custom: buildRouteValidationWithZod(z.object({})) },
             },
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<AttackDiscoveryGetResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<{}>> => {
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
@@ -50,7 +46,6 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
           const authenticatedUser = assistantContext.getCurrentUser();
-          const connectorId = decodeURIComponent(request.params.connectorId);
           if (authenticatedUser == null) {
             return resp.error({
               body: `Authenticated user not found`,
@@ -63,21 +58,12 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
               statusCode: 500,
             });
           }
-          const attackDiscovery = await findAttackDiscoveryByConnectorId({
+          const attackDiscovery = await getAttackDiscoveryStats({
             dataClient,
-            connectorId,
             authenticatedUser,
           });
           return response.ok({
-            body:
-              attackDiscovery != null
-                ? {
-                    data: attackDiscovery,
-                    entryExists: true,
-                  }
-                : {
-                    entryExists: false,
-                  },
+            body: {},
           });
         } catch (err) {
           logger.error(err);
