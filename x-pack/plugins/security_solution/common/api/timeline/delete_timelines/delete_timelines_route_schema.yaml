@@ -33,8 +33,9 @@ paths:
                   type: array
                   items:
                     type: string
-                searchId:
+                searchIds:
                   type: array
+                  description: Saved search ids that should be deleted alongside the timelines 
                   items:
                     type: string
       responses:

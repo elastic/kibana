@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Elastic Security - Timeline - Pinned Event API (https://www.elastic.co/guide/en/security/current/_pin_an_event_to_an_existing_timeline.html)
+  title: Elastic Security - Timeline - Pinned Event API
   version: 8.14.0
 servers:
   - url: 'http://{kibana_host}:{port}'

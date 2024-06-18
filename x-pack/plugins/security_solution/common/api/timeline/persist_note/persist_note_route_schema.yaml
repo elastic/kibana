@@ -42,7 +42,7 @@ paths:
                   nullable: true
       responses:
         '200':
-          description: Indicates the favorite status was successfully updated.
+          description: Indicates the note was successfully created.
           content:
             application/json:
               schema:

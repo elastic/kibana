@@ -69,7 +69,7 @@ paths:
              - nullable: true
       responses:
         '200':
-          description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
+          description: Indicates that the (template) timelines were found and returned.
           content:
             application/json:
               schema:
