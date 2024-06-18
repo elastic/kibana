@@ -9,13 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
 import {
   asDecimalOrInteger,
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../../common/utils/formatters';
+import { EntityServiceListItem, SignalTypes } from '../../../../../../server/routes/entities/types';
 import { Breakpoints } from '../../../../../hooks/use_breakpoints';
 import { unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';

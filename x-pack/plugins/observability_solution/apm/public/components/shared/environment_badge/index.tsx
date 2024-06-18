@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ItemsBadge } from '../item_badge';
 import { isEmpty } from 'lodash';
+import { ItemsBadge } from '../item_badge';
 import { NotAvailableEnvironment } from '../not_available_environment';
 
 interface Props {

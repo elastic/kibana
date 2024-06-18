@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiCode, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from 'react-intl';
-import { PopoverBadge } from './popover_badge';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { PopoverBadge } from './popover_badge';
 
 export const NotAvailableEnvironment = () => {
   return (
@@ -28,6 +28,7 @@ export const NotAvailableEnvironment = () => {
       }
       footer={
         <EuiLink
+          data-test-subj="apmServicesNotAvailableEnvironmentLink"
           href="https://demo.elastic.co/app/observabilityOnboarding/customLogs/?category=logs"
           external
         >

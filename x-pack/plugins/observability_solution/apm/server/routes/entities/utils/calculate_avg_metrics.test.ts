@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SignalTypes } from '../types';
 import { calculateAvgMetrics, mergeMetrics } from './calculate_avg_metrics';
 
 describe('calculateAverageMetrics', () => {
@@ -5,7 +13,7 @@ describe('calculateAverageMetrics', () => {
     const entities = [
       {
         agentName: 'nodejs',
-        signalTypes: ['foo', 'bar'],
+        signalTypes: [SignalTypes.METRICS, SignalTypes.LOGS],
         environments: [],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: [
@@ -28,7 +36,7 @@ describe('calculateAverageMetrics', () => {
       },
       {
         agentName: 'java',
-        signalTypes: ['baz'],
+        signalTypes: [SignalTypes.METRICS],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: [
@@ -56,7 +64,7 @@ describe('calculateAverageMetrics', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        signalTypes: ['foo', 'bar'],
+        signalTypes: [SignalTypes.METRICS, SignalTypes.LOGS],
         environments: [],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: {
@@ -70,7 +78,7 @@ describe('calculateAverageMetrics', () => {
       },
       {
         agentName: 'java',
-        signalTypes: ['baz'],
+        signalTypes: [SignalTypes.LOGS],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: {
@@ -88,7 +96,7 @@ describe('calculateAverageMetrics', () => {
     const entities = [
       {
         agentName: 'nodejs',
-        signalTypes: ['foo', 'bar'],
+        signalTypes: [SignalTypes.METRICS, SignalTypes.LOGS],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: [
@@ -116,7 +124,7 @@ describe('calculateAverageMetrics', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        signalTypes: ['foo', 'bar'],
+        signalTypes: [SignalTypes.METRICS, SignalTypes.LOGS],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: {

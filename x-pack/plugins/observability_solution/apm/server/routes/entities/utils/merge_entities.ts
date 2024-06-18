@@ -6,7 +6,7 @@
  */
 
 import { compact, uniq } from 'lodash';
-import { MergedServiceEntities, ServiceEntities } from '../get_entities';
+import { MergedServiceEntities, ServiceEntities } from '../types';
 
 export function mergeEntities({
   entities,

@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { PopoverBadge } from './popover_badge';
 import { i18n } from '@kbn/i18n';
+import { PopoverBadge } from './popover_badge';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 
 export const NotAvailableApmMetrics = () => {

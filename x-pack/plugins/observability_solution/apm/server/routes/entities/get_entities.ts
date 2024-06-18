@@ -9,53 +9,7 @@ import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ENTITY_ENVIRONMENT, FIRST_SEEN, LAST_SEEN } from '../../../common/es_fields/entities';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
-
-export interface ServiceEntities {
-  serviceName: string;
-  agentName?: string;
-  signalTypes: string[];
-  entity: Entity;
-}
-
-export interface MergedServiceEntities {
-  serviceName: string;
-  agentName?: string;
-  signalTypes: string[];
-  environments: string[];
-  metrics: EntityMetrics[];
-}
-
-export interface EntityMetrics {
-  latency?: number | null;
-  failedTransactionRate?: number | null;
-  throughput?: number | null;
-  logErrorRate?: number | null;
-  logRatePerMinute?: number | null;
-}
-interface Entity {
-  id: string;
-  latestTimestamp: string;
-  identityFields: {
-    service: {
-      name: string;
-      environment?: string | null;
-    };
-  };
-  metrics: EntityMetrics;
-}
-
-interface EntitiesRaw {
-  agent: {
-    name: string[];
-  };
-  data_stream: {
-    type: string[];
-  };
-  entity: Entity;
-}
-export interface SourceDoc {
-  [key: string]: string | string[] | SourceDoc;
-}
+import { EntitiesRaw, ServiceEntities } from './types';
 
 export function entitiesRangeQuery(start: number, end: number): QueryDslQueryContainer[] {
   return [
