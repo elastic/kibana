@@ -41,3 +41,16 @@ export interface AlertStatusFilter {
   query: string;
   label: string;
 }
+
+export interface Group {
+  field: string;
+  value: string;
+}
+
+export interface TimeRange {
+  from?: string;
+  to?: string;
+}
+
+// Alert fields['kibana.alert.group] type
+export type GroupBy = Group[];

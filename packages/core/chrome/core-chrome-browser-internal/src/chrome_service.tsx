@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
-import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
@@ -314,41 +313,12 @@ export class ChromeService {
       projectNavigation.setProjectName(projectName);
     };
 
-    const isIE = () => {
-      const ua = window.navigator.userAgent;
-      const msie = ua.indexOf('MSIE '); // IE 10 or older
-      const trident = ua.indexOf('Trident/'); // IE 11
-
-      return msie > 0 || trident > 0;
-    };
-
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning({
         title: mountReactNode(
           <FormattedMessage
             id="core.chrome.legacyBrowserWarning"
             defaultMessage="Your browser does not meet the security requirements for Kibana."
-          />
-        ),
-      });
-    }
-
-    if (isIE()) {
-      notifications.toasts.addWarning({
-        title: mountReactNode(
-          <FormattedMessage
-            id="core.chrome.browserDeprecationWarning"
-            defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
-            values={{
-              link: (
-                <EuiLink target="_blank" href="https://www.elastic.co/support/matrix" external>
-                  <FormattedMessage
-                    id="core.chrome.browserDeprecationLink"
-                    defaultMessage="the support matrix on our website"
-                  />
-                </EuiLink>
-              ),
-            }}
           />
         ),
       });
