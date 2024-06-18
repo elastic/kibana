@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Data views
   description: OpenAPI schema for data view endpoints
@@ -9,7 +9,10 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: /
+  - url: https://{kibana_url}
+    variables:
+      kibana_url:
+        default: localhost:5601
 security:
   - basicAuth: []
   - apiKeyAuth: []
@@ -19,7 +22,7 @@ tags:
 paths:
   /s/{spaceId}/api/data_views:
     get:
-      summary: Retrieves a list of all data views.
+      summary: Get all data views
       operationId: getAllDataViews
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -63,7 +66,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /s/{spaceId}/api/data_views/data_view:
     post:
-      summary: Creates a data view.
+      summary: Create a data view
       operationId: createDataView
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -96,7 +99,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /s/{spaceId}/api/data_views/data_view/{viewId}:
     get:
-      summary: Retrieves a single data view by identifier.
+      summary: Get a data view
       operationId: getDataView
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -122,7 +125,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     delete:
-      summary: Deletes a data view.
+      summary: Delete a data view
       operationId: deleteDataView
       description: |
         WARNING: When you delete a data view, it cannot be recovered. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -142,7 +145,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     post:
-      summary: Updates a data view.
+      summary: Update a data view
       operationId: updateDataView
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -176,7 +179,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /s/{spaceId}/api/data_views/default:
     get:
-      summary: Retrieves the default data view identifier.
+      summary: Get the default data view identifier
       operationId: getDefaultDataView
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -204,7 +207,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
     post:
-      summary: Sets the default data view identifier.
+      summary: Sets the default data view identifier
       operationId: setDefaultDatailView
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -223,9 +226,8 @@ paths:
                 - data_view_id
               properties:
                 data_view_id:
-                  type:
-                    - string
-                    - 'null'
+                  type: string
+                  nullable: true
                   description: |
                     The data view identifier. NOTE: The API does not validate whether it is a valid identifier. Use `null` to unset the default data view.
                 force:
@@ -253,10 +255,10 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /s/{spaceId}/api/data_views/data_view/{viewId}/fields:
     post:
-      summary: Update fields presentation metadata such as count, customLabel and format.
+      summary: Update data view fields metadata
       operationId: updateFieldsMetadata
       description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.
+        Update fields presentation metadata such as count, customLabel and format. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.
       tags:
         - data views
       parameters:
@@ -296,7 +298,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field:
     post:
-      summary: Creates a runtime field.
+      summary: Create a runtime field
       operationId: createRuntimeField
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -327,8 +329,15 @@ paths:
             examples:
               createRuntimeFieldRequest:
                 $ref: '#/components/examples/create_runtime_field_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
     put:
-      summary: Create or update an existing runtime field.
+      summary: Create or update a runtime field
       operationId: createUpdateRuntimeField
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -379,9 +388,6 @@ paths:
                     type: array
                     items:
                       type: object
-              examples:
-                createRuntimeFieldResponse:
-                  $ref: '#/components/examples/create_runtime_field_response'
         '400':
           description: Bad request
           content:
@@ -390,7 +396,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
     get:
-      summary: Retrieves a runtime field.
+      summary: Get a runtime field
       operationId: getRuntimeField
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -424,7 +430,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     delete:
-      summary: Delete a runtime field from a data view.
+      summary: Delete a runtime field from a data view
       operationId: deleteRuntimeField
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -444,7 +450,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     post:
-      summary: Update an existing runtime field.
+      summary: Update a runtime field
       operationId: updateRuntimeField
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -484,6 +490,461 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+  /api/data_views:
+    get:
+      summary: Get all data views in the default space
+      operationId: getAllDataViewsDefault
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data_view:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        namespaces:
+                          type: array
+                          items:
+                            type: string
+                        title:
+                          type: string
+                        typeMeta:
+                          type: object
+              examples:
+                getAllDataViewsResponse:
+                  $ref: '#/components/examples/get_data_views_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/data_view:
+    post:
+      summary: Create a data view in the default space
+      operationId: createDataViewDefault
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_data_view_request_object'
+            examples:
+              createDataViewRequest:
+                $ref: '#/components/examples/create_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/data_view_response_object'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/data_view/{viewId}:
+    get:
+      summary: Get a data view in the default space
+      operationId: getDataViewDefault
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/view_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/data_view_response_object'
+              examples:
+                getDataViewResponse:
+                  $ref: '#/components/examples/get_data_view_response'
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+    delete:
+      summary: Delete a data view from the default space
+      operationId: deleteDataViewDefault
+      description: |
+        WARNING: When you delete a data view, it cannot be recovered. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/view_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+    post:
+      summary: Update a data view in the default space
+      operationId: updateDataViewDefault
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/view_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/update_data_view_request_object'
+            examples:
+              updateDataViewRequest:
+                $ref: '#/components/examples/update_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/data_view_response_object'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/data_view/{viewId}/fields:
+    post:
+      summary: Update data view fields metadata in the default space
+      operationId: updateFieldsMetadataDefault
+      description: |
+        Update fields presentation metadata such as count, customLabel and format. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/view_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fields
+              properties:
+                fields:
+                  description: The field object.
+                  type: object
+            examples:
+              updateFieldsMetadataRequest:
+                $ref: '#/components/examples/update_field_metadata_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/data_view/{viewId}/runtime_field:
+    post:
+      summary: Create a runtime field in the default space
+      operationId: createRuntimeFieldDefault
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/view_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - runtimeField
+              properties:
+                name:
+                  type: string
+                  description: |
+                    The name for a runtime field.
+                runtimeField:
+                  type: object
+                  description: |
+                    The runtime field definition object.
+            examples:
+              createRuntimeFieldRequest:
+                $ref: '#/components/examples/create_runtime_field_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+    put:
+      summary: Create or update a runtime field in the default space
+      operationId: createUpdateRuntimeFieldDefault
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - name: viewId
+          in: path
+          description: |
+            The ID of the data view fields you want to update.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - runtimeField
+              properties:
+                name:
+                  type: string
+                  description: |
+                    The name for a runtime field.
+                runtimeField:
+                  type: object
+                  description: |
+                    The runtime field definition object.
+            examples:
+              updateRuntimeFieldRequest:
+                $ref: '#/components/examples/create_runtime_field_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data_view:
+                    type: object
+                  fields:
+                    type: array
+                    items:
+                      type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
+    get:
+      summary: Get a runtime field in the default space
+      operationId: getRuntimeFieldDefault
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/field_name'
+        - $ref: '#/components/parameters/view_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data_view:
+                    type: object
+                  fields:
+                    type: array
+                    items:
+                      type: object
+              examples:
+                getRuntimeFieldResponse:
+                  $ref: '#/components/examples/get_runtime_field_response'
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+    delete:
+      summary: Delete a runtime field from a data view in the default space
+      operationId: deleteRuntimeFieldDefault
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/field_name'
+        - $ref: '#/components/parameters/view_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+    post:
+      summary: Update a runtime field in the default space
+      operationId: updateRuntimeFieldDefault
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/field_name'
+        - $ref: '#/components/parameters/view_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - runtimeField
+              properties:
+                runtimeField:
+                  type: object
+                  description: |
+                    The runtime field definition object.
+
+                    You can update following fields:
+
+                    - `type`
+                    - `script`
+            examples:
+              updateRuntimeFieldRequest:
+                $ref: '#/components/examples/update_runtime_field_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/default:
+    get:
+      summary: Get the default data view in the default space
+      operationId: getDefaultDataViewDefault
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data_view_id:
+                    type: string
+              examples:
+                getDefaultDataViewResponse:
+                  $ref: '#/components/examples/get_default_data_view_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+    post:
+      summary: Set the default data view in the default space
+      operationId: setDefaultDatailViewDefault
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data_view_id
+              properties:
+                data_view_id:
+                  type: string
+                  nullable: true
+                  description: |
+                    The data view identifier. NOTE: The API does not validate whether it is a valid identifier. Use `null` to unset the default data view.
+                force:
+                  type: boolean
+                  description: Update an existing default data view identifier.
+                  default: false
+            examples:
+              setDefaultDataViewRequest:
+                $ref: '#/components/examples/set_default_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
 components:
   securitySchemes:
     basicAuth:
@@ -493,7 +954,8 @@ components:
       type: apiKey
       in: header
       name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+      description: |
+        Serverless APIs support only key-based authentication. You must create an API key and use the encoded value in the request header. For example: 'Authorization: ApiKey base64AccessApiKey'.
   parameters:
     space_id:
       in: path
@@ -502,8 +964,7 @@ components:
       required: true
       schema:
         type: string
-        examples:
-          - default
+        example: default
     kbn_xsrf:
       schema:
         type: string
@@ -1518,13 +1979,6 @@ components:
           type: long
           script:
             source: emit(doc["foo"].value)
-    create_runtime_field_response:
-      summary: The API returns created runtime field object array and updated data view object.
-      value:
-        data_view:
-          ...: null
-        fields:
-          - ...
     get_runtime_field_response:
       summary: The get runtime field API returns a JSON object that contains information about the runtime field (`hour_of_day`) and the data view (`d3d7af60-4c81-11e8-b3d7-01146121b73d`).
       value:
