@@ -39,6 +39,8 @@ import type {
   ReportManualRuleRunCancelJobParams,
   ReportManualRuleRunExecuteParams,
   ReportManualRuleRunOpenModalParams,
+  ReportEventLogShowSourceEventDateRangeParams,
+  ReportEventLogFilterByRunTypeParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -188,4 +190,14 @@ export class TelemetryClient implements TelemetryClientStart {
   public reportManualRuleRunCancelJob = (params: ReportManualRuleRunCancelJobParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.ManualRuleRunCancelJob, params);
   };
+
+  public reportEventLogFilterByRunType = (params: ReportEventLogFilterByRunTypeParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.EventLogFilterByRunType, params);
+  };
+
+  public reportEventLogShowSourceEventDateRange(
+    params: ReportEventLogShowSourceEventDateRangeParams
+  ): void {
+    this.analytics.reportEvent(TelemetryEventTypes.EventLogShowSourceEventDateRange, params);
+  }
 }

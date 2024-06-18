@@ -66,6 +66,12 @@ import type {
   ReportManualRuleRunCancelJobParams,
   ReportManualRuleRunTelemetryEventParams,
 } from './events/manual_rule_run/types';
+import type {
+  EventLogTelemetryEvent,
+  ReportEventLogFilterByRunTypeParams,
+  ReportEventLogShowSourceEventDateRangeParams,
+  ReportEventLogTelemetryEventParams,
+} from './events/event_log/types';
 
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
@@ -85,6 +91,7 @@ export type {
 } from './events/entity_analytics/types';
 export * from './events/document_details/types';
 export * from './events/manual_rule_run/types';
+export * from './events/event_log/types';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -129,7 +136,8 @@ export type TelemetryEventParams =
   | OnboardingHubStepOpenParams
   | OnboardingHubStepFinishedParams
   | OnboardingHubStepLinkClickedParams
-  | ReportManualRuleRunTelemetryEventParams;
+  | ReportManualRuleRunTelemetryEventParams
+  | ReportEventLogTelemetryEventParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
@@ -180,6 +188,12 @@ export interface TelemetryClientStart {
   reportManualRuleRunOpenModal(params: ReportManualRuleRunOpenModalParams): void;
   reportManualRuleRunExecute(params: ReportManualRuleRunExecuteParams): void;
   reportManualRuleRunCancelJob(params: ReportManualRuleRunCancelJobParams): void;
+
+  // event log
+  reportEventLogFilterByRunType(params: ReportEventLogFilterByRunTypeParams): void;
+  reportEventLogShowSourceEventDateRange(
+    params: ReportEventLogShowSourceEventDateRangeParams
+  ): void;
 }
 
 export type TelemetryEvent =
@@ -206,4 +220,5 @@ export type TelemetryEvent =
       schema: RootSchema<ReportBreadcrumbClickedParams>;
     }
   | OnboardingHubTelemetryEvent
-  | ManualRuleRunTelemetryEvent;
+  | ManualRuleRunTelemetryEvent
+  | EventLogTelemetryEvent;

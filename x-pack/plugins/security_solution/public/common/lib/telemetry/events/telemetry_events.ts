@@ -44,6 +44,7 @@ import {
   manualRuleRunExecuteEvent,
   manualRuleRunOpenModalEvent,
 } from './manual_rule_run';
+import { eventLogFilterByRunTypeEvent, eventLogShowSourceEventDateRangeEvent } from './event_log';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -185,4 +186,6 @@ export const telemetryEvents = [
   manualRuleRunCancelJobEvent,
   manualRuleRunExecuteEvent,
   manualRuleRunOpenModalEvent,
+  eventLogFilterByRunTypeEvent,
+  eventLogShowSourceEventDateRangeEvent,
 ];

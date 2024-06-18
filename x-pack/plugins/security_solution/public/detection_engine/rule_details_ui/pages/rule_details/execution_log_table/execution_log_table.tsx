@@ -120,6 +120,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     },
     storage,
     timelines,
+    telemetry,
   } = useKibana().services;
   const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
 
@@ -453,6 +454,17 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     renderItem: renderExpandedItem,
   });
 
+  const handleShowSourceEventTimeRange = useCallback(
+    (e) => {
+      const isVisible = e.target.checked;
+      onShowSourceEventTimeRange(isVisible);
+      telemetry.reportEventLogShowSourceEventDateRange({
+        isVisible,
+      });
+    },
+    [onShowSourceEventTimeRange, telemetry]
+  );
+
   const executionLogColumns = useMemo(() => {
     const columns = [...EXECUTION_LOG_COLUMNS].filter((item) => {
       if ('field' in item) {
@@ -569,7 +581,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
                 label={i18n.RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE}
                 checked={showSourceEventTimeRange}
                 compressed={true}
-                onChange={(e) => onShowSourceEventTimeRange(e.target.checked)}
+                onChange={handleShowSourceEventTimeRange}
               />
             )}
             <UtilitySwitch
