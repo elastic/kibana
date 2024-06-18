@@ -806,12 +806,8 @@ export const fillDefineMachineLearningRule = (rule: MachineLearningRuleCreatePro
   const jobsAsArray = isArray(rule.machine_learning_job_id)
     ? rule.machine_learning_job_id
     : [rule.machine_learning_job_id];
-  const text = jobsAsArray
-    .map((machineLearningJob) => `${machineLearningJob}{downArrow}{enter}`)
-    .join('')
-    .concat('{esc}');
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
-  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(text);
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(optionsToComboboxText(jobsAsArray));
 
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
     force: true,
@@ -912,14 +908,22 @@ export const enablesAndPopulatesThresholdSuppression = (
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled').should('be.checked');
 };
 
+const optionsToComboboxText = (options: string[]) => {
+  const [first, ...rest] = options;
+  return [`${first}{downArrow}{enter}`, ...rest.map((o) => `${o}{enter}`)].join('').concat('{esc}');
+};
+
 export const fillAlertSuppressionFields = (fields: string[]) => {
-  fields.forEach((field) => {
-    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}`);
-  });
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(optionsToComboboxText(fields));
 };
 
 export const clearAlertSuppressionFields = () => {
-  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type('{selectall}{backspace}{enter}');
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
+  cy.get(ALERT_SUPPRESSION_FIELDS).within(() => {
+    cy.get(COMBO_BOX_CLEAR_BTN).click();
+  });
 };
 
 export const selectAlertSuppressionPerInterval = () => {
