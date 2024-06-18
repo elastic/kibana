@@ -254,7 +254,7 @@ export const getTimesliderControlFactory = (
 
       return {
         api,
-        Component: () => {
+        Component: (controlStyleProps) => {
           const [isAnchored, isPopoverOpen, timeRangeMeta, timeslice] =
             useBatchedPublishingSubjects(isAnchored$, isPopoverOpen$, timeRangeMeta$, timeslice$);
 
