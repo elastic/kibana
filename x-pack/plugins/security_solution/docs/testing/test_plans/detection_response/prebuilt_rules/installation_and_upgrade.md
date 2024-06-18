@@ -893,8 +893,8 @@ And <field_name> field is customized by the user (current version != base versio
 And <field_name> field is updated by Elastic in this upgrade (target version != base version)
 And customized <field_name> field is the same as the Elastic update in this upgrade (current version == target version)
 Then for <field_name> field the diff algorithm should output the current version as the merged one without a conflict
-And <field_name> field should not be returned from the `upgrade/_review` API endpoint
-And <field_name> field should not be shown in the upgrade preview UI
+And <field_name> field should be returned from the `upgrade/_review` API endpoint
+And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
 | field_name | base_version | current_version | target_version |

@@ -6,128 +6,95 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import type { IsolateHostPanelContext } from './context';
 import { useIsolateHostPanelContext } from './context';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { PanelHeader } from './header';
-import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
-import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
-import { isAlertFromCrowdstrikeEvent } from '../../../common/utils/crowdstrike_alert_check';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../common/mock/endpoint';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
+import { ISOLATE_HOST, UNISOLATE_HOST } from '../../../common/components/endpoint/host_isolation';
 import { TECHNICAL_PREVIEW } from '../../../common/translations';
 
-jest.mock('../../../common/hooks/use_experimental_features');
-jest.mock('../../../common/utils/sentinelone_alert_check');
-jest.mock('../../../common/utils/crowdstrike_alert_check');
 jest.mock('./context');
 
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-const mockIsAlertFromSentinelOneEvent = isAlertFromSentinelOneEvent as jest.Mock;
-const mockIsAlertFromCrowdstrike = isAlertFromCrowdstrikeEvent as jest.Mock;
+describe('Isolation Flyout PanelHeader', () => {
+  let render: () => ReturnType<AppContextTestRender['render']>;
 
-const renderPanelHeader = () =>
-  render(
-    <IntlProvider locale="en">
-      <PanelHeader />
-    </IntlProvider>
-  );
-
-describe('<PanelHeader />', () => {
-  beforeEach(() => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    mockIsAlertFromSentinelOneEvent.mockReturnValue(false);
-    mockIsAlertFromCrowdstrike.mockReturnValue(false);
-  });
-
-  it.each([
-    {
+  const setUseIsolateHostPanelContext = (data: Partial<IsolateHostPanelContext> = {}) => {
+    const panelContextMock: IsolateHostPanelContext = {
+      eventId: 'some-even-1',
+      indexName: 'some-index-name',
+      scopeId: 'some-scope-id',
+      dataFormattedForFieldBrowser: endpointAlertDataMock.generateEndpointAlertDetailsItemData(),
       isolateAction: 'isolateHost',
-      title: 'Isolate host',
-    },
-    {
-      isolateAction: 'unisolateHost',
-      title: 'Release host',
-    },
-  ])('should display release host message', ({ isolateAction, title }) => {
-    (useIsolateHostPanelContext as jest.Mock).mockReturnValue({ isolateAction });
+      ...data,
+    };
 
-    const { getByTestId } = renderPanelHeader();
+    (useIsolateHostPanelContext as jest.Mock).mockReturnValue(panelContextMock);
+  };
 
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent(title);
+  beforeEach(() => {
+    const appContextMock = createAppRootMockRenderer();
+
+    appContextMock.setExperimentalFlag({
+      responseActionsSentinelOneV1Enabled: true,
+      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+    });
+
+    render = () => appContextMock.render(<PanelHeader />);
+
+    setUseIsolateHostPanelContext({
+      isolateAction: 'isolateHost',
+      dataFormattedForFieldBrowser: endpointAlertDataMock.generateEndpointAlertDetailsItemData(),
+    });
   });
 
-  it.each([
-    {
-      action: 'isolateHost',
-      alertCheck: mockIsAlertFromSentinelOneEvent,
-      description: 'SentinelOne',
-    },
-    {
-      action: 'unisolateHost',
-      alertCheck: mockIsAlertFromSentinelOneEvent,
-      description: 'SentinelOne',
-    },
-    {
-      action: 'isolateHost',
-      alertCheck: mockIsAlertFromCrowdstrike,
-      description: 'Crowdstrike',
-    },
-    {
-      action: 'unisolateHost',
-      alertCheck: mockIsAlertFromCrowdstrike,
-      description: 'Crowdstrike',
-    },
-  ])(
-    'should display beta badge on $description alerts for %s host message',
-    ({ action, alertCheck }) => {
-      (useIsolateHostPanelContext as jest.Mock).mockReturnValue({
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const testConditions: Array<{
+    action: IsolateHostPanelContext['isolateAction'];
+    agentType: ResponseActionAgentType;
+    title: string;
+    // if `expectedBadgeText` is `undefined`, then it validates that the badge is not displayed
+    expectedBadgeText: string | undefined;
+  }> = [];
+
+  for (const agentType of RESPONSE_ACTION_AGENT_TYPE) {
+    (['isolateHost', 'unisolateHost'] as Array<IsolateHostPanelContext['isolateAction']>).forEach(
+      (action) => {
+        testConditions.push({
+          action,
+          agentType,
+          title: action === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST,
+          expectedBadgeText:
+            agentType === 'crowdstrike' || agentType === 'sentinel_one'
+              ? TECHNICAL_PREVIEW
+              : undefined,
+        });
+      }
+    );
+  }
+
+  it.each(testConditions)(
+    'should display correct flyout header title for $action on agentType $agentType',
+    ({ action, agentType, title, expectedBadgeText }) => {
+      setUseIsolateHostPanelContext({
         isolateAction: action,
+        dataFormattedForFieldBrowser:
+          endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentType),
       });
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-      alertCheck.mockReturnValue(true);
+      const { getByTestId, queryByTestId } = render();
 
-      const { getByTestId } = renderPanelHeader();
+      expect(getByTestId('flyoutHostIsolationHeaderTitle')).toHaveTextContent(title);
 
-      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent(TECHNICAL_PREVIEW);
-    }
-  );
-
-  it.each([
-    {
-      action: 'isolateHost',
-      alertCheck: mockIsAlertFromSentinelOneEvent,
-      description: 'SentinelOne',
-    },
-    {
-      action: 'unisolateHost',
-      alertCheck: mockIsAlertFromSentinelOneEvent,
-      description: 'SentinelOne',
-    },
-    {
-      action: 'isolateHost',
-      alertCheck: mockIsAlertFromCrowdstrike,
-      description: 'Crowdstrike',
-    },
-    {
-      action: 'unisolateHost',
-      alertCheck: mockIsAlertFromCrowdstrike,
-      description: 'Crowdstrike',
-    },
-  ])(
-    'should not display beta badge on $description alerts for %s host message',
-    ({ action, alertCheck }) => {
-      (useIsolateHostPanelContext as jest.Mock).mockReturnValue({
-        isolateAction: action,
-      });
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-      alertCheck.mockReturnValue(false);
-
-      const { getByTestId } = renderPanelHeader();
-
-      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).not.toHaveTextContent(TECHNICAL_PREVIEW);
+      if (expectedBadgeText) {
+        expect(getByTestId('flyoutHostIsolationHeaderBadge')).toHaveTextContent(expectedBadgeText);
+      } else {
+        expect(queryByTestId('flyoutHostIsolationHeaderBadge')).toBeNull();
+      }
     }
   );
 });

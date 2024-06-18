@@ -44,19 +44,25 @@ export const getCommonTableColumns = (): Array<
   {
     field: 'indexFieldType',
     name: i18n.INDEX_MAPPING_TYPE_ACTUAL,
-    render: (_, x) =>
-      x.type != null && x.indexFieldType !== x.type ? (
-        getIsInSameFamily({ ecsExpectedType: x.type, type: x.indexFieldType }) ? (
+    render: (_, x) => {
+      // if custom field or ecs based field with mapping match
+      if (!x.hasEcsMetadata || x.indexFieldType === x.type) {
+        return <CodeSuccess data-test-subj="codeSuccess">{x.indexFieldType}</CodeSuccess>;
+      }
+
+      // mapping mismatch due to same family
+      if (getIsInSameFamily({ ecsExpectedType: x.type, type: x.indexFieldType })) {
+        return (
           <div>
             <CodeSuccess data-test-subj="codeSuccess">{x.indexFieldType}</CodeSuccess>
             <SameFamily />
           </div>
-        ) : (
-          <CodeDanger data-test-subj="codeDanger">{x.indexFieldType}</CodeDanger>
-        )
-      ) : (
-        <CodeSuccess data-test-subj="codeSuccess">{x.indexFieldType}</CodeSuccess>
-      ),
+        );
+      }
+
+      // mapping mismatch
+      return <CodeDanger data-test-subj="codeDanger">{x.indexFieldType}</CodeDanger>;
+    },
     sortable: true,
     truncateText: false,
     width: '15%',

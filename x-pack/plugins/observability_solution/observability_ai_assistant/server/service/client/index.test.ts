@@ -27,6 +27,7 @@ import { createFunctionResponseMessage } from '../../../common/utils/create_func
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
+import { USER_INSTRUCTIONS_HEADER } from '../util/get_system_message_from_instructions';
 import { observableIntoStream } from '../util/observable_into_stream';
 import { CreateChatCompletionResponseChunk } from './adapters/process_openai_stream';
 
@@ -34,7 +35,7 @@ type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
 
 type LlmSimulator = ReturnType<typeof createLlmSimulator>;
 
-const EXPECTED_STORED_SYSTEM_MESSAGE = `system\n\nWhat follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n\nYou MUST respond in the users preferred language which is: English.`;
+const EXPECTED_STORED_SYSTEM_MESSAGE = `system\n\n${USER_INSTRUCTIONS_HEADER}\n\nYou MUST respond in the users preferred language which is: English.`;
 
 const nextTick = () => {
   return new Promise(process.nextTick);
@@ -368,8 +369,8 @@ describe('Observability AI Assistant client', () => {
               last_updated: expect.any(String),
               token_count: {
                 completion: 1,
-                prompt: 78,
-                total: 79,
+                prompt: 84,
+                total: 85,
               },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
@@ -425,8 +426,8 @@ describe('Observability AI Assistant client', () => {
               last_updated: expect.any(String),
               token_count: {
                 completion: 6,
-                prompt: 262,
-                total: 268,
+                prompt: 268,
+                total: 274,
               },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
@@ -443,8 +444,8 @@ describe('Observability AI Assistant client', () => {
                 title: 'An auto-generated title',
                 token_count: {
                   completion: 6,
-                  prompt: 262,
-                  total: 268,
+                  prompt: 268,
+                  total: 274,
                 },
               },
               labels: {},
@@ -574,8 +575,8 @@ describe('Observability AI Assistant client', () => {
           last_updated: expect.any(String),
           token_count: {
             completion: 2,
-            prompt: 156,
-            total: 158,
+            prompt: 162,
+            total: 164,
           },
         },
         type: StreamingChatResponseEventType.ConversationUpdate,
@@ -593,8 +594,8 @@ describe('Observability AI Assistant client', () => {
             title: 'My stored conversation',
             token_count: {
               completion: 2,
-              prompt: 156,
-              total: 158,
+              prompt: 162,
+              total: 164,
             },
           },
           labels: {},

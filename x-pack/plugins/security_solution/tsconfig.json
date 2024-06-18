@@ -15,7 +15,11 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     {
@@ -145,7 +149,6 @@
     "@kbn/grouping",
     "@kbn/securitysolution-data-table",
     "@kbn/core-analytics-server",
-    "@kbn/analytics-client",
     "@kbn/security-solution-side-nav",
     "@kbn/ml-anomaly-utils",
     "@kbn/discover-plugin",

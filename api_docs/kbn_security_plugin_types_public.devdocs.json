@@ -652,26 +652,6 @@
                 "path": "src/plugins/image_embeddable/public/components/image_editor/open_image_editor.tsx"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/public/applications/index.tsx"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/public/applications/shared/role_mapping/roles_empty_prompt.tsx"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/public/applications/shared/role_mapping/roles_empty_prompt.tsx"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/links.ts"
               },

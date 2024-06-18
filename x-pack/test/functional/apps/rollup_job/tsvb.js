@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import mockRolledUpData from './hybrid_index_helper';
+import { MOCK_ROLLUP_INDEX_NAME, createMockRollupIndex } from './test_helpers';
 
 export default function ({ getService, getPageObjects }) {
   const es = getService('es');
@@ -24,9 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const fromTime = 'Oct 15, 2019 @ 00:00:01.000';
   const toTime = 'Oct 15, 2019 @ 19:31:44.000';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/56816
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/168267
-  describe.skip('tsvb integration', function () {
+  describe('tsvb integration', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `tsvb-test-rollup-job-${Date.now()}`;
@@ -49,6 +48,10 @@ export default function ({ getService, getPageObjects }) {
         'metrics:allowStringIndices': true,
         'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}"}`,
       });
+
+      // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+      // We will simulate rollup usage by creating a mock-up rollup index
+      await createMockRollupIndex(es);
     });
 
     it('create rollup tsvb', async () => {
@@ -108,7 +111,11 @@ export default function ({ getService, getPageObjects }) {
         method: 'DELETE',
       });
 
-      await esDeleteAllIndices([rollupTargetIndexName, rollupSourceIndexName]);
+      await esDeleteAllIndices([
+        rollupTargetIndexName,
+        rollupSourceIndexName,
+        MOCK_ROLLUP_INDEX_NAME,
+      ]);
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup.json'
       );

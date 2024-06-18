@@ -14,8 +14,9 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
+import type { DocumentCountStats } from '@kbn/aiops-log-rate-analysis/types';
 
-import type { DocumentCountStats, DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import { getDocumentCountStatsRequest, processDocumentCountStats } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';

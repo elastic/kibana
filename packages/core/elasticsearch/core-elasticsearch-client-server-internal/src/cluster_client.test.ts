@@ -14,9 +14,17 @@ import {
 import type { Client } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClientConfig,
+  ElasticsearchClient,
+} from '@kbn/core-elasticsearch-server';
 import { ClusterClient } from './cluster_client';
-import { DEFAULT_HEADERS, getDefaultHeaders } from './headers';
+import {
+  DEFAULT_HEADERS,
+  ES_SECONDARY_AUTH_HEADER,
+  AUTHORIZATION_HEADER,
+  getDefaultHeaders,
+} from './headers';
 import { AgentManager } from './agent_manager';
 import { duration } from 'moment';
 
@@ -51,6 +59,7 @@ describe('ClusterClient', () => {
   let internalClient: jest.Mocked<Client>;
   let scopedClient: jest.Mocked<Client>;
   let agentFactoryProvider: AgentManager;
+  let client: ElasticsearchClient;
 
   const mockTransport = { mockTransport: true };
 
@@ -125,7 +134,36 @@ describe('ClusterClient', () => {
     });
   });
 
-  describe('#asScoped', () => {
+  describe('#asScoped().asCurrentUser', () => {
+    it('lazily instantiate the client when first called', () => {
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      expect(scopedClient.child).not.toHaveBeenCalled();
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+
+      expect(scopedClient.child).not.toHaveBeenCalled();
+
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith({
+        headers: expect.any(Object),
+        Transport: mockTransport,
+      });
+
+      expect(client).toBe(scopedClient.child.mock.results[0].value);
+    });
+
     it('returns a scoped cluster client bound to the request', () => {
       const clusterClient = new ClusterClient({
         config: createConfig(),
@@ -138,6 +176,9 @@ describe('ClusterClient', () => {
       const request = httpServerMock.createKibanaRequest();
 
       const scopedClusterClient = clusterClient.asScoped(request);
+
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
@@ -164,7 +205,9 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(createTransportMock).toHaveBeenCalledTimes(1);
       expect(createTransportMock).toHaveBeenCalledWith({
@@ -173,7 +216,7 @@ describe('ClusterClient', () => {
       });
     });
 
-    it('calls `createTransportcreateInternalErrorHandler` lazily', () => {
+    it('calls `createInternalErrorHandler` lazily', () => {
       const getExecutionContext = jest.fn();
       const getUnauthorizedErrorHandler = jest.fn();
       const clusterClient = new ClusterClient({
@@ -188,7 +231,8 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      client = scopedClusterClient.asCurrentUser;
 
       expect(createTransportMock).toHaveBeenCalledTimes(1);
       expect(createTransportMock).toHaveBeenCalledWith({
@@ -224,6 +268,10 @@ describe('ClusterClient', () => {
       const scopedClusterClient1 = clusterClient.asScoped(request);
       const scopedClusterClient2 = clusterClient.asScoped(request);
 
+      // trigger client instantiation via getter
+      client = scopedClusterClient1.asCurrentUser;
+      client = scopedClusterClient2.asCurrentUser;
+
       expect(scopedClient.child).toHaveBeenCalledTimes(2);
 
       expect(scopedClusterClient1).not.toBe(scopedClusterClient2);
@@ -251,7 +299,9 @@ describe('ClusterClient', () => {
         },
       });
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
@@ -280,7 +330,9 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest({});
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
@@ -318,7 +370,9 @@ describe('ClusterClient', () => {
         },
       });
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
@@ -353,7 +407,9 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest({});
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
@@ -384,7 +440,9 @@ describe('ClusterClient', () => {
         kibanaRequestState: { requestId: 'my-fake-id', requestUuid: 'ignore-this-id' },
       });
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
@@ -419,7 +477,9 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest({});
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
@@ -456,7 +516,9 @@ describe('ClusterClient', () => {
         headers: { foo: 'request' },
       });
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
@@ -491,7 +553,9 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
@@ -524,7 +588,9 @@ describe('ClusterClient', () => {
         headers: { [headerKey]: 'foo' },
       });
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
@@ -559,7 +625,9 @@ describe('ClusterClient', () => {
         kibanaRequestState: { requestId: 'from request', requestUuid: 'ignore-this-id' },
       });
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
@@ -593,7 +661,9 @@ describe('ClusterClient', () => {
         },
       };
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
@@ -626,13 +696,274 @@ describe('ClusterClient', () => {
         },
       };
 
-      clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: { ...defaultHeaders, foo: 'bar' },
         })
+      );
+    });
+  });
+
+  describe('#asScoped().asSecondaryAuthUser', () => {
+    it('lazily instantiate the client when first called', () => {
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      expect(internalClient.child).not.toHaveBeenCalled();
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+
+      expect(internalClient.child).not.toHaveBeenCalled();
+
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledTimes(1);
+      expect(internalClient.child).toHaveBeenCalledWith({
+        headers: expect.any(Object),
+      });
+
+      expect(client).toBe(internalClient.child.mock.results[0].value);
+    });
+
+    it('returns a scoped cluster client bound to the request', () => {
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(scopedClusterClient.asSecondaryAuthUser).toBe(
+        internalClient.child.mock.results[0].value
+      );
+    });
+
+    it('creates a scoped client using the proper `es-secondary-authorization` header', () => {
+      const config = createConfig({
+        requestHeadersWhitelist: ['foo'],
+      });
+      authHeaders.get.mockReturnValue({
+        [AUTHORIZATION_HEADER]: 'yes',
+      });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          foo: 'bar',
+          hello: 'dolly',
+        },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledTimes(1);
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: { ...defaultHeaders, [ES_SECONDARY_AUTH_HEADER]: 'yes' },
+        })
+      );
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          headers: { [AUTHORIZATION_HEADER]: 'yes' },
+        })
+      );
+    });
+
+    it('throws when used with a request without authorization header', () => {
+      const config = createConfig({
+        requestHeadersWhitelist: ['foo'],
+      });
+      authHeaders.get.mockReturnValue({});
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          foo: 'bar',
+          hello: 'dolly',
+        },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      expect(() => {
+        client = scopedClusterClient.asSecondaryAuthUser;
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"asSecondaryAuthUser called from a client scoped to a request without 'authorization' header."`
+      );
+    });
+
+    it('includes the `customHeaders` from the config without filtering them', () => {
+      const config = createConfig({
+        customHeaders: {
+          foo: 'bar',
+          hello: 'dolly',
+        },
+        requestHeadersWhitelist: ['authorization'],
+      });
+      authHeaders.get.mockReturnValue({
+        [AUTHORIZATION_HEADER]: 'foo',
+      });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = httpServerMock.createKibanaRequest({});
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledTimes(1);
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [ES_SECONDARY_AUTH_HEADER]: 'foo',
+            foo: 'bar',
+            hello: 'dolly',
+          },
+        })
+      );
+    });
+
+    it('does not add the x-opaque-id header based on the request id', () => {
+      const config = createConfig();
+      authHeaders.get.mockReturnValue({
+        [AUTHORIZATION_HEADER]: 'foo',
+      });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        kibanaRequestState: { requestId: 'my-fake-id', requestUuid: 'ignore-this-id' },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledTimes(1);
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.not.objectContaining({
+            'x-opaque-id': expect.any(String),
+          }),
+        })
+      );
+    });
+
+    it('uses the authorization header from the request when using a `FakeRequest`', () => {
+      const config = createConfig({
+        requestHeadersWhitelist: ['authorization', 'foo'],
+      });
+      authHeaders.get.mockReturnValue({
+        [AUTHORIZATION_HEADER]: 'will_not_be_used',
+      });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = {
+        headers: {
+          [AUTHORIZATION_HEADER]: 'yes',
+          hello: 'dolly',
+        },
+      };
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledTimes(1);
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({ [ES_SECONDARY_AUTH_HEADER]: 'yes' }),
+        })
+      );
+    });
+
+    it('throws when used with a `FakeRequest` without authorization header', () => {
+      const config = createConfig({
+        requestHeadersWhitelist: ['authorization', 'foo'],
+      });
+      authHeaders.get.mockReturnValue({
+        [AUTHORIZATION_HEADER]: 'will_not_be_used',
+      });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = {
+        headers: {
+          hello: 'dolly',
+        },
+      };
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+
+      expect(() => {
+        // trigger client instantiation via getter
+        client = scopedClusterClient.asSecondaryAuthUser;
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"asSecondaryAuthUser called from a client scoped to a request without 'authorization' header."`
       );
     });
   });

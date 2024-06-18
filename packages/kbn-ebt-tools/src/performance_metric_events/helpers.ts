@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsClient } from '@kbn/analytics-client';
+import type { AnalyticsClient } from '@kbn/ebt/client';
 import { type PerformanceMetricEvent, METRIC_EVENT_SCHEMA } from './schema';
 
 const PERFORMANCE_METRIC_EVENT_TYPE = 'performance_metric';

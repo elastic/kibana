@@ -28,6 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../../common/core'),
       require.resolve('../../common/reporting'),
       require.resolve('../../common/console'),
+      require.resolve('../../common/saved_objects_management'),
       require.resolve('../../common/telemetry'),
     ],
     junit: {

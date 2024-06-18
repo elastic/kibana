@@ -198,6 +198,14 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * ```
    */
   description?: string;
+
+  /**
+   * Setting this to `true` declares this route to be deprecated. Consumers SHOULD
+   * refrain from usage of this route.
+   *
+   * @remarks This will be surfaced in OAS documentation.
+   */
+  deprecated?: boolean;
 }
 
 /**

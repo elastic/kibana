@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { RuleFieldsDiff, ThreeWayDiff } from '../../../../../common/api/detection_engine';
+import { ThreeWayDiffOutcome } from '../../../../../common/api/detection_engine';
 import type { FieldsGroupDiff } from '../../model/rule_details/rule_field_diff';
 import {
   ABOUT_UPGRADE_FIELD_ORDER,
@@ -36,3 +38,21 @@ export const getSectionedFieldDiffs = (fields: FieldsGroupDiff[]) => {
     setupFields,
   };
 };
+
+/**
+ * Filters out any fields that have a `diff_outcome` of `CustomizedValueNoUpdate`
+ * or `CustomizedValueSameUpdate` as they are not supported for display in the
+ * current per-field rule diff flyout
+ */
+export const filterUnsupportedDiffOutcomes = (
+  fields: Partial<RuleFieldsDiff>
+): Partial<RuleFieldsDiff> =>
+  Object.fromEntries(
+    Object.entries(fields).filter(([key, value]) => {
+      const diff = value as ThreeWayDiff<unknown>;
+      return (
+        diff.diff_outcome !== ThreeWayDiffOutcome.CustomizedValueNoUpdate &&
+        diff.diff_outcome !== ThreeWayDiffOutcome.CustomizedValueSameUpdate
+      );
+    })
+  );

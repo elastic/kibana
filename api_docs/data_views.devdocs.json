@@ -12943,10 +12943,6 @@
             "references": [
               {
                 "plugin": "data",
-                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts"
               },
               {
@@ -12954,12 +12950,16 @@
                 "path": "src/plugins/data/common/search/tabify/response_writer.ts"
               },
               {
-                "plugin": "@kbn/search-errors",
-                "path": "packages/kbn-search-errors/src/painless_error.tsx"
+                "plugin": "data",
+                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
+              },
+              {
+                "plugin": "@kbn/search-errors",
+                "path": "packages/kbn-search-errors/src/painless_error.tsx"
               },
               {
                 "plugin": "savedObjectsManagement",
@@ -13226,10 +13226,6 @@
                 "path": "x-pack/plugins/observability_solution/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
@@ -13244,6 +13240,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/eql_query_bar/validators.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "transform",

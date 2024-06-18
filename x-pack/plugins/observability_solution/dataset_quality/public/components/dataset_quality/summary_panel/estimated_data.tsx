@@ -17,7 +17,8 @@ import {
 import { DataPlaceholder } from './data_placeholder';
 
 export function EstimatedData() {
-  const { estimatedData, isEstimatedDataLoading } = useSummaryPanelContext();
+  const { estimatedData, isEstimatedDataLoading, isUserAuthorizedForDataset } =
+    useSummaryPanelContext();
 
   return (
     <DataPlaceholder
@@ -25,6 +26,7 @@ export function EstimatedData() {
       tooltip={summaryPanelEstimatedDataTooltipText}
       value={formatNumber(estimatedData, BYTE_NUMBER_FORMAT)}
       isLoading={isEstimatedDataLoading}
+      isUserAuthorizedForDataset={isUserAuthorizedForDataset}
     />
   );
 }

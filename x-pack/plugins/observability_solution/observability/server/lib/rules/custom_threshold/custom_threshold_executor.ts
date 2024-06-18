@@ -17,7 +17,6 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { Group } from '../../../../common/custom_threshold_rule/types';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
@@ -46,6 +45,7 @@ import {
 import { formatAlertResult, getLabel } from './lib/format_alert_result';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
+import { Group } from '../../../../common/typings';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;

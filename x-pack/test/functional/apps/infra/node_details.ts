@@ -680,6 +680,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
+          it('should show / hide alerts section with no alerts and show / hide closed section content', async () => {
+            await pageObjects.assetDetails.alertsSectionCollapsibleExist();
+            // Collapsed by default
+            await pageObjects.assetDetails.alertsSectionClosedContentNoAlertsExist();
+            // Expand
+            await pageObjects.assetDetails.alertsSectionCollapsibleClick();
+            await pageObjects.assetDetails.alertsSectionClosedContentNoAlertsMissing();
+            // Check if buttons exist
+            await pageObjects.assetDetails.overviewLinkToAlertsExist();
+            await pageObjects.assetDetails.overviewOpenAlertsFlyoutExist();
+          });
+
           describe('Metadata Tab', () => {
             before(async () => {
               await pageObjects.assetDetails.clickMetadataTab();
@@ -710,6 +722,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 expect(await searchInput.getAttribute('value')).to.be('test');
               });
               await searchInput.clearValue();
+            });
+          });
+
+          describe('Metrics Tab', () => {
+            before(async () => {
+              await pageObjects.assetDetails.clickMetricsTab();
+            });
+
+            [
+              { metric: 'cpu', chartsCount: 1 },
+              { metric: 'memory', chartsCount: 1 },
+              { metric: 'disk', chartsCount: 1 },
+              { metric: 'network', chartsCount: 1 },
+            ].forEach(({ metric, chartsCount }) => {
+              it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
+                const charts = await pageObjects.assetDetails.getMetricsTabDockerCharts(metric);
+                expect(charts.length).to.equal(chartsCount);
+              });
+
+              it(`should render a quick access for ${metric} in the side panel`, async () => {
+                await pageObjects.assetDetails.quickAccessItemExists(metric);
+              });
             });
           });
         });

@@ -1119,4 +1119,10 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.boolean,
   },
+  subobjects: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+    schema: t.boolean,
+  },
 };

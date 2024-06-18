@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { ThreeVersionsOf } from '../../../../../../../../common/api/detection_engine';
 import { simpleDiffAlgorithm } from './simple_diff_algorithm';
 
-export const numberDiffAlgorithm = simpleDiffAlgorithm<number>;
+export const numberDiffAlgorithm = <TValue extends number | undefined>(
+  versions: ThreeVersionsOf<TValue>
+) => simpleDiffAlgorithm<TValue>(versions);

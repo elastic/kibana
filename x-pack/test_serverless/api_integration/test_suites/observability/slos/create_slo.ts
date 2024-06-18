@@ -149,10 +149,10 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedTransforms: ExpectedTransforms = {
           count: 2,
           results: {
-            transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3.2' },
+            transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3.3' },
             transform1: {
               id: 'slo-summary-my-custom-id1-1',
-              destIndex: '.slo-observability.summary-v3.2',
+              destIndex: '.slo-observability.summary-v3.3',
             },
           },
           typeOfVersion: 'string',
@@ -318,25 +318,25 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedTransforms: ExpectedTransforms = {
           count: 8,
           results: {
-            transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3.2' },
-            transform1: { id: 'slo-my-custom-id2-1', destIndex: '.slo-observability.sli-v3.2' },
-            transform2: { id: 'slo-my-custom-id3-1', destIndex: '.slo-observability.sli-v3.2' },
-            transform3: { id: 'slo-my-custom-id4-1', destIndex: '.slo-observability.sli-v3.2' },
+            transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3.3' },
+            transform1: { id: 'slo-my-custom-id2-1', destIndex: '.slo-observability.sli-v3.3' },
+            transform2: { id: 'slo-my-custom-id3-1', destIndex: '.slo-observability.sli-v3.3' },
+            transform3: { id: 'slo-my-custom-id4-1', destIndex: '.slo-observability.sli-v3.3' },
             transform4: {
               id: 'slo-summary-my-custom-id1-1',
-              destIndex: '.slo-observability.summary-v3.2',
+              destIndex: '.slo-observability.summary-v3.3',
             },
             transform5: {
               id: 'slo-summary-my-custom-id2-1',
-              destIndex: '.slo-observability.summary-v3.2',
+              destIndex: '.slo-observability.summary-v3.3',
             },
             transform6: {
               id: 'slo-summary-my-custom-id3-1',
-              destIndex: '.slo-observability.summary-v3.2',
+              destIndex: '.slo-observability.summary-v3.3',
             },
             transform7: {
               id: 'slo-summary-my-custom-id4-1',
-              destIndex: '.slo-observability.summary-v3.2',
+              destIndex: '.slo-observability.summary-v3.3',
             },
           },
           typeOfVersion: 'string',

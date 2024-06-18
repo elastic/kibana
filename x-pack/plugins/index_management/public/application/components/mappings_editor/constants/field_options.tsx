@@ -26,6 +26,7 @@ export const FIELD_TYPES_OPTIONS = Object.entries(MAIN_DATA_TYPE_DEFINITION).map
   ([dataType, { label }]) => ({
     value: dataType,
     label,
+    'data-test-subj': `fieldTypesOptions-${dataType}`,
   })
 ) as ComboBoxOption[];
 

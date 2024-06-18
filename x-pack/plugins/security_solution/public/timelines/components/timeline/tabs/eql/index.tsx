@@ -92,8 +92,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
 
-  const leadingControlColumns = useTimelineControlColumn(columns, TIMELINE_NO_SORTING);
-
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
@@ -135,6 +133,14 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     skip: !canQueryTimeline(),
     startDate: start,
     timerangeKind,
+  });
+
+  const leadingControlColumns = useTimelineControlColumn({
+    columns,
+    sort: TIMELINE_NO_SORTING,
+    timelineId,
+    activeTab: TimelineTabs.eql,
+    refetch,
   });
 
   const isQueryLoading = useMemo(

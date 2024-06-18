@@ -843,9 +843,9 @@ describe('parseAggregationResults', () => {
             sampleEsqlSourceFieldsHit,
           ],
           sourceFields: {
-            'host.hostname': ['host-1'],
-            'host.id': ['1'],
-            'host.name': ['host-1'],
+            'host.hostname': ['host-1', 'host-1', 'host-1', 'host-1'],
+            'host.id': ['1', '1', '1', '1'],
+            'host.name': ['host-1', 'host-1', 'host-1', 'host-1'],
           },
         },
       ],

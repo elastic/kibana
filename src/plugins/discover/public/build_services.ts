@@ -56,7 +56,7 @@ import { memoize, noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
-import type { DiscoverStartPlugins } from './plugin';
+import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';

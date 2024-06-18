@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EventTypeOpts } from '@kbn/analytics-client';
+import type { EventTypeOpts } from '@kbn/core/public';
 import type { Message, Conversation } from '../../../common';
 import type { Feedback } from '../../components/buttons/feedback_buttons';
 import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';

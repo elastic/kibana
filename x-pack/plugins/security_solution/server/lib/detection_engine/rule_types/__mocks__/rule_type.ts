@@ -104,14 +104,6 @@ export const createRuleTypeMocks = (
     alertWithPersistence: jest.fn(),
     logger: loggerMock,
     shouldWriteAlerts: () => true,
-    dataViews: {
-      createDataViewLazy: jest.fn().mockResolvedValue({
-        getFields: jest.fn().mockResolvedValue({
-          getFieldMapSorted: jest.fn().mockReturnValue({}),
-        }),
-        getSourceFiltering: jest.fn().mockReturnValue({ excludes: [] }),
-      }),
-    },
   };
 
   return {

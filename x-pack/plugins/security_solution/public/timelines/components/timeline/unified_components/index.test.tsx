@@ -58,6 +58,14 @@ jest.mock('../../../../common/lib/kuery');
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(() => ({
+    pathname: '',
+    search: '',
+  })),
+}));
+
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
   if (feature === 'unifiedComponentsInTimelineEnabled') {
     return true;
@@ -67,8 +75,8 @@ const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof Experimental
 
 jest.mock('../../../../common/lib/kibana');
 
-// unified-field-list is is reporiting multiple analytics events
-jest.mock(`@kbn/analytics-client`);
+// unified-field-list is reporting multiple analytics events
+jest.mock(`@kbn/ebt/client`);
 
 const columnsToDisplay = [
   ...defaultUdtHeaders,
@@ -79,8 +87,8 @@ const columnsToDisplay = [
 ];
 
 // These tests can take more than standard timeout of 5s
-// that is why we are setting it to 10s
-const SPECIAL_TEST_TIMEOUT = 10000;
+// that is why we are increasing the timeout
+const SPECIAL_TEST_TIMEOUT = 50000;
 
 const localMockedTimelineData = structuredClone(mockTimelineData);
 
@@ -110,6 +118,8 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
     dataLoadingState: DataLoadingState.loaded,
     updatedAt: Date.now(),
     isTextBasedQuery: false,
+    eventIdToNoteIds: {} as Record<string, string[]>,
+    pinnedEventIds: {} as Record<string, boolean>,
   };
 
   const dispatch = useDispatch();
@@ -188,8 +198,6 @@ describe('unified timeline', () => {
   });
 
   beforeEach(() => {
-    const ONE_SECOND = 1000;
-    jest.setTimeout(10 * ONE_SECOND);
     HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
       return {
         width: 1000,
@@ -216,9 +224,7 @@ describe('unified timeline', () => {
     );
   });
 
-  // Flaky : See https://github.com/elastic/kibana/issues/179831
-  // removing/moving column current leads to infitinite loop, will be fixed in further PRs.
-  describe.skip('columns', () => {
+  describe('columns', () => {
     it(
       'should move column left correctly ',
       async () => {
@@ -297,7 +303,7 @@ describe('unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    it.skip(
+    it(
       'should remove column ',
       async () => {
         const field = {
@@ -539,9 +545,7 @@ describe('unified timeline', () => {
     );
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/180937
-  // FLAKY: https://github.com/elastic/kibana/issues/180956
-  describe.skip('unified field list', () => {
+  describe('unified field list', () => {
     it(
       'should be able to add filters',
       async () => {

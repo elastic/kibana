@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import type { InfraMetadata } from '../../../../../common/http_api';
 
 export interface Field {
@@ -39,10 +40,17 @@ export const getAllFields = (metadata: InfraMetadata | null) => {
           value,
         };
       } else {
-        return Object.entries(value ?? {}).map(([prop, subProp]) => ({
-          name: `${category}.${property}.${prop}`,
-          value: subProp,
-        }));
+        return Object.entries(value ?? {})
+          .map(([prop, subProp]) => {
+            if (!Array.isArray(subProp) && isPlainObject(subProp)) {
+              return { name: '', value: '' };
+            }
+            return {
+              name: `${category}.${property}.${prop}`,
+              value: subProp,
+            };
+          })
+          .filter(({ name }) => name);
       }
     }
     return [];

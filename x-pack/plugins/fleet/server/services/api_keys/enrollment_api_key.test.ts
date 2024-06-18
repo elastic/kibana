@@ -17,7 +17,11 @@ import { agentPolicyService } from '../agent_policy';
 import { auditLoggingService } from '../audit_logging';
 import { appContextService } from '../app_context';
 
-import { deleteEnrollmentApiKey, generateEnrollmentAPIKey } from './enrollment_api_key';
+import {
+  deleteEnrollmentApiKey,
+  generateEnrollmentAPIKey,
+  getEnrollmentAPIKey,
+} from './enrollment_api_key';
 
 jest.mock('../audit_logging');
 jest.mock('../agent_policy');
@@ -145,6 +149,51 @@ describe('enrollment api keys', () => {
         message:
           'User deleting enrollment API key [id=test-id] [api_key_id=test-enrollment-api-key-id]',
       });
+    });
+  });
+
+  describe('getEnrollementApiKey', () => {
+    it('should not allow to retrieve a key in the current space', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.get.mockResolvedValue({
+        _id: 'test-id',
+        _index: ENROLLMENT_API_KEYS_INDEX,
+        _source: {
+          active: true,
+          created_at: new Date().toISOString(),
+          api_key_id: 'test-enrollment-api-key-id',
+          namespaces: ['test'],
+        },
+        found: true,
+      });
+
+      const enrollmentKey = await getEnrollmentAPIKey(
+        esClient,
+        'test-enrollment-api-key-id',
+        'test'
+      );
+      expect(enrollmentKey).toBeDefined();
+    });
+    it('should not allow to retrieve a key in a different space', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.get.mockResolvedValue({
+        _id: 'test-id',
+        _index: ENROLLMENT_API_KEYS_INDEX,
+        _source: {
+          active: true,
+          created_at: new Date().toISOString(),
+          api_key_id: 'test-enrollment-api-key-id',
+        },
+        found: true,
+      });
+
+      await expect(
+        getEnrollmentAPIKey(esClient, 'test-enrollment-api-key-id', 'test')
+      ).rejects.toThrowError(
+        'Enrollment api key test-enrollment-api-key-id not found in namespace'
+      );
     });
   });
 });

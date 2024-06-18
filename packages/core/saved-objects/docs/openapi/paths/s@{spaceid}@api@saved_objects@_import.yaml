@@ -1,0 +1,41 @@
+post:
+  summary: Import saved objects
+  operationId: importSavedObjects
+  description: |
+    Creates sets of Kibana saved objects from a file created by the export API.
+    Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - saved objects
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+    - $ref: '../components/parameters/compatibility_mode.yaml'
+    - $ref: '../components/parameters/create_new_copies.yaml'
+    - $ref: '../components/parameters/overwrite.yaml'
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          $ref: '../components/schemas/import_objects_request.yaml'
+        examples:
+          importObjectsRequest:
+            $ref: '../components/examples/import_objects_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/200_import_objects_response.yaml'
+          examples:
+            importObjectsResponse:
+              $ref: '../components/examples/import_objects_response.yaml'
+    '400':
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

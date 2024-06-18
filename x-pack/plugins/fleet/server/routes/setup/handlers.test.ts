@@ -14,6 +14,7 @@ import { RegistryError } from '../../errors';
 import {
   createAppContextStartContractMock,
   createPackagePolicyServiceMock,
+  createUninstallTokenServiceMock,
   xpackMocks,
 } from '../../mocks';
 import { agentServiceMock } from '../../services/agents/agent_service.mock';
@@ -45,6 +46,9 @@ describe('FleetSetupHandler', () => {
     context = {
       ...xpackMocks.createRequestHandlerContext(),
       fleet: {
+        uninstallTokenService: {
+          asCurrentUser: createUninstallTokenServiceMock(),
+        },
         agentClient: {
           asCurrentUser: agentServiceMock.createClient(),
           asInternalUser: agentServiceMock.createClient(),
@@ -129,6 +133,9 @@ describe('FleetStatusHandler', () => {
     context = {
       ...xpackMocks.createRequestHandlerContext(),
       fleet: {
+        uninstallTokenService: {
+          asCurrentUser: createUninstallTokenServiceMock(),
+        },
         agentClient: {
           asCurrentUser: agentServiceMock.createClient(),
           asInternalUser: agentServiceMock.createClient(),

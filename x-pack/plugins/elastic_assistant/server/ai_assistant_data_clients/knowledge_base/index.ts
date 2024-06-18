@@ -11,19 +11,23 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Document } from 'langchain/document';
+import { Document } from 'langchain/document';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import {
+  KnowledgeBaseEntryCreateProps,
+  KnowledgeBaseEntryResponse,
+} from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 import { GetElser } from '../../types';
-import { transformToCreateSchema } from './create_knowledge_base_entry';
+import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
 import { EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 import { ESQL_DOCS_LOADED_QUERY } from '../../routes/knowledge_base/constants';
-import { isModelAlreadyExistsError } from './helpers';
+import { getKBVectorSearchQuery, isModelAlreadyExistsError } from './helpers';
 
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ml: MlPluginSetup;
@@ -217,8 +221,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   /**
    * Adds LangChain Documents to the knowledge base
    *
-   * @param documents
-   * @param authenticatedUser
+   * @param documents LangChain Documents to add to the knowledge base
    */
   public addKnowledgeBaseDocuments = async ({
     documents,
@@ -260,5 +263,101 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`errors: ${JSON.stringify(errors, null, 2)}`);
 
     return created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [];
+  };
+
+  /**
+   * Performs similarity search to retrieve LangChain Documents from the knowledge base
+   */
+  public getKnowledgeBaseDocuments = async ({
+    filter,
+    kbResource,
+    query,
+    required,
+  }: {
+    filter?: QueryDslQueryContainer;
+    kbResource?: string;
+    query: string;
+    required?: boolean;
+  }): Promise<Document[]> => {
+    const user = this.options.currentUser;
+    if (user == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    const esClient = await this.options.elasticsearchClientPromise;
+    const modelId = await this.options.getElserId();
+
+    const vectorSearchQuery = getKBVectorSearchQuery({
+      filter,
+      kbResource,
+      modelId,
+      query,
+      required,
+      user,
+    });
+
+    try {
+      const result = await esClient.search<EsKnowledgeBaseEntrySchema>({
+        index: this.indexTemplateAndPattern.alias,
+        size: 10,
+        query: vectorSearchQuery,
+      });
+
+      const results = result.hits.hits.map(
+        (hit) =>
+          new Document({
+            pageContent: hit?._source?.text ?? '',
+            metadata: hit?._source?.metadata ?? {},
+          })
+      );
+
+      this.options.logger.debug(
+        `getKnowledgeBaseDocuments() - Similarity Search Query:\n ${JSON.stringify(
+          vectorSearchQuery
+        )}`
+      );
+      this.options.logger.debug(
+        `getKnowledgeBaseDocuments() - Similarity Search Results:\n ${JSON.stringify(results)}`
+      );
+
+      return results;
+    } catch (e) {
+      this.options.logger.error(`Error performing KB Similarity Search: ${e.message}`);
+      return [];
+    }
+  };
+
+  /**
+   * Creates a new Knowledge Base Entry.
+   *
+   * @param knowledgeBaseEntry
+   */
+  public createKnowledgeBaseEntry = async ({
+    knowledgeBaseEntry,
+  }: {
+    knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
+  }): Promise<KnowledgeBaseEntryResponse | null> => {
+    const authenticatedUser = this.options.currentUser;
+    if (authenticatedUser == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    this.options.logger.debug(
+      `Creating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
+    );
+    this.options.logger.debug(`kbIndex: ${this.indexTemplateAndPattern.alias}`);
+    const esClient = await this.options.elasticsearchClientPromise;
+    return createKnowledgeBaseEntry({
+      esClient,
+      knowledgeBaseIndex: this.indexTemplateAndPattern.alias,
+      logger: this.options.logger,
+      spaceId: this.spaceId,
+      user: authenticatedUser,
+      knowledgeBaseEntry,
+    });
   };
 }

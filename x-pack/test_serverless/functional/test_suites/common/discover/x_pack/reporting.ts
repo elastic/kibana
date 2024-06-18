@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { Key } from 'selenium-webdriver';
 import moment from 'moment';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -27,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'share',
   ]);
   const filterBar = getService('filterBar');
-  const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
   const setFieldsFromSource = async (setValue: boolean) => {
@@ -115,42 +113,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
-      // this test does not pass because of discover using short urls - investigate in separate PR
-      xit('generates a report with single timefilter', async () => {
-        await PageObjects.discover.clickNewSearchButton();
-        await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
-        await PageObjects.discover.saveSearch('single-timefilter-search');
-
-        // get shared URL value
-        const sharedURL = await browser.getCurrentUrl();
-
-        // click 'Copy POST URL'
-        await PageObjects.share.clickShareTopNavButton();
-        await PageObjects.reporting.openExportTab();
-        const copyButton = await testSubjects.find('shareReportingCopyURL');
-        const reportURL = (await copyButton.getAttribute('data-share-url')) ?? '';
-
-        // get number of filters in URLs
-        const timeFiltersNumberInReportURL =
-          decodeURIComponent(reportURL).split(
-            'query:(range:(order_date:(format:strict_date_optional_time'
-          ).length - 1;
-        const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
-
-        expect(timeFiltersNumberInSharedURL).to.be(1);
-        expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
-
-        expect(timeFiltersNumberInReportURL).to.be(1);
-        expect(
-          decodeURIComponent(reportURL).includes(
-            'query:(range:(order_date:(format:strict_date_optional_time'
-          )
-        ).to.be(true);
-
-        // return keyboard state
-        await browser.getActions().keyUp(Key.CONTROL).perform();
-        await browser.getActions().keyUp('v').perform();
-      });
       it('generates a report from a new search with data: default', async () => {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.reporting.setTimepickerInEcommerceDataRange();

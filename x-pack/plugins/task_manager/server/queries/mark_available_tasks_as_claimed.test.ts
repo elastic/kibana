@@ -14,6 +14,8 @@ import {
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
   EnabledTask,
+  InactiveTasks,
+  RecognizedTask,
   OneOfTaskTypes,
 } from './mark_available_tasks_as_claimed';
 
@@ -169,6 +171,57 @@ if (doc['task.runAt'].size()!=0) {
         },
       },
     });
+  });
+
+  test('generates InactiveTasks clause as expected', () => {
+    expect(InactiveTasks).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "must_not": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "must": Object {
+                  "range": Object {
+                    "task.retryAt": Object {
+                      "gt": "now",
+                    },
+                  },
+                },
+                "should": Array [
+                  Object {
+                    "term": Object {
+                      "task.status": "running",
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "task.status": "claiming",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  test('generates RecognizedTask clause as expected', () => {
+    expect(RecognizedTask).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "must_not": Array [
+            Object {
+              "term": Object {
+                "task.status": "unrecognized",
+              },
+            },
+          ],
+        },
+      }
+    `);
   });
 
   describe(`script`, () => {

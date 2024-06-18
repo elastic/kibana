@@ -99,7 +99,6 @@
     "@kbn/profiling-data-access-plugin",
     "@kbn/profiling-utils",
     "@kbn/core-analytics-server",
-    "@kbn/analytics-client",
     "@kbn/monaco",
     "@kbn/deeplinks-observability",
     "@kbn/custom-icons",

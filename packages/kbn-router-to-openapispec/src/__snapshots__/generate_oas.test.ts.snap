@@ -26,7 +26,6 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
-        "description": undefined,
         "operationId": "/foo/{id}#0",
         "parameters": Array [
           Object {
@@ -133,7 +132,7 @@ Object {
   "paths": Object {
     "/bar": Object {
       "get": Object {
-        "description": undefined,
+        "deprecated": true,
         "operationId": "/bar#0",
         "parameters": Array [
           Object {
@@ -577,7 +576,6 @@ Object {
   "paths": Object {
     "/recursive": Object {
       "get": Object {
-        "description": undefined,
         "operationId": "/recursive#0",
         "parameters": Array [
           Object {
@@ -660,7 +658,6 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
-        "description": undefined,
         "operationId": "/foo/{id}#0",
         "parameters": Array [
           Object {
@@ -698,7 +695,6 @@ Object {
     },
     "/test": Object {
       "get": Object {
-        "description": undefined,
         "operationId": "/test#0",
         "parameters": Array [
           Object {

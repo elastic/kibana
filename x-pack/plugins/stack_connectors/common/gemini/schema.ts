@@ -24,6 +24,8 @@ export const RunActionParamsSchema = schema.object({
   model: schema.maybe(schema.string()),
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  temperature: schema.maybe(schema.number()),
+  stopSequences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const RunApiResponseSchema = schema.object({
@@ -49,6 +51,28 @@ export const RunActionResponseSchema = schema.object(
   },
   { unknowns: 'ignore' }
 );
+
+export const InvokeAIActionParamsSchema = schema.object({
+  messages: schema.any(),
+  model: schema.maybe(schema.string()),
+  temperature: schema.maybe(schema.number()),
+  stopSequences: schema.maybe(schema.arrayOf(schema.string())),
+  signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
+});
+
+export const InvokeAIActionResponseSchema = schema.object({
+  message: schema.string(),
+  usageMetadata: schema.maybe(
+    schema.object({
+      promptTokenCount: schema.number(),
+      candidatesTokenCount: schema.number(),
+      totalTokenCount: schema.number(),
+    })
+  ),
+});
+
+export const StreamingResponseSchema = schema.any();
 
 export const DashboardActionParamsSchema = schema.object({
   dashboardId: schema.string(),

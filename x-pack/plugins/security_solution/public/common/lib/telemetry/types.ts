@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
 import type {
   AttackDiscoveryTelemetryEvent,
   ReportAttackDiscoveriesGeneratedParams,

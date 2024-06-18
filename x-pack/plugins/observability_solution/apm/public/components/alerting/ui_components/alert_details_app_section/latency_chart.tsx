@@ -15,8 +15,10 @@ import { getDurationFormatter } from '@kbn/observability-plugin/common';
 import { ALERT_RULE_TYPE_ID, ALERT_EVALUATION_THRESHOLD, ALERT_END } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import {
+  AlertActiveTimeRangeAnnotation,
   AlertThresholdAnnotation,
   AlertThresholdTimeRangeRect,
+  AlertAnnotation,
 } from '@kbn/observability-alert-details';
 import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -39,7 +41,6 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { DEFAULT_DATE_FORMAT } from './constants';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { ViewInAPMButton } from './view_in_apm_button';
-import { getAlertStartAnnotation } from './get_alert_start_annotation';
 
 function LatencyChart({
   alert,
@@ -159,20 +160,26 @@ function LatencyChart({
       isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID]) ||
       customAlertEvaluationThreshold
     ) {
-      return [...alertEvalThresholdChartData];
+      return [
+        <AlertActiveTimeRangeAnnotation
+          alertStart={alert.start}
+          alertEnd={alertEnd}
+          color={euiTheme.colors.danger}
+          id={'alertActiveRect'}
+          key={'alertActiveRect'}
+        />,
+        <AlertAnnotation
+          key={'alertAnnotationStart'}
+          id={'alertAnnotationStart'}
+          alertStart={alert.start}
+          color={euiTheme.colors.danger}
+          dateFormat={
+            (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT
+          }
+        />,
+        ...alertEvalThresholdChartData,
+      ];
     }
-    return [];
-  };
-  const getLatencyChartAlertStartData = () => {
-    if (alert.start) {
-      return getAlertStartAnnotation({
-        alertStart: alert.start,
-        alertEnd,
-        color: euiTheme.colors.danger,
-        dateFormat: (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT,
-      });
-    }
-    return [];
   };
   const memoizedData = useMemo(
     () =>
@@ -240,7 +247,7 @@ function LatencyChart({
         </EuiFlexGroup>
         <TimeseriesChart
           id="latencyChart"
-          annotations={[...getLatencyChartAdditionalData(), ...getLatencyChartAlertStartData()]}
+          annotations={getLatencyChartAdditionalData()}
           height={200}
           comparisonEnabled={comparisonEnabled}
           offset={offset}

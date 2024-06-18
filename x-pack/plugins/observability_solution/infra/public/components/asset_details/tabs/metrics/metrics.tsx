@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { HostMetrics } from './host_metrics';
+import { ContainerMetrics } from './container_metrics';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 
 export const Metrics = () => {
@@ -14,6 +15,8 @@ export const Metrics = () => {
   switch (asset.type) {
     case 'host':
       return <HostMetrics />;
+    case 'container':
+      return <ContainerMetrics />;
     default:
       return null;
   }

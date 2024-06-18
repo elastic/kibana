@@ -579,10 +579,15 @@ export function trainedModelsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
-          const body = await mlClient.startTrainedModelDeployment({
-            model_id: modelId,
-            ...(request.query ? request.query : {}),
-          });
+          const body = await mlClient.startTrainedModelDeployment(
+            {
+              model_id: modelId,
+              ...(request.query ? request.query : {}),
+            },
+            {
+              maxRetries: 0,
+            }
+          );
           return response.ok({
             body,
           });
@@ -879,6 +884,41 @@ export function trainedModelsRoutes(
               modelId,
               mlSavedObjectService
             );
+
+            return response.ok({
+              body,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/download_status Gets models download status
+   * @apiName ModelsDownloadStatus
+   * @apiDescription Gets download status for all currently downloading models
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_status`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canCreateTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+          try {
+            const body = await modelsProvider(client, mlClient, cloud).getModelsDownloadStatus();
 
             return response.ok({
               body,

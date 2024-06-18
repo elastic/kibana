@@ -19,6 +19,7 @@ import {
   RootProfileService,
   SolutionType,
 } from '../profiles';
+import { createProfileProviderServices } from '../profiles/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
 
 export const createContextAwarenessMocks = () => {
@@ -61,6 +62,24 @@ export const createContextAwarenessMocks = () => {
         ...prev(),
         rootProfile: () => 'document-profile',
       })),
+      getDocViewer: (prev) => (params) => {
+        const recordId = params.record.id;
+        const prevValue = prev(params);
+        return {
+          title: `${prevValue.title} #${recordId}`,
+          docViewsRegistry: (registry) => {
+            registry.add({
+              id: 'doc_view_mock',
+              title: 'Mock tab',
+              order: 10,
+              component: () => {
+                return null;
+              },
+            });
+            return prevValue.docViewsRegistry(registry);
+          },
+        };
+      },
     } as DocumentProfileProvider['profile'],
     resolve: jest.fn(() => ({
       isMatch: true,
@@ -89,6 +108,8 @@ export const createContextAwarenessMocks = () => {
     documentProfileServiceMock
   );
 
+  const profileProviderServices = createProfileProviderServices();
+
   return {
     rootProfileProviderMock,
     dataSourceProfileProviderMock,
@@ -96,5 +117,6 @@ export const createContextAwarenessMocks = () => {
     contextRecordMock,
     contextRecordMock2,
     profilesManagerMock,
+    profileProviderServices,
   };
 };

@@ -57,6 +57,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
 
   return (
     <EuiDescribedFormGroup
+      fullWidth
       title={
         <h3>
           <FormattedMessage

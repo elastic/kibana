@@ -97,13 +97,20 @@ export const createPureDatasetQualityControllerStateMachine = (
                   target: 'loaded',
                   actions: ['storeDegradedDocStats', 'storeDatasets'],
                 },
-                onError: {
-                  target: 'loaded',
-                  actions: ['notifyFetchDegradedStatsFailed'],
-                },
+                onError: [
+                  {
+                    target: 'unauthorized',
+                    cond: 'checkIfActionForbidden',
+                  },
+                  {
+                    target: 'loaded',
+                    actions: ['notifyFetchDegradedStatsFailed'],
+                  },
+                ],
               },
             },
             loaded: {},
+            unauthorized: { type: 'final' },
           },
           on: {
             UPDATE_TIME_RANGE: {
@@ -187,13 +194,20 @@ export const createPureDatasetQualityControllerStateMachine = (
                   target: 'loaded',
                   actions: ['storeNonAggregatableDatasets'],
                 },
-                onError: {
-                  target: 'loaded',
-                  actions: ['notifyFetchNonAggregatableDatasetsFailed'],
-                },
+                onError: [
+                  {
+                    target: 'unauthorized',
+                    cond: 'checkIfActionForbidden',
+                  },
+                  {
+                    target: 'loaded',
+                    actions: ['notifyFetchNonAggregatableDatasetsFailed'],
+                  },
+                ],
               },
             },
             loaded: {},
+            unauthorized: { type: 'final' },
           },
           on: {
             UPDATE_TIME_RANGE: {
@@ -300,13 +314,22 @@ export const createPureDatasetQualityControllerStateMachine = (
                           target: 'done',
                           actions: ['storeIntegrationDashboards'],
                         },
-                        onError: {
-                          target: 'done',
-                          actions: ['notifyFetchIntegrationDashboardsFailed'],
-                        },
+                        onError: [
+                          {
+                            target: 'unauthorized',
+                            cond: 'checkIfActionForbidden',
+                          },
+                          {
+                            target: 'done',
+                            actions: ['notifyFetchIntegrationDashboardsFailed'],
+                          },
+                        ],
                       },
                     },
                     done: {
+                      type: 'final',
+                    },
+                    unauthorized: {
                       type: 'final',
                     },
                   },
@@ -505,15 +528,18 @@ export const createPureDatasetQualityControllerStateMachine = (
         }),
         resetFlyoutOptions: assign((_context, _event) => ({ flyout: DEFAULT_CONTEXT.flyout })),
         storeDataStreamStats: assign((_context, event) => {
-          if ('data' in event) {
-            const dataStreamStats = event.data as DataStreamStat[];
+          if ('data' in event && 'dataStreamsStats' in event.data) {
+            const dataStreamStats = event.data.dataStreamsStats as DataStreamStat[];
+            const datasetUserPrivileges = event.data.datasetUserPrivileges;
 
             // Check if any DataStreamStat has null; to check for serverless
-            const isSizeStatsAvailable = dataStreamStats.some((stat) => stat.totalDocs !== null);
+            const isSizeStatsAvailable =
+              !dataStreamStats.length || dataStreamStats.some((stat) => stat.totalDocs !== null);
 
             return {
               dataStreamStats,
               isSizeStatsAvailable,
+              datasetUserPrivileges,
             };
           }
           return {};
@@ -624,6 +650,11 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+      },
+      guards: {
+        checkIfActionForbidden: (context, event) => {
+          return 'data' in event && 'statusCode' in event.data && event.data.statusCode === 403;
+        },
       },
     }
   );

@@ -168,7 +168,6 @@ export const ControlGroup = () => {
         content={ControlGroupStrings.invalidControlWarning.getTourContent(invalidControlType)}
         footerAction={[
           <EuiCheckbox
-            compressed
             checked={suppressTourChecked}
             id={'controlGroup--suppressTourCheckbox'}
             className="controlGroup--suppressTourCheckbox"

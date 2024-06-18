@@ -36,7 +36,6 @@ describe.skip('useSourceIndicesFields Hook', () => {
           {
             field: 'field1',
             model_id: 'model1',
-            nested: false,
             indices: ['newIndex'],
           },
         ],
@@ -44,6 +43,7 @@ describe.skip('useSourceIndicesFields Hook', () => {
         bm25_query_fields: [],
         source_fields: ['field1'],
         skipped_fields: 0,
+        semantic_fields: [],
       },
     };
 
@@ -87,11 +87,11 @@ describe.skip('useSourceIndicesFields Hook', () => {
       expect(result.current.indices).toEqual([]);
       expect(getValues()).toMatchInlineSnapshot(`
         Object {
-          "doc_size": 5,
+          "doc_size": 3,
           "elasticsearch_query": Object {},
           "indices": Array [],
           "prompt": "You are an assistant for question-answering tasks.",
-          "source_fields": Array [],
+          "source_fields": Object {},
         }
       `);
       result.current.addIndex('newIndex');
@@ -109,16 +109,15 @@ describe.skip('useSourceIndicesFields Hook', () => {
       expect(result.current.loading).toBe(false);
       expect(getValues()).toMatchInlineSnapshot(`
         Object {
-          "doc_size": 5,
+          "doc_size": 3,
           "elasticsearch_query": Object {
             "retriever": Object {
               "standard": Object {
                 "query": Object {
-                  "text_expansion": Object {
-                    "field1": Object {
-                      "model_id": "model1",
-                      "model_text": "{query}",
-                    },
+                  "sparse_vector": Object {
+                    "field": "field1",
+                    "inference_id": "model1",
+                    "query": "{query}",
                   },
                 },
               },
@@ -146,6 +145,7 @@ describe.skip('useSourceIndicesFields Hook', () => {
         bm25_query_fields: [],
         source_fields: [],
         skipped_fields: 0,
+        semantic_fields: [],
       },
     };
 
@@ -169,7 +169,7 @@ describe.skip('useSourceIndicesFields Hook', () => {
       expect(result.current.loading).toBe(false);
       expect(getValues()).toMatchInlineSnapshot(`
         Object {
-          "doc_size": 5,
+          "doc_size": 3,
           "elasticsearch_query": Object {
             "retriever": Object {
               "standard": Object {
@@ -199,6 +199,7 @@ describe.skip('useSourceIndicesFields Hook', () => {
         bm25_query_fields: [],
         source_fields: [],
         skipped_fields: 0,
+        semantic_fields: [],
       },
     };
 
@@ -222,7 +223,7 @@ describe.skip('useSourceIndicesFields Hook', () => {
       expect(result.current.loading).toBe(false);
       expect(getValues()).toMatchInlineSnapshot(`
         Object {
-          "doc_size": 5,
+          "doc_size": 3,
           "elasticsearch_query": Object {
             "retriever": Object {
               "standard": Object {

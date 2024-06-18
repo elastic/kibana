@@ -17,6 +17,7 @@ import type {
 } from '@kbn/core/server';
 
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { RuleResponseValidationError } from '../rule_management/logic/detection_rules_client/utils';
 
 export interface OutputError {
   message: string;
@@ -114,6 +115,12 @@ export const transformBulkError = (
     return createBulkErrorObject({
       ruleId,
       statusCode: 400,
+      message: err.message,
+    });
+  } else if (err instanceof RuleResponseValidationError) {
+    return createBulkErrorObject({
+      ruleId: err.ruleId,
+      statusCode: 500,
       message: err.message,
     });
   } else {

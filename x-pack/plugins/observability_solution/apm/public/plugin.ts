@@ -20,7 +20,7 @@ import {
 } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public/plugin';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';

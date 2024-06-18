@@ -6,13 +6,12 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { createAssist as Assist } from '../utils/assist';
-import { clipContext, ConversationalChain } from './conversational_chain';
-import { FakeListChatModel } from '@langchain/core/utils/testing';
-import { FakeListLLM } from 'langchain/llms/fake';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { experimental_StreamData, Message } from 'ai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { FakeListChatModel, FakeStreamingLLM } from '@langchain/core/utils/testing';
+import { Message, experimental_StreamData } from 'ai';
+import { createAssist as Assist } from '../utils/assist';
+import { ConversationalChain, clipContext } from './conversational_chain';
 
 describe('conversational chain', () => {
   const createTestChain = async ({
@@ -76,7 +75,7 @@ describe('conversational chain', () => {
       ? new FakeListChatModel({
           responses,
         })
-      : new FakeListLLM({ responses });
+      : new FakeStreamingLLM({ responses });
 
     const aiClient = Assist({
       es_client: mockElasticsearchClient as unknown as Client,
@@ -206,6 +205,57 @@ describe('conversational chain', () => {
         },
       ],
       contentField: { index: 'field', website: 'metadata.source' },
+    });
+  }, 10000);
+
+  it('should be able to create a conversational chain with inner hit field', async () => {
+    await createTestChain({
+      responses: ['the final answer'],
+      chat: [
+        {
+          id: '1',
+          role: 'user',
+          content: 'what is the work from home policy?',
+        },
+      ],
+      expectedFinalAnswer: 'the final answer',
+      docs: [
+        {
+          _index: 'index',
+          _id: '1',
+          inner_hits: {
+            'field.inference.chunks': {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      text: 'value',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      ],
+      expectedDocs: [
+        {
+          documents: [{ metadata: { _id: '1', _index: 'index' }, pageContent: 'value' }],
+          type: 'retrieved_docs',
+        },
+      ],
+      expectedTokens: [
+        { type: 'context_token_count', count: 7 },
+        { type: 'prompt_token_count', count: 20 },
+      ],
+      expectedSearchRequest: [
+        {
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+        },
+      ],
+      contentField: { index: 'field' },
     });
   }, 10000);
 

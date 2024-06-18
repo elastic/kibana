@@ -33,6 +33,7 @@ import { GetSLOsOverview } from '../../services/get_slos_overview';
 import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
+  DefaultBurnRatesClient,
   DefaultSummaryClient,
   DefaultSummaryTransformManager,
   DefaultTransformManager,
@@ -295,7 +296,8 @@ const getSLORoute = createSloServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const summaryClient = new DefaultSummaryClient(esClient);
+    const burnRatesClient = new DefaultBurnRatesClient(esClient);
+    const summaryClient = new DefaultSummaryClient(esClient, burnRatesClient);
     const defintionClient = new SloDefinitionClient(repository, esClient, logger);
     const getSLO = new GetSLO(defintionClient, summaryClient);
 

@@ -7,18 +7,25 @@
 
 export type IndicesQuerySourceFields = Record<string, QuerySourceFields>;
 
-interface ModelFields {
+interface ModelField {
   field: string;
   model_id: string;
-  nested: boolean;
+  indices: string[];
+}
+
+interface SemanticField {
+  field: string;
+  inferenceId: string;
+  embeddingType: 'sparse_vector' | 'dense_vector';
   indices: string[];
 }
 
 export interface QuerySourceFields {
-  elser_query_fields: ModelFields[];
-  dense_vector_query_fields: ModelFields[];
+  elser_query_fields: ModelField[];
+  dense_vector_query_fields: ModelField[];
   bm25_query_fields: string[];
   source_fields: string[];
+  semantic_fields: SemanticField[];
   skipped_fields: number;
 }
 

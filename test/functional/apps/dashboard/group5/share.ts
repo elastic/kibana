@@ -49,13 +49,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.share.clickShareTopNavButton();
       return await PageObjects.share.isShareMenuOpen();
     });
-    // if (mode === 'savedObject') {
-    // await PageObjects.share.exportAsSavedObject();
-    // }
-    return PageObjects.share.getSharedUrl();
+    return await PageObjects.share.getSharedUrl();
   };
 
-  describe.skip('share dashboard', () => {
+  describe('share dashboard', () => {
     const testFilterState = async (mode: TestingModes) => {
       it('should not have "filters" state in either app or global state when no filters', async () => {
         expect(await getSharedUrl(mode)).to.not.contain('filters');
@@ -120,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
 
-    describe.skip('snapshot share', async () => {
+    describe('snapshot share', async () => {
       describe('test local state', async () => {
         it('should not have "panels" state when not in unsaved changes state', async () => {
           await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
@@ -147,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe.skip('test filter state', async () => {
+      describe('test filter state', async () => {
         await testFilterState('snapshot');
       });
 
@@ -158,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('saved object share', async () => {
+    describe('saved object share', async () => {
       describe('test filter state', async () => {
         await testFilterState('savedObject');
       });

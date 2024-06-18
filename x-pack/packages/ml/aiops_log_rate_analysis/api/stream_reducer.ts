@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
-import type { AiopsLogRateAnalysisApiAction } from './actions';
-import { API_ACTION_NAME } from './actions';
+import type {
+  SignificantItem,
+  SignificantItemGroup,
+  SignificantItemHistogram,
+  SignificantItemGroupHistogram,
+} from '@kbn/ml-agg-utils';
 
 export interface StreamState {
   ccsWarning: boolean;
@@ -22,7 +27,7 @@ export interface StreamState {
   zeroDocsFallback: boolean;
 }
 
-export const initialState: StreamState = {
+export const getDefaultState = (): StreamState => ({
   ccsWarning: false,
   significantItems: [],
   significantItemsGroups: [],
@@ -30,50 +35,87 @@ export const initialState: StreamState = {
   loaded: 0,
   loadingState: '',
   zeroDocsFallback: false,
-};
+});
 
-export function streamReducer(
-  state: StreamState,
-  action: AiopsLogRateAnalysisApiAction
-): StreamState {
-  switch (action.type) {
-    case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS:
-      return { ...state, significantItems: [...state.significantItems, ...action.payload] };
-    case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_HISTOGRAM:
-      const significantItems = state.significantItems.map((cp) => {
+export const logRateAnalysisResultsSlice = createSlice({
+  name: 'logRateAnalysisResults',
+  initialState: getDefaultState(),
+  reducers: {
+    addSignificantItems: (state, action: PayloadAction<SignificantItem[]>) => {
+      state.significantItems.push(...action.payload);
+    },
+    addSignificantItemsHistogram: (state, action: PayloadAction<SignificantItemHistogram[]>) => {
+      state.significantItems = state.significantItems.map((cp) => {
         const cpHistogram = action.payload.find(
           (h) => h.fieldName === cp.fieldName && h.fieldValue === cp.fieldValue
         );
-        if (cpHistogram) {
-          cp.histogram = cpHistogram.histogram;
-        }
-        return cp;
+        return {
+          ...cp,
+          ...(cpHistogram ? { histogram: cpHistogram.histogram } : {}),
+        };
       });
-      return { ...state, significantItems };
-    case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP:
-      return { ...state, significantItemsGroups: action.payload };
-    case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM:
-      const significantItemsGroups = state.significantItemsGroups.map((cpg) => {
+    },
+    addSignificantItemsGroup: (state, action: PayloadAction<SignificantItemGroup[]>) => {
+      state.significantItemsGroups = action.payload;
+    },
+    addSignificantItemsGroupHistogram: (
+      state,
+      action: PayloadAction<SignificantItemGroupHistogram[]>
+    ) => {
+      state.significantItemsGroups = state.significantItemsGroups.map((cpg) => {
         const cpHistogram = action.payload.find((h) => h.id === cpg.id);
         if (cpHistogram) {
           cpg.histogram = cpHistogram.histogram;
         }
         return cpg;
       });
-      return { ...state, significantItemsGroups };
-    case API_ACTION_NAME.ADD_ERROR:
-      return { ...state, errors: [...state.errors, action.payload] };
-    case API_ACTION_NAME.RESET_ERRORS:
-      return { ...state, errors: [] };
-    case API_ACTION_NAME.RESET_GROUPS:
-      return { ...state, significantItemsGroups: [] };
-    case API_ACTION_NAME.RESET_ALL:
-      return initialState;
-    case API_ACTION_NAME.UPDATE_LOADING_STATE:
+    },
+    addError: (state, action: PayloadAction<string>) => {
+      state.errors.push(action.payload);
+    },
+    ping: () => {},
+    resetErrors: (state) => {
+      state.errors = [];
+    },
+    resetGroups: (state) => {
+      state.significantItemsGroups = [];
+    },
+    resetAll: () => getDefaultState(),
+    updateLoadingState: (
+      state,
+      action: PayloadAction<{
+        ccsWarning: boolean;
+        loaded: number;
+        loadingState: string;
+        remainingFieldCandidates?: string[];
+        groupsMissing?: boolean;
+      }>
+    ) => {
       return { ...state, ...action.payload };
-    case API_ACTION_NAME.SET_ZERO_DOCS_FALLBACK:
-      return { ...state, zeroDocsFallback: action.payload };
-    default:
-      return state;
-  }
-}
+    },
+    setZeroDocsFallback: (state, action: PayloadAction<boolean>) => {
+      state.zeroDocsFallback = action.payload;
+    },
+  },
+});
+
+export const streamReducer = logRateAnalysisResultsSlice.reducer;
+export const streamReducerActions = logRateAnalysisResultsSlice.actions;
+
+type StreamReducerActions = typeof streamReducerActions;
+export type ApiActionName = keyof StreamReducerActions;
+export type AiopsLogRateAnalysisApiAction = ReturnType<StreamReducerActions[ApiActionName]>;
+
+export const {
+  addError,
+  addSignificantItems,
+  addSignificantItemsGroup,
+  addSignificantItemsGroupHistogram,
+  addSignificantItemsHistogram,
+  ping,
+  resetAll,
+  resetErrors,
+  resetGroups,
+  setZeroDocsFallback,
+  updateLoadingState,
+} = logRateAnalysisResultsSlice.actions;

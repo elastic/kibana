@@ -32,7 +32,7 @@ import {
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
-import { IntegrationIcon } from '../../common';
+import { PrivilegesWarningIconWrapper, IntegrationIcon } from '../../common';
 import { useRedirectLink } from '../../../hooks';
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
@@ -157,6 +157,8 @@ const datasetQualityColumnTooltip = (
 
 export const getDatasetQualityTableColumns = ({
   fieldFormats,
+  canUserMonitorDataset,
+  canUserMonitorAnyDataStream,
   selectedDataset,
   openFlyout,
   loadingDataStreamStats,
@@ -166,6 +168,8 @@ export const getDatasetQualityTableColumns = ({
   isActiveDataset,
 }: {
   fieldFormats: FieldFormatsStart;
+  canUserMonitorDataset: boolean;
+  canUserMonitorAnyDataStream: boolean;
   selectedDataset?: FlyoutDataset;
   loadingDataStreamStats: boolean;
   loadingDegradedStats: boolean;
@@ -230,7 +234,7 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '160px',
     },
-    ...(isSizeStatsAvailable
+    ...(isSizeStatsAvailable && canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
           {
             name: sizeColumnName,
@@ -238,17 +242,22 @@ export const getDatasetQualityTableColumns = ({
             sortable: true,
             render: (_: any, dataStreamStat: DataStreamStat) => {
               return (
-                <EuiSkeletonRectangle
-                  width="60px"
-                  height="20px"
-                  borderRadius="m"
-                  isLoading={loadingDataStreamStats || loadingDegradedStats}
+                <PrivilegesWarningIconWrapper
+                  title={`sizeBytes-${dataStreamStat.title}`}
+                  hasPrivileges={dataStreamStat.userPrivileges?.canMonitor ?? true}
                 >
-                  {formatNumber(
-                    DataStreamStat.calculateFilteredSize(dataStreamStat),
-                    BYTE_NUMBER_FORMAT
-                  )}
-                </EuiSkeletonRectangle>
+                  <EuiSkeletonRectangle
+                    width="60px"
+                    height="20px"
+                    borderRadius="m"
+                    isLoading={loadingDataStreamStats || loadingDegradedStats}
+                  >
+                    {formatNumber(
+                      DataStreamStat.calculateFilteredSize(dataStreamStat),
+                      BYTE_NUMBER_FORMAT
+                    )}
+                  </EuiSkeletonRectangle>
+                </PrivilegesWarningIconWrapper>
               );
             },
             width: '100px',
@@ -290,33 +299,42 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '140px',
     },
-    {
-      name: lastActivityColumnName,
-      field: 'lastActivity',
-      render: (timestamp: number) => (
-        <EuiSkeletonRectangle
-          width="200px"
-          height="20px"
-          borderRadius="m"
-          isLoading={loadingDataStreamStats}
-        >
-          {!isActiveDataset(timestamp) ? (
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
-              <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
-                <EuiIcon tabIndex={0} type="iInCircle" size="s" />
-              </EuiToolTip>
-            </EuiFlexGroup>
-          ) : (
-            fieldFormats
-              .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-              .convert(timestamp)
-          )}
-        </EuiSkeletonRectangle>
-      ),
-      width: '300px',
-      sortable: true,
-    },
+    ...(canUserMonitorDataset && canUserMonitorAnyDataStream
+      ? [
+          {
+            name: lastActivityColumnName,
+            field: 'lastActivity',
+            render: (timestamp: number, { userPrivileges, title }: DataStreamStat) => (
+              <PrivilegesWarningIconWrapper
+                title={`lastActivity-${title}`}
+                hasPrivileges={userPrivileges?.canMonitor ?? true}
+              >
+                <EuiSkeletonRectangle
+                  width="200px"
+                  height="20px"
+                  borderRadius="m"
+                  isLoading={loadingDataStreamStats}
+                >
+                  {!isActiveDataset(timestamp) ? (
+                    <EuiFlexGroup gutterSize="xs" alignItems="center">
+                      <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
+                      <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
+                        <EuiIcon tabIndex={0} type="iInCircle" size="s" />
+                      </EuiToolTip>
+                    </EuiFlexGroup>
+                  ) : (
+                    fieldFormats
+                      .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
+                      .convert(timestamp)
+                  )}
+                </EuiSkeletonRectangle>
+              </PrivilegesWarningIconWrapper>
+            ),
+            width: '300px',
+            sortable: true,
+          },
+        ]
+      : []),
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (
