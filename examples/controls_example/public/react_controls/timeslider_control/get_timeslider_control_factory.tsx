@@ -198,7 +198,7 @@ export const getTimesliderControlFactory = (
         }),
         map(() => {
           // Observable notifies subscriber when loading is finished
-          // Return void to not expose internal implemenation details of observabale
+          // Return void to not expose internal implementation details of observable
           return;
         })
       );
