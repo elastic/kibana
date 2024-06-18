@@ -93,6 +93,7 @@ import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
+import { useMlRuleValidations } from '../../../../common/components/ml/hooks/use_ml_rule_validations';
 import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -103,6 +104,7 @@ import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAllEsqlRuleFields } from '../../hooks';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
+import { useRuleFields } from '../../../rule_management/logic/use_rule_fields';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -167,40 +169,52 @@ const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
 
 // eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
+  browserFields,
+  dataSourceType,
+  defaultSavedQuery,
+  enableThresholdSuppression,
+  form,
+  groupByFields,
+  index,
+  indexPattern,
+  indicesConfig,
+  isIndexPatternLoading,
   isLoading,
+  isQueryBarValid,
   isUpdateView = false,
   kibanaDataViews,
-  indicesConfig,
-  threatIndicesConfig,
-  defaultSavedQuery,
-  form,
   optionsSelected,
-  setOptionsSelected,
-  indexPattern,
-  isIndexPatternLoading,
-  browserFields,
-  isQueryBarValid,
+  queryBarSavedId,
+  queryBarTitle,
+  ruleType,
   setIsQueryBarValid,
   setIsThreatQueryBarValid,
-  ruleType,
-  index,
-  threatIndex,
-  groupByFields,
-  dataSourceType,
+  setOptionsSelected,
   shouldLoadQueryDynamically,
-  queryBarTitle,
-  queryBarSavedId,
+  threatIndex,
+  threatIndicesConfig,
   thresholdFields,
-  enableThresholdSuppression,
 }) => {
   const queryClient = useQueryClient();
 
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
-  const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
+
+  const mlCapabilities = useMlCapabilities();
+  const [{ machineLearningJobId }] = useFormData<DefineStepRule>({
+    form,
+    watch: ['machineLearningJobId'],
+  });
+  const { someJobsStarted: someMlJobsStarted, noJobsStarted: noMlJobsStarted } =
+    useMlRuleValidations({ machineLearningJobId });
+  const { loading: mlFieldsLoading, fields: mlFields } = useRuleFields({ machineLearningJobId });
+  const mlSuppressionFields = useMemo(
+    () => getTermsAggregationFields(mlFields as BrowserField[]),
+    [mlFields]
+  );
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
@@ -1068,22 +1082,35 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 </EuiText>
               }
             >
-              <UseField
-                path="groupByFields"
-                component={MultiSelectFieldsAutocomplete}
-                componentProps={{
-                  browserFields: isEsqlRule(ruleType)
-                    ? esqlSuppressionFields
-                    : termsAggregationFields,
-                  isDisabled:
-                    !isAlertSuppressionLicenseValid ||
-                    areSuppressionFieldsDisabledBySequence ||
-                    isEsqlSuppressionLoading,
-                  disabledText: areSuppressionFieldsDisabledBySequence
-                    ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
-                    : alertSuppressionUpsellingMessage,
-                }}
-              />
+              <>
+                <UseField
+                  path="groupByFields"
+                  component={MultiSelectFieldsAutocomplete}
+                  componentProps={{
+                    browserFields: isEsqlRule(ruleType)
+                      ? esqlSuppressionFields
+                      : isMlRule(ruleType)
+                      ? mlSuppressionFields
+                      : termsAggregationFields,
+                    isDisabled:
+                      !isAlertSuppressionLicenseValid ||
+                      areSuppressionFieldsDisabledBySequence ||
+                      isEsqlSuppressionLoading ||
+                      mlFieldsLoading ||
+                      (noMlJobsStarted && isMlRule(ruleType)),
+                    disabledText: areSuppressionFieldsDisabledBySequence
+                      ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
+                      : noMlJobsStarted && isMlRule(ruleType)
+                      ? i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL
+                      : alertSuppressionUpsellingMessage,
+                  }}
+                />
+                {someMlJobsStarted && (
+                  <EuiText size="xs" color="warning">
+                    {i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL}
+                  </EuiText>
+                )}
+              </>
             </RuleTypeEuiFormRow>
 
             <IntendedRuleTypeEuiFormRow
