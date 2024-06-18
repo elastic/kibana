@@ -58,8 +58,7 @@ unknown
       * {{{description}}} 
       */
       {{/if}}
-      {{#if (startsWithSpecialChar @key)}}'{{@key}}'{{else}}{{@key}}{{/if}}
-      {{~#unless (includes ../required @key)}}?{{/unless~}}: {{> ts_input_type }};
+      '{{@key}}'{{~#unless (includes ../required @key)}}?{{/unless~}}: {{> ts_input_type }};
     {{/each}}
     {{~#if additionalProperties}}
       {{~#if (eq additionalProperties true)~}}
