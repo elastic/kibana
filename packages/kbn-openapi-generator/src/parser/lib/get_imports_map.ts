@@ -25,15 +25,33 @@ export const getImportsMap = (parsedSchema: OpenApiDocument): ImportsMap => {
   const importMap: Record<string, string[]> = {}; // key: import path, value: list of symbols to import
   const refs = findRefs(parsedSchema);
   refs.forEach((ref) => {
-    const refParts = ref.split('#/components/schemas/');
-    const importedSymbol = refParts[1];
-    let importPath = refParts[0];
-    if (importPath) {
-      importPath = importPath.replace('.schema.yaml', '.gen');
-      const currentSymbols = importMap[importPath] ?? [];
-      importMap[importPath] = uniq([...currentSymbols, importedSymbol]);
+    if (isExternalRef(ref) && isSchemaRef(ref)) {
+      const refParts = ref.split('#/components/schemas/');
+      const importedSymbol = refParts[1];
+      let importPath = refParts[0];
+      if (importPath) {
+        importPath = importPath.replace('.schema.yaml', '.gen');
+        const currentSymbols = importMap[importPath] ?? [];
+        importMap[importPath] = uniq([...currentSymbols, importedSymbol]);
+      }
     }
   });
 
   return importMap;
 };
+
+/**
+ * Check if the given reference refers to something not in the same document
+ * # signifies a reference from the root of the document
+ * @param ref $ref value
+ * @returns True if the reference is external
+ */
+const isExternalRef = (ref: string): boolean => !ref.startsWith('#');
+
+/**
+ * Check if the given reference refers to a schema
+ * We do not currently support references to other components
+ * @param ref $ref value
+ * @returns True if the reference is to a schema
+ */
+const isSchemaRef = (ref: string): boolean => ref.includes('#/components/schemas/');
