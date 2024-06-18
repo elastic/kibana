@@ -15,6 +15,7 @@ import {
   apiPublishesPanelTitle,
   apiPublishesUnsavedChanges,
   getPanelTitle,
+  PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -52,6 +53,7 @@ import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
+import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
@@ -129,7 +131,9 @@ export class DashboardContainer
     TracksQueryPerformance,
     HasSaveNotification,
     HasRuntimeChildState,
-    HasSerializedChildState
+    HasSerializedChildState,
+    PublishesSettings,
+    Partial<PublishesViewMode>
 {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 

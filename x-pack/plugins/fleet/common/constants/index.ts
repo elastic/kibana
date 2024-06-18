@@ -37,8 +37,6 @@ export const FLEET_SERVER_INDICES_VERSION = 1;
 
 export const FLEET_SERVER_ARTIFACTS_INDEX = '.fleet-artifacts';
 
-export const FLEET_SERVER_SERVERS_INDEX = '.fleet-servers';
-
 export const FLEET_SERVER_INDICES = [
   '.fleet-actions',
   '.fleet-actions-results',
@@ -47,7 +45,6 @@ export const FLEET_SERVER_INDICES = [
   '.fleet-enrollment-api-keys',
   '.fleet-policies',
   '.fleet-policies-leader',
-  FLEET_SERVER_SERVERS_INDEX,
 ];
 
 // Nodes that can be queried by datastreams API

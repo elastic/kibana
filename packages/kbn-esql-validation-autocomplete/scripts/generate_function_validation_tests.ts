@@ -142,7 +142,7 @@ function generateImplicitDateCastingTestsForFunction(
     signature.params.some(
       (param, i) =>
         param.type === 'date' &&
-        !definition.signatures.some((def) => def.params[i].type === 'string') // don't count parameters that already accept a string
+        !definition.signatures.some((def) => getParamAtPosition(def, i)?.type === 'string') // don't count parameters that already accept a string
     )
   );
 

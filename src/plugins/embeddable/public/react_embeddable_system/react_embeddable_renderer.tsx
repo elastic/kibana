@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { HasSerializedChildState, SerializedPanelState } from '@kbn/presentation-containers';
+import {
+  apiIsPresentationContainer,
+  HasSerializedChildState,
+  SerializedPanelState,
+} from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import {
   apiPublishesDataLoading,
@@ -19,7 +23,11 @@ import { BehaviorSubject, combineLatest, debounceTime, skip, Subscription, switc
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { initializeReactEmbeddableState } from './react_embeddable_state';
-import { DefaultEmbeddableApi, ReactEmbeddableApiRegistration } from './types';
+import {
+  BuildReactEmbeddableApiRegistration,
+  DefaultEmbeddableApi,
+  SetReactEmbeddableApiRegistration,
+} from './types';
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
 
@@ -90,86 +98,119 @@ export const ReactEmbeddableRenderer = <
         const factory = await getReactEmbeddableFactory<SerializedState, Api, RuntimeState>(type);
         const subscriptions = new Subscription();
 
-        const { initialState, startStateDiffing } = await initializeReactEmbeddableState<
-          SerializedState,
-          Api,
-          RuntimeState
-        >(uuid, factory, parentApi);
-
-        const buildApi = (
-          apiRegistration: ReactEmbeddableApiRegistration<SerializedState, Api>,
-          comparators: StateComparators<RuntimeState>
+        const setApi = (
+          apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, Api>
         ) => {
-          if (onAnyStateChange) {
-            /**
-             * To avoid unnecessary re-renders, only subscribe to the comparator publishing subjects if
-             * an `onAnyStateChange` callback is provided
-             */
-            const comparatorDefinitions: Array<
-              ComparatorDefinition<RuntimeState, keyof RuntimeState>
-            > = Object.values(comparators);
-            subscriptions.add(
-              combineLatest(comparatorDefinitions.map((comparator) => comparator[0]))
-                .pipe(
-                  skip(1),
-                  debounceTime(ON_STATE_CHANGE_DEBOUNCE),
-                  switchMap(() => {
-                    const isAsync =
-                      apiRegistration.serializeState.prototype?.name === 'AsyncFunction';
-                    return isAsync
-                      ? (apiRegistration.serializeState() as Promise<
-                          SerializedPanelState<SerializedState>
-                        >)
-                      : Promise.resolve(apiRegistration.serializeState());
-                  })
-                )
-                .subscribe((serializedState) => {
-                  onAnyStateChange(serializedState);
-                })
-            );
-          }
-
-          const { unsavedChanges, resetUnsavedChanges, cleanup, snapshotRuntimeState } =
-            startStateDiffing(comparators);
           const fullApi = {
             ...apiRegistration,
             uuid,
             phase$,
             parentApi,
-            unsavedChanges,
             type: factory.type,
-            resetUnsavedChanges,
-            snapshotRuntimeState,
           } as unknown as Api;
-          cleanupFunction.current = () => {
-            subscriptions.unsubscribe();
-            cleanup();
-          };
           onApiAvailable?.(fullApi);
           return fullApi;
         };
 
-        const { api, Component } = await factory.buildEmbeddable(
-          initialState,
-          buildApi,
-          uuid,
-          parentApi
-        );
+        const buildEmbeddable = async () => {
+          const { initialState, startStateDiffing } = await initializeReactEmbeddableState<
+            SerializedState,
+            Api,
+            RuntimeState
+          >(uuid, factory, parentApi);
 
-        if (apiPublishesDataLoading(api)) {
-          subscriptions.add(
-            api.dataLoading.subscribe((loading) => reportPhaseChange(Boolean(loading)))
+          const buildApi = (
+            apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, Api>,
+            comparators: StateComparators<RuntimeState>
+          ) => {
+            if (onAnyStateChange) {
+              /**
+               * To avoid unnecessary re-renders, only subscribe to the comparator publishing subjects if
+               * an `onAnyStateChange` callback is provided
+               */
+              const comparatorDefinitions: Array<
+                ComparatorDefinition<RuntimeState, keyof RuntimeState>
+              > = Object.values(comparators);
+              subscriptions.add(
+                combineLatest(comparatorDefinitions.map((comparator) => comparator[0]))
+                  .pipe(
+                    skip(1),
+                    debounceTime(ON_STATE_CHANGE_DEBOUNCE),
+                    switchMap(() => {
+                      const isAsync =
+                        apiRegistration.serializeState.prototype?.name === 'AsyncFunction';
+                      return isAsync
+                        ? (apiRegistration.serializeState() as Promise<
+                            SerializedPanelState<SerializedState>
+                          >)
+                        : Promise.resolve(apiRegistration.serializeState());
+                    })
+                  )
+                  .subscribe((serializedState) => {
+                    onAnyStateChange(serializedState);
+                  })
+              );
+            }
+
+            const { unsavedChanges, resetUnsavedChanges, cleanup, snapshotRuntimeState } =
+              startStateDiffing(comparators);
+
+            const fullApi = setApi({
+              ...apiRegistration,
+              unsavedChanges,
+              resetUnsavedChanges,
+              snapshotRuntimeState,
+            } as unknown as SetReactEmbeddableApiRegistration<SerializedState, Api>);
+
+            cleanupFunction.current = () => cleanup();
+            return fullApi;
+          };
+
+          const { api, Component } = await factory.buildEmbeddable(
+            initialState,
+            buildApi,
+            uuid,
+            parentApi,
+            setApi
           );
-        } else {
-          reportPhaseChange(false);
+
+          if (apiPublishesDataLoading(api)) {
+            subscriptions.add(
+              api.dataLoading.subscribe((loading) => reportPhaseChange(Boolean(loading)))
+            );
+          } else {
+            reportPhaseChange(false);
+          }
+
+          return { api, Component };
+        };
+
+        try {
+          const { api, Component } = await buildEmbeddable();
+          return React.forwardRef<typeof api>((_, ref) => {
+            // expose the api into the imperative handle
+            useImperativeHandle(ref, () => api, []);
+
+            return <Component />;
+          });
+        } catch (e) {
+          /**
+           * critical error encountered when trying to build the api / embeddable;
+           * since no API is available, create a dummy API that allows the panel to be deleted
+           * */
+          const errorApi = {
+            uuid,
+            blockingError: new BehaviorSubject(e),
+          } as unknown as Api;
+          if (apiIsPresentationContainer(parentApi)) {
+            errorApi.parentApi = parentApi;
+          }
+          return React.forwardRef<Api>((_, ref) => {
+            // expose the dummy error api into the imperative handle
+            useImperativeHandle(ref, () => errorApi, []);
+            return null;
+          });
         }
-
-        return React.forwardRef<typeof api>((_, ref) => {
-          // expose the api into the imperative handle
-          useImperativeHandle(ref, () => api, []);
-
-          return <Component />;
-        });
       })();
     },
     /**

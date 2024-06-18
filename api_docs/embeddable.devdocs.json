@@ -12900,7 +12900,7 @@
             ],
             "signature": [
               "(initialState: RuntimeState, buildApi: (apiRegistration: ",
-              "ReactEmbeddableApiRegistration",
+              "BuildReactEmbeddableApiRegistration",
               "<SerializedState, Api>, comparators: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
@@ -12909,7 +12909,9 @@
                 "section": "def-common.StateComparators",
                 "text": "StateComparators"
               },
-              "<RuntimeState>) => Api, uuid: string, parentApi?: unknown) => Promise<{ Component: React.FC<{}>; api: Api; }>"
+              "<RuntimeState>) => Api, uuid: string, parentApi: unknown, setApi: (api: ",
+              "SetReactEmbeddableApiRegistration",
+              "<SerializedState, Api>) => Api) => Promise<{ Component: React.FC<{}>; api: Api; }>"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
@@ -12939,7 +12941,7 @@
                 "description": [],
                 "signature": [
                   "(apiRegistration: ",
-                  "ReactEmbeddableApiRegistration",
+                  "BuildReactEmbeddableApiRegistration",
                   "<SerializedState, Api>, comparators: ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
@@ -12979,6 +12981,23 @@
                 "description": [],
                 "signature": [
                   "unknown"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableFactory.buildEmbeddable.$5",
+                "type": "Function",
+                "tags": [],
+                "label": "setApi",
+                "description": [],
+                "signature": [
+                  "(api: ",
+                  "SetReactEmbeddableApiRegistration",
+                  "<SerializedState, Api>) => Api"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
@@ -14022,10 +14041,6 @@
             {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/plugin.ts"
-            },
-            {
-              "plugin": "maps",
-              "path": "x-pack/plugins/maps/public/plugin.ts"
             }
           ],
           "returnComment": [],
@@ -14276,32 +14291,8 @@
               "path": "src/plugins/dashboard/public/plugin.tsx"
             },
             {
-              "plugin": "maps",
-              "path": "x-pack/plugins/maps/public/plugin.ts"
-            },
-            {
               "plugin": "discover",
               "path": "src/plugins/discover/public/plugin.tsx"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/observability_solution/infra/public/plugin.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
             },
             {
               "plugin": "links",
@@ -14696,14 +14687,6 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_renderer.tsx"
-            },
-            {
-              "plugin": "observabilityShared",
-              "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/profiling_embeddable.tsx"
-            },
-            {
-              "plugin": "observabilityShared",
-              "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx"
             },
             {
               "plugin": "dashboard",
