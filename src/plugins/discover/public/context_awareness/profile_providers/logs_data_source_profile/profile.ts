@@ -25,6 +25,18 @@ export const createLogsDataSourceProfileProvider = (
   profile: {
     getRowIndicatorProvider,
     getCellRenderers,
+    getDefaultAppState: (prev) => () => {
+      const prevState = prev();
+
+      return {
+        columns: [
+          ...(prevState?.columns ?? []),
+          { name: 'log.level', width: 100 },
+          { name: 'message' },
+        ],
+        rowHeight: 1,
+      };
+    },
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
