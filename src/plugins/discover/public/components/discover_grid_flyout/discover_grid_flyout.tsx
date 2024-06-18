@@ -31,12 +31,14 @@ import { Filter, Query, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-q
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
 import { useDiscoverCustomization } from '../../customizations';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
+import { useProfileAccessor } from '../../context_awareness';
 
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;
@@ -161,6 +163,29 @@ export function DiscoverGridFlyout({
     [onRemoveColumn, services.toastNotifications]
   );
 
+  const defaultFlyoutTitle = isEsqlQuery
+    ? i18n.translate('discover.grid.tableRow.docViewerEsqlDetailHeading', {
+        defaultMessage: 'Result',
+      })
+    : i18n.translate('discover.grid.tableRow.docViewerDetailHeading', {
+        defaultMessage: 'Document',
+      });
+
+  const getDocViewerAccessor = useProfileAccessor('getDocViewer', {
+    record: actualHit,
+  });
+  const docViewer = useMemo(() => {
+    const getDocViewer = getDocViewerAccessor(() => ({
+      title: flyoutCustomization?.title ?? defaultFlyoutTitle,
+      docViewsRegistry: (registry: DocViewsRegistry) =>
+        typeof flyoutCustomization?.docViewsRegistry === 'function'
+          ? flyoutCustomization.docViewsRegistry(registry)
+          : registry,
+    }));
+
+    return getDocViewer({ record: actualHit });
+  }, [defaultFlyoutTitle, flyoutCustomization, getDocViewerAccessor, actualHit]);
+
   const renderDefaultContent = useCallback(
     () => (
       <UnifiedDocViewer
@@ -172,7 +197,7 @@ export function DiscoverGridFlyout({
         onAddColumn={addColumn}
         onRemoveColumn={removeColumn}
         textBasedHits={isEsqlQuery ? hits : undefined}
-        docViewsRegistry={flyoutCustomization?.docViewsRegistry}
+        docViewsRegistry={docViewer.docViewsRegistry}
       />
     ),
     [
@@ -185,7 +210,7 @@ export function DiscoverGridFlyout({
       isEsqlQuery,
       onFilter,
       removeColumn,
-      flyoutCustomization?.docViewsRegistry,
+      docViewer.docViewsRegistry,
     ]
   );
 
@@ -207,15 +232,6 @@ export function DiscoverGridFlyout({
   ) : (
     renderDefaultContent()
   );
-
-  const defaultFlyoutTitle = isEsqlQuery
-    ? i18n.translate('discover.grid.tableRow.docViewerEsqlDetailHeading', {
-        defaultMessage: 'Result',
-      })
-    : i18n.translate('discover.grid.tableRow.docViewerDetailHeading', {
-        defaultMessage: 'Document',
-      });
-  const flyoutTitle = flyoutCustomization?.title ?? defaultFlyoutTitle;
 
   return (
     <EuiPortal>
@@ -252,7 +268,7 @@ export function DiscoverGridFlyout({
                   white-space: nowrap;
                 `}
               >
-                <h2>{flyoutTitle}</h2>
+                <h2>{docViewer.title}</h2>
               </EuiTitle>
             </EuiFlexItem>
             {activePage !== -1 && (
