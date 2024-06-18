@@ -69,7 +69,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
 
           const graph = await getEcsGraph(model);
 
-          let results: EcsMappingResponse;
+          let results;
           if (req.body?.mapping) {
             results = await graph.invoke({
               packageName,
@@ -83,7 +83,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
               datastreamName,
               rawSamples,
             });
-          return res.ok({ body: results });
+          return res.ok({ body: EcsMappingResponse.parse(results) });
         } catch (e) {
           return res.badRequest({ body: e });
         }

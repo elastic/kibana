@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import nunjucks from 'nunjucks';
 import { join as joinPath } from 'path';
+import nunjucks from 'nunjucks';
 import type { Integration } from '../../common';
-import { createSync, ensureDirSync } from '../util';
+import { ensureDirSync, createSync } from '../util';
 
 export function createPackageSystemTests(integrationDir: string, integration: Integration) {
   const systemTestsDockerDir = joinPath(integrationDir, '_dev/deploy/docker/');
