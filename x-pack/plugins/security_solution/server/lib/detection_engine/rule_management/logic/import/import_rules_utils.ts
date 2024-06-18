@@ -16,7 +16,7 @@ import type { RuleToImport } from '../../../../../../common/api/detection_engine
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
-import type { IDetectionRulesClient } from '../rule_management/detection_rules_client';
+import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 
 export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -94,9 +94,7 @@ export const importRules = async ({
                   exceptions_list: [...exceptions],
                 },
                 overwriteRules,
-                options: {
-                  allowMissingConnectorSecrets,
-                },
+                allowMissingConnectorSecrets,
               });
 
               resolve({

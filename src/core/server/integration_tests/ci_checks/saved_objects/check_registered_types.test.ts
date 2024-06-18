@@ -55,8 +55,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
 
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
-        "action": "cc93fe2c0c76e57c2568c63170e05daea897c136",
-        "action_task_params": "96e27e7f4e8273ffcd87060221e2b75e81912dd5",
+        "action": "0e6fc0b74c7312a8c11ff6b14437b93a997358b8",
+        "action_task_params": "b50cb5c8a493881474918e8d4985e61374ca4c30",
         "ad_hoc_run_params": "d4e3c5c794151d0a4f5c71e886b2aa638da73ad2",
         "alert": "3a67d3f1db80af36bd57aaea47ecfef87e43c58f",
         "api_key_pending_invalidation": "1399e87ca37b3d3a65d269c924eda70726cfe886",
@@ -113,7 +113,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ingest-agent-policies": "90625b4a5ded9d4867358fcccc14a57c0454fcee",
         "ingest-download-sources": "279a68147e62e4d8858c09ad1cf03bd5551ce58d",
         "ingest-outputs": "daafff49255ab700e07491376fe89f04fc998b91",
-        "ingest-package-policies": "44c682a6bf23993c665f0a60a427f3c120a0a10d",
+        "ingest-package-policies": "579cd432aa814145f59587354c0f55c71341e5dd",
         "ingest_manager_settings": "91445219e7115ff0c45d1dabd5d614a80b421797",
         "inventory-view": "b8683c8e352a286b4aca1ab21003115a4800af83",
         "kql-telemetry": "93c1d16c1a0dfca9c8842062cf5ef8f62ae401ad",
