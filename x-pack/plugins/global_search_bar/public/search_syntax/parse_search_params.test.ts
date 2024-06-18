@@ -49,10 +49,10 @@ describe('parseSearchParams', () => {
     });
   });
 
-  it('handles unknowns field clauses', () => {
+  it('adds unknowns field clauses to the search term', () => {
     const searchParams = parseSearchParams('tag:foo unknown:bar hello');
     expect(searchParams).toEqual({
-      term: 'hello',
+      term: 'hello unknown:bar',
       filters: {
         tags: ['foo'],
         unknowns: {
