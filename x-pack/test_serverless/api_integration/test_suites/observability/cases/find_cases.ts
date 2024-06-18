@@ -5,19 +5,28 @@
  * 2.0.
  */
 
+import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import expect from '@kbn/expect';
+import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const svlCases = getService('svlCases');
+  const svlUserManager = getService('svlUserManager');
 
   let findCasesResp: any;
-  let postCaseReq: any;
+  let postCaseReq: CasePostRequest;
 
   describe('find_cases', () => {
+    let roleAuthc: RoleCredentials;
     before(async () => {
       findCasesResp = svlCases.api.getFindCasesResp();
       postCaseReq = svlCases.api.getPostCaseReq('observability');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     afterEach(async () => {
@@ -25,16 +34,16 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return empty response', async () => {
-      const cases = await svlCases.api.findCases({});
+      const cases = await svlCases.api.findCases({}, roleAuthc);
       expect(cases).to.eql(findCasesResp);
     });
 
     it('should return cases', async () => {
-      const a = await svlCases.api.createCase(postCaseReq);
-      const b = await svlCases.api.createCase(postCaseReq);
-      const c = await svlCases.api.createCase(postCaseReq);
+      const a = await svlCases.api.createCase(postCaseReq, roleAuthc);
+      const b = await svlCases.api.createCase(postCaseReq, roleAuthc);
+      const c = await svlCases.api.createCase(postCaseReq, roleAuthc);
 
-      const cases = await svlCases.api.findCases({});
+      const cases = await svlCases.api.findCases({}, roleAuthc);
 
       expect(cases).to.eql({
         ...findCasesResp,
@@ -45,14 +54,22 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns empty response when trying to find cases with owner as cases', async () => {
-      const cases = await svlCases.api.findCases({ query: { owner: 'cases' } });
+      const cases = await svlCases.api.findCases(
+        {
+          query: { owner: 'cases' },
+        },
+        roleAuthc
+      );
       expect(cases).to.eql(findCasesResp);
     });
 
     it('returns empty response when trying to find cases with owner as securitySolution', async () => {
-      const cases = await svlCases.api.findCases({
-        query: { owner: 'securitySolution' },
-      });
+      const cases = await svlCases.api.findCases(
+        {
+          query: { owner: 'securitySolution' },
+        },
+        roleAuthc
+      );
       expect(cases).to.eql(findCasesResp);
     });
   });

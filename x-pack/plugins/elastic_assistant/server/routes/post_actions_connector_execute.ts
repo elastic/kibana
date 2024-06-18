@@ -17,16 +17,14 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
+import {
+  INVOKE_ASSISTANT_ERROR_EVENT,
+} from '../lib/telemetry/event_based_telemetry';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
-import {
-  appendAssistantMessageToConversation,
-  langChainExecute,
-  nonLangChainExecute,
-  updateConversationWithUserInput,
-} from './helpers';
+import { appendAssistantMessageToConversation, langChainExecute, nonLangChainExecute, updateConversationWithUserInput } from './helpers';
+
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -152,6 +150,7 @@ export const postActionsConnectorExecuteRoute = (
               telemetry,
             });
           }
+
           return await langChainExecute({
             abortSignal,
             actionsClient,

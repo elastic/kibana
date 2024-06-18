@@ -14,6 +14,7 @@ import { mockActionResponse } from './mocks';
 import { BaseMessage } from '@langchain/core/messages';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { parseBedrockStream } from '../utils/bedrock';
+import { parseGeminiStream } from '../utils/gemini';
 
 const connectorId = 'mock-connector-id';
 
@@ -93,6 +94,7 @@ const defaultArgs = {
   streaming: false,
 };
 jest.mock('../utils/bedrock');
+jest.mock('../utils/gemini');
 
 describe('ActionsClientSimpleChatModel', () => {
   beforeEach(() => {
@@ -215,6 +217,7 @@ describe('ActionsClientSimpleChatModel', () => {
   describe('_call streaming: true', () => {
     beforeEach(() => {
       (parseBedrockStream as jest.Mock).mockResolvedValue(mockActionResponse.message);
+      (parseGeminiStream as jest.Mock).mockResolvedValue(mockActionResponse.message);
     });
     it('returns the expected content when _call is invoked with streaming and llmType is Bedrock', async () => {
       const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel({
@@ -237,7 +240,7 @@ describe('ActionsClientSimpleChatModel', () => {
     it('returns the expected content when _call is invoked with streaming and llmType is Gemini', async () => {
       const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel({
         ...defaultArgs,
-        actions: mockActions,
+        actions: mockStreamActions,
         llmType: 'gemini',
         streaming: true,
       });
@@ -247,8 +250,8 @@ describe('ActionsClientSimpleChatModel', () => {
         callOptions,
         callRunManager
       );
-      const subAction = mockExecute.mock.calls[0][0].params.subAction;
-      expect(subAction).toEqual('invokeAI');
+      const subAction = mockStreamExecute.mock.calls[0][0].params.subAction;
+      expect(subAction).toEqual('invokeStream');
 
       expect(result).toEqual(mockActionResponse.message);
     });

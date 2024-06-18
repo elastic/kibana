@@ -26,12 +26,14 @@ paths:
               schema:
                 type: object
                 properties:
-                  name:
-                    type: string
                   status:
                     type: string
+                  id:
+                    type: string
+                    description: Fleet Server host id
                   host:
                     type: string
+                    deprecated: true
         '400':
           $ref: '#/components/responses/error'
       operationId: fleet-server-health-check
@@ -44,8 +46,13 @@ paths:
             schema:
               type: object
               properties:
+                id:
+                  type: string
                 host:
                   type: string
+                  deprecated: true
+              required:
+                - id
   /setup:
     post:
       summary: Initiate Fleet setup
@@ -391,6 +398,8 @@ paths:
                 required:
                   - items
         '400':
+          $ref: '#/components/responses/error'
+        '429':
           $ref: '#/components/responses/error'
       operationId: install-package-by-upload
       description: ''
@@ -4821,6 +4830,11 @@ components:
               - enabled
         policy_id:
           type: string
+          deprecated: true
+        policy_ids:
+          type: array
+          items:
+            type: string
         name:
           type: string
         description:
@@ -5296,6 +5310,14 @@ components:
           type: string
           description: Agent policy ID where that package policy will be added
           example: agent-policy-id
+          deprecated: true
+        policy_ids:
+          type: array
+          items:
+            type: string
+          description: Agent policy IDs where that package policy will be added
+          example:
+            - agent-policy-id
         package:
           type: object
           properties:
@@ -5377,7 +5399,6 @@ components:
             the agent policy is managed.
       required:
         - name
-        - policy_id
         - package
     upgrade_diff:
       title: Package policy Upgrade dryrun

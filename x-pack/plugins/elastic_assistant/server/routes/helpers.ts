@@ -45,6 +45,7 @@ import {
   ElasticAssistantRequestHandlerContext,
   GetElser,
 } from '../types';
+import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
 
 interface GetPluginNameFromRequestParams {
   request: KibanaRequest;
@@ -156,10 +157,13 @@ export const generateTitleForNewChatConversation = async ({
           model,
           messages: [
             {
-              role: 'assistant',
+              role: 'system',
               content: `You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Please create the title in ${responseLanguage}.`,
             },
-            message,
+            {
+              role: message.role,
+              content: message.content,
+            },
           ],
           ...(actionTypeId === '.gen-ai'
             ? { n: 1, stop: null, temperature: 0.2 }
@@ -401,7 +405,7 @@ export const langChainExecute = async ({
     kbDataClient
   );
 
-  const result: StreamResponseWithHeaders | StaticReturnType = await callAgentExecutor({
+  const executorParams = {
     abortSignal,
     alertsIndexPattern: request.body.alertsIndexPattern,
     anonymizationFields: anonymizationFieldsRes
@@ -430,7 +434,16 @@ export const langChainExecute = async ({
         logger,
       }),
     },
-  });
+  };
+
+  // New code path for LangGraph implementation, behind `assistantKnowledgeBaseByDefault` FF
+  let result: StreamResponseWithHeaders | StaticReturnType;
+  if (enableKnowledgeBaseByDefault) {
+    result = await callAssistantGraph(executorParams);
+  } else {
+    result = await callAgentExecutor(executorParams);
+  }
+
 
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
@@ -583,6 +596,8 @@ export const updateConversationWithUserInput = async ({
   }));
 
   const lastMessage = newMessages?.[0] ?? messages?.[0];
+  console.log(conversation?.title)
+  console.log(lastMessage)
 
   if (conversation?.title === NEW_CHAT && lastMessage) {
     const title = await generateTitleForNewChatConversation({
