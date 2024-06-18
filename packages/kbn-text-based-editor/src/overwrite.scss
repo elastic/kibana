@@ -21,9 +21,13 @@
 }
 
 // Suggest (autocomplete) menu
-.TextBasedLangEditor .monaco-editor .suggest-widget {
+.TextBasedLangEditor .monaco-editor .suggest-widget, .TextBasedLangEditor .monaco-editor .suggest-details-container {
   @include euiBottomShadow;
   border-radius: $euiBorderRadius;
+}
+
+.TextBasedLangEditor .monaco-editor .suggest-details-container {
+  background-color: $euiColorEmptyShade;
 }
 
 .TextBasedLangEditor_errorMessage {

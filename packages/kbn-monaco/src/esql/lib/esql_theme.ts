@@ -145,7 +145,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     'editor.selectionHighlightBorder': euiThemeVars.euiColorLightShade,
     'editorSuggestWidget.background': euiThemeVars.euiColorEmptyShade,
     'editorSuggestWidget.border': euiThemeVars.euiColorEmptyShade,
-    'editorSuggestWidget.foreground': euiThemeVars.euiTextSubduedColor,
+    'editorSuggestWidget.foreground': euiThemeVars.euiTextColor,
     'editorSuggestWidget.selectedBackground': euiThemeVars.euiColorPrimary,
     'editorSuggestWidget.selectedForeground': euiThemeVars.euiColorEmptyShade,
   },
