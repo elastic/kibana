@@ -84,7 +84,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
 
   echo "Writing to vault..."
 
-  set_kv_in_legacy_vault "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" \
+  set_in_legacy_vault "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" \
     username="$CLOUD_DEPLOYMENT_USERNAME" \
     password="$CLOUD_DEPLOYMENT_PASSWORD"
 
