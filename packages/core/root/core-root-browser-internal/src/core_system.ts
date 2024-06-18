@@ -38,6 +38,7 @@ import { PluginsService } from '@kbn/core-plugins-browser-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
+import { HelpCenterService } from '@kbn/core-help-center-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
@@ -107,6 +108,7 @@ export class CoreSystem {
   private readonly customBranding: CustomBrandingService;
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
+  private readonly helpCenter: HelpCenterService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: CoreSystemParams) {
@@ -154,6 +156,7 @@ export class CoreSystem {
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreAppsService(this.coreContext);
     this.customBranding = new CustomBrandingService();
+    this.helpCenter = new HelpCenterService();
 
     performance.mark(KBN_LOAD_MARKS, {
       detail: LOAD_CORE_CREATED,
@@ -247,6 +250,7 @@ export class CoreSystem {
       const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings, analytics });
       const customBranding = this.customBranding.setup({ injectedMetadata });
+      const helpCenter = this.helpCenter.setup();
 
       const application = this.application.setup({ http, analytics });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
@@ -255,6 +259,7 @@ export class CoreSystem {
         analytics,
         application,
         fatalErrors: this.fatalErrorsSetup,
+        helpCenter,
         http,
         injectedMetadata,
         notifications,
@@ -344,6 +349,7 @@ export class CoreSystem {
         customBranding,
       });
       const deprecations = this.deprecations.start({ http });
+      const helpCenter = this.helpCenter.start();
 
       this.coreApp.start({
         application,
@@ -362,6 +368,7 @@ export class CoreSystem {
         chrome,
         docLinks,
         executionContext,
+        helpCenter,
         http,
         theme,
         savedObjects,
@@ -391,6 +398,7 @@ export class CoreSystem {
         application,
         chrome,
         analytics,
+        helpCenter,
         i18n,
         overlays,
         theme,

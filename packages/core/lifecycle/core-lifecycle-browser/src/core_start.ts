@@ -24,6 +24,7 @@ import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { PluginsServiceStart } from '@kbn/core-plugins-contracts-browser';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
+import { HelpCenterStart } from '@kbn/core-help-center-browser';
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
@@ -47,6 +48,8 @@ export interface CoreStart {
   docLinks: DocLinksStart;
   /** {@link ExecutionContextStart} */
   executionContext: ExecutionContextStart;
+  /** {@link HelpCenterStart} */
+  helpCenter: HelpCenterStart;
   /** {@link HttpStart} */
   http: HttpStart;
   /**
