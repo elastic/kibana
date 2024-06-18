@@ -53,6 +53,7 @@ export const PACKAGE_POLICIES_MAPPINGS = {
     enabled: { type: 'boolean' },
     is_managed: { type: 'boolean' },
     policy_id: { type: 'keyword' },
+    policy_ids: { type: 'keyword' },
     package: {
       properties: {
         name: { type: 'keyword' },

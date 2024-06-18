@@ -16,7 +16,7 @@ const LATEST_FINDINGS_TRANSFORM_V830 = 'cloud_security_posture.findings_latest-d
 const LATEST_FINDINGS_TRANSFORM_V840 = 'cloud_security_posture.findings_latest-default-8.4.0';
 const LATEST_FINDINGS_TRANSFORM_V880 = 'cloud_security_posture.findings_latest-default-8.8.0';
 
-const CURRENT_FINDINGS_TRANSFORM = 'cloud_security_posture.findings_latest-default-8.15.0';
+const CURRENT_FINDINGS_TRANSFORM_VERSION = 'cloud_security_posture.findings_latest-default-8.15.0';
 
 export const DEPRECATED_FINDINGS_TRANSFORMS_VERSION = [
   LATEST_FINDINGS_TRANSFORM_V830,
@@ -25,7 +25,7 @@ export const DEPRECATED_FINDINGS_TRANSFORMS_VERSION = [
 ];
 
 export const latestFindingsTransform: TransformPutTransformRequest = {
-  transform_id: CURRENT_FINDINGS_TRANSFORM,
+  transform_id: CURRENT_FINDINGS_TRANSFORM_VERSION,
   description: 'Defines findings transformation to view only the latest finding per resource',
   source: {
     index: FINDINGS_INDEX_PATTERN,

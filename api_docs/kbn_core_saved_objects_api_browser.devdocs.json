@@ -139,19 +139,19 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "canvas",

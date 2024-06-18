@@ -11,12 +11,11 @@ import {
   EuiCheckbox,
   EuiFieldSearch,
   EuiFormRow,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -370,7 +369,9 @@ export const Expressions: React.FC<Props> = (props) => {
                 {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
                   defaultMessage: "Alert me if there's no data",
                 })}{' '}
-                <EuiToolTip
+                <EuiIconTip
+                  type="questionInCircle"
+                  color="subdued"
                   content={
                     (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
                     i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
@@ -378,9 +379,7 @@ export const Expressions: React.FC<Props> = (props) => {
                         'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
                     })
                   }
-                >
-                  <EuiIcon type="questionInCircle" color="subdued" />
-                </EuiToolTip>
+                />
               </>
             }
             checked={ruleParams.alertOnNoData}
@@ -471,7 +470,9 @@ export const Expressions: React.FC<Props> = (props) => {
             {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnGroupDisappear', {
               defaultMessage: 'Alert me if a group stops reporting data',
             })}{' '}
-            <EuiToolTip
+            <EuiIconTip
+              type="questionInCircle"
+              color="subdued"
               content={
                 (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
                 i18n.translate('xpack.infra.metrics.alertFlyout.groupDisappearHelpText', {
@@ -479,9 +480,7 @@ export const Expressions: React.FC<Props> = (props) => {
                     'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
                 })
               }
-            >
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
+            />
           </>
         }
         disabled={!hasGroupBy}

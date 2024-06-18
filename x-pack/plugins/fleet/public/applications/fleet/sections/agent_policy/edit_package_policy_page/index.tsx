@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { omit } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,6 +19,7 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 
+import { useSetIsReadOnly } from '../../../../integrations/hooks/use_read_only_context';
 import {
   useLink,
   useBreadcrumbs,
@@ -103,7 +104,7 @@ export const EditPackagePolicyForm = memo<{
 
   const {
     // data
-    agentPolicy,
+    agentPolicies,
     isLoadingData,
     loadingError,
     packagePolicy,
@@ -125,7 +126,7 @@ export const EditPackagePolicyForm = memo<{
   });
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
-
+  useSetIsReadOnly(canWriteIntegrationPolicies);
   const newSecrets = useMemo(() => {
     if (!packageInfo) {
       return [];
@@ -134,22 +135,26 @@ export const EditPackagePolicyForm = memo<{
     return getNewSecrets({ packageInfo, packagePolicy });
   }, [packageInfo, packagePolicy]);
 
-  const policyId = agentPolicy?.id ?? '';
+  const policyIds = agentPolicies.map((policy) => policy.id);
 
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
   useEffect(() => {
     const getAgentCount = async () => {
-      const { data } = await sendGetAgentStatus({ policyId });
-      if (data?.results.total) {
-        setAgentCount(data.results.total);
+      let count = 0;
+      for (const policyId of policyIds) {
+        const { data } = await sendGetAgentStatus({ policyId });
+        if (data?.results.total) {
+          count += data.results.total;
+        }
       }
+      setAgentCount(count);
     };
 
-    if (isFleetEnabled && policyId) {
+    if (isFleetEnabled && policyIds.length > 0) {
       getAgentCount();
     }
-  }, [policyId, isFleetEnabled]);
+  }, [policyIds, isFleetEnabled]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
@@ -170,25 +175,25 @@ export const EditPackagePolicyForm = memo<{
   //  if `from === 'edit'` then it links back to Policy Details
   //  if `from === 'package-edit'`, or `upgrade-from-integrations-policy-list` then it links back to the Integration Policy List
   const cancelUrl = useMemo((): string => {
-    if (packageInfo && policyId) {
+    if (packageInfo && policyIds.length > 0) {
       return from === 'package-edit'
         ? getHref('integration_details_policies', {
             pkgkey: pkgKeyFromPackageInfo(packageInfo!),
           })
-        : getHref('policy_details', { policyId });
+        : getHref('policy_details', { policyId: policyIds[0] });
     }
     return '/';
-  }, [from, getHref, packageInfo, policyId]);
+  }, [from, getHref, packageInfo, policyIds]);
   const successRedirectPath = useMemo(() => {
-    if (packageInfo && policyId) {
+    if (packageInfo && policyIds.length > 0) {
       return from === 'package-edit' || from === 'upgrade-from-integrations-policy-list'
         ? getHref('integration_details_policies', {
             pkgkey: pkgKeyFromPackageInfo(packageInfo!),
           })
-        : getHref('policy_details', { policyId });
+        : getHref('policy_details', { policyId: policyIds[0] });
     }
     return '/';
-  }, [from, getHref, packageInfo, policyId]);
+  }, [from, getHref, packageInfo, policyIds]);
 
   useHistoryBlock(isEdited);
 
@@ -197,7 +202,7 @@ export const EditPackagePolicyForm = memo<{
       setFormState('INVALID');
       return;
     }
-    if (agentCount !== 0 && policyId !== AGENTLESS_POLICY_ID && formState !== 'CONFIRM') {
+    if (agentCount !== 0 && !policyIds.includes(AGENTLESS_POLICY_ID) && formState !== 'CONFIRM') {
       setFormState('CONFIRM');
       return;
     }
@@ -215,11 +220,11 @@ export const EditPackagePolicyForm = memo<{
         }),
         'data-test-subj': 'policyUpdateSuccessToast',
         text:
-          agentCount && agentPolicy
+          agentCount && agentPolicies.length > 0
             ? i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the ''{agentPolicyName}'' policy`,
+                defaultMessage: `Fleet will deploy updates to all agents that use the ''{agentPolicyNames}'' policy`,
                 values: {
-                  agentPolicyName: agentPolicy.name,
+                  agentPolicyNames: agentPolicies.map((policy) => policy.name).join(', '),
                 },
               })
             : undefined,
@@ -276,7 +281,7 @@ export const EditPackagePolicyForm = memo<{
   const layoutProps = {
     from: extensionView?.useLatestPackageVersion && isUpgrade ? 'upgrade-from-extension' : from,
     cancelUrl,
-    agentPolicy,
+    agentPolicies,
     packageInfo,
     tabs: tabsViews?.length
       ? [
@@ -302,11 +307,11 @@ export const EditPackagePolicyForm = memo<{
 
   const configurePackage = useMemo(
     () =>
-      agentPolicy && packageInfo ? (
+      agentPolicies && packageInfo ? (
         <>
           {selectedTab === 0 && (
             <StepDefinePackagePolicy
-              agentPolicy={agentPolicy}
+              agentPolicies={agentPolicies}
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
@@ -329,7 +334,7 @@ export const EditPackagePolicyForm = memo<{
           )}
 
           {extensionView &&
-            packagePolicy.policy_id &&
+            packagePolicy.policy_ids[0] &&
             packagePolicy.package?.name &&
             originalPackagePolicy && (
               <ExtensionWrapper>
@@ -351,7 +356,7 @@ export const EditPackagePolicyForm = memo<{
         </>
       ) : null,
     [
-      agentPolicy,
+      agentPolicies,
       packageInfo,
       packagePolicy,
       updatePackagePolicy,
@@ -368,7 +373,7 @@ export const EditPackagePolicyForm = memo<{
   const replaceConfigurePackage = replaceDefineStepView && originalPackagePolicy && packageInfo && (
     <ExtensionWrapper>
       <replaceDefineStepView.Component
-        agentPolicy={agentPolicy}
+        agentPolicy={agentPolicies[0]}
         packageInfo={packageInfo}
         policy={originalPackagePolicy}
         newPolicy={packagePolicy}
@@ -401,7 +406,7 @@ export const EditPackagePolicyForm = memo<{
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
-        ) : loadingError || !agentPolicy || !packageInfo ? (
+        ) : loadingError || isEmpty(agentPolicies) || !packageInfo ? (
           <ErrorComponent
             title={
               <FormattedMessage
@@ -419,17 +424,17 @@ export const EditPackagePolicyForm = memo<{
         ) : (
           <>
             <Breadcrumb
-              agentPolicyName={agentPolicy.name}
+              agentPolicyName={agentPolicies[0].name}
               from={from}
               packagePolicyName={packagePolicy.name}
               pkgkey={pkgKeyFromPackageInfo(packageInfo)}
               pkgTitle={packageInfo.title}
-              policyId={policyId}
+              policyId={policyIds[0]}
             />
             {formState === 'CONFIRM' && (
               <ConfirmDeployAgentPolicyModal
                 agentCount={agentCount}
-                agentPolicy={agentPolicy}
+                agentPolicies={agentPolicies}
                 onConfirm={onSubmit}
                 onCancel={() => setFormState('VALID')}
               />
@@ -453,7 +458,7 @@ export const EditPackagePolicyForm = memo<{
             <EuiBottomBar>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  {agentPolicy && packageInfo && formState === 'INVALID' ? (
+                  {agentPolicies && packageInfo && formState === 'INVALID' ? (
                     <FormattedMessage
                       id="xpack.fleet.createPackagePolicy.errorOnSaveText"
                       defaultMessage="Your integration policy has errors. Please fix them before saving."

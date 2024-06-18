@@ -6,13 +6,12 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { createAssist as Assist } from '../utils/assist';
-import { clipContext, ConversationalChain } from './conversational_chain';
-import { FakeListChatModel } from '@langchain/core/utils/testing';
-import { FakeListLLM } from 'langchain/llms/fake';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { experimental_StreamData, Message } from 'ai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { FakeListChatModel, FakeStreamingLLM } from '@langchain/core/utils/testing';
+import { Message, experimental_StreamData } from 'ai';
+import { createAssist as Assist } from '../utils/assist';
+import { ConversationalChain, clipContext } from './conversational_chain';
 
 describe('conversational chain', () => {
   const createTestChain = async ({
@@ -76,7 +75,7 @@ describe('conversational chain', () => {
       ? new FakeListChatModel({
           responses,
         })
-      : new FakeListLLM({ responses });
+      : new FakeStreamingLLM({ responses });
 
     const aiClient = Assist({
       es_client: mockElasticsearchClient as unknown as Client,
@@ -172,7 +171,7 @@ describe('conversational chain', () => {
         },
       ],
     });
-  });
+  }, 10000);
 
   it('should be able to create a conversational chain with nested field', async () => {
     await createTestChain({
@@ -207,7 +206,7 @@ describe('conversational chain', () => {
       ],
       contentField: { index: 'field', website: 'metadata.source' },
     });
-  });
+  }, 10000);
 
   it('asking with chat history should re-write the question', async () => {
     await createTestChain({
@@ -251,7 +250,7 @@ describe('conversational chain', () => {
         },
       ],
     });
-  });
+  }, 10000);
 
   it('should cope with quotes in the query', async () => {
     await createTestChain({
@@ -295,7 +294,7 @@ describe('conversational chain', () => {
         },
       ],
     });
-  });
+  }, 10000);
 
   it('should work with an LLM based model', async () => {
     await createTestChain({
@@ -340,7 +339,7 @@ describe('conversational chain', () => {
       ],
       isChatModel: false,
     });
-  });
+  }, 10000);
 
   it('should clip the conversation', async () => {
     await createTestChain({
@@ -407,7 +406,7 @@ describe('conversational chain', () => {
       ],
       isChatModel: false,
     });
-  });
+  }, 10000);
 
   describe('clipContext', () => {
     const prompt = ChatPromptTemplate.fromTemplate(

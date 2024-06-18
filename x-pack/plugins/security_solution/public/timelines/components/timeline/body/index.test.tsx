@@ -38,6 +38,7 @@ import type {
   DroppableProvided,
   DroppableStateSnapshot,
 } from '@hello-pangea/dnd';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
@@ -94,6 +95,13 @@ jest.mock('react-redux', () => {
   return {
     ...original,
     useDispatch: () => mockDispatch,
+  };
+});
+
+const mockOpenFlyout = jest.fn();
+jest.mock('@kbn/expandable-flyout', () => {
+  return {
+    useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
   };
 });
 
@@ -415,66 +423,58 @@ describe('Body', () => {
     beforeEach(() => {
       mockDispatch.mockReset();
     });
-    test('call the right reduce action to show event details for query tab', async () => {
+
+    test('open the expandable flyout to show event details for query tab', async () => {
       const wrapper = await getWrapper(<StatefulBody {...props} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
-        payload: {
-          id: 'timeline-test',
-          panelView: 'eventDetail',
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: DocumentDetailsRightPanelKey,
           params: {
-            eventId: '1',
+            id: '1',
             indexName: undefined,
-            refetch: mockRefetch,
+            scopeId: 'timeline-test',
           },
-          tabType: 'query',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
-    test('call the right reduce action to show event details for pinned tab', async () => {
+    test('open the expandable flyout to show event details for pinned tab', async () => {
       const wrapper = await getWrapper(<StatefulBody {...props} tabType={TimelineTabs.pinned} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
-        payload: {
-          id: 'timeline-test',
-          panelView: 'eventDetail',
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: DocumentDetailsRightPanelKey,
           params: {
-            eventId: '1',
+            id: '1',
             indexName: undefined,
-            refetch: mockRefetch,
+            scopeId: 'timeline-test',
           },
-          tabType: 'pinned',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
-    test('call the right reduce action to show event details for notes tab', async () => {
+    test('open the expandable flyout to show event details for notes tab', async () => {
       const wrapper = await getWrapper(<StatefulBody {...props} tabType={TimelineTabs.notes} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
-        payload: {
-          id: 'timeline-test',
-          panelView: 'eventDetail',
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: DocumentDetailsRightPanelKey,
           params: {
-            eventId: '1',
+            id: '1',
             indexName: undefined,
-            refetch: mockRefetch,
+            scopeId: 'timeline-test',
           },
-          tabType: 'notes',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
   });
