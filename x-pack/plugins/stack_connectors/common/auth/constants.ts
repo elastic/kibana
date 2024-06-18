@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum WebhookAuthType {
+export enum AuthType {
   Basic = 'webhook-authentication-basic',
   SSL = 'webhook-authentication-ssl',
 }
@@ -13,4 +13,10 @@ export enum WebhookAuthType {
 export enum SSLCertType {
   CRT = 'ssl-crt-key',
   PFX = 'ssl-pfx',
+}
+
+export enum WebhookMethods {
+  PATCH = 'patch',
+  POST = 'post',
+  PUT = 'put',
 }
