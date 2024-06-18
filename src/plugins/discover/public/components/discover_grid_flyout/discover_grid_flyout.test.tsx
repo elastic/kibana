@@ -503,7 +503,7 @@ describe('Discover flyout', function () {
           processRecord: (record) => services.profilesManager.resolveDocumentProfile({ record }),
         });
         const { component } = await mountComponent({ records, services });
-        const title = findTestSubject(component, 'docTableRowDetailsTitle');
+        const title = findTestSubject(component, 'docViewerRowDetailsTitle');
         expect(title.text()).toBe('Document #new::1::');
         const content = findTestSubject(component, 'kbnDocViewer');
         expect(content.text()).toBe('Mock tab');
