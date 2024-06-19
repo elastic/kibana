@@ -99,18 +99,21 @@ describe('8.15.0 Endpoint Package Policy migration', () => {
         },
         events: {
           deduplicate_network_events: false,
+          ancestry_in_all_events: true,
           process_ancestry_length: 20,
         },
       });
       expect(migratedPolicyConfig.linux.advanced).toEqual({
         events: {
           deduplicate_network_events: false,
+          ancestry_in_all_events: true,
           process_ancestry_length: 20,
         },
       });
       expect(migratedPolicyConfig.mac.advanced).toEqual({
         events: {
           deduplicate_network_events: false,
+          ancestry_in_all_events: true,
           process_ancestry_length: 20,
         },
       });
@@ -135,14 +138,17 @@ describe('8.15.0 Endpoint Package Policy migration', () => {
       expectedPolicyConfig.windows.advanced.events = {
         deduplicate_network_events: false,
         process_ancestry_length: 20,
+        ancestry_in_all_events: true,
       };
       expectedPolicyConfig.linux.advanced.events = {
         deduplicate_network_events: false,
         process_ancestry_length: 20,
+        ancestry_in_all_events: true,
       };
       expectedPolicyConfig.mac.advanced.events = {
         deduplicate_network_events: false,
         process_ancestry_length: 20,
+        ancestry_in_all_events: true,
       };
 
       const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
@@ -180,10 +186,13 @@ describe('8.15.0 Endpoint Package Policy migration', () => {
       expectedPolicyConfig.windows.advanced.kernel.network_report_loopback = true;
       expectedPolicyConfig.windows.advanced.events.deduplicate_network_events = false;
       expectedPolicyConfig.windows.advanced.events.process_ancestry_length = 20;
+      expectedPolicyConfig.windows.advanced.events.ancestry_in_all_events = true;
       expectedPolicyConfig.linux.advanced.events.deduplicate_network_events = false;
       expectedPolicyConfig.linux.advanced.events.process_ancestry_length = 20;
+      expectedPolicyConfig.linux.advanced.events.ancestry_in_all_events = true;
       expectedPolicyConfig.mac.advanced.events.deduplicate_network_events = false;
       expectedPolicyConfig.mac.advanced.events.process_ancestry_length = 20;
+      expectedPolicyConfig.mac.advanced.events.ancestry_in_all_events = true;
 
       const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
         document: originalPolicyConfigSO,
@@ -204,18 +213,21 @@ describe('8.15.0 Endpoint Package Policy migration', () => {
         events: {
           deduplicate_network_events: true,
           process_ancestry_length: 10,
+          ancestry_in_all_events: false,
         },
       };
       originalPolicyConfig.linux.advanced = {
         events: {
           deduplicate_network_events: true,
           process_ancestry_length: 10,
+          ancestry_in_all_events: false,
         },
       };
       originalPolicyConfig.mac.advanced = {
         events: {
           deduplicate_network_events: true,
           process_ancestry_length: 10,
+          ancestry_in_all_events: false,
         },
       };
       const expectedPolicyConfig = cloneDeep(originalPolicyConfig);

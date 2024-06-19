@@ -1319,6 +1319,39 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.ancestry_in_all_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.ancestry_in_all_events',
+      {
+        defaultMessage:
+          'Include ancestor process entity IDs in all event types, by default it is only included in alerts and process events. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.ancestry_in_all_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.ancestry_in_all_events',
+      {
+        defaultMessage:
+          'Include ancestor process entity IDs in all event types, by default it is only included in alerts and process events. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.ancestry_in_all_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.ancestry_in_all_events',
+      {
+        defaultMessage:
+          'Include ancestor process entity IDs in all event types, by default it is only included in alerts and process events. Default: false',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.artifacts.global.proxy_url',
     first_supported_version: '8.8',
     documentation: i18n.translate(

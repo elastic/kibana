@@ -36,6 +36,7 @@ export const migratePackagePolicyToV8150: SavedObjectModelDataBackfillFn<
       events: {
         deduplicate_network_events: false,
         process_ancestry_length: 20,
+        ancestry_in_all_events: true,
         ...policy.windows.advanced?.events,
       },
     };
@@ -45,6 +46,7 @@ export const migratePackagePolicyToV8150: SavedObjectModelDataBackfillFn<
       events: {
         deduplicate_network_events: false,
         process_ancestry_length: 20,
+        ancestry_in_all_events: true,
         ...policy.linux.advanced?.events,
       },
     };
@@ -54,6 +56,7 @@ export const migratePackagePolicyToV8150: SavedObjectModelDataBackfillFn<
       events: {
         deduplicate_network_events: false,
         process_ancestry_length: 20,
+        ancestry_in_all_events: true,
         ...policy.mac.advanced?.events,
       },
     };
