@@ -6,17 +6,18 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { useSetupKnowledgeBase, UseSetupKnowledgeBaseParams } from './use_setup_knowledge_base';
-import { postKnowledgeBase as _postKnowledgeBase } from '../assistant/api';
+import { useDeleteKnowledgeBase, UseDeleteKnowledgeBaseParams } from './use_delete_knowledge_base';
+import { deleteKnowledgeBase as _deleteKnowledgeBase } from './api';
 import { useMutation as _useMutation } from '@tanstack/react-query';
 
-const postKnowledgeBaseMock = _postKnowledgeBase as jest.Mock;
 const useMutationMock = _useMutation as jest.Mock;
-jest.mock('../assistant/api', () => {
-  const actual = jest.requireActual('../assistant/api');
+const deleteKnowledgeBaseMock = _deleteKnowledgeBase as jest.Mock;
+
+jest.mock('./api', () => {
+  const actual = jest.requireActual('./api');
   return {
     ...actual,
-    postKnowledgeBase: jest.fn((...args) => actual.postKnowledgeBase(...args)),
+    deleteKnowledgeBase: jest.fn((...args) => actual.deleteKnowledgeBase(...args)),
   };
 });
 jest.mock('./use_knowledge_base_status');
@@ -42,28 +43,29 @@ const http = {
 const toasts = {
   addError: jest.fn(),
 };
-const defaultProps = { http, toasts } as unknown as UseSetupKnowledgeBaseParams;
+const defaultProps = { http, toasts } as unknown as UseDeleteKnowledgeBaseParams;
 
-describe('useSetupKnowledgeBase', () => {
+describe('useDeleteKnowledgeBase', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('should call api to post knowledge base setup', async () => {
+  it('should call api to delete knowledge base', async () => {
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useSetupKnowledgeBase(defaultProps));
+      const { waitForNextUpdate } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
       await waitForNextUpdate();
 
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/',
         {
-          method: 'POST',
+          method: 'DELETE',
+          signal: undefined,
           version: '1',
         }
       );
       expect(toasts.addError).not.toHaveBeenCalled();
     });
   });
-  it('should call api to post knowledge base setup with resource arg', async () => {
+  it('should call api to delete knowledge base with resource arg', async () => {
     useMutationMock.mockImplementation(async (queryKey, fn, opts) => {
       try {
         const res = await fn('something');
@@ -73,22 +75,23 @@ describe('useSetupKnowledgeBase', () => {
       }
     });
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useSetupKnowledgeBase(defaultProps));
+      const { waitForNextUpdate } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
       await waitForNextUpdate();
 
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/something',
         {
-          method: 'POST',
+          method: 'DELETE',
+          signal: undefined,
           version: '1',
         }
       );
     });
   });
 
-  it('should return setup response', async () => {
+  it('should return delete response', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSetupKnowledgeBase(defaultProps));
+      const { result, waitForNextUpdate } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
       await waitForNextUpdate();
 
       await expect(result.current).resolves.toStrictEqual(statusResponse);
@@ -96,9 +99,9 @@ describe('useSetupKnowledgeBase', () => {
   });
 
   it('should display error toast when api throws error', async () => {
-    postKnowledgeBaseMock.mockRejectedValue(new Error('this is an error'));
+    deleteKnowledgeBaseMock.mockRejectedValue(new Error('this is an error'));
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useSetupKnowledgeBase(defaultProps));
+      const { waitForNextUpdate } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
       await waitForNextUpdate();
 
       expect(toasts.addError).toHaveBeenCalled();

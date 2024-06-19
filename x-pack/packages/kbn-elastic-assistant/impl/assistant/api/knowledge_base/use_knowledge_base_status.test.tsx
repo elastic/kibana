@@ -7,12 +7,12 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useKnowledgeBaseStatus, UseKnowledgeBaseStatusParams } from './use_knowledge_base_status';
-import { getKnowledgeBaseStatus as _getKnowledgeBaseStatus } from '../assistant/api';
+import { getKnowledgeBaseStatus as _getKnowledgeBaseStatus } from './api';
 
 const getKnowledgeBaseStatusMock = _getKnowledgeBaseStatus as jest.Mock;
 
-jest.mock('../assistant/api', () => {
-  const actual = jest.requireActual('../assistant/api');
+jest.mock('./api', () => {
+  const actual = jest.requireActual('./api');
   return {
     ...actual,
     getKnowledgeBaseStatus: jest.fn((...args) => actual.getKnowledgeBaseStatus(...args)),
