@@ -24,7 +24,7 @@ export interface InternalState {
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
-  shouldUseDefaultProfileState: boolean;
+  resetDefaultProfileState: { columns: boolean; rowHeight: boolean };
 }
 
 export interface InternalStateTransitions {
@@ -49,9 +49,9 @@ export interface InternalStateTransitions {
     overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined
   ) => InternalState;
   resetOnSavedSearchChange: (state: InternalState) => () => InternalState;
-  setShouldUseDefaultProfileState: (
+  setResetDefaultProfileState: (
     state: InternalState
-  ) => (shouldUseDefaultProfileState: boolean) => InternalState;
+  ) => (resetDefaultProfileState: InternalState['resetDefaultProfileState']) => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -72,7 +72,7 @@ export function getInternalStateContainer() {
       expandedDoc: undefined,
       customFilters: [],
       overriddenVisContextAfterInvalidation: undefined,
-      shouldUseDefaultProfileState: false,
+      resetDefaultProfileState: { columns: false, rowHeight: false },
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -139,10 +139,11 @@ export function getInternalStateContainer() {
         overriddenVisContextAfterInvalidation: undefined,
         expandedDoc: undefined,
       }),
-      setShouldUseDefaultProfileState:
-        (prevState: InternalState) => (shouldUseDefaultProfileState: boolean) => ({
+      setResetDefaultProfileState:
+        (prevState: InternalState) =>
+        (resetDefaultProfileState: InternalState['resetDefaultProfileState']) => ({
           ...prevState,
-          shouldUseDefaultProfileState,
+          resetDefaultProfileState,
         }),
     },
     {},

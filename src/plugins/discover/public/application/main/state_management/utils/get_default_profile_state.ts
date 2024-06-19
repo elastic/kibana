@@ -9,30 +9,44 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '../discover_app_state_container';
-import { getMergedAccessor, ProfilesManager } from '../../../../context_awareness';
+import {
+  DefaultAppStateColumns,
+  getMergedAccessor,
+  ProfilesManager,
+} from '../../../../context_awareness';
+import type { InternalState } from '../discover_internal_state_container';
+import type { DataDocumentsMsg } from '../discover_data_state_container';
 
 export const getDefaultProfileState = ({
   profilesManager,
+  resetDefaultProfileState,
   dataView,
+  esqlQueryColumns,
 }: {
   profilesManager: ProfilesManager;
+  resetDefaultProfileState: InternalState['resetDefaultProfileState'];
   dataView: DataView;
+  esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns'];
 }) => {
   const stateUpdate: DiscoverAppState = {};
   const defaultState = getDefaultState(profilesManager, dataView);
-  const validColumns = defaultState.columns?.filter(({ name }) => dataView.getFieldByName(name));
 
-  if (validColumns?.length) {
-    const columns = validColumns.reduce<DiscoverGridSettings['columns']>(
-      (acc, { name, width }) => (width ? { ...acc, [name]: { width } } : acc),
-      undefined
-    );
+  if (resetDefaultProfileState.columns) {
+    const isValidColumn = getIsValidColumn(dataView, esqlQueryColumns);
+    const validColumns = defaultState.columns?.filter(isValidColumn);
 
-    stateUpdate.grid = columns ? { columns } : undefined;
-    stateUpdate.columns = validColumns.map(({ name }) => name);
+    if (validColumns?.length) {
+      const columns = validColumns.reduce<DiscoverGridSettings['columns']>(
+        (acc, { name, width }) => (width ? { ...acc, [name]: { width } } : acc),
+        undefined
+      );
+
+      stateUpdate.grid = columns ? { columns } : undefined;
+      stateUpdate.columns = validColumns.map(({ name }) => name);
+    }
   }
 
-  if (defaultState.rowHeight !== undefined) {
+  if (resetDefaultProfileState.rowHeight && defaultState.rowHeight !== undefined) {
     stateUpdate.rowHeight = defaultState.rowHeight;
   }
 
@@ -48,3 +62,13 @@ const getDefaultState = (profilesManager: ProfilesManager, dataView: DataView) =
 
   return getDefaultAppState({ dataView });
 };
+
+const getIsValidColumn =
+  (dataView: DataView, esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns']) =>
+  (column: DefaultAppStateColumns) => {
+    const isValid = esqlQueryColumns
+      ? esqlQueryColumns.some((esqlColumn) => esqlColumn.name === column.name)
+      : dataView.fields.getByName(column.name);
+
+    return Boolean(isValid);
+  };

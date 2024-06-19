@@ -31,13 +31,16 @@ export function useEsqlMode({
   dataViews: DataViewsContract;
 }) {
   const savedSearch = useSavedSearchInitial();
-  const initialFetch = useRef<boolean>(true);
   const prev = useRef<{
+    initialFetch: boolean;
     query: string;
-    recentlyUpdatedToColumns: string[];
+    allColumns: string[];
+    defaultColumns: string[];
   }>({
-    recentlyUpdatedToColumns: [],
+    initialFetch: true,
     query: '',
+    allColumns: [],
+    defaultColumns: [],
   });
 
   const cleanup = useCallback(() => {
@@ -46,10 +49,11 @@ export function useEsqlMode({
     }
 
     // cleanup when it's not an ES|QL query
-    initialFetch.current = true;
     prev.current = {
-      recentlyUpdatedToColumns: [],
+      initialFetch: true,
       query: '',
+      allColumns: [],
+      defaultColumns: [],
     };
   }, []);
 
@@ -57,13 +61,13 @@ export function useEsqlMode({
     const subscription = stateContainer.dataState.data$.documents$
       .pipe(
         switchMap(async (next) => {
-          const { query } = next;
+          const { query: nextQuery } = next;
 
-          if (!query || next.fetchStatus === FetchStatus.ERROR) {
+          if (!nextQuery || next.fetchStatus === FetchStatus.ERROR) {
             return;
           }
 
-          if (!isOfAggregateQueryType(query)) {
+          if (!isOfAggregateQueryType(nextQuery)) {
             // cleanup for a "regular" query
             cleanup();
             return;
@@ -73,48 +77,60 @@ export function useEsqlMode({
             return;
           }
 
-          const hasResults = Boolean(next.result?.length);
-          let nextColumns = prev.current.recentlyUpdatedToColumns;
+          let nextAllColumns = prev.current.allColumns;
+          let nextDefaultColumns = prev.current.defaultColumns;
 
-          if (hasResults) {
-            const firstRow = next.result![0];
-            const firstRowColumns = Object.keys(firstRow.raw);
+          if (next.result?.length) {
+            nextAllColumns = Object.keys(next.result[0].raw);
 
-            if (hasTransformationalCommand(query.esql)) {
-              nextColumns = firstRowColumns.slice(0, MAX_NUM_OF_COLUMNS);
+            if (hasTransformationalCommand(nextQuery.esql)) {
+              nextDefaultColumns = nextAllColumns.slice(0, MAX_NUM_OF_COLUMNS);
             } else {
-              nextColumns = [];
+              nextDefaultColumns = [];
             }
           }
 
-          if (initialFetch.current) {
-            initialFetch.current = false;
-            prev.current.query = query.esql;
-            prev.current.recentlyUpdatedToColumns = nextColumns;
+          if (prev.current.initialFetch) {
+            prev.current.initialFetch = false;
+            prev.current.query = nextQuery.esql;
+            prev.current.allColumns = nextAllColumns;
+            prev.current.defaultColumns = nextDefaultColumns;
           }
 
           const indexPatternChanged =
-            getIndexPatternFromESQLQuery(query.esql) !==
+            getIndexPatternFromESQLQuery(nextQuery.esql) !==
             getIndexPatternFromESQLQuery(prev.current.query);
 
-          const addColumnsToState =
-            indexPatternChanged || !isEqual(nextColumns, prev.current.recentlyUpdatedToColumns);
+          const allColumnsChanged = !isEqual(nextAllColumns, prev.current.allColumns);
+
+          const changeDefaultColumns =
+            indexPatternChanged || !isEqual(nextDefaultColumns, prev.current.defaultColumns);
 
           const { viewMode } = stateContainer.appState.getState();
           const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
           if (indexPatternChanged) {
-            stateContainer.internalState.transitions.setShouldUseDefaultProfileState(true);
+            stateContainer.internalState.transitions.setResetDefaultProfileState({
+              columns: true,
+              rowHeight: true,
+            });
+          } else if (allColumnsChanged) {
+            stateContainer.internalState.transitions.setResetDefaultProfileState({
+              columns: true,
+              rowHeight: false,
+            });
           }
 
-          if (indexPatternChanged || addColumnsToState || changeViewMode) {
-            prev.current.query = query.esql;
-            prev.current.recentlyUpdatedToColumns = nextColumns;
+          prev.current.allColumns = nextAllColumns;
+
+          if (indexPatternChanged || changeDefaultColumns || changeViewMode) {
+            prev.current.query = nextQuery.esql;
+            prev.current.defaultColumns = nextDefaultColumns;
 
             // just change URL state if necessary
-            if (addColumnsToState || changeViewMode) {
+            if (changeDefaultColumns || changeViewMode) {
               const nextState = {
-                ...(addColumnsToState && { columns: nextColumns }),
+                ...(changeDefaultColumns && { columns: nextDefaultColumns }),
                 ...(changeViewMode && { viewMode: undefined }),
               };
 
