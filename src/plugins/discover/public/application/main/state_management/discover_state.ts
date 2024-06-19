@@ -257,18 +257,19 @@ export function getDiscoverStateContainer({
   });
 
   /**
+   * Internal State Container, state that's not persisted and not part of the URL
+   */
+  const internalStateContainer = getInternalStateContainer();
+
+  /**
    * App State Container, synced with the _a part URL
    */
   const appStateContainer = getDiscoverAppStateContainer({
     stateStorage,
-    savedSearch: savedSearchContainer.getState(),
+    internalStateContainer,
+    savedSearchContainer,
     services,
   });
-
-  /**
-   * Internal State Container, state that's not persisted and not part of the URL
-   */
-  const internalStateContainer = getInternalStateContainer();
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
@@ -404,9 +405,7 @@ export function getDiscoverStateContainer({
     });
 
     // initialize app state container, syncing with _g and _a part of the URL
-    const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
-      savedSearchContainer.getState()
-    );
+    const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync();
 
     // subscribing to state changes of appStateContainer, triggering data fetching
     const appStateUnsubscribe = appStateContainer.subscribe(
