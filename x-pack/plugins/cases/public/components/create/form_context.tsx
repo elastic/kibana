@@ -34,7 +34,7 @@ import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_ca
 import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 import { useApplication } from '../../common/lib/kibana/use_application';
 import { getConfigurationByOwner } from '../../containers/configure/utils';
-import { getOwnerDefaultValue } from './owner_selector';
+import { getOwnerDefaultValue } from './get_owner_default_value';
 
 export const initialCaseValue: CreateCaseFormSchema = {
   title: '',
@@ -58,6 +58,7 @@ interface Props {
   onSuccess?: (theCase: CaseUI) => void;
   attachments?: CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
+  selectedOwner: string;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -66,6 +67,7 @@ export const FormContext: React.FC<Props> = ({
   onSuccess,
   attachments,
   initialValue,
+  selectedOwner,
 }) => {
   const { data: connectors = [] } = useGetSupportedActionConnectors();
   const { data: allConfigurations } = useGetAllCaseConfigurations();
@@ -136,7 +138,7 @@ export const FormContext: React.FC<Props> = ({
       isValid
     ) => {
       if (isValid) {
-        const { selectedOwner, customFields, ...userFormData } = dataWithoutConnectorId;
+        const { customFields, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
         const defaultOwner = owner[0] ?? availableOwners[0];
 
@@ -205,8 +207,9 @@ export const FormContext: React.FC<Props> = ({
       startTransaction,
       appId,
       attachments,
-      transformCustomFieldsData,
+      selectedOwner,
       allConfigurations,
+      transformCustomFieldsData,
       postCase,
       afterCaseCreated,
       onSuccess,

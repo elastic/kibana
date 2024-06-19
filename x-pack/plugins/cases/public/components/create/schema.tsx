@@ -79,7 +79,6 @@ export type CreateCaseFormSchema = Omit<
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
   syncAlerts: boolean;
-  selectedOwner?: string | null;
   customFields: Record<string, string | boolean>;
 };
 
@@ -110,15 +109,6 @@ export const schema: FormSchema<CreateCaseFormSchema> = {
           length: MAX_DESCRIPTION_LENGTH,
           message: i18n.MAX_LENGTH_ERROR('description', MAX_DESCRIPTION_LENGTH),
         }),
-      },
-    ],
-  },
-  selectedOwner: {
-    label: i18n.SOLUTION,
-    type: FIELD_TYPES.RADIO_GROUP,
-    validations: [
-      {
-        validator: emptyField(i18n.SOLUTION_REQUIRED),
       },
     ],
   },

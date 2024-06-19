@@ -57,3 +57,7 @@ export const TEMPLATE_LABEL = i18n.translate('xpack.cases.create.templateLabel',
 export const TEMPLATE_HELP_TEXT = i18n.translate('xpack.cases.create.templateHelpText', {
   defaultMessage: 'Selecting a template will pre-fill certain case fields below',
 });
+
+export const SOLUTION_SELECTOR_LABEL = i18n.translate('xpack.cases.create.solutionSelectorLabel', {
+  defaultMessage: 'Create case under:',
+});
