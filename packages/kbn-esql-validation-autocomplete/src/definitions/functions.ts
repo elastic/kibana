@@ -1345,8 +1345,7 @@ const logDefinition: FunctionDefinition = {
     // do not really care here about the base and field
     // just need to check both values are not negative
     for (const arg of fnDef.args) {
-      // @ts-expect-error upgrade typescript v5.1.6
-      if (isLiteralItem(arg) && arg.value < 0) {
+      if (isLiteralItem(arg) && Number(arg.value) < 0) {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
@@ -1399,8 +1398,7 @@ const log10Definition: FunctionDefinition = {
     // do not really care here about the base and field
     // just need to check both values are not negative
     for (const arg of fnDef.args) {
-      // @ts-expect-error upgrade typescript v5.1.6
-      if (isLiteralItem(arg) && arg.value < 0) {
+      if (isLiteralItem(arg) && Number(arg.value) < 0) {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
