@@ -21,33 +21,33 @@ import type { FormHook, FormData } from '@kbn/es-ui-shared-plugin/static/forms/h
 
 import * as i18n from './translations';
 
-export interface FormState<T extends FormData = FormData> {
+export interface FormState<T extends FormData = FormData, I extends FormData = T> {
   isValid: boolean | undefined;
-  submit: FormHook<T>['submit'];
+  submit: FormHook<T, I>['submit'];
 }
 
-export interface FlyOutBodyProps<T extends FormData = FormData> {
-  onChange: (state: FormState<T>) => void;
+export interface FlyOutBodyProps<T extends FormData = FormData, I extends FormData = T> {
+  onChange: (state: FormState<T, I>) => void;
 }
 
-export interface FlyoutProps<T extends FormData = FormData> {
+export interface FlyoutProps<T extends FormData = FormData, I extends FormData = T> {
   disabled: boolean;
   isLoading: boolean;
   onCloseFlyout: () => void;
-  onSaveField: (data: T) => void;
+  onSaveField: (data: I) => void;
   renderHeader: () => React.ReactNode;
-  renderBody: ({ onChange }: FlyOutBodyProps<T>) => React.ReactNode;
+  renderBody: ({ onChange }: FlyOutBodyProps<T, I>) => React.ReactNode;
 }
 
-export const CommonFlyout = <T extends FormData = FormData>({
+export const CommonFlyout = <T extends FormData = FormData, I extends FormData = T>({
   onCloseFlyout,
   onSaveField,
   isLoading,
   disabled,
   renderHeader,
   renderBody,
-}: FlyoutProps<T>) => {
-  const [formState, setFormState] = useState<FormState<T>>({
+}: FlyoutProps<T, I>) => {
+  const [formState, setFormState] = useState<FormState<T, I>>({
     isValid: undefined,
     submit: async () => ({
       isValid: false,
@@ -61,7 +61,13 @@ export const CommonFlyout = <T extends FormData = FormData>({
     const { isValid, data } = await submit();
 
     if (isValid) {
-      onSaveField(data as T);
+      /**
+       * The serializer transforms the data
+       * from the form format to the backend
+       * format. The I generic is the correct
+       * format of the data.
+       */
+      onSaveField(data as unknown as I);
     }
   }, [onSaveField, submit]);
 

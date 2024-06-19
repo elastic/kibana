@@ -508,6 +508,7 @@ describe('CommonFlyout ', () => {
             key: 'random_key',
             name: 'Template 1',
             description: 'test description',
+            caseFields: null,
           }}
           connectors={[]}
           currentConfiguration={currentConfiguration}
@@ -563,6 +564,7 @@ describe('CommonFlyout ', () => {
             key: 'random_key',
             name: 'Template 1',
             description: 'test description',
+            caseFields: null,
           }}
           connectors={[]}
           currentConfiguration={newConfig}
@@ -627,6 +629,7 @@ describe('CommonFlyout ', () => {
             key: 'random_key',
             name: 'Template 1',
             description: 'test description',
+            caseFields: null,
           }}
           connectors={connectorsMock}
           currentConfiguration={newConfig}

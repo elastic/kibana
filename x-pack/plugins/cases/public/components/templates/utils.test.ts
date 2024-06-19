@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { getTemplateSerializedData } from './utils';
+import { casesConfigurationsMock } from '../../containers/configure/mock';
+import { connectorsMock } from '../../containers/mock';
+import { templateSerializer } from './utils';
 
 describe('utils', () => {
-  describe('getTemplateSerializedData', () => {
+  describe('templateSerializer', () => {
     it('serializes empty fields correctly', () => {
-      const res = getTemplateSerializedData({
+      const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: '',
         name: '',
         templateDescription: '',
@@ -26,7 +28,7 @@ describe('utils', () => {
     });
 
     it('serializes connectors fields correctly', () => {
-      const res = getTemplateSerializedData({
+      const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: '',
         name: '',
         templateDescription: '',
@@ -39,7 +41,7 @@ describe('utils', () => {
     });
 
     it('serializes non empty fields correctly', () => {
-      const res = getTemplateSerializedData({
+      const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: 'key_1',
         name: 'template 1',
         templateDescription: 'description 1',
@@ -58,7 +60,7 @@ describe('utils', () => {
     });
 
     it('serializes custom fields correctly', () => {
-      const res = getTemplateSerializedData({
+      const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: 'key_1',
         name: 'template 1',
         templateDescription: '',
@@ -81,7 +83,7 @@ describe('utils', () => {
     });
 
     it('serializes connector fields correctly', () => {
-      const res = getTemplateSerializedData({
+      const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: 'key_1',
         name: 'template 1',
         templateDescription: '',

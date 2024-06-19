@@ -88,6 +88,7 @@ describe('TemplateForm', () => {
         key: 'template_key_1',
         name: 'Template 1',
         description: 'Sample description',
+        caseFields: null,
       },
     };
     appMockRenderer.render(<TemplateForm {...newProps} />);
@@ -239,7 +240,7 @@ describe('TemplateForm', () => {
       <TemplateForm
         {...{
           ...defaultProps,
-          initialValue: { key: 'template_1_key', name: 'Template 1' },
+          initialValue: { key: 'template_1_key', name: 'Template 1', caseFields: null },
           onChange: onChangeState,
         }}
       />
@@ -335,7 +336,7 @@ describe('TemplateForm', () => {
       <TemplateForm
         {...{
           ...defaultProps,
-          initialValue: { key: 'template_1_key', name: 'Template 1' },
+          initialValue: { key: 'template_1_key', name: 'Template 1', caseFields: null },
           currentConfiguration: {
             ...defaultProps.currentConfiguration,
             connector: {
@@ -473,6 +474,7 @@ describe('TemplateForm', () => {
           initialValue: {
             key: 'template_1_key',
             name: 'Template 1',
+            caseFields: null,
           },
           currentConfiguration: {
             ...defaultProps.currentConfiguration,
@@ -550,12 +552,12 @@ describe('TemplateForm', () => {
         caseFields: {
           customFields: [
             {
-              type: CustomFieldTypes.TEXT,
+              type: CustomFieldTypes.TEXT as const,
               key: 'test_key_1',
               value: 'this is my first custom field value',
             },
             {
-              type: CustomFieldTypes.TOGGLE,
+              type: CustomFieldTypes.TOGGLE as const,
               key: 'test_key_2',
               value: false,
             },
