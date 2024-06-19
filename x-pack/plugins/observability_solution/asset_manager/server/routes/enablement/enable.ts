@@ -29,7 +29,7 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   server,
   logger,
 }: SetupRouteOptions<T>) {
-  router.post<unknown, unknown, EnableManagedEntityResponse>(
+  router.put<unknown, unknown, EnableManagedEntityResponse>(
     {
       path: `${ENTITY_INTERNAL_API_PREFIX}/managed/enablement`,
       validate: false,
