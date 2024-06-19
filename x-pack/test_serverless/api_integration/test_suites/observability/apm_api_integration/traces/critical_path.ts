@@ -68,8 +68,8 @@ export default function ({ getService }: APMFtrContextProvider) {
     });
 
     after(async () => {
-      await synthtraceEsClient.clean();
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      return synthtraceEsClient.clean();
     });
 
     it('returns service map elements', async () => {
@@ -93,6 +93,7 @@ export default function ({ getService }: APMFtrContextProvider) {
       });
 
       expect(response.status).toBe(200);
+      expect(response.body.criticalPath).not.toBeUndefined();
     });
   });
 }
