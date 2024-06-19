@@ -52,7 +52,7 @@ export const createLogsDataSourceProfileProvider = (
 };
 
 const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row, euiTheme) => {
-  const logLevel = row.flattened['log.level'];
+  const logLevel = row.flattened['log.level'] || row.flattened.log_level;
   const logLevelCoalescedValue = getLogLevelCoalescedValue(logLevel);
 
   if (logLevelCoalescedValue) {
