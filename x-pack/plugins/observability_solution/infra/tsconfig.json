@@ -56,7 +56,6 @@
     "@kbn/charts-plugin",
     "@kbn/lens-plugin",
     "@kbn/core-analytics-server",
-    "@kbn/analytics-client",
     "@kbn/shared-ux-router",
     "@kbn/alerts-as-data-utils",
     "@kbn/cases-plugin",
