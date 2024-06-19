@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiIcon, EuiTextColor } from '@elastic/eui';
-import { InferenceEndpointUI } from '../../types';
-import * as i18n from '../../../../../common/translations';
-import { useInferenceToast } from '../../../../hooks/use_inference_toast';
+import { InferenceEndpointUI } from '../../../../types';
+import * as i18n from '../../../../../../../common/translations';
+import { useInferenceToast } from '../../../../../../hooks/use_inference_toast';
 import { UseCopyIDActionProps } from '../types';
 
 export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {

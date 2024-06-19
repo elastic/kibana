@@ -9,7 +9,7 @@ import React from 'react';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { RenderElasticsearch } from './render_elasticsearch';
 import { RenderCohere } from './render_cohere';
-import { ProviderKeys } from '../types';
+import { ServiceProviderKeys } from '../../types';
 import { RenderHuggingFace } from './render_hugging_face';
 import { RenderOpenAI } from './render_open_ai';
 
@@ -18,16 +18,16 @@ export interface RenderEndpointProps {
 }
 
 type RenderMapType = {
-  [key in ProviderKeys]?: JSX.Element;
+  [key in ServiceProviderKeys]?: JSX.Element;
 };
 
 export const RenderEndpoint: React.FC<RenderEndpointProps> = ({ endpoint }) => {
   const renderMap: RenderMapType = {
-    [ProviderKeys.elser]: <RenderElasticsearch endpoint={endpoint} />,
-    [ProviderKeys.elasticsearch]: <RenderElasticsearch endpoint={endpoint} />,
-    [ProviderKeys.cohere]: <RenderCohere endpoint={endpoint} />,
-    [ProviderKeys.huggingFace]: <RenderHuggingFace endpoint={endpoint} />,
-    [ProviderKeys.openai]: <RenderOpenAI endpoint={endpoint} />,
+    [ServiceProviderKeys.elser]: <RenderElasticsearch endpoint={endpoint} />,
+    [ServiceProviderKeys.elasticsearch]: <RenderElasticsearch endpoint={endpoint} />,
+    [ServiceProviderKeys.cohere]: <RenderCohere endpoint={endpoint} />,
+    [ServiceProviderKeys.hugging_face]: <RenderHuggingFace endpoint={endpoint} />,
+    [ServiceProviderKeys.openai]: <RenderOpenAI endpoint={endpoint} />,
   };
 
   return renderMap[endpoint.service] || <strong>{endpoint.model_id}</strong>;

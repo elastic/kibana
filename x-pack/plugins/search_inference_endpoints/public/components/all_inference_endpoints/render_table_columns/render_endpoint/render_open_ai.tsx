@@ -10,12 +10,12 @@ import React from 'react';
 import { RenderEndpointProps } from './render_endpoint';
 
 interface ServiceSettings {
-  similarity: string;
   model_id: string;
+  url: string;
 }
 
 export const RenderOpenAI: React.FC<RenderEndpointProps> = ({ endpoint }) => {
-  const serviceSettings = endpoint.service_settings as ServiceSettings | null;
+  const serviceSettings = endpoint.service_settings as ServiceSettings;
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
@@ -29,9 +29,7 @@ export const RenderOpenAI: React.FC<RenderEndpointProps> = ({ endpoint }) => {
               <EuiBadge color="default">{serviceSettings.model_id}</EuiBadge>
             </EuiFlexItem>
           )}
-          {serviceSettings?.similarity && (
-            <EuiFlexItem grow={false}>{serviceSettings.similarity}</EuiFlexItem>
-          )}
+          {serviceSettings?.url && <EuiFlexItem grow={false}>{serviceSettings.url}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

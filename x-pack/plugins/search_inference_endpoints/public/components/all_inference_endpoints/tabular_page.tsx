@@ -18,7 +18,7 @@ import { EndpointsTable } from './endpoints_table';
 import { ProviderFilter } from './filter/provider_filter';
 import { TaskTypeFilter } from './filter/task_type_filter';
 import { TableSearch } from './search/table_search';
-import { useTableColumns } from './table_columns';
+import { useTableColumns } from './render_table_columns/table_columns';
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];

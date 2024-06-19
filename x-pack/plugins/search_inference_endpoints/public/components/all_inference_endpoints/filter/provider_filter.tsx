@@ -7,20 +7,20 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { PROVIDERS } from '../service_provider';
-import type { FilterOptions, ProviderKeys } from '../types';
+import { SERVICE_PROVIDERS } from '../render_table_columns/render_service_provider/service_provider';
+import type { FilterOptions, ServiceProviderKeys } from '../types';
 import type { MultiSelectFilterOption } from './multi_select_filter';
 import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {
-  optionKeys: ProviderKeys[];
+  optionKeys: ServiceProviderKeys[];
   onChange: (newFilterOptions: Partial<FilterOptions>) => void;
 }
 
 const options = mapToMultiSelectOption(
-  Object.keys(PROVIDERS) as ProviderKeys[],
-  Object.fromEntries(Object.entries(PROVIDERS).map(([key, { name }]) => [key, name]))
+  Object.keys(SERVICE_PROVIDERS) as ServiceProviderKeys[],
+  Object.fromEntries(Object.entries(SERVICE_PROVIDERS).map(([key, { name }]) => [key, name]))
 );
 
 export const ProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
@@ -35,7 +35,7 @@ export const ProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
       [filterId]: selectedOptionKeys,
     });
   };
-  const renderOption = (option: MultiSelectFilterOption<ProviderKeys>) => {
+  const renderOption = (option: MultiSelectFilterOption<ServiceProviderKeys>) => {
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
         <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
@@ -45,8 +45,8 @@ export const ProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
 
   return (
     <>
-      <MultiSelectFilter<ProviderKeys>
-        buttonLabel={i18n.PROVIDER}
+      <MultiSelectFilter<ServiceProviderKeys>
+        buttonLabel={i18n.SERVICE_PROVIDER}
         id={'provider'}
         onChange={onSystemFilterChange}
         options={options}

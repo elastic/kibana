@@ -18,12 +18,18 @@ interface ModelSettings {
 
 const ModelSettingsBadge: React.FC<{ modelSettings: ModelSettings }> = ({ modelSettings }) => (
   <EuiFlexGroup gutterSize="s">
-    <EuiFlexItem grow={false}>
-      <EuiBadge color="default">{modelSettings.model_id}</EuiBadge>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      {i18n.THREADS(modelSettings.num_threads)} | {i18n.ALLOCATIONS(modelSettings.num_allocations)}
-    </EuiFlexItem>
+    {modelSettings.model_id && (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="default">{modelSettings.model_id}</EuiBadge>
+      </EuiFlexItem>
+    )}
+    {(modelSettings.num_threads || modelSettings.num_allocations) && (
+      <EuiFlexItem grow={false}>
+        {modelSettings.num_threads && i18n.THREADS(modelSettings.num_threads)}
+        {modelSettings.num_threads && modelSettings.num_allocations && ' | '}
+        {modelSettings.num_allocations && i18n.ALLOCATIONS(modelSettings.num_allocations)}
+      </EuiFlexItem>
+    )}
   </EuiFlexGroup>
 );
 
