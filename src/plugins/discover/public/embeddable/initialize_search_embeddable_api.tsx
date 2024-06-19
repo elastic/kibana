@@ -65,9 +65,9 @@ export const initializeSearchEmbeddableApi = async (
     discoverServices: DiscoverServices;
   }
 ): Promise<{
-  searchEmbeddableApi: PublishesSavedSearch & PublishesDataViews;
-  searchEmbeddableStateManager: SearchEmbeddableStateManager;
-  searchEmbeddableComparators: StateComparators<SearchEmbeddableSerializedAttributes>;
+  api: PublishesSavedSearch & PublishesDataViews;
+  stateManager: SearchEmbeddableStateManager;
+  comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
   cleanup: () => void;
 }> => {
   const serializedSearchSource$ = new BehaviorSubject(initialState.serializedSearchSource);
@@ -140,57 +140,51 @@ export const initializeSearchEmbeddableApi = async (
       savedSearch$.next(newSavedSearch);
     });
 
-  const getSearchEmbeddableComparators =
-    (): StateComparators<SearchEmbeddableSerializedAttributes> => {
-      return {
-        serializedSearchSource: [
-          serializedSearchSource$,
-          (value) => {
-            return; // the search source can't currently be changed from dashboard, so the setter is not necessary
-          },
-        ],
-        viewMode: [
-          savedSearchViewMode$,
-          (value) => {
-            return; // the view mode can't currently be changed from dashboard, so the setter is not necessary
-          },
-        ],
-        breakdownField: [breakdownField$, (value) => breakdownField$.next(value)],
-        sort: [sort$, (value) => sort$.next(value), (a, b) => deepEqual(a, b)],
-        columns: [columns$, (value) => columns$.next(value), (a, b) => deepEqual(a, b)],
-        sampleSize: [
-          sampleSize$,
-          (value) => sampleSize$.next(value),
-          (a, b) => (a ?? defaultSampleSize) === (b ?? defaultSampleSize),
-        ],
-        rowsPerPage: [
-          rowsPerPage$,
-          (value) => rowsPerPage$.next(value),
-          (a, b) => (a ?? defaultRowsPerPage) === (b ?? defaultRowsPerPage),
-        ],
-        rowHeight: [
-          rowHeight$,
-          (value) => rowHeight$.next(value),
-          (a, b) => (a ?? defaultRowHeight) === (b ?? defaultRowHeight),
-        ],
-        headerRowHeight: [
-          headerRowHeight$,
-          (value) => headerRowHeight$.next(value),
-          (a, b) =>
-            (a ?? DEFAULT_HEADER_ROW_HEIGHT_LINES) === (b ?? DEFAULT_HEADER_ROW_HEIGHT_LINES),
-        ],
-      };
-    };
-
   return {
     cleanup: () => {
       syncSavedSearch.unsubscribe();
     },
-    searchEmbeddableApi: {
+    api: {
       dataViews,
       savedSearch$,
     },
-    searchEmbeddableStateManager: stateManager,
-    searchEmbeddableComparators: getSearchEmbeddableComparators(),
+    stateManager,
+    comparators: {
+      serializedSearchSource: [
+        serializedSearchSource$,
+        (value) => {
+          return; // the search source can't currently be changed from dashboard, so the setter is not necessary
+        },
+      ],
+      viewMode: [
+        savedSearchViewMode$,
+        (value) => {
+          return; // the view mode can't currently be changed from dashboard, so the setter is not necessary
+        },
+      ],
+      breakdownField: [breakdownField$, (value) => breakdownField$.next(value)],
+      sort: [sort$, (value) => sort$.next(value), (a, b) => deepEqual(a, b)],
+      columns: [columns$, (value) => columns$.next(value), (a, b) => deepEqual(a, b)],
+      sampleSize: [
+        sampleSize$,
+        (value) => sampleSize$.next(value),
+        (a, b) => (a ?? defaultSampleSize) === (b ?? defaultSampleSize),
+      ],
+      rowsPerPage: [
+        rowsPerPage$,
+        (value) => rowsPerPage$.next(value),
+        (a, b) => (a ?? defaultRowsPerPage) === (b ?? defaultRowsPerPage),
+      ],
+      rowHeight: [
+        rowHeight$,
+        (value) => rowHeight$.next(value),
+        (a, b) => (a ?? defaultRowHeight) === (b ?? defaultRowHeight),
+      ],
+      headerRowHeight: [
+        headerRowHeight$,
+        (value) => headerRowHeight$.next(value),
+        (a, b) => (a ?? DEFAULT_HEADER_ROW_HEIGHT_LINES) === (b ?? DEFAULT_HEADER_ROW_HEIGHT_LINES),
+      ],
+    },
   };
 };

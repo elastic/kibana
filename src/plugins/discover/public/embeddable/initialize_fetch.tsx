@@ -23,9 +23,11 @@ import {
   apiHasParentApi,
   fetch$,
   FetchContext,
+  HasParentApi,
   PublishesDataViews,
   PublishesPanelTitle,
   PublishesSavedObjectId,
+  PublishesTimeslice,
 } from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -49,7 +51,7 @@ type SavedSearchPartialFetchApi = PublishesSavedSearch &
     dataLoading: BehaviorSubject<boolean | undefined>;
     blockingError: BehaviorSubject<Error | undefined>;
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
-  };
+  } & HasParentApi<PublishesTimeslice>;
 
 export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): boolean => {
   const query = savedSearch.searchSource.getField('query');

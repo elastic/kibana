@@ -54,44 +54,47 @@ export const getSearchEmbeddableFactory = ({
 
   const savedSearchEmbeddableFactory: ReactEmbeddableFactory<
     SearchEmbeddableSerializedState,
-    SearchEmbeddableApi,
-    SearchEmbeddableRuntimeState
+    SearchEmbeddableRuntimeState,
+    SearchEmbeddableApi
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
     deserializeState: async (serializedState) => {
       return deserializeState({ serializedState, discoverServices });
     },
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
-      const {
-        serialize: serializeTimeRange,
-        api: timeRangeApi,
-        comparators: timeRangeComparators,
-      } = initializeTimeRange(initialState);
+      /** One Discover context awareness */
+      const solutionNavId = await firstValueFrom(
+        discoverServices.core.chrome.getActiveSolutionNavId$()
+      );
+      await discoverServices.profilesManager.resolveRootProfile({ solutionNavId });
+
+      /** Specific by-reference state */
+      const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
       const defaultPanelTitle$ = new BehaviorSubject<string | undefined>(
         initialState?.savedObjectTitle
       );
       const defaultPanelDescription$ = new BehaviorSubject<string | undefined>(
         initialState?.savedObjectDescription
       );
-      const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
+
+      /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const fetchContext$ = new BehaviorSubject<FetchContext | undefined>(undefined);
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
 
-      const {
-        searchEmbeddableApi,
-        searchEmbeddableComparators,
-        searchEmbeddableStateManager,
-        cleanup: cleanupSavedSearchApi,
-      } = await initializeSearchEmbeddableApi(initialState, { discoverServices });
-
+      /** Build API */
+      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
+      const timeRange = initializeTimeRange(initialState);
+      const searchEmbeddable = await initializeSearchEmbeddableApi(initialState, {
+        discoverServices,
+      });
       const unsubscribeFromFetch = initializeFetch({
         api: {
+          parentApi,
           ...titlesApi,
-          savedSearch$: searchEmbeddableApi.savedSearch$,
-          dataViews: searchEmbeddableApi.dataViews,
+          savedSearch$: searchEmbeddable.api.savedSearch$,
+          dataViews: searchEmbeddable.api.dataViews,
           savedObjectId: savedObjectId$,
           dataLoading: dataLoading$,
           blockingError: blockingError$,
@@ -99,23 +102,18 @@ export const getSearchEmbeddableFactory = ({
           fetchWarnings$,
         },
         discoverServices,
-        stateManager: searchEmbeddableStateManager,
+        stateManager: searchEmbeddable.stateManager,
       });
-
-      const solutionNavId = await firstValueFrom(
-        discoverServices.core.chrome.getActiveSolutionNavId$()
-      );
-      await discoverServices.profilesManager.resolveRootProfile({ solutionNavId });
 
       const api: SearchEmbeddableApi = buildApi(
         {
           ...titlesApi,
-          ...searchEmbeddableApi,
-          ...timeRangeApi,
+          ...searchEmbeddable.api,
+          ...timeRange.api,
           ...initializeEditApi({
             uuid,
             parentApi,
-            partialApi: { ...searchEmbeddableApi, fetchContext$, savedObjectId: savedObjectId$ },
+            partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId: savedObjectId$ },
             discoverServices,
             isEditable: startServices.isEditable,
           }),
@@ -176,16 +174,16 @@ export const getSearchEmbeddableFactory = ({
             serializeState({
               uuid,
               initialState,
-              savedSearch: searchEmbeddableApi.savedSearch$.getValue(),
+              savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
               serializeTitles,
-              serializeTimeRange,
+              serializeTimeRange: timeRange.serialize,
               savedObjectId: savedObjectId$.getValue(),
             }),
         },
         {
           ...titleComparators,
-          ...timeRangeComparators,
-          ...searchEmbeddableComparators,
+          ...timeRange.comparators,
+          ...searchEmbeddable.comparators,
           savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
           savedObjectTitle: [defaultPanelTitle$, (value) => defaultPanelTitle$.next(value)],
           savedObjectDescription: [
@@ -205,7 +203,7 @@ export const getSearchEmbeddableFactory = ({
 
           useEffect(() => {
             return () => {
-              cleanupSavedSearchApi();
+              searchEmbeddable.cleanup();
               unsubscribeFromFetch();
             };
           }, []);
@@ -283,7 +281,7 @@ export const getSearchEmbeddableFactory = ({
                     }}
                     dataView={dataView!}
                     onAddFilter={onAddFilter}
-                    stateManager={searchEmbeddableStateManager}
+                    stateManager={searchEmbeddable.stateManager}
                   />
                 ) : (
                   <CellActionsProvider
@@ -295,7 +293,7 @@ export const getSearchEmbeddableFactory = ({
                       api={{ ...api, fetchWarnings$ }}
                       dataView={dataView!}
                       onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
-                      stateManager={searchEmbeddableStateManager}
+                      stateManager={searchEmbeddable.stateManager}
                     />
                   </CellActionsProvider>
                 )}

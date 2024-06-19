@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { BehaviorSubject, map, Observable } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import {
   AppMountParameters,
   AppUpdater,
@@ -21,8 +20,9 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { SEARCH_EMBEDDABLE_TYPE, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import { SavedSearchType } from '@kbn/saved-search-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
