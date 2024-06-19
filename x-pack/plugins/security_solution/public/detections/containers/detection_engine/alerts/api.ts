@@ -30,7 +30,7 @@ import type {
   CheckSignalIndex,
   UpdateAlertStatusByIdsProps,
 } from './types';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint/endpoint_isolation';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 /**

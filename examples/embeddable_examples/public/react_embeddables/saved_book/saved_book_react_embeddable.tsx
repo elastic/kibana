@@ -41,8 +41,8 @@ const bookSerializedStateIsByReference = (
 export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
   const savedBookEmbeddableFactory: ReactEmbeddableFactory<
     BookSerializedState,
-    BookApi,
-    BookRuntimeState
+    BookRuntimeState,
+    BookApi
   > = {
     type: SAVED_BOOK_ID,
     deserializeState: async (serializedState) => {

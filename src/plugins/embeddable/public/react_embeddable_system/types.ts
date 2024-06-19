@@ -38,7 +38,11 @@ export interface DefaultEmbeddableApi<SerializedState extends object = object>
  */
 export type SetReactEmbeddableApiRegistration<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
 > = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$'>;
 
 /**
@@ -47,9 +51,13 @@ export type SetReactEmbeddableApiRegistration<
  */
 export type BuildReactEmbeddableApiRegistration<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
 > = Omit<
-  SetReactEmbeddableApiRegistration<SerializedState, Api>,
+  SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>,
   'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
 >;
 
@@ -62,8 +70,11 @@ export type BuildReactEmbeddableApiRegistration<
  **/
 export interface ReactEmbeddableFactory<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
-  RuntimeState extends object = SerializedState
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
 > {
   /**
    * A unique key for the type of this embeddable. The React Embeddable Renderer will use this type
@@ -98,12 +109,12 @@ export interface ReactEmbeddableFactory<
      * changes logic that the dashboard expects using the provided comparators
      */
     buildApi: (
-      apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, Api>,
+      apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>,
       comparators: StateComparators<RuntimeState>
     ) => Api & HasSnapshottableState<RuntimeState>,
     uuid: string,
     parentApi: unknown | undefined,
     /** `setApi` should be used when the unsaved changes logic in `buildApi` is unnecessary */
-    setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, Api>) => Api
+    setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>) => Api
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 }

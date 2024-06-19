@@ -29,11 +29,14 @@ import { DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';
 
 export const initializeReactEmbeddableState = async <
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
-  RuntimeState extends object = SerializedState
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
 >(
   uuid: string,
-  factory: ReactEmbeddableFactory<SerializedState, Api, RuntimeState>,
+  factory: ReactEmbeddableFactory<SerializedState, RuntimeState, Api>,
   parentApi: HasSerializedChildState<SerializedState>
 ) => {
   const serializedState = parentApi.getSerializedStateForChild(uuid);
