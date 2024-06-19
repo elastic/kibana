@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  FieldDescriptionIconButton,
-  type FieldDescriptionIconButtonProps,
-} from './field_description_icon_button';
+export { Walker, type WalkerOptions, walk } from './walker';
