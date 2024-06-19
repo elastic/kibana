@@ -92,11 +92,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                   {command}
                 </EuiCodeBlock>
                 <EuiSpacer />
-                <CopyToClipboardButton
-                  text={command}
-                  color="primary"
-                  fill={status === 'notStarted'}
-                />
+                <CopyToClipboardButton textToCopy={command} fill={status === 'notStarted'} />
               </>
             ) : (
               <EuiSkeletonText lines={6} />
