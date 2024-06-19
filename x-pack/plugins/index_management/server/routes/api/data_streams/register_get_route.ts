@@ -100,7 +100,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         let dataStreamsStats;
         let dataStreamsPrivileges;
 
-        if (includeStats && config.isDataStreamStatsEnabled) {
+        if (includeStats && config.isDataStreamStatsEnabled !== false) {
           ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client));
         }
 
@@ -142,7 +142,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
       try {
         const { data_streams: dataStreams } = await getDataStreams(client, name);
 
-        if (config.isDataStreamStatsEnabled) {
+        if (config.isDataStreamStatsEnabled !== false) {
           ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client, name));
         }
 

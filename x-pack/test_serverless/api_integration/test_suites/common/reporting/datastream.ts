@@ -72,12 +72,9 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ],
         lifecycle: { enabled: true },
-        maxTimeStamp: 0,
         nextGenerationManagedBy: 'Data stream lifecycle',
         privileges: { delete_index: true, manage_data_stream_lifecycle: true },
         timeStampField: { name: '@timestamp' },
-        storageSize: expect.any(String),
-        storageSizeBytes: expect.any(Number),
       });
     });
   });

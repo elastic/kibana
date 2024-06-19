@@ -54,10 +54,13 @@ export default function ({ getService }: FtrProviderContext) {
         generation: 1,
         health: 'green',
         ilmPolicyName: 'kibana-reporting',
+        maxTimeStamp: 0,
         privileges: { delete_index: true, manage_data_stream_lifecycle: true },
         hidden: true,
         lifecycle: { enabled: true },
         nextGenerationManagedBy: 'Index Lifecycle Management',
+        storageSize: expect.any(String),
+        storageSizeBytes: expect.any(Number),
       });
     });
   });
