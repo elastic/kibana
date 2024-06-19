@@ -1426,6 +1426,8 @@
       "@kbn/search-errors/*": ["packages/kbn-search-errors/*"],
       "@kbn/search-examples-plugin": ["examples/search_examples"],
       "@kbn/search-examples-plugin/*": ["examples/search_examples/*"],
+      "@kbn/search-homepage": ["x-pack/plugins/search_homepage"],
+      "@kbn/search-homepage/*": ["x-pack/plugins/search_homepage/*"],
       "@kbn/search-index-documents": ["packages/kbn-search-index-documents"],
       "@kbn/search-index-documents/*": ["packages/kbn-search-index-documents/*"],
       "@kbn/search-inference-endpoints": ["x-pack/plugins/search_inference_endpoints"],
