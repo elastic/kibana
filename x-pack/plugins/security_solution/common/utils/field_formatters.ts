@@ -106,8 +106,8 @@ export const getDataFromFieldsHits = (
 
     // format nested fields
     const nestedFields = Array.isArray(item)
-      // @ts-expect-error upgrade typescript v5.1.6
-      ? item // @ts-expect-error upgrade typescript v5.1.6
+      ? // @ts-expect-error upgrade typescript v5.1.6
+        item // @ts-expect-error upgrade typescript v5.1.6
           .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
           .flat()
       : getDataFromFieldsHits(item, prependField, fieldCategory);
