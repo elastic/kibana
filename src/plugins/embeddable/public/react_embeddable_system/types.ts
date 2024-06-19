@@ -25,12 +25,15 @@ import React from 'react';
  *
  * Before adding anything to this interface, please be certain that it belongs in *every* embeddable.
  */
-export interface DefaultEmbeddableApi<SerializedState extends object = object>
-  extends DefaultPresentationPanelApi,
+export interface DefaultEmbeddableApi<
+  SerializedState extends object = object,
+  RuntimeState extends object = SerializedState
+> extends DefaultPresentationPanelApi,
     HasType,
     PublishesPhaseEvents,
     PublishesUnsavedChanges,
-    HasSerializableState<SerializedState> {}
+    HasSerializableState<SerializedState>,
+    HasSnapshottableState<RuntimeState> {}
 
 /**
  * Defines the subset of the default embeddable API that the `setApi` method uses, which allows implementors
