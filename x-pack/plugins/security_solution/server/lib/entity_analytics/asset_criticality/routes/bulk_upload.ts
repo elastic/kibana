@@ -8,7 +8,7 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { Readable } from 'node:stream';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { AssetCriticalityBulkUploadResponse } from '../../../../../common/api/entity_analytics';
 import { AssetCriticalityBulkUploadRequest } from '../../../../../common/api/entity_analytics';
 import type { ConfigType } from '../../../../config';

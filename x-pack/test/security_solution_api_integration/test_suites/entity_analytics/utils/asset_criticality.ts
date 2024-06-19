@@ -19,7 +19,10 @@ import {
   API_VERSIONS,
   ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import type { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
+import type {
+  AssetCriticalityRecord,
+  CreateAssetCriticalityRecord,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
