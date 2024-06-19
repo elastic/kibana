@@ -264,7 +264,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, []);
 
   useEffect(() => {
-    if (!isLoading) setIsQueryLoading(false);
     setIsQueryLoading(Boolean(isLoading));
   }, [isLoading]);
 
