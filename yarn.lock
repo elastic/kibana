@@ -3277,10 +3277,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-client@link:packages/analytics/client":
-  version "0.0.0"
-  uid ""
-
 "@kbn/analytics-collection-utils@link:packages/analytics/utils/analytics_collection_utils":
   version "0.0.0"
   uid ""
@@ -3290,22 +3286,6 @@
   uid ""
 
 "@kbn/analytics-plugin-a-plugin@link:test/analytics/plugins/analytics_plugin_a":
-  version "0.0.0"
-  uid ""
-
-"@kbn/analytics-shippers-elastic-v3-browser@link:packages/analytics/shippers/elastic_v3/browser":
-  version "0.0.0"
-  uid ""
-
-"@kbn/analytics-shippers-elastic-v3-common@link:packages/analytics/shippers/elastic_v3/common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/analytics-shippers-elastic-v3-server@link:packages/analytics/shippers/elastic_v3/server":
-  version "0.0.0"
-  uid ""
-
-"@kbn/analytics-shippers-fullstory@link:packages/analytics/shippers/fullstory":
   version "0.0.0"
   uid ""
 
@@ -4654,6 +4634,10 @@
   uid ""
 
 "@kbn/ebt-tools@link:packages/kbn-ebt-tools":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ebt@link:packages/analytics/ebt":
   version "0.0.0"
   uid ""
 
