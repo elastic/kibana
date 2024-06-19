@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const BUILT_IN_ID_PREFIX = '__builtin__';
+export const BUILT_IN_ID_PREFIX = 'builtin_';
 export const BUILT_IN_ALLOWED_INDICES = [
   'apm-*',
   'logs-*',
