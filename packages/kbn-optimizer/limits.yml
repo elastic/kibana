@@ -82,7 +82,7 @@ pageLoadAssetSize:
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
-  integrationAssistant: 20927
+  integrationAssistant: 87666
   interactiveSetup: 80000
   investigate: 17970
   kibanaOverview: 56279
@@ -139,7 +139,7 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 81771
   securitySolution: 98429
-  securitySolutionEss: 16573
+  securitySolutionEss: 31586
   securitySolutionServerless: 62488
   serverless: 16573
   serverlessObservability: 68747
