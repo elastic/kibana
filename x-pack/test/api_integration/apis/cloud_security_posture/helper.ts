@@ -137,36 +137,6 @@ export async function createPackagePolicy(
           })
           .expect(200);
 
-  // const { body: postPackageResponse } = await supertest
-  //   .post(`/api/fleet/package_policies`)
-  //   .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-  //   .set('kbn-xsrf', 'xxxx')
-  //   .send({
-  //     force: true,
-  //     name: packageName,
-  //     description: '',
-  //     namespace: 'default',
-  //     policy_id: agentPolicyId,
-  //     enabled: true,
-  //     inputs: [inputs],
-  //     package: {
-  //       name: 'cloud_security_posture',
-  //       title,
-  //       version,
-  //     },
-  //     vars: {
-  //       deployment: {
-  //         value: deployment,
-  //         type: 'text',
-  //       },
-  //       posture: {
-  //         value: posture,
-  //         type: 'text',
-  //       },
-  //     },
-  //   })
-  //   .expect(200);
-
   return postPackageResponse.item;
 }
 
