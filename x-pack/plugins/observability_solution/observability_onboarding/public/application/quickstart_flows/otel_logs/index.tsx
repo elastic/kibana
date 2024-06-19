@@ -92,9 +92,7 @@ export const OtelLogsPanel: React.FC = () => {
               )}
             </p>
           </EuiText>
-          <EuiCodeBlock language="yaml" isCopyable>
-            {'kubectl apply -f otel-collector-k8s.yml'}
-          </EuiCodeBlock>
+          <CopyableCodeBlock content={'kubectl apply -f otel-collector-k8s.yml'} />
         </>
       ),
       firstStepTitle: i18n.translate(
@@ -452,7 +450,10 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
                   <p>
                     {i18n.translate(
                       'xpack.observability_onboarding.otelLogsPanel.p.collectLogsWithOpenTelemetryLabel',
-                      { defaultMessage: 'Collect logs and host metrics using the OTel collector.' }
+                      {
+                        defaultMessage:
+                          'Collect logs and host metrics using the Elastic distribution of the OTel collector.',
+                      }
                     )}
                   </p>
                 </EuiText>
@@ -511,9 +512,10 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
                       <EuiText>
                         <p>
                           {i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.p.firstYouNeedToLabel',
+                            'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
                             {
-                              defaultMessage: 'Run the command on your host.',
+                              defaultMessage:
+                                'Run the following command on your host to download and configure the collector.',
                             }
                           )}
                         </p>
@@ -595,9 +597,7 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
                             )}
                       </p>
                     </EuiText>
-                    <EuiCodeBlock language="yaml" isCopyable>
-                      {selectedContent.check}
-                    </EuiCodeBlock>
+                    <CopyableCodeBlock content={selectedContent.check} />
                   </EuiFlexGroup>
                 ),
               },
@@ -713,3 +713,27 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
     </EuiPanel>
   );
 };
+
+function CopyableCodeBlock({ content }: { content: string }) {
+  return (
+    <>
+      <EuiCodeBlock language="yaml">{content}</EuiCodeBlock>
+      <EuiCopy textToCopy={content}>
+        {(copy) => (
+          <EuiButton
+            data-test-subj="observabilityOnboardingCopyableCodeBlockCopyToClipboardButton"
+            color="primary"
+            fill
+            iconType="copyClipboard"
+            onClick={copy}
+          >
+            {i18n.translate(
+              'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
+              { defaultMessage: 'Copy to clipboard' }
+            )}
+          </EuiButton>
+        )}
+      </EuiCopy>
+    </>
+  );
+}
