@@ -60,7 +60,6 @@ export const TestConnectorForm = ({
     (async () => {
       const res = (await actionTypeModel?.validateParams(actionParams)).errors as IErrorObject;
       setActionErrors({ ...res });
-      // @ts-expect-error upgrade typescript v5.1.6
       setHasErrors(!!Object.values(res).find((errors) => (errors.length as number) > 0));
     })();
   }, [actionTypeModel, actionParams]);
