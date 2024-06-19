@@ -95,15 +95,15 @@ function set_in_legacy_vault() {
   VAULT_ROLE_ID="$(get_vault_role_id)"
   VAULT_SECRET_ID="$(get_vault_secret_id)"
 
-  vault -address=$LEGACY_VAULT_ADDR status || echo "Can't print status"
+  vault status -address=$LEGACY_VAULT_ADDR || echo "Can't print status"
 
   TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
   VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$TOKEN"
 
-  vault -address=$LEGACY_VAULT_ADDR status || echo "Can't print status"
+  vault status -address=$LEGACY_VAULT_ADDR || echo "Can't print status"
 
   # shellcheck disable=SC2068
-  VAULT_ADDR=$LEGACY_VAULT_ADDR vault write "secret/kibana-issues/dev/cloud-deploy/$key_path" ${fields[@]}
+  vault write -address=$LEGACY_VAULT_ADDR "secret/kibana-issues/dev/cloud-deploy/$key_path" ${fields[@]}
 }
 
 function unset_in_legacy_vault() {
@@ -115,7 +115,7 @@ function unset_in_legacy_vault() {
   TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
   VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$TOKEN"
 
-  VAULT_ADDR=$LEGACY_VAULT_ADDR vault delete "secret/kibana-issues/dev/cloud-deploy/$key_path"
+  vault delete -address=$LEGACY_VAULT_ADDR "secret/kibana-issues/dev/cloud-deploy/$key_path"
 }
 
 function print_legacy_vault_read() {
