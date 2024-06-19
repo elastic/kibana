@@ -436,6 +436,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       remoteClustersOnPremSetupTrustWithCert: `${ELASTICSEARCH_DOCS}remote-clusters-cert.html`,
       remoteClustersOnPremSetupTrustWithApiKey: `${ELASTICSEARCH_DOCS}remote-clusters-api-key.html`,
       remoteClustersCloudSetupTrust: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-enable-ccs.html`,
+      rollupMigratingToDownsampling: `${ELASTICSEARCH_DOCS}rollup-migrating-to-downsampling.html`,
       rrf: `${ELASTICSEARCH_DOCS}rrf.html`,
       scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
       secureCluster: `${ELASTICSEARCH_DOCS}secure-cluster.html`,
