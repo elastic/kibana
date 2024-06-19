@@ -12,6 +12,7 @@ import { Conversation } from '../../assistant_context/types';
 export interface CodeBlockDetails {
   type: QueryType;
   content: string;
+  timestamp: string;
   start: number;
   end: number;
   getControlContainer?: () => Element | undefined;
@@ -43,7 +44,7 @@ export const MARKDOWN_TYPES = {
  *
  * @param markdown
  */
-export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
+export const analyzeMarkdown = (markdown: string, timestamp: string): CodeBlockDetails[] => {
   const codeBlockRegex = /```(\w+)?\s([\s\S]*?)```/g;
   const matches = [...markdown.matchAll(codeBlockRegex)];
 
@@ -63,7 +64,7 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
     const content = match[2].trim();
     const start = match.index || 0;
     const end = start + match[0].length;
-    return { type: type as QueryType, content, start, end };
+    return { type: type as QueryType, content, start, end, timestamp };
   });
 
   return result;

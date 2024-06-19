@@ -65,14 +65,15 @@ export const augmentMessageCodeBlocks = (
   currentConversation: Conversation,
   showAnonymizedValues: boolean
 ): CodeBlockDetails[][] => {
-  const cbd = currentConversation.messages.map(({ content }) =>
+  const cbd = currentConversation.messages.map(({ content, timestamp }) =>
     analyzeMarkdown(
       showAnonymizedValues
         ? content ?? ''
         : replaceAnonymizedValuesWithOriginalValues({
             messageContent: content ?? '',
             replacements: currentConversation.replacements,
-          })
+          }),
+      timestamp
     )
   );
 

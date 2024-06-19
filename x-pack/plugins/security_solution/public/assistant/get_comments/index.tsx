@@ -193,6 +193,7 @@ export const getComments = ({
             actionTypeId={actionTypeId}
             abortStream={abortStream}
             content={transformedMessage.content}
+            timestamp={transformedMessage.timestamp}
             index={index}
             isControlsEnabled={isControlsEnabled}
             isEnabledLangChain={isEnabledLangChain}

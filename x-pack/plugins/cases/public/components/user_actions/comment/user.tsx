@@ -99,6 +99,7 @@ export const createUserAttachmentUserActionBuilder = ({
             ref={(element) => (commentRefs.current[comment.id] = element)}
             id={comment.id}
             content={comment.comment}
+            timestamp={comment.createdAt}
             isEditable={isEdit}
             caseId={caseId}
             onChangeEditable={handleManageMarkdownEditId}

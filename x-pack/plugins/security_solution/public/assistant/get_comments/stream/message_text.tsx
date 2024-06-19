@@ -29,6 +29,7 @@ import { EsqlCodeBlock } from '../custom_codeblock/esql_code_block';
 
 interface Props {
   content: string;
+  timestamp?: string;
   index: number;
   loading: boolean;
 }
@@ -99,7 +100,7 @@ const loadingCursorPlugin = () => {
   };
 };
 
-const getPluginDependencies = () => {
+const getPluginDependencies = (timestamp?: string) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
   const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
@@ -112,7 +113,7 @@ const getPluginDependencies = () => {
     esql: (props) => {
       return (
         <>
-          <EsqlCodeBlock {...props} />
+          <EsqlCodeBlock {...props} timestamp={timestamp} />
           <EuiSpacer size="m" />
         </>
       );
@@ -152,12 +153,12 @@ const getPluginDependencies = () => {
   };
 };
 
-export function MessageText({ loading, content, index }: Props) {
+export function MessageText({ loading, content, timestamp, index }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
 
-  const { parsingPluginList, processingPluginList } = getPluginDependencies();
+  const { parsingPluginList, processingPluginList } = getPluginDependencies(timestamp);
 
   return (
     <EuiText className={containerClassName}>

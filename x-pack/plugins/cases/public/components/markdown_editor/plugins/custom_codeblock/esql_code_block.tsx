@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiSpacer,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -29,7 +30,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
 function generateId() {
   return uuidv4();
@@ -39,15 +40,17 @@ const saveVisualizationLabel = i18n.translate('xpack.securityAiAssistant.lensESQ
   defaultMessage: 'Save visualization',
 });
 
-export function EsqlCodeBlock({
-  value,
-  actionsDisabled,
-  timestamp,
-}: {
+interface EsqlCodeBlockProps {
   value: string;
   timestamp: string;
   actionsDisabled: boolean;
-}) {
+}
+
+const EsqlCodeBlockComponent: React.FC<EsqlCodeBlockProps> = ({
+  value,
+  actionsDisabled = false,
+  timestamp,
+}) => {
   const { lens, dataViews: dataViewService, data } = useKibana().services;
   const theme = useEuiTheme();
 
@@ -319,4 +322,17 @@ export function EsqlCodeBlock({
       ) : null}
     </>
   );
-}
+};
+
+EsqlCodeBlockComponent.displayName = 'EsqlCodeBlock';
+
+export const EsqlCodeBlock = React.memo(EsqlCodeBlockComponent);
+
+export const getEsqlRenderer = (timestamp) => (props) => {
+  return (
+    <>
+      <EsqlCodeBlock {...props} timestamp={timestamp} />
+      <EuiSpacer size="m" />
+    </>
+  );
+};

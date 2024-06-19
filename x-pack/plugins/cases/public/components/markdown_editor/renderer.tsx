@@ -16,6 +16,7 @@ interface Props {
   children: string;
   disableLinks?: boolean;
   textSize?: EuiMarkdownFormatProps['textSize'];
+  timestamp?: string;
 }
 
 const withDisabledLinks = (disableLinks?: boolean): React.FC<EuiLinkAnchorProps> => {
@@ -28,8 +29,13 @@ const withDisabledLinks = (disableLinks?: boolean): React.FC<EuiLinkAnchorProps>
   return MarkdownLinkProcessingComponent;
 };
 
-const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, textSize }) => {
-  const { processingPlugins, parsingPlugins } = usePlugins();
+const MarkdownRendererComponent: React.FC<Props> = ({
+  children,
+  disableLinks,
+  textSize,
+  timestamp,
+}) => {
+  const { processingPlugins, parsingPlugins } = usePlugins({ timestamp });
   // Deep clone of the processing plugins to prevent affecting the markdown editor.
   const processingPluginList = cloneDeep(processingPlugins);
   // This line of code is TS-compatible and it will break if [1][1] change in the future.

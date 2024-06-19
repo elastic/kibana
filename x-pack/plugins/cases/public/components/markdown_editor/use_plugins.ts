@@ -16,15 +16,26 @@ import type { TemporaryProcessingPluginsType } from './types';
 import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kibana';
 import * as lensMarkdownPlugin from './plugins/lens';
 import { ID as LensPluginId } from './plugins/lens/constants';
+import { getEsqlRenderer } from './plugins/custom_codeblock/esql_code_block';
+import { customCodeBlockLanguagePlugin } from './plugins/custom_codeblock/custom_codeblock_markdown_plugin';
 
-export const usePlugins = (disabledPlugins?: string[]) => {
+export const usePlugins = ({
+  disabledPlugins,
+  timestamp,
+}: {
+  disabledPlugins?: string[];
+  timestamp?: string;
+} = {}) => {
   const kibanaConfig = KibanaServices.getConfig();
   const timelinePlugins = useTimelineContext()?.editor_plugins;
   const appCapabilities = useApplicationCapabilities();
 
   return useMemo(() => {
     const uiPlugins = getDefaultEuiMarkdownUiPlugins();
-    const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
+    const parsingPlugins = [
+      customCodeBlockLanguagePlugin,
+      ...getDefaultEuiMarkdownParsingPlugins(),
+    ];
     const processingPlugins =
       getDefaultEuiMarkdownProcessingPlugins() as TemporaryProcessingPluginsType;
 
@@ -36,6 +47,8 @@ export const usePlugins = (disabledPlugins?: string[]) => {
       // This line of code is TS-compatible and it will break if [1][1] change in the future.
       processingPlugins[1][1].components.timeline = timelinePlugins.processingPluginRenderer;
     }
+
+    processingPlugins[1][1].components.esql = getEsqlRenderer(timestamp);
 
     if (
       kibanaConfig?.markdownPlugins?.lens &&
@@ -59,5 +72,6 @@ export const usePlugins = (disabledPlugins?: string[]) => {
     disabledPlugins,
     kibanaConfig?.markdownPlugins?.lens,
     timelinePlugins,
+    timestamp,
   ]);
 };
