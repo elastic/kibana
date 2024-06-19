@@ -10,84 +10,83 @@ servers:
       port:
         default: '5601'
 paths:
-  /api/asset_criticality:
+  /api/asset_criticality/list:
     post:
       x-labels: [ess, serverless]
       summary: List asset criticality data, filtering and sorting as needed
       parameters:
-        - $ref: '#/components/parameters/sort_field'
-        - $ref: '#/components/parameters/sort_order'
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/per_page'
-        - $ref: '#/components/parameters/kuery'
+        - name: sort_field
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - id_value
+              - id_field
+              - criticality_level
+              - \@timestamp
+          description: The field to sort by.
+        - name: sort_order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+          description: The order to sort by.
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          description: The page number to return.
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+          description: The number of records to return per page.
+        - name: kuery
+          in: query
+          required: false
+          schema:
+            type: string
+          description: The kuery to filter by.
       responses:
         '200':
           description: Bulk upload successful
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  records:
-                    type: array
-                    items:
-                      $ref: './common.schema.yaml#/components/schemas/AssetCriticalityRecord'
-                  page:
-                    type: integer
-                    minimum: 1
-                  per_page:
-                    type: integer
-                    minimum: 1
-                    maximum: 1000
-                  total:
-                    type: integer
-                    minimum: 0
+                $ref: '#/components/schemas/AssetCriticalityListResponse'
+
 components:
-  parameters:
-    sort_field:
-      name: sort_field
-      in: query
-      required: false
-      schema:
-        type: string
-        enum:
-          - id_value
-          - id_field
-          - criticality_level
-          - \@timestamp
-      description: The field to sort by.
-    sort_order:
-      name: sort_order
-      in: query
-      required: false
-      schema:
-        type: string
-        enum:
-          - asc
-          - desc
-      description: The order to sort by.
-    page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-        minimum: 1
-      description: The page number to return.
-    per_page:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 1000
-      description: The number of records to return per page.
-    kuery:
-      name: kuery
-      in: query
-      required: false
-      schema:
-        type: string
-      description: The kuery to filter by.
+  schemas:
+    AssetCriticalityListResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: './common.schema.yaml#/components/schemas/AssetCriticalityRecord'
+        page:
+          type: integer
+          minimum: 1
+        per_page:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        total:
+          type: integer
+          minimum: 0
+      required:
+        - records
+        - page
+        - per_page
+        - total
+
     
