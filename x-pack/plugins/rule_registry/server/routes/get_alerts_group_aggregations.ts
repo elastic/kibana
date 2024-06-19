@@ -20,15 +20,17 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
       path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
       validate: {
         body: buildRouteValidation(
-          t.interface({
-            featureIds: t.array(t.string),
-            groupByField: t.string,
-            aggregations: alertsAggregationsSchema,
-            filters: t.union([t.array(t.object), t.undefined]),
-            sort: t.union([t.array(t.object), t.undefined]),
-            pageIndex: t.union([t.number, t.undefined]),
-            pageSize: t.union([t.number, t.undefined]),
-          })
+          t.exact(
+            t.interface({
+              featureIds: t.array(t.string),
+              groupByField: t.string,
+              aggregations: alertsAggregationsSchema,
+              filters: t.union([t.array(t.object), t.undefined]),
+              sort: t.union([t.array(t.object), t.undefined]),
+              pageIndex: t.union([t.number, t.undefined]),
+              pageSize: t.union([t.number, t.undefined]),
+            })
+          )
         ),
       },
       options: {
