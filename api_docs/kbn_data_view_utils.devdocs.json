@@ -18,7 +18,74 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/data-view-utils",
+        "id": "def-common.createRegExpPatternFrom",
+        "type": "Function",
+        "tags": [],
+        "label": "createRegExpPatternFrom",
+        "description": [],
+        "signature": [
+          "(basePatterns: string | string[]) => RegExp"
+        ],
+        "path": "packages/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-view-utils",
+            "id": "def-common.createRegExpPatternFrom.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "basePatterns",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "packages/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-view-utils",
+        "id": "def-common.testPatternAgainstAllowedList",
+        "type": "Function",
+        "tags": [],
+        "label": "testPatternAgainstAllowedList",
+        "description": [],
+        "signature": [
+          "(allowedList: (string | RegExp)[]) => (value: string) => boolean"
+        ],
+        "path": "packages/kbn-data-view-utils/src/utils/test_pattern_against_allowed_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-view-utils",
+            "id": "def-common.testPatternAgainstAllowedList.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "allowedList",
+            "description": [],
+            "signature": [
+              "(string | RegExp)[]"
+            ],
+            "path": "packages/kbn-data-view-utils/src/utils/test_pattern_against_allowed_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [
