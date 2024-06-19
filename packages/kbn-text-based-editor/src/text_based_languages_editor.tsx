@@ -187,7 +187,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
-  const [isQueryLoading, setIsQueryLoading] = useState(true);
+  const [isQueryLoading, setIsQueryLoading] = useState(isLoading == null ? true : isLoading);
   const [abortController, setAbortController] = useState(new AbortController());
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -265,6 +265,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
+    setIsQueryLoading(Boolean(isLoading));
   }, [isLoading]);
 
   const [documentationSections, setDocumentationSections] =
@@ -479,7 +480,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         });
       }
     };
-    if (isQueryLoading || isLoading) {
+    if (isQueryLoading) {
       addQueriesToCache({
         queryString,
         timeZone,
@@ -494,7 +495,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
       setRefetchHistoryItems(true);
     }
-  }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, queryString, timeZone]);
+  }, [clientParserStatus, isQueryLoading, parseMessages, queryString, timeZone]);
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
@@ -691,9 +692,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     },
     quickSuggestions: true,
     readOnly:
-      isLoading ||
-      isDisabled ||
-      Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+      isDisabled || Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
     renderLineHighlight: !isCodeEditorExpanded ? 'none' : 'line',
     renderLineHighlightOnlyWhenFocus: true,
     scrollbar: {
