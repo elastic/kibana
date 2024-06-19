@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -14,18 +14,37 @@ import {
   EuiText,
   EuiBadge,
   useEuiTheme,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { CasesConfigurationUITemplate } from '../../../common/ui';
 import { TruncatedText } from '../truncated_text';
-
+import type { TemplateConfiguration, TemplatesConfiguration } from '../../../common/types/domain';
+import { DeleteConfirmationModal } from '../configure_cases/delete_confirmation_modal';
+import * as i18n from './translations';
 export interface Props {
-  templates: CasesConfigurationUITemplate[];
+  templates: TemplatesConfiguration;
+  onDeleteTemplate: (key: string) => void;
+  onEditTemplate: (key: string) => void;
 }
 
 const TemplatesListComponent: React.FC<Props> = (props) => {
-  const { templates } = props;
+  const { templates, onEditTemplate, onDeleteTemplate } = props;
   const { euiTheme } = useEuiTheme();
+  const [itemToBeDeleted, SetItemToBeDeleted] = useState<TemplateConfiguration | null>(null);
+
+  const onConfirm = useCallback(() => {
+    if (itemToBeDeleted) {
+      onDeleteTemplate(itemToBeDeleted.key);
+    }
+
+    SetItemToBeDeleted(null);
+  }, [onDeleteTemplate, SetItemToBeDeleted, itemToBeDeleted]);
+
+  const onCancel = useCallback(() => {
+    SetItemToBeDeleted(null);
+  }, []);
+
+  const showModal = Boolean(itemToBeDeleted);
 
   return templates.length ? (
     <>
@@ -65,12 +84,42 @@ const TemplatesListComponent: React.FC<Props> = (props) => {
                         : null}
                     </EuiFlexGroup>
                   </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          data-test-subj={`${template.key}-template-edit`}
+                          aria-label={`${template.key}-template-edit`}
+                          iconType="pencil"
+                          color="primary"
+                          onClick={() => onEditTemplate(template.key)}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          data-test-subj={`${template.key}-template-delete`}
+                          aria-label={`${template.key}-template-delete`}
+                          iconType="minusInCircle"
+                          color="danger"
+                          onClick={() => SetItemToBeDeleted(template)}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>
               <EuiSpacer size="s" />
             </React.Fragment>
           ))}
         </EuiFlexItem>
+        {showModal && itemToBeDeleted ? (
+          <DeleteConfirmationModal
+            title={i18n.DELETE_TITLE(itemToBeDeleted.name)}
+            message={i18n.DELETE_MESSAGE(itemToBeDeleted.name)}
+            onCancel={onCancel}
+            onConfirm={onConfirm}
+          />
+        ) : null}
       </EuiFlexGroup>
     </>
   ) : null;

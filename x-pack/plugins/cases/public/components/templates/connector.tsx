@@ -23,16 +23,16 @@ interface Props {
   connectors: ActionConnector[];
   isLoading: boolean;
   configurationConnectorId: string;
+  isEditMode?: boolean;
 }
 
 const ConnectorComponent: React.FC<Props> = ({
   connectors,
   isLoading,
   configurationConnectorId,
+  isEditMode = false,
 }) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
-  const connector = getConnectorById(connectorId, connectors) ?? null;
-
   const { actions } = useApplicationCapabilities();
   const { permissions } = useCasesContext();
   const hasReadPermissions = permissions.connectors && actions.read;
@@ -41,6 +41,8 @@ const ConnectorComponent: React.FC<Props> = ({
     config: schema.connectorId as FieldConfig,
     connectors,
   });
+
+  const connector = getConnectorById(connectorId, connectors) ?? null;
 
   if (!hasReadPermissions) {
     return (
@@ -57,7 +59,7 @@ const ConnectorComponent: React.FC<Props> = ({
           path="connectorId"
           config={connectorIdConfig}
           component={ConnectorSelector}
-          defaultValue={configurationConnectorId}
+          defaultValue={isEditMode ? connectorId : configurationConnectorId}
           componentProps={{
             connectors,
             dataTestSubj: 'caseConnectors',

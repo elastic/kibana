@@ -65,6 +65,18 @@ export const CONNECTOR_FIELDS = i18n.translate('xpack.cases.templates.connectorF
   defaultMessage: 'External Connector Fields',
 });
 
+export const DELETE_TITLE = (name: string) =>
+  i18n.translate('xpack.cases.configuration.deleteTitle', {
+    values: { name },
+    defaultMessage: 'Delete {name}?',
+  });
+
+export const DELETE_MESSAGE = (name: string) =>
+  i18n.translate('xpack.cases.configuration.deleteMessage', {
+    values: { name },
+    defaultMessage: 'This action will permanently delete {name}.',
+  });
+
 export const MAX_TEMPLATE_LIMIT = (maxTemplates: number) =>
   i18n.translate('xpack.cases.templates.maxTemplateLimit', {
     values: { maxTemplates },

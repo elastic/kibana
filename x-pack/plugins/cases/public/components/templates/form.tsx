@@ -9,18 +9,19 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import React, { useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { ActionConnector } from '../../../common/types/domain';
+import type { FormState } from '../configure_cases/flyout';
 import { schema } from './schema';
 import { FormFields } from './form_fields';
-import { templateSerializer } from './utils';
+import { templateDeserializer } from './utils';
 import type { TemplateFormProps } from './types';
 import type { CasesConfigurationUI } from '../../containers/types';
-import type { FormState } from '../configure_cases/flyout';
 
 interface Props {
   onChange: (state: FormState<TemplateFormProps>) => void;
   initialValue: TemplateFormProps | null;
   connectors: ActionConnector[];
   currentConfiguration: CasesConfigurationUI;
+  isEditMode?: boolean;
 }
 
 const FormComponent: React.FC<Props> = ({
@@ -28,6 +29,7 @@ const FormComponent: React.FC<Props> = ({
   initialValue,
   connectors,
   currentConfiguration,
+  isEditMode = false,
 }) => {
   const keyDefaultValue = useMemo(() => uuidv4(), []);
 
@@ -35,12 +37,13 @@ const FormComponent: React.FC<Props> = ({
     defaultValue: initialValue ?? {
       key: keyDefaultValue,
       name: '',
-      templateDescription: '',
-      templateTags: [],
+      description: '',
+      tags: [],
+      caseFields: null,
     },
     options: { stripEmptyFields: false },
     schema,
-    serializer: templateSerializer,
+    deserializer: templateDeserializer,
   });
 
   const { submit, isValid, isSubmitting } = form;
@@ -57,6 +60,7 @@ const FormComponent: React.FC<Props> = ({
         isSubmitting={isSubmitting}
         connectors={connectors}
         currentConfiguration={currentConfiguration}
+        isEditMode={isEditMode}
       />
     </Form>
   );

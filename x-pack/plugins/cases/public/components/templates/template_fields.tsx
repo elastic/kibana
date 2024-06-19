@@ -29,7 +29,7 @@ const TemplateFieldsComponent: React.FC<{
         },
       }}
     />
-    <TemplateTags isLoading={isLoading} tags={configurationTemplateTags} />
+    <TemplateTags isLoading={isLoading} tagOptions={configurationTemplateTags} />
     <UseField
       path="templateDescription"
       component={TextAreaField}

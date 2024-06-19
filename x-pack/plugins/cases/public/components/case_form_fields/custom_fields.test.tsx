@@ -24,6 +24,7 @@ describe('CustomFields', () => {
     configurationCustomFields: customFieldsConfigurationMock,
     isLoading: false,
     setCustomFieldsOptional: false,
+    isEditMode: false,
   };
 
   beforeEach(() => {
@@ -75,6 +76,23 @@ describe('CustomFields', () => {
     );
 
     expect(screen.getAllByTestId('form-optional-field-label')).toHaveLength(2);
+  });
+
+  it('should not set default value when in edit mode', async () => {
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <CustomFields
+          isLoading={false}
+          configurationCustomFields={[customFieldsConfigurationMock[0]]}
+          setCustomFieldsOptional={false}
+          isEditMode={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(
+      screen.queryByText(`${customFieldsConfigurationMock[0].defaultValue}`)
+    ).not.toBeInTheDocument();
   });
 
   it('should sort the custom fields correctly', async () => {

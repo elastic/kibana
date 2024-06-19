@@ -6,18 +6,23 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplatesList } from './templates_list';
+import userEvent from '@testing-library/user-event';
 
 describe('TemplatesList', () => {
   let appMockRender: AppMockRenderer;
+  const onDeleteTemplate = jest.fn();
+  const onEditTemplate = jest.fn();
 
   const props = {
     templates: templatesConfigurationMock,
+    onDeleteTemplate,
+    onEditTemplate,
   };
 
   beforeEach(() => {
@@ -69,5 +74,72 @@ describe('TemplatesList', () => {
     appMockRender.render(<TemplatesList {...{ ...props, templates: [] }} />);
 
     expect(screen.queryAllByTestId(`template-`, { exact: false })).toHaveLength(0);
+  });
+
+  it('renders edit button', async () => {
+    appMockRender.render(
+      <TemplatesList {...{ ...props, templates: [templatesConfigurationMock[0]] }} />
+    );
+
+    expect(
+      await screen.findByTestId(`${templatesConfigurationMock[0].key}-template-edit`)
+    ).toBeInTheDocument();
+  });
+
+  it('renders delete button', async () => {
+    appMockRender.render(
+      <TemplatesList {...{ ...props, templates: [templatesConfigurationMock[0]] }} />
+    );
+
+    expect(
+      await screen.findByTestId(`${templatesConfigurationMock[0].key}-template-delete`)
+    ).toBeInTheDocument();
+  });
+
+  it('renders delete modal', async () => {
+    appMockRender.render(
+      <TemplatesList {...{ ...props, templates: [templatesConfigurationMock[0]] }} />
+    );
+
+    userEvent.click(
+      await screen.findByTestId(`${templatesConfigurationMock[0].key}-template-delete`)
+    );
+
+    expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+    expect(await screen.findByText('Delete')).toBeInTheDocument();
+    expect(await screen.findByText('Cancel')).toBeInTheDocument();
+  });
+
+  it('calls onEditTemplate correctly', async () => {
+    appMockRender.render(<TemplatesList {...props} />);
+
+    const list = await screen.findByTestId('templates-list');
+
+    userEvent.click(
+      await within(list).findByTestId(`${templatesConfigurationMock[0].key}-template-edit`)
+    );
+
+    await waitFor(() => {
+      expect(props.onEditTemplate).toHaveBeenCalledWith(templatesConfigurationMock[0].key);
+    });
+  });
+
+  it('calls onDeleteTemplate correctly', async () => {
+    appMockRender.render(<TemplatesList {...props} />);
+
+    const list = await screen.findByTestId('templates-list');
+
+    userEvent.click(
+      await within(list).findByTestId(`${templatesConfigurationMock[0].key}-template-delete`)
+    );
+
+    expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+
+    userEvent.click(await screen.findByText('Delete'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
+      expect(props.onDeleteTemplate).toHaveBeenCalledWith(templatesConfigurationMock[0].key);
+    });
   });
 });

@@ -24,5 +24,5 @@ export type CaseFieldsProps = Omit<
 export type TemplateFormProps = Pick<TemplateConfiguration, 'key' | 'name'> &
   CaseFieldsProps & {
     templateTags?: string[];
-    templateDescription: string;
+    templateDescription?: string;
   };
