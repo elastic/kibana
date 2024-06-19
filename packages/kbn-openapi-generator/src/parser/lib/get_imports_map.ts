@@ -10,35 +10,54 @@ import { uniq } from 'lodash';
 import type { OpenApiDocument } from '../openapi_types';
 import { findRefs } from './find_refs';
 
+const SCHEMA_COMPONENT_PATH = '#/components/schemas/';
+
 export interface ImportsMap {
   [importPath: string]: string[];
 }
 
 /**
- * Traverse the OpenAPI document, find all external references, and return a map
- * of import paths and imported symbols
+ * Find all external schema references in the document,
+ * return a map of import paths and imported symbols
  *
  * @param parsedSchema Parsed OpenAPI document
  * @returns A map of import paths to symbols to import
  */
 export const getImportsMap = (parsedSchema: OpenApiDocument): ImportsMap => {
-  const importMap: Record<string, string[]> = {}; // key: import path, value: list of symbols to import
-  const refs = findRefs(parsedSchema);
-  refs.forEach((ref) => {
-    if (isExternalRef(ref) && isSchemaRef(ref)) {
-      const refParts = ref.split('#/components/schemas/');
-      const importedSymbol = refParts[1];
-      let importPath = refParts[0];
-      if (importPath) {
-        importPath = importPath.replace('.schema.yaml', '.gen');
-        const currentSymbols = importMap[importPath] ?? [];
-        importMap[importPath] = uniq([...currentSymbols, importedSymbol]);
-      }
-    }
-  });
+  const externalSchemaRefs = findExternalSchemaRefs(parsedSchema);
 
-  return importMap;
+  return externalSchemaRefs.reduce<ImportsMap>((importMap, ref) => {
+    const { importPath, importedSymbol, genFileImportPath } = parseRef(ref);
+    if (importPath) {
+      const symbols = uniq([...importMap[genFileImportPath], importedSymbol]);
+      importMap[genFileImportPath] = symbols;
+    }
+    return importMap;
+  }, {});
 };
+
+/**
+ * Given a component schema reference, parse the import path and imported symbol
+ * And generate the import path for the generated file
+ * @param ref $ref value
+ * @returns An object with importPath, importedSymbol, and genFileImportPath
+ */
+const parseRef = (
+  ref: string
+): { importPath: string; importedSymbol: string; genFileImportPath: string } => {
+  const [importPath, importedSymbol] = ref.split(SCHEMA_COMPONENT_PATH);
+  const genFileImportPath = importPath.replace('.schema.yaml', '.gen');
+  return { importPath, importedSymbol, genFileImportPath };
+};
+
+/**
+ * Traverse the OpenAPI document recursively and find all external schema references
+ *
+ * @param parsedSchema Parsed OpenAPI document
+ * @returns A list of external schema references
+ */
+const findExternalSchemaRefs = (parsedSchema: OpenApiDocument): string[] =>
+  findRefs(parsedSchema).filter((ref) => isExternalRef(ref) && isSchemaRef(ref));
 
 /**
  * Check if the given reference refers to something not in the same document
@@ -54,4 +73,4 @@ const isExternalRef = (ref: string): boolean => !ref.startsWith('#');
  * @param ref $ref value
  * @returns True if the reference is to a schema
  */
-const isSchemaRef = (ref: string): boolean => ref.includes('#/components/schemas/');
+const isSchemaRef = (ref: string): boolean => ref.includes(SCHEMA_COMPONENT_PATH);
