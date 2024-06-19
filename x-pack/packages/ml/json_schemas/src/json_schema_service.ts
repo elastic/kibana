@@ -64,6 +64,33 @@ export class JsonSchemaService {
     };
   }
 
+  private allComponents: Record<string, object> = {};
+  private componentsDict = new Set<string>();
+
+  /**
+   * Extracts only used components
+   */
+  private extractComponents(bodySchema: object) {
+    for (const prop of Object.values(bodySchema)) {
+      if (typeof prop !== 'object' || !prop) {
+        continue;
+      }
+
+      // Check if prop contains a $ref
+      if (prop.$ref) {
+        if (!this.componentsDict.has(prop.$ref)) {
+          this.componentsDict.add(prop.$ref);
+          // Check all references of this ref
+          const schemaKey: string = prop.$ref.split('/').pop()!;
+          // @ts-ignore
+          this.extractComponents(this.allComponents.schemas[schemaKey]);
+        }
+      }
+
+      this.extractComponents(prop);
+    }
+  }
+
   public async resolveSchema(
     path: EditorEndpoints,
     method: string,
@@ -81,7 +108,11 @@ export class JsonSchemaService {
 
     let bodySchema = definition.requestBody.content['application/json'].schema;
 
+    // Store components for a later use, to extract only used components
+    this.allComponents = fileContent.components;
+
     if (props) {
+      // Only extract requested properties from the schema
       const propDef = bodySchema.properties[props[0]];
       if (propDef.$ref) {
         bodySchema = fileContent.components.schemas[propDef.$ref.split('/').pop()!];
@@ -90,8 +121,19 @@ export class JsonSchemaService {
 
     bodySchema = this.applyOverrides(path, bodySchema);
 
-    // @ts-ignore
-    const components = schema.components;
+    // Extract only used components
+    this.extractComponents(bodySchema);
+
+    const components = Array.from(this.componentsDict).reduce(
+      (acc, ref) => {
+        // Split component path
+        const componentName = ref.split('/').pop()!;
+        // @ts-ignore
+        acc.schemas[componentName] = fileContent.components.schemas[componentName];
+        return acc;
+      },
+      { schemas: {} }
+    );
 
     return {
       ...bodySchema,
