@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+
+import { EuiButton } from '@elastic/eui';
+import { useMutation } from '@tanstack/react-query';
+import { useToggle } from 'react-use';
+import { AssetCriticalityModal } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import type { DeleteAssetCriticalityResponse } from '../../../../entity_analytics/api/api';
+import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import type { Params } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+import type { AssetCriticalityRecord } from '../../../../../common/api/entity_analytics';
 import { HostsFields } from '../../../../../common/api/search_strategy/hosts/model/sort';
 import type {
   Columns,
@@ -27,11 +37,15 @@ import type {
   HostsSortField,
 } from '../../../../../common/search_strategy/security_solution/hosts';
 import type { Direction, RiskSeverity } from '../../../../../common/search_strategy';
-import { SecurityPageName } from '../../../../../common/constants';
+import {
+  ENABLE_ASSET_CRITICALITY_SETTING,
+  SecurityPageName,
+} from '../../../../../common/constants';
 import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
+import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -153,40 +167,105 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     [dispatch, navigateTo, type]
   );
 
+  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
+
   const hostsColumns = useMemo(
     () =>
       getHostsColumns(
         isPlatinumOrTrialLicense && hasEntityAnalyticsCapability,
-        dispatchSeverityUpdate
+        dispatchSeverityUpdate,
+        isAssetCriticalityEnabled
       ),
-    [dispatchSeverityUpdate, isPlatinumOrTrialLicense, hasEntityAnalyticsCapability]
+    [
+      dispatchSeverityUpdate,
+      isPlatinumOrTrialLicense,
+      hasEntityAnalyticsCapability,
+      isAssetCriticalityEnabled,
+    ]
   );
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
+  const [selected, setSelected] = useState<HostsEdges[]>([]);
+
+  const { createAssetCriticality, deleteAssetCriticality } = useEntityAnalyticsRoutes();
+
+  const [isCriticalityModalVisible, toggleCriticalityModal] = useToggle(false);
+  const criticality = useMutation<
+    Array<AssetCriticalityRecord | DeleteAssetCriticalityResponse>,
+    unknown,
+    Params[],
+    unknown
+  >({
+    mutationFn: (records) => {
+      // console.log('mutating records', records);
+      const promises = records.map(({ criticalityLevel, idField, idValue }) => {
+        if (criticalityLevel === 'unassigned') {
+          return deleteAssetCriticality({ idField, idValue, refresh: 'wait_for' });
+        }
+
+        return createAssetCriticality({ idField, idValue, criticalityLevel, refresh: 'wait_for' });
+      });
+
+      return Promise.all(promises).then((results) => {
+        // console.log('results', results);
+        return results;
+      });
+    },
+    onSuccess: () => location.reload(),
+  });
+
+  const bulkAssignCriticality = (criticalityLevel: CriticalityLevelWithUnassigned) => {
+    const obj = selected.map(buildCriticalityMutationParams(criticalityLevel));
+    criticality.mutate(obj);
+  };
 
   return (
-    <PaginatedTable
-      activePage={activePage}
-      columns={hostsColumns}
-      dataTestSubj={`table-${tableType}`}
-      headerCount={totalCount}
-      headerTitle={i18n.HOSTS}
-      headerUnit={i18n.UNIT(totalCount)}
-      id={id}
-      isInspect={isInspect}
-      itemsPerRow={rowItems}
-      limit={limit}
-      loading={loading}
-      loadPage={loadPage}
-      onChange={onChange}
-      pageOfItems={data}
-      setQuerySkip={setQuerySkip}
-      showMorePagesIndicator={showMorePagesIndicator}
-      sorting={sorting}
-      totalCount={fakeTotalCount}
-      updateLimitPagination={updateLimitPagination}
-      updateActivePage={updateActivePage}
-    />
+    <>
+      {isCriticalityModalVisible ? (
+        <AssetCriticalityModal
+          onSave={bulkAssignCriticality}
+          initialCriticalityLevel={undefined}
+          toggle={toggleCriticalityModal}
+        />
+      ) : null}
+      <PaginatedTable
+        activePage={activePage}
+        columns={hostsColumns}
+        dataTestSubj={`table-${tableType}`}
+        headerCount={totalCount}
+        headerTitle={i18n.HOSTS}
+        headerUnit={i18n.UNIT(totalCount)}
+        headerSupplement={
+          selected && selected.length > 0 ? (
+            <EuiButton
+              onClick={() => toggleCriticalityModal(true)}
+              title={`Assign criticality to ${selected.length} selected items`}
+            >{`Assign criticality to ${selected.length} selected items`}</EuiButton>
+          ) : undefined
+        }
+        id={id}
+        isInspect={isInspect}
+        itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadPage={loadPage}
+        onChange={onChange}
+        pageOfItems={data}
+        setQuerySkip={setQuerySkip}
+        showMorePagesIndicator={showMorePagesIndicator}
+        sorting={sorting}
+        selection={{
+          selected,
+          onSelectionChange: (items) => {
+            setSelected(items as HostsEdges[]);
+          },
+        }}
+        itemId={(item) => (item as HostsEdges).node._id || ''}
+        totalCount={fakeTotalCount}
+        updateLimitPagination={updateLimitPagination}
+        updateActivePage={updateActivePage}
+      />
+    </>
   );
 };
 
@@ -217,3 +296,13 @@ const getNodeField = (field: HostsFields): string => {
 export const HostsTable = React.memo(HostsTableComponent);
 
 HostsTable.displayName = 'HostsTable';
+
+const buildCriticalityMutationParams =
+  (criticalityLevel: Params['criticalityLevel']) =>
+  (edge: HostsEdges): Params => {
+    return {
+      idField: 'host.name',
+      idValue: edge.node.host?.name?.[0] || '',
+      criticalityLevel,
+    };
+  };

@@ -79,6 +79,7 @@ export class AssetCriticalityDataClient {
     query: ESFilter;
     size?: number;
   }): Promise<SearchResponse<AssetCriticalityRecord>> {
+    console.log('Asset criticality opts:', this.options);
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),
       ignore_unavailable: true,
