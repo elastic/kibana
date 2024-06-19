@@ -30,14 +30,14 @@ export default function ({ getService }: FtrProviderContext) {
 
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let role: RoleCredentials;
+  let roleAuthc: RoleCredentials;
 
   describe('bsearch', () => {
     before(async () => {
-      role = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(role);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
     describe('post', () => {
       it('should return 200 a single response', async () => {
@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
           .set(svlCommonApi.getInternalRequestHeader())
-          .set(role.apiKeyHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
               {
@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
           .set(svlCommonApi.getInternalRequestHeader())
-          .set(role.apiKeyHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
               {
@@ -118,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
           .set(svlCommonApi.getInternalRequestHeader())
-          .set(role.apiKeyHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
               {
@@ -164,7 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
           .set(svlCommonApi.getInternalRequestHeader())
-          .set(role.apiKeyHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
               {
@@ -198,7 +198,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
           .set(svlCommonApi.getInternalRequestHeader())
-          .set(role.apiKeyHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
               {
@@ -241,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
             // TODO: API requests in Serverless require internal request headers
             .set(svlCommonApi.getInternalRequestHeader())
-            .set(role.apiKeyHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               batch: [
                 {
