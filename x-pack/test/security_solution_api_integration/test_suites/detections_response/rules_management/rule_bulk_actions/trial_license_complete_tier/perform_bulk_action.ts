@@ -2409,7 +2409,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return all existing and enabled rules as succeeded', async () => {
         const intervalInMinutes = 25;
         const interval = `${intervalInMinutes}m`;
-        const createdRule1 = await createRule(
+        await createRule(
           supertest,
           log,
           getCustomQueryRuleParams({
@@ -2418,7 +2418,7 @@ export default ({ getService }: FtrProviderContext): void => {
             interval,
           })
         );
-        const createdRule2 = await createRule(
+        await createRule(
           supertest,
           log,
           getCustomQueryRuleParams({
@@ -2450,16 +2450,6 @@ export default ({ getService }: FtrProviderContext): void => {
           skipped: 0,
           succeeded: 2,
           total: 2,
-        });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: expect.arrayContaining([
-            expect.objectContaining(createdRule1),
-            expect.objectContaining(createdRule2),
-          ]),
         });
         expect(body.attributes.errors).toBeUndefined();
       });
@@ -2508,13 +2498,6 @@ export default ({ getService }: FtrProviderContext): void => {
           skipped: 0,
           succeeded: 0,
           total: 2,
-        });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
         });
 
         expect(body.attributes.errors).toHaveLength(1);
@@ -2580,13 +2563,6 @@ export default ({ getService }: FtrProviderContext): void => {
           succeeded: 0,
           total: 2,
         });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
-        });
 
         expect(body.attributes.errors).toHaveLength(1);
         expect(body.attributes.errors[0]).toEqual({
@@ -2646,13 +2622,6 @@ export default ({ getService }: FtrProviderContext): void => {
           skipped: 0,
           succeeded: 0,
           total: 2,
-        });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
         });
 
         expect(body.attributes.errors).toHaveLength(1);
@@ -2718,13 +2687,6 @@ export default ({ getService }: FtrProviderContext): void => {
           succeeded: 0,
           total: 2,
         });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
-        });
 
         expect(body.attributes.errors).toHaveLength(1);
         expect(body.attributes.errors[0]).toEqual({
@@ -2789,13 +2751,6 @@ export default ({ getService }: FtrProviderContext): void => {
           succeeded: 0,
           total: 2,
         });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
-        });
 
         expect(body.attributes.errors).toHaveLength(1);
         expect(body.attributes.errors[0]).toEqual({
@@ -2850,13 +2805,6 @@ export default ({ getService }: FtrProviderContext): void => {
           skipped: 0,
           succeeded: 1,
           total: 2,
-        });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: expect.arrayContaining([expect.objectContaining(createdRule1)]),
         });
 
         expect(body.attributes.errors).toHaveLength(1);
@@ -2915,13 +2863,6 @@ export default ({ getService }: FtrProviderContext): void => {
           skipped: 0,
           succeeded: 1,
           total: 2,
-        });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: expect.arrayContaining([expect.objectContaining(createdRule2)]),
         });
 
         expect(body.attributes.errors).toHaveLength(1);

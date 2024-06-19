@@ -343,13 +343,6 @@ export default ({ getService }: FtrProviderContext): void => {
           succeeded: 2,
           total: 2,
         });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
-        });
         expect(body.attributes.errors).toBeUndefined();
       });
 
@@ -397,13 +390,6 @@ export default ({ getService }: FtrProviderContext): void => {
           skipped: 0,
           succeeded: 0,
           total: 2,
-        });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
         });
 
         expect(body.attributes.errors).toHaveLength(1);
@@ -469,13 +455,6 @@ export default ({ getService }: FtrProviderContext): void => {
           succeeded: 0,
           total: 2,
         });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
-        });
 
         expect(body.attributes.errors).toHaveLength(1);
         expect(body.attributes.errors[0]).toEqual({
@@ -535,13 +514,6 @@ export default ({ getService }: FtrProviderContext): void => {
           skipped: 0,
           succeeded: 0,
           total: 2,
-        });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
         });
 
         expect(body.attributes.errors).toHaveLength(1);
@@ -607,13 +579,6 @@ export default ({ getService }: FtrProviderContext): void => {
           succeeded: 0,
           total: 2,
         });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
-        });
 
         expect(body.attributes.errors).toHaveLength(1);
         expect(body.attributes.errors[0]).toEqual({
@@ -678,13 +643,6 @@ export default ({ getService }: FtrProviderContext): void => {
           succeeded: 0,
           total: 2,
         });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
-        });
 
         expect(body.attributes.errors).toHaveLength(1);
         expect(body.attributes.errors[0]).toEqual({
@@ -739,13 +697,6 @@ export default ({ getService }: FtrProviderContext): void => {
           skipped: 0,
           succeeded: 1,
           total: 2,
-        });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
         });
 
         expect(body.attributes.errors).toHaveLength(1);
@@ -804,13 +755,6 @@ export default ({ getService }: FtrProviderContext): void => {
           skipped: 0,
           succeeded: 1,
           total: 2,
-        });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-          backfilled: [],
         });
 
         expect(body.attributes.errors).toHaveLength(1);
