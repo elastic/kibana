@@ -93,7 +93,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   );
 
   const agentPoliciesNamesList = useMemo(
-    () => agentPolicies.map((p) => p.name).join(', '),
+    () => agentPolicies?.map((p) => p.name).join(', '),
     [agentPolicies]
   );
 
