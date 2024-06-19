@@ -30,34 +30,39 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
-const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
-  let retryCount = 0;
-  let arraySize = [];
+  const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
+    let retryCount = 0;
+    let arraySize = [];
 
     while (retryCount < 10) {
       try {
-        const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
+        const kibanaServer2 = getService('kibanaServer');
+        const cspBenchmarkRules = await kibanaServer2.savedObjects.find<CspBenchmarkRule>({
           type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
         });
 
-      const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
-        (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
-      );
-      arraySize.push(requestedBenchmarkRules.length)
-      if (requestedBenchmarkRules.length > 1) {
-        return requestedBenchmarkRules.map((item) => item.attributes);
-      } else {
-        throw new Error(`No benchmark rules found for benchmark ID: ${benchmarkId}`);
+        const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
+          (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
+        );
+        arraySize.push(requestedBenchmarkRules.length);
+        if (requestedBenchmarkRules.length > 1) {
+          return requestedBenchmarkRules.map((item) => item.attributes);
+        } else {
+          throw new Error(`No benchmark rules found for benchmark ID: ${benchmarkId}`);
+        }
+      } catch (error) {
+        retryCount++;
+
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 second delay
       }
-    } catch (error) {
-      retryCount++;
-
-      await new Promise(resolve => setTimeout(resolve, 3000)); // 1 second delay
-    }
     }
 
-  throw new Error(`Failed to retrieve benchmark rules after ${retryCount} attempts, with rule array size of ${arraySize.join(',')}`);
-};
+    throw new Error(
+      `Failed to retrieve benchmark rules after ${retryCount} attempts, with rule array size of ${arraySize.join(
+        ','
+      )}`
+    );
+  };
 
   const getMockFinding = (rule: CspBenchmarkRule, evaluation: string) => ({
     '@timestamp': '2023-06-29T02:08:44.993Z',
