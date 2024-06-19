@@ -17,3 +17,9 @@ export interface GridData {
   width: number;
   height: number;
 }
+
+export interface GridSettings {
+  gutterSize: number;
+  rowHeight: number;
+  columnCount: number;
+}

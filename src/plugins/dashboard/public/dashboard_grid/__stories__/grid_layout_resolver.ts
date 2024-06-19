@@ -77,7 +77,6 @@ export const resolveGridLayout = (originalLayout: GridLayout, dragRequest: GridD
     }
   }
   const compactedGrid = compactGridLayout(gridLayout);
-
   return compactedGrid;
 };
 
