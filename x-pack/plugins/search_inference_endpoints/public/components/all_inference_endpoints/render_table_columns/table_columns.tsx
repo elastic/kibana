@@ -12,11 +12,25 @@ import { useActions } from './render_actions/use_actions';
 import { RenderEndpoint } from './render_endpoint/render_endpoint';
 import { ServiceProvider } from './render_service_provider/service_provider';
 import { TaskType } from './render_task_type/task_type';
+import { DeploymentStatus } from './render_deployment_status/deployment_status';
+import { DeploymentStatusEnum } from '../types';
 
 export const useTableColumns = () => {
   const { actions } = useActions();
 
   const TABLE_COLUMNS = [
+    {
+      field: 'deployment',
+      name: '',
+      render: (deployment: DeploymentStatusEnum) => {
+        if (deployment != null) {
+          return <DeploymentStatus status={deployment} />;
+        }
+
+        return null;
+      },
+      width: '2%',
+    },
     {
       field: 'endpoint',
       name: i18n.ENDPOINT,

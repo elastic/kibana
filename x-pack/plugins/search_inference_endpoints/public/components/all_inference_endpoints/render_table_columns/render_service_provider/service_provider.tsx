@@ -54,7 +54,11 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ providerKey })
 
   return provider ? (
     <>
-      <EuiIcon type={provider.icon} style={{ marginRight: '8px' }} />
+      <EuiIcon
+        data-test-subj={`table-column-service-provider-${provider.name}`}
+        type={provider.icon}
+        style={{ marginRight: '8px' }}
+      />
       <span>{provider.name}</span>
     </>
   ) : (

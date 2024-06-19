@@ -57,7 +57,14 @@ export interface EuiBasicTableSortTypes {
   field: string;
 }
 
+export enum DeploymentStatusEnum {
+  deployed = 'deployed',
+  notDeployed = 'not_deployed',
+  notApplicable = 'not_applicable',
+}
+
 export interface InferenceEndpointUI {
+  deployment: DeploymentStatusEnum;
   endpoint: InferenceAPIConfigResponse;
   provider: string;
   type: string;

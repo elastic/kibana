@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// TaskType.tsx
-
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 
