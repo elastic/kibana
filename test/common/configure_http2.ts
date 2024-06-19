@@ -27,6 +27,10 @@ export const configureHTTP2 = (config: ConfigType): ConfigType => {
   // have no real alternatives to accept self-signed certs
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
+  if (!config.browser) {
+    config.browser = {};
+  }
+
   // tell webdriver browser to accept self-signed certificates
   config.browser.acceptInsecureCerts = true;
 
