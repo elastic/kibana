@@ -24,7 +24,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
             t.interface({
               featureIds: t.array(t.string),
               groupByField: t.string,
-              aggregations: alertsAggregationsSchema,
+              aggregations: t.union([alertsAggregationsSchema, t.undefined]),
               filters: t.union([t.array(t.object), t.undefined]),
               sort: t.union([t.array(t.object), t.undefined]),
               pageIndex: t.union([t.number, t.undefined]),

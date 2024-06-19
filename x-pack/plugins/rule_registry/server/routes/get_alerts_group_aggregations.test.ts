@@ -200,7 +200,7 @@ describe('getAlertsGroupAggregations', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"featureIds\\",Invalid value \\"undefined\\" supplied to \\"aggregations\\"'"`
+        `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"featureIds\\"'"`
       );
     });
 

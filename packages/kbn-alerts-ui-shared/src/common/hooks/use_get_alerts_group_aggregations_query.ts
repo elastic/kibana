@@ -26,7 +26,7 @@ export interface UseGetAlertsGroupAggregationsQueryProps {
   params: {
     featureIds: AlertConsumers[];
     groupByField: string;
-    aggregations: Record<string, AggregationsAggregationContainer>;
+    aggregations?: Record<string, AggregationsAggregationContainer>;
     filters?: QueryDslQueryContainer[];
     sort?: SortCombinations[];
     pageIndex?: number;
@@ -35,9 +35,18 @@ export interface UseGetAlertsGroupAggregationsQueryProps {
 }
 
 /**
- * Fetches alerts aggregations for a given groupByField
+ * Fetches alerts aggregations for a given groupByField.
  *
- * Applies alerting RBAC thorough featureIds
+ * Some default aggregations are applied:
+ * - `groupByFields`, to get the buckets based on the provided grouping field,
+ *   - `unitsCount`, to count the number of alerts in each bucket,
+ * - `unitsCount`, to count the total number of alerts targeted by the query,
+ * - `groupsCount`, to count the total number of groups.
+ *
+ * The provided `aggregations` are applied within `groupByFields`. Here the `groupByField` runtime
+ * field can be used to perform grouping-based aggregations.
+ *
+ * Applies alerting RBAC through featureIds.
  */
 export const useGetAlertsGroupAggregationsQuery = <T>({
   http,

@@ -1060,7 +1060,7 @@ export class AlertsClient {
     /**
      * The aggregations to perform on the groupByField buckets
      */
-    aggregations: TypeOf<typeof alertsAggregationsSchema>;
+    aggregations?: TypeOf<typeof alertsAggregationsSchema>;
     /**
      * The filters to apply to the query
      */
