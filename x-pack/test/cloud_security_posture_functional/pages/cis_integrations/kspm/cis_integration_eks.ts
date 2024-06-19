@@ -75,7 +75,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('KSPM EKS Temporary Keys', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186389
+    describe.skip('KSPM EKS Temporary Keys', () => {
       it('KSPM EKS Temporary Keys Workflow', async () => {
         const accessKeyId = 'accessKeyIdTest';
         const accessKeySecretKey = 'accessKeySecretKeyTest';
