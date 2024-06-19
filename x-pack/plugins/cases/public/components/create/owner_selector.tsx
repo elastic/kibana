@@ -98,9 +98,7 @@ const OwnerSelector = ({
 OwnerSelector.displayName = 'OwnerSelector';
 
 const CaseOwnerSelector: React.FC<Props> = ({ availableOwners, isLoading }) => {
-  const defaultValue = availableOwners.includes(SECURITY_SOLUTION_OWNER)
-    ? SECURITY_SOLUTION_OWNER
-    : availableOwners[0] ?? SECURITY_SOLUTION_OWNER;
+  const defaultValue = getOwnerDefaultValue(availableOwners);
 
   return (
     <UseField
@@ -115,3 +113,8 @@ const CaseOwnerSelector: React.FC<Props> = ({ availableOwners, isLoading }) => {
 CaseOwnerSelector.displayName = 'CaseOwnerSelectionComponent';
 
 export const CreateCaseOwnerSelector = memo(CaseOwnerSelector);
+
+export const getOwnerDefaultValue = (availableOwners: string[]) =>
+  availableOwners.includes(SECURITY_SOLUTION_OWNER)
+    ? SECURITY_SOLUTION_OWNER
+    : availableOwners[0] ?? SECURITY_SOLUTION_OWNER;

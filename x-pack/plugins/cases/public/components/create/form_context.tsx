@@ -33,6 +33,8 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 import { useApplication } from '../../common/lib/kibana/use_application';
+import { getConfigurationByOwner } from '../../containers/configure/utils';
+import { getOwnerDefaultValue } from './owner_selector';
 
 export const initialCaseValue: CreateCaseFormSchema = {
   title: '',
@@ -213,8 +215,18 @@ export const FormContext: React.FC<Props> = ({
     ]
   );
 
+  /**
+   * This is needed to initiate the connector
+   * with the one set in the configuration
+   * when creating a case.
+   */
+  const configuration = getConfigurationByOwner({
+    configurations: allConfigurations,
+    owner: owner[0] ?? getOwnerDefaultValue(availableOwners),
+  });
+
   const { form } = useForm<CreateCaseFormSchema>({
-    defaultValue: { ...initialCaseValue, ...initialValue },
+    defaultValue: { ...initialCaseValue, connectorId: configuration.connector.id, ...initialValue },
     options: { stripEmptyFields: false },
     schema,
     onSubmit: submitCase,

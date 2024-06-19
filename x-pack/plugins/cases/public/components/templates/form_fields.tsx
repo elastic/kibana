@@ -32,7 +32,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   isEditMode,
 }) => {
   const { isSyncAlertsEnabled } = useCasesFeatures();
-  const { customFields: configurationCustomFields, connector, templates } = currentConfiguration;
+  const { customFields: configurationCustomFields, templates } = currentConfiguration;
   const configurationTemplateTags = templates
     .map((template) => (template?.tags?.length ? template.tags : []))
     .flat();
@@ -77,15 +77,10 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
     () => ({
       title: i18n.CONNECTOR_FIELDS,
       children: (
-        <Connector
-          connectors={connectors}
-          isLoading={isSubmitting}
-          isLoadingConnectors={false}
-          configurationConnector={connector}
-        />
+        <Connector connectors={connectors} isLoading={isSubmitting} isLoadingConnectors={false} />
       ),
     }),
-    [connectors, isSubmitting, connector]
+    [connectors, isSubmitting]
   );
 
   const allSteps = useMemo(

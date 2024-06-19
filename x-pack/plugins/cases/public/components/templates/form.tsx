@@ -8,7 +8,7 @@
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { ActionConnector } from '../../../common/types/domain';
+import type { ActionConnector, TemplateConfiguration } from '../../../common/types/domain';
 import type { FormState } from '../configure_cases/flyout';
 import { schema } from './schema';
 import { FormFields } from './form_fields';
@@ -18,7 +18,7 @@ import type { CasesConfigurationUI } from '../../containers/types';
 
 interface Props {
   onChange: (state: FormState<TemplateFormProps>) => void;
-  initialValue: TemplateFormProps | null;
+  initialValue: TemplateConfiguration | null;
   connectors: ActionConnector[];
   currentConfiguration: CasesConfigurationUI;
   isEditMode?: boolean;
@@ -39,7 +39,9 @@ const FormComponent: React.FC<Props> = ({
       name: '',
       description: '',
       tags: [],
-      caseFields: null,
+      caseFields: {
+        connector: currentConfiguration.connector,
+      },
     },
     options: { stripEmptyFields: false },
     schema,

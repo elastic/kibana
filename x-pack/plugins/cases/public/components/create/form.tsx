@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -129,10 +129,20 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       [configurations, configurationOwner]
     );
 
-    const { reset, updateFieldValues, isSubmitting } = useFormContext();
+    const { reset, updateFieldValues, isSubmitting, setFieldValue } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
     const availableOwners = useAvailableCasesOwners();
     const canShowCaseSolutionSelection = !owner.length && availableOwners.length > 1;
+
+    /**
+     * Changes the selected connector
+     * when the user selects a solution.
+     * Each solution has its own configuration
+     * so the connector has to change.
+     */
+    useEffect(() => {
+      setFieldValue('connectorId', configuration.connector.id);
+    }, [configuration.connector.id, setFieldValue]);
 
     const onTemplateChange = useCallback(
       (caseFields: CasesConfigurationUITemplate['caseFields']) => {
@@ -208,11 +218,11 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             connectors={connectors}
             isLoadingConnectors={isLoading}
             isLoading={isSubmitting}
-            configurationConnector={configuration.connector}
+            key={`${configurationOwner}-${configuration.connector.id}`}
           />
         ),
       }),
-      [configuration.connector, connectors, isLoading, isSubmitting]
+      [configuration.connector.id, configurationOwner, connectors, isLoading, isSubmitting]
     );
 
     const allSteps = useMemo(
