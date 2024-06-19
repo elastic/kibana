@@ -21,6 +21,7 @@ import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
 import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
 import PageNotFound from '../404';
@@ -41,6 +42,7 @@ export function SloDetailsPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+  const { data: permissions } = usePermissions();
 
   const { sloId } = useParams<SloDetailsPathParams>();
   const { instanceId: sloInstanceId, remoteName } = useGetQueryParams();
@@ -61,8 +63,6 @@ export function SloDetailsPage() {
     isAutoRefreshing,
     selectedTabId,
   });
-
-  useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
   useEffect(() => {
     if (!slo || !observabilityAIAssistant) {
@@ -90,13 +90,17 @@ export function SloDetailsPage() {
     });
   }, [observabilityAIAssistant, slo]);
 
+  useEffect(() => {
+    if (hasRightLicense === false || permissions?.hasAllReadRequested === false) {
+      navigateToUrl(basePath.prepend(paths.slosWelcome));
+    }
+  }, [hasRightLicense, permissions, navigateToUrl, basePath]);
+
+  useBreadcrumbs(getBreadcrumbs(basePath, slo));
+
   const isSloNotFound = !isLoading && slo === undefined;
   if (isSloNotFound) {
     return <PageNotFound />;
-  }
-
-  if (hasRightLicense === false) {
-    navigateToUrl(basePath.prepend(paths.slos));
   }
 
   const isPerformingAction = isLoading || isDeleting;
