@@ -17,6 +17,7 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { parseGeminiStream } from '../utils/gemini';
 import { parseBedrockStream } from '../utils/bedrock';
 import { getDefaultArguments } from './constants';
 
@@ -75,8 +76,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     this.llmType = llmType ?? 'ActionsClientSimpleChatModel';
     this.model = model;
     this.temperature = temperature;
-    // only enable streaming for bedrock
-    this.streaming = streaming && llmType === 'bedrock';
+    this.streaming = streaming;
   }
 
   _llmType() {
@@ -154,7 +154,6 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       return content; // per the contact of _call, return a string
     }
 
-    // Bedrock streaming
     const readable = get('data', actionResult) as Readable;
 
     if (typeof readable?.read !== 'function') {
@@ -182,13 +181,9 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         }
       }
     };
+    const streamParser = this.llmType === 'bedrock' ? parseBedrockStream : parseGeminiStream;
 
-    const parsed = await parseBedrockStream(
-      readable,
-      this.#logger,
-      this.#signal,
-      handleLLMNewToken
-    );
+    const parsed = await streamParser(readable, this.#logger, this.#signal, handleLLMNewToken);
 
     return parsed; // per the contact of _call, return a string
   }

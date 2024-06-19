@@ -8944,6 +8944,132 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval 1::string",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1::foo",
+      "error": [
+        "Invalid type [foo] for casting"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1::string::long::double",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval trim(\"23\"::double)",
+      "error": [
+        "Argument of [trim] must be [string], found value [\"23\"::double] type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval trim(23::string)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 + \"2\"::long",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 + \"2\"",
+      "error": [
+        "Argument of [+] must be [number], found value [\"2\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval trim(to_double(\"23\")::string::double::long::string::double)",
+      "error": [
+        "Argument of [trim] must be [string], found value [to_double(\"23\")::string::double::long::string::double] type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::long)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::unsigned_long)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::int)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::integer)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::double)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval TRIM(23::string)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval TRIM(23::text)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval TRIM(23::keyword)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval true AND \"false\"::boolean",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval true AND \"false\"::bool",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval true AND \"false\"",
+      "error": [
+        "Argument of [and] must be [boolean], found value [\"false\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_lower(trim(numberField)::string)",
+      "error": [
+        "Argument of [trim] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_upper(trim(numberField)::string::string::string::string)",
+      "error": [
+        "Argument of [trim] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_lower(to_upper(trim(numberField)::string)::string)",
+      "error": [
+        "Argument of [trim] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = date_diff(\"month\", \"2023-12-02T11:00:00.000Z\", \"2023-12-02T11:00:00.000Z\")",
       "error": [],
       "warning": []
