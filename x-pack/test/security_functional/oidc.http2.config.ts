@@ -40,5 +40,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `xpack.security.authc.realms.oidc.oidc1.ssl.certificate_authorities=${CA_CERT_PATH}`,
       ],
     },
+    junit: {
+      reportName: 'Chrome X-Pack Security Functional Tests HTTP/2 (OpenID Connect)',
+    },
   });
 }

@@ -38,5 +38,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `xpack.security.authc.realms.oidc.oidc1.ssl.certificate_authorities=${CA_CERT_PATH}`,
       ],
     },
+    junit: {
+      reportName: 'X-Pack Security API Integration Tests HTTP/2 (OIDC - Authorization Code Flow)',
+    },
   });
 }

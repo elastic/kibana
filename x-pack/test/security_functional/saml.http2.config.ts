@@ -4,26 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
+import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { configureHTTP2 } from '../../../test/common/configure_http2';
 
+// the default export of config files must be a config provider
+// that returns an object with the projects config values
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
   const functionalConfig = await readConfigFile(require.resolve('./saml.config'));
+  const kibanaFunctionalConfig = await readConfigFile(
+    require.resolve('../../../test/functional/config.base.js')
+  );
 
-  const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
-  const idpPath = require.resolve('@kbn/security-api-integration-helpers/saml/idp_metadata.xml');
+  const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
+  const idpPath = resolve(
+    __dirname,
+    '../security_api_integration/plugins/saml_provider/metadata.xml'
+  );
 
   return configureHTTP2({
     ...functionalConfig.getAll(),
     esTestCluster: {
-      ...functionalConfig.get('esTestCluster'),
+      license: 'trial',
+      from: 'snapshot',
       serverArgs: [
-        ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
         'xpack.security.authc.token.enabled=true',
-        'xpack.security.authc.token.timeout=15s',
         'xpack.security.authc.realms.saml.saml1.order=0',
         `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${idpPath}`,
         'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co/saml1',
@@ -35,7 +48,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ],
     },
     junit: {
-      reportName: 'X-Pack Security API Integration Tests HTTP/2 (SAML)',
+      reportName: 'Chrome X-Pack Security Functional Tests HTTP/2 (SAML)',
     },
   });
 }
