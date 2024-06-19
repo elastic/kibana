@@ -34,11 +34,11 @@ const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRu
   let retryCount = 0;
   let arraySize = [];
 
-  while (retryCount < 10) {
-    try {
-      const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
-        type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-      });
+    while (retryCount < 10) {
+      try {
+        const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
+          type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
+        });
 
       const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
         (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
@@ -54,7 +54,7 @@ const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRu
 
       await new Promise(resolve => setTimeout(resolve, 3000)); // 1 second delay
     }
-  }
+    }
 
   throw new Error(`Failed to retrieve benchmark rules after ${retryCount} attempts, with rule array size of ${arraySize.join(',')}`);
 };
