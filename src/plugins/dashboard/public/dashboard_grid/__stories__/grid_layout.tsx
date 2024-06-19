@@ -139,6 +139,7 @@ export const KibanaGridLayout = ({
         {Object.values(gridLayout).map((gridData) => (
           <KibanaGridElement
             isBeingDragged={draggingId === gridData.id || resizingId === gridData.id}
+            anyDragActive={Boolean(draggingId || resizingId)}
             setResizingId={setResizingId}
             setDraggingId={setDraggingId}
             updateShift={updateShift}

@@ -15,6 +15,7 @@ import { GridData } from './types';
 export const KibanaGridElement = ({
   id,
   isBeingDragged,
+  anyDragActive,
   gridData,
   updateShift,
   setDraggingId,
@@ -23,6 +24,7 @@ export const KibanaGridElement = ({
   id: string;
   gridData: GridData;
   isBeingDragged: boolean;
+  anyDragActive: boolean;
   setDraggingId: (id: string | undefined) => void;
   setResizingId: (id: string | undefined) => void;
   updateShift: (pos: { x: number; y: number }) => void;
@@ -50,10 +52,10 @@ export const KibanaGridElement = ({
             ? `${euiThemeVars.euiBorderWidthThin} dashed ${euiThemeVars.euiColorSuccess}`
             : 'auto'};
           :hover .resizeHandle {
-            opacity: 1;
+            opacity: ${anyDragActive ? 0 : 1};
           }
           :hover .dragHandle {
-            opacity: 1;
+            opacity: ${anyDragActive ? 0 : 1};
           }
         `}
       >
