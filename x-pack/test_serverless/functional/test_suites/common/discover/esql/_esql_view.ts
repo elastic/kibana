@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // here Lens suggests a XY so it is rendered
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('xyVisChart');
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
       });
 
