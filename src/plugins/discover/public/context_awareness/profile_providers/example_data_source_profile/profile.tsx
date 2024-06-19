@@ -25,7 +25,14 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
         const level = getFieldValue(props.row, 'log.level');
 
         if (!level) {
-          return <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
+          return (
+            <span
+              css={{ color: euiThemeVars.euiTextSubduedColor }}
+              data-test-subj="exampleDataSourceProfileLogLevelEmpty"
+            >
+              (None)
+            </span>
+          );
         }
 
         const levelMap: Record<string, string> = {
