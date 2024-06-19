@@ -202,10 +202,10 @@ describe('React embeddables', () => {
   const testId = '1234';
   const buildDashboardWithReactEmbeddable = async <Api extends DefaultEmbeddableApi>(
     testType: string,
-    mockApi: BuildReactEmbeddableApiRegistration<{}, Api>
+    mockApi: BuildReactEmbeddableApiRegistration<{}, {}, Api>
   ) => {
     const fullApi$ = new Subject<Api & HasSnapshottableState<{}>>();
-    const reactEmbeddableFactory: ReactEmbeddableFactory<{}, Api> = {
+    const reactEmbeddableFactory: ReactEmbeddableFactory<{}, {}, Api> = {
       type: testType,
       deserializeState: jest.fn().mockImplementation((state) => state.rawState),
       buildEmbeddable: async (state, registerApi) => {
@@ -282,6 +282,7 @@ describe('React embeddables', () => {
   it('Duplicates child with library transforms', async () => {
     const libraryTransformsMockApi: BuildReactEmbeddableApiRegistration<
       {},
+      {},
       DefaultEmbeddableApi & HasLibraryTransforms
     > = {
       serializeState: jest.fn().mockImplementation(() => ({ rawState: {} })),
@@ -304,6 +305,7 @@ describe('React embeddables', () => {
 
   it('Duplicates a child with in place library transforms', async () => {
     const inPlaceLibraryTransformsMockApi: BuildReactEmbeddableApiRegistration<
+      {},
       {},
       DefaultEmbeddableApi & HasInPlaceLibraryTransforms
     > = {
