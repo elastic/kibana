@@ -43,7 +43,7 @@ export default function (providerContext: FtrProviderContext) {
           (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
         );
 
-        if (requestedBenchmarkRules.length > 0) {
+        if (requestedBenchmarkRules.length > 1) {
           return requestedBenchmarkRules.map((item) => item.attributes);
         } else {
           throw new Error(`No benchmark rules found for benchmark ID: ${benchmarkId}`);
