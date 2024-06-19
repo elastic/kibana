@@ -196,7 +196,7 @@ export const CloudSecurityDataTable = ({
     storage,
     data,
     dataViewFieldEditor,
-    isCloudSecurity : true
+    isCloudSecurity: true,
   };
 
   const {

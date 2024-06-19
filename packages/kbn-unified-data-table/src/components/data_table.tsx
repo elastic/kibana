@@ -799,6 +799,7 @@ export const UnifiedDataTable = ({
       valueToStringConverter,
       visibleCellActions,
       visibleColumns,
+      isCloudSecurity,
     ]
   );
 
