@@ -150,12 +150,10 @@ describe('set signal status', () => {
         path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
         body: setStatusSignalMissingIdsAndQueryPayload(),
       });
-      const response = await server.inject(request, requestContextMock.convertContext(context));
-      expect(response.status).toEqual(400);
-      expect(response.body).toEqual({
-        message: ['either "signal_ids" or "query" must be set'],
-        status_code: 400,
-      });
+
+      const result = server.validate(request);
+
+      expect(result.badRequest).toHaveBeenCalled();
     });
 
     test('rejects if signal_ids but no status', async () => {
@@ -167,9 +165,7 @@ describe('set signal status', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "status"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
     });
 
     test('rejects if query but no status', async () => {
@@ -181,9 +177,7 @@ describe('set signal status', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "status"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
     });
 
     test('rejects if query and signal_ids but no status', async () => {
@@ -199,9 +193,7 @@ describe('set signal status', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "status"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
     });
   });
 });

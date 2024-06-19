@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TelemetryCounter } from '@kbn/analytics-client';
+import type { TelemetryCounter } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { registerEbtCounters } from './register_ebt_counters';
