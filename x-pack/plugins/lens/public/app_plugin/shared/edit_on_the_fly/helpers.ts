@@ -15,7 +15,8 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
-import { suggestionsApi } from '../../../lens_suggestions_api';
+import { suggestionsApi, type ChartType } from '../../../lens_suggestions_api';
+import type { VisualizationState } from '../../../state_management';
 
 export const getSuggestions = async (
   query: AggregateQuery,
@@ -24,6 +25,7 @@ export const getSuggestions = async (
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
   setErrors: (errors: Error[]) => void,
+  visualization: VisualizationState,
   abortController?: AbortController
 ) => {
   try {
@@ -49,7 +51,13 @@ export const getSuggestions = async (
     };
 
     const allSuggestions =
-      suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
+      suggestionsApi({
+        context,
+        dataView,
+        datasourceMap,
+        visualizationMap,
+        preferredChartType: visualization.activeId as ChartType,
+      }) ?? [];
 
     // Lens might not return suggestions for some cases, i.e. in case of errors
     if (!allSuggestions.length) return undefined;
