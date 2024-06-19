@@ -72,7 +72,7 @@ export function getInternalStateContainer() {
       expandedDoc: undefined,
       customFilters: [],
       overriddenVisContextAfterInvalidation: undefined,
-      shouldUseDefaultProfileState: true,
+      shouldUseDefaultProfileState: false,
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
