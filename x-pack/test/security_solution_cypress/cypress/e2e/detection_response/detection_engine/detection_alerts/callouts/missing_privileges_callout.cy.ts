@@ -71,7 +71,7 @@ describe('Detections > Callouts', { tags: ['@ess', '@serverless', '@skipInServer
 
     // FYI: Rules Management check moved to ../detection_rules/all_rules_read_only.spec.ts
 
-    context.only('On Rule Details page', () => {
+    context('On Rule Details page', () => {
       beforeEach(() => {
         createRule(getNewRule()).then((rule) =>
           loadPageAsReadOnlyUser(ruleDetailsUrl(rule.body.id))
