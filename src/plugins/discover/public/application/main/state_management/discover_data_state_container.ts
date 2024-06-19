@@ -282,17 +282,26 @@ export function getDataStateContainer({
             autoRefreshDone = undefined;
           }
 
-          const { shouldUseDefaultProfileState, dataView } = internalStateContainer.getState();
+          const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
+          const { esqlQueryColumns } = dataSubjects.documents$.getValue();
 
-          if (shouldUseDefaultProfileState && dataView) {
-            const stateUpdate = getDefaultProfileState({ profilesManager, dataView });
+          if (dataView) {
+            const stateUpdate = getDefaultProfileState({
+              profilesManager,
+              resetDefaultProfileState,
+              dataView,
+              esqlQueryColumns,
+            });
 
             if (stateUpdate) {
               await appStateContainer.replaceUrlState(stateUpdate);
             }
           }
 
-          internalStateContainer.transitions.setShouldUseDefaultProfileState(false);
+          internalStateContainer.transitions.setResetDefaultProfileState({
+            columns: false,
+            rowHeight: false,
+          });
         })
       )
       .subscribe();
