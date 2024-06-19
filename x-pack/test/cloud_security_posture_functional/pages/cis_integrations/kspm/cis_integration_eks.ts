@@ -108,7 +108,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('KSPM EKS Shared Credentials', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186387
+    describe.skip('KSPM EKS Shared Credentials', () => {
       it('KSPM EKS Shared Credentials Workflow', async () => {
         const sharedCredentialFile = 'sharedCredentialFileTest';
         const sharedCredentialProfileName = 'sharedCredentialProfileNameTest';
