@@ -25,7 +25,7 @@ import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_con
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
 import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../../../common/lib/kibana';
-import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
+import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint/endpoint_isolation/mocks';
 import {
   isFailedResourceState,
   isLoadedResourceState,
@@ -1031,7 +1031,7 @@ describe('when on the endpoint list page', () => {
       const agentPolicy = generator.generateAgentPolicy();
       agentPolicyId = agentPolicy.id;
       agentId = hosts[0].metadata.elastic.agent.id;
-      packagePolicy.policy_id = agentPolicyId;
+      packagePolicy.policy_ids = [agentPolicyId];
 
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: hostInfo,
