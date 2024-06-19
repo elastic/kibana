@@ -7,6 +7,7 @@
  */
 
 import type Handlebars from '@kbn/handlebars';
+import { HelperOptions } from 'handlebars';
 import { snakeCase, camelCase } from 'lodash';
 
 export function registerHelpers(handlebarsInstance: typeof Handlebars) {
@@ -47,13 +48,43 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('isUnknown', (val: object) => {
     return !('type' in val || '$ref' in val || 'anyOf' in val || 'oneOf' in val || 'allOf' in val);
   });
-  handlebarsInstance.registerHelper('startsWithSpecialChar', (val: string) => {
-    return /^[^a-zA-Z0-9]/.test(val);
-  });
   handlebarsInstance.registerHelper(
     'replace',
     (val: string, searchValue: string, replaceValue: string) => {
       return val.replace(searchValue, replaceValue);
+    }
+  );
+
+  /**
+   * Checks whether provided reference is a known circular reference or a part of circular chain.
+   *
+   * It's expected that `context.recursiveRefs` has been filled by the parser.
+   */
+  handlebarsInstance.registerHelper('isCircularRef', (ref: string, options: HelperOptions) => {
+    if (!options.data?.root?.circularRefs) {
+      return false;
+    }
+
+    const circularRefs: Set<string> = options.data.root.circularRefs;
+
+    return circularRefs.has(ref);
+  });
+
+  /**
+   * Checks whether provided schema is circular or a part of the circular chain.
+   *
+   * It's expected that `context.circularRefs` has been filled by the parser.
+   */
+  handlebarsInstance.registerHelper(
+    'isCircularSchema',
+    (schemaName: string, options: HelperOptions) => {
+      if (!options.data?.root?.circularRefs) {
+        return false;
+      }
+
+      const circularRefs: Set<string> = options.data.root.circularRefs;
+
+      return circularRefs.has(`#/components/schemas/${schemaName}`);
     }
   );
 }
