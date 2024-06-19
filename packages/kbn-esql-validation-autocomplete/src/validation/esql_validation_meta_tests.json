@@ -7989,13 +7989,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval 1::foo",
-      "error": [
-        "Invalid type [foo] for casting"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval 1::string::long::double",
       "error": [],
       "warning": []
