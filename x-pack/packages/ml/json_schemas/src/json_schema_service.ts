@@ -154,6 +154,7 @@ export class JsonSchemaService {
     await Promise.all(
       supportedEndpoints.map(async (e) => {
         // need to extract schema in order to keep required components
+        this.componentsDict.clear();
         const result = await this.resolveSchema(e.path, e.method, e.props, schema);
         Fs.writeFileSync(
           Path.resolve(
