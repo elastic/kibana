@@ -97,6 +97,10 @@ export const OtelLogsPanel: React.FC = () => {
           </EuiCodeBlock>
         </>
       ),
+      firstStepTitle: i18n.translate(
+        'xpack.observability_onboarding.otelLogsPanel.steps.downloadManifest',
+        { defaultMessage: 'Download the manifest' }
+      ),
       content: `apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -468,20 +472,15 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
           <EuiSteps
             steps={[
               {
-                title: 'Download and run the collector',
+                title: i18n.translate(
+                  'xpack.observability_onboarding.otelLogsPanel.steps.platform',
+                  {
+                    defaultMessage: 'Select your platform',
+                  }
+                ),
+
                 children: (
                   <EuiFlexGroup direction="column">
-                    <EuiText>
-                      <p>
-                        {i18n.translate(
-                          'xpack.observability_onboarding.otelLogsPanel.p.firstYouNeedToLabel',
-                          {
-                            defaultMessage:
-                              'Select your platform, and run the command on your host.',
-                          }
-                        )}
-                      </p>
-                    </EuiText>
                     <EuiButtonGroup
                       legend={i18n.translate(
                         'xpack.observability_onboarding.otelLogsPanel.choosePlatform',
@@ -497,7 +496,29 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
                         setSelectedTab(id);
                       }}
                     />
-
+                  </EuiFlexGroup>
+                ),
+              },
+              {
+                title: selectedContent.firstStepTitle
+                  ? selectedContent.firstStepTitle
+                  : i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.install', {
+                      defaultMessage: 'Download the collector',
+                    }),
+                children: (
+                  <EuiFlexGroup direction="column">
+                    {selectedTab !== 'kubernetes' && (
+                      <EuiText>
+                        <p>
+                          {i18n.translate(
+                            'xpack.observability_onboarding.otelLogsPanel.p.firstYouNeedToLabel',
+                            {
+                              defaultMessage: 'Run the command on your host.',
+                            }
+                          )}
+                        </p>
+                      </EuiText>
+                    )}
                     <EuiFlexItem>
                       <EuiCodeBlock language="sh" isCopyable overflowHeight={300}>
                         {selectedContent.content}
@@ -520,7 +541,7 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
                           >
                             {i18n.translate(
                               'xpack.observability_onboarding.installOtelCollector.configStep.downloadConfigButton',
-                              { defaultMessage: 'Download config file' }
+                              { defaultMessage: 'Download manifest' }
                             )}
                           </EuiButton>
                         ) : (
@@ -543,6 +564,18 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
                         )}
                       </EuiFlexGroup>
                     </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+              },
+              {
+                title: i18n.translate(
+                  'xpack.observability_onboarding.otelLogsPanel.steps.install',
+                  {
+                    defaultMessage: 'Start the collector',
+                  }
+                ),
+                children: (
+                  <EuiFlexGroup direction="column">
                     {selectedContent.prompt}
                     <EuiText>
                       <p>
