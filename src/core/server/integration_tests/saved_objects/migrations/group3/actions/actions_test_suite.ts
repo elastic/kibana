@@ -44,6 +44,7 @@ import {
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,
   createBulkIndexOperationTuple,
+  checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
 interface EsServer {
@@ -236,6 +237,76 @@ export const runActionTestSuite = ({
           }),
         })
       );
+    });
+  });
+
+  describe('checkClusterRoutingAllocation', () => {
+    it('resolves left when cluster.routing.allocation.enabled is incompatible', async () => {
+      expect.assertions(3);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Disable all routing allocation
+            cluster: { routing: { allocation: { enable: 'none' } } },
+          },
+        },
+      });
+      const task = checkClusterRoutingAllocationEnabled(client);
+      await expect(task()).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "incompatible_cluster_routing_allocation",
+          },
+        }
+      `);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Allow routing to existing primaries only
+            cluster: { routing: { allocation: { enable: 'primaries' } } },
+          },
+        },
+      });
+      const task2 = checkClusterRoutingAllocationEnabled(client);
+      await expect(task2()).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "incompatible_cluster_routing_allocation",
+          },
+        }
+      `);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Allow routing to new primaries only
+            cluster: { routing: { allocation: { enable: 'new_primaries' } } },
+          },
+        },
+      });
+      const task3 = checkClusterRoutingAllocationEnabled(client);
+      await expect(task3()).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "incompatible_cluster_routing_allocation",
+          },
+        }
+      `);
+    });
+    it('resolves right when cluster.routing.allocation.enabled=all', async () => {
+      expect.assertions(1);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            cluster: { routing: { allocation: { enable: 'all' } } },
+          },
+        },
+      });
+      const task = checkClusterRoutingAllocationEnabled(client);
+      const result = await task();
+      expect(Either.isRight(result)).toBe(true);
     });
   });
 
