@@ -97,7 +97,7 @@ export class AutocompleteField extends React.Component<
             <EuiPanel
               data-test-subj="o11ySuggestionsPanel"
               paddingSize="none"
-              hasShadow={true}
+              hasShadow
               css={css`
                 position: absolute;
                 width: 100%;
