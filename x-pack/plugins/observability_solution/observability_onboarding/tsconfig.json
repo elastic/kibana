@@ -41,7 +41,9 @@
     "@kbn/discover-plugin",
     "@kbn/utility-types",
     "@kbn/spaces-plugin",
-    "@kbn/ebt"
+    "@kbn/ebt",
+    "@kbn/dashboard-plugin",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": [
     "target/**/*"
