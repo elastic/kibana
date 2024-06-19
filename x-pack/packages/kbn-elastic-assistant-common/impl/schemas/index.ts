@@ -45,3 +45,4 @@ export * from './knowledge_base/crud_kb_route.gen';
 export * from './knowledge_base/bulk_crud_knowledge_base_route.gen';
 export * from './knowledge_base/common_attributes.gen';
 export * from './knowledge_base/crud_knowledge_base_route.gen';
+export * from './knowledge_base/find_knowledge_base_entries_route.gen';

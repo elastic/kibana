@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Connectors
   description: OpenAPI schema for Connectors endpoints
@@ -14,16 +14,6 @@ tags:
 servers:
   - url: /
 paths:
-  '/api/actions/connector':
-    $ref: 'paths/api@actions@connector.yaml'
-  '/api/actions/connector/{connectorId}':
-    $ref: 'paths/api@actions@connector@{connectorid}.yaml'
-  '/api/actions/connector/{connectorId}/_execute':
-    $ref: paths/api@actions@connector@{connectorid}@_execute.yaml
-  '/api/actions/connectors':
-    $ref: paths/api@actions@connectors.yaml
-  '/api/actions/connector_types':
-    $ref: paths/api@actions@connector_types.yaml
   '/s/{spaceId}/api/actions/connector':
     $ref: 'paths/s@{spaceid}@api@actions@connector.yaml'
   '/s/{spaceId}/api/actions/connector/{connectorId}':
@@ -34,6 +24,17 @@ paths:
     $ref: paths/s@{spaceid}@api@actions@connector_types.yaml
   '/s/{spaceId}/api/actions/connector/{connectorId}/_execute':
     $ref: paths/s@{spaceid}@api@actions@connector@{connectorid}@_execute.yaml
+# Default space
+  '/api/actions/connector':
+    $ref: 'paths/api@actions@connector.yaml'
+  '/api/actions/connector/{connectorId}':
+    $ref: 'paths/api@actions@connector@{connectorid}.yaml'
+  '/api/actions/connector/{connectorId}/_execute':
+    $ref: paths/api@actions@connector@{connectorid}@_execute.yaml
+  '/api/actions/connectors':
+    $ref: paths/api@actions@connectors.yaml
+  '/api/actions/connector_types':
+    $ref: paths/api@actions@connector_types.yaml
 # Deprecated endpoints:
   '/s/{spaceId}/api/actions/action/{actionId}':
     $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}.yaml'
