@@ -95,8 +95,12 @@ function set_in_legacy_vault() {
   VAULT_ROLE_ID="$(get_vault_role_id)"
   VAULT_SECRET_ID="$(get_vault_secret_id)"
 
+  vault -address=$LEGACY_VAULT_ADDR status || echo "Can't print status"
+
   TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
   VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$TOKEN"
+
+  vault -address=$LEGACY_VAULT_ADDR status || echo "Can't print status"
 
   # shellcheck disable=SC2068
   VAULT_ADDR=$LEGACY_VAULT_ADDR vault write "secret/kibana-issues/dev/cloud-deploy/$key_path" ${fields[@]}
