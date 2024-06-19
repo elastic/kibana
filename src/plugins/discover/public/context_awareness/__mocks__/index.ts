@@ -68,7 +68,7 @@ export const createContextAwarenessMocks = ({
         const recordId = params.record.id;
         const prevValue = prev(params);
         return {
-          title: `${prevValue.title} #${recordId}`,
+          title: `${prevValue.title ?? 'Document'} #${recordId}`,
           docViewsRegistry: (registry) => {
             registry.add({
               id: 'doc_view_mock',
