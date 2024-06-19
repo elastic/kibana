@@ -7,12 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
-import React, { useEffect } from 'react';
+import React from 'react';
 import moment from 'moment';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -66,7 +65,6 @@ export type MetricThresholdAlert = TopAlert<MetricThresholdAlertField>;
 interface AppSectionProps {
   alert: MetricThresholdAlert;
   rule: MetricThresholdRule;
-  ruleLink: string;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
@@ -145,6 +143,7 @@ export function AlertDetailsAppSection({
 
     setAlertSummaryFields(alertSummaryFields);
   }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
+
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
       {rule.params.criteria.map((criterion, index) => {

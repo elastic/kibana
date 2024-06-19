@@ -48,6 +48,7 @@ export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
 export type DatasetQualityApiClientKey =
   | 'noAccessUser'
+  | 'viewerUser'
   | 'readUser'
   | 'adminUser'
   | 'writeUser'
@@ -120,9 +121,13 @@ export function createTestConfig(
               kibanaServer,
               username: DatasetQualityUsername.noAccessUser,
             }),
-            readUser: await getDatasetQualityApiClient({
+            viewerUser: await getDatasetQualityApiClient({
               kibanaServer,
               username: DatasetQualityUsername.viewerUser,
+            }),
+            readUser: await getDatasetQualityApiClient({
+              kibanaServer,
+              username: DatasetQualityUsername.readUser,
             }),
             adminUser: await getDatasetQualityApiClient({
               kibanaServer,
