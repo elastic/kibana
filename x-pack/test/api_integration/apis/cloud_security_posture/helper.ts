@@ -12,7 +12,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { SecurityService } from '../../../../../test/common/services/security/security';
-import { RoleCredentials } from 'x-pack/test_serverless/shared/services';
+import { RoleCredentials } from '../../../../test_serverless/shared/services';
 
 export const deleteIndex = (es: Client, indexToBeDeleted: string[]) => {
   Promise.all([
@@ -75,7 +75,7 @@ export async function createPackagePolicy(
 
   const inputs = posture === 'vuln_mgmt' ? { ...inputTemplate, streams } : { ...inputTemplate };
 
-  let { body: postPackageResponse } =
+  const { body: postPackageResponse } =
     roleAuthc && internalRequestHeader
       ? await supertest
           .post(`/api/fleet/package_policies`)
