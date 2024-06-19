@@ -6,7 +6,7 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { getAlertsGroupAggregations } from './get_group_aggregations';
+import { getAlertsGroupAggregations } from './get_alerts_group_aggregations';
 import { RacRequestHandlerContext } from '../types';
 import { getAlertByIdRoute } from './get_alert_by_id';
 import { updateAlertByIdRoute } from './update_alert_by_id';
