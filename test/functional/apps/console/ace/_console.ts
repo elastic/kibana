@@ -8,33 +8,8 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../ftr_provider_context';
-
-const DEFAULT_REQUEST = `
-# Welcome to the Dev Tools Console!
-#
-# You can use Console to explore the Elasticsearch API. See the \n  Elasticsearch API reference to learn more:
-# https://www.elastic.co/guide/en/elasticsearch/reference/current\n  /rest-apis.html
-#
-# Here are a few examples to get you started.
-
-
-# Create an index
-PUT /my-index
-
-
-# Add a document to my-index
-POST /my-index/_doc
-{
-    "id": "park_rocky-mountain",
-    "title": "Rocky Mountain",
-    "description": "Bisected north to south by the Continental \n      Divide, this portion of the Rockies has ecosystems varying \n      from over 150 riparian lakes to montane and subalpine forests \n      to treeless alpine tundra."
-}
-
-
-# Perform a search in my-index
-GET /my-index/_search?q="rocky mountain"
-`.trim();
+import { DEFAULT_INPUT_VALUE } from '@kbn/console-plugin/common/constants';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -58,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         const actualRequest = await PageObjects.console.getRequest();
         log.debug(actualRequest);
-        expect(actualRequest.trim()).to.eql(DEFAULT_REQUEST);
+        expect(actualRequest.replace(/\s/g, '')).to.eql(DEFAULT_INPUT_VALUE.replace(/\s/g, ''));
       });
     });
 

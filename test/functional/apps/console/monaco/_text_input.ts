@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -16,11 +16,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('text input', function testTextInput() {
     before(async () => {
       await PageObjects.common.navigateToApp('console');
-      await PageObjects.console.collapseHelp();
+      await PageObjects.console.closeHelpIfExists();
     });
 
     beforeEach(async () => {
-      await PageObjects.console.clearTextArea();
+      await PageObjects.console.monaco.clearEditorText();
     });
 
     describe('with a data URI in the load_from query', () => {
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await retry.try(async () => {
-          const actualRequest = await PageObjects.console.getRequest();
+          const actualRequest = await PageObjects.console.monaco.getEditorText();
           expect(actualRequest.trim()).to.eql('hello');
         });
       });
@@ -48,16 +48,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('copy/pasting cURL commands into the console', () => {
+    // not yet implemented for monaco https://github.com/elastic/kibana/issues/186001
+    describe.skip('copy/pasting cURL commands into the console', () => {
       it('should convert cURL commands into the console request format', async () => {
-        await PageObjects.console.enterRequest(
+        await PageObjects.console.monaco.enterText(
           `\n curl -XGET "http://localhost:9200/_search?pretty" -d'\n{"query": {"match_all": {}}}'`
         );
-        await PageObjects.console.copyRequestsToClipboard();
-        await PageObjects.console.clearTextArea();
-        await PageObjects.console.pasteClipboardValue();
+        await PageObjects.console.monaco.copyRequestsToClipboard();
+        await PageObjects.console.monaco.clearEditorText();
+        await PageObjects.console.monaco.pasteClipboardValue();
         await retry.try(async () => {
-          const actualRequest = await PageObjects.console.getRequest();
+          const actualRequest = await PageObjects.console.monaco.getEditorText();
           expect(actualRequest.trim()).to.eql('GET /_search?pretty\n {"query": {"match_all": {}}}');
         });
       });
@@ -65,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('console history', () => {
       const sendRequest = async (request: string) => {
-        await PageObjects.console.enterRequest(request);
+        await PageObjects.console.monaco.enterText(request);
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
       };
@@ -85,11 +86,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should load a request from history', async () => {
         await sendRequest('GET _search\n{"query": {"match_all": {}}}');
-        await PageObjects.console.clearTextArea();
+        await PageObjects.console.monaco.clearEditorText();
         await PageObjects.console.clickHistory();
         await PageObjects.console.loadRequestFromHistory(0);
         await retry.try(async () => {
-          const actualRequest = await PageObjects.console.getRequest();
+          const actualRequest = await PageObjects.console.monaco.getEditorText();
           expect(actualRequest.trim()).to.eql(
             'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}'
           );

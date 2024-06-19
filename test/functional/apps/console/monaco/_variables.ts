@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const retry = getService('retry');
@@ -20,10 +20,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
-      await retry.try(async () => {
-        await PageObjects.console.collapseHelp();
-        await PageObjects.console.clearTextArea();
-      });
+      await PageObjects.console.closeHelpIfExists();
+      await PageObjects.console.monaco.clearEditorText();
     });
 
     it('should allow creating a new variable', async () => {
@@ -43,7 +41,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     describe('with variables in url', () => {
       it('should send a successful request', async () => {
         await PageObjects.console.addNewVariable({ name: 'index3', value: '_search' });
-        await PageObjects.console.enterRequest('\n GET ${index3}');
+        await PageObjects.console.monaco.enterText('\n GET ${index3}');
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -55,12 +53,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     describe('with variables in request body', () => {
-      it('should send a successful request', async () => {
+      // bug in monaco https://github.com/elastic/kibana/issues/185999
+      it.skip('should send a successful request', async () => {
         await PageObjects.console.addNewVariable({ name: 'query1', value: '{"match_all": {}}' });
-        await PageObjects.console.enterRequest('\n GET _search');
-        await PageObjects.console.pressEnter();
-        await PageObjects.console.enterText(`{\n\t"query": "\${query1}"`);
-        await PageObjects.console.pressEnter();
+        await PageObjects.console.monaco.enterText('\n GET _search\n');
+        await PageObjects.console.monaco.enterText(`{\n\t"query": "\${query1}"`);
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
 

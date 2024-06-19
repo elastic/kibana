@@ -7,23 +7,13 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { configureHTTP2 } from '../../../../common/configure_http2';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../../config.base.js'));
+  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
 
-  return {
+  return configureHTTP2({
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
-    junit: {
-      reportName: 'Dashboard Elements - Controls Options List tests',
-    },
-    kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
-        // disabling the monaco editor to run tests for ace
-        `--console.dev.enableMonaco=false`,
-      ],
-    },
-  };
+  });
 }
