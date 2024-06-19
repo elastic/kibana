@@ -19,6 +19,10 @@ import { EntityServiceListItem, SignalTypes } from '../../../../../../server/rou
 import { Breakpoints } from '../../../../../hooks/use_breakpoints';
 import { unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';
+import {
+  getTimeSeriesColor,
+  ChartType,
+} from '../../../../shared/charts/helper/get_timeseries_color';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ServiceLink } from '../../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../../shared/list_metric';
@@ -65,9 +69,7 @@ export function getServiceColumns({
       sortable: true,
       width: `${unit * 9}px`,
       dataType: 'number',
-      render: (_, { environments }) => {
-        return <EnvironmentBadge environments={environments} />;
-      },
+      render: (_, { environments }) => <EnvironmentBadge environments={environments} />,
       align: RIGHT_ALIGNMENT,
     },
     {
@@ -79,11 +81,14 @@ export function getServiceColumns({
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
       render: (_, { metrics, signalTypes }) => {
+        const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
+
         return !signalTypes.includes(SignalTypes.METRICS) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
             isLoading={false}
+            color={currentPeriodColor}
             hideSeries
             valueLabel={asMillisecondDuration(metrics.latency)}
           />
@@ -99,11 +104,14 @@ export function getServiceColumns({
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
       render: (_, { metrics, signalTypes }) => {
+        const { currentPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
+
         return !signalTypes.includes(SignalTypes.METRICS) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
             isLoading={false}
+            color={currentPeriodColor}
             hideSeries
             valueLabel={asTransactionRate(metrics.throughput)}
           />
@@ -119,11 +127,14 @@ export function getServiceColumns({
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
       render: (_, { metrics, signalTypes }) => {
+        const { currentPeriodColor } = getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
+
         return !signalTypes.includes(SignalTypes.METRICS) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
             isLoading={false}
+            color={currentPeriodColor}
             hideSeries
             valueLabel={asPercent(metrics.failedTransactionRate, 1)}
           />
@@ -139,9 +150,12 @@ export function getServiceColumns({
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
       render: (_, { metrics }) => {
+        const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_RATE);
+
         return (
           <ListMetric
             isLoading={false}
+            color={currentPeriodColor}
             hideSeries
             valueLabel={asDecimalOrInteger(metrics.logRatePerMinute)}
           />
@@ -157,9 +171,12 @@ export function getServiceColumns({
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
       render: (_, { metrics }) => {
+        const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_ERROR_RATE);
+
         return (
           <ListMetric
             isLoading={false}
+            color={currentPeriodColor}
             hideSeries
             valueLabel={asPercent(metrics.logErrorRate, 1)}
           />
