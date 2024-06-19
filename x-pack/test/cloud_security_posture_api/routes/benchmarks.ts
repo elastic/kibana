@@ -32,6 +32,7 @@ export default function (providerContext: FtrProviderContext) {
 
 const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
   let retryCount = 0;
+  let arraySize = [];
 
   while (retryCount < 10) {
     try {
@@ -42,21 +43,20 @@ const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRu
       const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
         (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
       );
-
-      if (requestedBenchmarkRules.length > 0) {
+      arraySize.push(requestedBenchmarkRules.length)
+      if (requestedBenchmarkRules.length > 1) {
         return requestedBenchmarkRules.map((item) => item.attributes);
       } else {
         throw new Error(`No benchmark rules found for benchmark ID: ${benchmarkId}`);
       }
     } catch (error) {
       retryCount++;
-      console.error(`Attempt ${retryCount} failed:`, error);
-      // You can add a delay between retries if needed
+
       await new Promise(resolve => setTimeout(resolve, 3000)); // 1 second delay
     }
   }
 
-  throw new Error(`Failed to retrieve benchmark rules after ${retryCount} attempts`);
+  throw new Error(`Failed to retrieve benchmark rules after ${retryCount} attempts, with rule array size of ${arraySize.join(',')}`);
 };
 
   const getMockFinding = (rule: CspBenchmarkRule, evaluation: string) => ({
