@@ -7,7 +7,7 @@
 
 import { join as joinPath } from 'path';
 import type { InputType } from '../../common';
-import { ensureDirSync, createSync, readSync } from '../util';
+import { createSync, ensureDirSync, readSync } from '../util';
 
 export function createAgentInput(specificDataStreamDir: string, inputTypes: InputType[]): void {
   const agentDir = joinPath(specificDataStreamDir, 'agent', 'stream');
