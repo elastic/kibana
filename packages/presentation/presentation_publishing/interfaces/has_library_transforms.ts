@@ -51,7 +51,6 @@ export interface HasInPlaceLibraryTransforms<RuntimeState extends object = objec
 
   /**
    * gets a snapshot of this embeddable's runtime state without any state that links it to a library item.
-   * @returns
    */
   getByValueRuntimeSnapshot: () => RuntimeState;
 
