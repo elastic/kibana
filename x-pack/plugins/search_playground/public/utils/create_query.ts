@@ -46,6 +46,7 @@ interface ReRankOptions {
 
 export function createQuery(
   fields: IndexFields,
+  sourceFields: IndexFields,
   fieldDescriptors: IndicesQuerySourceFields,
   rerankOptions: ReRankOptions = {
     rrf: true,
@@ -57,19 +58,83 @@ export function createQuery(
       const indexFields: string[] = fields[index];
       const indexFieldDescriptors: QuerySourceFields = fieldDescriptors[index];
 
+      const semanticMatches = indexFields.map((field) => {
+        const semanticField = indexFieldDescriptors.semantic_fields.find((x) => x.field === field);
+        const isSourceField = sourceFields[index].includes(field);
+
+        // this is needed to get the inner_hits for the source field
+        // we cant rely on only the semantic field
+        // in future inner_hits option will be added to semantic
+        if (semanticField && isSourceField) {
+          if (semanticField.embeddingType === 'dense_vector') {
+            const filter =
+              semanticField.indices.length < indices.length
+                ? { filter: { terms: { _index: semanticField.indices } } }
+                : {};
+
+            return {
+              nested: {
+                path: `${semanticField.field}.inference.chunks`,
+                query: {
+                  knn: {
+                    field: `${semanticField.field}.inference.chunks.embeddings`,
+                    ...filter,
+                    query_vector_builder: {
+                      text_embedding: {
+                        model_id: semanticField.inferenceId,
+                        model_text: '{query}',
+                      },
+                    },
+                  },
+                },
+                inner_hits: {
+                  size: 2,
+                  _source: [`${semanticField.field}.inference.chunks.text`],
+                },
+              },
+            };
+          } else if (semanticField.embeddingType === 'sparse_vector') {
+            return {
+              nested: {
+                path: `${semanticField.field}.inference.chunks`,
+                query: {
+                  sparse_vector: {
+                    inference_id: semanticField.inferenceId,
+                    field: `${semanticField.field}.inference.chunks.embeddings`,
+                    query: '{query}',
+                  },
+                },
+                inner_hits: {
+                  size: 2,
+                  _source: [`${semanticField.field}.inference.chunks.text`],
+                },
+              },
+            };
+          }
+        } else if (semanticField) {
+          return {
+            semantic: {
+              field: semanticField.field,
+              query: '{query}',
+            },
+          };
+        } else {
+          return null;
+        }
+      });
+
       const sparseMatches =
         indexFields.map((field) => {
           const elserField = indexFieldDescriptors.elser_query_fields.find(
             (x) => x.field === field
           );
 
-          // not supporting nested fields for now
-          if (elserField && !elserField.nested) {
+          if (elserField) {
             // when another index has the same field, we don't want to duplicate the match rule
             const hasExistingSparseMatch = acc.queryMatches.find(
-              (x: any) =>
-                x?.text_expansion?.[field] &&
-                x?.text_expansion?.[field].model_id === elserField?.model_id
+              (x) =>
+                x?.sparse_vector?.field === field &&
+                x?.sparse_vector?.inference_id === elserField?.model_id
             );
 
             if (hasExistingSparseMatch) {
@@ -77,11 +142,10 @@ export function createQuery(
             }
 
             return {
-              text_expansion: {
-                [elserField.field]: {
-                  model_id: elserField.model_id,
-                  model_text: '{query}',
-                },
+              sparse_vector: {
+                field: elserField.field,
+                inference_id: elserField.model_id,
+                query: '{query}',
               },
             };
           }
@@ -108,8 +172,7 @@ export function createQuery(
             (x) => x.field === field
           );
 
-          // not supporting nested fields for now
-          if (denseVectorField && !denseVectorField.nested) {
+          if (denseVectorField) {
             // when the knn field isn't found in all indices, we need a filter to ensure we only use the field from the correct index
             const filter =
               denseVectorField.indices.length < indices.length
@@ -134,7 +197,7 @@ export function createQuery(
         })
         .filter((x) => !!x);
 
-      const matches = [...sparseMatches, bm25Match].filter((x) => !!x);
+      const matches = [...sparseMatches, ...semanticMatches, bm25Match].filter((x) => !!x);
 
       return {
         queryMatches: [...acc.queryMatches, ...matches],
@@ -222,6 +285,14 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
     (acc: IndexFields, index: string) => {
       const indexFieldDescriptors = fieldDescriptors[index];
 
+      // semantic_text fields are prioritized
+      if (indexFieldDescriptors.semantic_fields.length > 0) {
+        return {
+          ...acc,
+          [index]: indexFieldDescriptors.semantic_fields.map((x) => x.field),
+        };
+      }
+
       // if there are no source fields, we don't need to suggest anything
       if (indexFieldDescriptors.source_fields.length === 0) {
         return {
@@ -253,7 +324,9 @@ export function getDefaultQueryFields(fieldDescriptors: IndicesQuerySourceFields
       const indexFieldDescriptors = fieldDescriptors[index];
       const fields: string[] = [];
 
-      if (indexFieldDescriptors.elser_query_fields.length > 0) {
+      if (indexFieldDescriptors.semantic_fields.length > 0) {
+        fields.push(...indexFieldDescriptors.semantic_fields.map((x) => x.field));
+      } else if (indexFieldDescriptors.elser_query_fields.length > 0) {
         const suggested = indexFieldDescriptors.elser_query_fields.filter((x) =>
           SUGGESTED_SPARSE_FIELDS.includes(x.field)
         );
