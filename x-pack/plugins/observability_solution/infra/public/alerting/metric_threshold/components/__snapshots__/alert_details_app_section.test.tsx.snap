@@ -49,6 +49,8 @@ Array [
       ],
       "timeSize": 15,
       "timeUnit": "m",
+      "warningComparator": undefined,
+      "warningThreshold": undefined,
     },
     "searchConfiguration": Object {
       "query": Object {
