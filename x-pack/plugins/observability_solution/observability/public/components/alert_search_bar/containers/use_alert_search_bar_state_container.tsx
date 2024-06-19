@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
 import { isRight } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 import * as t from 'io-ts';
@@ -157,9 +156,7 @@ function setupUrlStateSync(
     stateStorage: {
       ...urlStateStorage,
       set: <AlertSearchBarStateContainer,>(key: string, state: AlertSearchBarStateContainer) =>
-        urlStateStorage.set(key, state, {
-          replace: deepEqual(defaultState, state) ? true : replace,
-        }),
+        urlStateStorage.set(key, state, { replace }),
     },
   });
 }
