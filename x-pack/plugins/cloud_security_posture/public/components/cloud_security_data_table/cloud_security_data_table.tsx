@@ -135,27 +135,32 @@ export const CloudSecurityDataTable = ({
     columnsLocalStorageKey,
     defaultColumns.map((c) => c.id)
   );
-  const [localSettings, setLocalSettings] = useLocalStorage<UnifiedDataTableSettings>(
+  const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
     `${columnsLocalStorageKey}:settings`,
     {
-      columns: defaultColumns.reduce((prev, curr) => {
-        const columnDefaultSettings = curr.width ? { width: curr.width } : {};
-        const newColumn = { [curr.id]: columnDefaultSettings };
-        return { ...prev, ...newColumn };
+      columns: defaultColumns.reduce((columnSettings, column) => {
+        const columnDefaultSettings = column.width ? { width: column.width } : {};
+        const newColumn = { [column.id]: columnDefaultSettings };
+        return { ...columnSettings, ...newColumn };
       }, {} as UnifiedDataTableSettings['columns']),
     }
   );
 
-  const settings: UnifiedDataTableSettings = {
-    columns: defaultColumns.reduce((prev, curr) => {
-      const newColumn: UnifiedDataTableSettingsColumn = {
-        ..._.pick(localSettings?.columns?.[curr.id], ['width']),
-        display: columnHeaders?.[curr.id],
-      };
+  const settings = useMemo(() => {
+    return {
+      columns: Object.keys(persistedSettings?.columns as UnifiedDataTableSettings).reduce(
+        (columnSettings, column) => {
+          const newColumn: UnifiedDataTableSettingsColumn = {
+            ..._.pick(persistedSettings?.columns?.[column], ['width']),
+            display: columnHeaders?.[column],
+          };
 
-      return { ...prev, ...{ [curr.id]: newColumn } };
-    }, {} as UnifiedDataTableSettings['columns']),
-  };
+          return { ...columnSettings, [column]: newColumn };
+        },
+        {} as UnifiedDataTableSettings['columns']
+      ),
+    };
+  }, [defaultColumns, persistedSettings, columnHeaders]);
 
   const { dataView, dataViewIsRefetching, dataViewRefetch } = useDataViewContext();
 
@@ -256,14 +261,13 @@ export const CloudSecurityDataTable = ({
   );
 
   const onResize = (colSettings: { columnId: string; width: number }) => {
-    const grid = localSettings || {};
+    const grid = persistedSettings || {};
     const newColumns = { ...(grid.columns || {}) };
     newColumns[colSettings.columnId] = {
-      ...newColumns[colSettings.columnId],
       width: Math.round(colSettings.width),
     };
     const newGrid = { ...grid, columns: newColumns };
-    setLocalSettings(newGrid);
+    setPersistedSettings(newGrid);
   };
 
   const externalCustomRenderers = useMemo(() => {
