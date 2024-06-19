@@ -7,6 +7,7 @@
 
 import { recurse } from 'cypress-recurse';
 import type { UsageRecord } from '@kbn/security-solution-serverless/server/types';
+import { METERING_SERVICE_BATCH_SIZE } from '@kbn/security-solution-serverless/server/constants';
 import {
   getInterceptedRequestsFromTransparentApiProxy,
   startTransparentApiProxy,
@@ -54,7 +55,7 @@ describe(
 
     describe('Usage Reporting Task', () => {
       it('properly sends indexed heartbeats to the metering api', () => {
-        const expectedChunks = Math.ceil(HEARTBEAT_COUNT / 1000);
+        const expectedChunks = Math.ceil(HEARTBEAT_COUNT / METERING_SERVICE_BATCH_SIZE);
 
         recurse(
           getInterceptedRequestsFromTransparentApiProxy,
@@ -64,9 +65,12 @@ describe(
 
               for (let i = 0; i < expectedChunks; i++) {
                 if (i < expectedChunks - 1) {
-                  expect(res[i]).to.have.length(1000);
+                  expect(res[i]).to.have.length(METERING_SERVICE_BATCH_SIZE);
                 } else {
-                  expect(res[i]).to.have.length(HEARTBEAT_COUNT % 1000 || 1000); // The last or only chunk
+                  // The last or only chunk
+                  expect(res[i]).to.have.length(
+                    HEARTBEAT_COUNT % METERING_SERVICE_BATCH_SIZE || METERING_SERVICE_BATCH_SIZE
+                  );
                 }
               }
 
