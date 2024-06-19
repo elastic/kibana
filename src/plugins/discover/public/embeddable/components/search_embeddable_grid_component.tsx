@@ -144,55 +144,49 @@ export function SearchEmbeddableGridComponent({
     return getAllowedSampleSize(savedSearch.sampleSize, discoverServices.uiSettings);
   }, [savedSearch.sampleSize, discoverServices]);
 
+  const sharedProps = {
+    columns: savedSearch.columns ?? [],
+    dataView,
+    interceptedWarnings,
+    onFilter: onAddFilter,
+    rows,
+    rowsPerPageState: savedSearch.rowsPerPage,
+    sampleSizeState: fetchedSampleSize,
+    searchDescription: panelDescription || savedSearchDescription,
+    sort,
+    totalHitCount,
+    useNewFieldsApi: !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
+  };
+
   if (useLegacyTable) {
     return (
       <DiscoverDocTableEmbeddableMemoized
+        {...sharedProps}
         {...onStateEditedProps}
-        columns={savedSearch.columns ?? []}
-        dataView={dataView}
         filters={savedSearch.searchSource.getField('filter') as Filter[]}
-        interceptedWarnings={interceptedWarnings}
         isEsqlMode={isEsql}
         isLoading={Boolean(loading)}
-        onFilter={onAddFilter}
-        rows={rows}
-        rowsPerPageState={savedSearch.rowsPerPage}
-        sampleSizeState={fetchedSampleSize}
-        searchDescription={panelDescription || savedSearchDescription}
         sharedItemTitle={panelTitle || savedSearchTitle}
-        sort={sort}
-        totalHitCount={totalHitCount}
-        useNewFieldsApi={!discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false)}
       />
     );
   }
 
   return (
     <DiscoverGridEmbeddableMemoized
+      {...sharedProps}
       {...onStateEditedProps}
       ariaLabelledBy={'documentsAriaLabel'}
       cellActionsTriggerId={SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID}
-      columns={savedSearch.columns ?? []}
       columnsMeta={columnsMeta}
-      dataView={dataView}
       headerRowHeightState={savedSearch.headerRowHeight}
-      interceptedWarnings={interceptedWarnings}
       isPlainRecord={isEsql}
       loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
-      onFilter={onAddFilter}
       query={savedSearch.searchSource.getField('query')}
       rowHeightState={savedSearch.rowHeight}
-      rows={rows}
-      rowsPerPageState={savedSearch.rowsPerPage}
-      sampleSizeState={fetchedSampleSize}
       savedSearchId={savedSearchId}
-      searchDescription={panelDescription || savedSearchDescription}
       searchTitle={panelTitle || savedSearchTitle}
       services={discoverServices}
       showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
-      sort={sort}
-      totalHitCount={totalHitCount}
-      useNewFieldsApi={!discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false)}
     />
   );
 }

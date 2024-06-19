@@ -23,6 +23,9 @@ import {
   apiHasParentApi,
   fetch$,
   FetchContext,
+  PublishesDataViews,
+  PublishesPanelTitle,
+  PublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -35,22 +38,28 @@ import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
-import { SearchEmbeddableApi, SearchEmbeddableStateManager } from './types';
+import { PublishesSavedSearch, SearchEmbeddableStateManager } from './types';
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
 
-type PartialFetchApi = SearchEmbeddableApi & {
-  fetchContext$: BehaviorSubject<FetchContext | undefined>;
-  dataLoading: BehaviorSubject<boolean | undefined>;
-  blockingError: BehaviorSubject<Error | undefined>;
-  fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
-};
+type SavedSearchPartialFetchApi = PublishesSavedSearch &
+  PublishesSavedObjectId &
+  PublishesDataViews &
+  PublishesPanelTitle & {
+    fetchContext$: BehaviorSubject<FetchContext | undefined>;
+    dataLoading: BehaviorSubject<boolean | undefined>;
+    blockingError: BehaviorSubject<Error | undefined>;
+    fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
+  };
 
 export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): boolean => {
   const query = savedSearch.searchSource.getField('query');
   return isOfAggregateQueryType(query);
 };
 
-const getExecutionContext = async (api: PartialFetchApi, discoverServices: DiscoverServices) => {
+const getExecutionContext = async (
+  api: SavedSearchPartialFetchApi,
+  discoverServices: DiscoverServices
+) => {
   const { editUrl } = await getAppTarget(api, discoverServices);
   const childContext: KibanaExecutionContext = {
     type: SEARCH_EMBEDDABLE_TYPE,
@@ -74,27 +83,16 @@ export function initializeFetch({
   stateManager,
   discoverServices,
 }: {
-  api: SearchEmbeddableApi & {
-    fetchContext$: BehaviorSubject<FetchContext | undefined>;
-    dataLoading: BehaviorSubject<boolean | undefined>;
-    blockingError: BehaviorSubject<Error | undefined>;
-    fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
-  };
+  api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
   discoverServices: DiscoverServices;
 }) {
   const requestAdapter = new RequestAdapter();
   let abortController = new AbortController();
 
-  const fetchSubscription = combineLatest([
-    fetch$(api),
-    api.savedSearch$,
-    api.dataViews,
-    stateManager.sort,
-    stateManager.sampleSize,
-  ])
+  const fetchSubscription = combineLatest([fetch$(api), api.savedSearch$, api.dataViews])
     .pipe(
-      switchMap(async ([fetchContext, savedSearch, dataViews, sort, sampleSize]) => {
+      switchMap(async ([fetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
         api.blockingError.next(undefined);
         if (!dataView || !savedSearch.searchSource) {
@@ -109,8 +107,8 @@ export function initializeFetch({
           discoverServices,
           savedSearch.searchSource,
           dataView,
-          sort,
-          getAllowedSampleSize(sampleSize, discoverServices.uiSettings),
+          savedSearch.sort,
+          getAllowedSampleSize(savedSearch.sampleSize, discoverServices.uiSettings),
           useNewFieldsApi,
           fetchContext,
           {

@@ -12,6 +12,9 @@ import { SearchSource } from '@kbn/data-plugin/public';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common/search';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedSearchPublicPluginStart } from './plugin';
+import { SavedSearch } from '../common';
+import { SerializableSavedSearch } from '../common/types';
+import { SavedSearchUnwrapResult } from './services/saved_searches';
 
 const createEmptySearchSource = jest.fn(() => {
   const deps = {
@@ -31,12 +34,34 @@ const createEmptySearchSource = jest.fn(() => {
   return searchSource;
 });
 
+const toSavedSearchMock = jest.fn((id, result, serialized) =>
+  Promise.resolve(
+    serialized
+      ? ({
+          id,
+          title: result.attributes.title,
+          serializedSearchSource: createEmptySearchSource().getSerializedFields(),
+          managed: false,
+        } as SerializableSavedSearch)
+      : ({
+          id,
+          title: result.attributes.title,
+          searchSource: createEmptySearchSource(),
+          managed: false,
+        } as SavedSearch)
+  )
+) as SavedSearchPublicPluginStart['byValue']['toSavedSearch'];
+
 const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
-  get: jest.fn().mockImplementation(() => ({
-    id: 'savedSearch',
-    title: 'savedSearchTitle',
-    searchSource: createEmptySearchSource(),
-  })),
+  get: jest
+    .fn()
+    .mockImplementation((id, serialized) =>
+      toSavedSearchMock(
+        id ?? 'savedSearch',
+        { attributes: { title: 'savedSearchTitle' } } as SavedSearchUnwrapResult,
+        serialized
+      )
+    ),
   getAll: jest.fn(),
   getNew: jest.fn().mockImplementation(() => ({
     searchSource: createEmptySearchSource(),
@@ -44,14 +69,7 @@ const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
   save: jest.fn(),
   checkForDuplicateTitle: jest.fn(),
   byValue: {
-    toSavedSearch: jest.fn((id, result) =>
-      Promise.resolve({
-        id,
-        title: result.attributes.title,
-        searchSource: createEmptySearchSource(),
-        managed: false,
-      })
-    ),
+    toSavedSearch: toSavedSearchMock,
   },
 });
 

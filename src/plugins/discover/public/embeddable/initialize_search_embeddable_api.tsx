@@ -94,6 +94,14 @@ export const initializeSearchEmbeddableApi = async (
   const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
   const totalHitCount$ = new BehaviorSubject<number | undefined>(undefined);
 
+  const defaultRowHeight = discoverServices.uiSettings.get(ROW_HEIGHT_OPTION);
+  const defaultRowsPerPage = getDefaultRowsPerPage(discoverServices.uiSettings);
+  const defaultSampleSize = discoverServices.uiSettings.get(SAMPLE_SIZE_SETTING);
+
+  /**
+   * The state manager is used to modify the state of the saved search - this should never be
+   * treated as the source of truth
+   */
   const stateManager: SearchEmbeddableStateManager = {
     breakdownField: breakdownField$,
     columns: columns$,
@@ -108,10 +116,7 @@ export const initializeSearchEmbeddableApi = async (
     viewMode: savedSearchViewMode$,
   };
 
-  const defaultRowHeight = discoverServices.uiSettings.get(ROW_HEIGHT_OPTION);
-  const defaultRowsPerPage = getDefaultRowsPerPage(discoverServices.uiSettings);
-  const defaultSampleSize = discoverServices.uiSettings.get(SAMPLE_SIZE_SETTING);
-
+  /** The saved search should be the source of truth for all state  */
   const savedSearch$ = new BehaviorSubject(initializedSavedSearch(stateManager, searchSource));
 
   /** This will fire when any of the **editable** state changes */

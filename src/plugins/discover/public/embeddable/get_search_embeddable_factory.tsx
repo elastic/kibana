@@ -6,20 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { omit, pick } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-containers';
 import {
   FetchContext,
   initializeTimeRange,
@@ -27,16 +23,13 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { toSavedSearchAttributes, VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 
-import { extract, inject } from '../../common/embeddable/search_inject_extract';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
-import { EDITABLE_PANEL_KEYS, EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
@@ -45,6 +38,7 @@ import {
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedState,
 } from './types';
+import { deserializeState, serializeState } from './utils/serialization_utils';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -56,8 +50,7 @@ export const getSearchEmbeddableFactory = ({
   };
   discoverServices: DiscoverServices;
 }) => {
-  const { get, save, checkForDuplicateTitle } = discoverServices.savedSearch;
-  const { toSavedSearch } = discoverServices.savedSearch.byValue;
+  const { save, checkForDuplicateTitle } = discoverServices.savedSearch;
 
   const savedSearchEmbeddableFactory: ReactEmbeddableFactory<
     SearchEmbeddableSerializedState,
@@ -66,37 +59,7 @@ export const getSearchEmbeddableFactory = ({
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
     deserializeState: async (serializedState) => {
-      const panelState = pick(serializedState.rawState, EDITABLE_PANEL_KEYS);
-      const savedObjectId = serializedState.rawState.savedObjectId;
-      if (savedObjectId) {
-        // by reference
-        const so = await get(savedObjectId, true);
-        const savedObjectOverride = pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
-        return {
-          // ignore the time range from the saved object - only global time range + panel time range matter
-          ...omit(so, 'timeRange'),
-          savedObjectId,
-          savedObjectTitle: so.title,
-          savedObjectDescription: so.description,
-          // Overwrite SO state with dashboard state for title, description, columns, sort, etc.
-          ...panelState,
-          ...savedObjectOverride,
-        };
-      } else {
-        // by value
-        const savedSearch = await toSavedSearch(
-          undefined,
-          inject(
-            serializedState.rawState as EmbeddableStateWithType,
-            serializedState.references ?? []
-          ) as SavedSearchUnwrapResult,
-          true
-        );
-        return {
-          ...savedSearch,
-          ...panelState,
-        };
-      }
+      return deserializeState({ serializedState, discoverServices });
     },
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
@@ -121,68 +84,28 @@ export const getSearchEmbeddableFactory = ({
         searchEmbeddableApi,
         searchEmbeddableComparators,
         searchEmbeddableStateManager,
-        cleanup,
+        cleanup: cleanupSavedSearchApi,
       } = await initializeSearchEmbeddableApi(initialState, { discoverServices });
+
+      const unsubscribeFromFetch = initializeFetch({
+        api: {
+          ...titlesApi,
+          savedSearch$: searchEmbeddableApi.savedSearch$,
+          dataViews: searchEmbeddableApi.dataViews,
+          savedObjectId: savedObjectId$,
+          dataLoading: dataLoading$,
+          blockingError: blockingError$,
+          fetchContext$,
+          fetchWarnings$,
+        },
+        discoverServices,
+        stateManager: searchEmbeddableStateManager,
+      });
 
       const solutionNavId = await firstValueFrom(
         discoverServices.core.chrome.getActiveSolutionNavId$()
       );
       await discoverServices.profilesManager.resolveRootProfile({ solutionNavId });
-
-      const serializeState = async (): Promise<
-        SerializedPanelState<SearchEmbeddableSerializedState>
-      > => {
-        const savedSearch = searchEmbeddableApi.savedSearch$.getValue();
-        const searchSource = savedSearch.searchSource;
-        const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
-        const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
-
-        const savedObjectId = savedObjectId$.getValue();
-        if (savedObjectId) {
-          // only save the current state that is **different** than the initial state
-          const overwriteState = EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
-            if (
-              deepEqual(
-                savedSearchAttributes[key],
-                initialState[key as keyof SearchEmbeddableRuntimeState]
-              )
-            ) {
-              return prev;
-            }
-            return { ...prev, [key]: savedSearchAttributes[key] };
-          }, {});
-
-          return {
-            rawState: {
-              savedObjectId,
-              // Serialize the current dashboard state into the panel state **without** updating the saved object
-              ...serializeTitles(),
-              ...serializeTimeRange(),
-              ...overwriteState,
-            },
-            // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
-            references: [],
-          };
-        }
-
-        const { state, references } = extract({
-          id: uuid,
-          type: SEARCH_EMBEDDABLE_TYPE,
-          attributes: {
-            ...savedSearchAttributes,
-            references: originalReferences,
-          },
-        });
-
-        return {
-          rawState: {
-            ...serializeTitles(),
-            ...serializeTimeRange(),
-            ...(state as unknown as SearchEmbeddableSerializedState),
-          },
-          references,
-        };
-      };
 
       const api: SearchEmbeddableApi = buildApi(
         {
@@ -249,7 +172,15 @@ export const getSearchEmbeddableFactory = ({
             defaultPanelTitle$.next(undefined);
             defaultPanelDescription$.next(undefined);
           },
-          serializeState,
+          serializeState: () =>
+            serializeState({
+              uuid,
+              initialState,
+              savedSearch: searchEmbeddableApi.savedSearch$.getValue(),
+              serializeTitles,
+              serializeTimeRange,
+              savedObjectId: savedObjectId$.getValue(),
+            }),
         },
         {
           ...titleComparators,
@@ -264,30 +195,17 @@ export const getSearchEmbeddableFactory = ({
         }
       );
 
-      const unsubscribeFromFetch = initializeFetch({
-        api: {
-          ...api,
-          dataLoading: dataLoading$,
-          blockingError: blockingError$,
-          fetchContext$,
-          fetchWarnings$,
-        },
-        discoverServices,
-        stateManager: searchEmbeddableStateManager,
-      });
-
       return {
         api,
         Component: () => {
-          const [savedSearch, dataViews, columns] = useBatchedPublishingSubjects(
+          const [savedSearch, dataViews] = useBatchedPublishingSubjects(
             api.savedSearch$,
-            api.dataViews,
-            searchEmbeddableStateManager.columns
+            api.dataViews
           );
 
           useEffect(() => {
             return () => {
-              cleanup();
+              cleanupSavedSearchApi();
               unsubscribeFromFetch();
             };
           }, []);
@@ -350,8 +268,8 @@ export const getSearchEmbeddableFactory = ({
               discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS) &&
               viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
               dataView &&
-              Array.isArray(columns),
-            [columns, dataView, viewMode]
+              Array.isArray(savedSearch.columns),
+            [savedSearch, dataView, viewMode]
           );
 
           return (

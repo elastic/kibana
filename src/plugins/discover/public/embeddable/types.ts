@@ -20,9 +20,14 @@ import {
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { SavedSearch, SerializableSavedSearch } from '@kbn/saved-search-plugin/common/types';
+import {
+  SavedSearch,
+  SavedSearchAttributes,
+  SerializableSavedSearch,
+} from '@kbn/saved-search-plugin/common/types';
 import { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { BehaviorSubject } from 'rxjs';
+import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 export type SearchEmbeddableState = Pick<
   SerializableSavedSearch,
@@ -52,10 +57,9 @@ export type SearchEmbeddableSerializedAttributes = Omit<
 
 export type SearchEmbeddableSerializedState = SerializedTitles &
   SerializedTimeRange &
-  Pick<SerializableSavedSearch, 'sort' | 'columns'> & {
+  Partial<Pick<SavedSearchAttributes, typeof EDITABLE_SAVED_SEARCH_KEYS[number]>> & {
     // by value
-    attributes?: SearchEmbeddableSerializedAttributes;
-
+    attributes?: SavedSearchAttributes & { references: SavedSearch['references'] };
     // by reference
     savedObjectId?: string;
   };
@@ -68,7 +72,10 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     savedObjectDescription?: string;
   };
 
-export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
+export type SearchEmbeddableApi = DefaultEmbeddableApi<
+  SearchEmbeddableSerializedState,
+  SearchEmbeddableRuntimeState
+> &
   PublishesDataViews &
   PublishesSavedObjectId &
   PublishesDataLoading &
