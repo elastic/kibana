@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
 import { useKibana } from '../../../common/lib/kibana';
 import { PanelHeader } from './header';
@@ -20,11 +21,12 @@ import { EventKind } from '../shared/constants/event_kinds';
 import { useLeftPanelContext } from './context';
 import { LeftPanelTour } from './components/tour';
 
-export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response';
+export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response' | 'notes';
 export const LeftPanelVisualizeTab: LeftPanelPaths = 'visualize';
 export const LeftPanelInsightsTab: LeftPanelPaths = 'insights';
 export const LeftPanelInvestigationTab: LeftPanelPaths = 'investigation';
 export const LeftPanelResponseTab: LeftPanelPaths = 'response';
+export const LeftPanelNotesTab: LeftPanelPaths = 'notes';
 
 export interface LeftPanelProps extends FlyoutPanelProps {
   key: typeof DocumentDetailsLeftPanelKey;
@@ -41,14 +43,18 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
+  const notesEnabled = useIsExperimentalFeatureEnabled('notesEnabled');
 
-  const tabsDisplayed = useMemo(
-    () =>
+  const tabsDisplayed = useMemo(() => {
+    const tabList =
       eventKind === EventKind.signal
         ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
-        : [tabs.insightsTab],
-    [eventKind]
-  );
+        : [tabs.insightsTab];
+    if (notesEnabled) {
+      tabList.push(tabs.notesTab);
+    }
+    return tabList;
+  }, [eventKind, notesEnabled]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;

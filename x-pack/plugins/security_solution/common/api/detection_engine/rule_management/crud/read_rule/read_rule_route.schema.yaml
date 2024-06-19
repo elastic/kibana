@@ -5,8 +5,9 @@ info:
 paths:
   /api/detection_engine/rules:
     get:
-      operationId: ReadRule
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
+      operationId: ReadRule
       description: Read a single rule
       tags:
         - Rules API
