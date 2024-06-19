@@ -29,6 +29,8 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 
 export type ServiceGroupsSortType = 'recently_added' | 'alphabetical';
 
+const GET_STARTED_URL = 'https://www.elastic.co/guide/en/apm/get-started/current/index.html';
+
 export function ServiceGroupsList() {
   const { core } = useApmPluginContext();
   const isMultiSignalEnabled = core.uiSettings.get<boolean>(apmEnableMultiSignal, false);
@@ -144,7 +146,7 @@ export function ServiceGroupsList() {
                               link: (
                                 <EuiLink
                                   data-test-subj="apmServiceGroupsApmInstrumentedLink"
-                                  href="https://www.elastic.co/guide/en/apm/get-started/current/index.html"
+                                  href={GET_STARTED_URL}
                                   target="_blank"
                                 >
                                   {i18n.translate('xpack.apm.serviceGroups.onlyApmLink', {

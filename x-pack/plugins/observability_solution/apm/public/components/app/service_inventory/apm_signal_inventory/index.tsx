@@ -301,8 +301,7 @@ export function ApmServiceInventory() {
   ]);
 
   const settingsField = fields[apmEnableServiceInventoryTableSearchBar];
-  const isTableSearchBarEnabled =
-    Boolean(settingsField?.savedValue ?? settingsField?.defaultValue) ?? false;
+  const isTableSearchBarEnabled = Boolean(settingsField?.savedValue ?? settingsField?.defaultValue);
 
   return (
     <>

@@ -44,7 +44,7 @@ export function SparkPlot({
   comparisonSeriesColor,
 }: {
   type?: SparkPlotType;
-  color?: string;
+  color: string;
   isLoading: boolean;
   series?: Coordinate[] | null;
   valueLabel: React.ReactNode;

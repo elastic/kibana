@@ -13,16 +13,16 @@ export function mergeEntities({
 }: {
   entities: ServiceEntities[];
 }): MergedServiceEntities[] {
-  const map = new Map();
-  const mergedEntities = entities.reduce((prev, current) => {
+  const mergedEntities = entities.reduce((map, current) => {
     const key = current.serviceName;
-
     if (map.has(key)) {
       const existingEntity = map.get(key);
-      return map.set(key, mergeFunc(current, existingEntity));
+      map.set(key, mergeFunc(current, existingEntity));
+    } else {
+      map.set(key, mergeFunc(current));
     }
-    return map.set(key, mergeFunc(current));
-  }, map);
+    return map;
+  }, new Map());
 
   return [...mergedEntities.values()];
 }
