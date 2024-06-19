@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { resolve as resolvePath } from 'path';
+import { join as joinPath } from 'path';
 import type { InputType } from '../../common';
 import { ensureDirSync, createSync, readSync } from '../util';
 
 export function createAgentInput(specificDataStreamDir: string, inputTypes: InputType[]): void {
-  const agentDir = resolvePath(specificDataStreamDir, 'agent', 'stream');
-  const agentTemplatesDir = resolvePath(__dirname, '../templates/agent');
+  const agentDir = joinPath(specificDataStreamDir, 'agent', 'stream');
+  const agentTemplatesDir = joinPath(__dirname, '../templates/agent');
   ensureDirSync(agentDir);
 
   // Load common options that exists for all .yml.hbs files, to be merged with each specific input file
-  const commonFilePath = resolvePath(agentTemplatesDir, 'common.yml.hbs');
+  const commonFilePath = joinPath(agentTemplatesDir, 'common.yml.hbs');
   const commonFile = readSync(commonFilePath);
 
   for (const inputType of inputTypes) {
-    const inputTypeFilePath = resolvePath(
+    const inputTypeFilePath = joinPath(
       agentTemplatesDir,
       `${inputType.replaceAll('-', '_')}.yml.hbs`
     );
@@ -27,7 +27,7 @@ export function createAgentInput(specificDataStreamDir: string, inputTypes: Inpu
 
     const combinedContents = `${inputTypeFile}\n${commonFile}`;
 
-    const destinationFilePath = resolvePath(agentDir, `${inputType}.yml.hbs`);
+    const destinationFilePath = joinPath(agentDir, `${inputType}.yml.hbs`);
     createSync(destinationFilePath, combinedContents);
   }
 }
