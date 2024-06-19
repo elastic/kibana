@@ -1634,6 +1634,69 @@ describe('validation logic', () => {
       });
     });
 
+    describe('inline casting', () => {
+      // accepts casting
+      testErrorsAndWarnings('from a_index | eval 1::string', []);
+
+      // errors if the cast type is invalid
+      // testErrorsAndWarnings('from a_index | eval 1::foo', ['Invalid type [foo] for casting']);
+
+      // accepts casting with multiple types
+      testErrorsAndWarnings('from a_index | eval 1::string::long::double', []);
+
+      // takes into account casting in function arguments
+      testErrorsAndWarnings('from a_index | eval trim("23"::double)', [
+        'Argument of [trim] must be [string], found value ["23"::double] type [double]',
+      ]);
+      testErrorsAndWarnings('from a_index | eval trim(23::string)', []);
+      testErrorsAndWarnings('from a_index | eval 1 + "2"::long', []);
+      testErrorsAndWarnings('from a_index | eval 1 + "2"', [
+        // just a counter-case to make sure the previous test is meaningful
+        'Argument of [+] must be [number], found value ["2"] type [string]',
+      ]);
+      testErrorsAndWarnings(
+        'from a_index | eval trim(to_double("23")::string::double::long::string::double)',
+        [
+          'Argument of [trim] must be [string], found value [to_double("23")::string::double::long::string::double] type [double]',
+        ]
+      );
+
+      // accepts elasticsearch subtypes and type aliases like int and keyword
+      // (once https://github.com/elastic/kibana/issues/174710 is done this won't be a special case anymore)
+      testErrorsAndWarnings('from a_index | eval CEIL(23::long)', []);
+      testErrorsAndWarnings('from a_index | eval CEIL(23::unsigned_long)', []);
+      testErrorsAndWarnings('from a_index | eval CEIL(23::int)', []);
+      testErrorsAndWarnings('from a_index | eval CEIL(23::integer)', []);
+      testErrorsAndWarnings('from a_index | eval CEIL(23::double)', []);
+
+      testErrorsAndWarnings('from a_index | eval TRIM(23::string)', []);
+      testErrorsAndWarnings('from a_index | eval TRIM(23::text)', []);
+      testErrorsAndWarnings('from a_index | eval TRIM(23::keyword)', []);
+
+      testErrorsAndWarnings('from a_index | eval true AND "false"::boolean', []);
+      testErrorsAndWarnings('from a_index | eval true AND "false"::bool', []);
+      testErrorsAndWarnings('from a_index | eval true AND "false"', [
+        // just a counter-case to make sure the previous tests are meaningful
+        'Argument of [and] must be [boolean], found value ["false"] type [string]',
+      ]);
+
+      // enforces strings for cartesian_point conversion
+      // testErrorsAndWarnings('from a_index | eval 23::cartesian_point', ['wrong type!']);
+
+      // still validates nested functions when they are casted
+      testErrorsAndWarnings('from a_index | eval to_lower(trim(numberField)::string)', [
+        'Argument of [trim] must be [string], found value [numberField] type [number]',
+      ]);
+      testErrorsAndWarnings(
+        'from a_index | eval to_upper(trim(numberField)::string::string::string::string)',
+        ['Argument of [trim] must be [string], found value [numberField] type [number]']
+      );
+      testErrorsAndWarnings(
+        'from a_index | eval to_lower(to_upper(trim(numberField)::string)::string)',
+        ['Argument of [trim] must be [string], found value [numberField] type [number]']
+      );
+    });
+
     describe(FUNCTION_DESCRIBE_BLOCK_NAME, () => {
       describe('date_diff', () => {
         testErrorsAndWarnings(
