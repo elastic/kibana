@@ -6,24 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   renderCustomToolbar,
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import { getLogLevelColor, getLogLevelCoalescedValue } from '@kbn/discover-utils';
-
-const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row, euiTheme) => {
-  const logLevel = row.flattened['log.level'];
-  const logLevelCoalescedValue = getLogLevelCoalescedValue(logLevel);
-
-  if (logLevelCoalescedValue) {
-    return getLogLevelColor(logLevelCoalescedValue, euiTheme);
-  }
-
-  return undefined;
-};
+import { useProfileAccessor } from '../../context_awareness';
 
 /**
  * Customized version of the UnifiedDataTable
@@ -31,6 +20,11 @@ const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row
  * @constructor
  */
 export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
+  const getRowIndicatorColorAccessor = useProfileAccessor('getRowIndicatorColor');
+  const getRowIndicatorColor = useMemo(() => {
+    return getRowIndicatorColorAccessor(undefined);
+  }, [getRowIndicatorColorAccessor]);
+
   return (
     <UnifiedDataTable
       showColumnTokens

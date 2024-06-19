@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CustomCellRenderer } from '@kbn/unified-data-table';
+import type { CustomCellRenderer, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
@@ -22,4 +22,5 @@ export interface DocViewerExtensionParams {
 export interface Profile {
   getCellRenderers: () => CustomCellRenderer;
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
+  getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'];
 }

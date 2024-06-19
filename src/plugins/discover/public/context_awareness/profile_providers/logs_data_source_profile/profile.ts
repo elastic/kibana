@@ -8,6 +8,8 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getLogLevelCoalescedValue, getLogLevelColor } from '@kbn/discover-utils';
+import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { isDataViewSource, isEsqlSource } from '../../../../common/data_sources';
 import {
   DataSourceCategory,
@@ -20,7 +22,9 @@ export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
-  profile: {},
+  profile: {
+    getRowIndicatorColor: () => getRowIndicatorColor,
+  },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
 
@@ -47,4 +51,15 @@ const extractIndexPatternFrom = ({
   }
 
   return null;
+};
+
+const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row, euiTheme) => {
+  const logLevel = row.flattened['log.level'];
+  const logLevelCoalescedValue = getLogLevelCoalescedValue(logLevel);
+
+  if (logLevelCoalescedValue) {
+    return getLogLevelColor(logLevelCoalescedValue, euiTheme);
+  }
+
+  return undefined;
 };
