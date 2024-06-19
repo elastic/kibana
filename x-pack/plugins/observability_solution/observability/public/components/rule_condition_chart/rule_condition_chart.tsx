@@ -149,7 +149,12 @@ export function RuleConditionChart({
 
   // Build the warning threshold reference line
   useEffect(() => {
-    if (!warningThreshold) return;
+    if (!warningThreshold) {
+      if (warningThresholdReferenceLine?.length) {
+        setWarningThresholdReferenceLine([]);
+      }
+      return;
+    }
     const refLayers = [];
     if (
       warningComparator === COMPARATORS.NOT_BETWEEN ||
@@ -205,7 +210,13 @@ export function RuleConditionChart({
       refLayers.push(warningThresholdRefLine, bufferRefLine);
     }
     setWarningThresholdReferenceLine(refLayers);
-  }, [warningThreshold, warningComparator, euiTheme.colors.warning, metrics]);
+  }, [
+    warningThreshold,
+    warningComparator,
+    euiTheme.colors.warning,
+    metrics,
+    warningThresholdReferenceLine?.length,
+  ]);
 
   // Build the threshold reference line
   useEffect(() => {
