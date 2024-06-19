@@ -165,15 +165,19 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
 
             daemonsets.push(daemonset)
           } else {
-              const message = `${resource} ${daemonsetName} has no pods or it does not exist`
-              const daemonset = {
-                'name': daemonsetName,
-                'pods': [],
-                'namespace': namespace,
-                'message': message,
-                'reason': '',
-              };
-              daemonsets.push(daemonset)
+              if (request.query.name !== undefined) {
+                const message = `${resource} ${daemonsetName} has no pods or it does not exist`
+                return response.ok({
+                  body: {
+                    time: time,
+                    message: message,
+                    name: request.query.name,
+                    namespace: request.query.namespace,
+                    reason: "Not found or has no pods",
+                    daemonsets: [],
+                  },
+                });
+              }
           }
         }
         return response.ok({

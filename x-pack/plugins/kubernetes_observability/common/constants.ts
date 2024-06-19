@@ -22,3 +22,5 @@ export const DAEMONSET_MEMORY_ROUTE = '/api/kubernetes/daemonsets/memory';
 export const NODE_MEMORY_ROUTE = '/api/kubernetes/nodes/memory';
 //EVENTS
 export const EVENTS_ROUTE = '/api/kubernetes/events';
+//OPENAI
+export const OPENAI_ROUTE = '/api/kubernetes/openai/analyze';

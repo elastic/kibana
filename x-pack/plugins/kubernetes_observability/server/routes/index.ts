@@ -18,6 +18,7 @@ import { registerDaemonsetsMemoryRoute } from './daemonsets_memory';
 import { registerEventsRoute } from './events';
 import { registerNodesCpuRoute } from './nodes_cpu';
 import { registerNodesMemoryRoute } from './nodes_memory';
+import { registerOpenaiRoute } from './openai';
 
 
 export const registerRoutes = (
@@ -37,4 +38,5 @@ export const registerRoutes = (
   registerEventsRoute(router, logger);
   registerNodesCpuRoute(router, logger);
   registerNodesMemoryRoute(router, logger);
+  registerOpenaiRoute(router, logger);
 };

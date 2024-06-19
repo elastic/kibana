@@ -15,6 +15,12 @@ import {
   EuiFormRow,
   EuiSuperSelect,
   EuiButtonGroup,
+  EuiCodeBlock,
+  EuiPortal,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiButton,
   EuiToolTip,
   EuiIcon,
@@ -27,6 +33,14 @@ import styled from 'styled-components';
 const ContentWrapper = styled(EuiFlexGroup)`
   height: 100%;
   margin: 0 auto;
+`;
+
+const CommandCode = styled.div.attrs(() => {
+  return {
+    className: 'eui-textBreakAll',
+  };
+})`
+  margin-right: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 export class kubernetesObservability implements Plugin {
@@ -75,6 +89,11 @@ export type Query = {
   deployment: string;
   daemonset: string;
   period: string;
+};
+
+export type AIQuery = {
+  content: string;
+  assistant_id: string;
 };
 
 export const NAMESPACE_OPTIONS = [
@@ -150,7 +169,22 @@ export const PERIODS_SELECT_OPTIONS = [
 
 export class PublicKubernetesObservabilityClient {
     constructor(private readonly http: HttpStart) {}
-  
+     
+    async analyze(content: string, assistant_id: string) {
+      console.log("CALLED TO ASK OPENAI")
+      console.log("assistant is " + assistant_id);
+      var query = {} as AIQuery;
+      if (content !== undefined) {
+        query['content'] = content
+      }
+      if (assistant_id !== '') {
+        query['assistant_id'] = assistant_id
+      }
+      console.log(query);
+      const results = await this.http.get('/api/kubernetes/openai/analyze', {version: '1', query});
+      return results;
+    }
+    
     async getNodesMemory(period: string) {
       console.log("CALLED TO GET NODES MEM")
       var query = {} as Query;
@@ -372,6 +406,12 @@ const  KubernetesObservabilityComp = ({
   const [triggerPodCpu, setTriggerPodCpu] = useState(true);
   const [triggerPodMem, setTriggerPodMem] = useState(true);
   const [period, setPeriod] = useState('now-5m');
+  const [assistant, setAssistant] = useState('');
+  const [nodeMemAnalysis, setNodeMemAnalysis] = useState('');
+  const [nodeCpuAnalysis, setNodeCpuAnalysis] = useState('');
+  const [isNodesMemFlyoutOpen, setIsNodesMemFlyoutOpen] = useState<boolean>(false);
+
+
   // useEffect(() => {
   //   const timer = setInterval(() => {
   //     console.log('This will run after 10 second!')
@@ -382,7 +422,7 @@ const  KubernetesObservabilityComp = ({
   // }, []);
   
   useEffect(() => {
-    if (hasTimeElapsed) {
+    if (hasTimeElapsed) {  
       client.getNodesMemory(period).then(data => {
         console.log(data);
         console.log("AAAAAAAAA DUE TO period change")
@@ -392,6 +432,18 @@ const  KubernetesObservabilityComp = ({
   
         const nodes = nodesArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
         setNodesMem(nodes);
+        if (nodes.length !== 0) {
+          var content = JSON.stringify(nodes);
+          content = `What can you tell me about my kubernetes nodes memory utilization based on the following json: ${content} \n Return only the analysis and suggestions part"`
+          client.analyze(content, assistant).then(result => {
+            console.log(result);
+            setAssistant(result.assistant);
+            setNodeMemAnalysis(result.response);
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        }
         })
         .catch(error => {
             console.log(error)
@@ -409,6 +461,18 @@ const  KubernetesObservabilityComp = ({
 
         const nodes = nodesArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
         setNodesCpu(nodes);
+        if (nodes.length !== 0) {
+          var content = JSON.stringify(nodes);
+          content = `What can you tell me about my kubernetes nodes cpu utilization based on the following json: ${content} \n Return only the analysis and suggestions part"`
+          client.analyze(content, assistant).then(result => {
+            console.log(result);
+            setAssistant(result.assistant);
+            setNodeCpuAnalysis(result.response);
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        }
         })
         .catch(error => {
             console.log(error)
@@ -1750,8 +1814,69 @@ const  KubernetesObservabilityComp = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiText size="s"><b>Timestamp</b>: {nodeMemtime}</EuiText>
-            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiText textAlign="left" size="s"><b>Timestamp</b>: {nodeMemtime}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+              <div style={{ width: 900 }}>
+                <EuiButton
+                        onClick={() => setIsNodesMemFlyoutOpen(true)}
+                        isDisabled={nodeMemAnalysis===""}
+                        size={'s'}
+                        color="primary"
+                      >
+                        <FormattedMessage
+                          id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                          defaultMessage="Analyze Results"
+                        />
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isNodesMemFlyoutOpen && (
+            <EuiPortal>
+              <EuiFlyout onClose={() => setIsNodesMemFlyoutOpen(false)} size="l" maxWidth={1000}>
+                <EuiFlyoutHeader hasBorder>
+                  <EuiTitle size="m">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.jsonFlyoutTitle"
+                        defaultMessage="Nodes Memory Utilization Analysis"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody>
+                  <EuiText>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.jsonFlyoutDescription"
+                        defaultMessage="The analysis below is provided by Azure Openai gpt-4o version 2024-05-01-preview"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="html" isCopyable fontSize="l" whiteSpace="pre" paddingSize="l">
+                    {nodeMemAnalysis}
+                  </EuiCodeBlock>
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => setIsNodesMemFlyoutOpen(false)} flush="left">
+                        <FormattedMessage
+                          id="xpack.fleet.agentDetails.agentDetailsJsonFlyoutCloseButtonLabel"
+                          defaultMessage="Close"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlyoutFooter>
+            </EuiFlyout>
+            </EuiPortal>
+          )}
+            <EuiSpacer size="m" />
             <EuiInMemoryTable
               items= {nodesMem}
               columns= {nodeMemcolumns}
