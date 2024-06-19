@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { useConfig } from '../../../../../hooks';
 import { ExperimentalFeaturesService } from '../../../../../services';
 import type {
   AgentPolicy,
@@ -20,11 +21,15 @@ import { SelectedPolicyTab } from '../../components';
 import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
 
 export const useAgentless = () => {
+  const config = useConfig();
   const { agentless: agentlessExperimentalFeatureEnabled } = ExperimentalFeaturesService.get();
   const { cloud } = useStartServices();
   const isServerless = !!cloud?.isServerlessEnabled;
+  const isCloud = !!cloud?.isCloudEnabled;
+  const agentlessAPI = config.agentless?.api.url;
 
-  const isAgentlessEnabled = agentlessExperimentalFeatureEnabled && isServerless;
+  const isAgentlessEnabled =
+    agentlessExperimentalFeatureEnabled && (isServerless || (isCloud && !!agentlessAPI));
 
   const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
     if (!agentPolicy) return false;
@@ -74,11 +79,14 @@ export function useSetupTechnology({
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   packageInfo?: PackageInfo;
 }) {
+  const { cloud } = useStartServices();
   const { isAgentlessEnabled, isAgentlessIntegration } = useAgentless();
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
   );
   const [agentlessPolicy, setAgentlessPolicy] = useState<AgentPolicy | undefined>();
+  const config = useConfig();
+  const agentlessAPI = config.agentless?.api.url;
 
   useEffect(() => {
     if (isAgentlessEnabled && packageInfo && isAgentlessIntegration(packageInfo)) {
@@ -96,18 +104,23 @@ export function useSetupTechnology({
       }
     };
 
-    if (isAgentlessEnabled) {
+    if (isAgentlessEnabled && cloud?.isServerlessEnabled) {
       fetchAgentlessPolicy();
     }
-  }, [isAgentlessEnabled]);
+  }, [isAgentlessEnabled, cloud?.isServerlessEnabled]);
 
   const handleSetupTechnologyChange = useCallback(
-    (setupTechnology) => {
+    (setupTechnology: SetupTechnology) => {
       if (!isAgentlessEnabled || setupTechnology === selectedSetupTechnology) {
         return;
       }
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
+        if (agentlessAPI) {
+          updateNewAgentPolicy({ ...newAgentPolicy, supports_agentless: true });
+          setSelectedPolicyTab(SelectedPolicyTab.NEW);
+          updateAgentPolicies([]);
+        }
         if (agentlessPolicy) {
           updateAgentPolicies([agentlessPolicy]);
           setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
@@ -122,17 +135,18 @@ export function useSetupTechnology({
     [
       isAgentlessEnabled,
       selectedSetupTechnology,
+      agentlessAPI,
       agentlessPolicy,
-      updateAgentPolicies,
-      setSelectedPolicyTab,
       updateNewAgentPolicy,
       newAgentPolicy,
+      setSelectedPolicyTab,
+      updateAgentPolicies,
     ]
   );
 
   return {
     handleSetupTechnologyChange,
-    agentlessPolicy,
+    isAgentlessEnabled,
     selectedSetupTechnology,
   };
 }

@@ -1570,8 +1570,8 @@ class AgentPolicyService {
   private checkAgentless(agentPolicy: Partial<NewAgentPolicy>) {
     const cloudSetup = appContextService.getCloud();
     if (
-      (!cloudSetup?.isServerlessEnabled ||
-        !appContextService.getExperimentalFeatures().agentless) &&
+      (!cloudSetup?.isServerlessEnabled || !cloudSetup?.isCloudEnabled) &&
+      !appContextService.getExperimentalFeatures().agentless &&
       agentPolicy?.supports_agentless !== undefined
     ) {
       throw new AgentPolicyInvalidError(
