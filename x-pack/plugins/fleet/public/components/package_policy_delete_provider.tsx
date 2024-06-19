@@ -224,7 +224,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
             >
               {hasMultipleAgentPolicies ? (
                 <FormattedMessage
-                  id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentPoliciesMessage"
                   defaultMessage="Fleet has detected that the related agent policies {toolTip} are already in use by some of your agents."
                   values={{
                     toolTip: (
