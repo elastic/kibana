@@ -19,6 +19,7 @@ import {
   ServiceProviderKeys,
   TaskTypes,
 } from '../components/all_inference_endpoints/types';
+import { DeploymentStatusEnum } from '../components/all_inference_endpoints/types';
 
 interface UseTableDataReturn {
   tableData: InferenceEndpointUI[];
@@ -32,7 +33,8 @@ export const useTableData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
   queryParams: QueryParams,
   filterOptions: FilterOptions,
-  searchKey: string
+  searchKey: string,
+  deploymentStatus: Record<string, DeploymentStatusEnum>
 ): UseTableDataReturn => {
   const tableData: InferenceEndpointUI[] = useMemo(() => {
     let filteredEndpoints = inferenceEndpoints;
@@ -53,12 +55,21 @@ export const useTableData = (
 
     return filteredEndpoints
       .filter((endpoint) => endpoint.model_id.includes(searchKey))
-      .map((endpoint) => ({
-        endpoint,
-        provider: endpoint.service,
-        type: endpoint.task_type,
-      }));
-  }, [inferenceEndpoints, searchKey, filterOptions]);
+      .map((endpoint) => {
+        const isElasticService =
+          endpoint.service === ServiceProviderKeys.elasticsearch ||
+          endpoint.service === ServiceProviderKeys.elser;
+
+        return {
+          deployment: isElasticService
+            ? deploymentStatus[endpoint.service_settings?.model_id]
+            : DeploymentStatusEnum.notApplicable,
+          endpoint,
+          provider: endpoint.service,
+          type: endpoint.task_type,
+        };
+      });
+  }, [inferenceEndpoints, searchKey, filterOptions, deploymentStatus]);
 
   const sortedTableData: InferenceEndpointUI[] = useMemo(() => {
     return [...tableData].sort((a, b) => {

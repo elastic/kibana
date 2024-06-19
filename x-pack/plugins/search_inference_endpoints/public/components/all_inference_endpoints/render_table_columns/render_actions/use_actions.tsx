@@ -51,7 +51,6 @@ const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }
       <EuiPopover
         id={`inference-action-popover-${interfaceEndpoint.endpoint}`}
         key={`inference-action-popover-${interfaceEndpoint.endpoint}`}
-        data-test-subj={`inference-action-popover-${interfaceEndpoint.endpoint}`}
         button={
           <EuiButtonIcon
             onClick={tooglePopover}
@@ -59,7 +58,6 @@ const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }
             aria-label={'Actions'}
             color="text"
             key={`inference-action-popover-button-${interfaceEndpoint.endpoint}`}
-            data-test-subj={`inference-action-popover-button-${interfaceEndpoint.endpoint}`}
             disabled={false}
           />
         }
@@ -72,7 +70,6 @@ const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }
           initialPanelId={0}
           panels={panels}
           key={`inference-action-menu-${interfaceEndpoint.endpoint}`}
-          data-test-subj={`inference-action-menu-${interfaceEndpoint.endpoint}`}
         />
       </EuiPopover>
       {deleteAction.isModalVisible ? (

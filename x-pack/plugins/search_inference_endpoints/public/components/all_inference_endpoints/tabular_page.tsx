@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
@@ -13,12 +13,15 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useTableData } from '../../hooks/use_table_data';
 import { FilterOptions } from './types';
 
+import { DeploymentStatusEnum } from './types';
+
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
 import { EndpointsTable } from './endpoints_table';
 import { ProviderFilter } from './filter/provider_filter';
 import { TaskTypeFilter } from './filter/task_type_filter';
 import { TableSearch } from './search/table_search';
 import { useTableColumns } from './render_table_columns/table_columns';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -26,8 +29,15 @@ interface TabularPageProps {
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
   const [searchKey, setSearchKey] = React.useState('');
+  const [deploymentStatus, setDeploymentStatus] = React.useState<
+    Record<string, DeploymentStatusEnum>
+  >({});
   const { queryParams, setQueryParams, filterOptions, setFilterOptions } =
     useAllInferenceEndpointsState();
+
+  const {
+    services: { ml },
+  } = useKibana();
 
   const onFilterChangedCallback = useCallback(
     (newFilterOptions: Partial<FilterOptions>) => {
@@ -36,11 +46,35 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     [setFilterOptions]
   );
 
+  useEffect(() => {
+    const fetchDeploymentStatus = async () => {
+      const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
+      if (trainedModelStats) {
+        const newDeploymentStatus = trainedModelStats?.trained_model_stats.reduce(
+          (acc, modelStat) => {
+            if (modelStat.model_id) {
+              acc[modelStat.model_id] =
+                modelStat?.deployment_stats?.state === 'started'
+                  ? DeploymentStatusEnum.deployed
+                  : DeploymentStatusEnum.notDeployed;
+            }
+            return acc;
+          },
+          {} as Record<string, DeploymentStatusEnum>
+        );
+        setDeploymentStatus(newDeploymentStatus);
+      }
+    };
+
+    fetchDeploymentStatus();
+  }, [ml]);
+
   const { paginatedSortedTableData, pagination, sorting } = useTableData(
     inferenceEndpoints,
     queryParams,
     filterOptions,
-    searchKey
+    searchKey,
+    deploymentStatus
   );
 
   const tableColumns = useTableColumns();
