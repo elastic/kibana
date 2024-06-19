@@ -40,8 +40,6 @@ import { AlertParams } from '../../types';
 import { Threshold } from '../custom_threshold';
 import { CustomThresholdRule, CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
-import { Groups } from './groups';
-import { Tags } from './tags';
 import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';
 import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { SearchConfigurationWithExtractedReferenceType } from '../../../../../common/custom_threshold_rule/types';

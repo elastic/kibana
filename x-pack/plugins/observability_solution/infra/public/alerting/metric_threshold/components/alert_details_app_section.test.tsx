@@ -17,8 +17,6 @@ import {
 } from '../mocks/metric_threshold_rule';
 import { AlertDetailsAppSection } from './alert_details_app_section';
 import { RuleConditionChart } from '@kbn/observability-plugin/public';
-import { Groups } from './groups';
-import { Tags } from './tags';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();

@@ -170,6 +170,8 @@ export function AlertDetailsAppSection({ alert, rule, setAlertSummaryFields }: A
                         comparator: criterion.comparator,
                         timeSize: criterion.timeSize,
                         timeUnit: criterion.timeUnit,
+                        warningComparator: criterion.warningComparator,
+                        warningThreshold: criterion.warningThreshold,
                       }}
                       chartOptions={{
                         // For alert details page, the series type needs to be changed to 'bar_stacked'
