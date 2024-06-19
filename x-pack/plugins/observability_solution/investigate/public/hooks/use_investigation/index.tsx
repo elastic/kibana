@@ -4,26 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import { v4 } from 'uuid';
-import { keyBy, last, omit } from 'lodash';
 import type { AuthenticatedUser, NotificationsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { last, omit, pull } from 'lodash';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { v4 } from 'uuid';
 import type { GlobalWidgetParameters } from '../..';
-import type {
-  InvestigateWidget,
-  InvestigateWidgetCreate,
-  Investigation,
-  InvestigationRevision,
-  WorkflowBlock,
-} from '../../../common';
-import { mergePlainObjects } from '../../../common/utils/merge_plain_objects';
+import type { InvestigateWidget, InvestigateWidgetCreate, WorkflowBlock } from '../../../common';
 import type { WidgetDefinition } from '../../types';
 import {
   InvestigateWidgetApiContextProvider,
   UseInvestigateWidgetApi,
 } from '../use_investigate_widget';
-import { createNewInvestigation } from './create_new_investigation';
+import {
+  createInvestigationStore,
+  StatefulInvestigation,
+  StatefulInvestigationRevision,
+} from './investigation_store';
 
 export type RenderableInvestigateWidget = InvestigateWidget & {
   loading: boolean;
@@ -38,36 +36,24 @@ export type RenderableInvestigateTimeline = Omit<StatefulInvestigation, 'revisio
   revisions: RenderableInvestigationRevision[];
 };
 
-type StatefulInvestigateWidget = InvestigateWidget & {
-  loading: boolean;
-  Component: React.ComponentType<{ widget: InvestigateWidget }>;
-};
-
-type StatefulInvestigation = Omit<Investigation, 'revisions'> & {
-  persisted: boolean;
-  revisions: StatefulInvestigationRevision[];
-};
-
-type StatefulInvestigationRevision = Omit<InvestigationRevision, 'items'> & {
-  items: StatefulInvestigateWidget[];
-};
-
 export interface UseInvestigationApi {
   startNewInvestigation: (id: string) => void;
   loadInvestigation: (id: string) => void;
-  investigation: Omit<StatefulInvestigation, 'revisions'>;
-  revision: RenderableInvestigationRevision;
-  hasUnsavedChanges: boolean;
+  investigation?: Omit<StatefulInvestigation, 'revisions'>;
+  revision?: RenderableInvestigationRevision;
   isAtLatestRevision: boolean;
   isAtEarliestRevision: boolean;
   setItemPositions: (
     positions: Array<{ id: string; columns: number; rows: number }>
   ) => Promise<void>;
   setItemTitle: (id: string, title: string) => Promise<void>;
+  updateItem: (
+    id: string,
+    cb: (item: InvestigateWidget) => Promise<InvestigateWidget>
+  ) => Promise<void>;
   copyItem: (id: string) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   addItem: (options: InvestigateWidgetCreate) => Promise<void>;
-  updateItem: (widget: InvestigateWidget) => Promise<void>;
   lockItem: (id: string) => Promise<void>;
   unlockItem: (id: string) => Promise<void>;
   setItemParameters: (
@@ -77,52 +63,9 @@ export interface UseInvestigationApi {
   setGlobalParameters: (parameters: GlobalWidgetParameters) => Promise<void>;
   blocks: WorkflowBlock[];
   setRevision: (revisionId: string) => void;
-  isNewInvestigation: boolean;
-}
-
-async function regenerateItem({
-  user,
-  widgetDefinitions,
-  signal,
-  widget,
-  globalWidgetParameters,
-}: {
-  user: AuthenticatedUser;
-  widgetDefinitions: WidgetDefinition[];
-  widget: InvestigateWidgetCreate | InvestigateWidget;
-  signal: AbortSignal;
-  globalWidgetParameters: GlobalWidgetParameters;
-}): Promise<InvestigateWidget> {
-  const now = Date.now();
-
-  const definition = widgetDefinitions.find(
-    (currentDefinition) => currentDefinition.type === widget.type
-  );
-
-  if (!definition) {
-    throw new Error(`Definition for widget ${widget.type} not found`);
-  }
-
-  const nextParameters = mergePlainObjects(
-    globalWidgetParameters,
-    widget.parameters,
-    widget.locked ? {} : globalWidgetParameters
-  );
-
-  const widgetData = await definition.generate({
-    parameters: nextParameters,
-    signal,
-  });
-
-  return {
-    created: now,
-    id: v4(),
-    ...widget,
-    parameters: nextParameters,
-    data: widgetData,
-    user,
-    last_updated: now,
-  };
+  gotoPreviousRevision: () => Promise<void>;
+  gotoNextRevision: () => Promise<void>;
+  setTitle: (title: string) => Promise<void>;
 }
 
 function useInvestigationWithoutContext({
@@ -138,9 +81,11 @@ function useInvestigationWithoutContext({
   from: string;
   to: string;
 }): UseInvestigationApi {
-  const [investigation, setInvestigation] = useState<StatefulInvestigation>({
-    ...createNewInvestigation({
+  const investigationStoreRef = useRef(
+    createInvestigationStore({
+      id: v4(),
       user,
+      widgetDefinitions,
       globalWidgetParameters: {
         query: {
           language: 'kuery',
@@ -152,186 +97,111 @@ function useInvestigationWithoutContext({
         },
         filters: [],
       },
-    }),
-    persisted: false,
-  } as StatefulInvestigation);
+    })
+  );
+
+  const investigation$ = investigationStoreRef.current.asObservable();
+
+  const investigation = useObservable(investigation$)?.investigation;
 
   const currentRevision = useMemo(() => {
-    return investigation.revisions.find((revision) => revision.id === investigation.revision)!;
-  }, [investigation.revision, investigation.revisions]);
+    return investigation?.revisions.find((revision) => revision.id === investigation.revision);
+  }, [investigation?.revision, investigation?.revisions]);
 
-  const isAtEarliestRevision = investigation.revisions[0].id === currentRevision.id;
+  const isAtEarliestRevision = investigation?.revisions[0].id === currentRevision?.id;
 
-  const isAtLatestRevision = last(investigation.revisions)?.id === currentRevision.id;
-
-  const isNewInvestigation = investigation.revisions.length === 1 && !investigation.persisted;
-
-  const hasUnsavedChanges = !!investigation.persisted;
+  const isAtLatestRevision = last(investigation?.revisions)?.id === currentRevision?.id;
 
   const [blocksById, setBlocksById] = useState<Record<string, WorkflowBlock[]>>({});
 
-  const updateInvestigation = useCallback(
-    (cb: (prevRevision: StatefulInvestigationRevision) => StatefulInvestigationRevision) => {
-      setInvestigation((prevInvestigation) => {
-        const curRevision = prevInvestigation.revisions.find(
-          (revision) => revision.id === prevInvestigation.revision
-        )!;
-
-        const nextRevision = {
-          ...cb(curRevision),
-          id: v4(),
-        };
-
-        const nextInvestigation = {
-          ...prevInvestigation,
-          persisted: false,
-          revisions: prevInvestigation.revisions.concat(nextRevision),
-          revision: nextRevision.id,
-        };
-
-        return nextInvestigation;
-      });
-    },
-    []
-  );
-
-  const updateItem = useCallback(
-    (id: string, cb: (widget: InvestigateWidget) => Promise<Partial<InvestigateWidget>>): void => {
-      updateInvestigation((prevInvestigation) => {
-        const foundItem = prevInvestigation.items.find((item) => item.id === id);
-        if (!foundItem) {
-          return prevInvestigation;
-        }
-        const next = {
-          ...prevInvestigation,
-          items: prevInvestigation.items.map((item) => {
-            if (item.id === id) {
-              return { ...item, loading: true };
-            }
-            return item;
-          }),
-        };
-
-        cb(foundItem)
-          .then((props) => {
-            return { ...props, loading: false };
-          })
-          .catch(() => {
-            return { loading: false };
-          })
-          .then((props) => {
-            updateInvestigation((_prevInvestigation) => {
-              return {
-                ..._prevInvestigation,
-                items: prevInvestigation.items.map((item) => {
-                  if (item.id === id) {
-                    return { ...item, ...props };
-                  }
-                  return item;
-                }),
-              };
-            });
-          });
-
-        return next;
-      });
-    },
-    [updateInvestigation]
-  );
-
-  const updateItemForApi = useCallback(
-    async (widget: InvestigateWidget) => {
-      return updateItem(widget.id, async () => {
-        return regenerateItem({
-          globalWidgetParameters: currentRevision.parameters,
-          signal: new AbortController().signal,
-          user,
-          widget,
-          widgetDefinitions,
-        });
-      });
-    },
-    [currentRevision.parameters, user, widgetDefinitions, updateItem]
-  );
-
-  const deleteItem = useCallback(
-    async (id: string) => {
-      setBlocksById((prevBlocks) => omit(prevBlocks, id));
-      updateInvestigation((prevInvestigation) => {
-        return {
-          ...prevInvestigation,
-          items: prevInvestigation.items.filter((item) => item.id !== id),
-        };
-      });
-    },
-    [updateInvestigation]
-  );
+  const deleteItem = useCallback(async (id: string) => {
+    setBlocksById((prevBlocks) => omit(prevBlocks, id));
+    return investigationStoreRef.current.deleteItem(id);
+  }, []);
 
   const deleteItemRef = useRef(deleteItem);
   deleteItemRef.current = deleteItem;
 
+  const widgetComponentsById = useRef<
+    Record<string, React.ComponentType<{ widget: InvestigateWidget }>>
+  >({});
+
+  const itemsWithContext = useMemo(() => {
+    const unusedComponentIds = Object.keys(widgetComponentsById);
+
+    const nextItemsWithContext =
+      currentRevision?.items.map((item) => {
+        let Component = widgetComponentsById.current[item.id];
+        if (!Component) {
+          const id = item.id;
+          const api: UseInvestigateWidgetApi = {
+            onWidgetAdd: async (create) => {
+              return addItemRef.current(create);
+            },
+            blocks: {
+              publish: (nextBlocks) => {
+                const nextIds = nextBlocks.map((block) => block.id);
+                setBlocksById((prevBlocksById) => ({
+                  ...prevBlocksById,
+                  [id]: (prevBlocksById[id] ?? []).concat(nextBlocks),
+                }));
+                return () => {
+                  setBlocksById((prevBlocksById) => ({
+                    ...prevBlocksById,
+                    [id]: (prevBlocksById[id] ?? []).filter((block) => !nextIds.includes(block.id)),
+                  }));
+                };
+              },
+            },
+          };
+
+          const onDelete = () => {
+            return investigationStoreRef.current.deleteItem(id);
+          };
+
+          const widgetDefinition = widgetDefinitions.find(
+            (definition) => definition.type === item.type
+          )!;
+
+          Component = widgetComponentsById.current[id] = (props) => {
+            return (
+              <InvestigateWidgetApiContextProvider value={api}>
+                {widgetDefinition
+                  ? widgetDefinition.render({
+                      blocks: api.blocks,
+                      onWidgetAdd: api.onWidgetAdd,
+                      onDelete,
+                      widget: props.widget,
+                    })
+                  : undefined}
+              </InvestigateWidgetApiContextProvider>
+            );
+          };
+        }
+
+        pull(unusedComponentIds, item.id);
+
+        return {
+          ...item,
+          Component,
+        };
+      }) ?? [];
+
+    unusedComponentIds.forEach((id) => {
+      delete widgetComponentsById.current[id];
+    });
+
+    return nextItemsWithContext;
+  }, [currentRevision?.items, widgetDefinitions]);
+
   const addItem = useCallback(
     async (widget: InvestigateWidgetCreate) => {
       try {
-        const widgetWithData = await regenerateItem({
-          widgetDefinitions,
-          globalWidgetParameters: currentRevision.parameters,
-          signal: new AbortController().signal,
-          user: user!,
-          widget,
-        });
+        const id = v4();
 
-        const widgetDefinition = widgetDefinitions.find(
-          (definition) => definition.type === widget.type
-        );
+        setBlocksById((prevBlocksById) => ({ ...prevBlocksById, [id]: [] }));
 
-        const api: UseInvestigateWidgetApi = {
-          onWidgetAdd: async (create) => {
-            return addItemRef.current(create);
-          },
-          blocks: {
-            publish: (nextBlocks) => {
-              const nextIds = nextBlocks.map((block) => block.id);
-              setBlocksById((prevBlocksById) => ({
-                ...prevBlocksById,
-                [widgetWithData.id]: (prevBlocksById[widgetWithData.id] ?? []).concat(nextBlocks),
-              }));
-              return () => {
-                setBlocksById((prevBlocksById) => ({
-                  ...prevBlocksById,
-                  [widgetWithData.id]: (prevBlocksById[widgetWithData.id] ?? []).filter(
-                    (block) => !nextIds.includes(block.id)
-                  ),
-                }));
-              };
-            },
-          },
-        };
-
-        const withComponent: StatefulInvestigateWidget = {
-          ...widgetWithData,
-          loading: false,
-          Component: (props) => (
-            <InvestigateWidgetApiContextProvider value={api}>
-              {widgetDefinition
-                ? widgetDefinition.render({
-                    blocks: api.blocks,
-                    onWidgetAdd: api.onWidgetAdd,
-                    onDelete: () => {
-                      return deleteItemRef.current(widgetWithData.id);
-                    },
-                    widget: props.widget,
-                  })
-                : undefined}
-            </InvestigateWidgetApiContextProvider>
-          ),
-        };
-
-        setBlocksById((prevBlocksById) => ({ ...prevBlocksById, [widgetWithData.id]: [] }));
-
-        updateInvestigation((prevInvestigation) => {
-          return { ...prevInvestigation, items: prevInvestigation.items.concat(withComponent) };
-        });
+        await investigationStoreRef.current.addItem(id, widget);
       } catch (error) {
         notifications.showErrorDialog({
           title: i18n.translate('xpack.investigate.failedToAddWidget', {
@@ -341,220 +211,98 @@ function useInvestigationWithoutContext({
         });
       }
     },
-    [updateInvestigation, currentRevision.parameters, user, widgetDefinitions, notifications]
+    [notifications]
   );
 
   const addItemRef = useRef(addItem);
   addItemRef.current = addItem;
 
   const renderableRevision = useMemo(() => {
-    return {
-      ...currentRevision,
-      items: currentRevision.items.map((item) => {
-        const { Component, ...rest } = item;
-        return {
-          ...rest,
-          element: <Component widget={item} />,
-        };
-      }),
-    };
-  }, [currentRevision]);
+    return currentRevision
+      ? {
+          ...currentRevision,
+          items: itemsWithContext.map((item) => {
+            const { Component, ...rest } = item;
+            return {
+              ...rest,
+              element: <Component widget={item} />,
+            };
+          }),
+        }
+      : undefined;
+  }, [currentRevision, itemsWithContext]);
 
   const startNewInvestigation = useCallback(
-    (id: string) => {
-      setInvestigation((prevInvestigation) => {
-        const lastRevision = last(prevInvestigation.revisions)!;
+    async (id: string) => {
+      const prevInvestigation = await investigationStoreRef.current.getInvestigation();
 
-        const createdInvestigation = createNewInvestigation({
-          id,
-          user,
-          globalWidgetParameters: lastRevision.parameters,
-        });
+      const lastRevision = last(prevInvestigation.revisions)!;
 
-        setBlocksById({});
-
-        return {
-          ...createdInvestigation,
-          persisted: false,
-        } as StatefulInvestigation;
+      const createdInvestigation = createInvestigationStore({
+        id,
+        user,
+        globalWidgetParameters: lastRevision.parameters,
+        widgetDefinitions,
       });
+
+      setBlocksById({});
+
+      investigationStoreRef.current = createdInvestigation;
     },
-    [user]
+    [user, widgetDefinitions]
   );
 
   const loadInvestigation = useCallback((id: string) => {}, []);
 
-  const setItemPositions = useCallback(
-    async (positions: Array<{ id: string; columns: number; rows: number }>) => {
-      updateInvestigation((prevInvestigation) => {
-        const itemsById = keyBy(prevInvestigation.items, (item) => item.id);
-        return {
-          ...prevInvestigation,
-          items: positions.map((position) => {
-            return {
-              ...itemsById[position.id],
-              rows: position.rows,
-              columns: position.columns,
-            };
-          }),
-        };
-      });
-    },
-    [updateInvestigation]
-  );
-
-  const setItemTitle = useCallback(
-    async (id: string, title: string) => {
-      return updateItem(id, async () => ({ title }));
-    },
-    [updateItem]
-  );
-
-  const copyItem = useCallback(
-    async (id: string) => {
-      return updateInvestigation((prevInvestigation) => {
-        const foundItem = prevInvestigation.items.find((item) => item.id === id);
-        return {
-          ...prevInvestigation,
-          items: foundItem
-            ? prevInvestigation.items.concat({ ...foundItem, id: v4() })
-            : prevInvestigation.items,
-        };
-      });
-    },
-    [updateInvestigation]
-  );
-
-  const lockItem = useCallback(
-    async (id: string) => {
-      return updateItem(id, async () => ({ locked: true }));
-    },
-    [updateItem]
-  );
-
-  const unlockItem = useCallback(
-    async (id: string) => {
-      return updateItem(id, async (prev) => {
-        return regenerateItem({
-          user: user!,
-          widget: {
-            ...prev,
-            locked: false,
-          },
-          signal: new AbortController().signal,
-          globalWidgetParameters: currentRevision.parameters,
-          widgetDefinitions,
-        });
-      });
-    },
-    [updateItem, currentRevision.parameters, user, widgetDefinitions]
-  );
-
   const setItemParameters = useCallback(
     async (id: string, nextGlobalWidgetParameters: GlobalWidgetParameters) => {
-      return updateItem(id, (prev) => {
-        return regenerateItem({
-          user: user!,
-          widget: prev,
-          signal: new AbortController().signal,
-          globalWidgetParameters: nextGlobalWidgetParameters,
-          widgetDefinitions,
-        });
-      });
+      return investigationStoreRef.current.setItemParameters(id, nextGlobalWidgetParameters);
     },
-    [updateItem, user, widgetDefinitions]
+    []
   );
 
-  const setGlobalParameters = useCallback(
-    async (nextParameters: GlobalWidgetParameters) => {
-      updateInvestigation((prevRevision) => {
-        Promise.all(
-          prevRevision.items.map((item) => {
-            if (item.locked) {
-              return item;
-            }
-            return regenerateItem({
-              user: user!,
-              globalWidgetParameters: nextParameters,
-              signal: new AbortController().signal,
-              widget: item,
-              widgetDefinitions,
-            });
-          })
-        ).then((allUpdatedItems) => {
-          updateInvestigation((_prevRevision) => {
-            const updatedItemsById = keyBy(allUpdatedItems, (item) => item.id);
-            return {
-              ..._prevRevision,
-              items: _prevRevision.items.map((item) => ({
-                ...item,
-                ...updatedItemsById[item.id],
-                loading: false,
-              })),
-            };
-          });
-        });
-
-        return {
-          ...prevRevision,
-          items: prevRevision.items.map((item) => {
-            if (item.locked) {
-              return item;
-            }
-            return { ...item };
-          }),
-          parameters: nextParameters,
-        };
-      });
-    },
-    [updateInvestigation, user, widgetDefinitions]
-  );
-
-  const setRevision = useCallback((revisionId: string) => {
-    setInvestigation((prevInvestigation) => {
-      const revision = prevInvestigation.revisions.find(
-        (revisionAtIndex) => revisionAtIndex.id === revisionId
-      );
-
-      if (!revision) {
-        throw new Error('Could not locate revision for ' + revisionId);
-      }
-
-      return {
-        ...prevInvestigation,
-        revision: revisionId,
-        persisted: false,
-      };
-    });
-  }, []);
-
-  const lastItemId = last(currentRevision.items)?.id;
+  const lastItemId = last(currentRevision?.items)?.id;
 
   const blocks = useMemo(() => {
     return lastItemId && blocksById[lastItemId] ? blocksById[lastItemId] : [];
   }, [blocksById, lastItemId]);
 
-  return {
-    startNewInvestigation,
-    loadInvestigation,
-    investigation,
-    revision: renderableRevision,
-    hasUnsavedChanges,
-    isAtLatestRevision,
-    isAtEarliestRevision,
-    blocks,
+  const {
+    copyItem,
+    gotoNextRevision,
+    gotoPreviousRevision,
+    lockItem,
+    setGlobalParameters,
     setItemPositions,
     setItemTitle,
-    copyItem,
-    addItem,
-    deleteItem,
-    lockItem,
-    unlockItem,
-    setItemParameters,
-    setGlobalParameters,
-    updateItem: updateItemForApi,
     setRevision,
-    isNewInvestigation,
+    setTitle,
+    unlockItem,
+    updateItem,
+  } = investigationStoreRef.current;
+
+  return {
+    addItem,
+    blocks,
+    copyItem,
+    deleteItem,
+    gotoNextRevision,
+    gotoPreviousRevision,
+    investigation,
+    isAtEarliestRevision,
+    isAtLatestRevision,
+    loadInvestigation,
+    lockItem,
+    revision: renderableRevision,
+    setGlobalParameters,
+    setItemParameters,
+    setItemPositions,
+    setItemTitle,
+    setRevision,
+    setTitle,
+    startNewInvestigation,
+    unlockItem,
+    updateItem,
   };
 }
 

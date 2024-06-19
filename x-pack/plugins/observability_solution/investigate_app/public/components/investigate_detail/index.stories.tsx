@@ -7,8 +7,8 @@
 
 import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
+import { mergePlainObjects } from '@kbn/investigate-plugin/common';
 import { InvestigateDetail as Component } from '.';
-import { extendProps } from '../../../.storybook/extend_props';
 import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
 
 interface Args {
@@ -32,12 +32,10 @@ const defaultStory: Story = {
       investigation: {
         title: 'My investigation',
       },
-      revision: {
-        items: [],
-      },
       isAtLatestRevision: true,
       isAtEarliestRevision: true,
-      hasUnsavedChanges: false,
+      onUndoClick: () => {},
+      onRedoClick: () => {},
     },
   },
   render: function Render(args) {
@@ -57,40 +55,13 @@ export const InvestigateDetailEmptyStory: Story = {
   name: 'empty',
 };
 
-export const InvestigateDetailAtLeastOneUnlockedStory: Story = {
+export const InvestigateDetailHasRedo: Story = {
   ...defaultStory,
   args: {
-    props: extendProps(defaultStory.args!.props!, {
-      revision: {
-        items: [
-          {
-            locked: false,
-          },
-          {
-            locked: true,
-          },
-        ],
-      },
+    props: mergePlainObjects(defaultStory.args!.props!, {
+      isAtEarliestRevision: false,
+      isAtLatestRevision: false,
     }),
   },
-  name: 'lock all',
-};
-
-export const InvestigateDetailAllLockedStory: Story = {
-  ...defaultStory,
-  args: {
-    props: extendProps(defaultStory.args!.props!, {
-      revision: {
-        items: [
-          {
-            locked: true,
-          },
-          {
-            locked: true,
-          },
-        ],
-      },
-    }),
-  },
-  name: 'unlock all',
+  name: 'with undo and redo',
 };

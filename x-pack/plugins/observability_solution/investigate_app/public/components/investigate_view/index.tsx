@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type {
   GlobalWidgetParameters,
@@ -12,12 +12,11 @@ import type {
   InvestigateWidgetCreate,
 } from '@kbn/investigate-plugin/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
-import { keyBy, omit, pick } from 'lodash';
+import { isEqual, keyBy, omit, pick } from 'lodash';
 import { rgba } from 'polished';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { v4 } from 'uuid';
 import { useDateRange } from '../../hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { MiniMapContextProvider } from '../../hooks/use_mini_map';
@@ -31,8 +30,6 @@ import { InvestigateSearchBar } from '../investigate_search_bar';
 import { InvestigateWidgetGrid } from '../investigate_widget_grid';
 import { InvestigationHistory } from '../investigation_history';
 import { MiniTimeline } from '../mini_timeline';
-import { useInvestigateParams } from '../../hooks/use_investigate_params';
-import { useInvestigateRouter } from '../../hooks/use_investigate_router';
 
 const containerClassName = css`
   overflow: auto;
@@ -66,13 +63,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
       start: { investigate },
     },
   } = useKibana();
-
-  const { path, query } = useInvestigateParams('/*');
-
-  const investigateRouter = useInvestigateRouter();
-
-  const investigationIdFromPath = path && 'id' in path ? path.id : undefined;
-  const revisionIdFromPath = query && 'revision' in query ? query.revision : undefined;
 
   const [kuery, setKuery] = useState('');
 
@@ -129,20 +119,17 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     blocks,
     copyItem,
     deleteItem,
-    hasUnsavedChanges,
     investigation,
     isAtEarliestRevision,
     isAtLatestRevision,
-    loadInvestigation,
     lockItem,
     setGlobalParameters,
     setItemParameters,
-    startNewInvestigation,
     unlockItem,
     revision,
     updateItem,
-    setRevision,
-    isNewInvestigation,
+    gotoNextRevision,
+    gotoPreviousRevision,
   } = investigate.useInvestigation({
     user,
     from: range.start.toISOString(),
@@ -159,12 +146,17 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     return addItemRef.current(widgetCreate);
   };
 
+  const copyWidget = (id: string) => {
+    stickToBottom();
+    return copyItem(id);
+  };
+
   const createWidgetRef = useRef(createWidget);
 
   createWidgetRef.current = createWidget;
 
   useEffect(() => {
-    const itemIds = revision.items.map((item) => item.id) ?? [];
+    const itemIds = revision?.items.map((item) => item.id) ?? [];
     setEditingItem((prevEditingItem) => {
       if (prevEditingItem && !itemIds.includes(prevEditingItem.id)) {
         return undefined;
@@ -176,27 +168,29 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const gridItems = useMemo(() => {
     const widgetDefinitionsByType = keyBy(widgetDefinitions, 'type');
 
-    return revision.items.map((item) => {
+    return revision?.items.map((item) => {
       const definitionForType = widgetDefinitionsByType[item.type];
 
-      return {
-        title: item.title,
-        description: item.description ?? '',
-        id: item.id,
-        element: item.element,
-        columns: item.columns,
-        rows: item.rows,
-        chrome: definitionForType.chrome,
-        locked: item.locked,
-        loading: item.loading,
-        overrides: item.locked
-          ? getOverridesFromGlobalParameters(
-              pick(item.parameters, 'filters', 'query', 'timeRange'),
-              globalWidgetParameters,
-              uiSettings.get<string>(DATE_FORMAT_ID) ?? 'Browser'
-            )
-          : [],
-      };
+      return (
+        {
+          title: item.title,
+          description: item.description ?? '',
+          id: item.id,
+          element: item.element,
+          columns: item.columns,
+          rows: item.rows,
+          chrome: definitionForType.chrome,
+          locked: item.locked,
+          loading: item.loading,
+          overrides: item.locked
+            ? getOverridesFromGlobalParameters(
+                pick(item.parameters, 'filters', 'query', 'timeRange'),
+                globalWidgetParameters,
+                uiSettings.get<string>(DATE_FORMAT_ID) ?? 'Browser'
+              )
+            : [],
+        } ?? []
+      );
     });
   }, [revision, widgetDefinitions, globalWidgetParameters, uiSettings]);
 
@@ -205,49 +199,14 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const [searchBarFocused, setSearchBarFocused] = useState(false);
 
   useEffect(() => {
-    setGlobalParameters(globalWidgetParameters);
-  }, [globalWidgetParameters, setGlobalParameters]);
-
-  useEffect(() => {
-    if (investigationIdFromPath && investigation.id === investigationIdFromPath) {
-      return;
+    if (revision?.parameters && !isEqual(revision?.parameters, globalWidgetParameters)) {
+      setGlobalParameters(globalWidgetParameters);
     }
+  }, [revision?.parameters, globalWidgetParameters, setGlobalParameters]);
 
-    if (investigationIdFromPath) {
-      loadInvestigation(investigationIdFromPath);
-    } else if (!investigationIdFromPath && !isNewInvestigation) {
-      const id = v4();
-      // startNewInvestigation(id);
-    }
-  }, [
-    investigationIdFromPath,
-    loadInvestigation,
-    startNewInvestigation,
-    investigateRouter,
-    investigation.id,
-    isNewInvestigation,
-  ]);
-
-  useEffect(() => {
-    if (revisionIdFromPath) {
-      setRevision(revisionIdFromPath);
-    }
-  }, [revisionIdFromPath, setRevision, startNewInvestigation]);
-
-  useEffect(() => {
-    if (isNewInvestigation) {
-      return;
-    }
-
-    // investigateRouter.push('/{id}', {
-    //   path: {
-    //     id: investigation.id,
-    //   },
-    //   query: {
-    //     revision: !isAtLatestRevision ? revision.id : undefined,
-    //   },
-    // });
-  }, [investigation.id, revision.id, investigateRouter, isAtLatestRevision, isNewInvestigation]);
+  if (!investigation || !revision || !gridItems) {
+    return <EuiLoadingSpinner />;
+  }
 
   return (
     <MiniMapContextProvider container={scrollableContainer}>
@@ -349,10 +308,14 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
             <EuiFlexItem grow={false}>
               <InvestigateDetail
                 investigation={investigation}
-                revision={revision}
                 isAtEarliestRevision={isAtEarliestRevision}
                 isAtLatestRevision={isAtLatestRevision}
-                hasUnsavedChanges={hasUnsavedChanges}
+                onUndoClick={() => {
+                  gotoPreviousRevision();
+                }}
+                onRedoClick={() => {
+                  gotoNextRevision();
+                }}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -371,7 +334,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
         <EditWidgetFlyout
           widget={editingItem}
           onWidgetUpdate={async (nextWidget) => {
-            return updateItem(nextWidget);
+            return updateItem(nextWidget.id, async () => nextWidget);
           }}
           onClose={() => {
             setEditingItem(undefined);

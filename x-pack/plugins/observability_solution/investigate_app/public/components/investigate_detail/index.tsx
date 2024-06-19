@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import type { Investigation, InvestigationRevision } from '@kbn/investigate-plugin/common';
+import React from 'react';
+import type { Investigation } from '@kbn/investigate-plugin/common';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-
-const LOCK_ALL_LABEL = i18n.translate('xpack.investigateApp.investigateDetail.lockAllButtonLabel', {
-  defaultMessage: 'Lock all',
-});
-const UNLOCK_ALL_LABEL = i18n.translate(
-  'xpack.investigateApp.investigateDetail.unlockAllButtonLabel',
-  { defaultMessage: 'Unlock all' }
-);
 
 const titleClassName = css`
   .euiText {
@@ -25,20 +17,22 @@ const titleClassName = css`
   }
 `;
 
-const actionsClassName = css``;
-
 function InvestigateDetailButton({
   children,
   loading,
   iconType,
   dataTestSubj,
   onClick,
+  disabled,
+  iconSide,
 }: {
   children: string;
-  loading: boolean;
+  loading?: boolean;
   iconType: string;
   dataTestSubj: string;
   onClick: () => void;
+  disabled?: boolean;
+  iconSide: 'left' | 'right';
 }) {
   return (
     <EuiButtonEmpty
@@ -49,79 +43,69 @@ function InvestigateDetailButton({
       color="text"
       size="s"
       isLoading={loading}
-      disabled={loading}
+      disabled={disabled || loading}
+      iconSide={iconSide}
     >
       <EuiText size="xs">{children}</EuiText>
     </EuiButtonEmpty>
   );
 }
 
-function LockAllButton(
-  props: Omit<
-    React.ComponentProps<typeof InvestigateDetailButton>,
-    'iconType' | 'children' | 'dataTestSubj'
-  >
-) {
-  return (
-    <InvestigateDetailButton
-      {...props}
-      iconType="lock"
-      dataTestSubj="investigateAppLockAllButtonButton"
-    >
-      {LOCK_ALL_LABEL}
-    </InvestigateDetailButton>
-  );
-}
-
-function UnlockAllButton(
-  props: Omit<
-    React.ComponentProps<typeof InvestigateDetailButton>,
-    'iconType' | 'children' | 'dataTestSubj'
-  >
-) {
-  return (
-    <InvestigateDetailButton
-      {...props}
-      iconType="lockOpen"
-      dataTestSubj="investigateAppUnlockAllButtonButton"
-    >
-      {UNLOCK_ALL_LABEL}
-    </InvestigateDetailButton>
-  );
-}
-
 export function InvestigateDetail({
   investigation,
-  revision,
   isAtLatestRevision,
   isAtEarliestRevision,
-  hasUnsavedChanges,
+  onUndoClick,
+  onRedoClick,
 }: {
   investigation: Pick<Investigation, 'title'>;
-  revision: Pick<InvestigationRevision, 'items'>;
   isAtLatestRevision: boolean;
   isAtEarliestRevision: boolean;
-  hasUnsavedChanges: boolean;
+  onUndoClick: () => void;
+  onRedoClick: () => void;
 }) {
-  const anyItems = revision.items.length > 0;
-
-  const [loading, setLoading] = useState(false);
-
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      alignItems="flexStart"
-      justifyContent="flexStart"
-    >
+    <EuiFlexGroup direction="column" gutterSize="s" alignItems="stretch" justifyContent="flexStart">
       <EuiFlexItem grow={false} className={titleClassName}>
         <EuiText size="s">{investigation.title}</EuiText>
       </EuiFlexItem>
-      {anyItems ? (
-        <>
-          <EuiFlexItem grow={false} className={actionsClassName} />
-        </>
-      ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          alignItems="stretch"
+        >
+          <EuiFlexItem grow={false}>
+            <InvestigateDetailButton
+              disabled={isAtEarliestRevision}
+              onClick={onUndoClick}
+              iconType="editorUndo"
+              dataTestSubj="investigateDetailUndoButton"
+              iconSide="left"
+            >
+              {i18n.translate(
+                'xpack.investigateApp.investigateDetail.investigateDetailButton.undoLabel',
+                { defaultMessage: 'Undo' }
+              )}
+            </InvestigateDetailButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <InvestigateDetailButton
+              disabled={isAtLatestRevision}
+              onClick={onRedoClick}
+              iconType="editorRedo"
+              dataTestSubj="investigateDetailRedoButton"
+              iconSide="right"
+            >
+              {i18n.translate(
+                'xpack.investigateApp.investigateDetail.investigateDetailButton.redoLabel',
+                { defaultMessage: 'Redo' }
+              )}
+            </InvestigateDetailButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
