@@ -6,26 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { TimeRange, Filter, Query, AggregateQuery } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useEffect, useMemo } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { PublishingSubject } from '../../publishing_subject';
 
-export interface PublishesTimeRange {
+export interface PublishesTimeslice {
+  timeslice$?: PublishingSubject<[number, number] | undefined>;
+}
+
+export interface PublishesTimeRange extends PublishesTimeslice {
   timeRange$: PublishingSubject<TimeRange | undefined>;
   timeRestore$?: PublishingSubject<boolean | undefined>;
-  timeslice$?: PublishingSubject<[number, number] | undefined>;
 }
 
 export type PublishesWritableTimeRange = PublishesTimeRange & {
   setTimeRange: (timeRange: TimeRange | undefined) => void;
 };
 
-export type PublishesUnifiedSearch = PublishesTimeRange & {
-  isCompatibleWithUnifiedSearch?: () => boolean;
+export interface PublishesFilters {
   filters$: PublishingSubject<Filter[] | undefined>;
-  query$: PublishingSubject<Query | AggregateQuery | undefined>;
-};
+}
+
+export type PublishesUnifiedSearch = PublishesTimeRange &
+  PublishesFilters & {
+    isCompatibleWithUnifiedSearch?: () => boolean;
+    query$: PublishingSubject<Query | AggregateQuery | undefined>;
+  };
 
 export type PublishesWritableUnifiedSearch = PublishesUnifiedSearch &
   PublishesWritableTimeRange & {
@@ -37,6 +44,10 @@ export const apiPublishesTimeRange = (
   unknownApi: null | unknown
 ): unknownApi is PublishesTimeRange => {
   return Boolean(unknownApi && (unknownApi as PublishesTimeRange)?.timeRange$ !== undefined);
+};
+
+export const apiPublishesFilters = (unknownApi: unknown): unknownApi is PublishesFilters => {
+  return Boolean(unknownApi && (unknownApi as PublishesFilters)?.filters$ !== undefined);
 };
 
 export const apiPublishesUnifiedSearch = (

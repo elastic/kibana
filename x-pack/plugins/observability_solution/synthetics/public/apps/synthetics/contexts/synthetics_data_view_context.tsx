@@ -19,7 +19,7 @@ export const SyntheticsDataViewContextProvider: FC<
 > = ({ children, dataViews }) => {
   const { data } = useFetcher<Promise<DataView | undefined>>(async () => {
     return dataViews.create({ title: SYNTHETICS_INDEX_PATTERN });
-  }, []);
+  }, [dataViews]);
 
   return <SyntheticsDataViewContext.Provider value={data!} children={children} />;
 };

@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { dataTableSelectors } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ExpandedDetailType } from '../../../../../common/types';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../../helpers';
@@ -21,7 +21,6 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 
 export interface UseDetailPanelConfig {
@@ -49,7 +48,7 @@ export const useDetailPanel = ({
   const dispatch = useDispatch();
 
   const { openFlyout } = useExpandableFlyoutApi();
-  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
 
   const getScope = useMemo(() => {
     if (isTimelineScope(scopeId)) {
@@ -98,7 +97,7 @@ export const useDetailPanel = ({
 
   const openEventDetailsPanel = useCallback(
     (eventId?: string, onClose?: () => void) => {
-      if (isSecurityFlyoutEnabled) {
+      if (!expandableFlyoutDisabled) {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -121,16 +120,16 @@ export const useDetailPanel = ({
         onPanelClose.current = onClose ?? noopPanelClose;
       }
     },
-    [isSecurityFlyoutEnabled, openFlyout, eventDetailsIndex, scopeId, telemetry, loadDetailsPanel]
+    [expandableFlyoutDisabled, openFlyout, eventDetailsIndex, scopeId, telemetry, loadDetailsPanel]
   );
 
   const handleOnDetailsPanelClosed = useCallback(() => {
-    if (isSecurityFlyoutEnabled) return;
+    if (!expandableFlyoutDisabled) return;
     if (onPanelClose.current) onPanelClose.current();
     if (scopedActions) {
       dispatch(scopedActions.toggleDetailPanel({ tabType, id: scopeId }));
     }
-  }, [isSecurityFlyoutEnabled, scopedActions, dispatch, tabType, scopeId]);
+  }, [expandableFlyoutDisabled, scopedActions, dispatch, tabType, scopeId]);
 
   const DetailsPanel = useMemo(
     () =>

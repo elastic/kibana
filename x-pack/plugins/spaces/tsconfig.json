@@ -35,6 +35,8 @@
     "@kbn/core-http-server",
     "@kbn/react-kibana-context-render",
     "@kbn/utility-types-jest",
+    "@kbn/security-plugin-types-public",
+    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*",

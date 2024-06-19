@@ -194,3 +194,32 @@ export const INTERVAL_WARNING_TEXT = (minimum: string) =>
       'Intervals less than {minimum} are not recommended due to performance considerations.',
     values: { minimum },
   });
+
+export const ADD_ACTION_TEXT = i18n.translate('alertsUIShared.ruleForm.ruleActions.addActionText', {
+  defaultMessage: 'Add action',
+});
+
+export const RULE_DETAILS_TITLE = i18n.translate('alertsUIShared.ruleForm.ruleDetails.title', {
+  defaultMessage: 'Rule name and tags',
+});
+
+export const RULE_DETAILS_DESCRIPTION = i18n.translate(
+  'alertsUIShared.ruleForm.ruleDetails.description',
+  {
+    defaultMessage: 'Define a name and tags for your rule.',
+  }
+);
+
+export const RULE_NAME_INPUT_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.ruleDetails.ruleNameInputTitle',
+  {
+    defaultMessage: 'Rule name',
+  }
+);
+
+export const RULE_TAG_INPUT_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.ruleDetails.ruleTagsInputTitle',
+  {
+    defaultMessage: 'Tags',
+  }
+);

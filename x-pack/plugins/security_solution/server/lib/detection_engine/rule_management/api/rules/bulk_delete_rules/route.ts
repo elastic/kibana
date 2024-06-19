@@ -8,6 +8,7 @@
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type { IKibanaResponse, Logger, RequestHandler } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   BulkCrudRulesResponse,
   BulkDeleteRulesRequestBody,
@@ -18,13 +19,12 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import {
   buildSiemResponse,
   createBulkErrorObject,
   transformBulkError,
 } from '../../../../routes/utils';
-import { readRules } from '../../../logic/rule_management/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';

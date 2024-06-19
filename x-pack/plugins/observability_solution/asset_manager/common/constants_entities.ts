@@ -6,8 +6,14 @@
  */
 
 export const ENTITY_VERSION = 'v1';
-export const ENTITY_BASE_PREFIX = `.entities-observability.summary-${ENTITY_VERSION}`;
-export const ENTITY_TRANSFORM_PREFIX = `entities-observability-summary-${ENTITY_VERSION}`;
-export const ENTITY_DEFAULT_FREQUENCY = '1m';
-export const ENTITY_DEFAULT_SYNC_DELAY = '60s';
-export const ENTITY_API_PREFIX = '/api/entities';
+export const ENTITY_BASE_PREFIX = '.entities-observability';
+export const ENTITY_HISTORY_BASE_PREFIX = `${ENTITY_BASE_PREFIX}.history-${ENTITY_VERSION}`;
+export const ENTITY_LATEST_BASE_PREFIX = `${ENTITY_BASE_PREFIX}.latest-${ENTITY_VERSION}`;
+export const ENTITY_HISTORY_TRANSFORM_PREFIX = `entity-history-${ENTITY_VERSION}`;
+export const ENTITY_LATEST_TRANSFORM_PREFIX = `entity-latest-${ENTITY_VERSION}`;
+export const ENTITY_DEFAULT_HISTORY_FREQUENCY = '1m';
+export const ENTITY_DEFAULT_HISTORY_SYNC_DELAY = '60s';
+export const ENTITY_DEFAULT_LATEST_FREQUENCY = '30s';
+export const ENTITY_DEFAULT_LATEST_SYNC_DELAY = '1s';
+export const ENTITY_DEFAULT_METADATA_LIMIT = 1000;
+export const ENTITY_INTERNAL_API_PREFIX = '/internal/api/entities';
