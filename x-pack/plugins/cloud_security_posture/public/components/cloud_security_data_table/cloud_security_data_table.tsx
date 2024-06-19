@@ -160,7 +160,7 @@ export const CloudSecurityDataTable = ({
         {} as UnifiedDataTableSettings['columns']
       ),
     };
-  }, [defaultColumns, persistedSettings, columnHeaders]);
+  }, [persistedSettings, columnHeaders]);
 
   const { dataView, dataViewIsRefetching, dataViewRefetch } = useDataViewContext();
 
@@ -196,6 +196,7 @@ export const CloudSecurityDataTable = ({
     storage,
     data,
     dataViewFieldEditor,
+    isCloudSecurity : true
   };
 
   const {

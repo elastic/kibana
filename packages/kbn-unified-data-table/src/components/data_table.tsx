@@ -271,6 +271,7 @@ export interface UnifiedDataTableProps {
     toastNotifications: ToastsStart;
     storage: Storage;
     data: DataPublicPluginStart;
+    isCloudSecurity?: boolean;
   };
   /**
    * Callback to render DocumentView when the document is expanded
@@ -458,8 +459,15 @@ export const UnifiedDataTable = ({
   cellContext,
   renderCellPopover,
 }: UnifiedDataTableProps) => {
-  const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
-    services;
+  const {
+    fieldFormats,
+    toastNotifications,
+    dataViewFieldEditor,
+    uiSettings,
+    storage,
+    data,
+    isCloudSecurity,
+  } = services;
   const { darkMode } = useObservable(services.theme?.theme$ ?? of(themeDefault), themeDefault);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -759,7 +767,9 @@ export const UnifiedDataTable = ({
           toastNotifications,
         },
         hasEditDataViewPermission: () =>
-          Boolean(dataViewFieldEditor?.userPermissions?.editIndexPattern()),
+          Boolean(
+            isCloudSecurity ? false : dataViewFieldEditor?.userPermissions?.editIndexPattern()
+          ),
         valueToStringConverter,
         onFilter,
         editField,
