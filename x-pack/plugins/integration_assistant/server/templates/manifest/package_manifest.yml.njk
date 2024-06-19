@@ -1,9 +1,10 @@
 format_version: "{{ format_version }}"
-name: {{ package_name }}
+name: "{{ package_name }}"
 title: |
   {{ package_title }}
 version: {{ package_version }}
-description: "{{ package_description }}"
+description: |
+  {{ package_description }}
 type: integration
 categories:
   - security
@@ -20,12 +21,14 @@ policy_templates:
   - name: {{ package_name }}
     title: |
       {{ package_title }}
-    description: "{{ package_description}}"
+    description: |
+      {{ package_description}}
     inputs: {% for input in inputs %}
       - type: {{ input.type }}
         title: |
           {{ input.title }}
-        description: {{ input.description }} {% endfor %}
+        description: |
+          {{ input.description }} {% endfor %}
 owner:
   github: "{{ package_owner }}"
   type: elastic
