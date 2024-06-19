@@ -69,5 +69,5 @@ export async function changeDataView(
   }
 
   internalState.transitions.setIsDataViewLoading(false);
-  internalState.transitions.setShouldUseDefaultProfileState(true);
+  internalState.transitions.setResetDefaultProfileState({ columns: true, rowHeight: true });
 }
