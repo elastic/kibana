@@ -1087,6 +1087,7 @@ export class AlertsClient {
             size: MAX_ALERTS_GROUPING_QUERY_SIZE,
           },
           aggs: {
+            unitsCount: { value_count: { field: 'groupByField' } },
             bucket_truncate: {
               bucket_sort: {
                 sort,
