@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useIsMutating } from '@tanstack/react-query';
 import dedent from 'dedent';
 import { groupBy as _groupBy, mapValues } from 'lodash';
