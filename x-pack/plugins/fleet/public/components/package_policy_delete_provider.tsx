@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useMemo, useRef, useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -90,6 +90,11 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       setIsModalOpen(false);
     },
     []
+  );
+
+  const agentPoliciesNamesList = useMemo(
+    () => agentPolicies.map((p) => p.name).join(', '),
+    [agentPolicies]
   );
 
   const deletePackagePolicies = useMemo(
@@ -217,13 +222,38 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 />
               }
             >
-              <FormattedMessage
-                id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
-                defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
-                values={{
-                  agentPolicyName: <strong>{agentPolicies[0]?.name}</strong>,
-                }}
-              />
+              {hasMultipleAgentPolicies ? (
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
+                  defaultMessage="Fleet has detected that the related agent policies {toolTip} are already in use by some of your agents."
+                  values={{
+                    toolTip: (
+                      <EuiIconTip
+                        type="iInCircle"
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                        content={
+                          <FormattedMessage
+                            id="xpack.fleet.fleetServerSetup.affectedAgentsMessageTooltips"
+                            defaultMessage="{policies}"
+                            values={{ policies: agentPoliciesNamesList }}
+                          />
+                        }
+                        position="top"
+                      />
+                    ),
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
+                  defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
+                  values={{
+                    agentPolicyName: <strong>{agentPolicies[0]?.name}</strong>,
+                  }}
+                />
+              )}
             </EuiCallOut>
             <EuiSpacer size="l" />
           </>
