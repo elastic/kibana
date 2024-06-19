@@ -1575,7 +1575,7 @@ class AgentPolicyService {
       agentPolicy?.supports_agentless !== undefined
     ) {
       throw new AgentPolicyInvalidError(
-        'supports_agentless is only allowed in serverless environments that support the agentless feature'
+        'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
       );
     }
   }
