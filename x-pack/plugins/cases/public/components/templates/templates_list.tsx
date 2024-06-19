@@ -30,21 +30,21 @@ export interface Props {
 const TemplatesListComponent: React.FC<Props> = (props) => {
   const { templates, onEditTemplate, onDeleteTemplate } = props;
   const { euiTheme } = useEuiTheme();
-  const [selectedItem, setSelectedItem] = useState<TemplateConfiguration | null>(null);
+  const [itemToBeDeleted, SetItemToBeDeleted] = useState<TemplateConfiguration | null>(null);
 
   const onConfirm = useCallback(() => {
-    if (selectedItem) {
-      onDeleteTemplate(selectedItem.key);
+    if (itemToBeDeleted) {
+      onDeleteTemplate(itemToBeDeleted.key);
     }
 
-    setSelectedItem(null);
-  }, [onDeleteTemplate, setSelectedItem, selectedItem]);
+    SetItemToBeDeleted(null);
+  }, [onDeleteTemplate, SetItemToBeDeleted, itemToBeDeleted]);
 
   const onCancel = useCallback(() => {
-    setSelectedItem(null);
+    SetItemToBeDeleted(null);
   }, []);
 
-  const showModal = Boolean(selectedItem);
+  const showModal = Boolean(itemToBeDeleted);
 
   return templates.length ? (
     <>
@@ -101,7 +101,7 @@ const TemplatesListComponent: React.FC<Props> = (props) => {
                           aria-label={`${template.key}-template-delete`}
                           iconType="minusInCircle"
                           color="danger"
-                          onClick={() => setSelectedItem(template)}
+                          onClick={() => SetItemToBeDeleted(template)}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -112,10 +112,10 @@ const TemplatesListComponent: React.FC<Props> = (props) => {
             </React.Fragment>
           ))}
         </EuiFlexItem>
-        {showModal && selectedItem ? (
+        {showModal && itemToBeDeleted ? (
           <DeleteConfirmationModal
-            title={i18n.DELETE_TITLE(selectedItem.name)}
-            message={i18n.DELETE_MESSAGE(selectedItem.name)}
+            title={i18n.DELETE_TITLE(itemToBeDeleted.name)}
+            message={i18n.DELETE_MESSAGE(itemToBeDeleted.name)}
             onCancel={onCancel}
             onConfirm={onConfirm}
           />

@@ -56,7 +56,6 @@ describe('useGetIssue', () => {
       () =>
         useGetIssue({
           http,
-          actionConnector,
           id: 'RJ-107',
         }),
       { wrapper: appMockRender.AppWrapper }

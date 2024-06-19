@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useRef } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 
@@ -30,6 +30,7 @@ const SearchIssuesComponent: React.FC<Props> = ({ actionConnector, currentParent
     []
   );
   const { http } = useKibana().services;
+  const isFirstRender = useRef(true);
 
   const { isFetching: isLoadingIssues, data: issuesData } = useGetIssues({
     http,
@@ -49,7 +50,12 @@ const SearchIssuesComponent: React.FC<Props> = ({ actionConnector, currentParent
 
   const issue = issueData?.data ?? null;
 
-  if (!isLoadingIssue && issue && !selectedOptions.find((option) => option.value === issue.key)) {
+  if (
+    isFirstRender.current &&
+    !isLoadingIssue &&
+    issue &&
+    !selectedOptions.find((option) => option.value === issue.key)
+  ) {
     setSelectedOptions([{ label: issue.title, value: issue.key }]);
   }
 
@@ -64,7 +70,8 @@ const SearchIssuesComponent: React.FC<Props> = ({ actionConnector, currentParent
 
         const onChangeComboBox = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
           setSelectedOptions(changedOptions);
-          field.setValue(changedOptions[0].value ?? '');
+          field.setValue(changedOptions.length ? changedOptions[0].value : '');
+          isFirstRender.current = false;
         };
 
         return (
