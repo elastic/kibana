@@ -379,7 +379,7 @@ export class DiscoverPageObject extends FtrService {
       })
     );
     // Remove control columns
-    return result.slice(2).join(' ');
+    return result.slice(await this.dataGrid.getControlColumnsCount()).join(' ');
   }
 
   public async getDocTableIndexLegacy(index: number) {
@@ -389,7 +389,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async getDocTableField(index: number, cellIdx: number = -1) {
     const isLegacyDefault = await this.useLegacyTable();
-    const usedDefaultCellIdx = isLegacyDefault ? 0 : 2;
+    const usedDefaultCellIdx = isLegacyDefault ? 0 : await this.dataGrid.getControlColumnsCount();
     const usedCellIdx = cellIdx === -1 ? usedDefaultCellIdx : cellIdx;
     if (isLegacyDefault) {
       const fields = await this.find.allByCssSelector(
