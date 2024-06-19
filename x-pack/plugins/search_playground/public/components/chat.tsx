@@ -149,7 +149,7 @@ export const Chat = () => {
             >
               <EuiHorizontalRule margin="none" />
 
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
 
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
@@ -157,6 +157,7 @@ export const Chat = () => {
                     iconType="sparkles"
                     disabled={isToolBarActionsDisabled}
                     onClick={regenerateMessages}
+                    size="xs"
                   >
                     <FormattedMessage
                       id="xpack.searchPlayground.chat.regenerateBtn"
@@ -169,6 +170,7 @@ export const Chat = () => {
                     iconType="refresh"
                     disabled={isToolBarActionsDisabled}
                     onClick={handleClearChat}
+                    size="xs"
                   >
                     <FormattedMessage
                       id="xpack.searchPlayground.chat.clearChatBtn"
@@ -178,7 +180,7 @@ export const Chat = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
 
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
 
               <Controller
                 name={ChatFormFields.question}
