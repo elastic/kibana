@@ -21,13 +21,7 @@ import {
 import chroma from 'chroma-js';
 
 import { AlertSummaryField, RuleConditionChart, TopAlert } from '@kbn/observability-plugin/public';
-import {
-  ALERT_END,
-  ALERT_START,
-  ALERT_EVALUATION_VALUES,
-  ALERT_GROUP,
-  TAGS,
-} from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import type {
@@ -43,8 +37,6 @@ import { Threshold } from '../../common/components/threshold';
 import { useMetricsDataViewContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { Groups } from './groups';
-import { Tags } from './tags';
 import { AlertParams } from '../types';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
@@ -68,16 +60,10 @@ interface AppSectionProps {
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
-export function AlertDetailsAppSection({
-  alert,
-  rule,
-  ruleLink,
-  setAlertSummaryFields,
-}: AppSectionProps) {
+export function AlertDetailsAppSection({ alert, rule, setAlertSummaryFields }: AppSectionProps) {
   const { charts } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
   const groups = alert.fields[ALERT_GROUP];
-  const tags = alert.fields[TAGS];
   const { metricsView } = useMetricsDataViewContext();
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
@@ -111,38 +97,6 @@ export function AlertDetailsAppSection({
 
   const annotations: EventAnnotationConfig[] = [];
   annotations.push(alertStartAnnotation, alertRangeAnnotation);
-
-  useEffect(() => {
-    const alertSummaryFields = [];
-    if (groups) {
-      alertSummaryFields.push({
-        label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.source', {
-          defaultMessage: 'Source',
-        }),
-        value: <Groups groups={groups} />,
-      });
-    }
-    if (tags && tags.length > 0) {
-      alertSummaryFields.push({
-        label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.tags', {
-          defaultMessage: 'Tags',
-        }),
-        value: <Tags tags={tags} />,
-      });
-    }
-    alertSummaryFields.push({
-      label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.rule', {
-        defaultMessage: 'Rule',
-      }),
-      value: (
-        <EuiLink data-test-subj="metricsRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
-          {rule.name}
-        </EuiLink>
-      ),
-    });
-
-    setAlertSummaryFields(alertSummaryFields);
-  }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
 
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
