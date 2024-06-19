@@ -6,12 +6,10 @@
  */
 import expect from '@kbn/expect';
 import type { GetBenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types/latest';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-} from '@kbn/core-http-common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { createPackagePolicy } from '../../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import { RoleCredentials } from 'x-pack/test_serverless/shared/services';
+import { RoleCredentials } from '../../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

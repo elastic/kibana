@@ -5,9 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-} from '@kbn/core-http-common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import {
   FINDINGS_INDEX_DEFAULT_NS,
@@ -25,7 +23,7 @@ import {
   findingsMockData,
   vulnerabilityMockData,
 } from '../../../../../../test/api_integration/apis/cloud_security_posture/mock_data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import { RoleCredentials } from 'x-pack/test_serverless/shared/services';
+import { RoleCredentials } from '../../../../../shared/services';
 
 const INDEX_ARRAY = [
   FINDINGS_INDEX_DEFAULT_NS,

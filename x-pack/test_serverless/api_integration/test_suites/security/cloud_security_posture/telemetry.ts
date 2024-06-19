@@ -14,7 +14,7 @@ import {
   MockTelemetryFindings,
 } from '../../../../../test/cloud_security_posture_api/telemetry/data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import { RoleCredentials } from 'x-pack/test_serverless/shared/services';
+import { RoleCredentials } from '../../../../shared/services';
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 
@@ -35,19 +35,19 @@ export default function ({ getService }: FtrProviderContext) {
    * required before indexing findings
    */
   const waitForPluginInitialized = (
-    supertestWithoutAuth: SuperTestAgent,
-    internalRequestHeader: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string },
-    roleAuthc: RoleCredentials
+    supertestWithoutAuthParam: SuperTestAgent,
+    internalRequestHeaderParam: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string },
+    roleAuthcParam: RoleCredentials
   ): Promise<void> =>
     retry.try(async () => {
       log.debug('Check CSP plugin is initialized');
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
-      const response = await supertestWithoutAuth
+      const response = await supertestWithoutAuthParam
         .get('/internal/cloud_security_posture/status?check=init')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(internalRequestHeader)
-        .set(roleAuthc.apiKeyHeader)
+        .set(internalRequestHeaderParam)
+        .set(roleAuthcParam.apiKeyHeader)
         .expect(200);
       expect(response.body).to.eql({ isPluginInitialized: true });
       log.debug('CSP plugin is initialized');
