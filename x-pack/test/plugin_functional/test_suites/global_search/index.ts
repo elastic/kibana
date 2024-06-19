@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('GlobalSearch API', function () {
     loadTestFile(require.resolve('./global_search_providers'));
     loadTestFile(require.resolve('./global_search_bar'));
+    loadTestFile(require.resolve('./global_search_security_spaces'));
   });
 }
