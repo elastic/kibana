@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
-import type { BuildIntegrationApiRequest } from '../../../../../../common';
+import type { BuildIntegrationRequestBody } from '../../../../../../common';
 import type { State } from '../../state';
 import { runBuildIntegration, runInstallPackage } from '../../../../../common/lib/api';
 import { defaultLogoEncoded } from '../default_logo';
@@ -42,7 +42,7 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
 
     (async () => {
       try {
-        const parameters: BuildIntegrationApiRequest = {
+        const parameters: BuildIntegrationRequestBody = {
           integration: {
             title: integrationSettings.title ?? '',
             description: integrationSettings.description ?? '',

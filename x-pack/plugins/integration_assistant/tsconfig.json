@@ -29,6 +29,7 @@
     "@kbn/monaco",
     "@kbn/spaces-plugin",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/zod-helpers"
   ]
 }

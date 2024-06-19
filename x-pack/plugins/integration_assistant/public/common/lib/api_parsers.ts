@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { InstallPackageResponse } from '../../../common/types';
+import type { EpmPackageResponse } from './api';
 
 /**
  * This is a hacky way to get the integration name from the response.
  * Since the integration name is not returned in the response we have to parse it from the ingest pipeline name.
  * TODO: Return the package name from the fleet API: https://github.com/elastic/kibana/issues/185932
  */
-export const getIntegrationNameFromResponse = (response: InstallPackageResponse) => {
+export const getIntegrationNameFromResponse = (response: EpmPackageResponse) => {
   const ingestPipelineName = response.response?.[0]?.id;
   if (ingestPipelineName) {
     const match = ingestPipelineName.match(/^.*-([a-z\d_]+)\..*-([\d\.]+)$/);

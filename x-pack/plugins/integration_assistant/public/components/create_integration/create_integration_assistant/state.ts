@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createContext, useContext } from 'react';
-import type { Pipeline } from '../../../../common/types';
+import type { Pipeline, Docs } from '../../../../common';
 import type { AIConnector, IntegrationSettings } from './types';
 
 export interface State {
@@ -15,7 +15,7 @@ export interface State {
   isGenerating: boolean;
   result?: {
     pipeline: Pipeline;
-    docs: object[];
+    docs: Docs;
   };
 }
 

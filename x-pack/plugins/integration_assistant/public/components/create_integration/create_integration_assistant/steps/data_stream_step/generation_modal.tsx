@@ -23,9 +23,9 @@ import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import type {
-  CategorizationApiRequest,
-  EcsMappingApiRequest,
-  RelatedApiRequest,
+  CategorizationRequestBody,
+  EcsMappingRequestBody,
+  RelatedRequestBody,
 } from '../../../../../../common';
 import {
   runCategorizationGraph,
@@ -70,7 +70,7 @@ export const useGeneration = ({
 
     (async () => {
       try {
-        const ecsRequest: EcsMappingApiRequest = {
+        const ecsRequest: EcsMappingRequestBody = {
           packageName: integrationSettings.name ?? '',
           dataStreamName: integrationSettings.dataStreamName ?? '',
           rawSamples: integrationSettings.logsSampleParsed ?? [],
@@ -84,7 +84,7 @@ export const useGeneration = ({
           setError('No results from ECS graph');
           return;
         }
-        const categorizationRequest: CategorizationApiRequest = {
+        const categorizationRequest: CategorizationRequestBody = {
           ...ecsRequest,
           currentPipeline: ecsGraphResult.results.pipeline,
         };
@@ -92,7 +92,7 @@ export const useGeneration = ({
         setProgress('categorization');
         const categorizationResult = await runCategorizationGraph(categorizationRequest, deps);
         if (abortController.signal.aborted) return;
-        const relatedRequest: RelatedApiRequest = {
+        const relatedRequest: RelatedRequestBody = {
           ...categorizationRequest,
           currentPipeline: categorizationResult.results.pipeline,
         };

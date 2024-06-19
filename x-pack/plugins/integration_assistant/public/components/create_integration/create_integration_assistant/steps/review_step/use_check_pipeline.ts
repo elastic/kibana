@@ -8,7 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEmpty } from 'lodash/fp';
 import { useState, useEffect } from 'react';
-import type { CheckPipelineApiRequest, Pipeline } from '../../../../../../common';
+import type { CheckPipelineRequestBody, Pipeline } from '../../../../../../common';
 import { useActions, type State } from '../../state';
 import { runCheckPipelineResults } from '../../../../../common/lib/api';
 
@@ -41,7 +41,7 @@ export const useCheckPipeline = ({
 
     (async () => {
       try {
-        const parameters: CheckPipelineApiRequest = {
+        const parameters: CheckPipelineRequestBody = {
           pipeline: customPipeline,
           rawSamples: integrationSettings.logsSampleParsed ?? [],
         };

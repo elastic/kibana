@@ -7,18 +7,16 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type {
-  EcsMappingApiRequest,
-  EcsMappingApiResponse,
-  CategorizationApiRequest,
-  CategorizationApiResponse,
-  RelatedApiRequest,
-  RelatedApiResponse,
-  CheckPipelineApiRequest,
-  CheckPipelineApiResponse,
-  BuildIntegrationApiRequest,
-  InstallPackageResponse,
-  GetPackagesResponse,
-} from '../../../common/types';
+  EcsMappingRequestBody,
+  EcsMappingResponse,
+  CategorizationRequestBody,
+  CategorizationResponse,
+  RelatedRequestBody,
+  RelatedResponse,
+  CheckPipelineRequestBody,
+  CheckPipelineResponse,
+  BuildIntegrationRequestBody,
+} from '../../../common';
 import {
   INTEGRATION_BUILDER_PATH,
   ECS_GRAPH_PATH,
@@ -27,6 +25,10 @@ import {
   CHECK_PIPELINE_PATH,
 } from '../../../common';
 import { FLEET_PACKAGES_PATH } from '../../../common/constants';
+
+export interface EpmPackageResponse {
+  response: [{ id: string; name: string }];
+}
 
 const defaultHeaders = {
   'Elastic-Api-Version': '1',
@@ -41,47 +43,47 @@ export interface RequestDeps {
 }
 
 export const runEcsGraph = async (
-  body: EcsMappingApiRequest,
+  body: EcsMappingRequestBody,
   { http, abortSignal }: RequestDeps
-): Promise<EcsMappingApiResponse> =>
-  http.post<EcsMappingApiResponse>(ECS_GRAPH_PATH, {
+): Promise<EcsMappingResponse> =>
+  http.post<EcsMappingResponse>(ECS_GRAPH_PATH, {
     headers: defaultHeaders,
     body: JSON.stringify(body),
     signal: abortSignal,
   });
 
 export const runCategorizationGraph = async (
-  body: CategorizationApiRequest,
+  body: CategorizationRequestBody,
   { http, abortSignal }: RequestDeps
-): Promise<CategorizationApiResponse> =>
-  http.post<CategorizationApiResponse>(CATEGORIZATION_GRAPH_PATH, {
+): Promise<CategorizationResponse> =>
+  http.post<CategorizationResponse>(CATEGORIZATION_GRAPH_PATH, {
     headers: defaultHeaders,
     body: JSON.stringify(body),
     signal: abortSignal,
   });
 
 export const runRelatedGraph = async (
-  body: RelatedApiRequest,
+  body: RelatedRequestBody,
   { http, abortSignal }: RequestDeps
-): Promise<RelatedApiResponse> =>
-  http.post<RelatedApiResponse>(RELATED_GRAPH_PATH, {
+): Promise<RelatedResponse> =>
+  http.post<RelatedResponse>(RELATED_GRAPH_PATH, {
     headers: defaultHeaders,
     body: JSON.stringify(body),
     signal: abortSignal,
   });
 
 export const runCheckPipelineResults = async (
-  body: CheckPipelineApiRequest,
+  body: CheckPipelineRequestBody,
   { http, abortSignal }: RequestDeps
-): Promise<CheckPipelineApiResponse> =>
-  http.post<CheckPipelineApiResponse>(CHECK_PIPELINE_PATH, {
+): Promise<CheckPipelineResponse> =>
+  http.post<CheckPipelineResponse>(CHECK_PIPELINE_PATH, {
     headers: defaultHeaders,
     body: JSON.stringify(body),
     signal: abortSignal,
   });
 
 export const runBuildIntegration = async (
-  body: BuildIntegrationApiRequest,
+  body: BuildIntegrationRequestBody,
   { http, abortSignal }: RequestDeps
 ): Promise<Blob> =>
   http.post<Blob>(INTEGRATION_BUILDER_PATH, {
@@ -93,8 +95,8 @@ export const runBuildIntegration = async (
 export const runInstallPackage = async (
   zipFile: Blob,
   { http, abortSignal }: RequestDeps
-): Promise<InstallPackageResponse> =>
-  http.post<InstallPackageResponse>(FLEET_PACKAGES_PATH, {
+): Promise<EpmPackageResponse> =>
+  http.post<EpmPackageResponse>(FLEET_PACKAGES_PATH, {
     headers: {
       ...fleetDefaultHeaders,
       Accept: 'application/zip',
@@ -107,8 +109,8 @@ export const runInstallPackage = async (
 export const getInstalledPackages = async ({
   http,
   abortSignal,
-}: RequestDeps): Promise<GetPackagesResponse> =>
-  http.get<GetPackagesResponse>(FLEET_PACKAGES_PATH, {
+}: RequestDeps): Promise<EpmPackageResponse> =>
+  http.get<EpmPackageResponse>(FLEET_PACKAGES_PATH, {
     headers: fleetDefaultHeaders,
     signal: abortSignal,
   });

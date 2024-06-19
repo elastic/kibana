@@ -12,7 +12,7 @@ import { resolve as resolvePath } from 'path';
 import type { DataStream, Integration } from '../../common';
 import { copySync, createSync, ensureDirSync, generateUniqueId } from '../util';
 import { createAgentInput } from './agent';
-import { createDatastream } from './data_stream';
+import { createDataStream } from './data_stream';
 import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
 
@@ -34,7 +34,7 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
     const dataStreamName = dataStream.name;
     const specificDataStreamDir = resolvePath(dataStreamsDir, dataStreamName);
 
-    createDatastream(integration.name, specificDataStreamDir, dataStream);
+    createDataStream(integration.name, specificDataStreamDir, dataStream);
     createAgentInput(specificDataStreamDir, dataStream.inputTypes);
     createPipeline(specificDataStreamDir, dataStream.pipeline);
     createFieldMapping(integration.name, dataStreamName, specificDataStreamDir, dataStream.docs);

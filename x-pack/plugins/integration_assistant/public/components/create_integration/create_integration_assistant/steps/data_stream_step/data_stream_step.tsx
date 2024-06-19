@@ -15,7 +15,7 @@ import {
   EuiPanel,
   EuiSelect,
 } from '@elastic/eui';
-import type { InputType } from '../../../../../../common/types';
+import type { InputType } from '../../../../../../common';
 import { useActions, type State } from '../../state';
 import type { IntegrationSettings } from '../../types';
 import { StepContentWrapper } from '../step_content_wrapper';

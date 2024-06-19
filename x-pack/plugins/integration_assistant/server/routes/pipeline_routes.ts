@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
-import { CHECK_PIPELINE_PATH } from '../../common';
-import type { CheckPipelineApiRequest, CheckPipelineApiResponse } from '../../common/types';
+import type { IKibanaResponse, IRouter } from '@kbn/core/server';
+import { CheckPipelineRequestBody, CheckPipelineResponse, CHECK_PIPELINE_PATH } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { testPipeline } from '../util/pipeline';
+import { buildRouteValidationWithZod } from '../util/route_validation';
 
 export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -29,28 +28,23 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
         version: '1',
         validate: {
           request: {
-            body: schema.object({
-              pipeline: schema.any(),
-              rawSamples: schema.arrayOf(schema.string()),
-            }),
+            body: buildRouteValidationWithZod(CheckPipelineRequestBody),
           },
         },
       },
-      async (context, req, res) => {
-        const { rawSamples, pipeline } = req.body as CheckPipelineApiRequest;
+      async (context, req, res): Promise<IKibanaResponse<CheckPipelineResponse>> => {
+        const { rawSamples, pipeline } = req.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
-        let results: CheckPipelineApiResponse = { pipelineResults: [], errors: [] };
         try {
-          results = (await testPipeline(rawSamples, pipeline, client)) as CheckPipelineApiResponse;
+          const results = await testPipeline(rawSamples, pipeline, client);
           if (results?.errors && results.errors.length > 0) {
             return res.badRequest({ body: JSON.stringify(results.errors) });
           }
+          return res.ok({ body: CheckPipelineResponse.parse(results) });
         } catch (e) {
           return res.badRequest({ body: e });
         }
-
-        return res.ok({ body: results });
       }
     );
 }

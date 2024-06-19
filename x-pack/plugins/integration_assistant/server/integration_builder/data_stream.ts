@@ -10,7 +10,7 @@ import { resolve as resolvePath } from 'path';
 import type { DataStream } from '../../common';
 import { copySync, createSync, ensureDirSync, listDirSync } from '../util';
 
-export function createDatastream(
+export function createDataStream(
   packageName: string,
   specificDataStreamDir: string,
   dataStream: DataStream
