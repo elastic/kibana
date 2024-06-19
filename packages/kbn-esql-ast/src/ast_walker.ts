@@ -15,6 +15,7 @@ import {
   BooleanDefaultContext,
   type BooleanExpressionContext,
   BooleanLiteralContext,
+  InputParamsContext,
   BooleanValueContext,
   type CommandOptionsContext,
   ComparisonContext,
@@ -58,6 +59,8 @@ import {
   ValueExpressionDefaultContext,
   IndexIdentifierContext,
   InlineCastContext,
+  InputNamedOrPositionalParamContext,
+  InputParamContext,
 } from './antlr/esql_parser';
 import {
   createSource,
@@ -88,6 +91,9 @@ import type {
   ESQLCommandOption,
   ESQLAstItem,
   ESQLInlineCast,
+  ESQLUnnamedParamLiteral,
+  ESQLPositionalParamLiteral,
+  ESQLNamedParamLiteral,
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
@@ -337,6 +343,57 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
       }
     }
     return createList(ctx, values);
+  }
+  if (ctx instanceof InputParamsContext && ctx.children) {
+    const values: ESQLLiteral[] = [];
+
+    for (const child of ctx.children) {
+      if (child instanceof InputParamContext) {
+        const literal: ESQLUnnamedParamLiteral = {
+          type: 'literal',
+          literalType: 'param',
+          paramType: 'unnamed',
+          text: ctx.getText(),
+          name: '',
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: Boolean(ctx.exception),
+        };
+        values.push(literal);
+      } else if (child instanceof InputNamedOrPositionalParamContext) {
+        const text = child.getText();
+        const value = text.slice(1);
+        const valueAsNumber = Number(value);
+        const isPositional = String(valueAsNumber) === value;
+
+        if (isPositional) {
+          const literal: ESQLPositionalParamLiteral = {
+            type: 'literal',
+            literalType: 'param',
+            paramType: 'positional',
+            value: valueAsNumber,
+            text,
+            name: '',
+            location: getPosition(ctx.start, ctx.stop),
+            incomplete: Boolean(ctx.exception),
+          };
+          values.push(literal);
+        } else {
+          const literal: ESQLNamedParamLiteral = {
+            type: 'literal',
+            literalType: 'param',
+            paramType: 'named',
+            value,
+            text,
+            name: '',
+            location: getPosition(ctx.start, ctx.stop),
+            incomplete: Boolean(ctx.exception),
+          };
+          values.push(literal);
+        }
+      }
+    }
+
+    return values;
   }
 
   return createUnknownItem(ctx);
