@@ -367,7 +367,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
       result = (await this.options.client.asInternalUser.transport.request({
         method: 'POST',
-        path: '/_security/saml/authenticate',
+        path: '/_security/saml/authenticate?error_trace=true',
         body: {
           ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
           content: samlResponse,
