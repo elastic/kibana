@@ -115,6 +115,11 @@ export const allowedExperimentalValues = Object.freeze({
   expandableFlyoutDisabled: false,
 
   /**
+   * Enables new notes
+   */
+  notesEnabled: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -257,6 +262,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the manual rule run
    */
   manualRuleRunEnabled: false,
+
+  /**
+   * Adds a new option to filter descendants of a process for Management / Event Filters
+   */
+  filterProcessDescendantsForEventFiltersEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
