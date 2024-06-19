@@ -11,6 +11,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
 import type { RuleAlertType } from '../../../rule_schema';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type {
   IDetectionRulesClient,
   CreateCustomRuleArgs,
@@ -37,13 +38,13 @@ export const createDetectionRulesClient = (
   rulesClient: RulesClient,
   mlAuthz: MlAuthz
 ): IDetectionRulesClient => ({
-  async createCustomRule(args: CreateCustomRuleArgs): Promise<RuleAlertType> {
+  async createCustomRule(args: CreateCustomRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.createCustomRule', async () => {
       return createCustomRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 
-  async createPrebuiltRule(args: CreatePrebuiltRuleArgs): Promise<RuleAlertType> {
+  async createPrebuiltRule(args: CreatePrebuiltRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.createPrebuiltRule', async () => {
       return createPrebuiltRule(rulesClient, args, mlAuthz);
     });

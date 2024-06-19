@@ -9,7 +9,7 @@ import AdmZip from 'adm-zip';
 import nunjucks from 'nunjucks';
 import { tmpdir } from 'os';
 import { join as joinPath } from 'path';
-import type { DataStream, Integration } from '../../common';
+import type { Datastream, Integration } from '../../common';
 import { copySync, createSync, ensureDirSync, generateUniqueId } from '../util';
 import { createAgentInput } from './agent';
 import { createDatastream } from './data_stream';
@@ -113,7 +113,7 @@ async function createZipArchive(tmpPackageDir: string): Promise<Buffer> {
 function createPackageManifest(packageDir: string, integration: Integration): void {
   const uniqueInputs: { [key: string]: { type: string; title: string; description: string } } = {};
 
-  integration.dataStreams.forEach((dataStream: DataStream) => {
+  integration.dataStreams.forEach((dataStream: Datastream) => {
     dataStream.inputTypes.forEach((inputType: string) => {
       if (!uniqueInputs[inputType]) {
         uniqueInputs[inputType] = {
