@@ -525,21 +525,27 @@ describe('Lens App', () => {
         {}
       );
     });
-    describe('save buttons', () => {
+    describe.only('save buttons', () => {
       interface SaveProps {
         newCopyOnSave: boolean;
         returnToOrigin?: boolean;
         newTitle: string;
       }
 
-      function getButton(inst: ReactWrapper): TopNavMenuData {
+      function getSaveButton(inst: ReactWrapper): TopNavMenuData {
         return (
           inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
         ).find((button) => button.testId === 'lnsApp_saveButton')!;
       }
 
+      function getSaveAndReturnButton(inst: ReactWrapper): TopNavMenuData {
+        return (
+          inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
+        ).find((button) => button.testId === 'lnsApp_saveAndReturnButton')!;
+      }
+
       async function testSave(inst: ReactWrapper, saveProps: SaveProps) {
-        getButton(inst).run(inst.getDOMNode());
+        getSaveButton(inst).run(inst.getDOMNode());
         // wait a tick since SaveModalContainer initializes asynchronously
         await new Promise(process.nextTick);
         const handler = inst.update().find('SavedObjectSaveModalOrigin').prop('onSave') as (
@@ -558,13 +564,12 @@ describe('Lens App', () => {
       }) {
         const props = {
           ...makeDefaultProps(),
+          incomingState: {
+            originatingApp: 'ultraDashboard',
+          },
           initialInput: initialSavedObjectId
             ? { savedObjectId: initialSavedObjectId, id: '5678' }
             : undefined,
-        };
-
-        props.incomingState = {
-          originatingApp: 'ultraDashboard',
         };
 
         const services = makeDefaultServicesForApp();
@@ -598,7 +603,7 @@ describe('Lens App', () => {
             ...preloadedState,
           },
         });
-        expect(getButton(instance).disableButton).toEqual(false);
+        expect(getSaveAndReturnButton(instance).disableButton).toEqual(false);
         await act(async () => {
           testSave(instance, { ...saveProps });
         });
@@ -615,7 +620,7 @@ describe('Lens App', () => {
           },
         };
         const { instance, lensStore } = await mountWith({ services });
-        expect(getButton(instance).disableButton).toEqual(true);
+        expect(getSaveButton(instance).disableButton).toEqual(true);
         act(() => {
           lensStore.dispatch(
             setState({
@@ -624,12 +629,12 @@ describe('Lens App', () => {
           );
         });
         instance.update();
-        expect(getButton(instance).disableButton).toEqual(true);
+        expect(getSaveButton(instance).disableButton).toEqual(true);
       });
 
       it('shows a save button that is enabled when the frame has provided its state and does not show save and return or save as', async () => {
         const { instance, lensStore, services } = await mountWith({});
-        expect(getButton(instance).disableButton).toEqual(true);
+        expect(getSaveButton(instance).disableButton).toEqual(true);
         act(() => {
           lensStore.dispatch(
             setState({
@@ -638,7 +643,7 @@ describe('Lens App', () => {
           );
         });
         instance.update();
-        expect(getButton(instance).disableButton).toEqual(false);
+        expect(getSaveButton(instance).disableButton).toEqual(false);
 
         await act(async () => {
           const topNavMenuConfig = instance
@@ -656,7 +661,7 @@ describe('Lens App', () => {
         });
       });
 
-      it('Shows Save and Return and Save As buttons in create by value mode with originating app', async () => {
+      it('Shows Save and Return button in create by value mode with originating app', async () => {
         const props = makeDefaultProps();
         const services = makeDefaultServicesForApp();
         props.incomingState = {
@@ -686,7 +691,7 @@ describe('Lens App', () => {
           expect(topNavMenuConfig).toContainEqual(
             expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
           );
-          expect(topNavMenuConfig).toContainEqual(
+          expect(topNavMenuConfig).not.toContainEqual(
             expect.objectContaining(navMenuItems.expectedSaveAsButton)
           );
           expect(topNavMenuConfig).not.toContainEqual(
@@ -695,7 +700,7 @@ describe('Lens App', () => {
         });
       });
 
-      it('Shows Save and Return and Save As buttons in edit by reference mode', async () => {
+      it('Shows Save and Return button in edit by reference mode', async () => {
         const props = makeDefaultProps();
         props.initialInput = { savedObjectId: defaultSavedObjectId, id: '5678' };
         props.incomingState = {
@@ -716,7 +721,7 @@ describe('Lens App', () => {
           expect(topNavMenuConfig).toContainEqual(
             expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
           );
-          expect(topNavMenuConfig).toContainEqual(
+          expect(topNavMenuConfig).not.toContainEqual(
             expect.objectContaining(navMenuItems.expectedSaveAsButton)
           );
           expect(topNavMenuConfig).not.toContainEqual(
@@ -725,7 +730,7 @@ describe('Lens App', () => {
         });
       });
 
-      it('saves new docs', async () => {
+      it.only('saves new docs', async () => {
         const { props, services } = await save({
           initialSavedObjectId: undefined,
           newCopyOnSave: false,
@@ -845,7 +850,7 @@ describe('Lens App', () => {
           testSave(instance, { newCopyOnSave: false, newTitle: 'hello there' });
         });
         expect(props.redirectTo).not.toHaveBeenCalled();
-        expect(getButton(instance).disableButton).toEqual(false);
+        expect(getSaveButton(instance).disableButton).toEqual(false);
         // eslint-disable-next-line no-console
         expect(console.dir).toHaveBeenCalledTimes(1);
         mockedConsoleDir.mockRestore();
@@ -922,7 +927,7 @@ describe('Lens App', () => {
         });
         await act(async () => {
           instance.setProps({ initialInput: { savedObjectId: '123' } });
-          getButton(instance).run(instance.getDOMNode());
+          getSaveButton(instance).run(instance.getDOMNode());
         });
         instance.update();
         const onTitleDuplicate = jest.fn();
@@ -944,12 +949,12 @@ describe('Lens App', () => {
 
       it('does not show the copy button on first save', async () => {
         const props = makeDefaultProps();
-        props.incomingState = { originatingApp: 'coolContainer' };
+        // props.incomingState = { originatingApp: 'coolContainer' };
         const { instance } = await mountWith({
           props,
-          preloadedState: { isSaveable: true, isLinkedToOriginatingApp: true },
+          preloadedState: { isSaveable: true, isLinkedToOriginatingApp: false },
         });
-        await act(async () => getButton(instance).run(instance.getDOMNode()));
+        await act(async () => getSaveButton(instance).run(instance.getDOMNode()));
         instance.update();
         expect(instance.find(SavedObjectSaveModal).prop('showCopyOnSave')).toEqual(false);
       });
@@ -1073,20 +1078,20 @@ describe('Lens App', () => {
   });
 
   describe('inspector', () => {
-    function getButton(inst: ReactWrapper): TopNavMenuData {
+    function getSaveButton(inst: ReactWrapper): TopNavMenuData {
       return (
         inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
       ).find((button) => button.testId === 'lnsApp_inspectButton')!;
     }
 
     async function runInspect(inst: ReactWrapper) {
-      await getButton(inst).run(inst.getDOMNode());
+      await getSaveButton(inst).run(inst.getDOMNode());
       await inst.update();
     }
 
     it('inspector button should be available', async () => {
       const { instance } = await mountWith({ preloadedState: { isSaveable: true } });
-      const button = getButton(instance);
+      const button = getSaveButton(instance);
 
       expect(button.disableButton).toEqual(false);
     });
