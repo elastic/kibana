@@ -22,6 +22,9 @@ const services = {
       if (key === 'discover:showMultiFields') {
         return true;
       }
+      if (key === 'truncate:maxHeight') {
+        return 115;
+      }
     },
   },
   fieldFormats: {
@@ -127,6 +130,7 @@ describe('DocViewTable at Discover', () => {
     {
       _property: '_index',
       addInclusiveFilterButton: true,
+      ['toggleLongFieldValue-message']: false,
       noMappingWarning: false,
       toggleColumnButton: true,
       underscoreWarning: false,
@@ -134,6 +138,7 @@ describe('DocViewTable at Discover', () => {
     {
       _property: 'message',
       addInclusiveFilterButton: false,
+      ['toggleLongFieldValue-message']: true,
       noMappingWarning: false,
       toggleColumnButton: true,
       underscoreWarning: false,
@@ -141,6 +146,7 @@ describe('DocViewTable at Discover', () => {
     {
       _property: '_underscore',
       addInclusiveFilterButton: false,
+      ['toggleLongFieldValue-message']: false,
       noMappingWarning: false,
       toggleColumnButton: true,
       underScoreWarning: true,
@@ -148,6 +154,7 @@ describe('DocViewTable at Discover', () => {
     {
       _property: 'scripted',
       addInclusiveFilterButton: false,
+      ['toggleLongFieldValue-message']: false,
       noMappingWarning: false,
       toggleColumnButton: true,
       underScoreWarning: false,
@@ -155,6 +162,7 @@ describe('DocViewTable at Discover', () => {
     {
       _property: 'not_mapped',
       addInclusiveFilterButton: false,
+      ['toggleLongFieldValue-message']: false,
       noMappingWarning: true,
       toggleColumnButton: true,
       underScoreWarning: false,
@@ -166,21 +174,26 @@ describe('DocViewTable at Discover', () => {
       expect(rowComponent.length).toBe(1);
     });
 
-    (['addInclusiveFilterButton', 'toggleColumnButton', 'underscoreWarning'] as const).forEach(
-      (element) => {
-        const elementExist = check[element];
+    (
+      [
+        'addInclusiveFilterButton',
+        'toggleLongFieldValue-message',
+        'toggleColumnButton',
+        'underscoreWarning',
+      ] as const
+    ).forEach((element) => {
+      const elementExist = check[element];
 
-        if (typeof elementExist === 'boolean') {
-          const btn = findTestSubject(rowComponent, element, '^=');
+      if (typeof elementExist === 'boolean') {
+        const btn = findTestSubject(rowComponent, element, '^=');
 
-          it(`renders ${element} for '${check._property}' correctly`, () => {
-            const disabled = btn.length ? btn.props().disabled : true;
-            const clickAble = btn.length && !disabled ? true : false;
-            expect(clickAble).toBe(elementExist);
-          });
-        }
+        it(`renders ${element} for '${check._property}' correctly`, () => {
+          const disabled = btn.length ? btn.props().disabled : true;
+          const clickAble = btn.length && !disabled ? true : false;
+          expect(clickAble).toBe(elementExist);
+        });
       }
-    );
+    });
   });
 });
 
@@ -225,6 +238,17 @@ describe('DocViewTable at Discover Context', () => {
     expect(btn.length).toBe(1);
     btn.simulate('click');
     expect(props.filter).toBeCalled();
+  });
+
+  it(`renders functional collapse button`, () => {
+    const btn = findTestSubject(component, 'toggleLongFieldValue-message');
+    const html = component.html();
+
+    expect(component.html()).toContain('dscTruncateByHeight');
+
+    expect(btn.length).toBe(1);
+    btn.simulate('click');
+    expect(component.html() !== html).toBeTruthy();
   });
 });
 

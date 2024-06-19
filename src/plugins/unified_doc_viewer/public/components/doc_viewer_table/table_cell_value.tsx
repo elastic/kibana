@@ -7,12 +7,25 @@
  */
 
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import classNames from 'classnames';
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { IgnoredReason } from '@kbn/discover-utils';
+import { IgnoredReason, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import { FieldRecord } from './table';
+import { getUnifiedDocViewerServices } from '../../plugin';
+
+const COLLAPSE_LINE_LENGTH = 350;
+
+// Keep in memory what field values were expanded by the user and restore this state when the user opens DocViewer again
+const expandedFieldValuesSet = new Set<string>();
 
 interface IgnoreWarningProps {
   reason: IgnoredReason;
@@ -92,28 +105,81 @@ export const TableFieldValue = ({
   rawValue,
   ignoreReason,
 }: TableFieldValueProps) => {
+  const { uiSettings } = getUnifiedDocViewerServices();
+  const truncateMaxHeight = uiSettings.get(TRUNCATE_MAX_HEIGHT);
+
+  const valueRef = useRef<HTMLDivElement>(null);
+  const [collapsedScrollHeight, setCollapsedScrollHeight] = useState<number>(0);
+
+  const [isValueExpanded, setIsValueExpanded] = useState(expandedFieldValuesSet.has(field));
+  const isCollapsible =
+    truncateMaxHeight > 0 &&
+    String(rawValue).length > COLLAPSE_LINE_LENGTH &&
+    // Don't collapse if the field value fits into the available height anyway (when the screen width is large enough)
+    (!collapsedScrollHeight || collapsedScrollHeight > truncateMaxHeight);
+  const isCollapsed = isCollapsible && !isValueExpanded;
+
   const valueClassName = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     kbnDocViewer__value: true,
+    dscTruncateByHeight: isCollapsible && isCollapsed,
   });
+
+  const onToggleCollapse = useCallback(
+    () =>
+      setIsValueExpanded((isExpandedPrev) => {
+        const isExpandedNext = !isExpandedPrev;
+        if (isExpandedNext) {
+          expandedFieldValuesSet.add(field);
+        } else {
+          expandedFieldValuesSet.delete(field);
+        }
+        return isExpandedNext;
+      }),
+    [field, setIsValueExpanded]
+  );
+
+  useEffect(() => {
+    if (isCollapsible && isCollapsed && valueRef.current?.scrollHeight) {
+      setCollapsedScrollHeight(valueRef.current.scrollHeight);
+    }
+  }, [isCollapsible, isCollapsed, setCollapsedScrollHeight]);
+
   return (
     <Fragment>
       {ignoreReason && (
         <EuiFlexGroup gutterSize="s">
-          {ignoreReason && (
-            <EuiFlexItem grow={false}>
-              <IgnoreWarning reason={ignoreReason} rawValue={rawValue} />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <IgnoreWarning reason={ignoreReason} rawValue={rawValue} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
       <div
+        ref={valueRef}
         className={valueClassName}
         data-test-subj={`tableDocViewRow-${field}-value`}
         // Value returned from formatFieldValue is always sanitized
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: formattedValue }}
       />
+      {isCollapsible && (
+        <div>
+          <EuiButtonEmpty
+            size="xs"
+            flush="both"
+            data-test-subj={`toggleLongFieldValue-${field}`}
+            onClick={onToggleCollapse}
+          >
+            {isCollapsed
+              ? i18n.translate('unifiedDocViewer.docViews.table.viewMoreButton', {
+                  defaultMessage: 'View more',
+                })
+              : i18n.translate('unifiedDocViewer.docViews.table.viewLessButton', {
+                  defaultMessage: 'View less',
+                })}
+          </EuiButtonEmpty>
+        </div>
+      )}
     </Fragment>
   );
 };

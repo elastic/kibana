@@ -61,4 +61,8 @@
   line-height: $euiLineHeight;
   color: $euiColorFullShade;
   vertical-align: top;
+
+  &.dscTruncateByHeight {
+    @include euiOverflowShadow;
+  }
 }
