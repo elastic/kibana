@@ -47,13 +47,13 @@ export const deleteNoteRoute = (
           const frameworkRequest = await buildFrameworkRequest(context, security, request);
           const noteId = request.body?.noteId ?? '';
 
-          const res = await deleteNote({
+          await deleteNote({
             request: frameworkRequest,
             noteId,
           });
 
           return response.ok({
-            body: { data: { persistNote: res } },
+            body: { data: {} },
           });
         } catch (err) {
           const error = transformError(err);
