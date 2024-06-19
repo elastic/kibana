@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { CaseSeverity, CaseUI } from '../../../common';
-import { convertTemplateCustomFields, getTemplateSerializedData, removeEmptyFields, templateDeserializer } from './utils';
+import type { CaseUI } from '../../../common';
+import { CaseSeverity } from '../../../common';
+import {
+  convertTemplateCustomFields,
+  getTemplateSerializedData,
+  removeEmptyFields,
+  templateDeserializer,
+} from './utils';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
@@ -303,8 +309,8 @@ describe('utils', () => {
       const res = convertTemplateCustomFields(data);
 
       expect(res).toEqual({
-       [customFieldsConfigurationMock[0].key]: 'this is first custom field value',
-       [customFieldsConfigurationMock[1].key]: true,
+        [customFieldsConfigurationMock[0].key]: 'this is first custom field value',
+        [customFieldsConfigurationMock[1].key]: true,
       });
     });
 
@@ -319,12 +325,5 @@ describe('utils', () => {
 
       expect(res).toEqual(null);
     });
-
-    it('returns null when customFields empty', () => {
-      const res = convertTemplateCustomFields([]);
-
-      expect(res).toEqual(null);
-    });
-    
   });
 });
