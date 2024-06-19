@@ -355,22 +355,6 @@ describe('migrations v2 model', () => {
         const initState = Object.assign({}, initBaseState, {
           waitForMigrationCompletion: true,
         });
-        // test('INIT -> INIT when cluster routing allocation is incompatible', () => {
-        //   const res: ResponseType<'INIT'> = Either.left({
-        //     type: 'incompatible_cluster_routing_allocation',
-        //   });
-        //   const newState = model(initState, res) as FatalState;
-
-        //   expect(newState.controlState).toEqual('INIT');
-        //   expect(newState.retryCount).toEqual(1);
-        //   expect(newState.retryDelay).toEqual(2000);
-        //   expect(newState.logs[0]).toMatchInlineSnapshot(`
-        //     Object {
-        //       "level": "error",
-        //       "message": "Action failed with '[incompatible_cluster_routing_allocation] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to routingAllocationDisabled for more information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
-        //     }
-        //   `);
-        // });
 
         test('INIT -> FATAL when later version alias exists', () => {
           const res: ResponseType<'INIT'> = Either.right({
