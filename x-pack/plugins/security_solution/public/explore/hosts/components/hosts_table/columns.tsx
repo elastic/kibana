@@ -174,7 +174,7 @@ export const getHostsColumns = (
       mobileOptions: { show: true },
       sortable: false,
       render: (assetCriticality: CriticalityLevelWithUnassigned) => {
-        if (!assetCriticality) return;
+        if (!assetCriticality) return getEmptyTagValue();
         return (
           <AssetCriticalityBadge
             criticalityLevel={assetCriticality}
