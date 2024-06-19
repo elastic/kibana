@@ -20,10 +20,10 @@ export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
-  sloView: SLOView;
+  view: SLOView;
 }
 
-export function SlosView({ sloList, loading, error, sloView }: Props) {
+export function SlosView({ sloList, loading, error, view }: Props) {
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
   }
@@ -32,7 +32,7 @@ export function SlosView({ sloList, loading, error, sloView }: Props) {
     return <SloListError />;
   }
 
-  if (sloView === 'cardView') {
+  if (view === 'cardView') {
     return (
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
@@ -45,7 +45,7 @@ export function SlosView({ sloList, loading, error, sloView }: Props) {
     );
   }
 
-  if (sloView === 'compactView') {
+  if (view === 'compactView') {
     return (
       <EuiFlexGroup direction="column">
         <EuiFlexItem>

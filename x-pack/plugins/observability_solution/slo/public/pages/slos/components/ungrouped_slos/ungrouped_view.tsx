@@ -16,17 +16,17 @@ export interface Props {
   sloList: FindSLOResponse | undefined;
   loading: boolean;
   error: boolean;
-  sloView: SLOView;
+  view: SLOView;
 }
 
-export function UngroupedView({ sloList, loading, error, sloView }: Props) {
+export function UngroupedView({ sloList, loading, error, view }: Props) {
   const { state, onStateChange } = useUrlSearchState();
   const { page, perPage } = state;
   const { results = [], total = 0 } = sloList ?? {};
 
   return (
     <>
-      <SlosView sloList={results} loading={loading} error={error} sloView={sloView} />
+      <SlosView sloList={results} loading={loading} error={error} view={view} />
       {total > 0 && total > perPage ? (
         <EuiFlexItem>
           <EuiTablePagination

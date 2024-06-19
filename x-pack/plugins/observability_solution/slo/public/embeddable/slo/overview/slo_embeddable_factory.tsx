@@ -158,7 +158,7 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
                   </EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <GroupSloView
-                      sloView="cardView"
+                      view="cardView"
                       groupBy={groupBy}
                       groups={groups}
                       kqlQuery={kqlQuery}

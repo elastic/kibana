@@ -91,7 +91,7 @@ export function SloList() {
       <EuiFlexItem grow={false}>
         <ToggleSLOView
           sloList={sloList}
-          sloView={view}
+          view={view}
           onChangeView={(newView) => onStateChange({ view: newView })}
           onStateChange={onStateChange}
           state={state}
@@ -103,12 +103,12 @@ export function SloList() {
           sloList={sloList}
           loading={isLoading || isRefetching}
           error={isError}
-          sloView={view}
+          view={view}
         />
       )}
       {groupBy !== 'ungrouped' && (
         <GroupView
-          sloView={view}
+          view={view}
           groupBy={groupBy}
           kqlQuery={kqlQuery}
           sort={state.sort.by}
