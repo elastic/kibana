@@ -10,26 +10,25 @@ import { BehaviorSubject, filter, map, mergeMap, Observable, share, Subject, tap
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
-import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { getEsqlDataView } from './utils/get_esql_data_view';
-import { DiscoverAppState, DiscoverAppStateContainer } from './discover_app_state_container';
-import { DiscoverServices } from '../../../build_services';
-import { DiscoverSearchSessionManager } from './discover_search_session';
+import type { DiscoverAppStateContainer } from './discover_app_state_container';
+import type { DiscoverServices } from '../../../build_services';
+import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
-import { DiscoverInternalStateContainer } from './discover_internal_state_container';
-import { getMergedAccessor } from '../../../context_awareness';
+import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
+import { getDefaultProfileState } from './utils/get_default_profile_state';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -283,48 +282,17 @@ export function getDataStateContainer({
             autoRefreshDone = undefined;
           }
 
-          if (internalStateContainer.getState().shouldUseDefaultProfileState) {
-            const stateUpdate: DiscoverAppState = {};
-            const defaultState = getMergedAccessor(
-              profilesManager.getProfiles(),
-              'getDefaultAppState',
-              () => ({})
-            )();
-            const currentDataView = getSavedSearch().searchSource.getField('index');
-            const validColumns =
-              currentDataView && defaultState.columns
-                ? defaultState.columns.filter(({ name }) => currentDataView.getFieldByName(name))
-                : [];
+          const { shouldUseDefaultProfileState, dataView } = internalStateContainer.getState();
 
-            if (validColumns.length) {
-              const columns = validColumns.reduce<DiscoverGridSettings['columns']>(
-                (acc, { name, width }) => {
-                  if (!width) {
-                    return acc;
-                  }
+          if (shouldUseDefaultProfileState && dataView) {
+            const stateUpdate = getDefaultProfileState({ profilesManager, dataView });
 
-                  return {
-                    ...acc,
-                    [name]: { width },
-                  };
-                },
-                {}
-              );
-
-              stateUpdate.grid = { columns };
-              stateUpdate.columns = validColumns.map(({ name }) => name);
+            if (stateUpdate) {
+              await appStateContainer.replaceUrlState(stateUpdate);
             }
-
-            if (defaultState.rowHeight) {
-              stateUpdate.rowHeight = defaultState.rowHeight;
-            }
-
-            if (Object.keys(stateUpdate).length) {
-              appStateContainer.update(stateUpdate, true);
-            }
-
-            internalStateContainer.transitions.setShouldUseDefaultProfileState(false);
           }
+
+          internalStateContainer.transitions.setShouldUseDefaultProfileState(false);
         })
       )
       .subscribe();
