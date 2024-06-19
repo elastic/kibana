@@ -5,32 +5,20 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
-import { services } from './services';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { configureHTTP2 } from '../../../test/common/configure_http2';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
-  const plugin = resolve(__dirname, './plugins/oidc_provider');
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
-
-  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
-
-  const auditLogPath = resolve(__dirname, './packages/helpers/audit/oidc.log');
+  const functionalConfig = await readConfigFile(require.resolve('./oidc.config'));
 
   return configureHTTP2({
-    testFiles: [require.resolve('./tests/oidc/authorization_code_flow')],
-    servers: xPackAPITestsConfig.get('servers'),
-    security: { disableTestUser: true },
-    services,
-    junit: {
-      reportName: 'X-Pack Security API Integration Tests (OIDC - Authorization Code Flow)',
-    },
-
+    ...functionalConfig.getAll(),
     esTestCluster: {
-      ...xPackAPITestsConfig.get('esTestCluster'),
+      ...functionalConfig.get('esTestCluster'),
       serverArgs: [
         ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
         'xpack.security.authc.token.enabled=true',
@@ -47,25 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `xpack.security.authc.realms.oidc.oidc1.op.issuer=https://test-op.elastic.co`,
         `xpack.security.authc.realms.oidc.oidc1.op.jwkset_path=${jwksPath}`,
         `xpack.security.authc.realms.oidc.oidc1.claims.principal=sub`,
-      ],
-    },
-
-    kbnTestServer: {
-      ...xPackAPITestsConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        `--plugin-path=${plugin}`,
-        `--plugin-path=${testEndpointsPlugin}`,
-        `--xpack.security.authProviders=${JSON.stringify(['oidc', 'basic'])}`,
-        '--xpack.security.authc.oidc.realm="oidc1"',
-        '--xpack.security.audit.enabled=true',
-        '--xpack.security.audit.appender.type=file',
-        `--xpack.security.audit.appender.fileName=${auditLogPath}`,
-        '--xpack.security.audit.appender.layout.type=json',
-        `--xpack.security.audit.ignore_filters=${JSON.stringify([
-          { actions: ['http_request'] },
-          { categories: ['database'] },
-        ])}`,
+        `xpack.security.authc.realms.oidc.oidc1.ssl.certificate_authorities=${CA_CERT_PATH}`,
       ],
     },
   });

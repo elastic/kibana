@@ -6,6 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { configureHTTP2 } from '../../../test/common/configure_http2';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -36,6 +37,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `xpack.security.authc.realms.oidc.oidc1.op.issuer=https://test-op.elastic.co`,
         `xpack.security.authc.realms.oidc.oidc1.op.jwkset_path=${jwksPath}`,
         `xpack.security.authc.realms.oidc.oidc1.claims.principal=sub`,
+        `xpack.security.authc.realms.oidc.oidc1.ssl.certificate_authorities=${CA_CERT_PATH}`,
       ],
     },
   });
