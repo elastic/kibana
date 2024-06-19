@@ -6,12 +6,16 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import {
+  uptimeOverviewLocatorID,
+  UptimeOverviewLocatorInfraParams,
+  UptimeOverviewLocatorParams,
+} from '@kbn/deeplinks-observability';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { type UrlService } from '@kbn/share-plugin/common/url_service';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { subj as testSubject } from '@kbn/test-subj-selector';
-import { UptimeOverviewLocatorDefinition } from '@kbn/uptime-plugin/public/locators/overview';
 import React, { FC } from 'react';
 import { act } from 'react-dom/test-utils';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
@@ -23,7 +27,16 @@ coreStartMock.application.getUrlForApp.mockImplementation((app, options) => {
 
 const emptyUrlService = new MockUrlService();
 const urlServiceWithUptimeLocator = new MockUrlService();
-urlServiceWithUptimeLocator.locators.create(new UptimeOverviewLocatorDefinition());
+// we can't use the actual locator here because its import would create a
+// forbidden ts project reference cycle
+urlServiceWithUptimeLocator.locators.create<
+  UptimeOverviewLocatorInfraParams | UptimeOverviewLocatorParams
+>({
+  id: uptimeOverviewLocatorID,
+  getLocation: async (params) => {
+    return { app: 'uptime', path: '/overview', state: {} };
+  },
+});
 
 const ProviderWrapper: FC<{ urlService?: UrlService }> = ({
   children,
