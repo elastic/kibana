@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+export { SERVICE_PROVIDER, TASK_TYPE } from '../../../../common/translations';
+
 export const EMPTY_FILTER_MESSAGE = i18n.translate(
   'xpack.searchInferenceEndpoints.filter.emptyMessage',
   {
@@ -18,11 +20,3 @@ export const OPTIONS = (totalCount: number) =>
     defaultMessage: '{totalCount, plural, one {# option} other {# options}}',
     values: { totalCount },
   });
-
-export const PROVIDER = i18n.translate('xpack.searchInferenceEndpoints.filter.provider', {
-  defaultMessage: 'Provider',
-});
-
-export const TASK_TYPE = i18n.translate('xpack.searchInferenceEndpoints.filter.taskType', {
-  defaultMessage: 'Type',
-});

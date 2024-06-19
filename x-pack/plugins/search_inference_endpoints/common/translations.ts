@@ -119,3 +119,15 @@ export const DELETE_ACTION_LABEL = i18n.translate(
     defaultMessage: 'Delete endpoint',
   }
 );
+
+export const ENDPOINT = i18n.translate('xpack.searchInferenceEndpoints.endpoint', {
+  defaultMessage: 'Endpoint',
+});
+
+export const SERVICE_PROVIDER = i18n.translate('xpack.searchInferenceEndpoints.serviceProvider', {
+  defaultMessage: 'Provider',
+});
+
+export const TASK_TYPE = i18n.translate('xpack.searchInferenceEndpoints.taskType', {
+  defaultMessage: 'Type',
+});

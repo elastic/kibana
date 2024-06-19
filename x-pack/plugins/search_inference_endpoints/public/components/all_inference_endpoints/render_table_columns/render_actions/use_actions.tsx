@@ -12,10 +12,10 @@ import type {
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { InferenceEndpointUI } from './types';
+import { InferenceEndpointUI } from '../../types';
 import { useCopyIDAction } from './actions/copy_id/use_copy_id_action';
 import { useDeleteAction } from './actions/delete/use_delete_action';
-import { ConfirmDeleteEndpointModal } from './confirm_delete_endpoint';
+import { ConfirmDeleteEndpointModal } from './actions/delete/confirm_delete_endpoint';
 
 const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }> = ({
   interfaceEndpoint,

@@ -16,7 +16,7 @@ import {
   InferenceEndpointUI,
   QueryParams,
   SortOrder,
-  ProviderKeys,
+  ServiceProviderKeys,
   TaskTypes,
 } from '../components/all_inference_endpoints/types';
 
@@ -39,7 +39,9 @@ export const useTableData = (
 
     if (filterOptions.provider.length > 0) {
       filteredEndpoints = filteredEndpoints.filter((endpoint) =>
-        filterOptions.provider.includes(ProviderKeys[endpoint.service as keyof typeof ProviderKeys])
+        filterOptions.provider.includes(
+          ServiceProviderKeys[endpoint.service as keyof typeof ServiceProviderKeys]
+        )
       );
     }
 

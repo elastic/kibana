@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { EuiBadge } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { useActions } from './use_actions';
-import { ServiceProvider } from './service_provider';
+import React from 'react';
+import * as i18n from '../../../../common/translations';
+import { useActions } from './render_actions/use_actions';
 import { RenderEndpoint } from './render_endpoint/render_endpoint';
+import { ServiceProvider } from './render_service_provider/service_provider';
+import { TaskType } from './render_task_type/task_type';
 
 export const useTableColumns = () => {
   const { actions } = useActions();
@@ -19,9 +19,7 @@ export const useTableColumns = () => {
   const TABLE_COLUMNS = [
     {
       field: 'endpoint',
-      name: i18n.translate('xpack.searchInferenceEndpoints.inferenceEndpoints.table.endpoint', {
-        defaultMessage: 'Endpoint',
-      }),
+      name: i18n.ENDPOINT,
       render: (endpoint: InferenceAPIConfigResponse) => {
         if (endpoint != null) {
           return <RenderEndpoint endpoint={endpoint} />;
@@ -34,9 +32,7 @@ export const useTableColumns = () => {
     },
     {
       field: 'provider',
-      name: i18n.translate('xpack.searchInferenceEndpoints.inferenceEndpoints.table.provider', {
-        defaultMessage: 'Provider',
-      }),
+      name: i18n.SERVICE_PROVIDER,
       render: (provider: string) => {
         if (provider != null) {
           return <ServiceProvider providerKey={provider} />;
@@ -49,12 +45,10 @@ export const useTableColumns = () => {
     },
     {
       field: 'type',
-      name: i18n.translate('xpack.searchInferenceEndpoints.inferenceEndpoints.table.type', {
-        defaultMessage: 'Type',
-      }),
+      name: i18n.TASK_TYPE,
       render: (type: string) => {
         if (type != null) {
-          return <EuiBadge color="hollow">{type}</EuiBadge>;
+          return <TaskType type={type} />;
         }
 
         return null;

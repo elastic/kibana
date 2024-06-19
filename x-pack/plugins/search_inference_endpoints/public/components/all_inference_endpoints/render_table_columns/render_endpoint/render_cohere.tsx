@@ -10,13 +10,18 @@ import React from 'react';
 import { RenderEndpointProps } from './render_endpoint';
 
 interface ServiceSettings {
-  similarity: string;
   embedding_type: string;
   model_id: string;
 }
 
+interface TaskSettings {
+  input_type: string;
+  truncate: string;
+}
+
 export const RenderCohere: React.FC<RenderEndpointProps> = ({ endpoint }) => {
-  const serviceSettings = endpoint.service_settings as ServiceSettings | null;
+  const serviceSettings = endpoint.service_settings as ServiceSettings;
+  const taskSettings = endpoint.task_settings as TaskSettings;
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
@@ -24,16 +29,18 @@ export const RenderCohere: React.FC<RenderEndpointProps> = ({ endpoint }) => {
         <strong>{endpoint.model_id}</strong>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {serviceSettings && (
-          <EuiFlexGroup gutterSize="s">
+        <EuiFlexGroup gutterSize="s">
+          {serviceSettings.model_id && (
             <EuiFlexItem grow={false}>
               <EuiBadge color="default">{serviceSettings.model_id}</EuiBadge>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {serviceSettings.embedding_type}, {serviceSettings.similarity}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+          )}
+          <EuiFlexItem grow={false}>
+            {serviceSettings.embedding_type && <span>{serviceSettings.embedding_type}</span>}
+            {taskSettings.input_type && <span>, {taskSettings.input_type}</span>}
+            {taskSettings.truncate && <span>, truncate: {taskSettings.truncate}</span>}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

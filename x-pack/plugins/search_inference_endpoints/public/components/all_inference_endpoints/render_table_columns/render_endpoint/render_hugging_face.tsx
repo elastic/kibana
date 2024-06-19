@@ -14,7 +14,7 @@ interface ServiceSettings {
 }
 
 export const RenderHuggingFace: React.FC<RenderEndpointProps> = ({ endpoint }) => {
-  const serviceSettings = endpoint.service_settings as ServiceSettings | null;
+  const serviceSettings = endpoint.service_settings as ServiceSettings;
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column">

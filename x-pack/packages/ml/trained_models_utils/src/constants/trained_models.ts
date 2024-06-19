@@ -201,6 +201,7 @@ export type InferenceServiceSettings =
         api_key: string;
         organization_id: string;
         url: string;
+        model_id: string;
       };
     }
   | {
