@@ -26,8 +26,6 @@ export type ESQLSingleAstItem =
 
 export type ESQLAstField = ESQLFunction | ESQLColumn;
 
-export type ESQLAstField = ESQLFunction | ESQLColumn;
-
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
 export interface ESQLLocation {
