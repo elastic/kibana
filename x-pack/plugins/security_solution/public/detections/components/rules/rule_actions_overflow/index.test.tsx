@@ -34,6 +34,9 @@ jest.mock('../../../../common/lib/kibana', () => {
     ...actual,
     useKibana: jest.fn().mockReturnValue({
       services: {
+        telemetry: {
+          reportManualRuleRunOpenModal: jest.fn(),
+        },
         application: {
           navigateToApp: jest.fn(),
         },
