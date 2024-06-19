@@ -49,7 +49,7 @@ export const getColorIndicatorControlColumn = ({
     id: 'colorIndicator',
     width: COLOR_INDICATOR_WIDTH,
     headerCellRender: () => {
-      return null; // TODO: add a screen reader message
+      return null;
     },
     rowCellRender: ({ rowIndex }) => {
       return <ColorIndicatorCell rowIndex={rowIndex} getRowIndicatorColor={getRowIndicatorColor} />;
