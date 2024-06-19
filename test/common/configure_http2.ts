@@ -27,12 +27,8 @@ export const configureHTTP2 = (config: ConfigType): ConfigType => {
   // have no real alternatives to accept self-signed certs
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-  if (!config.browser) {
-    config.browser = {};
-  }
-
   // tell webdriver browser to accept self-signed certificates
-  config.browser.acceptInsecureCerts = true;
+  config.browser = { ...(config.browser ?? {}), acceptInsecureCerts: true };
 
   // change the configured kibana server to run on https with the dev CA
   config.servers.kibana = {
