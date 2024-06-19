@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async function () {
           await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
           const detailsEl = await dataGrid.getDetailsRows();
-          const defaultMessageEl = await detailsEl[0].findByTestSubject('docTableRowDetailsTitle');
+          const defaultMessageEl = await detailsEl[0].findByTestSubject('docViewerRowDetailsTitle');
           expect(defaultMessageEl).to.be.ok();
           await dataGrid.closeFlyout();
         });
@@ -186,9 +186,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should allow paginating docs in the flyout by clicking in the doc table', async function () {
         await retry.try(async function () {
           await dataGrid.clickRowToggle({ rowIndex: rowToInspect - 1 });
-          await testSubjects.exists(`dscDocNavigationPage0`);
+          await testSubjects.exists(`docViewerFlyoutNavigationPage0`);
           await dataGrid.clickRowToggle({ rowIndex: rowToInspect });
-          await testSubjects.exists(`dscDocNavigationPage1`);
+          await testSubjects.exists(`docViewerFlyoutNavigationPage1`);
           await dataGrid.closeFlyout();
         });
       });
