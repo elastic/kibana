@@ -14,6 +14,32 @@ paths:
     post:
       x-labels: [ess, serverless]
       x-internal: true
+      summary: Deprecated internal API which Uploads a CSV file containing asset criticality data
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The CSV file to upload.
+              required:
+                - file
+      responses:
+        '200':
+          description: CSV upload successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetCriticalityCsvUploadResponse'
+        '413':
+          description: File too large
+  /api/asset_criticality/upload_csv:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
       summary: Uploads a CSV file containing asset criticality data
       requestBody:
         content:
