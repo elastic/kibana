@@ -66,7 +66,7 @@ describe('useSetupTechnology', () => {
 
     expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-    expect(result.current.agentlessPolicy).toBeUndefined();
+    expect(result.current.isAgentlessEnabled).toBeFalsy();
   });
 
   it('should fetch agentless policy if agentless is enabled', async () => {
@@ -81,7 +81,7 @@ describe('useSetupTechnology', () => {
 
     await waitForNextUpdate();
 
-    expect(result.current.agentlessPolicy).toEqual({ id: 'agentless-policy-id' });
+    expect(result.current.isAgentlessEnabled).toBeTruthy();
   });
 
   it('should not fetch agentless policy if agentless is enabled but serverless is disabled', async () => {
@@ -102,7 +102,7 @@ describe('useSetupTechnology', () => {
 
     expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-    expect(result.current.agentlessPolicy).toBeUndefined();
+    expect(result.current.isAgentlessEnabled).toBeFalsy();
   });
 
   it('should update agent policy and selected policy tab when setup technology is agentless', async () => {
