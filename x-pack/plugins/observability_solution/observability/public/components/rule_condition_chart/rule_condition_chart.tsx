@@ -58,17 +58,19 @@ export interface GenericMetric {
   field?: string;
   filter?: string;
 }
+
+export interface RuleConditionChartExpressions {
+  metrics: GenericMetric[];
+  threshold: number[];
+  comparator: COMPARATORS | LEGACY_COMPARATORS;
+  warningThreshold?: number[];
+  warningComparator?: COMPARATORS | LEGACY_COMPARATORS;
+  timeSize?: number;
+  timeUnit?: TimeUnitChar;
+  equation?: string;
+}
 interface RuleConditionChartProps {
-  metricExpression: {
-    metrics: GenericMetric[];
-    threshold: number[];
-    comparator: COMPARATORS | LEGACY_COMPARATORS;
-    warningThreshold?: number[];
-    warningComparator?: COMPARATORS | LEGACY_COMPARATORS;
-    timeSize?: number;
-    timeUnit?: TimeUnitChar;
-    equation?: string;
-  };
+  metricExpression: RuleConditionChartExpressions;
   searchConfiguration: GenericSearchSourceFields;
   dataView?: DataView;
   groupBy?: string | string[];
