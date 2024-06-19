@@ -14,7 +14,6 @@ import { createPackagePolicy } from '../../../../../../test/api_integration/apis
 import { RoleCredentials } from 'x-pack/test_serverless/shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -90,43 +89,51 @@ export default function ({ getService }: FtrProviderContext) {
       agentPolicyId4 = agentPolicyResponse4.item.id;
 
       await createPackagePolicy(
-        supertest,
+        supertestWithoutAuth,
         agentPolicyId,
         'cspm',
         'cloudbeat/cis_aws',
         'aws',
         'cspm',
-        'CSPM-1'
+        'CSPM-1',
+        roleAuthc,
+        internalRequestHeader
       );
 
       await createPackagePolicy(
-        supertest,
+        supertestWithoutAuth,
         agentPolicyId2,
         'kspm',
         'cloudbeat/cis_k8s',
         'vanilla',
         'kspm',
-        'KSPM-1'
+        'KSPM-1',
+        roleAuthc,
+        internalRequestHeader
       );
 
       await createPackagePolicy(
-        supertest,
+        supertestWithoutAuth,
         agentPolicyId3,
         'vuln_mgmt',
         'cloudbeat/vuln_mgmt_aws',
         'aws',
         'vuln_mgmt',
-        'CNVM-1'
+        'CNVM-1',
+         roleAuthc,
+         internalRequestHeader
       );
 
       await createPackagePolicy(
-        supertest,
+        supertestWithoutAuth,
         agentPolicyId4,
         'kspm',
         'cloudbeat/cis_k8s',
         'vanilla',
         'kspm',
-        'KSPM-2'
+        'KSPM-2',
+        roleAuthc,
+        internalRequestHeader
       );
     });
 

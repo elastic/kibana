@@ -21,7 +21,6 @@ const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
-  const supertest = getService('supertest');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -97,13 +96,15 @@ export default function ({ getService }: FtrProviderContext) {
       agentPolicyId = agentPolicyResponse.item.id;
 
       await createPackagePolicy(
-        supertest,
+        supertestWithoutAuth,
         agentPolicyId,
         'cspm',
         'cloudbeat/cis_aws',
         'aws',
         'cspm',
-        'CSPM-1'
+        'CSPM-1',
+        roleAuthc,
+        internalRequestHeader
       );
       await waitForPluginInitialized(supertestWithoutAuth, internalRequestHeader, roleAuthc);
     });

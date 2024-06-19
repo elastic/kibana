@@ -18,7 +18,6 @@ import { createPackagePolicy } from '../../../../../test/api_integration/apis/cl
 import { RoleCredentials } from 'x-pack/test_serverless/shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -66,12 +65,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`Should return 500 error code when not provide package policy id or benchmark id`, async () => {
       await createPackagePolicy(
-        supertest,
+        supertestWithoutAuth,
         agentPolicyId,
         'kspm',
         'cloudbeat/cis_k8s',
         'vanilla',
-        'kspm'
+        'kspm',
+        'KSPM-1',
+        roleAuthc,
+        internalRequestHeader
       );
 
       const { body }: { body: { message: string } } = await supertestWithoutAuth
@@ -89,12 +91,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`Should return 500 error code when provide both package policy id and benchmark id`, async () => {
       await createPackagePolicy(
-        supertest,
+        supertestWithoutAuth,
         agentPolicyId,
         'kspm',
         'cloudbeat/cis_k8s',
         'vanilla',
-        'kspm'
+        'kspm',
+        'KSPM-2',
+        roleAuthc,
+        internalRequestHeader
       );
 
       const { body }: { body: { message: string } } = await supertestWithoutAuth
@@ -137,12 +142,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`Should return 200 status code and filter rules by benchmarkId`, async () => {
       await createPackagePolicy(
-        supertest,
+        supertestWithoutAuth,
         agentPolicyId,
         'kspm',
         'cloudbeat/cis_k8s',
         'vanilla',
-        'kspm'
+        'kspm',
+        'KSPM-3',
+        roleAuthc,
+        internalRequestHeader
       );
 
       const { body }: { body: FindCspBenchmarkRuleResponse } = await supertestWithoutAuth
@@ -169,12 +177,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`Should return 200 status code, and only requested fields in the response`, async () => {
       await createPackagePolicy(
-        supertest,
+        supertestWithoutAuth,
         agentPolicyId,
         'kspm',
         'cloudbeat/cis_k8s',
         'vanilla',
-        'kspm'
+        'kspm',
+        'KSPM-4',
+        roleAuthc,
+        internalRequestHeader
       );
 
       const { body }: { body: FindCspBenchmarkRuleResponse } = await supertestWithoutAuth
@@ -203,12 +214,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`Should return 200 status code, items sorted by metadata.section field`, async () => {
       await createPackagePolicy(
-        supertest,
+        supertestWithoutAuth,
         agentPolicyId,
         'kspm',
         'cloudbeat/cis_k8s',
         'vanilla',
-        'kspm'
+        'kspm',
+        'KSPM-5',
+        roleAuthc,
+        internalRequestHeader
       );
 
       const { body }: { body: FindCspBenchmarkRuleResponse } = await supertestWithoutAuth
@@ -238,12 +252,15 @@ export default function ({ getService }: FtrProviderContext) {
       const perPage = 10;
 
       await createPackagePolicy(
-        supertest,
+        supertestWithoutAuth,
         agentPolicyId,
         'kspm',
         'cloudbeat/cis_k8s',
         'vanilla',
-        'kspm'
+        'kspm',
+        'KSPM-6',
+        roleAuthc,
+        internalRequestHeader
       );
 
       const { body }: { body: FindCspBenchmarkRuleResponse } = await supertestWithoutAuth

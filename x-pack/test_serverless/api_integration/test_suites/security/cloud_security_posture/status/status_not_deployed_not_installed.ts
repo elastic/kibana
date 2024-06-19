@@ -15,7 +15,6 @@ import { RoleCredentials } from 'x-pack/test_serverless/shared/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -62,12 +61,15 @@ export default function (providerContext: FtrProviderContext) {
       });
       it(`Should return not-deployed when installed kspm, no findings on either indices and no healthy agents`, async () => {
         await createPackagePolicy(
-          supertest,
+          supertestWithoutAuth,
           agentPolicyId,
           'kspm',
           'cloudbeat/cis_k8s',
           'vanilla',
-          'kspm'
+          'kspm',
+          'KSPM-1',
+          roleAuthc,
+          internalRequestHeader
         );
 
         const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
@@ -101,12 +103,15 @@ export default function (providerContext: FtrProviderContext) {
 
       it(`Should return not-deployed when installed cspm, no findings on either indices and no healthy agents`, async () => {
         await createPackagePolicy(
-          supertest,
+          supertestWithoutAuth,
           agentPolicyId,
           'cspm',
           'cloudbeat/cis_aws',
           'aws',
-          'cspm'
+          'cspm',
+          'CSPM-1',
+          roleAuthc,
+          internalRequestHeader
         );
 
         const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
@@ -140,12 +145,15 @@ export default function (providerContext: FtrProviderContext) {
 
       it(`Should return not-deployed when installed cnvm, no findings on either indices and no healthy agents`, async () => {
         await createPackagePolicy(
-          supertest,
+          supertestWithoutAuth,
           agentPolicyId,
           'vuln_mgmt',
           'cloudbeat/vuln_mgmt_aws',
           'aws',
-          'vuln_mgmt'
+          'vuln_mgmt',
+          'CNVM-1',
+          roleAuthc,
+          internalRequestHeader
         );
 
         const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
