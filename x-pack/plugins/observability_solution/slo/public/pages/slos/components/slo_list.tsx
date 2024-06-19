@@ -18,6 +18,7 @@ import { SlosView } from './slos_view';
 import { ToggleSLOView } from './toggle_slo_view';
 
 export function SloList() {
+  const { onPageReady } = usePerformanceContext();
   const { observabilityAIAssistant } = useKibana().services;
   const { state, onStateChange } = useUrlSearchState();
   const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter, groupBy } = state;
@@ -77,6 +78,12 @@ export function SloList() {
       `),
     });
   }, [sloList, observabilityAIAssistant]);
+
+  useEffect(() => {
+    if (!isLoading && sloList !== undefined) {
+      onPageReady();
+    }
+  }, [isLoading, sloList, onPageReady]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
