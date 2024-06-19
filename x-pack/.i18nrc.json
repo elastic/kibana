@@ -47,6 +47,7 @@
     "xpack.idxMgmtPackage": "packages/index-management",
     "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
     "xpack.infra": "plugins/observability_solution/infra",
+    "xpack.logsDataAccess": "plugins/observability_solution/logs_data_access",
     "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",
     "xpack.logsShared": "plugins/observability_solution/logs_shared",
     "xpack.fleet": "plugins/fleet",

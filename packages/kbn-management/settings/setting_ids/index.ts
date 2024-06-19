@@ -142,6 +142,7 @@ export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
 export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
   'observability:logsExplorer:allowedDataViews';
 export const OBSERVABILITY_APM_ENABLE_MULTI_SIGNAL = 'observability:apmEnableMultiSignal';
+export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';

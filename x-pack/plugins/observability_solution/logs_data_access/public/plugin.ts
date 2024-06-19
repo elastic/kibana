@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
-import { uiSettings } from '../common/ui_settings';
+import { CoreStart } from '@kbn/core/public';
+import { Plugin } from '@kbn/core/public';
 import { registerServices } from './services/register_services';
-import { LogsDataAccessPluginStartDeps, LogsDataAccessPluginSetupDeps } from './types';
-
+import { LogsDataAccessPluginSetupDeps, LogsDataAccessPluginStartDeps } from './types';
 export type LogsDataAccessPluginSetup = ReturnType<LogsDataAccessPlugin['setup']>;
 export type LogsDataAccessPluginStart = ReturnType<LogsDataAccessPlugin['start']>;
 
@@ -28,20 +21,11 @@ export class LogsDataAccessPlugin
       LogsDataAccessPluginStartDeps
     >
 {
-  private readonly logger: Logger;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
-  public setup(core: CoreSetup, plugins: LogsDataAccessPluginSetupDeps) {
-    core.uiSettings.register(uiSettings);
-  }
+  public setup() {}
 
   public start(core: CoreStart, plugins: LogsDataAccessPluginStartDeps) {
     const services = registerServices({
-      logger: this.logger,
       deps: {
-        savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
       },
     });
@@ -50,4 +34,6 @@ export class LogsDataAccessPlugin
       services,
     };
   }
+
+  public stop() {}
 }
