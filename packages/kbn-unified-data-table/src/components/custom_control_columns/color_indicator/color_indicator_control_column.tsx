@@ -12,7 +12,7 @@ import { EuiDataGridControlColumn, useEuiTheme, EuiThemeComputed } from '@elasti
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../../../table_context';
 
-const COLOR_INDICATOR_WIDTH = 5;
+const COLOR_INDICATOR_WIDTH = 4;
 
 interface ColorIndicatorCellParams {
   rowIndex: number;
