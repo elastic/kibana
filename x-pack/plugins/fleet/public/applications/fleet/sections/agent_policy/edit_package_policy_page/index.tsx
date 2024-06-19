@@ -19,6 +19,7 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 
+import { useSetIsReadOnly } from '../../../../integrations/hooks/use_read_only_context';
 import {
   useLink,
   useBreadcrumbs,
@@ -128,7 +129,7 @@ export const EditPackagePolicyForm = memo<{
   });
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
-
+  useSetIsReadOnly(canWriteIntegrationPolicies);
   const newSecrets = useMemo(() => {
     if (!packageInfo) {
       return [];
