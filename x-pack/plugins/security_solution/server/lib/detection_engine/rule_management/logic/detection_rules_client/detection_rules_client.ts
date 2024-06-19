@@ -33,7 +33,7 @@ import { importRule } from './methods/import_rule';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 
 export const createDetectionRulesClient = (
-  actionsClient?: ActionsClient,
+  actionsClient: ActionsClient,
   rulesClient: RulesClient,
   mlAuthz: MlAuthz
 ): IDetectionRulesClient => ({

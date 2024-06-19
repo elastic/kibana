@@ -69,6 +69,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
     const coreContext = await context.core;
     const licensing = await context.licensing;
+    const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
 
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
@@ -114,7 +115,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
-      getDetectionRulesClient: memoize((actionsClient) => {
+      getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
           license: licensing.license,
           ml: plugins.ml,

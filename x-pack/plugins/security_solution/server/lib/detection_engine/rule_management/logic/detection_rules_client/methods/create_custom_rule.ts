@@ -16,22 +16,25 @@ import { convertCreateAPIToInternalSchema } from '../../../normalization/rule_co
 import { validateMlAuth } from '../utils';
 
 export const createCustomRule = async (
-  actionsClient?: ActionsClient,
+  actionsClient: ActionsClient,
   rulesClient: RulesClient,
   args: CreateCustomRuleArgs,
   mlAuthz: MlAuthz
 ): Promise<RuleAlertType> => {
-  const params = args.params;
+  const { params } = args;
+  await validateMlAuth(mlAuthz, params.type);
   const [oldActions, systemActions] = partition(params.actions, (action) =>
     actionsClient.isSystemAction(action.action_type_id)
   );
-  console.log('SYSTEM ACTIONS', systemActions);
-  console.log('OLD ACTIONS', oldActions);
-  const internalRule = convertCreateAPIToInternalSchema({
-    ...params,
-    actions: oldActions,
-    systemActions,
-  });
+
+  const internalRule = convertCreateAPIToInternalSchema(
+    {
+      ...params,
+      actions: oldActions,
+      systemActions,
+    },
+    { immutable: false }
+  );
   const rule = await rulesClient.create<RuleParams>({
     data: internalRule,
   });
