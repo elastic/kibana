@@ -21,19 +21,16 @@ import { ModeSwitcher } from './mode_switcher';
 import { MetricsEditMode } from './metrics_edit_mode';
 import { CustomMetricMode } from './types';
 import { DropdownButton } from '../../dropdown_button';
-import { DerivedIndexPattern } from '../../../../../../containers/metrics_source';
 
 interface Props {
   options: Array<{ text: string; value: string }>;
   metric: SnapshotMetricInput;
-  fields: DerivedIndexPattern['fields'];
   onChange: (metric: SnapshotMetricInput) => void;
   onChangeCustomMetrics: (metrics: SnapshotCustomMetricInput[]) => void;
   customMetrics: SnapshotCustomMetricInput[];
 }
 
 export const WaffleMetricControls = ({
-  fields,
   onChange,
   onChangeCustomMetrics,
   metric,
@@ -45,6 +42,7 @@ export const WaffleMetricControls = ({
   const [editModeCustomMetrics, setEditModeCustomMetrics] = useState<SnapshotCustomMetricInput[]>(
     []
   );
+
   const [editCustomMetric, setEditCustomMetric] = useState<SnapshotCustomMetricInput | undefined>();
   const handleClose = useCallback(() => {
     setPopoverState(false);
@@ -164,7 +162,6 @@ export const WaffleMetricControls = ({
         ) : null}
         {mode === 'addMetric' ? (
           <CustomMetricForm
-            fields={fields}
             customMetrics={customMetrics}
             onChange={handleCustomMetric}
             onCancel={setModeToPick}
@@ -173,7 +170,6 @@ export const WaffleMetricControls = ({
         {mode === 'editMetric' ? (
           <CustomMetricForm
             metric={editCustomMetric}
-            fields={fields}
             customMetrics={customMetrics}
             onChange={handleEditCustomMetric}
             onCancel={setModeToEdit}

@@ -28,6 +28,10 @@ export {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   LOCATORS_IDS,
   FLEET_ENROLLMENT_API_PREFIX,
+  INGEST_SAVED_OBJECT_INDEX,
+  AGENT_POLICY_MAPPINGS,
+  AGENT_MAPPINGS,
+  ENROLLMENT_API_KEY_MAPPINGS,
 } from '../../common/constants';
 
 export * from './page_paths';
@@ -48,16 +52,17 @@ export const TOUR_STORAGE_KEYS = {
   AGENT_ACTIVITY: 'fleet.agentActivityTour',
   ADD_AGENT_POPOVER: 'fleet.addAgentPopoverTour',
   INACTIVE_AGENTS: 'fleet.inactiveAgentsTour',
+  GRANULAR_PRIVILEGES: 'fleet.granularPrivileges',
 };
 
-export interface TOUR_STORAGE_CONFIG {
-  AGENT_ACTIVITY: {
-    active: boolean;
-  };
-  ADD_AGENT_POPOVER: {
-    active: boolean;
-  };
-  INACTIVE_AGENTS: {
-    active: boolean;
-  };
+export interface TourConfig {
+  active: boolean;
 }
+
+export type TourKey = keyof typeof TOUR_STORAGE_KEYS;
+
+export type TOUR_STORAGE_CONFIG = {
+  [k in TourKey]: TourConfig;
+};
+
+export const MAX_FLYOUT_WIDTH = 800;

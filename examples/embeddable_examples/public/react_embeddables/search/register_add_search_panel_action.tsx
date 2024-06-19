@@ -27,10 +27,16 @@ export const registerAddSearchPanelAction = (uiActions: UiActionsStart) => {
       embeddable.addNewPanel<SearchSerializedState>(
         {
           panelType: SEARCH_EMBEDDABLE_ID,
+          initialState: {},
         },
         true
       );
     },
   });
   uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_SEARCH_ACTION_ID);
+  if (uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
+    // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
+    // the create action if the Canvas-specific trigger does indeed exist.
+    uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', ADD_SEARCH_ACTION_ID);
+  }
 };

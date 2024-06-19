@@ -19,7 +19,8 @@ import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 export const getEventLogExecuteCompleteById = async (
   es: Client,
   log: ToolingLog,
-  ruleId: string
+  ruleId: string,
+  executionType: string = 'execute'
 ): Promise<number> => {
   const response = await es.search({
     index: '.kibana-event-log*',
@@ -36,7 +37,7 @@ export const getEventLogExecuteCompleteById = async (
           },
           {
             match_phrase: {
-              'event.action': 'execute',
+              'event.action': executionType,
             },
           },
           {

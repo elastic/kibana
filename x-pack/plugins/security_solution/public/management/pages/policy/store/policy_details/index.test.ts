@@ -37,6 +37,7 @@ describe('policy details: ', () => {
       updated_at: '',
       updated_by: '',
       policy_id: '',
+      policy_ids: [''],
       enabled: true,
       inputs: [
         {
@@ -257,6 +258,7 @@ describe('policy details: ', () => {
         name: '',
         description: '',
         policy_id: '',
+        policy_ids: [''],
         enabled: true,
         inputs: [
           {

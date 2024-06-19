@@ -107,7 +107,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
         title={
           <FormattedMessage
             id="xpack.idxMgmt.createTemplate.cloneTemplatePageTitle"
-            defaultMessage="Clone template '{name}'"
+            defaultMessage="Clone template ''{name}''"
             values={{ name: decodedTemplateName }}
           />
         }

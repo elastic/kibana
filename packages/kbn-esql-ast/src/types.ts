@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type ESQLAst = ESQLCommand[];
+export type ESQLAst = ESQLAstCommand[];
+
+export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
 
 export type ESQLSingleAstItem =
   | ESQLFunction
@@ -16,7 +18,9 @@ export type ESQLSingleAstItem =
   | ESQLTimeInterval
   | ESQLList
   | ESQLLiteral
-  | ESQLCommandMode;
+  | ESQLCommandMode
+  | ESQLInlineCast
+  | ESQLUnknownItem;
 
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
@@ -25,16 +29,22 @@ export interface ESQLLocation {
   max: number;
 }
 
-interface ESQLAstBaseItem {
-  name: string;
+export interface ESQLAstBaseItem<Name = string> {
+  name: Name;
   text: string;
   location: ESQLLocation;
   incomplete: boolean;
 }
 
-export interface ESQLCommand extends ESQLAstBaseItem {
+export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   type: 'command';
   args: ESQLAstItem[];
+}
+
+export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
+  indices: ESQLSource[];
+  aggregates?: ESQLAstItem[];
+  grouping?: ESQLAstItem[];
 }
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {
@@ -49,6 +59,27 @@ export interface ESQLCommandMode extends ESQLAstBaseItem {
 export interface ESQLFunction extends ESQLAstBaseItem {
   type: 'function';
   args: ESQLAstItem[];
+}
+
+export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem {
+  type: 'inlineCast';
+  value: ValueType;
+  castType: string;
+}
+
+/**
+ * This node represents something the AST generator
+ * didn't recognize in the ANTLR parse tree.
+ *
+ * It can show up if the AST generator code is out of sync
+ * with the ANTLR grammar or if there is some idiosyncrasy
+ * or bug in the parse tree.
+ *
+ * These nodes can be ignored for the purpose of validation
+ * and autocomplete, but they may be helpful in detecting bugs.
+ */
+export interface ESQLUnknownItem extends ESQLAstBaseItem {
+  type: 'unknown';
 }
 
 export interface ESQLTimeInterval extends ESQLAstBaseItem {

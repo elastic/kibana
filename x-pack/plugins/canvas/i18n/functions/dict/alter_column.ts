@@ -44,7 +44,7 @@ export const errors = {
   columnNotFound: (column: string) =>
     new Error(
       i18n.translate('xpack.canvas.functions.alterColumn.columnNotFoundErrorMessage', {
-        defaultMessage: "Column not found: '{column}'",
+        defaultMessage: "Column not found: ''{column}''",
         values: {
           column,
         },
@@ -53,7 +53,7 @@ export const errors = {
   cannotConvertType: (type: string) =>
     new Error(
       i18n.translate('xpack.canvas.functions.alterColumn.cannotConvertTypeErrorMessage', {
-        defaultMessage: "Cannot convert to '{type}'",
+        defaultMessage: "Cannot convert to ''{type}''",
         values: {
           type,
         },

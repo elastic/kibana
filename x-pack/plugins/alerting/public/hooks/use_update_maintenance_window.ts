@@ -40,7 +40,7 @@ export function useUpdateMaintenanceWindow(props?: UseUpdateMaintenanceWindowPro
     onSuccess: (variables: MaintenanceWindow) => {
       toasts.addSuccess(
         i18n.translate('xpack.alerting.maintenanceWindowsUpdateSuccess', {
-          defaultMessage: "Updated maintenance window '{title}'",
+          defaultMessage: "Updated maintenance window ''{title}''",
           values: {
             title: variables.title,
           },

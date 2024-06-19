@@ -32,14 +32,13 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/cases-plugin",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/elastic-assistant-common",
+    "@kbn/langchain",
     "@kbn/logging",
     "@kbn/react-kibana-context-render",
     "@kbn/doc-links",
     "@kbn/core-logging-server-mocks",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
-    "@kbn/analytics-client",
     "@kbn/console-plugin"
   ],
   "exclude": [

@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
   CustomizationCallback,
   DiscoverSetup,
@@ -140,41 +141,43 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                 document.body.appendChild(optionsContainer);
 
                 const element = (
-                  <EuiWrappingPopover
-                    ownFocus
-                    button={anchorElement}
-                    isOpen={true}
-                    panelPaddingSize="s"
-                    closePopover={closeOptionsPopover}
-                  >
-                    <EuiContextMenu
-                      size="s"
-                      initialPanelId={0}
-                      panels={[
-                        {
-                          id: 0,
-                          items: [
-                            {
-                              name: 'Create new',
-                              icon: 'plusInCircle',
-                              onClick: () => alert('Create new clicked'),
-                            },
-                            {
-                              name: 'Make a copy',
-                              icon: 'copy',
-                              onClick: () => alert('Make a copy clicked'),
-                            },
-                            {
-                              name: 'Manage saved searches',
-                              icon: 'gear',
-                              onClick: () => alert('Manage saved searches clicked'),
-                            },
-                          ],
-                        },
-                      ]}
-                      data-test-subj="customOptionsPopover"
-                    />
-                  </EuiWrappingPopover>
+                  <KibanaRenderContextProvider {...core}>
+                    <EuiWrappingPopover
+                      ownFocus
+                      button={anchorElement}
+                      isOpen={true}
+                      panelPaddingSize="s"
+                      closePopover={closeOptionsPopover}
+                    >
+                      <EuiContextMenu
+                        size="s"
+                        initialPanelId={0}
+                        panels={[
+                          {
+                            id: 0,
+                            items: [
+                              {
+                                name: 'Create new',
+                                icon: 'plusInCircle',
+                                onClick: () => alert('Create new clicked'),
+                              },
+                              {
+                                name: 'Make a copy',
+                                icon: 'copy',
+                                onClick: () => alert('Make a copy clicked'),
+                              },
+                              {
+                                name: 'Manage saved searches',
+                                icon: 'gear',
+                                onClick: () => alert('Manage saved searches clicked'),
+                              },
+                            ],
+                          },
+                        ]}
+                        data-test-subj="customOptionsPopover"
+                      />
+                    </EuiWrappingPopover>
+                  </KibanaRenderContextProvider>
                 );
 
                 ReactDOM.render(element, optionsContainer);
