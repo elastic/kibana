@@ -1,34 +1,6 @@
-/* eslint-disable-line @kbn/eslint/require-license-header */
-/*
- * This product uses import/no-restricted-paths which is available under a
- * "MIT" license.
- *
- * The MIT License (MIT)
- *
- * Copyright (c) 2015-present, Ben Mosher
- * https://github.com/benmosher/eslint-plugin-import
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 const path = require('path');
 const resolve = require('eslint-module-utils/resolve').default;
-const mm = require('micromatch');
+const { match } = require('micromatch');
 
 function isStaticRequire(node) {
   return (
@@ -43,7 +15,7 @@ function isStaticRequire(node) {
 }
 
 function traverseToTopFolder(src, pattern) {
-  while (mm([src], pattern).length > 0) {
+  while (match([src], pattern, { dot: true }).length > 0) {
     const srcIdx = src.lastIndexOf(path.sep);
     src = src.slice(0, srcIdx);
   }
@@ -51,7 +23,6 @@ function traverseToTopFolder(src, pattern) {
 }
 
 function isSameFolderOrDescendent(src, imported, pattern) {
-  // to allow to exclude file by name in pattern (e.g., !**/index*) we start with file dirname and then traverse
   const srcFileFolderRoot = traverseToTopFolder(path.dirname(src), pattern);
   const importedFileFolderRoot = traverseToTopFolder(path.dirname(imported), pattern);
 
@@ -109,12 +80,16 @@ module.exports = {
           ? path.relative(basePath, absoluteImportPath)
           : importPath;
 
+        const isTargetMatch = match([relativeSrcFile], target, { dot: true }).length > 0;
+        const isFromMatch = match([relativeImportFile], from, { dot: true }).length > 0;
+
         if (
-          !mm([relativeSrcFile], target).length ||
-          !mm([relativeImportFile], from).length ||
+          !isTargetMatch ||
+          !isFromMatch ||
           (allowSameFolder && isSameFolderOrDescendent(relativeSrcFile, relativeImportFile, from))
-        )
+        ) {
           continue;
+        }
 
         context.report({
           node,
