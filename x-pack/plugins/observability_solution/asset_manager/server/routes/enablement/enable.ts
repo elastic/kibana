@@ -9,6 +9,7 @@ import { RequestHandlerContext } from '@kbn/core/server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
+import { EnableManagedEntityResponse } from '../../../common/types_api';
 import {
   canEnableEntityDiscovery,
   checkIfAPIKeysAreEnabled,
@@ -28,7 +29,7 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   server,
   logger,
 }: SetupRouteOptions<T>) {
-  router.post<unknown, unknown, unknown>(
+  router.post<unknown, unknown, EnableManagedEntityResponse>(
     {
       path: `${ENTITY_INTERNAL_API_PREFIX}/managed/enablement`,
       validate: false,

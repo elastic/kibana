@@ -16,13 +16,14 @@ import {
 } from '../../lib/auth';
 import { ERROR_API_KEY_NOT_FOUND, ERROR_API_KEY_NOT_VALID } from '../../../common/errors';
 import { uninstallBuiltInEntityDefinitions } from '../../lib/entities/uninstall_entity_definition';
+import { DisableManagedEntityResponse } from '../../../common/types_api';
 
 export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,
   server,
   logger,
 }: SetupRouteOptions<T>) {
-  router.delete<unknown, unknown, unknown>(
+  router.delete<unknown, unknown, DisableManagedEntityResponse>(
     {
       path: `${ENTITY_INTERNAL_API_PREFIX}/managed/enablement`,
       validate: false,

@@ -18,3 +18,4 @@ export const ENTITY_DEFAULT_LATEST_SYNC_DELAY = '1s';
 export const ENTITY_DEFAULT_METADATA_LIMIT = 1000;
 export const ENTITY_API_PREFIX = '/api/entities';
 export const ENTITY_INTERNAL_API_PREFIX = '/internal/api/entities';
+export const MANAGED_ENTITY_ENABLEMENT_ROUTE = `${ENTITY_INTERNAL_API_PREFIX}/managed/enablement`;
