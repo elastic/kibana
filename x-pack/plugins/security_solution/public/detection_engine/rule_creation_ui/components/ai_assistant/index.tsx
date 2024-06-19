@@ -31,7 +31,7 @@ const retrieveErrorMessages = (errors: ValidationError[]): string =>
 const AiAssistantComponent: React.FC<AiAssistantProps> = ({ getFields }) => {
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
 
-  const getPromptContext = async () => {
+  const getPromptContext = useCallback(async () => {
     const queryField = getFields().queryBar;
     const { query, language } = (queryField.value as DefineStepRule['queryBar']).query;
 
@@ -47,7 +47,7 @@ const AiAssistantComponent: React.FC<AiAssistantProps> = ({ getFields }) => {
 returns validation error on form: \"${retrieveErrorMessages(queryField.errors)}\"
 Fix ${language} language query and give an example of it in markdown format that can be copied.
 Proposed solution should be valid and must not contain new line symbols (\\n)`;
-  };
+  }, [getFields]);
 
   const onShowOverlay = useCallback(() => {
     track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.OPEN_ASSISTANT_ON_RULE_QUERY_ERROR);
