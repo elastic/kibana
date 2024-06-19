@@ -503,7 +503,7 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
               {
                 title: selectedContent.firstStepTitle
                   ? selectedContent.firstStepTitle
-                  : i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.install', {
+                  : i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.download', {
                       defaultMessage: 'Download the collector',
                     }),
                 children: (
@@ -570,12 +570,9 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
                 ),
               },
               {
-                title: i18n.translate(
-                  'xpack.observability_onboarding.otelLogsPanel.steps.install',
-                  {
-                    defaultMessage: 'Start the collector',
-                  }
-                ),
+                title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.start', {
+                  defaultMessage: 'Start the collector',
+                }),
                 children: (
                   <EuiFlexGroup direction="column">
                     {selectedContent.prompt}
