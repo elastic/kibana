@@ -23,6 +23,8 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { SEARCH_EMBEDDABLE_TYPE, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import { once } from 'lodash';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
@@ -57,10 +59,7 @@ import {
   ProfilesManager,
   RootProfileService,
 } from './context_awareness';
-import { createProfileProviderServices } from './context_awareness/profiles/profile_provider_services';
 import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
-import { createLogsDataSourceProfileProvider } from './context_awareness/profile_providers/logs_data_source_profile';
-import { createLogDocumentProfileProvider } from './context_awareness/profile_providers/log_document_profile';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -69,16 +68,11 @@ import { createLogDocumentProfileProvider } from './context_awareness/profile_pr
 export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
 {
-  private readonly rootProfileService = new RootProfileService();
-  private readonly dataSourceProfileService = new DataSourceProfileService();
-  private readonly documentProfileService = new DocumentProfileService();
   private readonly appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly historyService = new HistoryService();
   private readonly inlineTopNav: Map<string | null, DiscoverCustomizationContext['inlineTopNav']> =
     new Map([[null, defaultCustomizationContext.inlineTopNav]]);
-  private readonly experimentalFeatures: ExperimentalFeatures = {
-    ruleFormV2Enabled: false,
-  };
+  private readonly experimentalFeatures: ExperimentalFeatures;
 
   private scopedHistory?: ScopedHistory<unknown>;
   private urlTracker?: UrlTracker;
@@ -88,8 +82,12 @@ export class DiscoverPlugin
   private singleDocLocator?: DiscoverSingleDocLocator;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.experimentalFeatures =
-      initializerContext.config.get().experimental ?? this.experimentalFeatures;
+    const experimental = this.initializerContext.config.get().experimental;
+
+    this.experimentalFeatures = {
+      ruleFormV2Enabled: experimental?.ruleFormV2Enabled ?? false,
+      enabledProfiles: experimental?.enabledProfiles ?? [],
+    };
   }
 
   setup(
@@ -185,7 +183,7 @@ export class DiscoverPlugin
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
-          profilesManager: this.createProfilesManager(),
+          profilesManager: await this.createProfilesManager(),
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
 
@@ -268,8 +266,6 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    this.registerProfiles();
-
     const viewSavedSearchAction = new ViewSavedSearchAction(core.application, this.locator!);
 
     plugins.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
@@ -305,22 +301,31 @@ export class DiscoverPlugin
     }
   }
 
-  private registerProfiles() {
-    const providerServices = createProfileProviderServices();
+  private createProfileServices = once(async () => {
+    const { registerProfileProviders } = await import('./context_awareness/profile_providers');
+    const rootProfileService = new RootProfileService();
+    const dataSourceProfileService = new DataSourceProfileService();
+    const documentProfileService = new DocumentProfileService();
+    const experimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
 
-    this.dataSourceProfileService.registerProvider(
-      createLogsDataSourceProfileProvider(providerServices)
-    );
-    this.documentProfileService.registerProvider(
-      createLogDocumentProfileProvider(providerServices)
-    );
-  }
+    registerProfileProviders({
+      rootProfileService,
+      dataSourceProfileService,
+      documentProfileService,
+      experimentalProfileIds,
+    });
 
-  private createProfilesManager() {
+    return { rootProfileService, dataSourceProfileService, documentProfileService };
+  });
+
+  private async createProfilesManager() {
+    const { rootProfileService, dataSourceProfileService, documentProfileService } =
+      await this.createProfileServices();
+
     return new ProfilesManager(
-      this.rootProfileService,
-      this.dataSourceProfileService,
-      this.documentProfileService
+      rootProfileService,
+      dataSourceProfileService,
+      documentProfileService
     );
   }
 
@@ -335,7 +340,7 @@ export class DiscoverPlugin
   private getDiscoverServices = (
     core: CoreStart,
     plugins: DiscoverStartPlugins,
-    profilesManager = this.createProfilesManager()
+    profilesManager: ProfilesManager
   ) => {
     return buildServices({
       core,
@@ -361,7 +366,8 @@ export class DiscoverPlugin
 
     const getDiscoverServicesInternal = async () => {
       const [coreStart, deps] = await core.getStartServices();
-      return this.getDiscoverServices(coreStart, deps);
+      const profilesManager = await this.createProfilesManager();
+      return this.getDiscoverServices(coreStart, deps, profilesManager);
     };
 
     plugins.embeddable.registerReactEmbeddableSavedObject({
