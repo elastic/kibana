@@ -11,6 +11,7 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
+import { IntegrationAssistantAPIAction } from '../../common/feature';
 import {
   CATEGORIZATION_GRAPH_PATH,
   CategorizationRequestBody,
@@ -29,6 +30,7 @@ export function registerCategorizationRoutes(
       path: CATEGORIZATION_GRAPH_PATH,
       access: 'internal',
       options: {
+        tags: [`access:${IntegrationAssistantAPIAction}`],
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, Plugin, CoreSetup } from '@kbn/core/public';
+import type { CoreStart, Plugin, CoreSetup, ApplicationStart } from '@kbn/core/public';
 import type {
   IntegrationAssistantPluginSetup,
   IntegrationAssistantPluginStart,
@@ -13,6 +13,7 @@ import type {
 } from './types';
 import { getCreateIntegrationLazy } from './components/create_integration';
 import { getCreateIntegrationCardButtonLazy } from './components/create_integration_card_button';
+import { IntegrationAssistantUICapability } from '../common/feature';
 
 export class IntegrationAssistantPlugin
   implements Plugin<IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart>
@@ -26,6 +27,10 @@ export class IntegrationAssistantPlugin
     dependencies: IntegrationAssistantPluginStartDependencies
   ): IntegrationAssistantPluginStart {
     const services = { ...core, ...dependencies };
+    const isAuthorized = hasBasicCapabilities(core.application.capabilities);
+    if (!isAuthorized) {
+      return {};
+    }
     return {
       CreateIntegration: getCreateIntegrationLazy(services),
       CreateIntegrationCardButton: getCreateIntegrationCardButtonLazy(),
@@ -34,3 +39,16 @@ export class IntegrationAssistantPlugin
 
   public stop() {}
 }
+
+const hasBasicCapabilities = (capabilities: ApplicationStart['capabilities']): boolean => {
+  const { fleet, fleetv2, actions } = capabilities;
+  if (
+    !fleet?.[IntegrationAssistantUICapability] || // create integrations assistant (from "Integrations" sub feature)
+    !fleetv2?.all || // Fleet v2 (real "Fleet" feature) write capability
+    !actions?.show || // Connectors read capability
+    !actions?.execute // Connectors execute capability
+  ) {
+    return false;
+  }
+  return true;
+};

@@ -11,6 +11,7 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
+import { IntegrationAssistantAPIAction } from '../../common/feature';
 import { ECS_GRAPH_PATH, EcsMappingRequestBody, EcsMappingResponse } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
@@ -23,6 +24,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
       path: ECS_GRAPH_PATH,
       access: 'internal',
       options: {
+        tags: [`access:${IntegrationAssistantAPIAction}`],
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },

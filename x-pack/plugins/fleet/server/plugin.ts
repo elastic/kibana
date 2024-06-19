@@ -42,6 +42,7 @@ import type {
 } from '@kbn/security-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldsMetadataServerSetup } from '@kbn/fields-metadata-plugin/server';
+import type { IntegrationAssistantPluginSetup } from '@kbn/integration-assistant-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -138,6 +139,7 @@ export interface FleetSetupDeps {
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
   fieldsMetadata: FieldsMetadataServerSetup;
+  integrationAssistant: IntegrationAssistantPluginSetup;
 }
 
 export interface FleetStartDeps {
@@ -462,6 +464,7 @@ export class FleetPlugin
         },
       });
 
+      const integrationAssistantSubFeature = deps.integrationAssistant?.getKibanaSubFeature();
       deps.features.registerKibanaFeature({
         id: 'fleet', // for BWC
         name: 'Integrations',
@@ -490,7 +493,7 @@ export class FleetPlugin
             ui: ['read'],
           },
         },
-        subFeatures: [],
+        subFeatures: integrationAssistantSubFeature ? [integrationAssistantSubFeature] : [],
       });
     }
 

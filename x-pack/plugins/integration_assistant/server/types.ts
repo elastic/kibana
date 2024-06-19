@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IntegrationAssistantPluginSetup {}
+export interface IntegrationAssistantPluginSetup {
+  getKibanaSubFeature: () => SubFeatureConfig;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IntegrationAssistantPluginStart {}
 
