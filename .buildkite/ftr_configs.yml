@@ -98,7 +98,8 @@ enabled:
   - test/api_integration/config.js
   - test/examples/config.js
   - test/functional/apps/bundles/config.ts
-  - test/functional/apps/console/config.ts
+  - test/functional/apps/console/monaco/config.ts
+  - test/functional/apps/console/ace/config.ts
   - test/functional/apps/context/config.ts
   - test/functional/apps/dashboard_elements/controls/common/config.ts
   - test/functional/apps/dashboard_elements/controls/options_list/config.ts
@@ -326,6 +327,7 @@ enabled:
   - x-pack/test/functional/apps/search_playground/config.ts
   - x-pack/test/functional/apps/snapshot_restore/config.ts
   - x-pack/test/functional/apps/spaces/config.ts
+  - x-pack/test/functional/apps/spaces/solution_view_flag_enabled/config.ts
   - x-pack/test/functional/apps/status_page/config.ts
   - x-pack/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts

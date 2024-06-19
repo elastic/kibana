@@ -716,6 +716,7 @@ packages/kbn-search-connectors @elastic/search-kibana
 x-pack/plugins/search_connectors @elastic/search-kibana
 packages/kbn-search-errors @elastic/kibana-data-discovery
 examples/search_examples @elastic/kibana-data-discovery
+x-pack/plugins/search_homepage @elastic/search-kibana
 packages/kbn-search-index-documents @elastic/search-kibana
 x-pack/plugins/search_inference_endpoints @elastic/search-kibana
 x-pack/plugins/search_notebooks @elastic/search-kibana
