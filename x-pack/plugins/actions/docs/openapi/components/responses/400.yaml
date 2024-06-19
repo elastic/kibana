@@ -6,13 +6,10 @@ content:
       properties:
         error: 
           type: string
-          examples:
-            - Bad Request
+          example: Bad Request
         message:
           type: string
-          examples:
-            - "error validating action type config: [index]: expected value of type [string] but got [undefined]"
+          example: "error validating action type config: [index]: expected value of type [string] but got [undefined]"
         statusCode:
           type: integer
-          examples:
-            - 400
+          example: 400
