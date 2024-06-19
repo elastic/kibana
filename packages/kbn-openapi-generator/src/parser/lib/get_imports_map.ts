@@ -29,8 +29,8 @@ export const getImportsMap = (parsedSchema: OpenApiDocument): ImportsMap => {
   return externalSchemaRefs.reduce<ImportsMap>((importMap, ref) => {
     const { importPath, importedSymbol, genFileImportPath } = parseRef(ref);
     if (importPath) {
-      const symbols = uniq([...importMap[genFileImportPath], importedSymbol]);
-      importMap[genFileImportPath] = symbols;
+      const existingSymbols = importMap[genFileImportPath] || [];
+      importMap[genFileImportPath] = uniq([...existingSymbols, importedSymbol]);
     }
     return importMap;
   }, {});
