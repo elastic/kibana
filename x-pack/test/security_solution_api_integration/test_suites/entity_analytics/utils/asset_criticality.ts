@@ -157,7 +157,7 @@ export const assetCriticalityRouteHelpersFactory = (
       .expect(expectStatusCode);
   },
   bulkUpload: async (
-    records: Array<{ id_field: string; id_value: string; criticality_level: string }>,
+    records: CreateAssetCriticalityRecord[],
     { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
   ) => {
     return supertest
