@@ -75,7 +75,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('KSPM EKS Temporary Keys', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186389
+    describe.skip('KSPM EKS Temporary Keys', () => {
       it('KSPM EKS Temporary Keys Workflow', async () => {
         const accessKeyId = 'accessKeyIdTest';
         const accessKeySecretKey = 'accessKeySecretKeyTest';
@@ -108,7 +109,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('KSPM EKS Shared Credentials', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186387
+    describe.skip('KSPM EKS Shared Credentials', () => {
       it('KSPM EKS Shared Credentials Workflow', async () => {
         const sharedCredentialFile = 'sharedCredentialFileTest';
         const sharedCredentialProfileName = 'sharedCredentialProfileNameTest';
