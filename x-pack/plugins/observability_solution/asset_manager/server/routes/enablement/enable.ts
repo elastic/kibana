@@ -6,113 +6,97 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import {
-  readEntityDiscoveryAPIKey,
-  saveEntityDiscoveryAPIKey,
-  deleteEntityDiscoveryAPIKey,
-  checkIfAPIKeysAreEnabled,
-  canEnableEntityDiscovery,
-  generateEntityDiscoveryAPIKey,
-  checkIfEntityDiscoveryAPIKeyIsValid,
-} from '../../lib/auth';
+import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
-import { ERROR_API_KEY_SERVICE_DISABLED, ERROR_USER_NOT_AUTHORIZED } from '../../../common/errors';
+import {
+  canEnableEntityDiscovery,
+  checkIfAPIKeysAreEnabled,
+  checkIfEntityDiscoveryAPIKeyIsValid,
+  deleteEntityDiscoveryAPIKey,
+  generateEntityDiscoveryAPIKey,
+  readEntityDiscoveryAPIKey,
+  saveEntityDiscoveryAPIKey,
+} from '../../lib/auth';
+import { builtInDefinitions } from '../../lib/entities/built_in';
+import { installBuiltInEntityDefinitions } from '../../lib/entities/install_entity_definition';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
+import { ERROR_API_KEY_SERVICE_DISABLED, ERROR_USER_NOT_AUTHORIZED } from '../../../common/errors';
 
-export function enableEntityDiscoveryKeyRoute<T extends RequestHandlerContext>({
+export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,
   server,
+  logger,
 }: SetupRouteOptions<T>) {
-  router.put(
+  router.post<unknown, unknown, unknown>(
     {
       path: `${ENTITY_INTERNAL_API_PREFIX}/managed/enablement`,
       validate: false,
     },
     async (context, req, res) => {
-      try {
-        server.logger.debug('checking if API key service is enabled');
-
-        const apiKeysEnabled = await checkIfAPIKeysAreEnabled(server);
-        if (!apiKeysEnabled) {
-          return res.ok({
-            body: {
-              success: false,
-              reason: ERROR_API_KEY_SERVICE_DISABLED,
-              message:
-                'API key service is not enabled; try configuring `xpack.security.authc.api_key.enabled` in your elasticsearch config',
-            },
-          });
-        }
-
-        server.logger.debug(
-          'checking if current Kibana user has permission to enable entity discovery'
-        );
-
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const canEnable = await canEnableEntityDiscovery(esClient);
-        if (!canEnable) {
-          return res.ok({
-            body: {
-              success: false,
-              reason: ERROR_USER_NOT_AUTHORIZED,
-              message:
-                'Current Kibana user does not have the required permissions to enable entity discovery',
-            },
-          });
-        }
-
-        const soClient = (await context.core).savedObjects.getClient({
-          includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+      const apiKeysEnabled = await checkIfAPIKeysAreEnabled(server);
+      if (!apiKeysEnabled) {
+        return res.ok({
+          body: {
+            success: false,
+            reason: ERROR_API_KEY_SERVICE_DISABLED,
+            message:
+              'API key service is not enabled; try configuring `xpack.security.authc.api_key.enabled` in your elasticsearch config',
+          },
         });
+      }
 
-        server.logger.debug('reading entity discovery API key from saved object');
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const canEnable = await canEnableEntityDiscovery(esClient);
+      if (!canEnable) {
+        return res.ok({
+          body: {
+            success: false,
+            reason: ERROR_USER_NOT_AUTHORIZED,
+            message:
+              'Current Kibana user does not have the required permissions to enable entity discovery',
+          },
+        });
+      }
 
-        const existingApiKey = await readEntityDiscoveryAPIKey(server);
+      const soClient = (await context.core).savedObjects.getClient({
+        includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+      });
 
-        if (existingApiKey !== undefined) {
-          server.logger.debug('validating existing entity discovery API key');
+      const existingApiKey = await readEntityDiscoveryAPIKey(server);
 
-          const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, existingApiKey);
+      if (existingApiKey !== undefined) {
+        const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, existingApiKey);
 
-          if (isValid) {
-            return res.ok({
-              body: {
-                success: true,
-                message: 'Valid entity discovery API key already exists',
-              },
-            });
-          }
-
-          server.logger.debug('existing entity discovery API key is invalid; deleting it');
-
+        if (!isValid) {
           await deleteEntityDiscoveryAPIKey(soClient);
           await server.security.authc.apiKeys.invalidateAsInternalUser({
             ids: [existingApiKey.id],
           });
         }
-
-        server.logger.debug('generating a fresh entity discovery API key');
-
-        const apiKey = await generateEntityDiscoveryAPIKey(server, req);
-
-        if (apiKey === undefined) {
-          throw new Error('could not generate entity discovery API key');
-        }
-
-        server.logger.debug('saving entity discovery API key in encrypted saved object');
-        await saveEntityDiscoveryAPIKey(soClient, apiKey);
-
-        return res.ok({
-          body: {
-            success: true,
-            message: 'New entity discovery API key generated',
-          },
-        });
-      } catch (err) {
-        server.logger.error(err);
-        return res.customError({ statusCode: 500, body: err });
       }
+
+      const apiKey = await generateEntityDiscoveryAPIKey(server, req);
+
+      if (apiKey === undefined) {
+        throw new Error('could not generate entity discovery API key');
+      }
+
+      await saveEntityDiscoveryAPIKey(soClient, apiKey);
+
+      const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
+      const scopedSoClient = server.core.savedObjects.getScopedClient(fakeRequest);
+      const scopedEsClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+
+      await installBuiltInEntityDefinitions({
+        logger,
+        builtInDefinitions,
+        spaceId: 'default',
+        esClient: scopedEsClient,
+        soClient: scopedSoClient,
+      });
+
+      return res.ok({ body: { success: true } });
     }
   );
 }
