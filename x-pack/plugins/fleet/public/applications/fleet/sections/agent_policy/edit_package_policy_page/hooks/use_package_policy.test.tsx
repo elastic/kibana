@@ -111,7 +111,7 @@ jest.mock('../../../../../../hooks/use_request', () => ({
                   },
                 ],
                 vars: {
-                  existing_package_level_var: { value: '/var/log/nginx/access.log*', type: 'text' },
+                  existing_input_level_var: { value: 'existing-value', type: 'text' },
                 },
               },
             ],
@@ -415,8 +415,8 @@ describe('usePackagePolicy', () => {
                   ],
                   vars: {
                     new_input_level_var: { value: 'test', type: 'text' },
-                    existing_package_level_var: {
-                      value: '/var/log/nginx/access.log*',
+                    existing_input_level_var: {
+                      value: 'default_value',
                       type: 'text',
                     },
                   },
@@ -448,6 +448,13 @@ describe('usePackagePolicy', () => {
                   vars: [
                     {
                       name: 'new_input_level_var',
+                      type: 'text',
+                      title: 'Paths',
+                      required: false,
+                      show_user: true,
+                    },
+                    {
+                      name: 'existing_input_level_var',
                       type: 'text',
                       title: 'Paths',
                       required: false,
@@ -501,13 +508,6 @@ describe('usePackagePolicy', () => {
               required: false,
               show_user: true,
             },
-            {
-              name: 'existing_package_level_var',
-              type: 'text',
-              title: 'Existing',
-              required: false,
-              show_user: true,
-            },
           ],
         },
       },
@@ -515,7 +515,7 @@ describe('usePackagePolicy', () => {
     } as any);
     const renderer = createFleetTestRendererMock();
     const { result, waitForNextUpdate } = renderer.renderHook(() =>
-      usePackagePolicyWithRelatedData('package-policy-1', {
+      usePackagePolicyWithRelatedData('package-policy-2', {
         forceUpgrade: true,
       })
     );
@@ -547,9 +547,9 @@ describe('usePackagePolicy', () => {
             ],
             "type": "logfile",
             "vars": Object {
-              "existing_package_level_var": Object {
+              "existing_input_level_var": Object {
                 "type": "text",
-                "value": "/var/log/nginx/access.log*",
+                "value": "existing-value",
               },
               "new_input_level_var": Object {
                 "type": "text",
