@@ -311,6 +311,11 @@ export const bucketAggsSchemas = t.intersection([
   ),
 ]);
 
+export const alertsAggregationsSchema = t.record(
+  t.string,
+  t.intersection([metricsAggsSchemas, bucketAggsSchemas])
+);
+
 export type PutIndexTemplateRequest = estypes.IndicesPutIndexTemplateRequest & {
   body?: { composed_of?: string[] };
 };

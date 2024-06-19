@@ -5,6 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { v4 as uuid } from 'uuid';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
@@ -27,6 +28,7 @@ import {
 
 import {
   InlineScript,
+  MappingRuntimeFields,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RuleTypeParams, PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
@@ -41,6 +43,8 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
+import { TypeOf } from 'io-ts';
+import { DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE, MAX_ALERTS_GROUPING_QUERY_SIZE } from './constants';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -53,6 +57,7 @@ import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { IRuleDataService } from '../rule_data_plugin_service';
 import { getAuthzFilter, getSpacesFilter } from '../lib';
 import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
+import { alertsAggregationsSchema } from '../../common/types';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -88,15 +93,15 @@ export interface ConstructorOptions {
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
   status: string;
-  _version: string | undefined;
+  _version?: string;
   index: string;
 }
 
 export interface BulkUpdateOptions<Params extends RuleTypeParams> {
-  ids: string[] | undefined | null;
+  ids?: string[] | null;
   status: STATUS_VALUES;
   index: string;
-  query: object | string | undefined | null;
+  query?: object | string | null;
 }
 
 interface MgetAndAuditAlert {
@@ -129,17 +134,18 @@ interface GetAlertSummaryParams {
 }
 
 interface SingleSearchAfterAndAudit {
-  id?: string | null | undefined;
-  query?: string | object | undefined;
-  aggs?: Record<string, any> | undefined;
+  id?: string | null;
+  query?: string | object;
+  aggs?: Record<string, any>;
   index?: string;
-  _source?: string[] | undefined;
+  _source?: string[] | false;
   track_total_hits?: boolean | number;
-  size?: number | undefined;
+  size?: number;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
-  sort?: estypes.SortOptions[] | undefined;
-  lastSortIds?: Array<string | number> | undefined;
+  sort?: estypes.SortOptions[];
+  lastSortIds?: Array<string | number>;
   featureIds?: string[];
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 /**
@@ -213,13 +219,10 @@ export class AlertsClient {
     items: Array<{
       _id: string;
       // this is typed kind of crazy to fit the output of es api response to this
-      _source?:
-        | {
-            [ALERT_RULE_TYPE_ID]?: string | null | undefined;
-            [ALERT_RULE_CONSUMER]?: string | null | undefined;
-          }
-        | null
-        | undefined;
+      _source?: {
+        [ALERT_RULE_TYPE_ID]?: string | null;
+        [ALERT_RULE_CONSUMER]?: string | null;
+      } | null;
     }>,
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update
   ) {
@@ -236,8 +239,8 @@ export class AlertsClient {
       { hitIds: [], ownersAndRuleTypeIds: [] } as {
         hitIds: string[];
         ownersAndRuleTypeIds: Array<{
-          [ALERT_RULE_TYPE_ID]: string | null | undefined;
-          [ALERT_RULE_CONSUMER]: string | null | undefined;
+          [ALERT_RULE_TYPE_ID]?: string | null;
+          [ALERT_RULE_CONSUMER]?: string | null;
         }>;
       }
     );
@@ -289,6 +292,7 @@ export class AlertsClient {
     sort,
     lastSortIds = [],
     featureIds,
+    runtimeMappings,
   }: SingleSearchAfterAndAudit) {
     try {
       const alertSpaceId = this.spaceId;
@@ -322,6 +326,7 @@ export class AlertsClient {
             },
           },
         ],
+        runtime_mappings: runtimeMappings,
       };
 
       if (lastSortIds.length > 0) {
@@ -982,6 +987,7 @@ export class AlertsClient {
     sort,
     track_total_hits: trackTotalHits,
     _source,
+    runtimeMappings,
   }: {
     aggs?: object;
     featureIds?: string[];
@@ -991,7 +997,8 @@ export class AlertsClient {
     size?: number;
     sort?: estypes.SortOptions[];
     track_total_hits?: boolean | number;
-    _source?: string[];
+    _source?: string[] | false;
+    runtimeMappings?: MappingRuntimeFields;
   }) {
     try {
       let indexToUse = index;
@@ -1013,6 +1020,7 @@ export class AlertsClient {
         operation: ReadOperations.Find,
         sort,
         lastSortIds: searchAfter,
+        runtimeMappings,
       });
 
       if (alertsSearchResponse == null) {
@@ -1026,6 +1034,103 @@ export class AlertsClient {
       this.logger.error(`find threw an error: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Performs a `find` query to extract aggregations on alert groups
+   */
+  public getGroupAggregations({
+    featureIds,
+    groupByField,
+    aggregations,
+    filters,
+    pageIndex = 0,
+    pageSize = DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE,
+    sort = [{ unitsCount: { order: 'desc' } }],
+  }: {
+    /**
+     * The feature ids the alerts belong to, used for authorization
+     */
+    featureIds: string[];
+    /**
+     * The field to group by
+     * @example "kibana.alert.rule.name"
+     */
+    groupByField: string;
+    /**
+     * The aggregations to perform on the groupByField buckets
+     */
+    aggregations: TypeOf<typeof alertsAggregationsSchema>;
+    /**
+     * The filters to apply to the query
+     */
+    filters?: estypes.QueryDslQueryContainer[];
+    /**
+     * Any sort options to apply to the groupByField aggregations
+     */
+    sort?: object[];
+    /**
+     * The page index to start from
+     */
+    pageIndex?: number;
+    /**
+     * The page size
+     */
+    pageSize?: number;
+  }) {
+    const uniqueValue = uuid();
+    return this.find({
+      aggs: {
+        groupByField: {
+          terms: {
+            field: 'groupByField',
+            size: MAX_ALERTS_GROUPING_QUERY_SIZE,
+          },
+          aggs: {
+            bucket_truncate: {
+              bucket_sort: {
+                sort,
+                from: pageIndex * pageSize,
+                size: pageSize,
+              },
+            },
+            ...(aggregations ?? {}),
+          },
+        },
+        unitsCount: { value_count: { field: 'groupByField' } },
+        groupsCount: { cardinality: { field: 'groupByField' } },
+      },
+      featureIds,
+      query: {
+        bool: {
+          filter: filters,
+        },
+      },
+      runtimeMappings: {
+        groupByField: {
+          type: 'keyword',
+          script: {
+            source:
+              // When size()==0, emits a uniqueValue as the value to represent this group  else join by uniqueValue.
+              "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
+              // Else, join the values with uniqueValue. We cannot simply emit the value like doc[params['selectedGroup']].value,
+              // the runtime field will only return the first value in an array.
+              // The docs advise that if the field has multiple values, "Scripts can call the emit method multiple times to emit multiple values."
+              // However, this gives us a group for each value instead of combining the values like we're aiming for.
+              // Instead of .value, we can retrieve all values with .join().
+              // Instead of joining with a "," we should join with a unique value to avoid splitting a value that happens to contain a ",".
+              // We will format into a proper array in parseGroupingQuery .
+              " else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}",
+            params: {
+              selectedGroup: groupByField,
+              uniqueValue,
+            },
+          },
+        },
+      },
+      size: 0,
+      _source: false,
+    });
   }
 
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
