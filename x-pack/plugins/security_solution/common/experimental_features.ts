@@ -86,13 +86,13 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables use of agent status service to get agent status information
    * for endpoint and third-party agents.
    */
-  agentStatusClientEnabled: false,
+  agentStatusClientEnabled: true,
 
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
    */
-  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
    * Enables scan response action on Endpoint
