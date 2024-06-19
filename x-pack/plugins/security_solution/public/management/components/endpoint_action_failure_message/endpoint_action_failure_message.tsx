@@ -18,17 +18,12 @@ interface EndpointActionFailureMessageProps {
   'data-test-subj'?: string;
 }
 
-type MandatoryProperty<T, Prop extends keyof T> = T & {
-  [prop in Prop]-?: NonNullable<T[Prop]>;
-};
-
 export const hasKnownErrorCode = (
-  endpointAgentOutput: MandatoryProperty<ActionDetails, 'outputs'>[string]
+  endpointAgentOutput: Required<Pick<ActionDetails, 'outputs'>>['outputs'][string]
 ): boolean =>
-  endpointAgentOutput &&
   endpointAgentOutput.type === 'json' &&
-  endpointAgentOutput.content.code &&
-  endpointActionResponseCodes[endpointAgentOutput.content.code];
+  !!endpointAgentOutput.content.code &&
+  !!endpointActionResponseCodes[endpointAgentOutput.content.code];
 
 export const EndpointActionFailureMessage = memo<EndpointActionFailureMessageProps>(
   ({ action, isConsoleOutput = true, 'data-test-subj': dataTestSubj }) => {
@@ -45,7 +40,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
         for (const agent of action.agents) {
           const endpointAgentOutput = action.outputs[agent];
 
-          if (hasKnownErrorCode(endpointAgentOutput)) {
+          if (endpointAgentOutput && hasKnownErrorCode(endpointAgentOutput)) {
             errors.push(endpointActionResponseCodes[endpointAgentOutput.content.code]);
           }
         }

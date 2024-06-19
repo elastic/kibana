@@ -127,7 +127,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
         <>
           {OUTPUT_MESSAGES.hasFailed(command)}
           {agents.map((agentId) => {
-            return hasKnownErrorCode(outputs[agentId]) ? (
+            return outputs[agentId] && hasKnownErrorCode(outputs[agentId]) ? (
               <>
                 <EuiSpacer size="s" />
                 <EndpointActionFailureMessage
