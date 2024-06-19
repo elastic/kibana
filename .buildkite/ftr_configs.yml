@@ -389,6 +389,7 @@ enabled:
   - x-pack/test/security_api_integration/oidc.http2.config.ts
   - x-pack/test/security_api_integration/pki.config.ts
   - x-pack/test/security_api_integration/saml.config.ts
+  - x-pack/test/security_api_integration/saml.http2.config.ts
   - x-pack/test/security_api_integration/saml_cloud.config.ts
   - x-pack/test/security_api_integration/session_idle.config.ts
   - x-pack/test/security_api_integration/session_invalidate.config.ts

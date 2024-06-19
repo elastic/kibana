@@ -11,9 +11,9 @@ import { configureHTTP2 } from '../../../test/common/configure_http2';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
+  const functionalConfig = await readConfigFile(require.resolve('./oidc.config'));
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
-  const functionalConfig = await readConfigFile(require.resolve('./oidc.config'));
 
   return configureHTTP2({
     ...functionalConfig.getAll(),
