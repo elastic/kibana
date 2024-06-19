@@ -36,6 +36,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/utility-types-jest",
     "@kbn/security-plugin-types-public",
+    "@kbn/cloud-plugin",
     "@kbn/security-plugin-types-common",
     "@kbn/core-application-browser",
   ],
