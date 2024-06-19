@@ -18,6 +18,9 @@ import userEvent from '@testing-library/user-event';
 
 describe('Case Owner Selection', () => {
   const onSubmit = jest.fn();
+  const onOwnerChange = jest.fn();
+  const selectedOwner = SECURITY_SOLUTION_OWNER;
+
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
@@ -28,7 +31,12 @@ describe('Case Owner Selection', () => {
   it('renders', async () => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
-        <CreateCaseOwnerSelector availableOwners={[SECURITY_SOLUTION_OWNER]} isLoading={false} />
+        <CreateCaseOwnerSelector
+          availableOwners={[SECURITY_SOLUTION_OWNER]}
+          isLoading={false}
+          onOwnerChange={onOwnerChange}
+          selectedOwner={selectedOwner}
+        />
       </FormTestComponent>
     );
 
@@ -41,7 +49,12 @@ describe('Case Owner Selection', () => {
   ])('disables %s button if user only has %j', async (disabledButton, permission) => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
-        <CreateCaseOwnerSelector availableOwners={[permission]} isLoading={false} />
+        <CreateCaseOwnerSelector
+          availableOwners={[permission]}
+          isLoading={false}
+          onOwnerChange={onOwnerChange}
+          selectedOwner={selectedOwner}
+        />
       </FormTestComponent>
     );
 
@@ -55,6 +68,8 @@ describe('Case Owner Selection', () => {
         <CreateCaseOwnerSelector
           availableOwners={[OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]}
           isLoading={false}
+          onOwnerChange={onOwnerChange}
+          selectedOwner={selectedOwner}
         />
       </FormTestComponent>
     );
@@ -73,7 +88,12 @@ describe('Case Owner Selection', () => {
   it('defaults to security Solution with empty owners', async () => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
-        <CreateCaseOwnerSelector availableOwners={[]} isLoading={false} />
+        <CreateCaseOwnerSelector
+          availableOwners={[]}
+          isLoading={false}
+          onOwnerChange={onOwnerChange}
+          selectedOwner={selectedOwner}
+        />
       </FormTestComponent>
     );
 
@@ -94,6 +114,8 @@ describe('Case Owner Selection', () => {
         <CreateCaseOwnerSelector
           availableOwners={[OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]}
           isLoading={false}
+          onOwnerChange={onOwnerChange}
+          selectedOwner={selectedOwner}
         />
       </FormTestComponent>
     );
