@@ -26,6 +26,10 @@ const supportedEndpoints = [
     method: 'put',
     props: ['pivot'],
   },
+  {
+    path: '/_ml/data_frame/analytics/{id}' as const,
+    method: 'put',
+  },
 ];
 
 /**
