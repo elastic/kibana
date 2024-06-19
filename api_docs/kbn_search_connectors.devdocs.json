@@ -6499,15 +6499,7 @@
             "section": "def-common.ConnectorStatus",
             "text": "ConnectorStatus"
           },
-          "; description: string | null; language: string | null; configuration: ",
-          {
-            "pluginId": "@kbn/search-connectors",
-            "scope": "common",
-            "docId": "kibKbnSearchConnectorsPluginApi",
-            "section": "def-common.ConnectorConfiguration",
-            "text": "ConnectorConfiguration"
-          },
-          "; index_name: string | null; pipeline?: ",
+          "; description: string | null; language: string | null; pipeline?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -6515,7 +6507,15 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | null | undefined; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
+          " | null | undefined; configuration: ",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ConnectorConfiguration",
+            "text": "ConnectorConfiguration"
+          },
+          "; index_name: string | null; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",

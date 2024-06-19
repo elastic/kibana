@@ -8,13 +8,13 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RiskScoresCalculationRequest } from '../../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
 import {
   APP_ID,
   DEFAULT_RISK_SCORE_PAGE_SIZE,
   RISK_SCORE_CALCULATION_URL,
 } from '../../../../../common/constants';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
