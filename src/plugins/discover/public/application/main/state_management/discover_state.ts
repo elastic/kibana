@@ -281,6 +281,7 @@ export function getDiscoverStateContainer({
       }
     }
   };
+
   const setDataView = (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
@@ -406,6 +407,7 @@ export function getDiscoverStateContainer({
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
       savedSearchContainer.getState()
     );
+
     // subscribing to state changes of appStateContainer, triggering data fetching
     const appStateUnsubscribe = appStateContainer.subscribe(
       buildStateSubscribe({
@@ -417,6 +419,7 @@ export function getDiscoverStateContainer({
         setDataView,
       })
     );
+
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
 
@@ -467,6 +470,7 @@ export function getDiscoverStateContainer({
     await onChangeDataView(newDataView);
     return newDataView;
   };
+
   /**
    * Triggered when a user submits a query in the search bar
    */
@@ -492,6 +496,7 @@ export function getDiscoverStateContainer({
       appState: appStateContainer,
     });
   };
+
   /**
    * Undo all changes to the current saved search
    */
@@ -518,6 +523,7 @@ export function getDiscoverStateContainer({
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
+
   const fetchData = (initial: boolean = false) => {
     addLog('fetchData', { initial });
     if (!initial || dataStateContainer.getInitialFetchStatus() === FetchStatus.LOADING) {

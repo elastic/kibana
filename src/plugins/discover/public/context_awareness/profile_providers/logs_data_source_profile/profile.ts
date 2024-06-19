@@ -21,17 +21,17 @@ export const createLogsDataSourceProfileProvider = (
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
   profile: {
-    getDefaultAppState: (prev) => () => {
-      const prevState = prev();
+    getDefaultAppState: (prev) => (params) => {
+      const prevState = prev(params);
+      const columns = prevState?.columns ?? [];
 
-      return {
-        columns: [
-          ...(prevState?.columns ?? []),
-          { name: 'log.level', width: 100 },
-          { name: 'message' },
-        ],
-        rowHeight: 1,
-      };
+      if (params.dataView.isTimeBased()) {
+        columns.push({ name: params.dataView.timeFieldName, width: 212 });
+      }
+
+      columns.push({ name: 'log.level', width: 100 }, { name: 'message' });
+
+      return { columns, rowHeight: 1 };
     },
   },
   resolve: (params) => {
