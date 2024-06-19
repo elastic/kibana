@@ -29,7 +29,6 @@ interface Props {
 }
 
 export function SloAlertsWrapper({
-  embeddable,
   slos,
   deps,
   timeRange: initialTimeRange,

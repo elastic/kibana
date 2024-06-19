@@ -108,7 +108,6 @@ export class SloPlugin
         pluginsSetup.embeddable.registerReactEmbeddableFactory(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           async () => {
-            const deps = { ...coreStart, ...pluginsStart };
             const { getOverviewEmbeddableFactory } = await import(
               './embeddable/slo/overview/slo_embeddable_factory'
             );
@@ -119,8 +118,6 @@ export class SloPlugin
         pluginsSetup.embeddable.registerReactEmbeddableFactory(
           SLO_ALERTS_EMBEDDABLE_ID,
           async () => {
-            const deps = { ...coreStart, ...pluginsStart };
-
             const { getAlertsEmbeddableFactory } = await import(
               './embeddable/slo/alerts/slo_alerts_embeddable_factory'
             );

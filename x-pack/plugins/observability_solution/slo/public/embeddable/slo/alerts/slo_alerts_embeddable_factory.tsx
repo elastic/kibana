@@ -143,7 +143,6 @@ export function getAlertsEmbeddableFactory(
                   <QueryClientProvider client={queryClient}>
                     <SloAlertsWrapper
                       onEdit={onEdit}
-                      embeddable={api}
                       deps={deps}
                       slos={slos}
                       timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
