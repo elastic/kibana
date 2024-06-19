@@ -86,19 +86,14 @@ export const getDefaultAssistantGraph = ({
         logger: logger.get(AGENT_NODE),
         state,
       });
-    const executeToolsNode = (state: AgentState, config?: RunnableConfig) => {
-      try {
-        return executeTools({
-          ...nodeParams,
-          config,
-          logger: logger.get(TOOLS_NODE),
-          state,
-          tools,
-        });
-      } catch (e) {
-        console.error('dupa', e);
-      }
-    };
+    const executeToolsNode = (state: AgentState, config?: RunnableConfig) =>
+      executeTools({
+        ...nodeParams,
+        config,
+        logger: logger.get(TOOLS_NODE),
+        state,
+        tools,
+      });
     const shouldContinueEdge = (state: AgentState) => shouldContinue({ ...nodeParams, state });
 
     // Put together a new graph using the nodes and default state from above

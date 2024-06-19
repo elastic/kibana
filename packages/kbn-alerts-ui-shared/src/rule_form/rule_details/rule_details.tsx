@@ -15,8 +15,7 @@ import {
   EuiComboBoxOptionOption,
   EuiText,
 } from '@elastic/eui';
-import type { SanitizedRule, RuleTypeParams } from '@kbn/alerting-types';
-import type { RuleFormErrors } from '../types';
+import type { RuleFormErrors, Rule, RuleTypeParams } from '../../common';
 import {
   RULE_DETAILS_TITLE,
   RULE_DETAILS_DESCRIPTION,
@@ -26,8 +25,8 @@ import {
 
 export interface RuleDetailsProps {
   formValues: {
-    tags?: SanitizedRule<RuleTypeParams>['tags'];
-    name: SanitizedRule<RuleTypeParams>['name'];
+    tags?: Rule<RuleTypeParams>['tags'];
+    name: Rule<RuleTypeParams>['name'];
   };
   errors?: RuleFormErrors;
   onChange: (property: string, value: unknown) => void;
