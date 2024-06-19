@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiPanel, transparentize } from '@elastic/eui';
+import { EuiIcon, EuiPanel, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useRef } from 'react';
@@ -28,6 +28,7 @@ export const KibanaGridElement = ({
   updateShift: (pos: { x: number; y: number }) => void;
 }) => {
   const divRef = useRef<HTMLDivElement>(null);
+  const ghostRef = useRef<HTMLDivElement>(null);
 
   return (
     <div
@@ -45,38 +46,66 @@ export const KibanaGridElement = ({
         css={css`
           position: relative;
           height: 100%;
-          border: ${isBeingDragged ? `1px dashed ${euiThemeVars.euiColorSuccess}` : 'auto'};
+          border: ${isBeingDragged
+            ? `${euiThemeVars.euiBorderWidthThin} dashed ${euiThemeVars.euiColorSuccess}`
+            : 'auto'};
           :hover .resizeHandle {
+            opacity: 1;
+          }
+          :hover .dragHandle {
             opacity: 1;
           }
         `}
       >
+        {/* Dragging ghost */}
+        <div
+          css={css`
+            position: absolute;
+            opacity: 0;
+          `}
+          ref={ghostRef}
+        >
+          <EuiIcon type="grid" />
+        </div>
+        {/* drag handle */}
         <div
           draggable="true"
+          className="dragHandle"
           css={css`
-            top: 0;
+            opacity: 0;
+            top: -${euiThemeVars.euiSizeL};
             position: absolute;
-            background-color: red;
+            z-index: 1000;
+            border: 1px solid ${euiThemeVars.euiBorderColor};
+            background-color: ${euiThemeVars.euiColorEmptyShade};
+            border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
             width: ${euiThemeVars.euiSizeL};
             height: ${euiThemeVars.euiSizeL};
             cursor: move;
+            display: flex;
+            justify-content: center;
+            align-items: center;
           `}
           onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.dropEffect = 'move';
+            e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
             const shiftX = e.clientX - divRef.current!.getBoundingClientRect().left;
             const shiftY = e.clientY - divRef.current!.getBoundingClientRect().top;
             updateShift({ x: shiftX, y: shiftY });
             setDraggingId(id);
           }}
-        ></div>
-        <strong>id:</strong> {gridData.id}{' '}
+        >
+          <EuiIcon type="grabOmnidirectional" />
+        </div>
+        {/* Resize handle */}
         <div
           draggable="true"
           className="resizeHandle"
           onDragStart={(e) => {
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.dropEffect = 'move';
+            e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
             const shiftX = e.clientX - divRef.current!.getBoundingClientRect().right;
             const shiftY = e.clientY - divRef.current!.getBoundingClientRect().bottom;
             updateShift({ x: shiftX, y: shiftY });
@@ -100,6 +129,8 @@ export const KibanaGridElement = ({
             }
           `}
         ></div>
+        {/* Contents */}
+        <strong>id:</strong> {gridData.id}
       </EuiPanel>
     </div>
   );

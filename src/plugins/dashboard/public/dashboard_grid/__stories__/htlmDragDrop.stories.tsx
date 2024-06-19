@@ -17,7 +17,7 @@ export default {
 };
 
 export const GridLayoutStorybook = () => {
-  const [gridLayout, setGridLayout] = useState<GridLayout>({
+  const [gridLayout1, setGridLayout1] = useState<GridLayout>({
     panel1: { column: 0, row: 0, width: 12, height: 6, id: 'panel1' },
     panel2: { column: 0, row: 6, width: 8, height: 4, id: 'panel2' },
     panel3: { column: 8, row: 6, width: 12, height: 4, id: 'panel3' },
@@ -30,8 +30,8 @@ export const GridLayoutStorybook = () => {
 
   return (
     <KibanaGridLayout
-      gridLayout={gridLayout}
-      setGridLayout={setGridLayout}
+      gridLayout={gridLayout1}
+      setGridLayout={setGridLayout1}
       settings={{ gutterSize: 8, rowHeight: 26, columnCount: 48 }}
     />
   );
