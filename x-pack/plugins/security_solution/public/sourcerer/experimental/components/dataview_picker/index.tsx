@@ -7,10 +7,11 @@
 
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useRef, useMemo, memo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
 import { selectDataView } from '../../redux/actions';
-import { useDispatch, useSelector } from '../../redux/hooks';
 import { sourcererAdapterSelector } from '../../redux/selectors';
 
 const TRIGGER_CONFIG = {
@@ -30,7 +31,7 @@ export const DataviewPicker = memo(() => {
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  // TODO: should this be implemented like that?
+  // TODO: should this be implemented like that? If yes, we need to source dataView somehow or implement the same thing based on the existing state value.
   // const canEditDataView =
   // Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
   const canEditDataView = true;
@@ -47,26 +48,27 @@ export const DataviewPicker = memo(() => {
 
   const onFieldEdited = useCallback(() => {}, []);
 
-  const editField = useMemo(
-    () =>
-      canEditDataView
-        ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
-            if (dataViewId) {
-              const dataViewInstance = await data.dataViews.get(dataViewId);
-              closeFieldEditor.current = dataViewFieldEditor.openEditor({
-                ctx: {
-                  dataView: dataViewInstance,
-                },
-                fieldName,
-                onSave: async () => {
-                  onFieldEdited();
-                },
-              });
-            }
-          }
-        : undefined,
-    [canEditDataView, dataViewId, data.dataViews, dataViewFieldEditor, onFieldEdited]
-  );
+  const editField = useMemo(() => {
+    if (!canEditDataView) {
+      return;
+    }
+    return async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
+      if (!dataViewId) {
+        return;
+      }
+
+      const dataViewInstance = await data.dataViews.get(dataViewId);
+      closeFieldEditor.current = dataViewFieldEditor.openEditor({
+        ctx: {
+          dataView: dataViewInstance,
+        },
+        fieldName,
+        onSave: async () => {
+          onFieldEdited();
+        },
+      });
+    };
+  }, [canEditDataView, dataViewId, data.dataViews, dataViewFieldEditor, onFieldEdited]);
 
   const addField = useMemo(
     () => (canEditDataView && editField ? () => editField(undefined, 'add') : undefined),
@@ -84,7 +86,7 @@ export const DataviewPicker = memo(() => {
 
   return (
     <DataViewPicker
-      currentDataViewId={dataViewId || undefined}
+      currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
       trigger={TRIGGER_CONFIG}
       onChangeDataView={handleChangeDataView}
       onEditDataView={handleEditDataView}

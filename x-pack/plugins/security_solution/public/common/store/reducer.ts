@@ -35,6 +35,10 @@ import type { GroupState } from './grouping/types';
 import { analyzerReducer } from '../../resolver/store/reducer';
 import { securitySolutionDiscoverReducer } from './discover/reducer';
 import type { AnalyzerState } from '../../resolver/types';
+import {
+  type DataviewPickerState,
+  reducer as dataviewPickerReducer,
+} from '../../sourcerer/experimental/redux/reducer';
 
 enableMapSet();
 
@@ -66,7 +70,8 @@ export const createInitialState = (
   },
   dataTableState: DataTableState,
   groupsState: GroupState,
-  analyzerState: AnalyzerState
+  analyzerState: AnalyzerState,
+  dataviewPickerState: DataviewPickerState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
@@ -128,6 +133,7 @@ export const createInitialState = (
       internal: undefined,
       savedSearch: undefined,
     },
+    dataviewPicker: dataviewPickerState,
   };
 
   return preloadedState;
@@ -146,6 +152,7 @@ export const createReducer: (
     sourcerer: sourcererReducer,
     globalUrlParam: globalUrlParamReducer,
     dataTable: dataTableReducer,
+    dataviewPicker: dataviewPickerReducer,
     groups: groupsReducer,
     analyzer: analyzerReducer,
     discover: securitySolutionDiscoverReducer,

@@ -7,25 +7,25 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 import type { SelectedDataView } from '../../store/model';
-import { type RootState } from './store';
+import { type State } from '../../../common/store/types';
 
 /**
  * Compatibility layer / adapter for legacy selector consumers.
  * It is used in useSecuritySolutionDataView hook as alternative data source (behind a flag)
  */
 export const sourcererAdapterSelector = createSelector(
-  [(state: RootState) => state],
+  [(state: State) => state],
   (state): SelectedDataView => {
     return {
-      loading: state.state === 'loading',
-      dataViewId: state.dataView.id || '',
-      patternList: state.patternList,
+      loading: state.dataviewPicker.state === 'loading',
+      dataViewId: state.dataviewPicker.dataView.id || '',
+      patternList: state.dataviewPicker.patternList,
       indicesExist: true,
       browserFields: {},
-      activePatterns: state.patternList,
+      activePatterns: state.dataviewPicker.patternList,
       runtimeMappings: {},
-      selectedPatterns: state.patternList,
-      indexPattern: { fields: [], title: state.dataView.title || '' },
+      selectedPatterns: state.dataviewPicker.patternList,
+      indexPattern: { fields: [], title: state.dataviewPicker.dataView.title || '' },
       sourcererDataView: {},
     };
   }

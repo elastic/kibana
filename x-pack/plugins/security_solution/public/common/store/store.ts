@@ -54,6 +54,11 @@ import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory
 import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
+import {
+  reducer as dataviewPickerReducer,
+  initialState as dataviewPickerState,
+} from '../../sourcerer/experimental/redux/reducer';
+import { listenerMiddleware } from '../../sourcerer/experimental/redux/listeners';
 
 let store: Store<State, Action> | null = null;
 
@@ -168,19 +173,22 @@ export const createStoreFactory = async (
     },
     dataTableInitialState,
     groupsInitialState,
-    analyzerInitialState
+    analyzerInitialState,
+    dataviewPickerState
   );
 
   const rootReducer = {
     ...subPlugins.explore.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
+    dataviewPicker: dataviewPickerReducer,
   };
 
   return createStore(initialState, rootReducer, coreStart, storage, [
     ...(subPlugins.management.store.middleware ?? []),
     ...(subPlugins.explore.store.middleware ?? []),
     ...[resolverMiddlewareFactory(dataAccessLayerFactory(coreStart)) ?? []],
+    listenerMiddleware.middleware,
   ]);
 };
 

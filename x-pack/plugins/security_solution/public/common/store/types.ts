@@ -25,6 +25,7 @@ import type { GlobalUrlParam } from './global_url_param';
 import type { GroupState } from './grouping/types';
 import type { SecuritySolutionDiscoverState } from './discover/model';
 import type { AnalyzerState } from '../../resolver/types';
+import { type DataviewPickerState } from '../../sourcerer/experimental/redux/reducer';
 
 export type State = HostsPluginState &
   UsersPluginState &
@@ -38,6 +39,7 @@ export type State = HostsPluginState &
     sourcerer: SourcererState;
     globalUrlParam: GlobalUrlParam;
     discover: SecuritySolutionDiscoverState;
+    dataviewPicker: DataviewPickerState;
   } & DataTableState &
   GroupState &
   AnalyzerState;

@@ -6,13 +6,15 @@
  */
 
 import React, { memo, useEffect, type FC, type PropsWithChildren } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-import { useDispatch } from '../redux/hooks';
-import { Context } from '../redux/context';
-import { store, listenerMiddleware, startAppListening } from '../redux/store';
 import { useKibana } from '../../../common/lib/kibana';
-import { createChangeDataviewListener, createInitDataviewListener } from '../redux/listeners';
+import {
+  createChangeDataviewListener,
+  createInitDataviewListener,
+  listenerMiddleware,
+  startAppListening,
+} from '../redux/listeners';
 import { init } from '../redux/actions';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 
@@ -38,11 +40,7 @@ export const DataviewPickerProvider: FC<PropsWithChildren<{}>> = memo(({ childre
     return () => listenerMiddleware.clearListeners();
   }, [services, dispatch]);
 
-  return (
-    <ReduxProvider context={Context} store={store}>
-      {children}
-    </ReduxProvider>
-  );
+  return <>{children}</>;
 });
 
 DataviewPickerProvider.displayName = 'DataviewPickerProvider';

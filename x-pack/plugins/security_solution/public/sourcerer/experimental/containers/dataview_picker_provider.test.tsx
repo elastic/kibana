@@ -8,11 +8,15 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { useDispatch } from '../redux/hooks';
+import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../common/lib/kibana';
 import { DataviewPickerProvider } from './dataview_picker_provider';
-import { startAppListening, listenerMiddleware } from '../redux/store';
-import { createChangeDataviewListener, createInitDataviewListener } from '../redux/listeners';
+import {
+  startAppListening,
+  listenerMiddleware,
+  createChangeDataviewListener,
+  createInitDataviewListener,
+} from '../redux/listeners';
 import { init } from '../redux/actions';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
@@ -21,19 +25,15 @@ jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('../redux/hooks', () => ({
+jest.mock('react-redux', () => ({
   useDispatch: jest.fn(),
 }));
 
-jest.mock('../redux/store', () => ({
-  ...jest.requireActual('../redux/store'),
+jest.mock('../redux/listeners', () => ({
   listenerMiddleware: {
     clearListeners: jest.fn(),
   },
   startAppListening: jest.fn(),
-}));
-
-jest.mock('../redux/listeners', () => ({
   createChangeDataviewListener: jest.fn(),
   createInitDataviewListener: jest.fn(),
 }));

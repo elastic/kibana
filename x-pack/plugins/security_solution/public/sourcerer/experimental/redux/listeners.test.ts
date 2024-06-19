@@ -15,13 +15,14 @@ import { createInitDataviewListener, createChangeDataviewListener } from './list
 import { isExperimentalSourcererEnabled } from '../is_enabled';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import { type ListenerEffectAPI } from '@reduxjs/toolkit';
-import type { AppDispatch, RootState } from './store';
+import type { AppDispatch } from './listeners';
+import { type State } from '../../../common/store/types';
 
 jest.mock('../is_enabled', () => ({
   isExperimentalSourcererEnabled: jest.fn().mockReturnValue(true),
 }));
 
-type ListenerApi = ListenerEffectAPI<RootState, AppDispatch>;
+type ListenerApi = ListenerEffectAPI<State, AppDispatch>;
 
 describe('Listeners', () => {
   describe('createInitDataviewListener', () => {
@@ -32,7 +33,7 @@ describe('Listeners', () => {
       listenerOptions = createInitDataviewListener({});
       listenerApi = {
         dispatch: jest.fn(),
-        getState: jest.fn(() => ({ state: 'pristine' })),
+        getState: jest.fn(() => ({ dataviewPicker: { state: 'pristine' } })),
       } as unknown as ListenerApi;
     });
 
@@ -50,7 +51,7 @@ describe('Listeners', () => {
     test('does not dispatch if state is not pristine', async () => {
       jest.mocked(isExperimentalSourcererEnabled).mockReturnValue(true);
       listenerApi.getState = jest.fn(() => ({
-        state: 'not_pristine',
+        dataviewPicker: { state: 'not_pristine' },
       })) as unknown as ListenerApi['getState'];
 
       await listenerOptions.effect(init('test-view'), listenerApi);

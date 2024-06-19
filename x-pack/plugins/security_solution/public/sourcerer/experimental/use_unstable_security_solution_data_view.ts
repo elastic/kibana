@@ -6,11 +6,11 @@
  */
 
 import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
 import { type SourcererScopeName, type SelectedDataView } from '../store/model';
 
 import { isExperimentalSourcererEnabled } from './is_enabled';
-import { useSelector } from './redux/hooks';
 import { sourcererAdapterSelector } from './redux/selectors';
 
 /**

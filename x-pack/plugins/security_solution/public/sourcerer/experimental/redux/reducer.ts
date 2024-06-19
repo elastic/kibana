@@ -51,3 +51,5 @@ export const reducer = createReducer(initialState, (builder) => {
     state.state = 'ready';
   });
 });
+
+export type DataviewPickerState = ReturnType<typeof reducer>;

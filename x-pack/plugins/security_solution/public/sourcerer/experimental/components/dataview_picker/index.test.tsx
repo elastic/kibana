@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { useDispatch, useSelector } from '../../redux/hooks';
+import { useDispatch, useSelector } from 'react-redux';
 import { selectDataView } from '../../redux/actions';
 import { DataviewPicker } from '.';
 
@@ -18,7 +18,7 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('../../redux/hooks', () => ({
+jest.mock('react-redux', () => ({
   useDispatch: jest.fn(),
   useSelector: jest.fn(),
 }));
