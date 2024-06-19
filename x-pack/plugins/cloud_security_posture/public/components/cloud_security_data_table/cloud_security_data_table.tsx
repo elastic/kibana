@@ -162,7 +162,7 @@ export const CloudSecurityDataTable = ({
     };
   }, [persistedSettings, columnHeaders]);
 
-  const { dataView, dataViewIsRefetching, dataViewRefetch } = useDataViewContext();
+  const { dataView, dataViewIsRefetching } = useDataViewContext();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
@@ -195,6 +195,7 @@ export const CloudSecurityDataTable = ({
     toastNotifications,
     storage,
     data,
+    dataViewFieldEditor
   };
 
   const {
@@ -363,7 +364,6 @@ export const CloudSecurityDataTable = ({
           gridStyleOverride={gridStyle}
           rowLineHeightOverride="24px"
           controlColumnIds={controlColumnIds}
-          onFieldEdited={dataViewRefetch}
         />
       </div>
     </CellActionsProvider>
