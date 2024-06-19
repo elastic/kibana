@@ -119,11 +119,7 @@ describe('Serialization utils', () => {
           ...mockedSavedSearchAttributes,
           serializedSearchSource: {} as SerializedSearchSourceFields,
         },
-        savedSearch: {
-          ...mockedSavedSearchAttributes,
-          managed: false,
-          searchSource,
-        },
+        savedSearch,
         serializeTitles: jest.fn(),
         serializeTimeRange: jest.fn(),
       });
@@ -157,11 +153,7 @@ describe('Serialization utils', () => {
           ...mockedSavedSearchAttributes,
           serializedSearchSource: {} as SerializedSearchSourceFields,
         },
-        savedSearch: {
-          ...mockedSavedSearchAttributes,
-          managed: false,
-          searchSource,
-        },
+        savedSearch,
         serializeTitles: jest.fn(),
         serializeTimeRange: jest.fn(),
         savedObjectId: 'test-id',
