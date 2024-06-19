@@ -101,6 +101,7 @@ packages/content-management/tabbed_table_list_view @elastic/appex-sharedux
 packages/content-management/table_list_view @elastic/appex-sharedux
 packages/content-management/table_list_view_common @elastic/appex-sharedux
 packages/content-management/table_list_view_table @elastic/appex-sharedux
+packages/content-management/user_profiles @elastic/appex-sharedux
 packages/kbn-content-management-utils @elastic/kibana-data-discovery
 examples/controls_example @elastic/kibana-presentation
 src/plugins/controls @elastic/kibana-presentation
@@ -621,6 +622,7 @@ x-pack/plugins/observability_solution/observability_shared @elastic/observabilit
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
+packages/kbn-openapi-common @elastic/security-detection-rule-management
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
@@ -751,6 +753,7 @@ packages/kbn-securitysolution-list-api @elastic/security-detection-engine
 packages/kbn-securitysolution-list-constants @elastic/security-detection-engine
 packages/kbn-securitysolution-list-hooks @elastic/security-detection-engine
 packages/kbn-securitysolution-list-utils @elastic/security-detection-engine
+packages/kbn-securitysolution-lists-common @elastic/security-detection-engine
 packages/kbn-securitysolution-rules @elastic/security-detection-engine
 packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
 packages/kbn-securitysolution-utils @elastic/security-detection-engine
