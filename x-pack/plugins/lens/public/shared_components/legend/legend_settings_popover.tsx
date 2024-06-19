@@ -242,22 +242,15 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
 }: LegendSettingsPopoverProps<LegendStats>) {
   const isLegendNotHidden = mode !== 'hide';
 
-  const canShowStatisticsConfigs = isLegendNotHidden && allowedLegendStats.length > 1;
+  const showsStatisticsSetting = isLegendNotHidden && allowedLegendStats.length > 1;
 
-  const canShowShowValueConfig =
+  const showsShowValueSetting =
     isLegendNotHidden &&
     allowedLegendStats.length === 1 &&
     (allowedLegendStats[0].value === LegendValue.CurrentAndLastValue ||
       allowedLegendStats[0].value === LegendValue.Value);
 
-  const isCurrentAndLastValueOnlySelected =
-    legendStats.length === 1 && legendStats[0] === LegendValue.CurrentAndLastValue;
-
-  const canShowLegendTitleChangeConfig =
-    canShowStatisticsConfigs &&
-    !isCurrentAndLastValueOnlySelected &&
-    legendStats.length > 0 &&
-    !!onLegendTitleChange;
+  const showsLegendTitleSetting = shouldDisplayTable(legendStats) && !!onLegendTitleChange;
 
   return (
     <ToolbarPopover
@@ -320,7 +313,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
         </>
       )}
 
-      {canShowStatisticsConfigs && (
+      {showsStatisticsSetting && (
         <>
           <EuiHorizontalRule margin="s" />
           <EuiFormRow
@@ -354,7 +347,8 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
           </EuiFormRow>
         </>
       )}
-      {canShowLegendTitleChangeConfig && (
+
+      {showsLegendTitleSetting && (
         <ToolbarTitleSettings
           settingId="legend"
           title={legendTitle}
@@ -364,7 +358,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
           placeholder={titlePlaceholder}
         />
       )}
-      {canShowShowValueConfig && (
+      {showsShowValueSetting && (
         <EuiFormRow
           display="columnCompressedSwitch"
           label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
