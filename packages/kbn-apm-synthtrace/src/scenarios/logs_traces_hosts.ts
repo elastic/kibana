@@ -23,7 +23,7 @@ import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environmen
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-// Use e.g. # ... --scenarioOpts.numServices=5 --scenarioOpts.customFieldPrefix="metric"
+// Use e.g. # ... --scenarioOpts.numServices=5 --scenarioOpts.customFieldPrefix="metric". See https://github.com/elastic/kibana/pull/184804 for more details.
 const DEFAULT_SCENARIO_OPTS = {
   numSpaces: 1,
   numServices: 10,
