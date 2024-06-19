@@ -109,7 +109,7 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             argType: argDef.type,
-            value: actualArg.value,
+            value: typeof actualArg.value === 'number' ? actualArg.value : String(actualArg.value),
             givenType: actualArg.literalType,
           },
           locations: actualArg.location,

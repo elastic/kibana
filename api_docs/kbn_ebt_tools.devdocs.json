@@ -65,9 +65,9 @@
         "signature": [
           "(analytics: Pick<",
           {
-            "pluginId": "@kbn/analytics-client",
+            "pluginId": "@kbn/ebt",
             "scope": "common",
-            "docId": "kibKbnAnalyticsClientPluginApi",
+            "docId": "kibKbnEbtPluginApi",
             "section": "def-common.IAnalyticsClient",
             "text": "IAnalyticsClient"
           },
@@ -89,9 +89,9 @@
             "signature": [
               "Pick<",
               {
-                "pluginId": "@kbn/analytics-client",
+                "pluginId": "@kbn/ebt",
                 "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
+                "docId": "kibKbnEbtPluginApi",
                 "section": "def-common.IAnalyticsClient",
                 "text": "IAnalyticsClient"
               },
@@ -118,9 +118,9 @@
         "signature": [
           "(analytics: Pick<",
           {
-            "pluginId": "@kbn/analytics-client",
+            "pluginId": "@kbn/ebt",
             "scope": "common",
-            "docId": "kibKbnAnalyticsClientPluginApi",
+            "docId": "kibKbnEbtPluginApi",
             "section": "def-common.IAnalyticsClient",
             "text": "IAnalyticsClient"
           },
@@ -150,9 +150,9 @@
             "signature": [
               "Pick<",
               {
-                "pluginId": "@kbn/analytics-client",
+                "pluginId": "@kbn/ebt",
                 "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
+                "docId": "kibKbnEbtPluginApi",
                 "section": "def-common.IAnalyticsClient",
                 "text": "IAnalyticsClient"
               },
