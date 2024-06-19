@@ -571,7 +571,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         body: schema.object(basicChartSchema),
       },
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canCreateJob'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
@@ -630,7 +630,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         body: schema.object(populationChartSchema),
       },
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canCreateJob'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
