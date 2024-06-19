@@ -27,6 +27,6 @@ export const getLogLevelColor = (
     case LogLevelCoalescedValue.fatal:
       return euiPaletteColorBlind()[2];
     default:
-      return undefined;
+      return euiTheme.colors.lightShade;
   }
 };
