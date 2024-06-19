@@ -78,13 +78,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         const text = await cell.getVisibleText();
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
 
-      await dataGrid.clickCellExpandButton(0, 3);
+      await dataGrid.clickCellExpandButton(0, 4);
 
       let expandDocId = '';
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
@@ -125,12 +125,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addSavedSearch('expand-cell-search');
 
       await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         const text = await cell.getVisibleText();
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
-      await dataGrid.clickCellExpandButton(0, 3);
+      await dataGrid.clickCellExpandButton(0, 4);
 
       let expandDocId = '';
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
