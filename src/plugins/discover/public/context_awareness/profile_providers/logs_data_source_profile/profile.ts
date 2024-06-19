@@ -10,12 +10,15 @@ import { LogLevelBadgeCell } from '../../../components/data_types/logs/log_level
 import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
 import { extractIndexPatternFrom } from '../extract_index_pattern_from';
+import { getLogLevelCoalescedValue, getLogLevelColor } from '@kbn/discover-utils';
+import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
   profile: {
+    getRowIndicatorColor: () => getRowIndicatorColor,
     getDefaultAppState: (prev) => (params) => {
       const prevState = prev(params);
       const columns = prevState?.columns ?? [];
@@ -46,3 +49,14 @@ export const createLogsDataSourceProfileProvider = (
     };
   },
 });
+};
+
+const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row, euiTheme) => {
+  const logLevel = row.flattened['log.level'];
+  const logLevelCoalescedValue = getLogLevelCoalescedValue(logLevel);
+
+  if (logLevelCoalescedValue) {
+    return getLogLevelColor(logLevelCoalescedValue, euiTheme);
+  }
+
+  return undefined;
