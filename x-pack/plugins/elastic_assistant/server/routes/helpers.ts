@@ -30,7 +30,7 @@ import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
 import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
 import { getLlmType } from './utils';
-import { StaticReturnType } from '../lib/langchain/executors/types';
+import { AgentExecutorParams, AssistantDataClients, StaticReturnType } from '../lib/langchain/executors/types';
 import { executeAction, StaticResponse } from '../lib/executor';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 
@@ -384,8 +384,10 @@ export const langChainExecute = async ({
       page: 1,
     });
 
+  const conversationsDataClient = await assistantContext.getAIAssistantConversationsDataClient();
+
   // Create an ElasticsearchStore for KB interactions
-  // Setup with kbDataClient if `enableKnowledgeBaseByDefault` FF is enabled
+  // Setup with kbDataClient if `assistantKnowledgeBaseByDefault` FF is enabled
   const enableKnowledgeBaseByDefault =
     assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
   const kbDataClient = enableKnowledgeBaseByDefault
@@ -405,8 +407,16 @@ export const langChainExecute = async ({
     kbDataClient
   );
 
-  const executorParams = {
+  const dataClients: AssistantDataClients = {
+    anonymizationFieldsDataClient: anonymizationFieldsDataClient ?? undefined,
+    conversationsDataClient: conversationsDataClient ?? undefined,
+    kbDataClient,
+  };
+
+  // Shared executor params
+  const executorParams: AgentExecutorParams<boolean> = {
     abortSignal,
+    dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
     anonymizationFields: anonymizationFieldsRes
       ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
@@ -510,7 +520,6 @@ export const createOrUpdateConversationWithUserInput = async ({
               defaultSystemPromptId: promptId,
             },
           },
-          authenticatedUser,
         });
       }
     }
@@ -574,7 +583,6 @@ export const updateConversationWithUserInput = async ({
             messages: newMessages,
             replacements,
           },
-          authenticatedUser,
         });
       }
     }
@@ -582,7 +590,6 @@ export const updateConversationWithUserInput = async ({
   }
   const conversation = await conversationsDataClient?.getConversation({
     id: conversationId,
-    authenticatedUser,
   });
   if (conversation == null) {
     throw new Error(`conversation id: "${conversationId}" not found`);

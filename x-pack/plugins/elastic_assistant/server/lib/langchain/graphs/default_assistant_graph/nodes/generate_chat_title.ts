@@ -32,11 +32,19 @@ export const GENERATE_CHAT_TITLE_NODE = 'generateChatTitle';
 
 export const generateChatTitle = async ({
   conversationsDataClient,
+  conversationId,
   logger,
   model,
   state,
 }: GenerateChatTitleParams) => {
   logger.debug(`Node state:\n ${JSON.stringify(state, null, 2)}`);
+
+  if (!conversationId) {
+    if (state.messages.length > 0) {
+      
+    }
+  }
+  const conversation = await conversationsDataClient?.getConversation({ id: conversationId });
   if (state.messages.length !== 0) {
     logger.debug('No need to generate chat title, messages already exist');
     return;

@@ -49,7 +49,6 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
               },
             });
           }
-          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
           if (authenticatedUser == null) {
             return assistantResponse.error({
@@ -57,6 +56,7 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
               statusCode: 401,
             });
           }
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
           const result = await dataClient?.findDocuments({
             perPage: 100,
@@ -73,7 +73,6 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
 
           const createdConversation = await dataClient?.createConversation({
             conversation: request.body,
-            authenticatedUser,
           });
 
           if (createdConversation == null) {

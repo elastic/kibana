@@ -19,6 +19,7 @@ import { AssistantDataClients } from '../../executors/types';
 import { shouldContinue } from './nodes/should_continue';
 import { AGENT_NODE, runAgent } from './nodes/run_agent';
 import { executeTools, TOOLS_NODE } from './nodes/execute_tools';
+import { GENERATE_CHAT_TITLE_NODE, generateChatTitle } from './nodes/generate_chat_title';
 
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
@@ -94,6 +95,13 @@ export const getDefaultAssistantGraph = ({
         state,
         tools,
       });
+    const generateChatTitleNode = (state: AgentState) =>
+      generateChatTitle({
+        ...nodeParams,
+        state,
+        conversationsDataClient: dataClients?.conversationsDataClient,
+        conversationId,
+      });
     const shouldContinueEdge = (state: AgentState) => shouldContinue({ ...nodeParams, state });
 
     // Put together a new graph using the nodes and default state from above
@@ -101,6 +109,7 @@ export const getDefaultAssistantGraph = ({
       channels: graphState,
     });
     // Define the nodes to cycle between
+    graph.addNode(GENERATE_CHAT_TITLE_NODE, generateChatTitleNode);
     graph.addNode(AGENT_NODE, runAgentNode);
     graph.addNode(TOOLS_NODE, executeToolsNode);
     // Add conditional edge for basic routing

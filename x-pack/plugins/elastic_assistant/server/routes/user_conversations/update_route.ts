@@ -54,7 +54,6 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
             });
           }
 
-          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
           if (authenticatedUser == null) {
             return assistantResponse.error({
@@ -62,6 +61,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
               statusCode: 401,
             });
           }
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
           const existingConversation = await dataClient?.getConversation({ id, authenticatedUser });
           if (existingConversation == null) {
