@@ -138,6 +138,7 @@
   padding-inline: 0;
   background: transparent;
   font-weight: $euiFontWeightBold;
+  line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
 }
 
 .unifiedDataTable__descriptionListDescription {
@@ -145,6 +146,7 @@
   padding-inline: 0;
   word-break: break-all;
   white-space: normal;
+  line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
 
   // Special handling for images coming from the image field formatter
   img {
