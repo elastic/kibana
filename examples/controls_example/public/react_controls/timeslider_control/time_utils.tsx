@@ -87,14 +87,14 @@ export function getTicks(min: number, max: number, timezone: string): EuiRangeTi
   return ticks.length <= 12
     ? ticks
     : ticks.map((tick, index) => {
-      return {
-        ...tick,
-        value: tick.value,
-        // to avoid label overlap, only display even tick labels
-        // Passing empty string as tick label results in tick not rendering, so must wrap empty label in react element
-        label: index % 2 === 0 ? tick.label : <span>&nbsp;</span>,
-      };
-    });
+        return {
+          ...tick,
+          value: tick.value,
+          // to avoid label overlap, only display even tick labels
+          // Passing empty string as tick label results in tick not rendering, so must wrap empty label in react element
+          label: index % 2 === 0 ? tick.label : <span>&nbsp;</span>,
+        };
+      });
 }
 
 export function getStepSize(ticks: EuiRangeTick[]): {
