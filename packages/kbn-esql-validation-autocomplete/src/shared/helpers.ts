@@ -571,3 +571,6 @@ export function shouldBeQuotedText(
 ) {
   return dashSupported ? /[^a-zA-Z\d_\.@-]/.test(text) : /[^a-zA-Z\d_\.@]/.test(text);
 }
+
+export const isAggFunction = (arg: ESQLFunction): boolean =>
+  getFunctionDefinition(arg.name)?.type === 'agg';
