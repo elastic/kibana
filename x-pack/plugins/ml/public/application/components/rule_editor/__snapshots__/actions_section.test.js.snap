@@ -23,10 +23,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
     >
       <EuiCheckbox
         checked={false}
-        compressed={false}
-        disabled={false}
         id="skip_result_cb"
-        indeterminate={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="Skip result (recommended)"
@@ -64,10 +61,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
     >
       <EuiCheckbox
         checked={false}
-        compressed={false}
-        disabled={false}
         id="skip_model_update_cb"
-        indeterminate={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="Skip model update"
@@ -118,10 +112,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
     >
       <EuiCheckbox
         checked={true}
-        compressed={false}
-        disabled={false}
         id="skip_result_cb"
-        indeterminate={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="Skip result (recommended)"
@@ -159,10 +150,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
     >
       <EuiCheckbox
         checked={true}
-        compressed={false}
-        disabled={false}
         id="skip_model_update_cb"
-        indeterminate={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="Skip model update"
@@ -213,10 +201,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
     >
       <EuiCheckbox
         checked={true}
-        compressed={false}
-        disabled={false}
         id="skip_result_cb"
-        indeterminate={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="Skip result (recommended)"
@@ -254,10 +239,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
     >
       <EuiCheckbox
         checked={false}
-        compressed={false}
-        disabled={false}
         id="skip_model_update_cb"
-        indeterminate={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="Skip model update"

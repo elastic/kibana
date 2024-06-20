@@ -84,9 +84,9 @@ export function TrainedModelsDeploymentModal({
         onCancel={closeModal}
         onConfirm={refreshModal}
         cancelButtonText={i18n.translate(
-          'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.cancelButtonLabel',
+          'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.closeButtonLabel',
           {
-            defaultMessage: 'Cancel',
+            defaultMessage: 'Close',
           }
         )}
         confirmButtonText={i18n.translate(

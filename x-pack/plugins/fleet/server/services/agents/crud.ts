@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { groupBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
-import { groupBy } from 'lodash';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
@@ -37,7 +37,9 @@ import { getLatestAvailableAgentVersion } from './versions';
 const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
 
-function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode | undefined {
+export function _joinFilters(
+  filters: Array<string | undefined | KueryNode>
+): KueryNode | undefined {
   try {
     return filters
       .filter((filter) => filter !== undefined)
@@ -214,6 +216,7 @@ export async function getAgentsByKuery(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
+    spaceId?: string;
     getStatusSummary?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
@@ -241,8 +244,18 @@ export async function getAgentsByKuery(
     searchAfter,
     pitId,
     aggregations,
+    spaceId,
   } = options;
   const filters = [];
+
+  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+  if (useSpaceAwareness && spaceId) {
+    if (spaceId === DEFAULT_SPACE_ID) {
+      filters.push(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`);
+    } else {
+      filters.push(`namespaces:"${spaceId}"`);
+    }
+  }
 
   if (kuery && kuery !== '') {
     filters.push(kuery);
