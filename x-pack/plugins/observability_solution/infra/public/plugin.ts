@@ -213,7 +213,6 @@ export class Plugin implements InfraClientPluginClass {
         euiIconType: 'logoObservability',
         order: 8100,
         appRoute: '/app/logs',
-        visibleIn: ['globalSearch'],
         // !! Need to be kept in sync with the routes in x-pack/plugins/observability_solution/infra/public/pages/logs/page_content.tsx
         deepLinks: [
           {

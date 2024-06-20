@@ -22,7 +22,7 @@ import {
 import { DataViewLocatorDefinition } from '../common/locators/data_view_locator';
 import { type ObservabilityLogsExplorerConfig } from '../common/plugin_config';
 import { DATA_RECEIVED_TELEMETRY_EVENT } from '../common/telemetry_events';
-import { logsAppTitle, logsExplorerAppTitle } from '../common/translations';
+import { logsExplorerAppTitle } from '../common/translations';
 import type {
   ObservabilityLogsExplorerAppMountParameters,
   ObservabilityLogsExplorerPluginSetup,
@@ -42,23 +42,20 @@ export class ObservabilityLogsExplorerPlugin
 
   public setup(
     core: CoreSetup<ObservabilityLogsExplorerStartDeps, ObservabilityLogsExplorerPluginStart>,
-    pluginsSetup: ObservabilityLogsExplorerSetupDeps
+    _pluginsSetup: ObservabilityLogsExplorerSetupDeps
   ) {
-    const { discover, share } = pluginsSetup;
+    const { discover, share } = _pluginsSetup;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
       id: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
-      title: logsAppTitle,
+      title: logsExplorerAppTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoLogging',
-      appRoute: '/app/observability-logs-explorer',
-      order: 8100,
       visibleIn: this.config.navigation.showAppLink
         ? ['globalSearch', 'sideNav']
-        : ['globalSearch', 'sideNav'],
+        : ['globalSearch'],
       keywords: ['logs', 'log', 'explorer', 'logs explorer'],
-      deepLinks: [],
       mount: async (appMountParams: ObservabilityLogsExplorerAppMountParameters) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
         const { renderObservabilityLogsExplorer } = await import(
