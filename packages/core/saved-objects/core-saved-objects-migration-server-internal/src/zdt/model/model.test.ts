@@ -9,7 +9,7 @@
 import './model.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { createContextMock, MockedMigratorContext } from '../test_helpers';
-import type { RetryableEsClientError } from '../../actions';
+import type { FetchIndexResponse, RetryableEsClientError } from '../../actions';
 import type { State, BaseState, FatalState, AllActionStates } from '../state';
 import type { StateActionResponse } from './types';
 import { model, modelStageMap } from './model';
@@ -89,7 +89,7 @@ describe('model', () => {
           mappings: { properties: {} },
           settings: {},
         },
-      });
+      }) as Either.Right<FetchIndexResponse>;
       const newState = model(state, res, context);
 
       expect(newState.retryCount).toEqual(0);
