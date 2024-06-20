@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export { entityDefinition, SO_ENTITY_DEFINITION_TYPE } from './entity_definition';
-export { EntityDiscoveryApiKeyType } from './entity_discovery_api_key';
+export const BUILT_IN_ID_PREFIX = 'builtin_';
+export const BUILT_IN_ALLOWED_INDICES = [
+  'apm-*',
+  'logs-*',
+  'metrics-*',
+  'filebeat*',
+  'metricbeat*',
+];
