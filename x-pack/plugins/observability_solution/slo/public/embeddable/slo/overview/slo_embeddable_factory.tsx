@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { EuiFlexItem, EuiLink, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTitles,
