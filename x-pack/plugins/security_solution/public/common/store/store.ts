@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import thunk from 'redux-thunk';
 import type {
   Action,
   Store,
@@ -54,6 +55,7 @@ import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory
 import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
+import { initialNotesState } from '../../notes/store/notes.slice';
 
 let store: Store<State, Action> | null = null;
 
@@ -168,7 +170,8 @@ export const createStoreFactory = async (
     },
     dataTableInitialState,
     groupsInitialState,
-    analyzerInitialState
+    analyzerInitialState,
+    initialNotesState
   );
 
   const rootReducer = {
@@ -284,7 +287,8 @@ export const createStore = (
   const middlewareEnhancer = applyMiddleware(
     ...createMiddlewares(kibana, storage),
     telemetryMiddleware,
-    ...(additionalMiddleware ?? [])
+    ...(additionalMiddleware ?? []),
+    thunk
   );
 
   store = createReduxStore(

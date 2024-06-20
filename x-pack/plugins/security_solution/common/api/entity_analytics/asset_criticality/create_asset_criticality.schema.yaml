@@ -15,13 +15,33 @@ paths:
       x-labels: [ess, serverless]
       x-internal: true
       operationId: AssetCriticalityCreateRecord
+      summary: Deprecated Internal Create Criticality Record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common.schema.yaml#/components/schemas/CreateSingleAssetCriticalityRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './common.schema.yaml#/components/schemas/AssetCriticalityRecord'
+        '400':
+          description: Invalid request
+  /api/asset_criticality:
+    post:
+      x-labels: [ess, serverless]
+      operationId: AssetCriticalityCreateRecord
       summary: Create Criticality Record
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: './common.schema.yaml#/components/schemas/CreateAssetCriticalityRecord'
+              $ref: './common.schema.yaml#/components/schemas/CreateSingleAssetCriticalityRequest'
       responses:
         '200':
           description: Successful response
