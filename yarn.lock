@@ -21238,7 +21238,7 @@ joi-to-json@^4.2.1:
     lodash "^4.17.21"
     semver-compare "^1.0.0"
 
-joi@^17.3.0, joi@^17.13.3:
+joi@^17.13.3, joi@^17.3.0:
   version "17.13.3"
   resolved "https://registry.yarnpkg.com/joi/-/joi-17.13.3.tgz#0f5cc1169c999b30d344366d384b12d92558bcec"
   integrity sha512-otDA4ldcIx+ZXsKHWmp0YizCweVRZG96J10b0FevjfuncLO1oX59THoAmHkNubYJ+9gWsYsp5k8v4ib6oDv1fA==
