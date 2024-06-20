@@ -23,7 +23,8 @@ paths:
                     type: string
                   index_mapping_outdated:
                     type: boolean
-                required: [name]
+                    nullable: true
+                required: [name, index_mapping_outdated]
         401:
           description: Unsuccessful authentication response
           content:

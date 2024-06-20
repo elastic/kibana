@@ -19,5 +19,5 @@ import { z } from 'zod';
 export type GetAlertsIndexResponse = z.infer<typeof GetAlertsIndexResponse>;
 export const GetAlertsIndexResponse = z.object({
   name: z.string(),
-  index_mapping_outdated: z.boolean().optional(),
+  index_mapping_outdated: z.boolean().nullable(),
 });
