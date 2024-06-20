@@ -93,6 +93,7 @@
     "xpack.rollupJobs": ["plugins/rollup"],
     "xpack.runtimeFields": "plugins/runtime_fields",
     "xpack.screenshotting": "plugins/screenshotting",
+    "xpack.searchHomepage": "plugins/search_homepage",
     "xpack.searchNotebooks": "plugins/search_notebooks",
     "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchInferenceEndpoints": "plugins/search_inference_endpoints",
