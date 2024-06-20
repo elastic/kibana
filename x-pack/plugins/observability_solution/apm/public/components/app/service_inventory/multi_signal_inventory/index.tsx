@@ -30,6 +30,7 @@ const INITIAL_SORT_DIRECTION = 'desc';
 
 const INITIAL_DATA: MainStatisticsApiResponse & { requestId: string } = {
   services: [],
+  requestId: '',
 };
 
 function useServicesEntitiesMainStatisticsFetcher() {
