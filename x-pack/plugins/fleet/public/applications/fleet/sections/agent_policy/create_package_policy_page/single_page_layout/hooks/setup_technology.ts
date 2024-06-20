@@ -111,17 +111,18 @@ export function useSetupTechnology({
       }
     };
 
-    // Tech debt: Remove check isServerless when Serverless uses the Agentless API
-    if (cloud?.isServerlessEnabled) {
-      fetchAgentlessPolicy();
-    } else if (cloud?.isCloudEnabled) {
-      setAgentlessPolicy(
-        generateNewAgentPolicyWithDefaults({
-          name: `Agentless policy ${uuidv4()}`,
-          supports_agentless: true,
-          // is_managed: true,
-        })
-      );
+    if (isAgentlessEnabled) {
+      // Tech debt: Remove check isServerless when Serverless uses the Agentless API
+      if (cloud?.isServerlessEnabled) {
+        fetchAgentlessPolicy();
+      } else if (cloud?.isCloudEnabled) {
+        setAgentlessPolicy(
+          generateNewAgentPolicyWithDefaults({
+            name: `Agentless policy ${uuidv4()}`,
+            supports_agentless: true,
+          })
+        );
+      }
     }
   }, [isAgentlessEnabled, cloud]);
 
