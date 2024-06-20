@@ -5,7 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
@@ -133,7 +133,7 @@ interface GetAlertSummaryParams {
   fixedInterval?: string;
 }
 
-interface SingleSearchAfterAndAudit {
+interface SearchAlertsParams {
   id?: string | null;
   query?: string | object;
   aggs?: Record<string, any>;
@@ -211,9 +211,6 @@ export class AlertsClient {
 
   /**
    * Accepts an array of ES documents and executes ensureAuthorized for the given operation
-   * @param items
-   * @param operation
-   * @returns
    */
   private async ensureAllAuthorized(
     items: Array<{
@@ -275,12 +272,9 @@ export class AlertsClient {
   }
 
   /**
-   * This will be used as a part of the "find" api
-   * In the future we will add an "aggs" param
-   * @param param0
-   * @returns
+   * Searches alerts by id or query and audits the results
    */
-  private async singleSearchAfterAndAudit({
+  private async searchAlerts({
     id,
     query,
     aggs,
@@ -293,7 +287,7 @@ export class AlertsClient {
     lastSortIds = [],
     featureIds,
     runtimeMappings,
-  }: SingleSearchAfterAndAudit) {
+  }: SearchAlertsParams) {
     try {
       const alertSpaceId = this.spaceId;
       if (alertSpaceId == null) {
@@ -343,16 +337,16 @@ export class AlertsClient {
         seq_no_primary_term: true,
       });
 
-      if (!result?.hits.hits.every((hit) => isValidAlert(hit))) {
-        const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
-        this.logger.error(errorMessage);
-        throw Boom.badData(errorMessage);
-      }
+      if (result?.hits?.hits?.length > 0) {
+        if (result.hits.hits.some((hit) => !isValidAlert(hit))) {
+          const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
+          this.logger.error(errorMessage);
+          throw Boom.badData(errorMessage);
+        }
 
-      if (result?.hits?.hits != null && result?.hits.hits.length > 0) {
         await this.ensureAllAuthorized(result.hits.hits, operation);
 
-        result?.hits.hits.map((item) =>
+        result?.hits.hits.forEach((item) =>
           this.auditLogger?.log(
             alertAuditEvent({
               action: operationAlertAuditActionMap[operation],
@@ -367,14 +361,15 @@ export class AlertsClient {
     } catch (error) {
       const errorMessage = `Unable to retrieve alert details for alert with id of "${id}" or with query "${query}" and operation ${operation} \nError: ${error}`;
       this.logger.error(errorMessage);
+      if (Boom.isBoom(error)) {
+        throw error;
+      }
       throw Boom.notFound(errorMessage);
     }
   }
 
   /**
    * When an update by ids is requested, do a multi-get, ensure authz and audit alerts, then execute bulk update
-   * @param param0
-   * @returns
    */
   private async mgetAlertsAuditOperate({
     alerts,
@@ -429,8 +424,6 @@ export class AlertsClient {
 
   /**
    * When an update by ids is requested, do a multi-get, ensure authz and audit alerts, then execute bulk update
-   * @param param0
-   * @returns
    */
   private async mgetAlertsAuditOperateStatus({
     alerts,
@@ -496,9 +489,7 @@ export class AlertsClient {
   }
 
   /**
-   * executes a search after to find alerts with query (+ authz filter)
-   * @param param0
-   * @returns
+   * Executes a search after to find alerts with query (+ authz filter)
    */
   private async queryAndAuditAllAlerts({
     index,
@@ -529,7 +520,7 @@ export class AlertsClient {
 
     while (hasSortIds) {
       try {
-        const result = await this.singleSearchAfterAndAudit({
+        const result = await this.searchAlerts({
           id: null,
           query,
           index,
@@ -612,7 +603,7 @@ export class AlertsClient {
   public async get({ id, index }: GetAlertParams) {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
-      const alert = await this.singleSearchAfterAndAudit({
+      const alert = await this.searchAlerts({
         id,
         index,
         operation: ReadOperations.Get,
@@ -650,7 +641,7 @@ export class AlertsClient {
       }
 
       // first search for the alert by id, then use the alert info to check if user has access to it
-      const responseAlertSum = await this.singleSearchAfterAndAudit({
+      const responseAlertSum = await this.searchAlerts({
         index: (indexToUse ?? []).join(),
         operation: ReadOperations.Get,
         aggs: {
@@ -752,7 +743,7 @@ export class AlertsClient {
     index,
   }: UpdateOptions<Params>) {
     try {
-      const alert = await this.singleSearchAfterAndAudit({
+      const alert = await this.searchAlerts({
         id,
         index,
         operation: WriteOperations.Update,
@@ -1009,8 +1000,7 @@ export class AlertsClient {
         }
       }
 
-      // first search for the alert by id, then use the alert info to check if user has access to it
-      const alertsSearchResponse = await this.singleSearchAfterAndAudit({
+      const alertsSearchResponse = await this.searchAlerts({
         query,
         aggs,
         _source,
@@ -1078,8 +1068,9 @@ export class AlertsClient {
      */
     pageSize?: number;
   }) {
-    const uniqueValue = uuid();
+    const uniqueValue = uuidv4();
     return this.find({
+      featureIds,
       aggs: {
         groupByField: {
           terms: {
@@ -1101,7 +1092,6 @@ export class AlertsClient {
         unitsCount: { value_count: { field: 'groupByField' } },
         groupsCount: { cardinality: { field: 'groupByField' } },
       },
-      featureIds,
       query: {
         bool: {
           filter: filters,

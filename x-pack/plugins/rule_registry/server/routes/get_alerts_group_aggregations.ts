@@ -52,11 +52,6 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
           pageIndex,
           pageSize,
         });
-        if (alerts == null) {
-          return response.notFound({
-            body: { message: `alerts not found` },
-          });
-        }
         return response.ok({
           body: alerts,
         });
