@@ -909,8 +909,10 @@ export const enablesAndPopulatesThresholdSuppression = (
 };
 
 const optionsToComboboxText = (options: string[]) => {
-  const [first, ...rest] = options;
-  return [`${first}{downArrow}{enter}`, ...rest.map((o) => `${o}{enter}`)].join('').concat('{esc}');
+  return options
+    .map((o) => `${o}{downArrow}{enter}`)
+    .join('')
+    .concat('{esc}');
 };
 
 export const fillAlertSuppressionFields = (fields: string[]) => {
