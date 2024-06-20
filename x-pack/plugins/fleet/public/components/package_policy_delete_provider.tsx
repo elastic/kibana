@@ -6,16 +6,18 @@
  */
 
 import React, { Fragment, useMemo, useRef, useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useStartServices, sendRequest, sendDeletePackagePolicy, useConfig } from '../hooks';
-import { AGENT_API_ROUTES, AGENTS_PREFIX, API_VERSIONS } from '../../common/constants';
+import { ExperimentalFeaturesService } from '../services';
+import { useStartServices, sendDeletePackagePolicy, useConfig } from '../hooks';
+import { AGENTS_PREFIX } from '../../common/constants';
 import type { AgentPolicy } from '../types';
+import { sendGetAgents } from '../hooks';
 
 interface Props {
-  agentPolicy?: AgentPolicy;
+  agentPolicies?: AgentPolicy[];
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
 }
 
@@ -27,7 +29,7 @@ export type DeletePackagePoliciesPrompt = (
 type OnSuccessCallback = (packagePoliciesDeleted: string[]) => void;
 
 export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
-  agentPolicy,
+  agentPolicies,
   children,
 }) => {
   const { notifications } = useStartServices();
@@ -40,27 +42,30 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const [agentsCount, setAgentsCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
+
+  const hasMultipleAgentPolicies =
+    enableReusableIntegrationPolicies && agentPolicies && agentPolicies.length > 1;
 
   const fetchAgentsCount = useMemo(
     () => async () => {
-      if (isLoadingAgentsCount || !isFleetEnabled || !agentPolicy) {
+      if (isLoadingAgentsCount || !isFleetEnabled || !agentPolicies) {
         return;
       }
       setIsLoadingAgentsCount(true);
-      const { data } = await sendRequest<{ total: number }>({
-        path: AGENT_API_ROUTES.LIST_PATTERN,
-        method: 'get',
-        query: {
-          page: 1,
-          perPage: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicy.id}`,
-        },
-        version: API_VERSIONS.public.v1,
+
+      const kuery = `(${agentPolicies
+        .map((policy) => `${AGENTS_PREFIX}.policy_id:"${policy.id}"`)
+        .join(' or ')})`;
+
+      const request = await sendGetAgents({
+        kuery,
+        showInactive: false,
       });
-      setAgentsCount(data?.total || 0);
+      setAgentsCount(request.data?.total || 0);
       setIsLoadingAgentsCount(false);
     },
-    [agentPolicy, isFleetEnabled, isLoadingAgentsCount]
+    [agentPolicies, isFleetEnabled, isLoadingAgentsCount]
   );
 
   const deletePackagePoliciesPrompt = useMemo(
@@ -85,6 +90,11 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       setIsModalOpen(false);
     },
     []
+  );
+
+  const agentPoliciesNamesList = useMemo(
+    () => agentPolicies?.map((p) => p.name).join(', '),
+    [agentPolicies]
   );
 
   const deletePackagePolicies = useMemo(
@@ -185,8 +195,23 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
             id="xpack.fleet.deletePackagePolicy.confirmModal.loadingAgentsCountMessage"
             defaultMessage="Checking affected agents…"
           />
-        ) : agentsCount ? (
+        ) : agentsCount && agentPolicies ? (
           <>
+            {hasMultipleAgentPolicies && (
+              <>
+                <EuiCallOut
+                  color="warning"
+                  iconType="alert"
+                  title={
+                    <FormattedMessage
+                      id="xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies"
+                      defaultMessage="This integration is shared by multiple agent policies."
+                    />
+                  }
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
             <EuiCallOut
               color="danger"
               title={
@@ -197,13 +222,38 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 />
               }
             >
-              <FormattedMessage
-                id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
-                defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
-                values={{
-                  agentPolicyName: <strong>{agentPolicy?.name}</strong>,
-                }}
-              />
+              {hasMultipleAgentPolicies ? (
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentPoliciesMessage"
+                  defaultMessage="Fleet has detected that the related agent policies {toolTip} are already in use by some of your agents."
+                  values={{
+                    toolTip: (
+                      <EuiIconTip
+                        type="iInCircle"
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                        content={
+                          <FormattedMessage
+                            id="xpack.fleet.fleetServerSetup.affectedAgentsMessageTooltips"
+                            defaultMessage="{policies}"
+                            values={{ policies: agentPoliciesNamesList }}
+                          />
+                        }
+                        position="top"
+                      />
+                    ),
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
+                  defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
+                  values={{
+                    agentPolicyName: <strong>{agentPolicies[0]?.name}</strong>,
+                  }}
+                />
+              )}
             </EuiCallOut>
             <EuiSpacer size="l" />
           </>

@@ -42,7 +42,7 @@ export type ControlGroupUnsavedChanges = Omit<
 export type ControlPanelState = DefaultControlState & { type: string; order: number };
 
 export type ControlGroupApi = PresentationContainer &
-  DefaultEmbeddableApi<ControlGroupSerializedState> &
+  DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
   PublishesFilters &
   PublishesDataViews &
   HasSerializedChildState<ControlPanelState> &
