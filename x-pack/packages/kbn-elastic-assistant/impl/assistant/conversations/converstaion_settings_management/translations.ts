@@ -42,9 +42,15 @@ export const CONVERSATIONS_TABLE_COLUMN_ACTIONS = i18n.translate(
   }
 );
 
-export const DELETE_CONVERSATION_CONFIRMATION_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSettings.deleteConfirmation.title',
+export const DELETE_CONVERSATION_CONFIRMATION_DEFAULT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSettings.deleteConfirmation.defaultTitle',
   {
-    defaultMessage: 'conversation',
+    defaultMessage: 'Delete conversation?',
   }
 );
+
+export const DELETE_CONVERSATION_CONFIRMATION_TITLE = (conversationTitle: string) =>
+  i18n.translate('xpack.elasticAssistant.assistant.conversationSettings.deleteConfirmation.Title', {
+    values: { conversationTitle },
+    defaultMessage: 'Delete "{conversationTitle}"?',
+  });

@@ -17,11 +17,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { QuickPrompt } from '../types';
-import { RowActions } from '../../common/components/assisttant_settings_management/row_actions';
+import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
 import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt_editor';
 import * as i18n from './translations';
-import { useFlyoutModalVisibility } from '../../common/components/assisttant_settings_management/flyout/use_flyout_modal_visibility';
-import { Flyout } from '../../common/components/assisttant_settings_management/flyout';
+import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
+import { Flyout } from '../../common/components/assistant_settings_management/flyout';
 import { CANCEL, DELETE } from '../../settings/translations';
 
 interface Props {
@@ -114,11 +114,13 @@ const QuickPromptSettingsManagementComponent = ({
         width: '120px',
         align: 'center',
         render: (prompt: QuickPrompt) => {
+          const isDeletable = !prompt.isDefault;
           return (
             <RowActions<QuickPrompt>
               rowItem={prompt}
               onDelete={onDeleteActionClicked}
-              onEdit={onEditActionClicked}
+              onEdit={isDeletable ? onEditActionClicked : undefined}
+              isDeletable={isDeletable}
             />
           );
         },

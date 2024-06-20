@@ -7,22 +7,25 @@
 
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-
-import {
-  DELETE_CONNECTOR_BUTTON,
-  EDIT_CONNECTOR_BUTTON,
-} from '../../../../connectorland/translations';
+import * as i18n from './translations';
 
 interface Props<T> {
-  rowItem: T;
-  onEdit?: (rowItem: T) => void;
+  isDeletable?: boolean;
+  isEditable?: boolean;
   onDelete?: (rowItem: T) => void;
-  disabled?: boolean;
+  onEdit?: (rowItem: T) => void;
+  rowItem: T;
 }
 
 type RowActionsComponentType = <T>(props: Props<T>) => JSX.Element;
 
-const RowActionsComponent = <T,>({ disabled, rowItem, onEdit, onDelete }: Props<T>) => {
+const RowActionsComponent = <T,>({
+  isDeletable = true,
+  isEditable = true,
+  onDelete,
+  onEdit,
+  rowItem,
+}: Props<T>) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -54,15 +57,26 @@ const RowActionsComponent = <T,>({ disabled, rowItem, onEdit, onDelete }: Props<
       <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
         {onEdit != null && (
           <EuiFlexItem>
-            <EuiButtonEmpty iconType="pencil" onClick={handleEditConnector} disabled={disabled}>
-              {EDIT_CONNECTOR_BUTTON}
+            <EuiButtonEmpty
+              iconType="pencil"
+              onClick={handleEditConnector}
+              disabled={!isEditable}
+              color="text"
+            >
+              {i18n.EDIT_BUTTON}
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
         {onDelete != null && (
           <EuiFlexItem>
-            <EuiButtonEmpty iconType="trash" onClick={handleDeleteConnector} disabled={disabled}>
-              {DELETE_CONNECTOR_BUTTON}
+            <EuiButtonEmpty
+              aria-label={i18n.DELETE_BUTTON}
+              iconType="trash"
+              onClick={handleDeleteConnector}
+              disabled={!isDeletable}
+              color="text"
+            >
+              {i18n.DELETE_BUTTON}
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}

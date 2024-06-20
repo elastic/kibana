@@ -17,6 +17,7 @@ import { SystemPromptSettingsProps } from './types';
  */
 export const SystemPromptSettings: React.FC<SystemPromptSettingsProps> = React.memo(
   ({
+    connectors,
     conversationSettings,
     onSelectedSystemPromptChange,
     selectedSystemPrompt,
@@ -37,6 +38,7 @@ export const SystemPromptSettings: React.FC<SystemPromptSettingsProps> = React.m
         <EuiHorizontalRule margin={'s'} />
 
         <SystemPromptEditor
+          connectors={connectors}
           conversationSettings={conversationSettings}
           onSelectedSystemPromptChange={onSelectedSystemPromptChange}
           selectedSystemPrompt={selectedSystemPrompt}

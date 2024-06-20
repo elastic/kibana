@@ -12,24 +12,24 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiBadge,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+
 import { Conversation, ConversationsBulkActions } from '../../../../..';
 import { AIConnector } from '../../../../connectorland/connector_selector';
-import { Flyout } from '../../../common/components/assisttant_settings_management/flyout';
-import { useFlyoutModalVisibility } from '../../../common/components/assisttant_settings_management/flyout/use_flyout_modal_visibility';
-import { RowActions } from '../../../common/components/assisttant_settings_management/row_actions';
-import { getSystemPromptsList } from '../../../quick_prompts/quick_prompt_settings_management.tsx/helpers';
+import { Flyout } from '../../../common/components/assistant_settings_management/flyout';
+import { useFlyoutModalVisibility } from '../../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { CANCEL, DELETE } from '../../../settings/translations';
 import { Prompt } from '../../../types';
 import { SystemPromptEditor } from '../system_prompt_modal/system_prompt_editor';
 import { SETTINGS_TITLE } from '../system_prompt_modal/translations';
+import { useSystemPromptEditor } from '../system_prompt_modal/use_system_prompt_editor';
 import * as i18n from './translations';
+import { useSystemPromptTable } from './use_system_prompt_table';
 
 interface Props {
+  connectors: AIConnector[] | undefined;
   conversations: Record<string, Conversation>;
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
@@ -47,6 +47,7 @@ interface Props {
 }
 
 const SystemPromptSettingsManagementComponent = ({
+  connectors,
   conversations,
   conversationSettings,
   onSelectedSystemPromptChange,
@@ -78,87 +79,49 @@ const SystemPromptSettingsManagementComponent = ({
     openFlyout();
   }, [onSelectedSystemPromptChange, openFlyout]);
 
+  const { onSystemPromptSelectionChange, onSystemPromptDeleted } = useSystemPromptEditor({
+    setUpdatedSystemPromptSettings,
+    onSelectedSystemPromptChange,
+  });
+
   const onEditActionClicked = useCallback(
     (prompt: Prompt) => {
-      onSelectedSystemPromptChange(prompt);
+      onSystemPromptSelectionChange(prompt);
       openFlyout();
     },
-    [onSelectedSystemPromptChange, openFlyout]
+    [onSystemPromptSelectionChange, openFlyout]
   );
 
   const onDeleteActionClicked = useCallback(
     (prompt: Prompt) => {
       setDeletedPrompt(prompt);
+      onSystemPromptDeleted(prompt.id);
       openConfirmModal();
     },
-    [openConfirmModal]
+    [onSystemPromptDeleted, openConfirmModal]
   );
 
   const onDeleteCancelled = useCallback(() => {
     setDeletedPrompt(null);
     closeConfirmModal();
-  }, [closeConfirmModal]);
+    resetSettings();
+  }, [closeConfirmModal, resetSettings]);
 
   const onDeleteConfirmed = useCallback(() => {
-    setUpdatedSystemPromptSettings((prev) => prev.filter((sp) => sp.id !== deletedPrompt?.id));
     handleSave();
     closeConfirmModal();
-  }, [closeConfirmModal, deletedPrompt?.id, handleSave, setUpdatedSystemPromptSettings]);
+    resetSettings();
+  }, [closeConfirmModal, handleSave, resetSettings]);
 
   const onSaveCancelled = useCallback(() => {
-    onSelectedSystemPromptChange();
     closeFlyout();
     resetSettings();
-  }, [onSelectedSystemPromptChange, closeFlyout, resetSettings]);
+  }, [closeFlyout, resetSettings]);
 
   const onSaveConfirmed = useCallback(() => {
     handleSave();
-    onSelectedSystemPromptChange();
     closeFlyout();
-  }, [closeFlyout, handleSave, onSelectedSystemPromptChange]);
-
-  const columns = useMemo(
-    () => [
-      {
-        name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_NAME,
-        render: (prompt: Prompt) =>
-          prompt?.name ? (
-            <EuiLink onClick={() => onEditActionClicked(prompt)}>{prompt?.name}</EuiLink>
-          ) : null,
-      },
-      {
-        field: 'defaultConversations',
-        name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_DEFAULT_CONVERSATIONS,
-        render: (defaultConversations: string[]) =>
-          defaultConversations.map((c, idx) => (
-            <EuiBadge id={`${idx}`} color="hollow">
-              {c}
-            </EuiBadge>
-          )),
-      },
-      /* TODO: enable when createdAt is added
-      {
-        field: 'createdAt',
-        name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_CREATED_ON,
-      },
-      */
-      {
-        name: 'Actions',
-        align: 'center',
-        width: '120px',
-        render: (prompt: Prompt) => {
-          return (
-            <RowActions<Prompt>
-              rowItem={prompt}
-              onEdit={onEditActionClicked}
-              onDelete={onDeleteActionClicked}
-            />
-          );
-        },
-      },
-    ],
-    [onEditActionClicked, onDeleteActionClicked]
-  );
+  }, [closeFlyout, handleSave]);
 
   const confirmationTitle = useMemo(
     () =>
@@ -168,9 +131,21 @@ const SystemPromptSettingsManagementComponent = ({
     [deletedPrompt?.name]
   );
 
+  const { getColumns, getSystemPromptsList } = useSystemPromptTable();
+
+  const columns = useMemo(
+    () => getColumns({ onEditActionClicked, onDeleteActionClicked }),
+    [getColumns, onEditActionClicked, onDeleteActionClicked]
+  );
   const systemPromptListItems = useMemo(
-    () => getSystemPromptsList(systemPromptSettings, conversations),
-    [systemPromptSettings, conversations]
+    () =>
+      getSystemPromptsList({
+        connectors,
+        conversationSettings,
+        defaultConnector,
+        systemPromptSettings,
+      }),
+    [getSystemPromptsList, connectors, conversationSettings, defaultConnector, systemPromptSettings]
   );
   return (
     <>
@@ -194,6 +169,7 @@ const SystemPromptSettingsManagementComponent = ({
         onSaveConfirmed={onSaveConfirmed}
       >
         <SystemPromptEditor
+          connectors={connectors}
           conversationSettings={conversationSettings}
           onSelectedSystemPromptChange={onSelectedSystemPromptChange}
           selectedSystemPrompt={selectedSystemPrompt}

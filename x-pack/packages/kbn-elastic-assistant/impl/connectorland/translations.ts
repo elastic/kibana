@@ -163,17 +163,3 @@ export const REFRESH_CONNECTORS_BUTTON = i18n.translate(
     defaultMessage: 'Refresh',
   }
 );
-
-export const EDIT_CONNECTOR_BUTTON = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.editConnectorButton',
-  {
-    defaultMessage: 'Edit',
-  }
-);
-
-export const DELETE_CONNECTOR_BUTTON = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.deleteConnectorButton',
-  {
-    defaultMessage: 'Delete',
-  }
-);

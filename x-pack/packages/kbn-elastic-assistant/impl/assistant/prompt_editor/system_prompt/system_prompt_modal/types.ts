@@ -9,6 +9,7 @@ import { Conversation, Prompt } from '../../../../..';
 import { ConversationsBulkActions } from '../../../api';
 
 export interface SystemPromptSettingsProps {
+  connectors: AIConnector[] | undefined;
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   onSelectedSystemPromptChange: (systemPrompt?: Prompt) => void;

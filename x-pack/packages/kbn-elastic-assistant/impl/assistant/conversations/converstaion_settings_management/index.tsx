@@ -5,39 +5,25 @@
  * 2.0.
  */
 
-import {
-  EuiPanel,
-  EuiSpacer,
-  EuiBadge,
-  EuiLink,
-  EuiBasicTableColumn,
-  EuiConfirmModal,
-  EuiInMemoryTable,
-} from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiConfirmModal, EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { FormattedDate } from '@kbn/i18n-react';
 import { Conversation } from '../../../assistant_context/types';
-import {
-  ConversationTableItem,
-  useConversationsList,
-} from '../conversation_selector_settings/use_conversation_selector_settings';
+import { ConversationTableItem, useConversationsTable } from './use_conversation_selector_settings';
 import { ConversationStreamingSwitch } from '../conversation_settings/conversation_streaming_switch';
 import { AIConnector } from '../../../connectorland/connector_selector';
-import { RowActions } from '../../common/components/assisttant_settings_management/row_actions';
 import * as i18n from './translations';
 
 import { Prompt } from '../../types';
 import { ConversationsBulkActions } from '../../api';
 import { useAssistantContext } from '../../../assistant_context';
 import { useConversationDeleted } from '../conversation_settings/use_conversation_deleted';
-import { useFlyoutModalVisibility } from '../../common/components/assisttant_settings_management/flyout/use_flyout_modal_visibility';
-import { Flyout } from '../../common/components/assisttant_settings_management/flyout';
+import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
+import { Flyout } from '../../common/components/assistant_settings_management/flyout';
 import { CANCEL, DELETE } from '../../settings/translations';
 import { ConversationSettingsEditor } from '../conversation_settings/conversation_settings_editor';
 import { useConversationChanged } from '../conversation_settings/use_conversation_changed';
-import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 
 interface Props {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -82,15 +68,13 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   setConversationSettings,
   setConversationsSettingsBulkActions,
 }) => {
-  console.log('conversationSettings----', conversationSettings);
-  console.log('selectedConversation---', selectedConversation);
   const { http } = useAssistantContext();
   const {
     isFlyoutOpen: editFlyoutVisible,
     openFlyout: openEditFlyout,
     closeFlyout: closeEditFlyout,
   } = useFlyoutModalVisibility();
-  const [deleteConversation, setDeleteConversation] = useState<ConversationTableItem | null>();
+  const [deletedConversation, setDeletedConversation] = useState<ConversationTableItem | null>();
 
   const {
     isFlyoutOpen: deleteConfirmModalVisibility,
@@ -125,26 +109,41 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const onDeleteActionClicked = useCallback(
     (rowItem: ConversationTableItem) => {
-      setDeleteConversation(rowItem);
+      setDeletedConversation(rowItem);
+      onConversationDeleted(rowItem.title);
+
       closeEditFlyout();
       openConfirmModal();
     },
-    [closeEditFlyout, openConfirmModal]
+    [closeEditFlyout, onConversationDeleted, openConfirmModal]
   );
 
   const onDeleteConfirmed = useCallback(() => {
-    if (!deleteConversation) return;
-    onConversationDeleted(deleteConversation.title);
+    if (Object.keys(conversationsSettingsBulkActions).length === 0) {
+      return;
+    }
+
+    handleSave();
     closeConfirmModal();
-  }, [deleteConversation, onConversationDeleted, closeConfirmModal]);
+    setConversationsSettingsBulkActions({});
+    refetchConversations();
+  }, [
+    closeConfirmModal,
+    conversationsSettingsBulkActions,
+    handleSave,
+    refetchConversations,
+    setConversationsSettingsBulkActions,
+  ]);
 
   const onDeleteCancelled = useCallback(() => {
-    setDeleteConversation(null);
+    setDeletedConversation(null);
     closeConfirmModal();
     resetSettings();
   }, [closeConfirmModal, resetSettings]);
 
-  const conversationOptions = useConversationsList({
+  const { getConversationsList, getColumns } = useConversationsTable();
+
+  const conversationOptions = getConversationsList({
     allSystemPrompts,
     actionTypeRegistry,
     connectors,
@@ -152,86 +151,27 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     defaultConnector,
   });
 
-  const onEditFlyoutClosed = useCallback(() => {
+  const onSaveCancelled = useCallback(() => {
     closeEditFlyout();
     resetSettings();
   }, [closeEditFlyout, resetSettings]);
 
-  const onEditFlyoutSaved = useCallback(() => {
+  const onSaveConfirmed = useCallback(() => {
     handleSave();
     closeEditFlyout();
-  }, [closeEditFlyout, handleSave]);
+    refetchConversations();
+    setConversationsSettingsBulkActions({});
+  }, [closeEditFlyout, handleSave, refetchConversations, setConversationsSettingsBulkActions]);
 
-  const columns: Array<EuiBasicTableColumn<ConversationTableItem>> = useMemo(
-    () => [
-      {
-        name: i18n.CONVERSATIONS_TABLE_COLUMN_TYPE,
-        render: (conversation: ConversationTableItem) => (
-          <EuiLink onClick={() => onEditActionClicked(conversation)}>{conversation.title}</EuiLink>
-        ),
-      },
-      {
-        name: i18n.CONVERSATIONS_TABLE_COLUMN_SYSTEM_PROMPT,
-        align: 'center',
-        render: (conversation: ConversationTableItem) => {
-          const systemPrompt: Prompt | undefined = allSystemPrompts.find(
-            ({ id }) => id === conversation.apiConfig?.defaultSystemPromptId
-          );
-
-          const defaultSystemPrompt = getDefaultSystemPrompt({
-            allSystemPrompts,
-            conversation,
-          });
-
-          const systemPromptTitle =
-            systemPrompt?.label ||
-            systemPrompt?.name ||
-            defaultSystemPrompt?.label ||
-            defaultSystemPrompt?.name;
-
-          return systemPromptTitle ? <EuiBadge color="hollow">{systemPromptTitle}</EuiBadge> : null;
-        },
-      },
-      {
-        field: 'actionType',
-        name: i18n.CONVERSATIONS_TABLE_COLUMN_CONNECTOR,
-        align: 'center',
-        render: (actionType: ConversationTableItem['actionType']) =>
-          actionType ? <EuiBadge color="hollow">{actionType}</EuiBadge> : null,
-      },
-      {
-        field: 'updatedAt',
-        name: i18n.CONVERSATIONS_TABLE_COLUMN_UPDATED_AT,
-        align: 'center',
-        render: (updatedAt: ConversationTableItem['updatedAt']) =>
-          updatedAt ? (
-            <EuiBadge color="hollow">
-              <FormattedDate
-                value={new Date(updatedAt)}
-                format="DD/MM/YYYY"
-                year="numeric"
-                month="2-digit"
-                day="numeric"
-              />
-            </EuiBadge>
-          ) : null,
-      },
-      {
-        name: i18n.CONVERSATIONS_TABLE_COLUMN_ACTIONS,
-        width: '120px',
-        align: 'center',
-        render: (prompt: ConversationTableItem) => {
-          return (
-            <RowActions<ConversationTableItem>
-              rowItem={prompt}
-              onDelete={onDeleteActionClicked}
-              onEdit={onEditActionClicked}
-            />
-          );
-        },
-      },
-    ],
-    [allSystemPrompts, onDeleteActionClicked, onEditActionClicked]
+  const columns = useMemo(
+    () =>
+      getColumns({
+        conversations: conversationSettings,
+        onDeleteActionClicked,
+        onEditActionClicked,
+        allSystemPrompts,
+      }),
+    [allSystemPrompts, conversationSettings, getColumns, onDeleteActionClicked, onEditActionClicked]
   );
 
   const sorting = useMemo(
@@ -242,6 +182,14 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       },
     }),
     []
+  );
+
+  const confirmationTitle = useMemo(
+    () =>
+      deletedConversation?.title
+        ? i18n.DELETE_CONVERSATION_CONFIRMATION_TITLE(deletedConversation?.title)
+        : i18n.DELETE_CONVERSATION_CONFIRMATION_DEFAULT_TITLE,
+    [deletedConversation?.title]
   );
 
   if (!conversationsLoaded) {
@@ -267,9 +215,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       {editFlyoutVisible && (
         <Flyout
           flyoutVisible={editFlyoutVisible}
-          onClose={onEditFlyoutClosed}
-          onSaveConfirmed={onEditFlyoutSaved}
-          onSaveCancelled={onEditFlyoutClosed}
+          onClose={onSaveCancelled}
+          onSaveConfirmed={onSaveConfirmed}
+          onSaveCancelled={onSaveCancelled}
           title={selectedConversation?.title ?? i18n.CONVERSATIONS_TABLE_COLUMN_TYPE}
         >
           <ConversationSettingsEditor
@@ -285,11 +233,11 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           />
         </Flyout>
       )}
-      {deleteConfirmModalVisibility && deleteConversation?.title && (
+      {deleteConfirmModalVisibility && deletedConversation?.title && (
         <EuiConfirmModal
-          aria-labelledby={i18n.DELETE_CONVERSATION_CONFIRMATION_TITLE}
-          title={i18n.DELETE_CONVERSATION_CONFIRMATION_TITLE}
-          titleProps={{ id: deleteConversation?.id ?? undefined }}
+          aria-labelledby={confirmationTitle}
+          title={confirmationTitle}
+          titleProps={{ id: deletedConversation?.id ?? undefined }}
           onCancel={onDeleteCancelled}
           onConfirm={onDeleteConfirmed}
           cancelButtonText={CANCEL}

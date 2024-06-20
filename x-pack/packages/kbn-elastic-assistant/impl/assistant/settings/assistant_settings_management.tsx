@@ -152,26 +152,13 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     }, [selectedSystemPrompt, systemPromptSettings]);
 
     const handleSave = useCallback(() => {
-      // If the selected conversation is deleted, we need to select a new conversation to prevent a crash creating a conversation that already exists
-      const isSelectedConversationDeleted =
-        conversationSettings[defaultSelectedConversation.title] == null;
-      const newSelectedConversationId: string | undefined = Object.keys(conversationSettings)[0];
-      if (isSelectedConversationDeleted && newSelectedConversationId != null) {
-        setSelectedConversationId(conversationSettings[newSelectedConversationId].title);
-      }
       saveSettings();
       toasts?.addSuccess({
         iconType: 'check',
         title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
       });
       setHasPendingChanges(false);
-    }, [
-      conversationSettings,
-      defaultSelectedConversation.title,
-      saveSettings,
-      setSelectedConversationId,
-      toasts,
-    ]);
+    }, [saveSettings, toasts]);
 
     const tabsConfig = useMemo(
       () => [
@@ -184,12 +171,12 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           label: i18n.CONVERSATIONS_MENU_ITEM,
         },
         {
-          id: QUICK_PROMPTS_TAB,
-          label: i18n.QUICK_PROMPTS_MENU_ITEM,
-        },
-        {
           id: SYSTEM_PROMPTS_TAB,
           label: i18n.SYSTEM_PROMPTS_MENU_ITEM,
+        },
+        {
+          id: QUICK_PROMPTS_TAB,
+          label: i18n.QUICK_PROMPTS_MENU_ITEM,
         },
         {
           id: ANONYMIZATION_TAB,
@@ -275,6 +262,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           )}
           {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
             <SystemPromptSettingsManagement
+              connectors={connectors}
               conversations={conversations}
               conversationSettings={conversationSettings}
               defaultConnector={defaultConnector}

@@ -72,6 +72,7 @@ export const useSettingsUpdater = (
     useState<Record<string, Conversation>>(conversations);
   const [conversationsSettingsBulkActions, setConversationsSettingsBulkActions] =
     useState<ConversationsBulkActions>({});
+  console.log('updater---', conversationsSettingsBulkActions);
   // Quick Prompts
   const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] =
     useState<QuickPrompt[]>(allQuickPrompts);

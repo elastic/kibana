@@ -26,9 +26,12 @@ import { ConversationMultiSelector } from './conversation_multi_selector/convers
 import { SystemPromptSelector } from './system_prompt_selector/system_prompt_selector';
 import { TEST_IDS } from '../../../constants';
 import { ConversationsBulkActions } from '../../../api';
-import { getSelectedConversations } from '../../../quick_prompts/quick_prompt_settings_management.tsx/helpers';
+import { getSelectedConversations } from '../system_prompt_settings_management/utils';
+import { useSystemPromptEditor } from './use_system_prompt_editor';
+import { getApiConfig, getDefaultNewSystemPrompt } from '../../../use_conversation/helpers';
 
 interface Props {
+  connectors: AIConnector[] | undefined;
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   onSelectedSystemPromptChange: (systemPrompt?: Prompt) => void;
@@ -46,6 +49,7 @@ interface Props {
  * Settings for adding/removing system prompts. Configure name, prompt and default conversations.
  */
 export const SystemPromptEditorComponent: React.FC<Props> = ({
+  connectors,
   conversationSettings,
   onSelectedSystemPromptChange,
   selectedSystemPrompt,
@@ -87,22 +91,42 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
     [selectedSystemPrompt, setUpdatedSystemPromptSettings]
   );
 
+  const conversationsWithApiConfig = Object.entries(conversationSettings).reduce<
+    Record<string, Conversation>
+  >((acc, [key, conversation]) => {
+    acc[key] = {
+      ...conversation,
+      ...getApiConfig({
+        allSystemPrompts: systemPromptSettings,
+        connectors,
+        conversation,
+        defaultConnector,
+      }),
+    };
+    return acc;
+  }, {});
   // Conversations this system prompt should be a default for
   const conversationOptions = useMemo(
-    () => Object.values(conversationSettings),
-    [conversationSettings]
+    () => Object.values(conversationsWithApiConfig),
+    [conversationsWithApiConfig]
   );
+
   const selectedConversations = useMemo(() => {
     return selectedSystemPrompt != null
-      ? getSelectedConversations(conversationSettings, selectedSystemPrompt.id)
+      ? getSelectedConversations(
+          systemPromptSettings,
+          conversationsWithApiConfig,
+          selectedSystemPrompt.id
+        )
       : [];
-  }, [conversationSettings, selectedSystemPrompt]);
+  }, [conversationsWithApiConfig, selectedSystemPrompt, systemPromptSettings]);
 
   const handleConversationSelectionChange = useCallback(
     (currentPromptConversations: Conversation[]) => {
       const currentPromptConversationTitles = currentPromptConversations.map(
         (convo) => convo.title
       );
+
       const getDefaultSystemPromptId = (convo: Conversation) =>
         currentPromptConversationTitles.includes(convo.title)
           ? selectedSystemPrompt?.id
@@ -110,7 +134,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
           ? // remove the default System Prompt if it is assigned to a conversation
             // but that conversation is not in the currentPromptConversationList
             // This means conversation was removed in the current transaction
-            undefined
+            getDefaultNewSystemPrompt(systemPromptSettings).id
           : //  leave it as it is .. if that conversation was neither added nor removed.
             convo.apiConfig?.defaultSystemPromptId;
 
@@ -145,16 +169,22 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
         );
 
         let updatedConversationsSettingsBulkActions = { ...conversationsSettingsBulkActions };
-        Object.values(conversationSettings).forEach((convo) => {
-          const getApiConfig = (): ApiConfig | {} => {
+        Object.values(conversationsWithApiConfig).forEach((convo) => {
+          const getApiConfigWithSelectedPrompt = (): ApiConfig | {} => {
             if (convo.apiConfig) {
               return {
                 apiConfig: {
-                  ...convo.apiConfig,
+                  ...getApiConfig({
+                    allSystemPrompts: systemPromptSettings,
+                    connectors,
+                    conversation: convo,
+                    defaultConnector,
+                  }).apiConfig,
                   defaultSystemPromptId: getDefaultSystemPromptId(convo),
                 },
               };
             }
+
             return {};
           };
           const createOperation =
@@ -164,14 +194,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
                     ...(updatedConversationsSettingsBulkActions.create ?? {}),
                     [convo.id]: {
                       ...convo,
-                      ...(convo.apiConfig
-                        ? {
-                            apiConfig: {
-                              ...convo.apiConfig,
-                              defaultSystemPromptId: getDefaultSystemPromptId(convo),
-                            },
-                          }
-                        : {}),
+                      ...(convo.apiConfig ? getApiConfigWithSelectedPrompt() : {}),
                     },
                   },
                 }
@@ -186,7 +209,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
                       ...(updatedConversationsSettingsBulkActions.update
                         ? updatedConversationsSettingsBulkActions.update[convo.id] ?? {}
                         : {}),
-                      ...getApiConfig(),
+                      ...getApiConfigWithSelectedPrompt(),
                     },
                   },
                 }
@@ -198,17 +221,19 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
             ...updateOperation,
           };
         });
+
         setConversationsSettingsBulkActions(updatedConversationsSettingsBulkActions);
       }
     },
     [
-      conversationSettings,
+      connectors,
       conversationsSettingsBulkActions,
-      defaultConnector?.actionTypeId,
-      defaultConnector?.id,
+      conversationsWithApiConfig,
+      defaultConnector,
       selectedSystemPrompt,
       setConversationSettings,
       setConversationsSettingsBulkActions,
+      systemPromptSettings,
     ]
   );
 
@@ -236,42 +261,10 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
     [selectedSystemPrompt, setUpdatedSystemPromptSettings]
   );
 
-  // When top level system prompt selection changes
-  const onSystemPromptSelectionChange = useCallback(
-    (systemPrompt?: Prompt | string) => {
-      const isNew = typeof systemPrompt === 'string';
-      const newSelectedSystemPrompt: Prompt | undefined = isNew
-        ? {
-            id: systemPrompt ?? '',
-            content: '',
-            name: systemPrompt ?? '',
-            promptType: 'system',
-          }
-        : systemPrompt;
-
-      if (newSelectedSystemPrompt != null) {
-        setUpdatedSystemPromptSettings((prev) => {
-          const alreadyExists = prev.some((sp) => sp.id === newSelectedSystemPrompt.id);
-
-          if (!alreadyExists) {
-            return [...prev, newSelectedSystemPrompt];
-          }
-
-          return prev;
-        });
-      }
-
-      onSelectedSystemPromptChange(newSelectedSystemPrompt);
-    },
-    [onSelectedSystemPromptChange, setUpdatedSystemPromptSettings]
-  );
-
-  const onSystemPromptDeleted = useCallback(
-    (id: string) => {
-      setUpdatedSystemPromptSettings((prev) => prev.filter((sp) => sp.id !== id));
-    },
-    [setUpdatedSystemPromptSettings]
-  );
+  const { onSystemPromptSelectionChange, onSystemPromptDeleted } = useSystemPromptEditor({
+    setUpdatedSystemPromptSettings,
+    onSelectedSystemPromptChange,
+  });
 
   return (
     <>

@@ -23,6 +23,8 @@ interface Props {
   onSelectedConversationChange: (conversation?: Conversation) => void;
 }
 
+type OnConversationSelectionChange = (c?: string | Conversation) => void;
+
 export const useConversationChanged = ({
   allSystemPrompts,
   conversationSettings,
@@ -38,8 +40,8 @@ export const useConversationChanged = ({
 
   // Conversation callbacks
   // When top level conversation selection changes
-  const onConversationSelectionChange = useCallback(
-    (c?: Conversation | string) => {
+  const onConversationSelectionChange: OnConversationSelectionChange = useCallback(
+    (c = '') => {
       const isNew = typeof c === 'string';
 
       const newSelectedConversation: Conversation | undefined = isNew
@@ -83,7 +85,10 @@ export const useConversationChanged = ({
         });
       }
 
-      onSelectedConversationChange(newSelectedConversation);
+      onSelectedConversationChange({
+        ...newSelectedConversation,
+        id: newSelectedConversation.id || newSelectedConversation.title,
+      });
     },
     [
       conversationSettings,
