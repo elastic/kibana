@@ -26,6 +26,36 @@ export interface RuleStatusFilterProps {
   onChange: (selectedStatuses: RuleStatus[]) => void;
 }
 
+const ruleStateFilterOptions: Array<{ key: RuleStatus; label: string }> = [
+  {
+    key: 'enabled',
+    label: i18n.translate(
+      'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.enabledOptionText',
+      {
+        defaultMessage: 'Rule is enabled',
+      }
+    ),
+  },
+  {
+    key: 'disabled',
+    label: i18n.translate(
+      'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.disabledOptionText',
+      {
+        defaultMessage: 'Rule is disabled',
+      }
+    ),
+  },
+  {
+    key: 'snoozed',
+    label: i18n.translate(
+      'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.snoozedOptionText',
+      {
+        defaultMessage: 'Rule has snoozed',
+      }
+    ),
+  },
+];
+
 const getOptionDataTestSubj = (status: RuleStatus) => `ruleStatusFilterOption-${status}`;
 
 export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
@@ -41,12 +71,12 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const onFilterItemChange: EuiSelectableProps['onChange'] = useCallback(
-    async (newOptions: EuiSelectableOption[]) => {
+    (newOptions: EuiSelectableOption[]) => {
       const selected = newOptions
-        .filter(({ checked, key }) => checked && key)
+        .filter(({ checked }) => checked === 'on')
         .map(({ key }) => key as RuleStatus);
 
-      await onChange(selected);
+      onChange(selected);
     },
     [onChange]
   );
@@ -55,44 +85,16 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
     setIsPopoverOpen((prevIsOpen) => !prevIsOpen);
   }, [setIsPopoverOpen]);
 
-  const selectableOptions = useMemo<EuiSelectableOption[]>(() => {
-    const partialOptions: Array<{ key: RuleStatus; label: string }> = [
-      {
-        key: 'enabled',
-        label: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.enabledOptionText',
-          {
-            defaultMessage: 'Rule is enabled',
-          }
-        ),
-      },
-      {
-        key: 'disabled',
-        label: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.disabledOptionText',
-          {
-            defaultMessage: 'Rule is disabled',
-          }
-        ),
-      },
-      {
-        key: 'snoozed',
-        label: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.snoozedOptionText',
-          {
-            defaultMessage: 'Rule has snoozed',
-          }
-        ),
-      },
-    ];
-
-    return partialOptions.map(({ key, label }) => ({
-      key,
-      label,
-      'data-test-subj': optionDataTestSubj(key),
-      checked: selectedStatuses.includes(key) ? 'on' : undefined,
-    }));
-  }, [optionDataTestSubj, selectedStatuses]);
+  const selectableOptions = useMemo<EuiSelectableOption[]>(
+    () =>
+      ruleStateFilterOptions.map(({ key, label }) => ({
+        key,
+        label,
+        'data-test-subj': optionDataTestSubj(key),
+        checked: selectedStatuses.includes(key) ? 'on' : undefined,
+      })),
+    [optionDataTestSubj, selectedStatuses]
+  );
 
   return (
     <EuiFilterGroup data-test-subj={dataTestSubj}>
@@ -119,8 +121,12 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
           <EuiSelectable
             options={selectableOptions}
             onChange={onFilterItemChange}
-            style={{ width: 400 }}
-            listProps={{ bordered: false }}
+            listProps={{
+              bordered: false,
+              style: {
+                minWidth: 300,
+              },
+            }}
           >
             {(list) => list}
           </EuiSelectable>
