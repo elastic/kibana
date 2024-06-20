@@ -13,28 +13,44 @@ export function getLogRateChange(
   baselineBucketRate: number,
   deviationBucketRate: number
 ) {
-  const logRateChange =
-    baselineBucketRate > 0
-      ? analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-        ? `${Math.round((deviationBucketRate / baselineBucketRate) * 100) / 100}x higher`
-        : `${Math.round((baselineBucketRate / deviationBucketRate) * 100) / 100}x lower`
-      : analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-      ? i18n.translate(
-          'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateIncreaseLabelColumnTooltip',
-          {
-            defaultMessage: '{deviationBucketRate} docs from 0 in baseline',
-            values: { deviationBucketRate },
-          }
-        )
-      : i18n.translate(
-          'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateDecreaseLabelColumnTooltip',
-          {
-            defaultMessage: '0 docs from ${baselineBucketRate} in baseline',
-            values: { baselineBucketRate },
-          }
-        );
+  let message;
+  let factor;
 
-  return logRateChange;
+  if (baselineBucketRate > 0) {
+    if (analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE) {
+      factor = Math.round(((deviationBucketRate / baselineBucketRate) * 100) / 100);
+      message = i18n.translate(
+        'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateFactorIncreaseLabel',
+        {
+          defaultMessage: '{factor}x higher',
+          values: {
+            factor: Math.round(((deviationBucketRate / baselineBucketRate) * 100) / 100),
+          },
+        }
+      );
+    } else {
+      factor = Math.round(((baselineBucketRate / deviationBucketRate) * 100) / 100);
+      message = i18n.translate(
+        'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateFactorDecreaseLabel',
+        {
+          defaultMessage: '{factor}x lower',
+          values: {
+            factor,
+          },
+        }
+      );
+    }
+  } else {
+    // If the baseline rate is 0, then it can't be LOG_RATE_ANALYSIS_TYPE.DIP so we know it's a SPIKE
+    message = i18n.translate(
+      'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateDocIncreaseLabel',
+      {
+        defaultMessage: '{deviationBucketRate} docs up from 0 in baseline',
+        values: { deviationBucketRate },
+      }
+    );
+  }
+  return { message, factor };
 }
 
 export function getBaselineAndDeviationRates(

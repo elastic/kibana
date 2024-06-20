@@ -83,11 +83,6 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   const selectedSignificantItem = useAppSelector(
     (s) => s.logRateAnalysisTableRow.selectedSignificantItem
   );
-  const {
-    analysisType,
-    windowParameters,
-    documentStats: { documentCountStats },
-  } = useAppSelector((s) => s.logRateAnalysis);
 
   const dispatch = useAppDispatch();
 
@@ -102,9 +97,6 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
 
   const columns = useColumns(
     LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.SIGNIFICANT_ITEMS,
-    analysisType,
-    windowParameters,
-    documentCountStats?.interval ?? 0,
     skippedColumns,
     searchQuery,
     barColorOverride,

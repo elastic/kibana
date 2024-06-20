@@ -93,11 +93,6 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
 
   const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.pinnedGroup);
   const selectedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.selectedGroup);
-  const {
-    analysisType,
-    windowParameters,
-    documentStats: { documentCountStats },
-  } = useAppSelector((s) => s.logRateAnalysis);
   const dispatch = useAppDispatch();
   const isMounted = useMountedState();
 
@@ -244,9 +239,6 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
 
   const columns = useColumns(
     LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS,
-    analysisType,
-    windowParameters,
-    documentCountStats?.interval ?? 0,
     skippedColumns,
     searchQuery,
     barColorOverride,

@@ -21,7 +21,7 @@ import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
-import { type WindowParameters, LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { FieldStatsPopover } from '../field_stats_popover';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -143,9 +143,6 @@ const deviationRateMessage = i18n.translate(
 
 export const useColumns = (
   tableType: LogRateAnalysisResultsTableType,
-  analysisType: typeof LOG_RATE_ANALYSIS_TYPE[keyof typeof LOG_RATE_ANALYSIS_TYPE],
-  windowParameters: WindowParameters | undefined,
-  interval: number,
   skippedColumns: string[],
   searchQuery: estypes.QueryDslQueryContainer,
   barColorOverride?: string,
@@ -164,8 +161,14 @@ export const useColumns = (
 
   const loading = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
+  const {
+    analysisType,
+    windowParameters,
+    documentStats: { documentCountStats },
+  } = useAppSelector((s) => s.logRateAnalysis);
 
   const isGroupsTable = tableType === LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS;
+  const interval = documentCountStats?.interval ?? 0;
 
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
     return {
@@ -370,7 +373,7 @@ export const useColumns = (
 
           return <>{baselineBucketRate}</>;
         },
-        sortable: false,
+        sortable: true,
         valign: 'middle',
       },
       ['Deviation rate']: {
@@ -411,12 +414,12 @@ export const useColumns = (
 
           return <>{deviationBucketRate}</>;
         },
-        sortable: false,
+        sortable: true,
         valign: 'middle',
       },
       ['Log rate change']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnLogRateChange',
-        field: 'histogram',
+        field: 'pValue',
         name: (
           <>
             <FormattedMessage
@@ -465,11 +468,11 @@ export const useColumns = (
                 className="eui-alignTop"
               />
               &nbsp;
-              {logRateChange}
+              {logRateChange.message}
             </>
           );
         },
-        sortable: false,
+        sortable: true,
         valign: 'middle',
       },
       ['p-value']: {
