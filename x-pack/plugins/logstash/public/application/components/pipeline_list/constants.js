@@ -13,7 +13,7 @@ export const PIPELINE_LIST = {
   PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT: i18n.translate(
     'xpack.logstash.pipelineNotCentrallyManagedTooltip',
     {
-      defaultMessage: `This pipeline wasn't created using Centralized Configuration Management. It can't be managed or edited here.`,
+      defaultMessage: `This pipeline wasn't created using Centralized Configuration Management. It can't be managed or edited here. It has been retrieved from the Stack Monitoring data.`,
     }
   ),
   INFO_ALERTS: {
