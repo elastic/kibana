@@ -10,17 +10,16 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  ImportExceptionListRequestQuery,
+  ImportExceptionListResponse,
+} from '@kbn/securitysolution-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
 import { ConfigType } from '../config';
-import {
-  ImportExceptionsRequestQueryDecoded,
-  importExceptionsRequestQuery,
-  importExceptionsResponse,
-} from '../../common/api';
 
-import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
+import { buildSiemResponse, getExceptionListClient } from './utils';
 
 /**
  * Takes an ndjson file of exception lists and exception list items and
@@ -45,10 +44,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
         validate: {
           request: {
             body: schema.any(), // validation on file object is accomplished later in the handler.
-            query: buildRouteValidation<
-              typeof importExceptionsRequestQuery,
-              ImportExceptionsRequestQueryDecoded
-            >(importExceptionsRequestQuery),
+            query: buildRouteValidationWithZod(ImportExceptionListRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -60,6 +56,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
         try {
           const { filename } = request.body.file.hapi;
           const fileExtension = extname(filename).toLowerCase();
+
           if (fileExtension !== '.ndjson') {
             return siemResponse.error({
               body: `Invalid file extension ${fileExtension}`,
@@ -74,13 +71,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
             overwrite: request.query.overwrite,
           });
 
-          const [validated, errors] = validate(importsSummary, importExceptionsResponse);
-
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
-          } else {
-            return response.ok({ body: validated ?? {} });
-          }
+          return response.ok({ body: ImportExceptionListResponse.parse(importsSummary) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

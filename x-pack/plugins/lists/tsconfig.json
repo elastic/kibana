@@ -20,6 +20,7 @@
     "@kbn/securitysolution-list-hooks",
     "@kbn/securitysolution-list-api",
     "@kbn/securitysolution-lists-common",
+    "@kbn/securitysolution-exceptions-common",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/data-plugin",

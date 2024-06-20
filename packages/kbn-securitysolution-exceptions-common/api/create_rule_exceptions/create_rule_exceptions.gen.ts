@@ -17,11 +17,10 @@
 
 import { z } from 'zod';
 
-import { UUID } from '@kbn/openapi-common/schemas/primitives.gen';
+import { UUID, NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import {
   ExceptionListItem,
   ExceptionListItemHumanId,
-  ExceptionListHumanId,
   ExceptionListItemType,
   ExceptionListItemName,
   ExceptionListItemDescription,
@@ -29,27 +28,35 @@ import {
   ExceptionListItemOsTypeArray,
   ExceptionListItemTags,
   ExceptionListItemMeta,
-  ExceptionListItemCommentArray,
 } from '../model/exception_list_common.gen';
 import { ExceptionListItemEntryArray } from '../model/exception_list_item_entry.gen';
 
 export type RuleId = z.infer<typeof RuleId>;
 export const RuleId = UUID;
 
+export type CreateRuleExceptionListItemComment = z.infer<typeof CreateRuleExceptionListItemComment>;
+export const CreateRuleExceptionListItemComment = z.object({
+  comment: NonEmptyString,
+});
+
+export type CreateRuleExceptionListItemCommentArray = z.infer<
+  typeof CreateRuleExceptionListItemCommentArray
+>;
+export const CreateRuleExceptionListItemCommentArray = z.array(CreateRuleExceptionListItemComment);
+
 export type CreateRuleExceptionListItemProps = z.infer<typeof CreateRuleExceptionListItemProps>;
 export const CreateRuleExceptionListItemProps = z.object({
   item_id: ExceptionListItemHumanId.optional(),
-  list_id: ExceptionListHumanId.optional(),
   type: ExceptionListItemType,
   name: ExceptionListItemName,
   description: ExceptionListItemDescription,
   entries: ExceptionListItemEntryArray,
   namespace_type: ExceptionNamespaceType.optional().default('single'),
-  os_types: ExceptionListItemOsTypeArray.optional(),
-  tags: ExceptionListItemTags.optional(),
+  os_types: ExceptionListItemOsTypeArray.optional().default([]),
+  tags: ExceptionListItemTags.optional().default([]),
   meta: ExceptionListItemMeta.optional(),
   expire_time: z.string().datetime().optional(),
-  comments: ExceptionListItemCommentArray.optional(),
+  comments: CreateRuleExceptionListItemCommentArray.optional().default([]),
 });
 
 export type CreateRuleExceptionListItemsRequestParams = z.infer<
@@ -78,4 +85,4 @@ export type CreateRuleExceptionListItemsRequestBodyInput = z.input<
 export type CreateRuleExceptionListItemsResponse = z.infer<
   typeof CreateRuleExceptionListItemsResponse
 >;
-export const CreateRuleExceptionListItemsResponse = ExceptionListItem;
+export const CreateRuleExceptionListItemsResponse = z.array(ExceptionListItem);

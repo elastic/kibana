@@ -46,7 +46,7 @@ export type ExceptionListName = z.infer<typeof ExceptionListName>;
 export const ExceptionListName = NonEmptyString;
 
 export type ExceptionListDescription = z.infer<typeof ExceptionListDescription>;
-export const ExceptionListDescription = NonEmptyString;
+export const ExceptionListDescription = z.string();
 
 export type ExceptionListMeta = z.infer<typeof ExceptionListMeta>;
 export const ExceptionListMeta = z.object({}).catchall(z.unknown());
@@ -81,12 +81,12 @@ export const ExceptionListVersion = z.number().int().min(1);
 export type ExceptionList = z.infer<typeof ExceptionList>;
 export const ExceptionList = z.object({
   id: ExceptionListId,
-  list_id: ExceptionListHumanId.optional(),
+  list_id: ExceptionListHumanId,
   type: ExceptionListType,
   name: ExceptionListName,
   description: ExceptionListDescription,
   immutable: z.boolean(),
-  namespace_type: ExceptionNamespaceType.optional(),
+  namespace_type: ExceptionNamespaceType,
   os_types: ExceptionListOsTypeArray.optional(),
   tags: ExceptionListTags.optional(),
   meta: ExceptionListMeta.optional(),
@@ -112,7 +112,7 @@ export type ExceptionListItemName = z.infer<typeof ExceptionListItemName>;
 export const ExceptionListItemName = NonEmptyString;
 
 export type ExceptionListItemDescription = z.infer<typeof ExceptionListItemDescription>;
-export const ExceptionListItemDescription = NonEmptyString;
+export const ExceptionListItemDescription = z.string();
 
 export type ExceptionListItemMeta = z.infer<typeof ExceptionListItemMeta>;
 export const ExceptionListItemMeta = z.object({}).catchall(z.unknown());
@@ -150,7 +150,7 @@ export const ExceptionListItem = z.object({
   name: ExceptionListItemName,
   description: ExceptionListItemDescription,
   entries: ExceptionListItemEntryArray,
-  namespace_type: ExceptionNamespaceType.optional(),
+  namespace_type: ExceptionNamespaceType,
   os_types: ExceptionListItemOsTypeArray.optional(),
   tags: ExceptionListItemTags.optional(),
   meta: ExceptionListItemMeta.optional(),

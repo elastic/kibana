@@ -30,16 +30,16 @@ export const GetExceptionListSummaryRequestQuery = z.object({
   /**
    * Exception list's identifier generated upon creation
    */
-  id: ExceptionListId,
+  id: ExceptionListId.optional(),
   /**
    * Exception list's human readable identifier
    */
-  list_id: ExceptionListHumanId,
-  namespace_type: ExceptionNamespaceType,
+  list_id: ExceptionListHumanId.optional(),
+  namespace_type: ExceptionNamespaceType.optional().default('single'),
   /**
    * Search filter clause
    */
-  filter: z.string(),
+  filter: z.string().optional(),
 });
 export type GetExceptionListSummaryRequestQueryInput = z.input<
   typeof GetExceptionListSummaryRequestQuery
