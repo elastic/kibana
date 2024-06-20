@@ -11,6 +11,8 @@ import type { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-comm
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { DynamicTool } from '@langchain/core/tools';
 
+import { loggerMock } from '@kbn/logging-mocks';
+
 import { ATTACK_DISCOVERY_TOOL } from './attack_discovery_tool';
 import { mockAnonymizationFields } from '../mock/mock_anonymization_fields';
 import { mockEmptyOpenAndAcknowledgedAlertsQueryResults } from '../mock/mock_empty_open_and_acknowledged_alerts_qery_results';
@@ -66,11 +68,13 @@ describe('AttackDiscoveryTool', () => {
     search: jest.fn(),
   } as unknown as ElasticsearchClient;
   const llm = jest.fn() as unknown as ActionsClientLlm;
+  const logger = loggerMock.create();
 
   const rest = {
     anonymizationFields: mockAnonymizationFields,
     isEnabledKnowledgeBase: false,
     llm,
+    logger,
     modelExists: false,
     onNewReplacements: jest.fn(),
     size,

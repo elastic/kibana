@@ -16,43 +16,73 @@ export interface Mappings {
   indexes: Record<string, IndicesGetMappingIndexMappingRecord>;
 }
 
-export interface AllowedValue {
-  description?: string;
-  expected_event_types?: string[];
-  name?: string;
-}
+export interface EcsFieldMetadata {
+  dashed_name: string;
+  description: string;
+  flat_name: string;
+  level: string;
+  name: string;
+  normalize: string[];
+  short: string;
+  type: string;
 
-export interface EcsMetadata {
   allowed_values?: AllowedValue[];
-  dashed_name?: string;
-  description?: string;
-  example?: string;
-  flat_name?: string;
+  beta?: string;
+  doc_values?: boolean;
+  example?: string | number | boolean;
+  expected_values?: string[];
   format?: string;
   ignore_above?: number;
-  level?: string;
-  name?: string;
-  normalize?: string[];
+  index?: boolean;
+  input_format?: string;
+  multi_fields?: MultiField[];
+  object_type?: string;
+  original_fieldset?: string;
+  output_format?: string;
+  output_precision?: number;
+  pattern?: string;
   required?: boolean;
-  short?: string;
-  type?: string;
+  scaling_factor?: number;
 }
 
-export type EnrichedFieldMetadata = EcsMetadata & {
-  hasEcsMetadata: boolean;
+export interface AllowedValue {
+  description: string;
+  name: string;
+  expected_event_types?: string[];
+  beta?: string;
+}
+
+export interface MultiField {
+  flat_name: string;
+  name: string;
+  type: string;
+}
+
+export interface CustomFieldMetadata {
+  hasEcsMetadata: false;
+  indexFieldName: string;
+  indexFieldType: string;
+  indexInvalidValues: [];
+  isEcsCompliant: false;
+  isInSameFamily: false;
+}
+export interface EcsBasedFieldMetadata extends EcsFieldMetadata {
+  hasEcsMetadata: true;
   indexFieldName: string;
   indexFieldType: string;
   indexInvalidValues: UnallowedValueCount[];
   isEcsCompliant: boolean;
   isInSameFamily: boolean;
-};
+}
+
+export type EnrichedFieldMetadata = EcsBasedFieldMetadata | CustomFieldMetadata;
 
 export interface PartitionedFieldMetadata {
   all: EnrichedFieldMetadata[];
-  custom: EnrichedFieldMetadata[];
-  ecsCompliant: EnrichedFieldMetadata[];
-  incompatible: EnrichedFieldMetadata[];
-  sameFamily: EnrichedFieldMetadata[];
+  custom: CustomFieldMetadata[];
+  ecsCompliant: EcsBasedFieldMetadata[];
+  incompatible: EcsBasedFieldMetadata[];
+  sameFamily: EcsBasedFieldMetadata[];
 }
 
 export interface PartitionedFieldMetadataStats {
@@ -88,6 +118,32 @@ export interface UnallowedValueSearchResult {
 }
 
 export type IlmPhase = 'hot' | 'warm' | 'cold' | 'frozen' | 'unmanaged';
+
+export interface IncompatibleFieldMappingItem {
+  fieldName: string;
+  expectedValue: string;
+  actualValue: string;
+  description: string;
+}
+
+export interface ActualIncompatibleValue {
+  name: string;
+  count: number;
+}
+
+export interface IncompatibleFieldValueItem {
+  fieldName: string;
+  expectedValues: string[];
+  actualValues: ActualIncompatibleValue[];
+  description: string;
+}
+
+export interface SameFamilyFieldItem {
+  fieldName: string;
+  expectedValue: string;
+  actualValue: string;
+  description: string;
+}
 
 export interface IlmExplainPhaseCounts {
   hot: number;
