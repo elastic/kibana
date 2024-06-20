@@ -8,11 +8,9 @@
 
 import Path from 'path';
 import Fs from 'fs';
-
 import { REPO_ROOT } from '@kbn/repo-info';
 
 const localBundles = Path.join(REPO_ROOT, 'packages', 'kbn-monaco', 'target_workers');
 const bazelBundles = Path.resolve(REPO_ROOT, 'bazel-bin', Path.relative(REPO_ROOT, localBundles));
 
-// extracted const vars
-export const bundleDir = Fs.existsSync(localBundles) ? localBundles : bazelBundles;
+export const monacoBundleDir = Fs.existsSync(localBundles) ? localBundles : bazelBundles;
