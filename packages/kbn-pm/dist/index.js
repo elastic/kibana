@@ -27414,10 +27414,10 @@ micromatch.not = (list, patterns, options = {}) => {
     items.push(state.output);
   };
 
-  let matches = micromatch(list, patterns, { ...options, onResult });
+  let matches = new Set(micromatch(list, patterns, { ...options, onResult }));
 
   for (let item of items) {
-    if (!matches.includes(item)) {
+    if (!matches.has(item)) {
       result.add(item);
     }
   }
@@ -27667,7 +27667,7 @@ micromatch.scan = (...args) => picomatch.scan(...args);
  *
  * ```js
  * const mm = require('micromatch');
- * const state = mm(pattern[, options]);
+ * const state = mm.parse(pattern[, options]);
  * ```
  * @param {String} `glob`
  * @param {Object} `options`
@@ -27756,8 +27756,8 @@ const braces = (input, options = {}) => {
   let output = [];
 
   if (Array.isArray(input)) {
-    for (let pattern of input) {
-      let result = braces.create(pattern, options);
+    for (const pattern of input) {
+      const result = braces.create(pattern, options);
       if (Array.isArray(result)) {
         output.push(...result);
       } else {
@@ -27891,7 +27891,7 @@ braces.create = (input, options = {}) => {
     return [input];
   }
 
- return options.expand !== true
+  return options.expand !== true
     ? braces.compile(input, options)
     : braces.expand(input, options);
 };
@@ -27913,9 +27913,9 @@ module.exports = braces;
 const utils = __webpack_require__(312);
 
 module.exports = (ast, options = {}) => {
-  let stringify = (node, parent = {}) => {
-    let invalidBlock = options.escapeInvalid && utils.isInvalidBrace(parent);
-    let invalidNode = node.invalid === true && options.escapeInvalid === true;
+  const stringify = (node, parent = {}) => {
+    const invalidBlock = options.escapeInvalid && utils.isInvalidBrace(parent);
+    const invalidNode = node.invalid === true && options.escapeInvalid === true;
     let output = '';
 
     if (node.value) {
@@ -27930,7 +27930,7 @@ module.exports = (ast, options = {}) => {
     }
 
     if (node.nodes) {
-      for (let child of node.nodes) {
+      for (const child of node.nodes) {
         output += stringify(child);
       }
     }
@@ -27980,7 +27980,7 @@ exports.exceedsLimit = (min, max, step = 1, limit) => {
  */
 
 exports.escapeNode = (block, n = 0, type) => {
-  let node = block.nodes[n];
+  const node = block.nodes[n];
   if (!node) return;
 
   if ((type && node.type === type) || node.type === 'open' || node.type === 'close') {
@@ -28049,13 +28049,23 @@ exports.reduce = nodes => nodes.reduce((acc, node) => {
 
 exports.flatten = (...args) => {
   const result = [];
+
   const flat = arr => {
     for (let i = 0; i < arr.length; i++) {
-      let ele = arr[i];
-      Array.isArray(ele) ? flat(ele, result) : ele !== void 0 && result.push(ele);
+      const ele = arr[i];
+
+      if (Array.isArray(ele)) {
+        flat(ele);
+        continue;
+      }
+
+      if (ele !== undefined) {
+        result.push(ele);
+      }
     }
     return result;
   };
+
   flat(args);
   return result;
 };
@@ -28072,30 +28082,32 @@ const fill = __webpack_require__(314);
 const utils = __webpack_require__(312);
 
 const compile = (ast, options = {}) => {
-  let walk = (node, parent = {}) => {
-    let invalidBlock = utils.isInvalidBrace(parent);
-    let invalidNode = node.invalid === true && options.escapeInvalid === true;
-    let invalid = invalidBlock === true || invalidNode === true;
-    let prefix = options.escapeInvalid === true ? '\\' : '';
+  const walk = (node, parent = {}) => {
+    const invalidBlock = utils.isInvalidBrace(parent);
+    const invalidNode = node.invalid === true && options.escapeInvalid === true;
+    const invalid = invalidBlock === true || invalidNode === true;
+    const prefix = options.escapeInvalid === true ? '\\' : '';
     let output = '';
 
     if (node.isOpen === true) {
       return prefix + node.value;
     }
+
     if (node.isClose === true) {
+      console.log('node.isClose', prefix, node.value);
       return prefix + node.value;
     }
 
     if (node.type === 'open') {
-      return invalid ? (prefix + node.value) : '(';
+      return invalid ? prefix + node.value : '(';
     }
 
     if (node.type === 'close') {
-      return invalid ? (prefix + node.value) : ')';
+      return invalid ? prefix + node.value : ')';
     }
 
     if (node.type === 'comma') {
-      return node.prev.type === 'comma' ? '' : (invalid ? node.value : '|');
+      return node.prev.type === 'comma' ? '' : invalid ? node.value : '|';
     }
 
     if (node.value) {
@@ -28103,8 +28115,8 @@ const compile = (ast, options = {}) => {
     }
 
     if (node.nodes && node.ranges > 0) {
-      let args = utils.reduce(node.nodes);
-      let range = fill(...args, { ...options, wrap: false, toRegex: true });
+      const args = utils.reduce(node.nodes);
+      const range = fill(...args, { ...options, wrap: false, toRegex: true, strictZeros: true });
 
       if (range.length !== 0) {
         return args.length > 1 && range.length > 1 ? `(${range})` : range;
@@ -28112,10 +28124,11 @@ const compile = (ast, options = {}) => {
     }
 
     if (node.nodes) {
-      for (let child of node.nodes) {
+      for (const child of node.nodes) {
         output += walk(child, node);
       }
     }
+
     return output;
   };
 
@@ -28192,7 +28205,7 @@ const toMaxLen = (input, maxLength) => {
   return negative ? ('-' + input) : input;
 };
 
-const toSequence = (parts, options) => {
+const toSequence = (parts, options, maxLen) => {
   parts.negatives.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
   parts.positives.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
 
@@ -28202,11 +28215,11 @@ const toSequence = (parts, options) => {
   let result;
 
   if (parts.positives.length) {
-    positives = parts.positives.join('|');
+    positives = parts.positives.map(v => toMaxLen(String(v), maxLen)).join('|');
   }
 
   if (parts.negatives.length) {
-    negatives = `-(${prefix}${parts.negatives.join('|')})`;
+    negatives = `-(${prefix}${parts.negatives.map(v => toMaxLen(String(v), maxLen)).join('|')})`;
   }
 
   if (positives && negatives) {
@@ -28304,7 +28317,7 @@ const fillNumbers = (start, end, step = 1, options = {}) => {
 
   if (options.toRegex === true) {
     return step > 1
-      ? toSequence(parts, options)
+      ? toSequence(parts, options, maxLen)
       : toRegex(range, null, { wrap: false, ...options });
   }
 
@@ -28315,7 +28328,6 @@ const fillLetters = (start, end, step = 1, options = {}) => {
   if ((!isNumber(start) && start.length > 1) || (!isNumber(end) && end.length > 1)) {
     return invalidRange(start, end, options);
   }
-
 
   let format = options.transform || (val => String.fromCharCode(val));
   let a = `${start}`.charCodeAt(0);
@@ -28713,7 +28725,7 @@ const stringify = __webpack_require__(311);
 const utils = __webpack_require__(312);
 
 const append = (queue = '', stash = '', enclose = false) => {
-  let result = [];
+  const result = [];
 
   queue = [].concat(queue);
   stash = [].concat(stash);
@@ -28723,15 +28735,15 @@ const append = (queue = '', stash = '', enclose = false) => {
     return enclose ? utils.flatten(stash).map(ele => `{${ele}}`) : stash;
   }
 
-  for (let item of queue) {
+  for (const item of queue) {
     if (Array.isArray(item)) {
-      for (let value of item) {
+      for (const value of item) {
         result.push(append(value, stash, enclose));
       }
     } else {
       for (let ele of stash) {
         if (enclose === true && typeof ele === 'string') ele = `{${ele}}`;
-        result.push(Array.isArray(ele) ? append(item, ele, enclose) : (item + ele));
+        result.push(Array.isArray(ele) ? append(item, ele, enclose) : item + ele);
       }
     }
   }
@@ -28739,9 +28751,9 @@ const append = (queue = '', stash = '', enclose = false) => {
 };
 
 const expand = (ast, options = {}) => {
-  let rangeLimit = options.rangeLimit === void 0 ? 1000 : options.rangeLimit;
+  const rangeLimit = options.rangeLimit === undefined ? 1000 : options.rangeLimit;
 
-  let walk = (node, parent = {}) => {
+  const walk = (node, parent = {}) => {
     node.queue = [];
 
     let p = parent;
@@ -28763,7 +28775,7 @@ const expand = (ast, options = {}) => {
     }
 
     if (node.nodes && node.ranges > 0) {
-      let args = utils.reduce(node.nodes);
+      const args = utils.reduce(node.nodes);
 
       if (utils.exceedsLimit(...args, options.step, rangeLimit)) {
         throw new RangeError('expanded array length exceeds range limit. Use options.rangeLimit to increase or disable the limit.');
@@ -28779,7 +28791,7 @@ const expand = (ast, options = {}) => {
       return;
     }
 
-    let enclose = utils.encloseBrace(node);
+    const enclose = utils.encloseBrace(node);
     let queue = node.queue;
     let block = node;
 
@@ -28789,7 +28801,7 @@ const expand = (ast, options = {}) => {
     }
 
     for (let i = 0; i < node.nodes.length; i++) {
-      let child = node.nodes[i];
+      const child = node.nodes[i];
 
       if (child.type === 'comma' && node.type === 'brace') {
         if (i === 1) queue.push('');
@@ -28861,22 +28873,21 @@ const parse = (input, options = {}) => {
     throw new TypeError('Expected a string');
   }
 
-  let opts = options || {};
-  let max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+  const opts = options || {};
+  const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
   if (input.length > max) {
     throw new SyntaxError(`Input length (${input.length}), exceeds max characters (${max})`);
   }
 
-  let ast = { type: 'root', input, nodes: [] };
-  let stack = [ast];
+  const ast = { type: 'root', input, nodes: [] };
+  const stack = [ast];
   let block = ast;
   let prev = ast;
   let brackets = 0;
-  let length = input.length;
+  const length = input.length;
   let index = 0;
   let depth = 0;
   let value;
-  let memo = {};
 
   /**
    * Helpers
@@ -28939,7 +28950,6 @@ const parse = (input, options = {}) => {
     if (value === CHAR_LEFT_SQUARE_BRACKET) {
       brackets++;
 
-      let closed = true;
       let next;
 
       while (index < length && (next = advance())) {
@@ -28995,7 +29005,7 @@ const parse = (input, options = {}) => {
      */
 
     if (value === CHAR_DOUBLE_QUOTE || value === CHAR_SINGLE_QUOTE || value === CHAR_BACKTICK) {
-      let open = value;
+      const open = value;
       let next;
 
       if (options.keepQuotes !== true) {
@@ -29027,8 +29037,8 @@ const parse = (input, options = {}) => {
     if (value === CHAR_LEFT_CURLY_BRACE) {
       depth++;
 
-      let dollar = prev.value && prev.value.slice(-1) === '$' || block.dollar === true;
-      let brace = {
+      const dollar = prev.value && prev.value.slice(-1) === '$' || block.dollar === true;
+      const brace = {
         type: 'brace',
         open: true,
         close: false,
@@ -29055,7 +29065,7 @@ const parse = (input, options = {}) => {
         continue;
       }
 
-      let type = 'close';
+      const type = 'close';
       block = stack.pop();
       block.close = true;
 
@@ -29073,7 +29083,7 @@ const parse = (input, options = {}) => {
     if (value === CHAR_COMMA && depth > 0) {
       if (block.ranges > 0) {
         block.ranges = 0;
-        let open = block.nodes.shift();
+        const open = block.nodes.shift();
         block.nodes = [open, { type: 'text', value: stringify(block) }];
       }
 
@@ -29087,7 +29097,7 @@ const parse = (input, options = {}) => {
      */
 
     if (value === CHAR_DOT && depth > 0 && block.commas === 0) {
-      let siblings = block.nodes;
+      const siblings = block.nodes;
 
       if (depth === 0 || siblings.length === 0) {
         push({ type: 'text', value });
@@ -29114,7 +29124,7 @@ const parse = (input, options = {}) => {
       if (prev.type === 'range') {
         siblings.pop();
 
-        let before = siblings[siblings.length - 1];
+        const before = siblings[siblings.length - 1];
         before.value += prev.value + value;
         prev = before;
         block.ranges--;
@@ -29147,8 +29157,8 @@ const parse = (input, options = {}) => {
       });
 
       // get the location of the block on parent.nodes (block's siblings)
-      let parent = stack[stack.length - 1];
-      let index = parent.nodes.indexOf(block);
+      const parent = stack[stack.length - 1];
+      const index = parent.nodes.indexOf(block);
       // replace the (invalid) block with it's nodes
       parent.nodes.splice(index, 1, ...block.nodes);
     }
@@ -29169,7 +29179,7 @@ module.exports = parse;
 
 
 module.exports = {
-  MAX_LENGTH: 1024 * 64,
+  MAX_LENGTH: 10000,
 
   // Digits
   CHAR_0: '0', /* 0 */
@@ -70097,7 +70107,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _build_bazel_production_projects__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(612);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildBazelProductionProjects", function() { return _build_bazel_production_projects__WEBPACK_IMPORTED_MODULE_0__["buildBazelProductionProjects"]; });
 
-/* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(857);
+/* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(856);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildNonBazelProductionProjects", function() { return _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_1__["buildNonBazelProductionProjects"]; });
 
 /*
@@ -70124,7 +70134,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var globby__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(globby__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(857);
+/* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(856);
 /* harmony import */ var _utils_bazel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(469);
 /* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(270);
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(259);
@@ -98397,8 +98407,8 @@ const arrayUnion = __webpack_require__(281);
 const merge2 = __webpack_require__(282);
 const fastGlob = __webpack_require__(829);
 const dirGlob = __webpack_require__(367);
-const gitignore = __webpack_require__(855);
-const {FilterStream, UniqueStream} = __webpack_require__(856);
+const gitignore = __webpack_require__(854);
+const {FilterStream, UniqueStream} = __webpack_require__(855);
 
 const DEFAULT_FILTER = () => false;
 
@@ -98581,10 +98591,10 @@ module.exports.gitignore = gitignore;
 "use strict";
 
 const taskManager = __webpack_require__(830);
-const async_1 = __webpack_require__(840);
-const stream_1 = __webpack_require__(851);
-const sync_1 = __webpack_require__(852);
-const settings_1 = __webpack_require__(854);
+const async_1 = __webpack_require__(839);
+const stream_1 = __webpack_require__(850);
+const sync_1 = __webpack_require__(851);
+const settings_1 = __webpack_require__(853);
 const utils = __webpack_require__(831);
 async function FastGlob(source, options) {
     assertPatternsInput(source);
@@ -98818,9 +98828,9 @@ const path = __webpack_require__(835);
 exports.path = path;
 const pattern = __webpack_require__(836);
 exports.pattern = pattern;
-const stream = __webpack_require__(838);
+const stream = __webpack_require__(837);
 exports.stream = stream;
-const string = __webpack_require__(839);
+const string = __webpack_require__(838);
 exports.string = string;
 
 
@@ -98978,7 +98988,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.removeDuplicateSlashes = exports.matchAny = exports.convertPatternsToRe = exports.makeRe = exports.getPatternParts = exports.expandBraceExpansion = exports.expandPatternsWithBraceExpansion = exports.isAffectDepthOfReadingPattern = exports.endsWithSlashGlobStar = exports.hasGlobStar = exports.getBaseDirectory = exports.isPatternRelatedToParentDirectory = exports.getPatternsOutsideCurrentDirectory = exports.getPatternsInsideCurrentDirectory = exports.getPositivePatterns = exports.getNegativePatterns = exports.isPositivePattern = exports.isNegativePattern = exports.convertToNegativePattern = exports.convertToPositivePattern = exports.isDynamicPattern = exports.isStaticPattern = void 0;
 const path = __webpack_require__(4);
 const globParent = __webpack_require__(306);
-const micromatch = __webpack_require__(837);
+const micromatch = __webpack_require__(309);
 const GLOBSTAR = '**';
 const ESCAPE_SYMBOL = '\\';
 const COMMON_GLOB_SYMBOLS_RE = /[*?]|^!/;
@@ -99169,480 +99179,6 @@ exports.removeDuplicateSlashes = removeDuplicateSlashes;
 
 "use strict";
 
-
-const util = __webpack_require__(116);
-const braces = __webpack_require__(310);
-const picomatch = __webpack_require__(320);
-const utils = __webpack_require__(323);
-const isEmptyString = val => val === '' || val === './';
-
-/**
- * Returns an array of strings that match one or more glob patterns.
- *
- * ```js
- * const mm = require('micromatch');
- * // mm(list, patterns[, options]);
- *
- * console.log(mm(['a.js', 'a.txt'], ['*.js']));
- * //=> [ 'a.js' ]
- * ```
- * @param {String|Array<string>} `list` List of strings to match.
- * @param {String|Array<string>} `patterns` One or more glob patterns to use for matching.
- * @param {Object} `options` See available [options](#options)
- * @return {Array} Returns an array of matches
- * @summary false
- * @api public
- */
-
-const micromatch = (list, patterns, options) => {
-  patterns = [].concat(patterns);
-  list = [].concat(list);
-
-  let omit = new Set();
-  let keep = new Set();
-  let items = new Set();
-  let negatives = 0;
-
-  let onResult = state => {
-    items.add(state.output);
-    if (options && options.onResult) {
-      options.onResult(state);
-    }
-  };
-
-  for (let i = 0; i < patterns.length; i++) {
-    let isMatch = picomatch(String(patterns[i]), { ...options, onResult }, true);
-    let negated = isMatch.state.negated || isMatch.state.negatedExtglob;
-    if (negated) negatives++;
-
-    for (let item of list) {
-      let matched = isMatch(item, true);
-
-      let match = negated ? !matched.isMatch : matched.isMatch;
-      if (!match) continue;
-
-      if (negated) {
-        omit.add(matched.output);
-      } else {
-        omit.delete(matched.output);
-        keep.add(matched.output);
-      }
-    }
-  }
-
-  let result = negatives === patterns.length ? [...items] : [...keep];
-  let matches = result.filter(item => !omit.has(item));
-
-  if (options && matches.length === 0) {
-    if (options.failglob === true) {
-      throw new Error(`No matches found for "${patterns.join(', ')}"`);
-    }
-
-    if (options.nonull === true || options.nullglob === true) {
-      return options.unescape ? patterns.map(p => p.replace(/\\/g, '')) : patterns;
-    }
-  }
-
-  return matches;
-};
-
-/**
- * Backwards compatibility
- */
-
-micromatch.match = micromatch;
-
-/**
- * Returns a matcher function from the given glob `pattern` and `options`.
- * The returned function takes a string to match as its only argument and returns
- * true if the string is a match.
- *
- * ```js
- * const mm = require('micromatch');
- * // mm.matcher(pattern[, options]);
- *
- * const isMatch = mm.matcher('*.!(*a)');
- * console.log(isMatch('a.a')); //=> false
- * console.log(isMatch('a.b')); //=> true
- * ```
- * @param {String} `pattern` Glob pattern
- * @param {Object} `options`
- * @return {Function} Returns a matcher function.
- * @api public
- */
-
-micromatch.matcher = (pattern, options) => picomatch(pattern, options);
-
-/**
- * Returns true if **any** of the given glob `patterns` match the specified `string`.
- *
- * ```js
- * const mm = require('micromatch');
- * // mm.isMatch(string, patterns[, options]);
- *
- * console.log(mm.isMatch('a.a', ['b.*', '*.a'])); //=> true
- * console.log(mm.isMatch('a.a', 'b.*')); //=> false
- * ```
- * @param {String} `str` The string to test.
- * @param {String|Array} `patterns` One or more glob patterns to use for matching.
- * @param {Object} `[options]` See available [options](#options).
- * @return {Boolean} Returns true if any patterns match `str`
- * @api public
- */
-
-micromatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
-
-/**
- * Backwards compatibility
- */
-
-micromatch.any = micromatch.isMatch;
-
-/**
- * Returns a list of strings that _**do not match any**_ of the given `patterns`.
- *
- * ```js
- * const mm = require('micromatch');
- * // mm.not(list, patterns[, options]);
- *
- * console.log(mm.not(['a.a', 'b.b', 'c.c'], '*.a'));
- * //=> ['b.b', 'c.c']
- * ```
- * @param {Array} `list` Array of strings to match.
- * @param {String|Array} `patterns` One or more glob pattern to use for matching.
- * @param {Object} `options` See available [options](#options) for changing how matches are performed
- * @return {Array} Returns an array of strings that **do not match** the given patterns.
- * @api public
- */
-
-micromatch.not = (list, patterns, options = {}) => {
-  patterns = [].concat(patterns).map(String);
-  let result = new Set();
-  let items = [];
-
-  let onResult = state => {
-    if (options.onResult) options.onResult(state);
-    items.push(state.output);
-  };
-
-  let matches = micromatch(list, patterns, { ...options, onResult });
-
-  for (let item of items) {
-    if (!matches.includes(item)) {
-      result.add(item);
-    }
-  }
-  return [...result];
-};
-
-/**
- * Returns true if the given `string` contains the given pattern. Similar
- * to [.isMatch](#isMatch) but the pattern can match any part of the string.
- *
- * ```js
- * var mm = require('micromatch');
- * // mm.contains(string, pattern[, options]);
- *
- * console.log(mm.contains('aa/bb/cc', '*b'));
- * //=> true
- * console.log(mm.contains('aa/bb/cc', '*d'));
- * //=> false
- * ```
- * @param {String} `str` The string to match.
- * @param {String|Array} `patterns` Glob pattern to use for matching.
- * @param {Object} `options` See available [options](#options) for changing how matches are performed
- * @return {Boolean} Returns true if any of the patterns matches any part of `str`.
- * @api public
- */
-
-micromatch.contains = (str, pattern, options) => {
-  if (typeof str !== 'string') {
-    throw new TypeError(`Expected a string: "${util.inspect(str)}"`);
-  }
-
-  if (Array.isArray(pattern)) {
-    return pattern.some(p => micromatch.contains(str, p, options));
-  }
-
-  if (typeof pattern === 'string') {
-    if (isEmptyString(str) || isEmptyString(pattern)) {
-      return false;
-    }
-
-    if (str.includes(pattern) || (str.startsWith('./') && str.slice(2).includes(pattern))) {
-      return true;
-    }
-  }
-
-  return micromatch.isMatch(str, pattern, { ...options, contains: true });
-};
-
-/**
- * Filter the keys of the given object with the given `glob` pattern
- * and `options`. Does not attempt to match nested keys. If you need this feature,
- * use [glob-object][] instead.
- *
- * ```js
- * const mm = require('micromatch');
- * // mm.matchKeys(object, patterns[, options]);
- *
- * const obj = { aa: 'a', ab: 'b', ac: 'c' };
- * console.log(mm.matchKeys(obj, '*b'));
- * //=> { ab: 'b' }
- * ```
- * @param {Object} `object` The object with keys to filter.
- * @param {String|Array} `patterns` One or more glob patterns to use for matching.
- * @param {Object} `options` See available [options](#options) for changing how matches are performed
- * @return {Object} Returns an object with only keys that match the given patterns.
- * @api public
- */
-
-micromatch.matchKeys = (obj, patterns, options) => {
-  if (!utils.isObject(obj)) {
-    throw new TypeError('Expected the first argument to be an object');
-  }
-  let keys = micromatch(Object.keys(obj), patterns, options);
-  let res = {};
-  for (let key of keys) res[key] = obj[key];
-  return res;
-};
-
-/**
- * Returns true if some of the strings in the given `list` match any of the given glob `patterns`.
- *
- * ```js
- * const mm = require('micromatch');
- * // mm.some(list, patterns[, options]);
- *
- * console.log(mm.some(['foo.js', 'bar.js'], ['*.js', '!foo.js']));
- * // true
- * console.log(mm.some(['foo.js'], ['*.js', '!foo.js']));
- * // false
- * ```
- * @param {String|Array} `list` The string or array of strings to test. Returns as soon as the first match is found.
- * @param {String|Array} `patterns` One or more glob patterns to use for matching.
- * @param {Object} `options` See available [options](#options) for changing how matches are performed
- * @return {Boolean} Returns true if any `patterns` matches any of the strings in `list`
- * @api public
- */
-
-micromatch.some = (list, patterns, options) => {
-  let items = [].concat(list);
-
-  for (let pattern of [].concat(patterns)) {
-    let isMatch = picomatch(String(pattern), options);
-    if (items.some(item => isMatch(item))) {
-      return true;
-    }
-  }
-  return false;
-};
-
-/**
- * Returns true if every string in the given `list` matches
- * any of the given glob `patterns`.
- *
- * ```js
- * const mm = require('micromatch');
- * // mm.every(list, patterns[, options]);
- *
- * console.log(mm.every('foo.js', ['foo.js']));
- * // true
- * console.log(mm.every(['foo.js', 'bar.js'], ['*.js']));
- * // true
- * console.log(mm.every(['foo.js', 'bar.js'], ['*.js', '!foo.js']));
- * // false
- * console.log(mm.every(['foo.js'], ['*.js', '!foo.js']));
- * // false
- * ```
- * @param {String|Array} `list` The string or array of strings to test.
- * @param {String|Array} `patterns` One or more glob patterns to use for matching.
- * @param {Object} `options` See available [options](#options) for changing how matches are performed
- * @return {Boolean} Returns true if all `patterns` matches all of the strings in `list`
- * @api public
- */
-
-micromatch.every = (list, patterns, options) => {
-  let items = [].concat(list);
-
-  for (let pattern of [].concat(patterns)) {
-    let isMatch = picomatch(String(pattern), options);
-    if (!items.every(item => isMatch(item))) {
-      return false;
-    }
-  }
-  return true;
-};
-
-/**
- * Returns true if **all** of the given `patterns` match
- * the specified string.
- *
- * ```js
- * const mm = require('micromatch');
- * // mm.all(string, patterns[, options]);
- *
- * console.log(mm.all('foo.js', ['foo.js']));
- * // true
- *
- * console.log(mm.all('foo.js', ['*.js', '!foo.js']));
- * // false
- *
- * console.log(mm.all('foo.js', ['*.js', 'foo.js']));
- * // true
- *
- * console.log(mm.all('foo.js', ['*.js', 'f*', '*o*', '*o.js']));
- * // true
- * ```
- * @param {String|Array} `str` The string to test.
- * @param {String|Array} `patterns` One or more glob patterns to use for matching.
- * @param {Object} `options` See available [options](#options) for changing how matches are performed
- * @return {Boolean} Returns true if any patterns match `str`
- * @api public
- */
-
-micromatch.all = (str, patterns, options) => {
-  if (typeof str !== 'string') {
-    throw new TypeError(`Expected a string: "${util.inspect(str)}"`);
-  }
-
-  return [].concat(patterns).every(p => picomatch(p, options)(str));
-};
-
-/**
- * Returns an array of matches captured by `pattern` in `string, or `null` if the pattern did not match.
- *
- * ```js
- * const mm = require('micromatch');
- * // mm.capture(pattern, string[, options]);
- *
- * console.log(mm.capture('test/*.js', 'test/foo.js'));
- * //=> ['foo']
- * console.log(mm.capture('test/*.js', 'foo/bar.css'));
- * //=> null
- * ```
- * @param {String} `glob` Glob pattern to use for matching.
- * @param {String} `input` String to match
- * @param {Object} `options` See available [options](#options) for changing how matches are performed
- * @return {Array|null} Returns an array of captures if the input matches the glob pattern, otherwise `null`.
- * @api public
- */
-
-micromatch.capture = (glob, input, options) => {
-  let posix = utils.isWindows(options);
-  let regex = picomatch.makeRe(String(glob), { ...options, capture: true });
-  let match = regex.exec(posix ? utils.toPosixSlashes(input) : input);
-
-  if (match) {
-    return match.slice(1).map(v => v === void 0 ? '' : v);
-  }
-};
-
-/**
- * Create a regular expression from the given glob `pattern`.
- *
- * ```js
- * const mm = require('micromatch');
- * // mm.makeRe(pattern[, options]);
- *
- * console.log(mm.makeRe('*.js'));
- * //=> /^(?:(\.[\\\/])?(?!\.)(?=.)[^\/]*?\.js)$/
- * ```
- * @param {String} `pattern` A glob pattern to convert to regex.
- * @param {Object} `options`
- * @return {RegExp} Returns a regex created from the given pattern.
- * @api public
- */
-
-micromatch.makeRe = (...args) => picomatch.makeRe(...args);
-
-/**
- * Scan a glob pattern to separate the pattern into segments. Used
- * by the [split](#split) method.
- *
- * ```js
- * const mm = require('micromatch');
- * const state = mm.scan(pattern[, options]);
- * ```
- * @param {String} `pattern`
- * @param {Object} `options`
- * @return {Object} Returns an object with
- * @api public
- */
-
-micromatch.scan = (...args) => picomatch.scan(...args);
-
-/**
- * Parse a glob pattern to create the source string for a regular
- * expression.
- *
- * ```js
- * const mm = require('micromatch');
- * const state = mm(pattern[, options]);
- * ```
- * @param {String} `glob`
- * @param {Object} `options`
- * @return {Object} Returns an object with useful properties and output to be used as regex source string.
- * @api public
- */
-
-micromatch.parse = (patterns, options) => {
-  let res = [];
-  for (let pattern of [].concat(patterns || [])) {
-    for (let str of braces(String(pattern), options)) {
-      res.push(picomatch.parse(str, options));
-    }
-  }
-  return res;
-};
-
-/**
- * Process the given brace `pattern`.
- *
- * ```js
- * const { braces } = require('micromatch');
- * console.log(braces('foo/{a,b,c}/bar'));
- * //=> [ 'foo/(a|b|c)/bar' ]
- *
- * console.log(braces('foo/{a,b,c}/bar', { expand: true }));
- * //=> [ 'foo/a/bar', 'foo/b/bar', 'foo/c/bar' ]
- * ```
- * @param {String} `pattern` String with brace pattern to process.
- * @param {Object} `options` Any [options](#options) to change how expansion is performed. See the [braces][] library for all available options.
- * @return {Array}
- * @api public
- */
-
-micromatch.braces = (pattern, options) => {
-  if (typeof pattern !== 'string') throw new TypeError('Expected a string');
-  if ((options && options.nobrace === true) || !/\{.*\}/.test(pattern)) {
-    return [pattern];
-  }
-  return braces(pattern, options);
-};
-
-/**
- * Expand braces
- */
-
-micromatch.braceExpand = (pattern, options) => {
-  if (typeof pattern !== 'string') throw new TypeError('Expected a string');
-  return micromatch.braces(pattern, { ...options, expand: true });
-};
-
-/**
- * Expose micromatch
- */
-
-module.exports = micromatch;
-
-
-/***/ }),
-/* 838 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.merge = void 0;
 const merge2 = __webpack_require__(282);
@@ -99662,7 +99198,7 @@ function propagateCloseEventToSources(streams) {
 
 
 /***/ }),
-/* 839 */
+/* 838 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -99680,14 +99216,14 @@ exports.isEmpty = isEmpty;
 
 
 /***/ }),
-/* 840 */
+/* 839 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const async_1 = __webpack_require__(841);
-const provider_1 = __webpack_require__(844);
+const async_1 = __webpack_require__(840);
+const provider_1 = __webpack_require__(843);
 class ProviderAsync extends provider_1.default {
     constructor() {
         super(...arguments);
@@ -99710,15 +99246,15 @@ exports.default = ProviderAsync;
 
 
 /***/ }),
-/* 841 */
+/* 840 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const fsWalk = __webpack_require__(335);
-const reader_1 = __webpack_require__(842);
-const stream_1 = __webpack_require__(843);
+const reader_1 = __webpack_require__(841);
+const stream_1 = __webpack_require__(842);
 class ReaderAsync extends reader_1.default {
     constructor() {
         super(...arguments);
@@ -99752,7 +99288,7 @@ exports.default = ReaderAsync;
 
 
 /***/ }),
-/* 842 */
+/* 841 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -99792,7 +99328,7 @@ exports.default = Reader;
 
 
 /***/ }),
-/* 843 */
+/* 842 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -99801,7 +99337,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const stream_1 = __webpack_require__(172);
 const fsStat = __webpack_require__(330);
 const fsWalk = __webpack_require__(335);
-const reader_1 = __webpack_require__(842);
+const reader_1 = __webpack_require__(841);
 class ReaderStream extends reader_1.default {
     constructor() {
         super(...arguments);
@@ -99854,17 +99390,17 @@ exports.default = ReaderStream;
 
 
 /***/ }),
-/* 844 */
+/* 843 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __webpack_require__(4);
-const deep_1 = __webpack_require__(845);
-const entry_1 = __webpack_require__(848);
-const error_1 = __webpack_require__(849);
-const entry_2 = __webpack_require__(850);
+const deep_1 = __webpack_require__(844);
+const entry_1 = __webpack_require__(847);
+const error_1 = __webpack_require__(848);
+const entry_2 = __webpack_require__(849);
 class Provider {
     constructor(_settings) {
         this._settings = _settings;
@@ -99909,14 +99445,14 @@ exports.default = Provider;
 
 
 /***/ }),
-/* 845 */
+/* 844 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const utils = __webpack_require__(831);
-const partial_1 = __webpack_require__(846);
+const partial_1 = __webpack_require__(845);
 class DeepFilter {
     constructor(_settings, _micromatchOptions) {
         this._settings = _settings;
@@ -99978,13 +99514,13 @@ exports.default = DeepFilter;
 
 
 /***/ }),
-/* 846 */
+/* 845 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const matcher_1 = __webpack_require__(847);
+const matcher_1 = __webpack_require__(846);
 class PartialMatcher extends matcher_1.default {
     match(filepath) {
         const parts = filepath.split('/');
@@ -100023,7 +99559,7 @@ exports.default = PartialMatcher;
 
 
 /***/ }),
-/* 847 */
+/* 846 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -100075,7 +99611,7 @@ exports.default = Matcher;
 
 
 /***/ }),
-/* 848 */
+/* 847 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -100145,7 +99681,7 @@ exports.default = EntryFilter;
 
 
 /***/ }),
-/* 849 */
+/* 848 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -100167,7 +99703,7 @@ exports.default = ErrorFilter;
 
 
 /***/ }),
-/* 850 */
+/* 849 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -100200,15 +99736,15 @@ exports.default = EntryTransformer;
 
 
 /***/ }),
-/* 851 */
+/* 850 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const stream_1 = __webpack_require__(172);
-const stream_2 = __webpack_require__(843);
-const provider_1 = __webpack_require__(844);
+const stream_2 = __webpack_require__(842);
+const provider_1 = __webpack_require__(843);
 class ProviderStream extends provider_1.default {
     constructor() {
         super(...arguments);
@@ -100238,14 +99774,14 @@ exports.default = ProviderStream;
 
 
 /***/ }),
-/* 852 */
+/* 851 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const sync_1 = __webpack_require__(853);
-const provider_1 = __webpack_require__(844);
+const sync_1 = __webpack_require__(852);
+const provider_1 = __webpack_require__(843);
 class ProviderSync extends provider_1.default {
     constructor() {
         super(...arguments);
@@ -100268,7 +99804,7 @@ exports.default = ProviderSync;
 
 
 /***/ }),
-/* 853 */
+/* 852 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -100276,7 +99812,7 @@ exports.default = ProviderSync;
 Object.defineProperty(exports, "__esModule", { value: true });
 const fsStat = __webpack_require__(330);
 const fsWalk = __webpack_require__(335);
-const reader_1 = __webpack_require__(842);
+const reader_1 = __webpack_require__(841);
 class ReaderSync extends reader_1.default {
     constructor() {
         super(...arguments);
@@ -100318,7 +99854,7 @@ exports.default = ReaderSync;
 
 
 /***/ }),
-/* 854 */
+/* 853 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -100384,7 +99920,7 @@ exports.default = Settings;
 
 
 /***/ }),
-/* 855 */
+/* 854 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -100511,7 +100047,7 @@ module.exports.sync = options => {
 
 
 /***/ }),
-/* 856 */
+/* 855 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -100564,7 +100100,7 @@ module.exports = {
 
 
 /***/ }),
-/* 857 */
+/* 856 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

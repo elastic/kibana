@@ -43,7 +43,7 @@ function isStaticRequire(node) {
 }
 
 function traverseToTopFolder(src, pattern) {
-  while (mm([src], pattern).length > 0) {
+  while (mm([src], pattern, { noext: true }).length > 0) {
     const srcIdx = src.lastIndexOf(path.sep);
     src = src.slice(0, srcIdx);
   }
@@ -110,8 +110,8 @@ module.exports = {
           : importPath;
 
         if (
-          !mm([relativeSrcFile], target).length ||
-          !mm([relativeImportFile], from).length ||
+          !mm([relativeSrcFile], target, { noext: true }).length ||
+          !mm([relativeImportFile], from, { noext: true }).length ||
           (allowSameFolder && isSameFolderOrDescendent(relativeSrcFile, relativeImportFile, from))
         )
           continue;
