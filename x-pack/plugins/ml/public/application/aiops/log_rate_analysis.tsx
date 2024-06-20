@@ -53,6 +53,7 @@ export const LogRateAnalysisPage: FC = () => {
             'uiActions',
             'uiSettings',
             'unifiedSearch',
+            'observabilityAIAssistant',
           ])}
         />
       )}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -43,6 +44,7 @@ export interface AiopsPluginStartDeps {
   licensing: LicensingPluginStart;
   executionContext: ExecutionContextStart;
   embeddable: EmbeddableStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   usageCollection: UsageCollectionSetup;
 }
 
