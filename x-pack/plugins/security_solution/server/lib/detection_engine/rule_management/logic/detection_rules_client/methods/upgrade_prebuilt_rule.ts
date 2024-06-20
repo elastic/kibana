@@ -13,10 +13,10 @@ import type { UpgradePrebuiltRuleArgs } from '../detection_rules_client_interfac
 import {
   convertPatchAPIToInternalSchema,
   convertCreateAPIToInternalSchema,
+  internalRuleToAPIResponse,
 } from '../../../normalization/rule_converters';
 import { transformAlertToRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
 import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import { transform } from '../../../utils/utils';
 
 import { validateMlAuth, ClientError, RuleResponseValidationError } from '../utils';
 
@@ -65,7 +65,7 @@ export const upgradePrebuiltRule = async (
     });
 
     /* Trying to convert the rule to a RuleResponse object */
-    const parseResult = RuleResponse.safeParse(transform(createdRule));
+    const parseResult = RuleResponse.safeParse(internalRuleToAPIResponse(createdRule));
 
     if (!parseResult.success) {
       throw new RuleResponseValidationError({
@@ -85,18 +85,8 @@ export const upgradePrebuiltRule = async (
     data: patchedRule,
   });
 
-  const updatedRule = await readRules({
-    rulesClient,
-    ruleId: ruleAsset.rule_id,
-    id: undefined,
-  });
-
-  if (!updatedRule) {
-    throw new ClientError(`Rule ${ruleAsset.rule_id} not found after upgrade`, 500);
-  }
-
   /* Trying to convert the internal rule to a RuleResponse object */
-  const parseResult = RuleResponse.safeParse(transform(patchedInternalRule));
+  const parseResult = RuleResponse.safeParse(internalRuleToAPIResponse(patchedInternalRule));
 
   if (!parseResult.success) {
     throw new RuleResponseValidationError({

@@ -14,8 +14,8 @@ import { createBulkErrorObject } from '../../../../routes/utils';
 import {
   convertCreateAPIToInternalSchema,
   convertUpdateAPIToInternalSchema,
+  internalRuleToAPIResponse,
 } from '../../../normalization/rule_converters';
-import { transform } from '../../../utils/utils';
 import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 
 import { validateMlAuth, RuleResponseValidationError } from '../utils';
@@ -70,7 +70,7 @@ export const importRule = async (
   }
 
   /* Trying to convert an internal rule to a RuleResponse object */
-  const parseResult = RuleResponse.safeParse(transform(importedInternalRule));
+  const parseResult = RuleResponse.safeParse(internalRuleToAPIResponse(importedInternalRule));
 
   if (!parseResult.success) {
     throw new RuleResponseValidationError({

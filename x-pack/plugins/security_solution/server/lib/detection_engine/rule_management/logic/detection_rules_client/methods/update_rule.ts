@@ -9,8 +9,11 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { UpdateRuleArgs } from '../detection_rules_client_interface';
-import { getIdError, transform } from '../../../utils/utils';
-import { convertUpdateAPIToInternalSchema } from '../../../normalization/rule_converters';
+import { getIdError } from '../../../utils/utils';
+import {
+  convertUpdateAPIToInternalSchema,
+  internalRuleToAPIResponse,
+} from '../../../normalization/rule_converters';
 import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 
 import {
@@ -60,7 +63,9 @@ export const updateRule = async (
   );
 
   /* Trying to convert the internal rule to a RuleResponse object */
-  const parseResult = RuleResponse.safeParse(transform({ ...updatedInternalRule, enabled }));
+  const parseResult = RuleResponse.safeParse(
+    internalRuleToAPIResponse({ ...updatedInternalRule, enabled })
+  );
 
   if (!parseResult.success) {
     throw new RuleResponseValidationError({
