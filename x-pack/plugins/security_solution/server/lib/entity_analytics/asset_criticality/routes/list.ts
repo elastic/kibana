@@ -7,6 +7,7 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
   APP_ID,
@@ -14,7 +15,6 @@ import {
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import type { AssetCriticalityListResponse } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { ListAssetCriticalityQueryParams } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';

@@ -56,7 +56,6 @@
     "@kbn/charts-plugin",
     "@kbn/lens-plugin",
     "@kbn/core-analytics-server",
-    "@kbn/analytics-client",
     "@kbn/shared-ux-router",
     "@kbn/alerts-as-data-utils",
     "@kbn/cases-plugin",
@@ -64,7 +63,6 @@
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/discover-plugin",
-    "@kbn/observability-alert-details",
     "@kbn/observability-shared-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/ui-theme",
@@ -106,7 +104,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/event-annotation-common"
   ],
   "exclude": [
     "target/**/*"

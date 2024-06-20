@@ -13,7 +13,6 @@ export const ASSET_CRITICALITY_INTERNAL_STATUS_URL =
 export const ASSET_CRITICALITY_INTERNAL_CSV_UPLOAD_URL =
   `${ASSET_CRITICALITY_INTERNAL_URL}/upload_csv` as const;
 
-// TODO: rename this
 export const ASSET_CRITICALITY_PUBLIC_URL = `/api/asset_criticality` as const;
 export const ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL =
   `${ASSET_CRITICALITY_PUBLIC_URL}/upload_csv` as const;

@@ -162,7 +162,7 @@ export const assetCriticalityRouteHelpersFactory = (
       .expect(expectStatusCode);
   },
   bulkUpload: async (
-    records: Array<{ id_field: string; id_value: string; criticality_level: string }>,
+    records: CreateAssetCriticalityRecord[],
     { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
   ) => {
     return supertest
@@ -231,7 +231,6 @@ export const readAssetCriticality = async (
     index,
     size,
   });
-  console.log('results: ', JSON.stringify(results));
   return results.hits.hits.map((hit) => hit._source as AssetCriticalityRecord);
 };
 

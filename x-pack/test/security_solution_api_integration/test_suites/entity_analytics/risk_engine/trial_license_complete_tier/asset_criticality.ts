@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import _ from 'lodash';
+import { CreateAssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import {
   cleanRiskEngine,
   cleanAssetCriticality,
@@ -376,21 +377,19 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return a 403 if the advanced setting is disabled', async () => {
         await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
 
-        const validRecords = [
-          {
-            id_field: 'host.name',
-            id_value: 'delete-me',
-            criticality_level: 'high_impact',
-          },
-        ];
+        const validRecord: CreateAssetCriticalityRecord = {
+          id_field: 'host.name',
+          id_value: 'delete-me',
+          criticality_level: 'high_impact',
+        };
 
-        await assetCriticalityRoutes.bulkUpload(validRecords, {
+        await assetCriticalityRoutes.bulkUpload([validRecord], {
           expectStatusCode: 403,
         });
       });
 
       it('should correctly upload a valid record for one entity', async () => {
-        const validRecord = {
+        const validRecord: CreateAssetCriticalityRecord = {
           id_field: 'host.name',
           id_value: 'host-1',
           criticality_level: 'high_impact',
@@ -407,11 +406,14 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should correctly upload valid records for multiple entities', async () => {
-        const validRecords = Array.from({ length: 50 }, (__, i) => ({
-          id_field: 'host.name',
-          id_value: `host-${i}`,
-          criticality_level: 'high_impact',
-        }));
+        const validRecords: CreateAssetCriticalityRecord[] = Array.from(
+          { length: 50 },
+          (__, i) => ({
+            id_field: 'host.name',
+            id_value: `host-${i}`,
+            criticality_level: 'high_impact',
+          })
+        );
 
         const { body } = await assetCriticalityRoutes.bulkUpload(validRecords);
         expect(body.errors).to.eql([]);
@@ -429,9 +431,9 @@ export default ({ getService }: FtrProviderContext) => {
           id_field: 'host.name',
           id_value: 'host-1',
           criticality_level: 'invalid',
-        };
+        } as unknown as CreateAssetCriticalityRecord;
 
-        const validRecord = {
+        const validRecord: CreateAssetCriticalityRecord = {
           id_field: 'host.name',
           id_value: 'host-2',
           criticality_level: 'high_impact',
