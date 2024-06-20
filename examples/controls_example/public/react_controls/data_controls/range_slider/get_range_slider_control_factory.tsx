@@ -24,7 +24,7 @@ import {
 import { RangeSliderStrings } from './range_slider_strings';
 import { RangeSliderControl } from './components/range_slider_control';
 import { getMinMax } from './get_min_max';
-import { getCount } from './get_count';
+import { hasNoResults$ } from './has_no_results';
 
 export const getRangesliderControlFactory = (
   services: Services
@@ -60,7 +60,7 @@ export const getRangesliderControlFactory = (
     },
     buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
-      const loadingCount$ = new BehaviorSubject<boolean>(false);
+      const loadingHasNotResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
       const step$ = new BehaviorSubject<number | undefined>(initialState.step);
       const value$ = new BehaviorSubject<RangeValue | undefined>(initialState.value);
@@ -110,7 +110,7 @@ export const getRangesliderControlFactory = (
 
       const dataLoadingSubscription = combineLatest([
         loadingMinMax$,
-        loadingCount$
+        loadingHasNotResults$
       ])
         .pipe(
           map((values) => {
@@ -211,47 +211,19 @@ export const getRangesliderControlFactory = (
       });
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
-      let prevCountRequestAbortController: AbortController | undefined;
-      const countSubscription = combineLatest([
-        dataControl.api.filters$,
-        controlGroupApi.ignoreParentSettings,
-        controlGroupApi.dataControlFetch$,
-      ])
-        .pipe(
-          tap(() => {
-            if (prevCountRequestAbortController) {
-              prevCountRequestAbortController.abort();
-              prevCountRequestAbortController = undefined;
-            }
-          }),
-          switchMap(async ([filters, ignoreParentSettings, dataControlFetchContext]) => {
-            const dataView = dataControl.api.dataViews?.value?.[0];
-            const rangeFilter = filters?.[0];
-            if (!dataView || !rangeFilter || ignoreParentSettings?.ignoreValidations) {
-              return undefined;
-            }
-
-            try {
-              loadingCount$.next(true);
-              const abortController = new AbortController();
-              prevCountRequestAbortController = abortController;
-              return await getCount({
-                abortSignal: abortController.signal,
-                data: services.data,
-                dataView,
-                rangeFilter,
-                ...dataControlFetchContext,
-              });
-            } catch (error) {
-              // Ignore error, validation is not required for control to function properly
-              return undefined;
-            }
-
-          })
-        ).subscribe((count) => {
-          loadingCount$.next(false);
-          selectionHasNoResults$.next(typeof count === 'number' && count === 0);
-        });
+      const hasNotResultsSubscription = hasNoResults$({
+        data: services.data,
+        dataViews$: dataControl.api.dataViews,
+        filters$: dataControl.api.filters$,
+        ignoreParentSettings$: controlGroupApi.ignoreParentSettings,
+        dataControlFetch$: controlGroupApi.dataControlFetch$,
+        setIsLoading: (isLoading: boolean) => {
+          loadingHasNotResults$.next(isLoading);
+        },
+      })
+      .subscribe((hasNoResults) => {
+        selectionHasNoResults$.next(hasNoResults);
+      });
 
       return {
         api,
@@ -272,7 +244,7 @@ export const getRangesliderControlFactory = (
             return () => {
               dataLoadingSubscription.unsubscribe();
               fieldChangedSubscription.unsubscribe();
-              countSubscription.unsubscribe();
+              hasNotResultsSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
               outputFilterSubscription.unsubscribe();
             };
