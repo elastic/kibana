@@ -4,10 +4,14 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'oas_docs/kibana.serverless.yaml'
 
   pull_request:
     branches:
       - main
+    paths:
+      - 'oas_docs/kibana.serverless.yaml'
 
 permissions:
   contents: read
