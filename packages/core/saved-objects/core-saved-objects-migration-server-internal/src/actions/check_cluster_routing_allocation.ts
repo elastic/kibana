@@ -8,35 +8,22 @@
 
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Either from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/function';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 
-import { type FetchIndexResponse, fetchIndices } from './fetch_indices';
-
-const routingAllocationEnable = 'cluster.routing.allocation.enable';
-export interface ClusterRoutingAllocationEnabled {
-  clusterRoutingAllocationEnabled: boolean;
-}
-
-export interface InitActionParams {
-  client: ElasticsearchClient;
-  indices: string[];
-}
+const ROUTING_ALLOCATION_ENABLE = 'cluster.routing.allocation.enable';
 
 export interface IncompatibleClusterRoutingAllocation {
   type: 'incompatible_cluster_routing_allocation';
 }
 
-export const checkClusterRoutingAllocationEnabledTask =
-  ({
-    client,
-  }: {
-    client: ElasticsearchClient;
-  }): TaskEither.TaskEither<RetryableEsClientError | IncompatibleClusterRoutingAllocation, {}> =>
+export const checkClusterRoutingAllocationEnabled =
+  (
+    client: ElasticsearchClient
+  ): TaskEither.TaskEither<RetryableEsClientError | IncompatibleClusterRoutingAllocation, {}> =>
   () => {
     return client.cluster
       .getSettings({
@@ -45,8 +32,8 @@ export const checkClusterRoutingAllocationEnabledTask =
       .then((settings) => {
         // transient settings take preference over persistent settings
         const clusterRoutingAllocation =
-          settings?.transient?.[routingAllocationEnable] ??
-          settings?.persistent?.[routingAllocationEnable];
+          settings?.transient?.[ROUTING_ALLOCATION_ENABLE] ??
+          settings?.persistent?.[ROUTING_ALLOCATION_ENABLE];
 
         const clusterRoutingAllocationEnabledIsAll =
           clusterRoutingAllocation === undefined || clusterRoutingAllocation === 'all';
@@ -61,18 +48,3 @@ export const checkClusterRoutingAllocationEnabledTask =
       })
       .catch(catchRetryableEsClientErrors);
   };
-
-export const initAction = ({
-  client,
-  indices,
-}: InitActionParams): TaskEither.TaskEither<
-  RetryableEsClientError | IncompatibleClusterRoutingAllocation,
-  FetchIndexResponse
-> => {
-  return pipe(
-    checkClusterRoutingAllocationEnabledTask({ client }),
-    TaskEither.chainW((value) => {
-      return fetchIndices({ client, indices });
-    })
-  );
-};
