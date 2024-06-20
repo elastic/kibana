@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { ESQLSource, ESQLFunction, ESQLColumn, ESQLSingleAstItem } from '@kbn/esql-ast';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { getAstAndSyntaxErrors, Walker, walk } from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 500;
 
@@ -55,31 +55,6 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
   return pipes.filter((statement) => !/DROP\s/i.test(statement)).join('|');
 }
 
-// should use here the new walk function, hasnt been merged yet
-function findDateFieldInAst(astItem: ESQLFunction, variable: string): string | undefined {
-  const singleAstItem = astItem as ESQLFunction;
-  const args = singleAstItem.args;
-  const isLastNode = args?.some((a) => 'type' in a && a.type === 'column');
-  if (isLastNode) {
-    const column = args.find((a) => {
-      const argument = a as ESQLSingleAstItem;
-      return argument.type === 'column';
-    }) as ESQLColumn;
-    if (column) {
-      return column.name;
-    }
-  } else {
-    const functions = args?.filter((item) => 'type' in item && item.type === 'function');
-    for (const functionAstItem of functions) {
-      const item = findDateFieldInAst(functionAstItem as ESQLFunction, variable);
-      if (item) {
-        return item;
-      }
-    }
-  }
-  return undefined;
-}
-
 /**
  * When the ?earliest and ?latest params are used, we want to retrieve the timefield from the query.
  * @param esql:string
@@ -87,12 +62,33 @@ function findDateFieldInAst(astItem: ESQLFunction, variable: string): string | u
  */
 export const getTimeFieldFromESQLQuery = (esql: string) => {
   const { ast } = getAstAndSyntaxErrors(esql);
-  const whereCommand = ast.find(({ name }) => name === 'where');
-  if (!whereCommand) {
-    return;
-  }
-  return (
-    findDateFieldInAst(whereCommand as unknown as ESQLFunction, '?earliest') ??
-    findDateFieldInAst(whereCommand as unknown as ESQLFunction, '?latest')
+  const functions: ESQLFunction[] = [];
+
+  walk(ast, {
+    visitFunction: (node) => functions.push(node),
+  });
+
+  const params = Walker.params(ast);
+  const timeNamedParam = params.find(
+    (param) => param.value === 'earliest' || param.value === 'latest'
   );
+  if (!timeNamedParam || !functions.length) {
+    return undefined;
+  }
+  const allFunctionsWithNamedParams = functions.filter(
+    ({ location }) =>
+      location.min <= timeNamedParam.location.min && location.max >= timeNamedParam.location.max
+  );
+
+  if (!allFunctionsWithNamedParams.length) {
+    return undefined;
+  }
+  const lowLevelFunction = allFunctionsWithNamedParams[allFunctionsWithNamedParams.length - 1];
+
+  const column = lowLevelFunction.args.find((arg) => {
+    const argument = arg as ESQLSingleAstItem;
+    return argument.type === 'column';
+  }) as ESQLColumn;
+
+  return column?.name;
 };
