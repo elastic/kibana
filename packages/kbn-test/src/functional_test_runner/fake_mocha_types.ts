@@ -38,6 +38,8 @@ export interface Test extends Runnable {
   parent?: Suite;
   isPassed: () => boolean;
   pending?: boolean;
+  body: string;
+  meta: object;
 }
 
 export interface Runnable {

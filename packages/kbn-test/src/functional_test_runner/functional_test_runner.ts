@@ -273,6 +273,7 @@ export class FunctionalTestRunner {
       file: string;
       title: string;
       fullTitle: string;
+      meta: object;
     }
 
     const getFullTitle = (node: Test | Suite): string => {
@@ -288,10 +289,12 @@ export class FunctionalTestRunner {
       for (const subSuite of suite.suites) {
         suiteCount++;
         for (const test of subSuite.tests) {
+          if (test.meta) this.log.info(test.meta);
           const testEntry = {
             title: test.title,
             fullTitle: getFullTitle(test),
             file: test.file || '',
+            meta: test.meta || {},
           };
           if (test.pending) {
             pending.push(testEntry);
