@@ -47,10 +47,23 @@ export const RenderedWorkpadElementSchema = schema.object({
   position: PositionSchema,
 });
 
+export const GroupRenderableSchema = schema.object({
+  error: schema.nullable(schema.string()),
+  value: schema.object({
+    containerStyle: ContainerStyleSchema,
+  }),
+});
+
+export const RenderedWorkpadGroupSchema = schema.object({
+  expressionRenderable: GroupRenderableSchema,
+  id: schema.string(),
+  position: PositionSchema,
+});
+
 export const RenderedWorkpadPageSchema = schema.object({
   id: schema.string(),
   elements: schema.arrayOf(RenderedWorkpadElementSchema),
-  groups: schema.maybe(schema.arrayOf(schema.arrayOf(RenderedWorkpadElementSchema))),
+  groups: schema.maybe(schema.arrayOf(RenderedWorkpadGroupSchema)),
   style: schema.recordOf(schema.string(), schema.string()),
   transition: schema.maybe(
     schema.oneOf([
