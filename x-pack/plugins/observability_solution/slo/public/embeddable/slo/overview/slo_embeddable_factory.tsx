@@ -32,7 +32,11 @@ export const getOverviewPanelTitle = () =>
 export const getOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<SloPublicPluginsStart, SloPublicStart>
 ) => {
-  const factory: ReactEmbeddableFactory<SloOverviewEmbeddableState, SloOverviewApi> = {
+  const factory: ReactEmbeddableFactory<
+    SloOverviewEmbeddableState,
+    SloOverviewEmbeddableState,
+    SloOverviewApi
+  > = {
     type: SLO_OVERVIEW_EMBEDDABLE_ID,
     deserializeState: (state) => {
       return state.rawState as SloOverviewEmbeddableState;
