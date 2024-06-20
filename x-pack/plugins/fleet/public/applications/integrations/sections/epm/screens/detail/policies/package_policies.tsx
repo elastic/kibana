@@ -303,7 +303,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           const agentPolicy = agentPolicies[0]; // TODO: handle multiple agent policies
           return (
             <PackagePolicyActionsMenu
-              agentPolicy={agentPolicy}
+              agentPolicies={agentPolicies}
               packagePolicy={packagePolicy}
               showAddAgent={true}
               upgradePackagePolicyHref={
