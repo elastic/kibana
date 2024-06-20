@@ -36,7 +36,7 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
 };
 
 const emptyNotes: string[] = [];
-const DEFAULT_UDT_ROW_HEIGHT = 40;
+const DEFAULT_UDT_ROW_HEIGHT = 34;
 
 /**
  *
