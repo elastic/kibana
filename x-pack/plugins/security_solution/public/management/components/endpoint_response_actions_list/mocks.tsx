@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { ActionListApiResponse } from '../../../../common/endpoint/types';
+import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -27,7 +27,9 @@ export const getActionListMock = async ({
   isCompleted = true,
   isExpired = false,
   wasSuccessful = true,
+  errors = [],
   status = 'successful',
+  outputs = {},
 }: {
   agentTypes?: ResponseActionAgentType[];
   agentIds?: string[];
@@ -41,7 +43,9 @@ export const getActionListMock = async ({
   isCompleted?: boolean;
   isExpired?: boolean;
   wasSuccessful?: boolean;
+  errors?: string[];
   status?: ResponseActionStatus;
+  outputs?: Pick<ActionDetails, 'outputs'>;
 }): Promise<ActionListApiResponse> => {
   const endpointActionGenerator = new EndpointActionGenerator('seed');
 
@@ -82,6 +86,7 @@ export const getActionListMock = async ({
               }
             : {}),
         },
+        errors,
         outputs: {
           ...(command === 'upload'
             ? {
@@ -94,10 +99,11 @@ export const getActionListMock = async ({
                   },
                 },
               }
-            : {}),
+            : outputs),
         },
       });
     });
+
     return actionDetails;
   })[0];
 

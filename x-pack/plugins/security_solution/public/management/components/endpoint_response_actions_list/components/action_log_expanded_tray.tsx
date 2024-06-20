@@ -143,7 +143,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
                   )
               )}
             {/* if there are errors, show them as well*/}
-            {errors?.length &&
+            {!!errors?.length &&
               errors.map((error) => (
                 <div key={error}>
                   <EuiSpacer size="s" />

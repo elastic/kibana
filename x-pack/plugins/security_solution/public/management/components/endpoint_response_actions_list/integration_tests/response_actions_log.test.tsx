@@ -1027,7 +1027,7 @@ describe('Response actions history', () => {
     );
 
     it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
-      'shows Failed status badge for failed %s actions',
+      'shows Failed status badge for failed %s action',
       async (command) => {
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
@@ -1053,7 +1053,79 @@ describe('Response actions history', () => {
     );
 
     it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
-      'shows Failed status badge for expired %s actions',
+      'shows failed outputs and errors correctly for %s action',
+      async (command) => {
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({
+            agentIds: ['agent-a'],
+            actionCount: 1,
+            commands: [command],
+            wasSuccessful: false,
+            status: 'failed',
+            errors: ['Error here!'],
+            // just adding two commands for tests with respective error response codes
+            outputs: ['scan', 'get-file'].includes(command)
+              ? ({
+                  'agent-a': {
+                    type: 'json',
+                    content: {
+                      code:
+                        command === 'get-file'
+                          ? 'ra_get-file_error_not-found'
+                          : command === 'scan'
+                          ? 'ra_scan_error_scan_invalid-input'
+                          : 'non_code_for_test',
+                    },
+                  },
+                } as Pick<ActionDetails, 'outputs'>)
+              : undefined,
+          }),
+        });
+        render();
+
+        const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
+        const outputs = expandRows();
+        if (command === 'scan') {
+          expect(outputs.map((n) => n.textContent)).toEqual([
+            `${outputCommand} failedInvalid absolute file path providedError here!`,
+          ]);
+        } else if (command === 'get-file') {
+          expect(outputs.map((n) => n.textContent)).toEqual([
+            `${outputCommand} failedThe file specified was not foundError here!`,
+          ]);
+        } else {
+          expect(outputs.map((n) => n.textContent)).toEqual([`${outputCommand} failedError here!`]);
+        }
+      }
+    );
+
+    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+      'shows failed errors correctly for %s action when no outputs',
+      async (command) => {
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({
+            agentIds: ['agent-a'],
+            actionCount: 1,
+            commands: [command],
+            wasSuccessful: false,
+            status: 'failed',
+            errors: ['Some error without an output error code'],
+          }),
+        });
+        render();
+
+        const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
+        const outputs = expandRows();
+        expect(outputs.map((n) => n.textContent)).toEqual([
+          `${outputCommand} failedSome error without an output error code`,
+        ]);
+      }
+    );
+
+    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+      'shows Failed status badge for expired %s action',
       async (command) => {
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
@@ -1435,7 +1507,7 @@ describe('Response actions history', () => {
     });
   });
 
-  describe('Types  filter', () => {
+  describe('Types filter', () => {
     const filterPrefix = 'types-filter';
     it('should show a list of action types when opened', () => {
       render();
