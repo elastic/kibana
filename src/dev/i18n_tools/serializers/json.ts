@@ -15,9 +15,13 @@ export const serializeToJson: Serializer = (messages, formats = defaultEnFormats
     messages: {},
   };
 
-  for (const { id, defaultMessage, description } of messages) {
+  for (const messageDescriptor of messages) {
+    const { id, defaultMessage, description } = messageDescriptor;
+
     if (typeof id !== 'string' || typeof defaultMessage !== 'string') {
-      throw new Error(`Unexpected message inputs, id: ${id} message: ${defaultMessage}`);
+      throw new Error(
+        `Unexpected message inputs, got: ${JSON.stringify(messageDescriptor, null, 2)}`
+      );
     }
 
     if (description && typeof description === 'string') {

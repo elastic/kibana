@@ -9,18 +9,17 @@
 import type { TranslationInput } from '@kbn/i18n';
 
 // Map<namespace, [id, translatedMessage]>
-export type GroupedMessagesByNamespace = Map<string, Array<[string, string]>>;
+export type GroupedMessagesByNamespace = Map<string, Array<[string, { message: string }]>>;
 
 export function groupMessagesByNamespace(
   translationInput: TranslationInput,
   knownNamespaces: string[]
 ): GroupedMessagesByNamespace {
-  const localizedMessagesByNamespace = new Map();
+  const localizedMessagesByNamespace: GroupedMessagesByNamespace = new Map();
   for (const [messageId, messageValue] of Object.entries(translationInput.messages)) {
     const namespace = knownNamespaces.find((key) => messageId.startsWith(`${key}.`));
     if (!namespace) {
       continue;
-      throw new Error(`Unknown namespace in id ${messageId}`);
     }
 
     if (!localizedMessagesByNamespace.has(namespace)) {
@@ -28,7 +27,7 @@ export function groupMessagesByNamespace(
     }
 
     localizedMessagesByNamespace
-      .get(namespace)
+      .get(namespace)!
       .push([
         messageId,
         { message: typeof messageValue === 'string' ? messageValue : messageValue.text },

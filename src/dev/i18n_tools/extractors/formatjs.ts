@@ -241,16 +241,13 @@ export async function extractI18nMessageDescriptors(fileName: string, source: st
   return extractedMessages;
 }
 
+// import { readFile } from 'fs/promises';
 // const formatJsRunner = async (filePaths: string[]) => {
 //   for (const filePath of filePaths) {
 //     const source = await readFile(filePath, 'utf8');
 //     const extractedMessages = await extractI18nMessageDescriptors(filePath, source);
 
 //     console.log('final extractedMessages::', extractedMessages);
-
-//     extractedMessages.forEach(messageDescriptor => {
-//       verifyMessageDescriptor(messageDescriptor)
-//     });
 //   }
 // }
 

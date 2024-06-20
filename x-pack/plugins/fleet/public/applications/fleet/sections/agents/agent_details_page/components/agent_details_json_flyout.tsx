@@ -25,6 +25,7 @@ import {
 
 import type { Agent } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
+import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 
 export const AgentDetailsJsonFlyout = memo<{ agent: Agent; onClose: () => void }>(
   ({ agent, onClose }) => {
@@ -44,7 +45,7 @@ export const AgentDetailsJsonFlyout = memo<{ agent: Agent; onClose: () => void }
     const { docLinks } = useStartServices();
 
     return (
-      <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
+      <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>

@@ -26,10 +26,17 @@ export async function updateTranslationFile({
   targetFilePath,
 }: TranslationFileDetails) {
   try {
-    const fileJsonContent = serializeToJson(
-      [...namespacedTranslatedMessages.values()].reduce((acc, val) => acc.concat(val), []),
-      formats
-    );
+    const sortedMessages = [...namespacedTranslatedMessages.values()]
+      .flat()
+      .map(([id, details]) => {
+        return {
+          id,
+          defaultMessage: details.message,
+        };
+      })
+      .sort(({ id: key1 }, { id: key2 }) => key1.localeCompare(key2));
+
+    const fileJsonContent = serializeToJson(sortedMessages, formats);
     await writeFileAsync(makeAbsolutePath(targetFilePath), fileJsonContent);
   } catch (err) {
     throw err;
