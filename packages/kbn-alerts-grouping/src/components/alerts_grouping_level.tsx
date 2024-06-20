@@ -8,51 +8,17 @@
 
 import { memo, ReactElement, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { BoolQuery, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { getGroupingQuery, type GroupingAggregation } from '@kbn/grouping';
+import { type GroupingAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
-import { useFindAlertsQuery } from '@kbn/alerts-ui-shared';
+import {
+  useGetAlertsGroupAggregationsQuery,
+  UseGetAlertsGroupAggregationsQueryProps,
+} from '@kbn/alerts-ui-shared';
 import { AlertsGroupingProps } from '../types';
-
-interface AlertsGroupingQueryParams {
-  additionalFilters: Array<{
-    bool: BoolQuery;
-  }>;
-  from: string;
-  pageIndex: number;
-  pageSize: number;
-  selectedGroup: string;
-  uniqueValue: string;
-  to: string;
-  getAggregationsByGroupingField: AlertsGroupingProps['getAggregationsByGroupingField'];
-}
-
-export const getAlertsGroupingQuery = ({
-  additionalFilters,
-  from,
-  pageIndex,
-  pageSize,
-  selectedGroup,
-  uniqueValue,
-  to,
-  getAggregationsByGroupingField,
-}: AlertsGroupingQueryParams) =>
-  getGroupingQuery({
-    additionalFilters,
-    from,
-    groupByField: selectedGroup,
-    statsAggregations: !isNoneGroup([selectedGroup])
-      ? getAggregationsByGroupingField(selectedGroup)
-      : [],
-    pageNumber: pageIndex * pageSize,
-    uniqueValue,
-    size: pageSize,
-    sort: [{ unitsCount: { order: 'desc' } }],
-    to,
-  });
 
 export interface AlertsGroupingLevelProps<T extends Record<string, unknown> = {}>
   extends AlertsGroupingProps<T> {
@@ -97,7 +63,7 @@ export const AlertsGroupingLevel = memo(
     getAggregationsByGroupingField,
     services: { http, notifications },
   }: AlertsGroupingLevelProps<T>) => {
-    const additionalFilters = useMemo(() => {
+    const filters = useMemo(() => {
       try {
         return [
           buildEsQuery(undefined, globalQuery != null ? [globalQuery] : [], [
@@ -114,46 +80,50 @@ export const AlertsGroupingLevel = memo(
     // Create a unique, but stable (across re-renders) value
     const uniqueValue = useMemo(() => `alerts-grouping-level-${uuidv4()}`, []);
 
-    const queryGroups = useMemo(() => {
-      return getAlertsGroupingQuery({
-        additionalFilters,
-        selectedGroup,
-        uniqueValue,
-        from,
-        to,
-        pageSize,
+    const aggregationsQuery = useMemo<UseGetAlertsGroupAggregationsQueryProps['params']>(() => {
+      return {
+        featureIds,
+        groupByField: selectedGroup,
+        aggregations: getAggregationsByGroupingField(selectedGroup)?.reduce(
+          (acc, val) => Object.assign(acc, val),
+          {}
+        ),
+        filters: [
+          ...filters,
+          {
+            range: {
+              '@timestamp': {
+                gte: from,
+                lte: to,
+              },
+            },
+          },
+        ],
         pageIndex,
-        getAggregationsByGroupingField,
-      });
+        pageSize,
+      };
     }, [
-      additionalFilters,
+      featureIds,
+      filters,
       from,
       getAggregationsByGroupingField,
       pageIndex,
       pageSize,
       selectedGroup,
       to,
-      uniqueValue,
     ]);
 
-    const { data: alertGroupsData, isLoading: isLoadingGroups } = useFindAlertsQuery<
-      GroupingAggregation<T>
-    >({
-      http,
-      toasts: notifications.toasts,
-      enabled: queryGroups && !isNoneGroup([selectedGroup]),
-      params: {
-        feature_ids: featureIds,
-        ...queryGroups,
-      },
-    });
+    const { data: alertGroupsData, isLoading: isLoadingGroups } =
+      useGetAlertsGroupAggregationsQuery<GroupingAggregation<T>>({
+        http,
+        toasts: notifications.toasts,
+        enabled: aggregationsQuery && !isNoneGroup([selectedGroup]),
+        params: aggregationsQuery,
+      });
 
     const queriedGroup = useMemo<string | null>(
-      () =>
-        !isNoneGroup([selectedGroup])
-          ? queryGroups?.runtime_mappings?.groupByField?.script?.params?.selectedGroup
-          : null,
-      [queryGroups?.runtime_mappings?.groupByField?.script?.params?.selectedGroup, selectedGroup]
+      () => (!isNoneGroup([selectedGroup]) ? selectedGroup : null),
+      [selectedGroup]
     );
 
     const aggs = useMemo(

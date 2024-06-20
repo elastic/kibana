@@ -1081,7 +1081,7 @@ export class AlertsClient {
     const uniqueValue = uuid();
     return this.find({
       aggs: {
-        groupByField: {
+        groupByFields: {
           terms: {
             field: 'groupByField',
             size: MAX_ALERTS_GROUPING_QUERY_SIZE,
