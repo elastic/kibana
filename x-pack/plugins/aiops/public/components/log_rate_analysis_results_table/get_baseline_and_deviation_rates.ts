@@ -16,19 +16,30 @@ export function getLogRateChange(
   let message;
   let factor;
 
-  if (baselineBucketRate > 0) {
-    if (analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE) {
+  if (analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE) {
+    if (baselineBucketRate > 0) {
       factor = Math.round(((deviationBucketRate / baselineBucketRate) * 100) / 100);
       message = i18n.translate(
         'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateFactorIncreaseLabel',
         {
           defaultMessage: '{factor}x higher',
           values: {
-            factor: Math.round(((deviationBucketRate / baselineBucketRate) * 100) / 100),
+            factor,
           },
         }
       );
     } else {
+      message = i18n.translate(
+        'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateDocIncreaseLabel',
+        {
+          defaultMessage: '{deviationBucketRate} docs rate up from 0 in baseline',
+          values: { deviationBucketRate },
+        }
+      );
+    }
+  } else {
+    if (deviationBucketRate > 0) {
+      // For dip, "doc count" refers to the amount of documents in the baseline time range so we use baselineBucketRate
       factor = Math.round(((baselineBucketRate / deviationBucketRate) * 100) / 100);
       message = i18n.translate(
         'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateFactorDecreaseLabel',
@@ -39,21 +50,22 @@ export function getLogRateChange(
           },
         }
       );
+    } else {
+      message = i18n.translate(
+        'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateDocDecreaseLabel',
+        {
+          defaultMessage: 'docs rate down to 0 from {baselineBucketRate} in baseline',
+          values: { baselineBucketRate },
+        }
+      );
     }
-  } else {
-    // If the baseline rate is 0, then it can't be LOG_RATE_ANALYSIS_TYPE.DIP so we know it's a SPIKE
-    message = i18n.translate(
-      'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateDocIncreaseLabel',
-      {
-        defaultMessage: '{deviationBucketRate} docs up from 0 in baseline',
-        values: { deviationBucketRate },
-      }
-    );
   }
+
   return { message, factor };
 }
 
 export function getBaselineAndDeviationRates(
+  analysisType: typeof LOG_RATE_ANALYSIS_TYPE[keyof typeof LOG_RATE_ANALYSIS_TYPE],
   baselineBuckets: number,
   deviationBuckets: number,
   docCount: number | undefined,
@@ -61,13 +73,23 @@ export function getBaselineAndDeviationRates(
 ) {
   let baselineBucketRate;
   let deviationBucketRate;
+  if (analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE) {
+    if (bgCount !== undefined) {
+      baselineBucketRate = Math.round(bgCount / baselineBuckets);
+    }
 
-  if (bgCount !== undefined) {
-    baselineBucketRate = Math.round(bgCount / baselineBuckets);
-  }
+    if (docCount !== undefined) {
+      deviationBucketRate = Math.round(docCount / deviationBuckets);
+    }
+  } else {
+    // For dip, the "doc count" refers to the amount of documents in the baseline time range so we set baselineBucketRate
+    if (docCount !== undefined) {
+      baselineBucketRate = Math.round(docCount / baselineBuckets);
+    }
 
-  if (docCount !== undefined) {
-    deviationBucketRate = Math.round(docCount / deviationBuckets);
+    if (bgCount !== undefined) {
+      deviationBucketRate = Math.round(bgCount / deviationBuckets);
+    }
   }
 
   return { baselineBucketRate, deviationBucketRate };

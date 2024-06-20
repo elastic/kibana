@@ -365,6 +365,7 @@ export const useColumns = (
             return NOT_AVAILABLE;
 
           const { baselineBucketRate } = getBaselineAndDeviationRates(
+            analysisType,
             buckets.baselineBuckets,
             buckets.deviationBuckets,
             undefined,
@@ -406,6 +407,7 @@ export const useColumns = (
             return NOT_AVAILABLE;
 
           const { deviationBucketRate } = getBaselineAndDeviationRates(
+            analysisType,
             buckets.baselineBuckets,
             buckets.deviationBuckets,
             docCount,
@@ -447,6 +449,7 @@ export const useColumns = (
             return NOT_AVAILABLE;
 
           const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
+            analysisType,
             buckets.baselineBuckets,
             buckets.deviationBuckets,
             docCount,
