@@ -32,6 +32,9 @@ const defaultStory: Story = {
       investigations: [],
       error: undefined,
       loading: false,
+      onDeleteInvestigationClick: () => {},
+      onInvestigationClick: () => {},
+      onStartNewInvestigationClick: () => {},
     },
   },
   render: function Render(args) {
@@ -45,7 +48,7 @@ const defaultStory: Story = {
 
 export const WithInvestigationsStory: Story = {
   ...defaultStory,
-  args: merge({}, defaultStory, {
+  args: merge({}, defaultStory.args, {
     props: {
       loading: false,
       investigations: [
@@ -73,7 +76,7 @@ export const WithInvestigationsStory: Story = {
 
 export const LoadingEmptyStory: Story = {
   ...defaultStory,
-  args: merge({}, defaultStory, {
+  args: merge({}, defaultStory.args, {
     props: {
       loading: true,
     },
@@ -83,7 +86,7 @@ export const LoadingEmptyStory: Story = {
 
 export const ErrorStory: Story = {
   ...defaultStory,
-  args: merge({}, defaultStory, {
+  args: merge({}, defaultStory.args, {
     props: {
       loading: false,
       error: new Error('Failed to load investigations'),

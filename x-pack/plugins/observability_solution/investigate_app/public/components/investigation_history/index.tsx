@@ -18,8 +18,8 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
 import { Investigation } from '@kbn/investigate-plugin/common';
-import { useInvestigateRouter } from '../../hooks/use_investigate_router';
 import { useTheme } from '../../hooks/use_theme';
+import { InvestigateTextButton } from '../investigate_text_button';
 
 const headerClassName = css`
   text-transform: uppercase;
@@ -69,13 +69,17 @@ export function InvestigationHistory({
   investigations,
   loading,
   error,
+  onInvestigationClick,
+  onStartNewInvestigationClick,
+  onDeleteInvestigationClick,
 }: {
   investigations?: Array<Pick<Investigation, 'id' | 'title'>>;
   loading: boolean;
   error?: Error;
+  onInvestigationClick: (id: string) => void;
+  onStartNewInvestigationClick: () => void;
+  onDeleteInvestigationClick: (id: string) => void;
 }) {
-  const router = useInvestigateRouter();
-
   const theme = useTheme();
 
   const investigationsList = (
@@ -85,7 +89,12 @@ export function InvestigationHistory({
         className={classNames(investigationItemClassName, newInvestigationItemClassName)}
       >
         {}
-        <EuiLink data-test-subj="investigateAppInvestigationHistoryLink" href={router.link('/new')}>
+        <EuiLink
+          data-test-subj="investigateAppInvestigationHistoryLink"
+          onClick={() => {
+            onStartNewInvestigationClick();
+          }}
+        >
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type="newChat" size="s" color={theme.colors.text} />
@@ -107,14 +116,40 @@ export function InvestigationHistory({
       ) : null}
       {investigations?.map((investigation) => (
         <EuiFlexItem key={investigation.id} grow={false} className={investigationItemClassName}>
-          <EuiLink
-            data-test-subj="investigateAppInvestigationHistoryLink"
-            href={router.link('/{id}', { path: { id: investigation.id } })}
-          >
-            <EuiText size="s" color={theme.colors.text}>
-              {investigation.title}
-            </EuiText>
-          </EuiLink>
+          <EuiFlexGroup direction="row" alignItems="center">
+            <EuiFlexItem
+              grow
+              className={css`
+                .deleteinvestigationbutton: {
+                  visibility: hidden;
+                }
+                &:hover .deleteinvestigationbutton {
+                  visibility: visible;
+                }
+              `}
+            >
+              <EuiLink
+                data-test-subj="investigateAppInvestigationsListLink"
+                onClick={() => {
+                  onInvestigationClick(investigation.id);
+                }}
+              >
+                <EuiText size="s" color={theme.colors.text}>
+                  {investigation.title}
+                </EuiText>
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <InvestigateTextButton
+                className="deleteinvestigationbutton"
+                iconType="trash"
+                onClick={() => {
+                  onDeleteInvestigationClick(investigation.id);
+                }}
+                size="xs"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

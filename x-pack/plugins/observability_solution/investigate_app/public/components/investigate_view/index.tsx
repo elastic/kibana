@@ -6,17 +6,15 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type {
-  GlobalWidgetParameters,
-  InvestigateWidget,
-  InvestigateWidgetCreate,
-} from '@kbn/investigate-plugin/public';
+import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
-import { isEqual, keyBy, omit, pick } from 'lodash';
+import { keyBy, omit, pick } from 'lodash';
 import { rgba } from 'polished';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { v4 } from 'uuid';
+import datemath from '@elastic/datemath';
 import { useDateRange } from '../../hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { MiniMapContextProvider } from '../../hooks/use_mini_map';
@@ -64,9 +62,9 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     },
   } = useKibana();
 
-  const [kuery, setKuery] = useState('');
-
   const theme = useTheme();
+
+  const [displayedKuery, setDisplayedKuery] = useState('');
 
   const backgroundColorOpaque = rgba(theme.colors.emptyShade, 1);
   const backgroundColorTransparent = rgba(theme.colors.emptyShade, 0);
@@ -86,29 +84,9 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     z-index: 100;
   `;
 
-  const [range, setRange] = useDateRange();
-
   const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
 
-  const [filterOverrides, setFilterOverrides] = useState(() => {
-    return {
-      kuery,
-    };
-  });
-
-  const globalWidgetParameters: GlobalWidgetParameters = useMemo(() => {
-    return {
-      filters: [],
-      query: {
-        query: filterOverrides.kuery,
-        language: 'kuery',
-      },
-      timeRange: {
-        from: range.start.toISOString(),
-        to: range.end.toISOString(),
-      },
-    };
-  }, [range, filterOverrides]);
+  const [range, setRange] = useDateRange();
 
   const { ref: stickToBottomRef, stickToBottom } = useStickToBottom();
 
@@ -130,6 +108,10 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     updateItem,
     gotoNextRevision,
     gotoPreviousRevision,
+    startNewInvestigation,
+    loadInvestigation,
+    investigations,
+    deleteInvestigation,
   } = investigate.useInvestigation({
     user,
     from: range.start.toISOString(),
@@ -138,17 +120,9 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
 
   const [editingItem, setEditingItem] = useState<InvestigateWidget | undefined>(undefined);
 
-  const addItemRef = useRef(addItem);
-  addItemRef.current = addItem;
-
   const createWidget = (widgetCreate: InvestigateWidgetCreate) => {
     stickToBottom();
-    return addItemRef.current(widgetCreate);
-  };
-
-  const copyWidget = (id: string) => {
-    stickToBottom();
-    return copyItem(id);
+    return addItem(widgetCreate);
   };
 
   const createWidgetRef = useRef(createWidget);
@@ -164,6 +138,30 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
       return prevEditingItem;
     });
   }, [revision]);
+
+  useEffect(() => {
+    setDisplayedKuery(revision?.parameters.query.query ?? '');
+  }, [revision?.parameters.query.query]);
+
+  useEffect(() => {
+    if (
+      revision?.parameters.timeRange.from &&
+      revision?.parameters.timeRange.to &&
+      range.start.toISOString() !== revision.parameters.timeRange.from &&
+      range.end.toISOString() !== revision.parameters.timeRange.to
+    ) {
+      setRange({
+        from: revision.parameters.timeRange.from,
+        to: revision.parameters.timeRange.to,
+      });
+    }
+  }, [
+    revision?.parameters.timeRange.from,
+    revision?.parameters.timeRange.to,
+    range.start,
+    range.end,
+    setRange,
+  ]);
 
   const gridItems = useMemo(() => {
     const widgetDefinitionsByType = keyBy(widgetDefinitions, 'type');
@@ -185,24 +183,18 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
           overrides: item.locked
             ? getOverridesFromGlobalParameters(
                 pick(item.parameters, 'filters', 'query', 'timeRange'),
-                globalWidgetParameters,
+                revision.parameters,
                 uiSettings.get<string>(DATE_FORMAT_ID) ?? 'Browser'
               )
             : [],
         } ?? []
       );
     });
-  }, [revision, widgetDefinitions, globalWidgetParameters, uiSettings]);
+  }, [revision, widgetDefinitions, uiSettings]);
 
   const [scrollableContainer, setScrollableContainer] = useState<HTMLElement | null>(null);
 
   const [searchBarFocused, setSearchBarFocused] = useState(false);
-
-  useEffect(() => {
-    if (revision?.parameters && !isEqual(revision?.parameters, globalWidgetParameters)) {
-      setGlobalParameters(globalWidgetParameters);
-    }
-  }, [revision?.parameters, globalWidgetParameters, setGlobalParameters]);
 
   if (!investigation || !revision || !gridItems) {
     return <EuiLoadingSpinner />;
@@ -225,15 +217,26 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
           >
             <EuiFlexItem className={searchBarContainerClassName}>
               <InvestigateSearchBar
-                kuery={kuery}
+                kuery={displayedKuery}
                 rangeFrom={range.from}
                 rangeTo={range.to}
                 onQuerySubmit={({ kuery: nextKuery, dateRange: nextDateRange }) => {
+                  const nextTimeRange = {
+                    from: datemath.parse(nextDateRange.from)!.toISOString(),
+                    to: datemath.parse(nextDateRange.to)!.toISOString(),
+                  };
                   setRange(nextDateRange);
-                  setFilterOverrides((prevOverrides) => ({ ...prevOverrides, kuery: nextKuery }));
+                  setGlobalParameters({
+                    ...revision.parameters,
+                    query: {
+                      language: 'kuery',
+                      query: nextKuery,
+                    },
+                    timeRange: nextTimeRange,
+                  });
                 }}
-                onQueryChange={({ kuery: nextKuery }) => {
-                  setKuery(nextKuery);
+                onQueryChange={({ kuery: nextKuery, dateRange }) => {
+                  setDisplayedKuery(nextKuery);
                 }}
                 onFocus={() => {
                   setSearchBarFocused(true);
@@ -273,7 +276,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                   const itemToUpdate = revision.items.find((item) => item.id === updatedItem.id);
                   if (itemToUpdate) {
                     return setItemParameters(updatedItem.id, {
-                      ...globalWidgetParameters,
+                      ...revision.parameters,
                       ...omit(itemToUpdate.parameters, override.id),
                     });
                   }
@@ -292,9 +295,9 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                 assistantAvailable={true}
                 start={range.start}
                 end={range.end}
-                filters={globalWidgetParameters.filters}
-                query={globalWidgetParameters.query}
-                timeRange={globalWidgetParameters.timeRange}
+                filters={revision.parameters.filters}
+                query={revision.parameters.query}
+                timeRange={revision.parameters.timeRange}
                 onWidgetAdd={(widget) => {
                   return createWidgetRef.current(widget);
                 }}
@@ -322,7 +325,19 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
               <EuiHorizontalRule margin="none" />
             </EuiFlexItem>
             <EuiFlexItem grow>
-              <InvestigationHistory investigations={[]} loading={false} />
+              <InvestigationHistory
+                investigations={investigations}
+                onStartNewInvestigationClick={() => {
+                  startNewInvestigation(v4());
+                }}
+                onInvestigationClick={(id) => {
+                  loadInvestigation(id);
+                }}
+                onDeleteInvestigationClick={(id) => {
+                  deleteInvestigation(id);
+                }}
+                loading={false}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <MiniTimeline />

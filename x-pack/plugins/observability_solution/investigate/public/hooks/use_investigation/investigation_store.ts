@@ -17,7 +17,6 @@ import {
   Investigation,
   InvestigationRevision,
 } from '../../../common/types';
-import { createNewInvestigation } from './create_new_investigation';
 import { WidgetDefinition } from '../../types';
 
 export type StatefulInvestigateWidget = InvestigateWidget & {
@@ -105,24 +104,26 @@ async function regenerateItem({
 }
 
 export function createInvestigationStore({
-  id,
+  investigation,
   user,
-  globalWidgetParameters,
   widgetDefinitions,
 }: {
-  id: string;
+  investigation: Investigation;
   user: AuthenticatedUser;
-  globalWidgetParameters: GlobalWidgetParameters;
   widgetDefinitions: WidgetDefinition[];
 }): InvestigationStore {
   const controller = new AbortController();
 
   const observable$ = new BehaviorSubject<{ investigation: StatefulInvestigation }>({
-    investigation: createNewInvestigation({
-      id,
-      user,
-      globalWidgetParameters,
-    }) as StatefulInvestigation,
+    investigation: {
+      ...investigation,
+      revisions: investigation.revisions.map((revision) => {
+        return {
+          ...revision,
+          items: revision.items.map((item) => ({ ...item, loading: false })),
+        };
+      }),
+    },
   });
 
   async function updateInvestigationInPlace(
@@ -169,7 +170,8 @@ export function createInvestigationStore({
         ...prevInvestigation,
         revisions: prevInvestigation.revisions
           .slice(0, indexOfCurrentRevision + 1)
-          .concat(newRevision),
+          .concat(newRevision)
+          .slice(-10),
         revision: newRevision.id,
       };
     });
@@ -213,6 +215,46 @@ export function createInvestigationStore({
     });
   }
 
+  const regenerateItemAndUpdateRevision = async (
+    itemId: string,
+    partials: Partial<InvestigateWidget>
+  ) => {
+    await updateRevisionInPlace((prevRevision) => {
+      return {
+        ...prevRevision,
+        items: prevRevision.items.map((item) => {
+          if (item.id === itemId) {
+            return { ...item, loading: true, ...partials };
+          }
+          return item;
+        }),
+      };
+    });
+
+    await nextRevision(async (prevRevision) => {
+      return {
+        ...prevRevision,
+        items: await Promise.all(
+          prevRevision.items.map(async (item) => {
+            if (item.id === itemId) {
+              return {
+                ...(await regenerateItem({
+                  user,
+                  globalWidgetParameters: prevRevision.parameters,
+                  signal: controller.signal,
+                  widget: item,
+                  widgetDefinitions,
+                })),
+                loading: false,
+              };
+            }
+            return item;
+          })
+        ),
+      };
+    });
+  };
+
   const asObservable = observable$.asObservable();
 
   return {
@@ -229,7 +271,7 @@ export function createInvestigationStore({
                 ...item,
                 id: itemId,
               },
-              globalWidgetParameters,
+              globalWidgetParameters: prevRevision.parameters,
             })),
             loading: false,
           }),
@@ -243,7 +285,7 @@ export function createInvestigationStore({
       return nextRevision((prevRevision) => {
         const itemToCopy = prevRevision.items.find((item) => item.id === itemId);
         if (!itemToCopy) {
-          throw new Error('Cannot find item for id ' + id);
+          throw new Error('Cannot find item for id ' + itemId);
         }
         return {
           ...prevRevision,
@@ -342,6 +384,7 @@ export function createInvestigationStore({
       await nextRevision(async (prevRevision) => {
         return {
           ...prevRevision,
+          parameters,
           items: await Promise.all(
             prevRevision.items.map(async (item) => {
               return item.locked
@@ -349,7 +392,7 @@ export function createInvestigationStore({
                 : {
                     ...(await regenerateItem({
                       widget: item,
-                      globalWidgetParameters,
+                      globalWidgetParameters: parameters,
                       signal: controller.signal,
                       user,
                       widgetDefinitions,
@@ -361,10 +404,22 @@ export function createInvestigationStore({
         };
       });
     },
-    setTitle: async () => {},
-    lockItem: async () => {},
-    unlockItem: async () => {},
-    setItemTitle: async () => {},
-    setItemParameters: async () => {},
+    setItemTitle: async (itemId, title) => {
+      return updateItem(itemId, (prev) => ({ ...prev, title }));
+    },
+    lockItem: async (itemId) => {
+      return updateItem(itemId, (prev) => ({ ...prev, locked: true }));
+    },
+    unlockItem: async (itemId) => {
+      await regenerateItemAndUpdateRevision(itemId, { locked: false });
+    },
+    setTitle: async (title: string) => {
+      return nextRevision((prevRevision) => {
+        return { ...prevRevision, title };
+      });
+    },
+    setItemParameters: async (itemId, nextParameters) => {
+      await regenerateItemAndUpdateRevision(itemId, { parameters: nextParameters });
+    },
   };
 }

@@ -37,6 +37,8 @@ interface InvestigateTextButtonProps {
   className?: string;
   type?: 'submit' | 'reset' | 'button';
   color?: React.ComponentProps<typeof EuiButtonEmpty>['color'];
+  size?: 'xs' | 's' | 'm';
+  iconSize?: 's' | 'm';
 }
 
 export function InvestigateTextButton({
@@ -49,10 +51,12 @@ export function InvestigateTextButton({
   className,
   type,
   color = 'text',
+  size = 's',
+  iconSize = 's',
 }: InvestigateTextButtonProps) {
   const props = {
-    size: 's' as const,
-    iconSize: 's' as const,
+    size,
+    iconSize,
     iconType,
     color,
     disabled,
