@@ -89,7 +89,7 @@ export const useSourceIndicesFields = () => {
         setNoFieldsIndicesWarning(null);
       }
 
-      onElasticsearchQueryChange(createQuery(defaultFields, fields));
+      onElasticsearchQueryChange(createQuery(defaultFields, defaultSourceFields, fields));
       onSourceFieldsChange(defaultSourceFields);
       usageTracker?.count(
         AnalyticsEvents.sourceFieldsLoaded,
