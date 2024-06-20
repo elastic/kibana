@@ -155,7 +155,7 @@
         "label": "AlertSummary",
         "description": [],
         "signature": [
-          "({ alertSummaryFields }: AlertSummaryProps) => JSX.Element"
+          "({ alert, alertSummaryFields }: AlertSummaryProps) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability/public/pages/alert_details/components/alert_summary.tsx",
         "deprecated": false,
@@ -166,7 +166,7 @@
             "id": "def-public.AlertSummary.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ alertSummaryFields }",
+            "label": "{ alert, alertSummaryFields }",
             "description": [],
             "signature": [
               "AlertSummaryProps"

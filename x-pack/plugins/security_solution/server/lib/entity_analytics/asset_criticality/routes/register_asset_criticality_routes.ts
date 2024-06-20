@@ -14,6 +14,7 @@ import {
   assetCriticalityPublicCSVUploadRoute,
 } from './upload_csv';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { assetCriticalityPublicBulkUploadRoute } from './bulk_upload';
 
 export const registerAssetCriticalityRoutes = ({
   router,
@@ -31,6 +32,7 @@ export const registerAssetCriticalityRoutes = ({
 
   // Public routes
   assetCriticalityPublicCSVUploadRoute(router, logger, config, getStartServices);
+  assetCriticalityPublicBulkUploadRoute(router, logger, config);
   assetCriticalityPublicDeleteRoute(router, logger);
   assetCriticalityPublicGetRoute(router, logger);
   assetCriticalityPublicUpsertRoute(router, logger);
