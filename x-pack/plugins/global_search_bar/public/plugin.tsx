@@ -12,6 +12,7 @@ import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { SearchBar } from './components/search_bar';
 import { EventReporter, eventTypes } from './telemetry';
 
@@ -19,6 +20,7 @@ export interface GlobalSearchBarPluginStartDeps {
   globalSearch: GlobalSearchPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   usageCollection?: UsageCollectionSetup;
+  fileUpload: FileUploadPluginStart;
 }
 
 export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBarPluginStartDeps> {
@@ -36,7 +38,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
   }
 
   private getNavControl(deps: { core: CoreStart } & GlobalSearchBarPluginStartDeps) {
-    const { core, globalSearch, savedObjectsTagging, usageCollection } = deps;
+    const { core, globalSearch, savedObjectsTagging, usageCollection, fileUpload } = deps;
     const { application, http, theme, i18n } = core;
     const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
 
@@ -52,6 +54,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
               basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
               chromeStyle$={core.chrome.getChromeStyle$()}
               reportEvent={reportEvent}
+              maxBytes={fileUpload.getMaxBytes()}
             />
           </KibanaRenderContextProvider>,
           container

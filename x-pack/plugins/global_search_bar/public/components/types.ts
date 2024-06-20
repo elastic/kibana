@@ -20,4 +20,5 @@ export interface SearchBarProps {
   taggingApi?: SavedObjectTaggingPluginStart;
   basePathUrl: string;
   chromeStyle$: Observable<ChromeStyle>;
+  maxBytes: number;
 }
