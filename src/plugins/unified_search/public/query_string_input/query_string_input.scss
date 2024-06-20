@@ -59,6 +59,7 @@
     z-index: $euiZContentMenu + 1;
     top: $euiSizeM;
     bottom: unset;
+    right: $euiSizeXXL;
   }
 
   &--withPrepend {
