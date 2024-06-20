@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
+import { Logger } from '@kbn/logging';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   AttackDiscoveryPostRequestBody,
@@ -40,6 +41,7 @@ export const getAssistantToolParams = ({
   langChainTimeout,
   latestReplacements,
   llm,
+  logger,
   onNewReplacements,
   request,
   size,
@@ -50,6 +52,7 @@ export const getAssistantToolParams = ({
   langChainTimeout: number;
   latestReplacements: Replacements;
   llm: ActionsClientLlm;
+  logger: Logger;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<
     unknown,
@@ -65,6 +68,7 @@ export const getAssistantToolParams = ({
   esClient,
   langChainTimeout,
   llm,
+  logger,
   modelExists: false, // not required for attack discovery
   onNewReplacements,
   replacements: latestReplacements,

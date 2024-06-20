@@ -81,7 +81,7 @@ export function usePackagePolicyWithRelatedData(
   });
   const [originalPackagePolicy, setOriginalPackagePolicy] =
     useState<GetOnePackagePolicyResponse['item']>();
-  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
+  const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
   const [loadingError, setLoadingError] = useState<Error>();
@@ -171,17 +171,21 @@ export function usePackagePolicyWithRelatedData(
           throw packagePolicyError;
         }
 
-        const { data: agentPolicyData, error: agentPolicyError } = await sendGetOneAgentPolicy(
-          packagePolicyData!.item.policy_ids[0] // TODO multiple
-        );
+        const newAgentPolicies = [];
+        for (const policyId of packagePolicyData!.item.policy_ids) {
+          const { data: agentPolicyData, error: agentPolicyError } = await sendGetOneAgentPolicy(
+            policyId
+          );
 
-        if (agentPolicyError) {
-          throw agentPolicyError;
-        }
+          if (agentPolicyError) {
+            throw agentPolicyError;
+          }
 
-        if (agentPolicyData?.item) {
-          setAgentPolicy(agentPolicyData.item);
+          if (agentPolicyData?.item) {
+            newAgentPolicies.push(agentPolicyData.item);
+          }
         }
+        setAgentPolicies(newAgentPolicies);
 
         const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
           await sendUpgradePackagePolicyDryRun([packagePolicyId]);
@@ -260,7 +264,7 @@ export function usePackagePolicyWithRelatedData(
                 ...restOfInput
               } = input;
 
-              let basePolicyInputVars: any =
+              const basePolicyInputVars: any =
                 isUpgradeScenario &&
                 basePolicy.inputs.find(
                   (i) => i.type === input.type && i.policy_template === input.policy_template
@@ -268,14 +272,7 @@ export function usePackagePolicyWithRelatedData(
               let newInputVars = inputVars;
               if (basePolicyInputVars && inputVars) {
                 // merging vars from dry run with updated ones
-                basePolicyInputVars = Object.keys(inputVars).reduce(
-                  (acc, curr) => ({ ...acc, [curr]: basePolicyInputVars[curr] }),
-                  {}
-                );
-                newInputVars = {
-                  ...inputVars,
-                  ...basePolicyInputVars,
-                };
+                newInputVars = mergeVars(inputVars, basePolicyInputVars);
               }
               // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix
               if (basePackage.name === 'apm') {
@@ -353,7 +350,7 @@ export function usePackagePolicyWithRelatedData(
     isUpgrade,
     savePackagePolicy,
     isLoadingData,
-    agentPolicy,
+    agentPolicies,
     loadingError,
     packagePolicy,
     originalPackagePolicy,
