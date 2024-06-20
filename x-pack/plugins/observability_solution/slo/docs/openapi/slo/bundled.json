@@ -35,7 +35,7 @@
   "paths": {
     "/s/{spaceId}/api/observability/slos": {
       "post": {
-        "summary": "Creates an SLO.",
+        "summary": "Create a SLO",
         "operationId": "createSloOp",
         "description": "You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
         "tags": [
@@ -336,7 +336,7 @@
         }
       },
       "put": {
-        "summary": "Updates an SLO",
+        "summary": "Update a SLO",
         "operationId": "updateSloOp",
         "description": "You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
         "tags": [
@@ -417,7 +417,7 @@
         }
       },
       "delete": {
-        "summary": "Deletes an SLO",
+        "summary": "Delete a SLO",
         "operationId": "deleteSloOp",
         "description": "You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
         "tags": [
@@ -483,7 +483,7 @@
     },
     "/s/{spaceId}/api/observability/slos/{sloId}/enable": {
       "post": {
-        "summary": "Enables an SLO",
+        "summary": "Enable a SLO",
         "operationId": "enableSloOp",
         "description": "You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
         "tags": [
@@ -549,7 +549,7 @@
     },
     "/s/{spaceId}/api/observability/slos/{sloId}/disable": {
       "post": {
-        "summary": "Disables an SLO",
+        "summary": "Disable a SLO",
         "operationId": "disableSloOp",
         "description": "You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
         "tags": [
@@ -615,7 +615,7 @@
     },
     "/s/{spaceId}/api/observability/slos/{sloId}/_reset": {
       "post": {
-        "summary": "Resets an SLO.",
+        "summary": "Reset a SLO",
         "operationId": "resetSloOp",
         "description": "You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
         "tags": [
@@ -1111,7 +1111,7 @@
         ]
       },
       "kql_with_filters_good": {
-        "title": "KQL with filters",
+        "title": "KQL query for good events",
         "description": "The KQL query used to define the good events.",
         "oneOf": [
           {
@@ -1136,7 +1136,7 @@
         ]
       },
       "kql_with_filters_total": {
-        "title": "KQL with filters",
+        "title": "KQL query for all events",
         "description": "The KQL query used to define all events.",
         "oneOf": [
           {
