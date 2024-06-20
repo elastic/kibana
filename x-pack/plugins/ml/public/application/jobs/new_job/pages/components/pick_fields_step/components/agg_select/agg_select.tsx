@@ -8,11 +8,12 @@
 import type { FC } from 'react';
 import React, { useContext, useState, useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import type { Field, Aggregation, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
+import type { OptionWithFieldStats } from '../../../../../../../components/field_stats_flyout/eui_combo_box_with_field_stats';
 import { EuiComboBoxWithFieldStats } from '../../../../../../../components/field_stats_flyout';
 import { FieldStatsInfoButton } from '../../../../../../../components/field_stats_flyout/field_stats_info_button';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -32,14 +33,15 @@ export interface DropDownLabel {
 export interface DropDownOption extends EuiComboBoxOptionOption {
   label: Label;
   options: DropDownLabel[];
+  isEmpty?: boolean;
 }
 
 export type DropDownProps = DropDownLabel[] | EuiComboBoxOptionOption[];
 
 interface Props {
   fields: Field[];
-  changeHandler(d: EuiComboBoxOptionOption[]): void;
-  selectedOptions: EuiComboBoxOptionOption[];
+  changeHandler(d: OptionWithFieldStats[]): void;
+  selectedOptions: OptionWithFieldStats[];
   removeOptions: AggFieldPair[];
 }
 
@@ -51,15 +53,16 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   const removeLabels = removeOptions.map(createLabel);
   const { handleFieldStatsButtonClick, populatedFields } = useFieldStatsTrigger();
 
-  const options: EuiComboBoxOptionOption[] = useMemo(
+  const options: OptionWithFieldStats[] = useMemo(
     () => {
-      const opts: DropDownOption[] = [];
+      const opts: OptionWithFieldStats[] = [];
       fields.forEach((f) => {
         const isEmpty = f.id === EVENT_RATE_FIELD_ID ? false : !populatedFields?.has(f.name);
-        const aggOption: DropDownOption = {
+        const aggOption: OptionWithFieldStats = {
           isGroupLabel: true,
           key: f.name,
           searchableLabel: f.name,
+          isEmpty,
           // @ts-ignore Purposefully passing label as element instead of string
           // for more robust rendering
           label: (
@@ -69,7 +72,6 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
               field={f}
               label={f.name}
               onButtonClick={handleFieldStatsButtonClick}
-              isGroupLabel={true}
             />
           ),
         };
@@ -79,26 +81,16 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
             const label = `${a.title}(${f.name})`;
             if (removeLabels.includes(label) === true) return;
             if (a.dslName !== null) {
-              opts.push({
+              const agg: OptionWithFieldStats = {
+                key: label,
+                isGroupLabel: false,
                 isEmpty: f.id === EVENT_RATE_FIELD_ID ? false : !populatedFields?.has(f.name),
                 label,
-                agg: a,
                 field: omit(f, 'aggs'),
-              });
+              };
+              opts.push(agg);
             }
           });
-          //   ...f.aggs
-          //     .filter((a) => a.dslName !== null) // don't include aggs which have no ES equivalent
-          //     .map(
-          //       (a) =>
-          //         ({
-          //           label: `${a.title}(${f.name})`,
-          //           agg: a,
-          //           field: f,
-          //         } as DropDownLabel)
-          //     )
-          //     .filter((o) => removeLabels.includes(o.label) === false)
-          // );
         }
       });
       return opts;
@@ -119,15 +111,15 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
       data-test-subj="mlJobWizardAggSelection"
     >
       <EuiComboBoxWithFieldStats
-        ariaLabel={i18n.translate('xpack.ml.newJob.wizard.aggSelect.ariaLabel', {
+        aria-label={i18n.translate('xpack.ml.newJob.wizard.aggSelect.ariaLabel', {
           defaultMessage: 'Select an aggregation',
         })}
         singleSelection={true}
         options={options}
         selectedOptions={selectedOptions}
         onChange={changeHandler}
-        isClearable={false}
-        isInvalid={validation.valid === false}
+        // @todo isClearable={false}
+        // @todo isInvalid={validation.valid === false}
       />
     </EuiFormRow>
   );

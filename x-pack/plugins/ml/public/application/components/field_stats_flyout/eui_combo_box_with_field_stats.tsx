@@ -7,10 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
-import type { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
-import type { EuiComboBoxOptionOption, EuiSelectableOption } from '@elastic/eui';
-import { EuiSwitch } from '@elastic/eui';
-import { EuiSelectable } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopoverFooter,
   useEuiBackgroundColor,
@@ -18,20 +15,32 @@ import {
   EuiFilterGroup,
   EuiInputPopover,
   htmlIdGenerator,
+  EuiSelectable,
+  EuiSwitch,
+  EuiProgress,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { isDefined } from '@kbn/ml-is-defined';
 import { useFieldStatsTrigger } from './use_field_stats_trigger';
 import { useCurrentThemeVars } from '../../contexts/kibana';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 
 const MIN_POPOVER_WIDTH = 300;
+export type OptionWithFieldStats = EuiSelectableOption<{
+  key: string;
+  label: string | React.ReactNode;
+  isEmpty?: boolean;
+  isGroupLabelOption?: boolean;
+  isGroupLabel?: boolean;
+  field?: { id: string };
+}>;
 
 interface OptionsListPopoverSuggestionsProps {
-  options: EuiSelectableOption[];
-  renderOption: (option: EuiSelectableOption) => React.ReactNode;
-  singleSelection: boolean;
-  onChange: (newSuggestions: EuiSelectableOption[]) => void;
+  options: OptionWithFieldStats[];
+  renderOption: (option: OptionWithFieldStats) => React.ReactNode;
+  singleSelection?: boolean;
+  onChange?: (newSuggestions: OptionWithFieldStats[]) => void;
   setPopoverOpen: (open: boolean) => void;
 }
 const OptionsListPopoverSuggestions: FC<OptionsListPopoverSuggestionsProps> = ({
@@ -41,7 +50,7 @@ const OptionsListPopoverSuggestions: FC<OptionsListPopoverSuggestionsProps> = ({
   onChange,
   setPopoverOpen,
 }) => {
-  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
+  const [selectableOptions, setSelectableOptions] = useState<OptionWithFieldStats[]>([]); // will be set in following useEffect
   useEffect(() => {
     /* This useEffect makes selectableOptions responsive to search, show only selected, and clear selections */
     const _selectableOptions = (options ?? []).map((suggestion) => {
@@ -49,11 +58,11 @@ const OptionsListPopoverSuggestions: FC<OptionsListPopoverSuggestionsProps> = ({
         ...suggestion,
         key: suggestion.label ?? suggestion.field?.id,
         checked: undefined,
-        // checked: selectedOptionsSet?.has(suggestion.value) ? 'on' : undefined,
-        'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
+        'data-test-subj': `optionsList-control-selection-${suggestion.key}`,
       };
     });
     setSelectableOptions(_selectableOptions);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options.length]);
 
   return (
@@ -81,7 +90,11 @@ const OptionsListPopoverSuggestions: FC<OptionsListPopoverSuggestionsProps> = ({
   );
 };
 
-const OptionsListPopoverFooter = ({ showEmptyFields, setShowEmptyFields }) => {
+const OptionsListPopoverFooter: FC<{
+  showEmptyFields: boolean;
+  setShowEmptyFields: (showEmptyFields: boolean) => void;
+  isLoading?: boolean;
+}> = ({ showEmptyFields, setShowEmptyFields, isLoading }) => {
   const { euiTheme } = useCurrentThemeVars();
 
   return (
@@ -96,6 +109,16 @@ const OptionsListPopoverFooter = ({ showEmptyFields, setShowEmptyFields }) => {
           paddingLeft: euiTheme.euiSizeS,
         })}
       >
+        {isLoading ? (
+          <div style={{ position: 'absolute', width: '100%' }}>
+            <EuiProgress
+              data-test-subj="optionsList-control-popover-loading"
+              size="xs"
+              color="accent"
+            />
+          </div>
+        ) : null}
+
         <EuiSwitch
           label={i18n.translate(
             'xpack.plugins.ml.controls.optionsList.popover.includeEmptyFieldsLabel',
@@ -112,26 +135,20 @@ const OptionsListPopoverFooter = ({ showEmptyFields, setShowEmptyFields }) => {
 };
 
 interface OptionsListPopoverProps {
-  isLoading: boolean;
-  updateSearchString: (searchString: { value: string; valid: boolean }) => void;
-  loadMoreSuggestions: () => void;
-  options: EuiSelectableOption[];
-  renderOption: (option: EuiSelectableOption) => React.ReactNode;
-  searchString: { value: string; valid: boolean };
-  singleSelection: boolean;
-  onChange: (newSuggestions: EuiSelectableOption[]) => void;
+  options: OptionWithFieldStats[];
+  renderOption: (option: OptionWithFieldStats) => React.ReactNode;
+  singleSelection?: boolean;
+  onChange?: (newSuggestions: OptionWithFieldStats[]) => void;
   setPopoverOpen: (open: boolean) => void;
+  isLoading?: boolean;
 }
 const OptionsListPopover = ({
-  isLoading,
-  updateSearchString,
-  loadMoreSuggestions,
   options,
   renderOption,
-  searchString,
   singleSelection,
   onChange,
   setPopoverOpen,
+  isLoading,
 }: OptionsListPopoverProps) => {
   const { populatedFields } = useFieldStatsFlyoutContext();
 
@@ -142,10 +159,12 @@ const OptionsListPopover = ({
     return showEmptyFields
       ? options
       : options.filter((option) => {
-          if (option.key === 'Event rate' || option.field?.id === '__ml_event_rate_count__')
-            return true;
-          if (option.isGroupLabel)
+          if (isDefined(option.isEmpty)) {
+            return !option.isEmpty;
+          }
+          if (option.isGroupLabel || option.isGroupLabelOption) {
             return populatedFields?.has(option.key ?? option.searchableLabel);
+          }
           if (option.field) {
             return populatedFields?.has(option.field.id);
           }
@@ -173,6 +192,7 @@ const OptionsListPopover = ({
       <OptionsListPopoverFooter
         showEmptyFields={showEmptyFields}
         setShowEmptyFields={setShowEmptyFields}
+        isLoading={isLoading}
       />
     </div>
   );
@@ -194,10 +214,17 @@ const FALLBACK_PLACEHOLDER = i18n.translate('xpack.plugins.ml.selectOption.place
   defaultMessage: 'Any',
 });
 
-type OptionWithFieldStats = EuiSelectableOption<{ field: { id: string } }>;
-interface EuiComboBoxWithFieldStatsProps
-  extends EuiComboBoxProps<string | number | string[] | undefined> {
-  ariaLabel: string;
+interface EuiComboBoxWithFieldStatsProps {
+  options: OptionWithFieldStats[];
+  placeholder?: string;
+  'aria-label'?: string;
+  singleSelection?: boolean;
+  // renderOption: (option: OptionWithFieldStats, searchValue: string) => React.ReactNode;
+  onChange: (newSuggestions: OptionWithFieldStats[]) => void;
+  selectedOptions?: Array<{ label: string }>;
+  fullWidth?: boolean;
+  isDisabled?: boolean;
+  isLoading?: boolean;
 }
 export const EuiComboBoxWithFieldStats: FC<EuiComboBoxWithFieldStatsProps> = ({
   options,
@@ -205,17 +232,17 @@ export const EuiComboBoxWithFieldStats: FC<EuiComboBoxWithFieldStatsProps> = ({
   singleSelection,
   onChange,
   selectedOptions,
+  fullWidth,
+  isDisabled,
   isLoading,
-  ariaLabel,
-  ...restProps
+  'aria-label': ariaLabel,
 }) => {
   const { euiTheme } = useCurrentThemeVars();
   const { renderOption } = useFieldStatsTrigger();
-  const [searchString, updateSearchString] = useState({ value: '', valid: true });
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
-  const comboBoxOptions: EuiComboBoxOptionOption[] = useMemo(
+  const comboBoxOptions: OptionWithFieldStats[] = useMemo(
     () =>
       Array.isArray(options)
         ? options.map((o) => ({
@@ -227,12 +254,12 @@ export const EuiComboBoxWithFieldStats: FC<EuiComboBoxWithFieldStatsProps> = ({
   );
   const selectedOptionsCount = selectedOptions?.length ?? 0;
   const hasSelections = selectedOptionsCount > 0;
-  const loadMoreSuggestions = () => {};
   const id = useMemo(() => htmlIdGenerator()(), []);
   const selectionDisplayNode = selectedOptions?.map((option) => option.label).join(', ');
   const button = (
     <>
       <EuiFilterButton
+        isDisabled={isDisabled}
         placeholder={placeholder}
         badgeColor="success"
         iconType="arrowDown"
@@ -245,8 +272,6 @@ export const EuiComboBoxWithFieldStats: FC<EuiComboBoxWithFieldStatsProps> = ({
         data-test-subj={`optionsList-control-${id}`}
         onClick={() => setPopoverOpen(true)}
         isSelected={isPopoverOpen}
-        numActiveFilters={selectedOptionsCount}
-        hasActiveFilters={Boolean(selectedOptionsCount)}
         textProps={{ className: 'optionsList--selectionText' }}
         aria-label={ariaLabel}
         aria-expanded={isPopoverOpen}
@@ -260,7 +285,7 @@ export const EuiComboBoxWithFieldStats: FC<EuiComboBoxWithFieldStatsProps> = ({
 
   return (
     <div>
-      <EuiFilterGroup>
+      <EuiFilterGroup fullWidth={fullWidth}>
         <EuiInputPopover
           id={popoverId}
           ownFocus
@@ -283,24 +308,15 @@ export const EuiComboBoxWithFieldStats: FC<EuiComboBoxWithFieldStatsProps> = ({
           }}
         >
           <OptionsListPopover
-            isLoading={isLoading}
-            searchString={searchString}
-            updateSearchString={updateSearchString}
-            loadMoreSuggestions={loadMoreSuggestions}
             options={comboBoxOptions}
             renderOption={renderOption}
             singleSelection={singleSelection}
             onChange={onChange}
             setPopoverOpen={setPopoverOpen}
+            isLoading={isLoading}
           />
         </EuiInputPopover>
       </EuiFilterGroup>
     </div>
-    // <EuiComboBox
-    //   {...restProps}
-    //   options={comboBoxOptions}
-    // renderOption={renderOption}
-    // singleSelection={{ asPlainText: true }}
-    // />
   );
 };
