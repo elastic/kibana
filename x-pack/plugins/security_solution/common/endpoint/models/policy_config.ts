@@ -6,7 +6,7 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { ProtectionModes, AntivirusRegistrationModes } from '../types';
+import { AntivirusRegistrationModes, ProtectionModes } from '../types';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
@@ -80,8 +80,8 @@ export const policyFactory = (
         file: 'info',
       },
       antivirus_registration: {
-        mode: AntivirusRegistrationModes.disabled,
-        enabled: false,
+        mode: AntivirusRegistrationModes.sync,
+        enabled: true, // Defaults to true since Malware protection is set to prevent and mode is set to sync
       },
       attack_surface_reduction: {
         credential_hardening: {
@@ -235,6 +235,10 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         reputation_service: false,
         supported: false,
+      },
+      antivirus_registration: {
+        mode: AntivirusRegistrationModes.disabled,
+        enabled: false,
       },
       attack_surface_reduction: {
         credential_hardening: {
