@@ -154,29 +154,12 @@ export const getOverviewEmbeddableFactory = (
               const groups = groupFilters?.groups ?? [];
               return (
                 <Wrapper>
-                  <EuiFlexGroup
-                    data-test-subj="sloGroupOverviewPanel"
-                    data-shared-item=""
-                    justifyContent="flexEnd"
-                    wrap
+                  <EuiFlexItem
+                    grow={false}
                     css={`
-                      margin-bottom: 20px;
+                      margin-top: 20px;
                     `}
                   >
-                    <EuiFlexItem grow={false}>
-                      <EuiLink
-                        onClick={() => {
-                          onEdit();
-                        }}
-                        data-test-subj="o11ySloOverviewEditCriteriaLink"
-                      >
-                        {i18n.translate('xpack.slo.overviewEmbeddable.editCriteriaLabel', {
-                          defaultMessage: 'Edit criteria',
-                        })}
-                      </EuiLink>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
                     <GroupSloView
                       sloView="cardView"
                       groupBy={groupBy}
