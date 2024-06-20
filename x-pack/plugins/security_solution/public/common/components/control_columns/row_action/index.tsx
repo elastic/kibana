@@ -103,6 +103,9 @@ const RowActionComponent = ({
   const showExpandableFlyout =
     pageName === SecurityPageName.attackDiscovery ? true : !expandableFlyoutDisabled;
 
+  const ruleName = ecsData?.kibana?.alert?.rule?.name;
+  const title = ruleName ? ruleName[0] : 'Details Flyout';
+
   const handleOnEventDetailPanelOpened = useCallback(() => {
     const updatedExpandedDetail: ExpandedDetailType = {
       panelView: 'eventDetail',
@@ -119,6 +122,7 @@ const RowActionComponent = ({
           path: shouldFocusOnOverviewTab ? { tab: 'overview' } : undefined,
           params: {
             id: eventId,
+            title,
             indexName,
             scopeId: tableId,
           },
@@ -160,6 +164,7 @@ const RowActionComponent = ({
     telemetry,
     dispatch,
     tabType,
+    title,
   ]);
 
   const Action = controlColumn.rowCellRender;

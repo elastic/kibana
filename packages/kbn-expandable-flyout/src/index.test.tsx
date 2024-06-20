@@ -52,6 +52,15 @@ describe('ExpandableFlyout', () => {
           },
           left: undefined,
           preview: undefined,
+          history: [
+            {
+              right: {
+                id: 'key',
+              },
+              left: undefined,
+              preview: undefined,
+            },
+          ],
         },
       },
     };
@@ -74,6 +83,15 @@ describe('ExpandableFlyout', () => {
             id: 'key',
           },
           preview: undefined,
+          history: [
+            {
+              right: undefined,
+              left: {
+                id: 'key',
+              },
+              preview: undefined,
+            },
+          ],
         },
       },
     };
@@ -96,6 +114,15 @@ describe('ExpandableFlyout', () => {
           preview: [
             {
               id: 'key',
+            },
+          ],
+          history: [
+            {
+              right: undefined,
+              left: undefined,
+              preview: {
+                id: 'key',
+              },
             },
           ],
         },

@@ -7,8 +7,10 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import React, { type FC, useMemo, useCallback } from 'react';
-import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { type Criteria, EuiBasicTable, formatDate, EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { Filter } from '@kbn/es-query';
 import { isRight } from 'fp-ts/lib/Either';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
@@ -22,80 +24,13 @@ import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
+import {
+  DocumentPreviewPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../shared/constants/panel_keys';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
-
-export const columns = [
-  {
-    field: '@timestamp',
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.correlations.timestampColumnLabel"
-        defaultMessage="Timestamp"
-      />
-    ),
-    truncateText: true,
-    dataType: 'date' as const,
-    render: (value: string) => {
-      const date = formatDate(value, TIMESTAMP_DATE_FORMAT);
-      return (
-        <CellTooltipWrapper tooltip={date}>
-          <span>{date}</span>
-        </CellTooltipWrapper>
-      );
-    },
-  },
-  {
-    field: ALERT_RULE_NAME,
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.correlations.ruleColumnLabel"
-        defaultMessage="Rule"
-      />
-    ),
-    truncateText: true,
-    render: (value: string) => (
-      <CellTooltipWrapper tooltip={value}>
-        <span>{value}</span>
-      </CellTooltipWrapper>
-    ),
-  },
-  {
-    field: ALERT_REASON,
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.correlations.reasonColumnLabel"
-        defaultMessage="Reason"
-      />
-    ),
-    truncateText: true,
-    render: (value: string) => (
-      <CellTooltipWrapper tooltip={value} anchorPosition="left">
-        <span>{value}</span>
-      </CellTooltipWrapper>
-    ),
-  },
-  {
-    field: 'kibana.alert.severity',
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.correlations.severityColumnLabel"
-        defaultMessage="Severity"
-      />
-    ),
-    truncateText: true,
-    render: (value: string) => {
-      const decodedSeverity = Severity.decode(value);
-      const renderValue = isRight(decodedSeverity) ? (
-        <SeverityBadge value={decodedSeverity.right} />
-      ) : (
-        <p>{value}</p>
-      );
-      return <CellTooltipWrapper tooltip={value}>{renderValue}</CellTooltipWrapper>;
-    },
-  },
-];
 
 export interface CorrelationsDetailsAlertsTableProps {
   /**
@@ -149,6 +84,128 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     sorting,
     error,
   } = usePaginatedAlerts(alertIds || []);
+  const { openPreviewPanel, openFlyout } = useExpandableFlyoutApi();
+
+  const columns: Array<EuiBasicTableColumn<Record<string, unknown>>> = [
+    {
+      width: '10%',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.actionColumnLabel"
+          defaultMessage="Action"
+        />
+      ),
+      render: (items: Record<string, unknown>) => (
+        <EuiButtonIcon
+          iconType={'expand'}
+          aria-label={(items.id as string) ?? 'id'}
+          onClick={() =>
+            openFlyout({
+              right: {
+                id: DocumentDetailsRightPanelKey,
+                params: {
+                  id: items.id as string,
+                  indexName: items.index as string,
+                  title: items[ALERT_RULE_NAME] as string,
+                  scopeId,
+                },
+              },
+            })
+          }
+        />
+      ),
+    },
+    {
+      field: '@timestamp',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.timestampColumnLabel"
+          defaultMessage="Timestamp"
+        />
+      ),
+      truncateText: true,
+      dataType: 'date' as const,
+      render: (value: string) => {
+        const date = formatDate(value, TIMESTAMP_DATE_FORMAT);
+        return (
+          <CellTooltipWrapper tooltip={date}>
+            <span>{date}</span>
+          </CellTooltipWrapper>
+        );
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.ruleColumnLabel"
+          defaultMessage="Rule"
+        />
+      ),
+      truncateText: true,
+      render: (items: Record<string, unknown>) => (
+        <CellTooltipWrapper tooltip={items[ALERT_RULE_NAME] as string}>
+          <EuiLink
+            onClick={() =>
+              openPreviewPanel({
+                id: DocumentPreviewPanelKey,
+                params: {
+                  id: items.id as string,
+                  indexName: items.index as string,
+                  scopeId,
+                  banner: {
+                    title: i18n.translate(
+                      'xpack.securitySolution.flyout.right.host.hostPreviewTitle',
+                      {
+                        defaultMessage: 'Preview alert',
+                      }
+                    ),
+                    backgroundColor: 'warning',
+                    textColor: 'warning',
+                  },
+                },
+              })
+            }
+          >
+            <span>{items[ALERT_RULE_NAME]}</span>
+          </EuiLink>
+        </CellTooltipWrapper>
+      ),
+    },
+    {
+      field: ALERT_REASON,
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.reasonColumnLabel"
+          defaultMessage="Reason"
+        />
+      ),
+      truncateText: true,
+      render: (value: string) => (
+        <CellTooltipWrapper tooltip={value} anchorPosition="left">
+          <span>{value}</span>
+        </CellTooltipWrapper>
+      ),
+    },
+    {
+      field: 'kibana.alert.severity',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.severityColumnLabel"
+          defaultMessage="Severity"
+        />
+      ),
+      truncateText: true,
+      render: (value: string) => {
+        const decodedSeverity = Severity.decode(value);
+        const renderValue = isRight(decodedSeverity) ? (
+          <SeverityBadge value={decodedSeverity.right} />
+        ) : (
+          <p>{value}</p>
+        );
+        return <CellTooltipWrapper tooltip={value}>{renderValue}</CellTooltipWrapper>;
+      },
+    },
+  ];
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
@@ -166,13 +223,19 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
 
   const mappedData = useMemo(() => {
     return data
-      .map((hit) => hit.fields)
-      .map((fields = {}) =>
-        Object.keys(fields).reduce((result, fieldName) => {
-          result[fieldName] = fields?.[fieldName]?.[0] || fields?.[fieldName];
+      .map((hit) => {
+        return { fields: hit.fields ?? {}, id: hit._id, index: hit._index };
+      })
+      .map((dataWithMeta) => {
+        const res = Object.keys(dataWithMeta.fields).reduce((result, fieldName) => {
+          result[fieldName] =
+            dataWithMeta.fields?.[fieldName]?.[0] || dataWithMeta.fields?.[fieldName];
           return result;
-        }, {} as Record<string, unknown>)
-      );
+        }, {} as Record<string, unknown>);
+        res.id = dataWithMeta.id;
+        res.index = dataWithMeta.index;
+        return res;
+      });
   }, [data]);
 
   const shouldUseFilters = Boolean(

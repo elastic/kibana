@@ -33,6 +33,10 @@ export interface RightPanelContext {
    */
   scopeId: string;
   /**
+   * Title of the flyout to be displayed as header
+   */
+  title: string;
+  /**
    * An object containing fields by type
    */
   browserFields: BrowserFields;
@@ -76,7 +80,7 @@ export type RightPanelProviderProps = {
 } & Partial<RightPanelProps['params']>;
 
 export const RightPanelProvider = memo(
-  ({ id, indexName, scopeId, children }: RightPanelProviderProps) => {
+  ({ id, indexName, scopeId, title, children }: RightPanelProviderProps) => {
     const {
       browserFields,
       dataAsNestedObject,
@@ -95,6 +99,7 @@ export const RightPanelProvider = memo(
         id &&
         indexName &&
         scopeId &&
+        title &&
         dataAsNestedObject &&
         dataFormattedForFieldBrowser &&
         searchHit
@@ -102,6 +107,7 @@ export const RightPanelProvider = memo(
               eventId: id,
               indexName,
               scopeId,
+              title,
               browserFields,
               dataAsNestedObject,
               dataFormattedForFieldBrowser,
@@ -123,6 +129,7 @@ export const RightPanelProvider = memo(
         searchHit,
         refetchFlyoutData,
         getFieldsData,
+        title,
       ]
     );
 

@@ -79,6 +79,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1, { id: 'preview' }],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: { id: 'preview' },
+              },
+            ],
           },
         },
       };
@@ -109,6 +116,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -137,6 +151,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -189,6 +210,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -214,6 +242,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -263,6 +298,7 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [{ left: leftPanel1, right: rightPanel1, preview: previewPanel1 }],
           },
         },
       };
@@ -288,6 +324,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -337,6 +380,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -362,6 +412,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -402,6 +459,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: undefined,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: undefined,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -418,6 +482,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -444,6 +515,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -480,6 +558,13 @@ describe('reducer', () => {
             left: undefined,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: undefined,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -496,6 +581,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -521,6 +613,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -556,6 +655,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: undefined,
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: undefined,
+              },
+            ],
           },
         },
       };
@@ -572,6 +678,13 @@ describe('reducer', () => {
             left: rightPanel1,
             right: leftPanel1,
             preview: [previewPanel1, previewPanel2],
+            history: [
+              {
+                left: rightPanel1,
+                right: leftPanel1,
+                preview: previewPanel2,
+              },
+            ],
           },
         },
       };
@@ -597,6 +710,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -632,6 +752,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: undefined,
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: undefined,
+              },
+            ],
           },
         },
       };
@@ -648,6 +775,13 @@ describe('reducer', () => {
             left: rightPanel1,
             right: leftPanel1,
             preview: [previewPanel1, previewPanel2],
+            history: [
+              {
+                left: rightPanel1,
+                right: leftPanel1,
+                preview: previewPanel2,
+              },
+            ],
           },
         },
       };
@@ -673,6 +807,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -708,6 +849,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };
@@ -733,6 +881,13 @@ describe('reducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [
+              {
+                left: leftPanel1,
+                right: rightPanel1,
+                preview: previewPanel1,
+              },
+            ],
           },
         },
       };

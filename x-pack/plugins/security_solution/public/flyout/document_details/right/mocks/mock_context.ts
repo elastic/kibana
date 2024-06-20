@@ -27,4 +27,5 @@ export const mockContextValue: RightPanelContext = {
   investigationFields: [],
   refetchFlyoutData: jest.fn(),
   isPreview: false,
+  title: 'document details',
 };

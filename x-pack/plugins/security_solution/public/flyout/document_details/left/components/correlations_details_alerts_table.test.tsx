@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { EuiBasicTable } from '@elastic/eui';
-import { CorrelationsDetailsAlertsTable, columns } from './correlations_details_alerts_table';
+import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 
 jest.mock('../hooks/use_paginated_alerts');
@@ -97,7 +97,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
             'kibana.alert.severity': 'Severity2',
           },
         ],
-        columns,
+        columns: [],
         pagination: { pageIndex: 0, pageSize: 5, totalItemCount: 10, pageSizeOptions: [5, 10, 20] },
         sorting: { sort: { field: '@timestamp', direction: 'asc' }, enableAllColumns: true },
       }),

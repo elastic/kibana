@@ -31,6 +31,7 @@ export interface RightPanelProps extends FlyoutPanelProps {
     id: string;
     indexName: string;
     scopeId: string;
+    title: string;
   };
 }
 

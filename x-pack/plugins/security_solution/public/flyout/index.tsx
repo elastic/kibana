@@ -13,6 +13,7 @@ import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsRightPanelKey,
+  DocumentPreviewPanelKey,
 } from './document_details/shared/constants/panel_keys';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import { IsolateHostPanel } from './document_details/isolate_host';
@@ -26,14 +27,21 @@ import { LeftPanelProvider } from './document_details/left/context';
 import type { PreviewPanelProps } from './document_details/preview';
 import { PreviewPanel } from './document_details/preview';
 import { PreviewPanelProvider } from './document_details/preview/context';
+import type { DocumentPreviewPanelProps } from './document_details/document_preview';
+import { DocumentPreviewPanel } from './document_details/document_preview';
+import { DocumentPreviewPanelProvider } from './document_details/document_preview/context';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
+import type { UserPreviewPanelProps } from './entity_details/user_preview';
+import { UserPreviewPanel, UserPreviewPanelKey } from './entity_details/user_preview';
 import type { UserDetailsPanelProps } from './entity_details/user_details_left';
 import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
 import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
 import { HostPanel, HostPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
+import type { HostPreviewPanelProps } from './entity_details/host_preview';
+import { HostPreviewPanel, HostPreviewPanelKey } from './entity_details/host_preview';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -65,6 +73,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
+    key: DocumentPreviewPanelKey,
+    component: (props) => (
+      <DocumentPreviewPanelProvider {...(props as DocumentPreviewPanelProps).params}>
+        <DocumentPreviewPanel />
+      </DocumentPreviewPanelProvider>
+    ),
+  },
+  {
     key: DocumentDetailsIsolateHostPanelKey,
     component: (props) => (
       <IsolateHostPanelProvider {...(props as IsolateHostPanelProps).params}>
@@ -83,6 +99,10 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
+    key: UserPreviewPanelKey,
+    component: (props) => <UserPreviewPanel {...({ ...props.params } as UserPreviewPanelProps)} />,
+  },
+  {
     key: HostPanelKey,
     component: (props) => <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} />,
   },
@@ -91,6 +111,10 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => (
       <HostDetailsPanel {...(props as HostDetailsExpandableFlyoutProps).params} />
     ),
+  },
+  {
+    key: HostPreviewPanelKey,
+    component: (props) => <HostPreviewPanel {...({ ...props.params } as HostPreviewPanelProps)} />,
   },
 ];
 

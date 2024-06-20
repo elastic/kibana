@@ -20,4 +20,5 @@ export const mockFlyoutApi: ExpandableFlyoutApi = {
   closePreviewPanel: jest.fn(),
   previousPreviewPanel: jest.fn(),
   closeFlyout: jest.fn(),
+  goBack: jest.fn(),
 };
