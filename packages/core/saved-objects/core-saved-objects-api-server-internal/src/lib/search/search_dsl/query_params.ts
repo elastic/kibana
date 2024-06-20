@@ -13,6 +13,8 @@ import {
   ALL_NAMESPACES_STRING,
   DEFAULT_NAMESPACE_STRING,
 } from '@kbn/core-saved-objects-utils-server';
+import { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { getProperty } from '@kbn/core-saved-objects-base-server-internal/src/mappings/lib/get_property';
 import { getReferencesFilter } from './references_filter';
 
 type KueryNode = any;
@@ -32,11 +34,11 @@ function getTypes(registry: ISavedObjectTypeRegistry, type?: string | string[]) 
  *  Get the field params based on the types, searchFields, and rootSearchFields
  */
 function getSimpleQueryStringTypeFields(
-  types: string[],
-  searchFields: string[] = [],
+  types: string[], // TODO: remove this
+  searchFields: Map<string, string[]> = new Map(),
   rootSearchFields: string[] = []
 ) {
-  if (!searchFields.length && !rootSearchFields.length) {
+  if (!searchFields.size && !rootSearchFields.length) {
     return {
       lenient: true,
       fields: ['*'],
@@ -50,8 +52,8 @@ function getSimpleQueryStringTypeFields(
     }
   });
 
-  for (const field of searchFields) {
-    fields = fields.concat(types.map((prefix) => `${prefix}.${field}`));
+  for (const [prefix, fieldsWithoutPrefix] of searchFields) {
+    fields = fields.concat(fieldsWithoutPrefix.map((field) => `${prefix}.${field}`));
   }
 
   return { fields };
@@ -139,6 +141,7 @@ interface QueryParams {
   hasNoReference?: SavedObjectTypeIdTuple | SavedObjectTypeIdTuple[];
   hasNoReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
+  mappings?: IndexMapping;
 }
 
 // A de-duplicated set of namespaces makes for a more efficient query.
@@ -169,6 +172,7 @@ export function getQueryParams({
   hasNoReference,
   hasNoReferenceOperator,
   kueryNode,
+  mappings,
 }: QueryParams) {
   const types = getTypes(
     registry,
@@ -214,22 +218,44 @@ export function getQueryParams({
 
   if (search) {
     const useMatchPhrasePrefix = shouldUseMatchPhrasePrefix(search);
-    const simpleQueryStringClause = getSimpleQueryStringClause({
-      search,
-      types,
-      searchFields,
-      rootSearchFields,
-      defaultSearchOperator,
-    });
+    // TODO: I would guess mappings are always present except in test. Check this.
+    if (mappings) {
+      const searchStringQuery = getSearchStringQuery({
+        search,
+        types,
+        searchFields,
+        rootSearchFields,
+        defaultSearchOperator,
+        mappings,
+      });
 
-    if (useMatchPhrasePrefix) {
-      bool.should = [
-        simpleQueryStringClause,
-        ...getMatchPhrasePrefixClauses({ search, searchFields, types, registry }),
-      ];
-      bool.minimum_should_match = 1;
+      if (useMatchPhrasePrefix) {
+        bool.should = [
+          searchStringQuery,
+          ...getMatchPhrasePrefixClauses({ search, searchFields, types, registry }),
+        ];
+        bool.minimum_should_match = 1;
+      } else {
+        bool.must = searchStringQuery;
+      }
     } else {
-      bool.must = [simpleQueryStringClause];
+      const simpleQueryStringClause = getSimpleQueryStringClause({
+        search,
+        types,
+        searchFields,
+        rootSearchFields,
+        defaultSearchOperator,
+      });
+
+      if (useMatchPhrasePrefix) {
+        bool.should = [
+          simpleQueryStringClause,
+          ...getMatchPhrasePrefixClauses({ search, searchFields, types, registry }),
+        ];
+        bool.minimum_should_match = 1;
+      } else {
+        bool.must = [simpleQueryStringClause];
+      }
     }
   }
 
@@ -322,6 +348,142 @@ const getMatchPhrasePrefixFields = ({
   return output;
 };
 
+/**
+ * Generates an array of subpaths in reverse order from a given string by splitting it at each '.' and incrementally joining the parts.
+ * Includes the current path and the rest of the input in each subpath.
+ * @param input - The input string to generate subpaths from.
+ * @returns An array of objects with 'current' path and 'rest' of the input in reverse order.
+ */
+function generateReverseSubPathsWithRest(input: string): Array<{ path: string; rest: string }> {
+  const parts = input.split('.');
+  return (
+    parts
+      .map((_, index) => {
+        const path = parts.slice(0, index + 1).join('.');
+        const rest = parts.slice(index + 1).join('.');
+        return { path, rest };
+      })
+      // .filter(({ rest }: { rest: string }) => Boolean(rest))
+      .reverse()
+  );
+}
+
+// TODO: should this fn search for nested field inside nested fields?
+const getAllFields = ({ mappings, type }: { mappings: IndexMapping; type: string }) => {
+  const allFields = [];
+  const props = mappings.properties[type].properties;
+  for (const field in props) {
+    if (props.hasOwnProperty(field)) {
+      allFields.push(field);
+    }
+  }
+
+  return allFields;
+};
+
+const getSearchStringQuery = ({
+  search,
+  types,
+  searchFields: searchFieldsParam = [],
+  rootSearchFields,
+  defaultSearchOperator,
+  mappings,
+}: {
+  search: string;
+  types: string[];
+  searchFields?: string[];
+  rootSearchFields?: string[];
+  defaultSearchOperator?: SearchOperator;
+  mappings: IndexMapping;
+}) => {
+  const nestedFields: Map<string, string[]> = new Map();
+  const fields: Map<string, string[]> = new Map();
+
+  const isSearchFieldsSet =
+    searchFieldsParam.length > 0 ||
+    (searchFieldsParam.length === 1 && searchFieldsParam[0] !== '*');
+
+  types.forEach((prefix) => {
+    const searchFields = isSearchFieldsSet
+      ? searchFieldsParam
+      : getAllFields({ mappings, type: prefix });
+
+    console.log({ searchFieldsParam, isSearchFieldsSet, searchFields });
+
+    searchFields.forEach((field) => {
+      const absoluteFieldPath = `${prefix}.${field}`;
+      const paths = generateReverseSubPathsWithRest(absoluteFieldPath);
+      console.log({ paths });
+      let foundNestedField = false;
+      for (const { path, rest: fieldPath } of paths) {
+        console.log(`testing ${path}`);
+        if (getProperty(mappings, path)?.type === 'nested') {
+          const nestedPath = path;
+          console.log(`new nested field ${nestedPath}.${fieldPath}`);
+          nestedFields.set(nestedPath, [...(nestedFields.get(nestedPath) || []), fieldPath]);
+          foundNestedField = true;
+          break;
+        } else {
+          console.log('not nested');
+        }
+      }
+
+      const absolutePathType: string | undefined = getProperty(mappings, absoluteFieldPath)?.type;
+      if (!foundNestedField && absolutePathType !== 'nested' && absolutePathType !== undefined) {
+        fields.set(prefix, [...(fields.get(prefix) || []), field]);
+      }
+    });
+  });
+  console.log({ fields, nestedFields });
+  const nestedQueries = getNestedQueryStringClause({
+    nestedFields,
+    search,
+    isSearchFieldsSet,
+  });
+
+  const simpleQueryString = getSimpleQueryStringClause({
+    search,
+    types,
+    searchFields: fields,
+    rootSearchFields,
+    defaultSearchOperator,
+  });
+
+  return { bool: { should: [...nestedQueries, simpleQueryString].filter(Boolean) } };
+};
+
+/**
+ * Returns an array of clauses because there for each type we need to create a nested query
+ */
+const getNestedQueryStringClause = ({
+  search,
+  nestedFields,
+  isSearchFieldsSet,
+}: {
+  search: string;
+  nestedFields: Map<string, string[]>;
+  isSearchFieldsSet: boolean;
+}) => {
+  if (nestedFields.size === 0) {
+    return [];
+  }
+
+  // TODO: what about the defaultSearchOperator? Do we need to pass it here?
+  return Array.from(nestedFields.entries()).map(([path, fields]) => {
+    return {
+      nested: {
+        path,
+        query: {
+          simple_query_string: {
+            query: search,
+            fields: isSearchFieldsSet ? fields.map((field: string) => `${path}.${field}`) : ['*'],
+          },
+        },
+      },
+    };
+  });
+};
+
 const getSimpleQueryStringClause = ({
   search,
   types,
@@ -331,7 +493,7 @@ const getSimpleQueryStringClause = ({
 }: {
   search: string;
   types: string[];
-  searchFields?: string[];
+  searchFields?: Map<string, string[]>;
   rootSearchFields?: string[];
   defaultSearchOperator?: SearchOperator;
 }) => {
