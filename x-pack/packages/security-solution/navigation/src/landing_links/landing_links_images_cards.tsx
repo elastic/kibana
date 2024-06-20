@@ -45,6 +45,7 @@ export const LandingLinksImageCards: React.FC<LandingLinksImagesProps> = React.m
       <EuiPanel hasShadow={false} color="subdued" borderRadius="m" paddingSize="m">
         <EuiAccordion
           id={landingLinksAccordionId}
+          data-test-subj="LandingImageCards-accordion"
           buttonContent={
             <EuiFlexGroup
               gutterSize="xs"

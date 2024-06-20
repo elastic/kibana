@@ -19,16 +19,12 @@ export interface LandingLinksImageCardProps {
 }
 
 const CARD_HEIGHT = 116;
-const CARD_HEIGHT_IMAGE = 100;
+const CARD_HEIGHT_IMAGE = 106;
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
   return {
     card: css`
-      // Needed to use the primary color in the title underlining on hover
-      .euiCard__title {
-        color: ${euiTheme.colors.primaryText};
-      }
       height: ${CARD_HEIGHT}px;
       display: flex;
       justify-content: flex-start;
@@ -96,7 +92,6 @@ export const LandingLinksImageCard: React.FC<LandingLinksImageCardProps> = React
               >
                 <EuiImage
                   data-test-subj="LandingImageCard-image"
-                  role="presentation"
                   alt={title}
                   src={landingImage}
                   css={styles.image}

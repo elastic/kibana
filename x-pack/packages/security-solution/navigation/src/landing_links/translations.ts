@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const LANDING_LINKS_ACCORDION_HEADER = i18n.translate(
-  'xpack.securitySolution.navigation.landingLinks',
+  'securitySolutionPackages.navigation.landingLinks',
   {
     defaultMessage: 'Security views',
   }
