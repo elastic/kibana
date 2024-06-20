@@ -1,5 +1,5 @@
 post:
-  summary: Create a SLO
+  summary: Create an SLO
   operationId: createSloOp
   description: >
     You must have `all` privileges for the **SLOs** feature in the

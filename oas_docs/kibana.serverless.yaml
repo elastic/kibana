@@ -1946,7 +1946,7 @@ paths:
         - Serverless_saved_objects_apiKeyAuth: []
   /s/{spaceId}/api/observability/slos:
     post:
-      summary: Create a SLO
+      summary: Create an SLO
       operationId: createSloOp
       description: >
         You must have `all` privileges for the **SLOs** feature in the
@@ -2095,7 +2095,7 @@ paths:
         - SLOs_apiKeyAuth: []
   /s/{spaceId}/api/observability/slos/{sloId}:
     get:
-      summary: Get a SLO
+      summary: Get an SLO
       operationId: getSloOp
       description: >
         You must have the `read` privileges for the **SLOs** feature in the
@@ -2147,7 +2147,7 @@ paths:
         - SLOs_basicAuth: []
         - SLOs_apiKeyAuth: []
     put:
-      summary: Update a SLO
+      summary: Update an SLO
       operationId: updateSloOp
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
@@ -2199,7 +2199,7 @@ paths:
         - SLOs_basicAuth: []
         - SLOs_apiKeyAuth: []
     delete:
-      summary: Delete a SLO
+      summary: Delete an SLO
       operationId: deleteSloOp
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
@@ -2242,7 +2242,7 @@ paths:
         - SLOs_apiKeyAuth: []
   /s/{spaceId}/api/observability/slos/{sloId}/enable:
     post:
-      summary: Enable a SLO
+      summary: Enable an SLO
       operationId: enableSloOp
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
@@ -2285,7 +2285,7 @@ paths:
         - SLOs_apiKeyAuth: []
   /s/{spaceId}/api/observability/slos/{sloId}/disable:
     post:
-      summary: Disable a SLO
+      summary: Disable an SLO
       operationId: disableSloOp
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
@@ -2328,7 +2328,7 @@ paths:
         - SLOs_apiKeyAuth: []
   /s/{spaceId}/api/observability/slos/{sloId}/_reset:
     post:
-      summary: Reset a SLO
+      summary: Reset an SLO
       operationId: resetSloOp
       description: >
         You must have the `write` privileges for the **SLOs** feature in the
