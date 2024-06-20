@@ -11,6 +11,9 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import type { Field, Aggregation, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
+import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
+import { EuiComboBoxWithFieldStats } from '../../../../../../../components/field_stats_flyout';
 import { FieldStatsInfoButton } from '../../../../../../../components/field_stats_flyout/field_stats_info_button';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
@@ -49,39 +52,57 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   const { handleFieldStatsButtonClick, populatedFields } = useFieldStatsTrigger();
 
   const options: EuiComboBoxOptionOption[] = useMemo(
-    () =>
-      fields.map((f) => {
+    () => {
+      const opts: DropDownOption[] = [];
+      fields.forEach((f) => {
+        const isEmpty = f.id === EVENT_RATE_FIELD_ID ? false : !populatedFields?.has(f.name);
         const aggOption: DropDownOption = {
-          isGroupLabelOption: true,
+          isGroupLabel: true,
           key: f.name,
+          searchableLabel: f.name,
           // @ts-ignore Purposefully passing label as element instead of string
           // for more robust rendering
           label: (
             <FieldStatsInfoButton
               hideTrigger={f.id === EVENT_RATE_FIELD_ID}
-              isEmpty={f.id === EVENT_RATE_FIELD_ID ? false : !populatedFields?.has(f.name)}
+              isEmpty={isEmpty}
               field={f}
               label={f.name}
               onButtonClick={handleFieldStatsButtonClick}
+              isGroupLabel={true}
             />
           ),
-          options: [],
         };
+        opts.push(aggOption);
         if (typeof f.aggs !== 'undefined') {
-          aggOption.options = f.aggs
-            .filter((a) => a.dslName !== null) // don't include aggs which have no ES equivalent
-            .map(
-              (a) =>
-                ({
-                  label: `${a.title}(${f.name})`,
-                  agg: a,
-                  field: f,
-                } as DropDownLabel)
-            )
-            .filter((o) => removeLabels.includes(o.label) === false);
+          f.aggs.forEach((a) => {
+            const label = `${a.title}(${f.name})`;
+            if (removeLabels.includes(label) === true) return;
+            if (a.dslName !== null) {
+              opts.push({
+                isEmpty: f.id === EVENT_RATE_FIELD_ID ? false : !populatedFields?.has(f.name),
+                label,
+                agg: a,
+                field: omit(f, 'aggs'),
+              });
+            }
+          });
+          //   ...f.aggs
+          //     .filter((a) => a.dslName !== null) // don't include aggs which have no ES equivalent
+          //     .map(
+          //       (a) =>
+          //         ({
+          //           label: `${a.title}(${f.name})`,
+          //           agg: a,
+          //           field: f,
+          //         } as DropDownLabel)
+          //     )
+          //     .filter((o) => removeLabels.includes(o.label) === false)
+          // );
         }
-        return aggOption;
-      }),
+      });
+      return opts;
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [handleFieldStatsButtonClick, fields, removeLabels, populatedFields?.size]
   );
@@ -97,8 +118,11 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
       isInvalid={validation.valid === false}
       data-test-subj="mlJobWizardAggSelection"
     >
-      <EuiComboBox
-        singleSelection={{ asPlainText: true }}
+      <EuiComboBoxWithFieldStats
+        ariaLabel={i18n.translate('xpack.ml.newJob.wizard.aggSelect.ariaLabel', {
+          defaultMessage: 'Select an aggregation',
+        })}
+        singleSelection={true}
         options={options}
         selectedOptions={selectedOptions}
         onChange={changeHandler}

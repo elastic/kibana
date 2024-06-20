@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import React, { useCallback } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Field } from '@kbn/ml-anomaly-utils';
+import { isDefined } from '@kbn/ml-is-defined';
 import { optionCss } from './eui_combo_box_with_field_stats';
 import { useFieldStatsFlyoutContext } from '.';
 import type { FieldForStats } from './field_stats_info_button';
@@ -35,11 +36,16 @@ export const useFieldStatsTrigger = () => {
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption, searchValue: string): ReactNode => {
       const field = (option as Option).field;
+
       return option.isGroupLabelOption || !field ? (
         option.label
       ) : (
         <FieldStatsInfoButton
-          isEmpty={populatedFields && !populatedFields.has(field.id)}
+          isEmpty={
+            isDefined(option.isEmpty)
+              ? option.isEmpty
+              : populatedFields && !populatedFields.has(field.id)
+          }
           field={field}
           label={option.label}
           onButtonClick={handleFieldStatsButtonClick}

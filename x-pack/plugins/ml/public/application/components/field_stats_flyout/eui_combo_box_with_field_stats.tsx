@@ -47,7 +47,7 @@ const OptionsListPopoverSuggestions: FC<OptionsListPopoverSuggestionsProps> = ({
     const _selectableOptions = (options ?? []).map((suggestion) => {
       return {
         ...suggestion,
-        key: suggestion.field.id,
+        key: suggestion.label ?? suggestion.field?.id,
         checked: undefined,
         // checked: selectedOptionsSet?.has(suggestion.value) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
@@ -141,9 +141,17 @@ const OptionsListPopover = ({
   const filteredOptions = useMemo(() => {
     return showEmptyFields
       ? options
-      : options.filter((option) => populatedFields?.has(option.field.id));
+      : options.filter((option) => {
+          if (option.key === 'Event rate' || option.field?.id === '__ml_event_rate_count__')
+            return true;
+          if (option.isGroupLabel)
+            return populatedFields?.has(option.key ?? option.searchableLabel);
+          if (option.field) {
+            return populatedFields?.has(option.field.id);
+          }
+          return true;
+        });
   }, [options, showEmptyFields, populatedFields]);
-
   return (
     <div
       id={`control-popover-${id}`}
