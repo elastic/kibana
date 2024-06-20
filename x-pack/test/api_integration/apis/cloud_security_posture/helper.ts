@@ -12,7 +12,12 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { SecurityService } from '../../../../../test/common/services/security/security';
-import { RoleCredentials } from '../../../../test_serverless/shared/services';
+
+export interface RoleCredentials {
+  apiKey: { id: string; name: string };
+  apiKeyHeader: { Authorization: string };
+  cookieHeader: { Cookie: string };
+}
 
 export const deleteIndex = (es: Client, indexToBeDeleted: string[]) => {
   Promise.all([
