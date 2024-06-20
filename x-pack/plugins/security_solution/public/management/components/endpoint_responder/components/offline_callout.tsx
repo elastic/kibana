@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
 import { useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { HostStatus } from '../../../../../common/endpoint/types';
@@ -21,8 +20,7 @@ interface OfflineCalloutProps {
 }
 
 export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId, hostName }) => {
-  const isAgentTypeEnabled = useMemo(() => isAgentTypeAndActionSupported(agentType), [agentType]);
-  const { data } = useGetAgentStatus(endpointId, agentType, { enabled: isAgentTypeEnabled });
+  const { data } = useGetAgentStatus(endpointId, agentType);
 
   if (data?.[endpointId].status === HostStatus.OFFLINE) {
     return (

@@ -8,7 +8,6 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { isAgentTypeAndActionSupported } from '../../../../lib/endpoint';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { EndpointPendingActions } from '../../../../../../common/endpoint/types';
 import { useGetAgentStatus } from '../../../../../management/hooks/agents/use_get_agent_status';
@@ -34,10 +33,7 @@ export const AgentStatus = React.memo(
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const isAgentTypeEnabled = useMemo(() => isAgentTypeAndActionSupported(agentType), [agentType]);
-    const { data, isLoading, isFetched } = useGetAgentStatus(agentId, agentType, {
-      enabled: isAgentTypeEnabled,
-    });
+    const { data, isLoading, isFetched } = useGetAgentStatus(agentId, agentType);
 
     const agentStatus = data?.[agentId];
     const isCurrentlyIsolated = Boolean(agentStatus?.isolated);
