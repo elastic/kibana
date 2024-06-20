@@ -7,7 +7,14 @@
 
 import React from 'react';
 import numeral from '@elastic/numeral';
-import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiTitle,
+  EuiText,
+  EuiTextColor,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import {
   ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ,
   ACTIVE_NOW_LABEL,
@@ -20,13 +27,16 @@ interface Props {
 
 export const ActiveAlertCounts = ({ activeAlertCount }: Props) => {
   const { euiTheme } = useEuiTheme();
+  const describedTextId = useGeneratedHtmlId();
 
   return (
     <>
-      <EuiText
-        color={!!activeAlertCount ? euiTheme.colors.dangerText : euiTheme.colors.successText}
-      >
-        <h3 data-test-subj={ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ}>
+      <EuiTitle size="s">
+        <EuiTextColor
+          data-test-subj={ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ}
+          color={!!activeAlertCount ? euiTheme.colors.dangerText : euiTheme.colors.successText}
+          aria-describedby={describedTextId}
+        >
           {numeral(activeAlertCount).format(ALERT_COUNT_FORMAT)}
           {!!activeAlertCount && (
             <>
@@ -34,9 +44,9 @@ export const ActiveAlertCounts = ({ activeAlertCount }: Props) => {
               <EuiIcon type="warning" ascent={10} />
             </>
           )}
-        </h3>
-      </EuiText>
-      <EuiText size="s" color="subdued">
+        </EuiTextColor>
+      </EuiTitle>
+      <EuiText size="s" color="subdued" id={describedTextId}>
         {ACTIVE_NOW_LABEL}
       </EuiText>
     </>
