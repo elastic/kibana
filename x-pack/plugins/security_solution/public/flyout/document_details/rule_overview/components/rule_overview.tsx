@@ -8,11 +8,11 @@ import React, { memo, useState, useEffect } from 'react';
 import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { usePreviewPanelContext } from '../context';
+import { useRuleOverviewPanelContext } from '../context';
 import { ExpandableSection } from '../../right/components/expandable_section';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { getStepsData } from '../../../../detections/pages/detection_engine/rules/helpers';
-import { RulePreviewTitle } from './rule_preview_title';
+import { RuleTitle } from './rule_title';
 import { RuleAboutSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_about_section';
 import { RuleScheduleSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_schedule_section';
 import { RuleDefinitionSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_definition_section';
@@ -20,12 +20,12 @@ import { StepRuleActionsReadOnly } from '../../../../detection_engine/rule_creat
 import { FlyoutLoading } from '../../../shared/components/flyout_loading';
 import { FlyoutError } from '../../../shared/components/flyout_error';
 import {
-  RULE_PREVIEW_BODY_TEST_ID,
-  RULE_PREVIEW_ABOUT_TEST_ID,
-  RULE_PREVIEW_DEFINITION_TEST_ID,
-  RULE_PREVIEW_SCHEDULE_TEST_ID,
-  RULE_PREVIEW_ACTIONS_TEST_ID,
-  RULE_PREVIEW_LOADING_TEST_ID,
+  RULE_OVERVIEW_BODY_TEST_ID,
+  RULE_OVERVIEW_ABOUT_TEST_ID,
+  RULE_OVERVIEW_DEFINITION_TEST_ID,
+  RULE_OVERVIEW_SCHEDULE_TEST_ID,
+  RULE_OVERVIEW_ACTIONS_TEST_ID,
+  RULE_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
@@ -47,8 +47,8 @@ const panelViewStyle = css`
 /**
  * Rule summary on a preview panel on top of the right section of expandable flyout
  */
-export const RulePreview = memo(() => {
-  const { ruleId } = usePreviewPanelContext();
+export const RuleOverview = memo(() => {
+  const { ruleId } = useRuleOverviewPanelContext();
   const [rule, setRule] = useState<RuleResponse | null>(null);
   const {
     rule: maybeRule,
@@ -71,15 +71,15 @@ export const RulePreview = memo(() => {
   const hasActions = ruleActionsData != null && (hasNotificationActions || hasResponseActions);
 
   return ruleLoading ? (
-    <FlyoutLoading data-test-subj={RULE_PREVIEW_LOADING_TEST_ID} />
+    <FlyoutLoading data-test-subj={RULE_OVERVIEW_LOADING_TEST_ID} />
   ) : rule ? (
     <EuiPanel
       hasBorder={false}
       hasShadow={false}
-      data-test-subj={RULE_PREVIEW_BODY_TEST_ID}
+      data-test-subj={RULE_OVERVIEW_BODY_TEST_ID}
       className="eui-yScroll"
     >
-      <RulePreviewTitle rule={rule} isSuppressed={!isExistingRule} />
+      <RuleTitle rule={rule} isSuppressed={!isExistingRule} />
       <EuiHorizontalRule margin="s" />
       <EuiSpacer size="s" />
       <ExpandableSection
@@ -90,7 +90,7 @@ export const RulePreview = memo(() => {
           />
         }
         expanded
-        data-test-subj={RULE_PREVIEW_ABOUT_TEST_ID}
+        data-test-subj={RULE_OVERVIEW_ABOUT_TEST_ID}
       >
         <EuiText size="s">{rule.description}</EuiText>
         <EuiSpacer size="s" />
@@ -112,7 +112,7 @@ export const RulePreview = memo(() => {
           />
         }
         expanded={false}
-        data-test-subj={RULE_PREVIEW_DEFINITION_TEST_ID}
+        data-test-subj={RULE_OVERVIEW_DEFINITION_TEST_ID}
       >
         <RuleDefinitionSection
           rule={rule}
@@ -130,7 +130,7 @@ export const RulePreview = memo(() => {
           />
         }
         expanded={false}
-        data-test-subj={RULE_PREVIEW_SCHEDULE_TEST_ID}
+        data-test-subj={RULE_OVERVIEW_SCHEDULE_TEST_ID}
       >
         <RuleScheduleSection rule={rule} type="row" rowGutterSize="s" className={panelViewStyle} />
       </ExpandableSection>
@@ -144,7 +144,7 @@ export const RulePreview = memo(() => {
             />
           }
           expanded={false}
-          data-test-subj={RULE_PREVIEW_ACTIONS_TEST_ID}
+          data-test-subj={RULE_OVERVIEW_ACTIONS_TEST_ID}
         >
           <StepRuleActionsReadOnly addPadding={false} defaultValues={ruleActionsData} />
         </ExpandableSection>
@@ -157,4 +157,4 @@ export const RulePreview = memo(() => {
   );
 });
 
-RulePreview.displayName = 'RulePreview';
+RuleOverview.displayName = 'RuleOverview';

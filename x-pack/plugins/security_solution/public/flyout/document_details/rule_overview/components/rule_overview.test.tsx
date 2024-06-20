@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { act, render } from '@testing-library/react';
-import { RulePreview } from './rule_preview';
-import { PreviewPanelContext } from '../context';
+import { RuleOverview } from './rule_overview';
+import { RuleOverviewPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
 import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
@@ -23,16 +23,16 @@ import {
 } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import {
-  RULE_PREVIEW_BODY_TEST_ID,
-  RULE_PREVIEW_ABOUT_HEADER_TEST_ID,
-  RULE_PREVIEW_ABOUT_CONTENT_TEST_ID,
-  RULE_PREVIEW_DEFINITION_HEADER_TEST_ID,
-  RULE_PREVIEW_DEFINITION_CONTENT_TEST_ID,
-  RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID,
-  RULE_PREVIEW_SCHEDULE_CONTENT_TEST_ID,
-  RULE_PREVIEW_ACTIONS_HEADER_TEST_ID,
-  RULE_PREVIEW_ACTIONS_CONTENT_TEST_ID,
-  RULE_PREVIEW_LOADING_TEST_ID,
+  RULE_OVERVIEW_BODY_TEST_ID,
+  RULE_OVERVIEW_ABOUT_HEADER_TEST_ID,
+  RULE_OVERVIEW_ABOUT_CONTENT_TEST_ID,
+  RULE_OVERVIEW_DEFINITION_HEADER_TEST_ID,
+  RULE_OVERVIEW_DEFINITION_CONTENT_TEST_ID,
+  RULE_OVERVIEW_SCHEDULE_HEADER_TEST_ID,
+  RULE_OVERVIEW_SCHEDULE_CONTENT_TEST_ID,
+  RULE_OVERVIEW_ACTIONS_HEADER_TEST_ID,
+  RULE_OVERVIEW_ACTIONS_CONTENT_TEST_ID,
+  RULE_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
 
 jest.mock('../../../../common/lib/kibana');
@@ -58,9 +58,9 @@ const renderRulePreview = () =>
     <TestProviders>
       <ThemeProvider theme={mockTheme}>
         <TestProvider>
-          <PreviewPanelContext.Provider value={contextValue}>
-            <RulePreview />
-          </PreviewPanelContext.Provider>
+          <RuleOverviewPanelContext.Provider value={contextValue}>
+            <RuleOverview />
+          </RuleOverviewPanelContext.Provider>
         </TestProvider>
       </ThemeProvider>
     </TestProviders>
@@ -88,19 +88,19 @@ describe('<RulePreview />', () => {
     const { getByTestId } = renderRulePreview();
 
     await act(async () => {
-      expect(getByTestId(RULE_PREVIEW_BODY_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(RULE_PREVIEW_ABOUT_HEADER_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(RULE_PREVIEW_ABOUT_HEADER_TEST_ID)).toHaveTextContent('About');
-      expect(getByTestId(RULE_PREVIEW_ABOUT_CONTENT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(RULE_PREVIEW_DEFINITION_HEADER_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(RULE_PREVIEW_DEFINITION_HEADER_TEST_ID)).toHaveTextContent('Definition');
-      expect(getByTestId(RULE_PREVIEW_DEFINITION_CONTENT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID)).toHaveTextContent('Schedule');
-      expect(getByTestId(RULE_PREVIEW_SCHEDULE_CONTENT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(RULE_PREVIEW_ACTIONS_HEADER_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(RULE_PREVIEW_ACTIONS_HEADER_TEST_ID)).toHaveTextContent('Actions');
-      expect(getByTestId(RULE_PREVIEW_ACTIONS_CONTENT_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_OVERVIEW_BODY_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_OVERVIEW_ABOUT_HEADER_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_OVERVIEW_ABOUT_HEADER_TEST_ID)).toHaveTextContent('About');
+      expect(getByTestId(RULE_OVERVIEW_ABOUT_CONTENT_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_OVERVIEW_DEFINITION_HEADER_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_OVERVIEW_DEFINITION_HEADER_TEST_ID)).toHaveTextContent('Definition');
+      expect(getByTestId(RULE_OVERVIEW_DEFINITION_CONTENT_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_OVERVIEW_SCHEDULE_HEADER_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_OVERVIEW_SCHEDULE_HEADER_TEST_ID)).toHaveTextContent('Schedule');
+      expect(getByTestId(RULE_OVERVIEW_SCHEDULE_CONTENT_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_OVERVIEW_ACTIONS_HEADER_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_OVERVIEW_ACTIONS_HEADER_TEST_ID)).toHaveTextContent('Actions');
+      expect(getByTestId(RULE_OVERVIEW_ACTIONS_CONTENT_TEST_ID)).toBeInTheDocument();
     });
   });
 
@@ -116,8 +116,8 @@ describe('<RulePreview />', () => {
     const { queryByTestId } = renderRulePreview();
 
     await act(async () => {
-      expect(queryByTestId(RULE_PREVIEW_ACTIONS_HEADER_TEST_ID)).not.toBeInTheDocument();
-      expect(queryByTestId(RULE_PREVIEW_ACTIONS_CONTENT_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(RULE_OVERVIEW_ACTIONS_HEADER_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(RULE_OVERVIEW_ACTIONS_CONTENT_TEST_ID)).not.toBeInTheDocument();
     });
   });
 
@@ -126,7 +126,7 @@ describe('<RulePreview />', () => {
     mockGetStepsData.mockReturnValue({});
     const { getByTestId } = renderRulePreview();
     await act(async () => {
-      expect(getByTestId(RULE_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
     });
   });
 
@@ -135,7 +135,7 @@ describe('<RulePreview />', () => {
     mockGetStepsData.mockReturnValue({});
     const { queryByTestId, getByText } = renderRulePreview();
     await act(async () => {
-      expect(queryByTestId(RULE_PREVIEW_BODY_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(RULE_OVERVIEW_BODY_TEST_ID)).not.toBeInTheDocument();
       expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
     });
   });

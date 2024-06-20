@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { getDataTestSubjectSelector } from '../../helpers/common';
+import { PREFIX } from '../../shared/test_ids';
 
-export const DOCUMENT_DETAILS_FLYOUT_ALERT_REASON_PREVIEW_CONTAINER = getDataTestSubjectSelector(
-  'securitySolutionFlyoutAlertReasonBody'
-);
+export const ALERT_REASON_BODY_TEST_ID = `${PREFIX}AlertReasonBody` as const;

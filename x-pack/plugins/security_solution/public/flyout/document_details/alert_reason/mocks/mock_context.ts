@@ -6,16 +6,14 @@
  */
 
 import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
-import type { PreviewPanelContext } from '../context';
+import type { AlertReasonPanelContext } from '../context';
 
 /**
  * Mock contextValue for right panel context
  */
-export const mockContextValue: PreviewPanelContext = {
+export const mockContextValue: AlertReasonPanelContext = {
   eventId: 'eventId',
   indexName: 'index',
   scopeId: 'scopeId',
-  ruleId: '',
-  indexPattern: { fields: [], title: 'test index' },
   dataAsNestedObject: mockDataAsNestedObject,
 };

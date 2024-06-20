@@ -9,19 +9,19 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { mockContextValue } from '../mocks/mock_context';
-import { PreviewPanelContext } from '../context';
-import { RULE_PREVIEW_FOOTER_TEST_ID, RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID } from './test_ids';
-import { RulePreviewFooter } from './rule_preview_footer';
+import { RuleOverviewPanelContext } from '../context';
+import { RULE_OVERVIEW_FOOTER_TEST_ID, RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID } from './test_ids';
+import { RuleFooter } from './footer';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 
 jest.mock('../../shared/hooks/use_rule_details_link');
 
-const renderRulePreviewFooter = (contextValue: PreviewPanelContext) =>
+const renderRulePreviewFooter = (contextValue: RuleOverviewPanelContext) =>
   render(
     <TestProviders>
-      <PreviewPanelContext.Provider value={contextValue}>
-        <RulePreviewFooter />
-      </PreviewPanelContext.Provider>
+      <RuleOverviewPanelContext.Provider value={contextValue}>
+        <RuleFooter />
+      </RuleOverviewPanelContext.Provider>
     </TestProviders>
   );
 
@@ -31,9 +31,9 @@ describe('<RulePreviewFooter />', () => {
 
     const { getByTestId } = renderRulePreviewFooter(mockContextValue);
 
-    expect(getByTestId(RULE_PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(RULE_OVERVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID)).toHaveTextContent(
       'Show rule details'
     );
   });
@@ -43,7 +43,7 @@ describe('<RulePreviewFooter />', () => {
 
     const { queryByTestId } = renderRulePreviewFooter(mockContextValue);
 
-    expect(queryByTestId(RULE_PREVIEW_FOOTER_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RULE_OVERVIEW_FOOTER_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID)).not.toBeInTheDocument();
   });
 });
