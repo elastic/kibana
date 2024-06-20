@@ -39,7 +39,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
-    "@kbn/analytics-client",
     "@kbn/console-plugin"
   ],
   "exclude": [

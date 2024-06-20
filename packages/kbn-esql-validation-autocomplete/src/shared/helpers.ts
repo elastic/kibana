@@ -17,13 +17,14 @@ import type {
   ESQLSource,
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
+import { ESQLInlineCast } from '@kbn/esql-ast/src/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { timeUnits, chronoLiterals } from '../definitions/literals';
 import {
   byOption,
   metadataOption,
@@ -35,14 +36,14 @@ import {
 import type {
   CommandDefinition,
   CommandOptionsDefinition,
-  FunctionArgSignature,
+  FunctionParameter,
   FunctionDefinition,
   FunctionParameterType,
   FunctionReturnType,
-  SignatureArgType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
+import { esqlToKibanaType } from './esql_to_kibana_type';
 import type { ReasonTypes } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -74,6 +75,10 @@ export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
 
 export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
   return isSingleItem(arg) && arg.type === 'literal';
+}
+
+export function isInlineCastItem(arg: ESQLAstItem): arg is ESQLInlineCast {
+  return isSingleItem(arg) && arg.type === 'inlineCast';
 }
 
 export function isTimeIntervalItem(arg: ESQLAstItem): arg is ESQLTimeInterval {
@@ -235,11 +240,14 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
   return ['string', 'date'].includes(argType);
 }
 
-export function getColumnHit(
-  columnName: string,
-  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>,
-  position?: number
+/**
+ * This function returns the variable or field matching a column
+ */
+export function lookupColumn(
+  column: ESQLColumn,
+  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
+  const columnName = getQuotedColumnName(column);
   return fields.get(columnName) || variables.get(columnName)?.[0];
 }
 
@@ -350,7 +358,7 @@ export function getAllArrayTypes(
         types.push(subArg.literalType);
       }
       if (subArg.type === 'column') {
-        const hit = getColumnHit(subArg.name, references);
+        const hit = lookupColumn(subArg, references);
         types.push(hit?.type || 'unsupported');
       }
       if (subArg.type === 'timeInterval') {
@@ -368,7 +376,7 @@ export function getAllArrayTypes(
 }
 
 export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
-  return timeLiterals.some(({ name }) => name === item.unit.toLowerCase());
+  return timeUnits.some((unit) => unit === item.unit.toLowerCase());
 }
 
 /**
@@ -377,7 +385,7 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
  *
  * TODO - Consider merging with isEqualType to create a unified arg validation function
  */
-export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionArgSignature) {
+export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
   return (
     arg.literalType === 'string' &&
     argDef.literalOptions &&
@@ -388,17 +396,16 @@ export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionArgSignat
 }
 
 /**
- * Checks if an AST argument is of the correct type
+ * Checks if an AST function argument is of the correct type
  * given the definition.
  */
-export function isEqualType(
+export function checkFunctionArgMatchesDefinition(
   arg: ESQLSingleAstItem,
-  argDef: SignatureArgType,
+  parameterDefinition: FunctionParameter,
   references: ReferenceMaps,
-  parentCommand?: string,
-  nameHit?: string
+  parentCommand?: string
 ) {
-  const argType = 'innerType' in argDef && argDef.innerType ? argDef.innerType : argDef.type;
+  const argType = parameterDefinition.type;
   if (argType === 'any') {
     return true;
   }
@@ -417,11 +424,7 @@ export function isEqualType(
     return argType === 'time_literal' && inKnownTimeInterval(arg);
   }
   if (arg.type === 'column') {
-    if (argType === 'column') {
-      // anything goes, so avoid any effort here
-      return true;
-    }
-    const hit = getColumnHit(nameHit ?? arg.name, references);
+    const hit = lookupColumn(arg, references);
     const validHit = hit;
     if (!validHit) {
       return false;
@@ -429,6 +432,10 @@ export function isEqualType(
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     // if final type is of type any make it pass for now
     return wrappedTypes.some((ct) => ['any', 'null'].includes(ct) || argType === ct);
+  }
+  if (arg.type === 'inlineCast') {
+    // TODO - remove with https://github.com/elastic/kibana/issues/174710
+    return argType === esqlToKibanaType(arg.castType);
   }
 }
 
@@ -499,25 +506,48 @@ export function hasCCSSource(name: string) {
   return name.includes(':');
 }
 
-export function columnExists(
+/**
+ * This will return the name without any quotes.
+ *
+ * E.g. "`bytes`" will become "bytes"
+ *
+ * @param column
+ * @returns
+ */
+export const getUnquotedColumnName = (column: ESQLColumn) => column.name;
+
+/**
+ * This returns the name with any quotes that were present.
+ *
+ * E.g. "`bytes`" will be "`bytes`"
+ *
+ * @param column
+ * @returns
+ */
+export const getQuotedColumnName = (column: ESQLColumn) =>
+  column.quoted ? column.text : column.name;
+
+/**
+ * TODO - consider calling lookupColumn under the hood of this function. Seems like they should really do the same thing.
+ */
+export function getColumnExists(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ) {
-  if (fields.has(column.name) || variables.has(column.name)) {
-    return { hit: true, nameHit: column.name };
-  }
-  if (column.quoted) {
-    const originalName = column.text;
-    if (variables.has(originalName)) {
-      return { hit: true, nameHit: originalName };
+  const namesToCheck = [getUnquotedColumnName(column), getQuotedColumnName(column)];
+
+  for (const name of namesToCheck) {
+    if (fields.has(name) || variables.has(name)) {
+      return true;
+    }
+
+    // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
+    if (Boolean(fuzzySearch(name, fields.keys()) || fuzzySearch(name, variables.keys()))) {
+      return true;
     }
   }
-  if (
-    Boolean(fuzzySearch(column.name, fields.keys()) || fuzzySearch(column.name, variables.keys()))
-  ) {
-    return { hit: true, nameHit: column.name };
-  }
-  return { hit: false };
+
+  return false;
 }
 
 export function sourceExists(index: string, sources: Set<string>) {
@@ -541,3 +571,6 @@ export function shouldBeQuotedText(
 ) {
   return dashSupported ? /[^a-zA-Z\d_\.@-]/.test(text) : /[^a-zA-Z\d_\.@]/.test(text);
 }
+
+export const isAggFunction = (arg: ESQLFunction): boolean =>
+  getFunctionDefinition(arg.name)?.type === 'agg';
