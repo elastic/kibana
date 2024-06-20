@@ -37,7 +37,7 @@ export const LogsDeprecationCallout = () => {
         defaultMessage: 'Discover a new Logs Exploration experience!',
       })}
       color="warning"
-      iconType="pin"
+      iconType="iInCircle"
       heading="h2"
     >
       <p>
@@ -52,6 +52,7 @@ export const LogsDeprecationCallout = () => {
         })}
       </p>
       <EuiButton
+        fill
         data-test-subj="infraLogsDeprecationCalloutTryLogsExplorerButton"
         color="warning"
         {...logsExplorerLinkProps}
