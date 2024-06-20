@@ -241,6 +241,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async parseDatasetTable() {
+      await this.waitUntilTableLoaded();
       const table = await this.getDatasetsTable();
       return this.parseTable(table, [
         '0',
@@ -255,6 +256,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async parseDegradedFieldTable() {
+      await this.waitUntilTableInFlyoutLoaded();
       const table = await this.getDatasetQualityFlyoutDegradedFieldTable();
       return this.parseTable(table, ['Field', 'Docs count', 'Last Occurrence']);
     },
