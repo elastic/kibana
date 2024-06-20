@@ -730,7 +730,7 @@ export const UnifiedDataTable = ({
           uiSettings,
           toastNotifications,
         },
-        hasEditDataViewPermission: () => 
+        hasEditDataViewPermission: () =>
           Boolean(dataViewFieldEditor?.userPermissions?.editIndexPattern()),
         valueToStringConverter,
         onFilter,
