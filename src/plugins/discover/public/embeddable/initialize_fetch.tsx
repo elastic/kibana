@@ -8,6 +8,7 @@
 
 import { BehaviorSubject, combineLatest, lastValueFrom, switchMap } from 'rxjs';
 
+import { KibanaExecutionContext } from '@kbn/core/types';
 import {
   buildDataTableRecord,
   SEARCH_EMBEDDABLE_TYPE,
@@ -27,14 +28,13 @@ import {
   PublishesDataViews,
   PublishesPanelTitle,
   PublishesSavedObjectId,
-  PublishesTimeslice,
 } from '@kbn/presentation-publishing';
+import { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 
-import { KibanaExecutionContext } from '@kbn/core/types';
 import { createDataViewDataSource, createEsqlDataSource } from '../../common/data_sources';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { DiscoverServices } from '../build_services';
@@ -46,12 +46,13 @@ import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
   PublishesDataViews &
-  PublishesPanelTitle & {
+  PublishesPanelTitle &
+  PublishesWritableTimeRange & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
     dataLoading: BehaviorSubject<boolean | undefined>;
     blockingError: BehaviorSubject<Error | undefined>;
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
-  } & HasParentApi<PublishesTimeslice>;
+  } & HasParentApi;
 
 export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): boolean => {
   const query = savedSearch.searchSource.getField('query');

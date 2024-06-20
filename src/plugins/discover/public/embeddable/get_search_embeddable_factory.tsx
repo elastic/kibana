@@ -93,6 +93,7 @@ export const getSearchEmbeddableFactory = ({
         api: {
           parentApi,
           ...titlesApi,
+          ...timeRange.api,
           savedSearch$: searchEmbeddable.api.savedSearch$,
           dataViews: searchEmbeddable.api.dataViews,
           savedObjectId: savedObjectId$,
