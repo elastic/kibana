@@ -149,13 +149,13 @@ export const CloudSecurityDataTable = ({
   const settings = useMemo(() => {
     return {
       columns: Object.keys(persistedSettings?.columns as UnifiedDataTableSettings).reduce(
-        (columnSettings, column) => {
+        (columnSettings, columnId) => {
           const newColumn: UnifiedDataTableSettingsColumn = {
-            ..._.pick(persistedSettings?.columns?.[column], ['width']),
-            display: columnHeaders?.[column],
+            ..._.pick(persistedSettings?.columns?.[columnId], ['width']),
+            display: columnHeaders?.[columnId],
           };
 
-          return { ...columnSettings, [column]: newColumn };
+          return { ...columnSettings, [columnId]: newColumn };
         },
         {} as UnifiedDataTableSettings['columns']
       ),
