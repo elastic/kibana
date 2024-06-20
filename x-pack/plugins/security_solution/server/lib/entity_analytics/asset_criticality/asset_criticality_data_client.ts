@@ -87,7 +87,7 @@ export class AssetCriticalityDataClient {
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),
       ignore_unavailable: true,
-      body: { query },
+      query,
       size: Math.min(size ?? DEFAULT_CRITICALITY_RESPONSE_SIZE, MAX_CRITICALITY_RESPONSE_SIZE),
       from,
       sort,
