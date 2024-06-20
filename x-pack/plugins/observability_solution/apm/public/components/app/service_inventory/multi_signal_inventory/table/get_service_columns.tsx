@@ -29,19 +29,7 @@ import { ITableColumn } from '../../../../shared/managed_table';
 import { NotAvailableApmMetrics } from '../../../../shared/not_available_apm_metrics';
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
-
-export enum SignalTypes {
-  METRICS = 'metrics',
-  LOGS = 'logs',
-}
-export interface EntityServiceListItem {
-  signalTypes: SignalTypes[];
-  metrics: EntityMetrics;
-  environments: string[];
-  serviceName: string;
-  agentName: AgentName;
-}
-
+import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
 export function getServiceColumns({
   query,
   breakpoints,

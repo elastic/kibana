@@ -6,13 +6,14 @@
  */
 
 import { mapValues } from 'lodash';
-import { EntityMetrics, MergedServiceEntities } from '../types';
+import { EntityMetrics } from '../../../../common/entities/types';
+import { MergedServiceEntities } from '../types';
 
 export function calculateAvgMetrics(entities: MergedServiceEntities[]) {
   return entities.map((entity) => {
     const transformedMetrics = mergeMetrics(entity.metrics);
-    const averages = mapValues(transformedMetrics, (values) => {
-      const sum = values.reduce((acc, val) => acc + (val !== null ? val : 0), 0);
+    const averages = mapValues(transformedMetrics, (values: number[]) => {
+      const sum = values.reduce((acc: number, val: number) => acc + (val !== null ? val : 0), 0);
       return sum / values.length;
     });
 
@@ -22,20 +23,23 @@ export function calculateAvgMetrics(entities: MergedServiceEntities[]) {
     };
   });
 }
+type MetricsKey = keyof EntityMetrics;
 
 export function mergeMetrics(metrics: EntityMetrics[]) {
-  const mergedMetrics: { [key: string]: number[] } = {};
-  metrics.forEach((metric) => {
-    Object.keys(metric).forEach((key) => {
-      const value = metric[key as keyof EntityMetrics];
-      if (value) {
-        if (!mergedMetrics[key]) {
-          mergedMetrics[key] = [];
-        }
-        mergedMetrics[key].push(value);
-      }
-    });
-  });
+  return metrics.reduce((acc, metric) => {
+    for (const key in metric) {
+      if (metric.hasOwnProperty(key)) {
+        const metricsKey = key as MetricsKey;
 
-  return mergedMetrics;
+        const value = metric[metricsKey];
+        if (value) {
+          if (!acc[metricsKey]) {
+            acc[metricsKey] = [];
+          }
+          acc[metricsKey].push(value);
+        }
+      }
+    }
+    return acc;
+  }, {} as { [key in MetricsKey]: number[] });
 }

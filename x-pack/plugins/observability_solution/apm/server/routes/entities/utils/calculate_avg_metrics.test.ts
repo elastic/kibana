@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EntityMetrics, SignalTypes } from '../types';
+import { EntityMetrics, SignalTypes } from '../../../../common/entities/types';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { calculateAvgMetrics, mergeMetrics } from './calculate_avg_metrics';
 
 describe('calculateAverageMetrics', () => {
   it('calculates average metrics', () => {
     const entities = [
       {
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: [SignalTypes.METRICS, SignalTypes.LOGS],
         environments: [],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
@@ -35,7 +36,7 @@ describe('calculateAverageMetrics', () => {
         serviceName: 'service-1',
       },
       {
-        agentName: 'java',
+        agentName: 'java' as AgentName,
         signalTypes: [SignalTypes.METRICS],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -77,7 +78,7 @@ describe('calculateAverageMetrics', () => {
         serviceName: 'service-1',
       },
       {
-        agentName: 'java',
+        agentName: 'java' as AgentName,
         signalTypes: [SignalTypes.METRICS],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -95,7 +96,7 @@ describe('calculateAverageMetrics', () => {
   it('calculates average metrics with null', () => {
     const entities = [
       {
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: [SignalTypes.METRICS],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',

@@ -4,18 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LogsRatesMetrics } from '@kbn/logs-data-access-plugin/server';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-
-export interface EntityMetrics extends TraceMetrics, LogsRatesMetrics {}
-
-export interface EntityMetrics {
-  latency: number;
-  throughput: number;
-  failedTransactionRate: number;
-  logRatePerMinute: number;
-  logErrorRate: number | null;
-}
+import { SignalTypes, EntityMetrics } from '../../../common/entities/types';
 
 export interface Entity {
   id: string;

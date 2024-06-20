@@ -6,13 +6,14 @@
  */
 
 import { mergeEntities } from './merge_entities';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 
 describe('mergeEntities', () => {
   it('modifies one service', () => {
     const entities = [
       {
         serviceName: 'service-1',
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName as AgentName,
         signalTypes: ['metrics', 'logs'],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -31,7 +32,7 @@ describe('mergeEntities', () => {
     const result = mergeEntities({ entities });
     expect(result).toEqual([
       {
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName as AgentName,
         signalTypes: ['metrics', 'logs'],
         environments: ['test'],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -53,7 +54,7 @@ describe('mergeEntities', () => {
     const entities = [
       {
         serviceName: 'service-1',
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName as AgentName,
         signalTypes: ['foo'],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -71,7 +72,7 @@ describe('mergeEntities', () => {
       },
       {
         serviceName: 'service-1',
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName as AgentName,
         signalTypes: ['bar'],
         entity: {
           latestTimestamp: '2024-03-05T10:34:40.810Z',
@@ -88,7 +89,7 @@ describe('mergeEntities', () => {
       },
       {
         serviceName: 'service-2',
-        agentName: 'java',
+        agentName: 'java' as AgentName,
         signalTypes: ['baz'],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -105,7 +106,7 @@ describe('mergeEntities', () => {
       },
       {
         serviceName: 'service-2',
-        agentName: 'java',
+        agentName: 'java' as AgentName,
         signalTypes: ['baz'],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -125,7 +126,7 @@ describe('mergeEntities', () => {
     const result = mergeEntities({ entities });
     expect(result).toEqual([
       {
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: ['foo', 'bar'],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
@@ -148,7 +149,7 @@ describe('mergeEntities', () => {
         serviceName: 'service-1',
       },
       {
-        agentName: 'java',
+        agentName: 'java' as AgentName,
         signalTypes: ['baz'],
         environments: ['env-service-3', 'env-service-4'],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -176,7 +177,7 @@ describe('mergeEntities', () => {
     const entities = [
       {
         serviceName: 'service-1',
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: ['metrics', 'logs'],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -193,7 +194,7 @@ describe('mergeEntities', () => {
       },
       {
         serviceName: 'service-1',
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: ['metrics', 'logs'],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -210,7 +211,7 @@ describe('mergeEntities', () => {
       },
       {
         serviceName: 'service-1',
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: ['foo'],
         entity: {
           latestTimestamp: '2024-23-05T10:34:40.810Z',
@@ -229,7 +230,7 @@ describe('mergeEntities', () => {
     const result = mergeEntities({ entities });
     expect(result).toEqual([
       {
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: ['metrics', 'logs', 'foo'],
         environments: ['test', 'prod'],
         latestTimestamp: '2024-23-05T10:34:40.810Z',
@@ -264,7 +265,7 @@ describe('mergeEntities', () => {
     const entity = [
       {
         serviceName: 'service-1',
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: [],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -283,7 +284,7 @@ describe('mergeEntities', () => {
     const entityResult = mergeEntities({ entities: entity });
     expect(entityResult).toEqual([
       {
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: [],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -303,7 +304,7 @@ describe('mergeEntities', () => {
     const entities = [
       {
         serviceName: 'service-1',
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: [],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -320,7 +321,7 @@ describe('mergeEntities', () => {
       },
       {
         serviceName: 'service-1',
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: [],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -339,7 +340,7 @@ describe('mergeEntities', () => {
     const result = mergeEntities({ entities });
     expect(result).toEqual([
       {
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: [],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -368,7 +369,7 @@ describe('mergeEntities', () => {
     const entity = [
       {
         serviceName: 'service-1',
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: [],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -387,7 +388,7 @@ describe('mergeEntities', () => {
     const entityResult = mergeEntities({ entities: entity });
     expect(entityResult).toEqual([
       {
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: [],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -407,7 +408,7 @@ describe('mergeEntities', () => {
     const entities = [
       {
         serviceName: 'service-1',
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: [],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -424,7 +425,7 @@ describe('mergeEntities', () => {
       },
       {
         serviceName: 'service-1',
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: [],
         entity: {
           latestTimestamp: '2024-06-05T10:34:40.810Z',
@@ -443,7 +444,7 @@ describe('mergeEntities', () => {
     const result = mergeEntities({ entities });
     expect(result).toEqual([
       {
-        agentName: 'nodejs',
+        agentName: 'nodejs' as AgentName,
         signalTypes: [],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',

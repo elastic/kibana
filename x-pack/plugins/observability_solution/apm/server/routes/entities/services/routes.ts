@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { EntityServiceListItem } from '../../../../public/components/app/service_inventory/multi_signal_inventory/table/get_service_columns';
+import { EntityServiceListItem } from '../../../../common/entities/types';
 import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
