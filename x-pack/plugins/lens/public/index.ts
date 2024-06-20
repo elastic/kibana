@@ -125,3 +125,5 @@ export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 export type { LensPublicStart, LensPublicSetup, LensSuggestionsApi } from './plugin';
 
 export const plugin = () => new LensPlugin();
+
+export { USER_MESSAGE_IDS } from './user_messages_ids';
