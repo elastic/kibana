@@ -86,6 +86,7 @@ export const getFieldStatsChartEmbeddableFactory = (
 ) => {
   const factory: ReactEmbeddableFactory<
     FieldStatisticsTableEmbeddableState,
+    FieldStatisticsTableEmbeddableState,
     FieldStatisticsTableEmbeddableApi
   > = {
     type: FIELD_STATS_EMBEDDABLE_TYPE,
