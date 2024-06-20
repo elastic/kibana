@@ -60,7 +60,7 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
   return {
     label: fn.name,
-    text: hasArgs ? `${fn.name} $0` : fn.name,
+    text: hasArgs ? `${fn.name.toUpperCase()} $0` : fn.name.toUpperCase(),
     asSnippet: hasArgs,
     kind: 'Operator',
     detail: fn.description,
