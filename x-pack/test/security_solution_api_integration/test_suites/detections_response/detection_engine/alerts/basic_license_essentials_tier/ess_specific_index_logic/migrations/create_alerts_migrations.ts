@@ -70,11 +70,14 @@ export default ({ getService }: FtrProviderContext): void => {
       // Finalize the migration after each test so that the .siem-signals alias gets added to the migrated index -
       // this allows deleteSignalsIndex to find and delete the migrated index
       await sleep(5000); // Allow the migration to complete
-      await supertest
-        .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-        .set('kbn-xsrf', 'true')
-        .send({ migration_ids: createdMigrations.map((m) => m.migration_id) })
-        .expect(200);
+
+      if (createdMigrations.length > 0) {
+        await supertest
+          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ migration_ids: createdMigrations.map((m) => m.migration_id) })
+          .expect(200);
+      }
 
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
