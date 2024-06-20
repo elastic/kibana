@@ -23,6 +23,8 @@ interface ResultBucket {
   count: number;
 }
 
+const SIZE_LIMIT = 10000;
+
 export async function getDegradedDocsPaginated(options: {
   esClient: ElasticsearchClient;
   type?: DataStreamType;
@@ -65,7 +67,7 @@ export async function getDegradedDocsPaginated(options: {
     datasets: {
       composite: {
         ...(afterKey ? { after: afterKey } : {}),
-        size: 10000,
+        size: SIZE_LIMIT,
         sources: [
           { dataset: { terms: { field: 'data_stream.dataset' } } },
           { namespace: { terms: { field: 'data_stream.namespace' } } },
@@ -99,9 +101,10 @@ export async function getDegradedDocsPaginated(options: {
       aggs: aggs(after?.docsCount),
     },
   ]);
+  const [degradedDocsResponse, totalDocsResponse] = response.responses;
 
   const currDegradedDocs =
-    response.responses[0].aggregations?.datasets.buckets.map((bucket) => ({
+    degradedDocsResponse.aggregations?.datasets.buckets.map((bucket) => ({
       dataset: `${type}-${bucket.key.dataset}-${bucket.key.namespace}`,
       count: bucket.doc_count,
     })) ?? [];
@@ -109,7 +112,7 @@ export async function getDegradedDocsPaginated(options: {
   const degradedDocs = [...prevResults.degradedDocs, ...currDegradedDocs];
 
   const currTotalDocs =
-    response.responses[1].aggregations?.datasets.buckets.map((bucket) => ({
+    totalDocsResponse.aggregations?.datasets.buckets.map((bucket) => ({
       dataset: `${type}-${bucket.key.dataset}-${bucket.key.namespace}`,
       count: bucket.doc_count,
     })) ?? [];
@@ -117,8 +120,8 @@ export async function getDegradedDocsPaginated(options: {
   const docsCount = [...prevResults.docsCount, ...currTotalDocs];
 
   if (
-    response.responses[0].aggregations?.datasets.after_key ||
-    response.responses[1].aggregations?.datasets.after_key
+    totalDocsResponse.aggregations?.datasets.after_key &&
+    totalDocsResponse.aggregations?.datasets.buckets.length === SIZE_LIMIT
   ) {
     return getDegradedDocsPaginated({
       esClient,
@@ -128,12 +131,12 @@ export async function getDegradedDocsPaginated(options: {
       datasetQuery,
       after: {
         degradedDocs:
-          (response.responses[0].aggregations?.datasets.after_key as {
+          (degradedDocsResponse.aggregations?.datasets.after_key as {
             dataset: string;
             namespace: string;
           }) || after?.degradedDocs,
         docsCount:
-          (response.responses[1].aggregations?.datasets.after_key as {
+          (totalDocsResponse.aggregations?.datasets.after_key as {
             dataset: string;
             namespace: string;
           }) || after?.docsCount,
