@@ -187,7 +187,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
-  const [isQueryLoading, setIsQueryLoading] = useState(isLoading == null ? true : isLoading);
+  const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -221,7 +221,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   const onQuerySubmit = useCallback(() => {
-    if (isQueryLoading && allowQueryCancellation) {
+    if (isQueryLoading && isLoading && allowQueryCancellation) {
       abortController?.abort();
       setIsQueryLoading(false);
     } else {
@@ -235,7 +235,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       }
       onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
-  }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+  }, [
+    isQueryLoading,
+    isLoading,
+    allowQueryCancellation,
+    abortController,
+    onTextLangQuerySubmit,
+    language,
+  ]);
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editor1?.current?.getSelection();
@@ -264,7 +271,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, []);
 
   useEffect(() => {
-    setIsQueryLoading(Boolean(isLoading));
+    if (!isLoading) setIsQueryLoading(false);
   }, [isLoading]);
 
   const [documentationSections, setDocumentationSections] =
@@ -479,7 +486,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         });
       }
     };
-    if (isQueryLoading) {
+    if (isQueryLoading || isLoading) {
       addQueriesToCache({
         queryString,
         timeZone,
@@ -494,7 +501,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
       setRefetchHistoryItems(true);
     }
-  }, [clientParserStatus, isQueryLoading, parseMessages, queryString, timeZone]);
+  }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, queryString, timeZone]);
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
