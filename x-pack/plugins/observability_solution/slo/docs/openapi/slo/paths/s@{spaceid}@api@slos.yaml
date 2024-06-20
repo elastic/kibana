@@ -50,7 +50,7 @@ post:
     - url: https://localhost:5601
 
 get:
-  summary: Retrieves a paginated list of SLOs
+  summary: Get a paginated list of SLOs
   operationId: findSlosOp
   description: >
     You must have the `read` privileges for the **SLOs** feature in the
