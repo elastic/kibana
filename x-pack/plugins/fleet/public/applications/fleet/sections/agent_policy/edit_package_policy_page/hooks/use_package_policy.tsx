@@ -15,7 +15,7 @@ import type {
   UpgradePackagePolicyDryRunResponse,
 } from '../../../../../../../common/types/rest_spec';
 import {
-  sendGetOneAgentPolicy,
+  sendBulkGetAgentPolicies,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
   sendGetSettings,
@@ -94,11 +94,14 @@ export function usePackagePolicyWithRelatedData(
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const savePackagePolicy = async () => {
+  const savePackagePolicy = async (packagePolicyOverride?: Partial<PackagePolicy>) => {
     setFormState('LOADING');
     const {
       policy: { elasticsearch, ...restPackagePolicy },
-    } = await prepareInputPackagePolicyDataset(packagePolicy);
+    } = await prepareInputPackagePolicyDataset({
+      ...packagePolicy,
+      ...(packagePolicyOverride ?? {}),
+    });
     const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
 
     setFormState('SUBMITTED');
@@ -171,21 +174,15 @@ export function usePackagePolicyWithRelatedData(
           throw packagePolicyError;
         }
 
-        const newAgentPolicies = [];
-        for (const policyId of packagePolicyData!.item.policy_ids) {
-          const { data: agentPolicyData, error: agentPolicyError } = await sendGetOneAgentPolicy(
-            policyId
-          );
+        const { data, error: agentPolicyError } = await sendBulkGetAgentPolicies(
+          packagePolicyData!.item.policy_ids
+        );
 
-          if (agentPolicyError) {
-            throw agentPolicyError;
-          }
-
-          if (agentPolicyData?.item) {
-            newAgentPolicies.push(agentPolicyData.item);
-          }
+        if (agentPolicyError) {
+          throw agentPolicyError;
         }
-        setAgentPolicies(newAgentPolicies);
+
+        setAgentPolicies(data?.items ?? []);
 
         const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
           await sendUpgradePackagePolicyDryRun([packagePolicyId]);
