@@ -20,6 +20,7 @@ import { auditServiceMock, type MockedAuditService } from './audit.mock';
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = {
     registerSecurityDelegate: jest.fn(),
+    fips: { isEnabled: jest.fn() },
   };
 
   return mock;
@@ -35,9 +36,6 @@ const createStartMock = (): SecurityStartMock => {
       getCurrentUser: jest.fn(),
     },
     audit: auditServiceMock.create(),
-    experimental: {
-      isFipsEnabled: jest.fn(),
-    },
   };
 
   return mock;
@@ -46,6 +44,7 @@ const createStartMock = (): SecurityStartMock => {
 const createInternalSetupMock = () => {
   const mock: jest.Mocked<InternalSecurityServiceSetup> = {
     registerSecurityDelegate: jest.fn(),
+    fips: { isEnabled: jest.fn() },
   };
 
   return mock;
@@ -63,9 +62,6 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
       getCurrentUser: jest.fn(),
     },
     audit: auditServiceMock.create(),
-    experimental: {
-      isFipsEnabled: jest.fn(),
-    },
   };
 
   return mock;
