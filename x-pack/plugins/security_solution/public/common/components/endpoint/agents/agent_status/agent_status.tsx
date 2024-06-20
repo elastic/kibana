@@ -8,20 +8,14 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { isAgentTypeAndActionSupported } from '../../../../lib/endpoint';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { EndpointPendingActions } from '../../../../../../common/endpoint/types';
-import { useAgentStatusHook } from '../../../../../management/hooks/agents/use_get_agent_status';
+import { useGetAgentStatus } from '../../../../../management/hooks/agents/use_get_agent_status';
 import { useTestIdGenerator } from '../../../../../management/hooks/use_test_id_generator';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../../management/pages/endpoint_hosts/view/host_constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
 import { getAgentStatusText } from '../agent_status_text';
 import { AgentResponseActionsStatus } from './agent_response_action_status';
-export enum SENTINEL_ONE_NETWORK_STATUS {
-  CONNECTING = 'connecting',
-  CONNECTED = 'connected',
-  DISCONNECTING = 'disconnecting',
-  DISCONNECTED = 'disconnected',
-}
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   .isolation-status {
@@ -40,19 +34,12 @@ export const AgentStatus = React.memo(
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const useAgentStatus = useAgentStatusHook();
-
-    const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
-      'sentinelOneManualHostActionsEnabled'
-    );
-    const responseActionsCrowdstrikeManualHostIsolationEnabled = useIsExperimentalFeatureEnabled(
-      'responseActionsCrowdstrikeManualHostIsolationEnabled'
-    );
-    const { data, isLoading, isFetched } = useAgentStatus([agentId], agentType, {
-      enabled:
-        sentinelOneManualHostActionsEnabled || responseActionsCrowdstrikeManualHostIsolationEnabled,
+    const isAgentTypeEnabled = useMemo(() => isAgentTypeAndActionSupported(agentType), [agentType]);
+    const { data, isLoading, isFetched } = useGetAgentStatus(agentId, agentType, {
+      enabled: isAgentTypeEnabled,
     });
-    const agentStatus = data?.[`${agentId}`];
+
+    const agentStatus = data?.[agentId];
     const isCurrentlyIsolated = Boolean(agentStatus?.isolated);
     const pendingActions = agentStatus?.pendingActions;
 
