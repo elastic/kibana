@@ -625,7 +625,7 @@ export const UnifiedDataTable = ({
     () =>
       onFieldEdited
         ? (fieldName: string) => {
-            closeFieldEditor.current = services.dataViewFieldEditor.openEditor({
+            closeFieldEditor.current = services?.dataViewFieldEditor?.openEditor({
               ctx: {
                 dataView,
               },
@@ -636,7 +636,7 @@ export const UnifiedDataTable = ({
             });
           }
         : undefined,
-    [dataView, onFieldEdited, services.dataViewFieldEditor]
+    [dataView, onFieldEdited, services?.dataViewFieldEditor]
   );
 
   const timeFieldName = dataView.timeFieldName;
@@ -730,7 +730,8 @@ export const UnifiedDataTable = ({
           uiSettings,
           toastNotifications,
         },
-        hasEditDataViewPermission: () => dataViewFieldEditor.userPermissions.editIndexPattern(),
+        hasEditDataViewPermission: () => 
+          Boolean(dataViewFieldEditor?.userPermissions?.editIndexPattern()),
         valueToStringConverter,
         onFilter,
         editField,
