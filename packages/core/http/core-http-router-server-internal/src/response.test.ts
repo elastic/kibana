@@ -6,73 +6,55 @@
  * Side Public License, v 1.
  */
 
+import { IKibanaResponse } from '@kbn/core-http-server';
 import { kibanaResponseFactory } from './response';
 
 describe('kibanaResponseFactory', () => {
   describe('status codes', () => {
-    const tests = [
-      { name: 'ok', expectedStatusCode: 200, response: kibanaResponseFactory.ok() },
-      { name: 'created', expectedStatusCode: 201, response: kibanaResponseFactory.created() },
-      { name: 'accepted', expectedStatusCode: 202, response: kibanaResponseFactory.accepted() },
-      { name: 'noContent', expectedStatusCode: 204, response: kibanaResponseFactory.noContent() },
-      {
-        name: 'multiStatus',
-        expectedStatusCode: 207,
-        response: kibanaResponseFactory.multiStatus(),
-      },
-      {
-        name: 'redirected',
-        expectedStatusCode: 302,
-        response: kibanaResponseFactory.redirected({}),
-      },
-      {
-        name: 'notModified',
-        expectedStatusCode: 304,
-        response: kibanaResponseFactory.notModified({}),
-      },
-      { name: 'badRequest', expectedStatusCode: 400, response: kibanaResponseFactory.badRequest() },
-      {
-        name: 'unauthorized',
-        expectedStatusCode: 401,
-        response: kibanaResponseFactory.unauthorized(),
-      },
-      { name: 'forbidden', expectedStatusCode: 403, response: kibanaResponseFactory.forbidden() },
-      { name: 'notFound', expectedStatusCode: 404, response: kibanaResponseFactory.notFound() },
-      { name: 'conflict', expectedStatusCode: 409, response: kibanaResponseFactory.conflict() },
-      {
-        name: 'unprocessableContent',
-        expectedStatusCode: 422,
-        response: kibanaResponseFactory.unprocessableContent(),
-      },
-      {
-        name: 'file',
-        expectedStatusCode: 200,
-        response: kibanaResponseFactory.file({
+    const tests: Array<[string, number, IKibanaResponse]> = [
+      ['ok', 200, kibanaResponseFactory.ok()],
+      ['created', 201, kibanaResponseFactory.created()],
+      ['accepted', 202, kibanaResponseFactory.accepted()],
+      ['noContent', 204, kibanaResponseFactory.noContent()],
+      ['multiStatus', 207, kibanaResponseFactory.multiStatus()],
+      ['redirected', 302, kibanaResponseFactory.redirected({})],
+      ['notModified', 304, kibanaResponseFactory.notModified({})],
+      ['badRequest', 400, kibanaResponseFactory.badRequest()],
+      ['unauthorized', 401, kibanaResponseFactory.unauthorized()],
+      ['forbidden', 403, kibanaResponseFactory.forbidden()],
+      ['notFound', 404, kibanaResponseFactory.notFound()],
+      ['conflict', 409, kibanaResponseFactory.conflict()],
+      ['unprocessableContent', 422, kibanaResponseFactory.unprocessableContent()],
+      [
+        'file',
+        200,
+        kibanaResponseFactory.file({
           filename: 'test.txt',
           body: 'content',
         }),
-      },
-      {
-        name: 'custom 205',
-        expectedStatusCode: 205,
-        response: kibanaResponseFactory.custom({
+      ],
+      [
+        'custom:205',
+        205,
+        kibanaResponseFactory.custom({
           statusCode: 205,
         }),
-      },
-      {
-        name: 'customError 505',
-        expectedStatusCode: 505,
-        response: kibanaResponseFactory.customError({
+      ],
+      [
+        'customError:505',
+        505,
+        kibanaResponseFactory.customError({
           statusCode: 505,
         }),
-      },
+      ],
     ];
 
-    tests.forEach(({ name, expectedStatusCode, response }) => {
-      it(`.${name} produces a response with status code ${expectedStatusCode}`, () => {
+    it.each(tests)(
+      '.%s produces a response with status code %i',
+      (_name, expectedStatusCode, response) => {
         expect(response.status).toEqual(expectedStatusCode);
-      });
-    });
+      }
+    );
   });
 
   describe('res.file', () => {
