@@ -8,16 +8,16 @@
 import { CoreStart } from '@kbn/core/public';
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
-import { ServiceInventory } from '.';
-import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
-import { AnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { ApmServiceInventory } from '.';
+import { AnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
+import { AnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
+import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 const stories: Meta<{}> = {
   title: 'app/ServiceInventory',
-  component: ServiceInventory,
+  component: ApmServiceInventory,
   decorators: [
     (StoryComponent) => {
       const coreMock = {
@@ -60,5 +60,5 @@ const stories: Meta<{}> = {
 export default stories;
 
 export const Example: Story<{}> = () => {
-  return <ServiceInventory />;
+  return <ApmServiceInventory />;
 };

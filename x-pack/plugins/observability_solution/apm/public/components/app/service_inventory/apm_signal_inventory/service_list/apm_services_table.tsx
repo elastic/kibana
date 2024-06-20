@@ -23,38 +23,41 @@ import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
 import React, { useContext, useMemo } from 'react';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import { ServiceHealthStatus } from '../../../../../../common/service_health_status';
 import {
   ServiceInventoryFieldName,
   ServiceListItem,
-} from '../../../../../common/service_inventory';
-import { isDefaultTransactionType } from '../../../../../common/transaction_types';
+} from '../../../../../../common/service_inventory';
+import { isDefaultTransactionType } from '../../../../../../common/transaction_types';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
-} from '../../../../../common/utils/formatters';
-import { KibanaEnvironmentContext } from '../../../../context/kibana_environment_context/kibana_environment_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { Breakpoints, useBreakpoints } from '../../../../hooks/use_breakpoints';
-import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
-import { FETCH_STATUS, isFailure, isPending } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { unit } from '../../../../utils/style';
-import { ApmRoutes } from '../../../routing/apm_route_config';
-import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
-import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
-import { EnvironmentBadge } from '../../../shared/environment_badge';
-import { ServiceLink } from '../../../shared/links/apm/service_link';
-import { ListMetric } from '../../../shared/list_metric';
+} from '../../../../../../common/utils/formatters';
+import { KibanaEnvironmentContext } from '../../../../../context/kibana_environment_context/kibana_environment_context';
+import { useApmParams } from '../../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../../hooks/use_apm_router';
+import { Breakpoints, useBreakpoints } from '../../../../../hooks/use_breakpoints';
+import { useFallbackToTransactionsFetcher } from '../../../../../hooks/use_fallback_to_transactions_fetcher';
+import { FETCH_STATUS, isFailure, isPending } from '../../../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import { unit } from '../../../../../utils/style';
+import { ApmRoutes } from '../../../../routing/apm_route_config';
+import { AggregatedTransactionsBadge } from '../../../../shared/aggregated_transactions_badge';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../../shared/charts/helper/get_timeseries_color';
+import { EnvironmentBadge } from '../../../../shared/environment_badge';
+import { ServiceLink } from '../../../../shared/links/apm/service_link';
+import { ListMetric } from '../../../../shared/list_metric';
 import {
   ITableColumn,
   ManagedTable,
   SortFunction,
   TableSearchBar,
-} from '../../../shared/managed_table';
-import { TryItButton } from '../../../shared/try_it_button';
+} from '../../../../shared/managed_table';
+import { TryItButton } from '../../../../shared/try_it_button';
 import { HealthBadge } from './health_badge';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 
@@ -307,7 +310,7 @@ interface Props {
   isSavingSetting: boolean;
   onChangeTableSearchBarVisibility: () => void;
 }
-export function ServiceList({
+export function ApmServicesTable({
   status,
   items,
   noItemsMessage,

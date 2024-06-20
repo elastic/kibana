@@ -8,11 +8,11 @@
 import { composeStories } from '@storybook/testing-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { getServiceColumns } from '.';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { Breakpoints } from '../../../../hooks/use_breakpoints';
-import { apmRouter } from '../../../routing/apm_route_config';
-import * as timeSeriesColor from '../../../shared/charts/helper/get_timeseries_color';
+import { getServiceColumns } from './apm_services_table';
+import { ENVIRONMENT_ALL } from '../../../../../../common/environment_filter_values';
+import { Breakpoints } from '../../../../../hooks/use_breakpoints';
+import { apmRouter } from '../../../../routing/apm_route_config';
+import * as timeSeriesColor from '../../../../shared/charts/helper/get_timeseries_color';
 import * as stories from './service_list.stories';
 
 const { ServiceListEmptyState, ServiceListWithItems } = composeStories(stories);
