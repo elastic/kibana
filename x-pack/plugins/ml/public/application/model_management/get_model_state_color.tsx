@@ -23,7 +23,7 @@ export const getModelStateColor = (
       };
     case MODEL_STATE.DOWNLOADING:
       return {
-        color: 'warning',
+        color: 'primary',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadingName', {
           defaultMessage: 'Downloading...',
         }),

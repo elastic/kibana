@@ -43,6 +43,9 @@ export class ServerlessSearchPlugin
     core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
     setupDeps: ServerlessSearchPluginSetupDependencies
   ): ServerlessSearchPluginSetup {
+    const { searchHomepage } = setupDeps;
+    const useSearchHomepage = searchHomepage && searchHomepage.isHomepageFeatureEnabled();
+
     const queryClient = new QueryClient({
       mutationCache: new MutationCache({
         onError: (error) => {
@@ -69,6 +72,24 @@ export class ServerlessSearchPlugin
         },
       }),
     });
+    if (useSearchHomepage) {
+      core.application.register({
+        id: 'serverlessHomeRedirect',
+        title: i18n.translate('xpack.serverlessSearch.app.home.title', {
+          defaultMessage: 'Home',
+        }),
+        appRoute: '/app/elasticsearch',
+        euiIconType: 'logoElastic',
+        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+        visibleIn: [],
+        async mount({}: AppMountParameters) {
+          const [coreStart] = await core.getStartServices();
+          coreStart.application.navigateToApp('searchHomepage');
+          return () => {};
+        },
+      });
+    }
+
     core.application.register({
       id: 'serverlessElasticsearch',
       title: i18n.translate('xpack.serverlessSearch.app.elasticsearch.title', {
@@ -76,7 +97,7 @@ export class ServerlessSearchPlugin
       }),
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      appRoute: '/app/elasticsearch',
+      appRoute: useSearchHomepage ? '/app/elasticsearch/getting_started' : '/app/elasticsearch',
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/elasticsearch');
         const [coreStart, services] = await core.getStartServices();
@@ -121,10 +142,12 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    const { serverless, management, indexManagement, security } = services;
-    serverless.setProjectHome('/app/elasticsearch');
+    const { serverless, management, indexManagement, security, searchHomepage } = services;
+    const useSearchHomepage = searchHomepage && searchHomepage.isHomepageFeatureEnabled();
 
-    const navigationTree$ = of(navigationTree);
+    serverless.setProjectHome(useSearchHomepage ? '/app/elasticsearch/home' : '/app/elasticsearch');
+
+    const navigationTree$ = of(navigationTree(searchHomepage?.isHomepageFeatureEnabled() ?? false));
     serverless.initNavigation('search', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
