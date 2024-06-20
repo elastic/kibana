@@ -14,18 +14,18 @@ import { type State } from '../../../common/store/types';
  * It is used in useSecuritySolutionDataView hook as alternative data source (behind a flag)
  */
 export const sourcererAdapterSelector = createSelector(
-  [(state: State) => state],
-  (state): SelectedDataView => {
+  [(state: State) => state.dataviewPicker],
+  (dataViewPicker): SelectedDataView => {
     return {
-      loading: state.dataviewPicker.state === 'loading',
-      dataViewId: state.dataviewPicker.dataView.id || '',
-      patternList: state.dataviewPicker.patternList,
+      loading: dataViewPicker.state === 'loading',
+      dataViewId: dataViewPicker.dataView.id || '',
+      patternList: dataViewPicker.patternList,
       indicesExist: true,
       browserFields: {},
-      activePatterns: state.dataviewPicker.patternList,
+      activePatterns: dataViewPicker.patternList,
       runtimeMappings: {},
-      selectedPatterns: state.dataviewPicker.patternList,
-      indexPattern: { fields: [], title: state.dataviewPicker.dataView.title || '' },
+      selectedPatterns: dataViewPicker.patternList,
+      indexPattern: { fields: [], title: dataViewPicker.dataView.title || '' },
       sourcererDataView: {},
     };
   }
