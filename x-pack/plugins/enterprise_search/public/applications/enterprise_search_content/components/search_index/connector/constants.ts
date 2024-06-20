@@ -34,3 +34,28 @@ export const getConnectorTemplate = ({
     host: "${host || 'http://localhost:9200'}"
     api_key: "${apiKeyData?.encoded || ''}"
 `;
+
+export const getRunFromDockerSnippet = ({
+  connectorId,
+  elasticsearchHost,
+  serviceType,
+}: {
+  connectorId: string;
+  elasticsearchHost: string;
+  serviceType: string;
+}) => dedent`docker run \\
+
+  --rm \\
+
+  --tty -i \\
+
+  docker.elastic.co/enterprise-search/enterprise-search:8.15.0 \\
+
+  /app/bin/elastic-ingest \\
+
+  -e "connectors.[0].connector_id=${connectorId}" \\
+
+  -e "connectors.[0].service_type=${serviceType}" \\
+
+  -e "elasticsearch.host=${elasticsearchHost}"
+`;

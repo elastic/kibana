@@ -38,10 +38,12 @@ import {
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { startSync } from '../../lib/connectors/start_sync';
+import { createIndex } from '../../lib/indices/create_index';
 import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
 import { fetchUnattachedIndices } from '../../lib/indices/fetch_unattached_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
+import { generatedIndexName } from '../../lib/indices/generate_index_name';
 import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
@@ -765,6 +767,85 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
               total: totalResults,
             },
           },
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/generate_config',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId } = request.params;
+
+      let generatedName;
+      let apiKeyResponse;
+      try {
+        const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+
+        if (!connector) {
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error',
+              {
+                defaultMessage: 'Connector with id {connectorId} is not found.',
+                values: { connectorId },
+              }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+
+        generatedName = await generatedIndexName(
+          client,
+          connector.name || connector.service_type || 'my-connector'
+        );
+
+        await createIndex(client, generatedName, connector.language, true);
+
+        await client.asCurrentUser.transport.request({
+          body: {
+            index_name: generatedName,
+          },
+          method: 'PUT',
+          path: `/_connector/${connectorId}/_index_name`,
+        });
+
+        await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
+        apiKeyResponse = await generateApiKey(client, generatedName, connector.is_native);
+      } catch (error) {
+        // replace with generate error code
+        if (error.message === ErrorCode.GENERATE_INDEX_NAME_ERROR) {
+          createError({
+            errorCode: ErrorCode.GENERATE_INDEX_NAME_ERROR,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+              {
+                defaultMessage: 'Cannot find a unique index name to generate configuration',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+          throw error;
+        }
+      }
+
+      return response.ok({
+        body: {
+          apiKey: apiKeyResponse,
+          connectorId,
+          indexName: generatedName,
         },
         headers: { 'content-type': 'application/json' },
       });
