@@ -81,6 +81,7 @@ const groupSummarySchema = t.type({
       id: t.string,
       instanceId: t.string,
       name: t.string,
+      groupings: t.record(t.string, t.unknown),
     }),
   }),
   violated: t.number,
