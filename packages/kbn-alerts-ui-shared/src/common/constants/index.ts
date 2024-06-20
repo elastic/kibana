@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './rule_types';
-export * from './action_variable_types';
-export * from './action_group_types';
+export * from './i18n_weekdays';
+export * from './routes';

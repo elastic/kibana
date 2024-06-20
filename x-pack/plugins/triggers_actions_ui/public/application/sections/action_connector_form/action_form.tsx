@@ -22,13 +22,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import {
-  ActionGroup,
   RuleActionAlertsFilterProperty,
   RuleActionFrequency,
   RuleActionParam,
   RuleSystemAction,
 } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
+import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
@@ -50,13 +50,8 @@ import { DEFAULT_FREQUENCY, VIEW_LICENSE_OPTIONS_LINK } from '../../../common/co
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
-import { OmitMessageVariablesType } from '../../lib/action_variables';
 import { SystemActionTypeForm } from './system_action_type_form';
 
-export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
-  omitMessageVariables?: OmitMessageVariablesType;
-  defaultActionMessage?: string;
-}
 export interface ActionAccordionFormProps {
   actions: RuleUiAction[];
   defaultActionGroupId: string;

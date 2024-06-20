@@ -86,12 +86,13 @@ export {
 } from './application/components';
 
 export {
-  AlertProvidedActionVariables,
   hasMustacheTokens,
   templateActionVariable,
   updateActionConnector,
   executeAction,
 } from './application/lib';
+
+export type { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/action_variables';
 
 export type { ActionGroupWithCondition } from './application/sections';
 

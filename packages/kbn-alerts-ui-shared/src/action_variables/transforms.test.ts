@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { RuleType, ActionVariables } from '../../types';
-import { transformActionVariables } from './action_variables';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ActionVariables, RuleType } from '@kbn/triggers-actions-ui-types';
+import { transformActionVariables } from './transforms';
+import { ALERTING_FEATURE_ID } from '../rule_form';
 
 beforeEach(() => jest.resetAllMocks());
 

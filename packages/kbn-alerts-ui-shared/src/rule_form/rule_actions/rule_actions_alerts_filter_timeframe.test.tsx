@@ -1,25 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
-import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
-import { AlertsFilterTimeframe } from '@kbn/alerting-plugin/common';
 import { Moment } from 'moment';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { RuleActionsAlertsFilterTimeframe } from './rule_actions_alerts_filter_timeframe';
+import { AlertsFilterTimeframe } from '@kbn/alerting-types';
 
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
-}));
-
-describe('action_alerts_filter_timeframe', () => {
+describe('ruleActionsAlertsFilterTimeframe', () => {
   async function setup(timeframe?: AlertsFilterTimeframe) {
     const wrapper = mountWithIntl(
-      <ActionAlertsFilterTimeframe state={timeframe} onChange={() => {}} />
+      <RuleActionsAlertsFilterTimeframe
+        state={timeframe}
+        settings={
+          {
+            client: {
+              get: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
+            },
+          } as unknown as SettingsStart
+        }
+        onChange={() => {}}
+      />
     );
 
     // Wait for active space to resolve before requesting the component to update

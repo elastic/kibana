@@ -6,6 +6,15 @@
  * Side Public License, v 1.
  */
 
-export * from './rule_types';
-export * from './action_variable_types';
-export * from './action_group_types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+
+export interface ActionType {
+  id: string;
+  name: string;
+  enabled: boolean;
+  enabledInConfig: boolean;
+  enabledInLicense: boolean;
+  minimumLicenseRequired: LicenseType;
+  supportedFeatureIds: string[];
+  isSystemActionType: boolean;
+}
