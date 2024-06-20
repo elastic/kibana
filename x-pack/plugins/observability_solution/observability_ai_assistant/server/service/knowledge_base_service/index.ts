@@ -5,25 +5,28 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import { serverUnavailable, gatewayTimeout } from '@hapi/boom';
+import { serverUnavailable } from '@hapi/boom';
 import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import pLimit from 'p-limit';
-import pRetry from 'p-retry';
 import { isEmpty, map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
-import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
 import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
-import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
+import { resourceNames } from '..';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
-import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
+import {
+  createInferenceEndpoint,
+  deleteInferenceEndpoint,
+  getInferenceEndpoint,
+} from '../create_inference_endpoint';
 
 interface Dependencies {
-  esClient: ElasticsearchClient;
-  resources: ObservabilityAIAssistantResourceNames;
+  esClient: {
+    asInternalUser: ElasticsearchClient;
+  };
   logger: Logger;
   taskManagerStart: TaskManagerStartContract;
   getModelId: () => Promise<string>;
@@ -37,7 +40,7 @@ export interface RecalledEntry {
   labels?: Record<string, string>;
 }
 
-function isAlreadyExistsError(error: Error) {
+function isNotFoundError(error: Error) {
   return (
     error instanceof errors.ResponseError &&
     (error.body.error.type === 'resource_not_found_exception' ||
@@ -74,127 +77,12 @@ export class KnowledgeBaseService {
 
   private _queue: KnowledgeBaseEntryOperation[] = [];
 
-  constructor(private readonly dependencies: Dependencies) {
-    this.ensureTaskScheduled();
-  }
-
-  setup = async () => {
-    const elserModelId = await this.dependencies.getModelId();
-
-    const retryOptions = { factor: 1, minTimeout: 10000, retries: 12 };
-
-    const installModel = async () => {
-      this.dependencies.logger.info('Installing ELSER model');
-      await this.dependencies.esClient.ml.putTrainedModel(
-        {
-          model_id: elserModelId,
-          input: {
-            field_names: ['text_field'],
-          },
-          wait_for_completion: true,
-        },
-        { requestTimeout: '20m' }
-      );
-      this.dependencies.logger.info('Finished installing ELSER model');
-    };
-
-    const getIsModelInstalled = async () => {
-      const getResponse = await this.dependencies.esClient.ml.getTrainedModels({
-        model_id: elserModelId,
-        include: 'definition_status',
-      });
-
-      this.dependencies.logger.debug(
-        'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
-      );
-
-      return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
-    };
-
-    await pRetry(async () => {
-      let isModelInstalled: boolean = false;
-      try {
-        isModelInstalled = await getIsModelInstalled();
-      } catch (error) {
-        if (isAlreadyExistsError(error)) {
-          await installModel();
-          isModelInstalled = await getIsModelInstalled();
-        }
-      }
-
-      if (!isModelInstalled) {
-        throwKnowledgeBaseNotReady({
-          message: 'Model is not fully defined',
-        });
-      }
-    }, retryOptions);
-
-    try {
-      await this.dependencies.esClient.ml.startTrainedModelDeployment({
-        model_id: elserModelId,
-        wait_for: 'fully_allocated',
-      });
-    } catch (error) {
-      this.dependencies.logger.debug('Error starting model deployment');
-      this.dependencies.logger.debug(error);
-      if (!isAlreadyExistsError(error)) {
-        throw error;
-      }
-    }
-
-    await pRetry(async () => {
-      const response = await this.dependencies.esClient.ml.getTrainedModelsStats({
-        model_id: elserModelId,
-      });
-
-      const isReady = response.trained_model_stats.some((stats) =>
-        (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
-          (node) => node.routing_state.routing_state === 'started'
-        )
-      );
-
-      if (isReady) {
-        return Promise.resolve();
-      }
-
-      this.dependencies.logger.debug('Model is not allocated yet');
-      this.dependencies.logger.debug(JSON.stringify(response));
-
-      throw gatewayTimeout();
-    }, retryOptions);
-
-    this.dependencies.logger.info('Model is ready');
-    this.ensureTaskScheduled();
-  };
-
-  private ensureTaskScheduled() {
-    this.dependencies.taskManagerStart
-      .ensureScheduled({
-        taskType: INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
-        id: INDEX_QUEUED_DOCUMENTS_TASK_ID,
-        state: {},
-        params: {},
-        schedule: {
-          interval: '1h',
-        },
-      })
-      .then(() => {
-        this.dependencies.logger.debug('Scheduled queue task');
-        return this.dependencies.taskManagerStart.runSoon(INDEX_QUEUED_DOCUMENTS_TASK_ID);
-      })
-      .then(() => {
-        this.dependencies.logger.debug('Queue task ran');
-      })
-      .catch((err) => {
-        this.dependencies.logger.error(`Failed to schedule queue task`);
-        this.dependencies.logger.error(err);
-      });
-  }
+  constructor(private readonly dependencies: Dependencies) {}
 
   private async processOperation(operation: KnowledgeBaseEntryOperation) {
     if (operation.type === KnowledgeBaseEntryOperationType.Delete) {
-      await this.dependencies.esClient.deleteByQuery({
-        index: this.dependencies.resources.aliases.kb,
+      await this.dependencies.esClient.asInternalUser.deleteByQuery({
+        index: resourceNames.aliases.kb,
         query: {
           bool: {
             filter: [
@@ -216,12 +104,38 @@ export class KnowledgeBaseService {
     });
   }
 
+  async setup(esClient: { asCurrentUser: ElasticsearchClient }) {
+    return createInferenceEndpoint({ esClient, logger: this.dependencies.logger });
+  }
+
+  async reset(esClient: { asCurrentUser: ElasticsearchClient }) {
+    return deleteInferenceEndpoint({ esClient, logger: this.dependencies.logger });
+  }
+
+  async getStatus() {
+    try {
+      const res = await getInferenceEndpoint({
+        esClient: this.dependencies.esClient,
+        logger: this.dependencies.logger,
+      });
+
+      const isReady = res.endpoints.length > 0;
+      return isReady;
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return false;
+      }
+      throw error;
+    }
+  }
+
   async processQueue() {
     if (!this._queue.length) {
       return;
     }
 
-    if (!(await this.status()).ready) {
+    const kbStatus = await this.getStatus();
+    if (!kbStatus) {
       this.dependencies.logger.debug(`Bailing on queue task: KB is not ready yet`);
       return;
     }
@@ -270,54 +184,24 @@ export class KnowledgeBaseService {
     });
   }
 
-  status = async () => {
-    const elserModelId = await this.dependencies.getModelId();
-
-    try {
-      const modelStats = await this.dependencies.esClient.ml.getTrainedModelsStats({
-        model_id: elserModelId,
-      });
-      const elserModelStats = modelStats.trained_model_stats[0];
-      const deploymentState = elserModelStats.deployment_stats?.state;
-      const allocationState = elserModelStats.deployment_stats?.allocation_status.state;
-
-      return {
-        ready: deploymentState === 'started' && allocationState === 'fully_allocated',
-        deployment_state: deploymentState,
-        allocation_state: allocationState,
-        model_name: elserModelId,
-      };
-    } catch (error) {
-      return {
-        error: error instanceof errors.ResponseError ? error.body.error : String(error),
-        ready: false,
-        model_name: elserModelId,
-      };
-    }
-  };
-
   private async recallFromKnowledgeBase({
     queries,
     categories,
     namespace,
     user,
-    modelId,
   }: {
     queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
     namespace: string;
     user?: { name: string };
-    modelId: string;
   }): Promise<RecalledEntry[]> {
     const esQuery = {
       bool: {
         should: queries.map(({ text, boost = 1 }) => ({
-          text_expansion: {
-            'ml.tokens': {
-              model_text: text,
-              model_id: modelId,
-              boost,
-            },
+          semantic: {
+            field: 'semantic_text',
+            query: text,
+            boost,
           },
         })),
         filter: [
@@ -330,10 +214,11 @@ export class KnowledgeBaseService {
       },
     };
 
-    const response = await this.dependencies.esClient.search<
+    const response = await this.dependencies.esClient.asInternalUser.search<
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
     >({
-      index: [this.dependencies.resources.aliases.kb],
+      index: [resourceNames.aliases.kb],
+      // @ts-expect-error: `semantic` is not in the types yet
       query: esQuery,
       size: 20,
       _source: {
@@ -492,9 +377,8 @@ export class KnowledgeBaseService {
         queries,
         categories,
         namespace,
-        modelId,
       }).catch((error) => {
-        if (isAlreadyExistsError(error)) {
+        if (isNotFoundError(error)) {
           throwKnowledgeBaseNotReady(error.body);
         }
         throw error;
@@ -546,8 +430,8 @@ export class KnowledgeBaseService {
     user?: { name: string }
   ): Promise<UserInstruction[]> => {
     try {
-      const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
-        index: this.dependencies.resources.aliases.kb,
+      const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
+        index: resourceNames.aliases.kb,
         query: {
           bool: {
             must: [
@@ -590,8 +474,8 @@ export class KnowledgeBaseService {
     sortDirection?: 'asc' | 'desc';
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     try {
-      const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
-        index: this.dependencies.resources.aliases.kb,
+      const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
+        index: resourceNames.aliases.kb,
         ...(query
           ? {
               query: {
@@ -635,7 +519,7 @@ export class KnowledgeBaseService {
         })),
       };
     } catch (error) {
-      if (isAlreadyExistsError(error)) {
+      if (isNotFoundError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;
@@ -652,16 +536,16 @@ export class KnowledgeBaseService {
     namespace?: string;
   }): Promise<void> => {
     try {
-      await this.dependencies.esClient.index({
-        index: this.dependencies.resources.aliases.kb,
+      await this.dependencies.esClient.asInternalUser.index({
+        index: resourceNames.aliases.kb,
         id,
         document: {
           '@timestamp': new Date().toISOString(),
           ...document,
+          semantic_text: document.text,
           user,
           namespace,
         },
-        pipeline: this.dependencies.resources.pipelines.kb,
         refresh: 'wait_for',
       });
     } catch (error) {
@@ -694,15 +578,15 @@ export class KnowledgeBaseService {
 
   deleteEntry = async ({ id }: { id: string }): Promise<void> => {
     try {
-      await this.dependencies.esClient.delete({
-        index: this.dependencies.resources.aliases.kb,
+      await this.dependencies.esClient.asInternalUser.delete({
+        index: resourceNames.aliases.kb,
         id,
         refresh: 'wait_for',
       });
 
       return Promise.resolve();
     } catch (error) {
-      if (isAlreadyExistsError(error)) {
+      if (isNotFoundError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;

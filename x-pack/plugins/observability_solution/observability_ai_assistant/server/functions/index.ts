@@ -61,7 +61,7 @@ export const registerFunctions: RegistrationCallback = async ({
   }.
   If the user asks how to change the language, reply in the same language the user asked in.`);
 
-  const { ready: isReady } = await client.getKnowledgeBaseStatus();
+  const isKnowledgeBaseReady = await client.getKnowledgeBaseStatus();
 
   functions.registerInstruction(({ availableFunctionNames }) => {
     const instructions: string[] = [];
@@ -83,7 +83,7 @@ export const registerFunctions: RegistrationCallback = async ({
         Data that is compact enough automatically gets included in the response for the "${CONTEXT_FUNCTION_NAME}" function.`);
     }
 
-    if (isReady) {
+    if (isKnowledgeBaseReady) {
       if (availableFunctionNames.includes(SUMMARIZE_FUNCTION_NAME)) {
         instructions.push(`You can use the "${SUMMARIZE_FUNCTION_NAME}" function to store new information you have learned in a knowledge database.
           Only use this function when the user asks for it.
@@ -103,11 +103,11 @@ export const registerFunctions: RegistrationCallback = async ({
     return instructions.map((instruction) => dedent(instruction));
   });
 
-  if (isReady) {
+  if (isKnowledgeBaseReady) {
     registerSummarizationFunction(registrationParameters);
   }
 
-  registerContextFunction({ ...registrationParameters, isKnowledgeBaseAvailable: isReady });
+  registerContextFunction({ ...registrationParameters, isKnowledgeBaseReady });
 
   registerElasticsearchFunction(registrationParameters);
   const request = registrationParameters.resources.request;

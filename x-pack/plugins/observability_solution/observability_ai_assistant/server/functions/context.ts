@@ -24,8 +24,8 @@ export function registerContextFunction({
   client,
   functions,
   resources,
-  isKnowledgeBaseAvailable,
-}: FunctionRegistrationParameters & { isKnowledgeBaseAvailable: boolean }) {
+  isKnowledgeBaseReady,
+}: FunctionRegistrationParameters & { isKnowledgeBaseReady: boolean }) {
   functions.registerFunction(
     {
       name: CONTEXT_FUNCTION_NAME,
@@ -54,7 +54,7 @@ export function registerContextFunction({
           ...(dataWithinTokenLimit.length ? { data_on_screen: dataWithinTokenLimit } : {}),
         };
 
-        if (!isKnowledgeBaseAvailable) {
+        if (!isKnowledgeBaseReady) {
           return { content };
         }
 
