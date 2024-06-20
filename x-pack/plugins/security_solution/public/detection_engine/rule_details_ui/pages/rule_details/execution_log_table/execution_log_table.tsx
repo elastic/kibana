@@ -9,7 +9,12 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import moment from 'moment';
-import type { OnTimeChangeProps, OnRefreshProps, OnRefreshChangeProps } from '@elastic/eui';
+import type {
+  OnTimeChangeProps,
+  OnRefreshProps,
+  OnRefreshChangeProps,
+  EuiSwitchEvent,
+} from '@elastic/eui';
 import {
   EuiTextColor,
   EuiFlexGroup,
@@ -21,7 +26,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiDescriptionList,
-  EuiSwitchEvent,
 } from '@elastic/eui';
 
 import type { Filter, Query } from '@kbn/es-query';

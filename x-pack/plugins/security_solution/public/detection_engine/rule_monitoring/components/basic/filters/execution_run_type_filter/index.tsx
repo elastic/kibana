@@ -42,7 +42,7 @@ const ExecutionRunTypeFilterComponent: React.FC<ExecutionRunTypeFilterProps> = (
   const handleSelectionChange = useCallback(
     (types: RuleRunType[]) => {
       onChange(types);
-      telemetry.reportEventLogFilterByRunType({ runType: types?.join(',') });
+      telemetry.reportEventLogFilterByRunType({ runType: types });
     },
     [onChange, telemetry]
   );
