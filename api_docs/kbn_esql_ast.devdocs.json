@@ -1302,7 +1302,19 @@
             "docId": "kibKbnEsqlAstPluginApi",
             "section": "def-common.ESQLCommandMode",
             "text": "ESQLCommandMode"
-          }
+          },
+          " | ",
+          "ESQLInlineCast",
+          "<",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstItem",
+            "text": "ESQLAstItem"
+          },
+          "> | ",
+          "ESQLUnknownItem"
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",
         "deprecated": false,

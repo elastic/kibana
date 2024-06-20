@@ -50,6 +50,14 @@ export type CreateAssetCriticalityRecord = z.infer<typeof CreateAssetCriticality
 export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
   z.object({
     criticality_level: AssetCriticalityLevel,
+  })
+);
+
+export type CreateSingleAssetCriticalityRequest = z.infer<
+  typeof CreateSingleAssetCriticalityRequest
+>;
+export const CreateSingleAssetCriticalityRequest = CreateAssetCriticalityRecord.merge(
+  z.object({
     /**
      * If 'wait_for' the request will wait for the index refresh.
      */
@@ -76,3 +84,24 @@ export const AssetCriticalityRecord = CreateAssetCriticalityRecord.merge(
     '@timestamp': z.string().datetime(),
   })
 );
+
+export type AssetCriticalityBulkUploadErrorItem = z.infer<
+  typeof AssetCriticalityBulkUploadErrorItem
+>;
+export const AssetCriticalityBulkUploadErrorItem = z.object({
+  message: z.string(),
+  index: z.number().int(),
+});
+
+export type AssetCriticalityBulkUploadStats = z.infer<typeof AssetCriticalityBulkUploadStats>;
+export const AssetCriticalityBulkUploadStats = z.object({
+  successful: z.number().int(),
+  failed: z.number().int(),
+  total: z.number().int(),
+});
+
+export type AssetCriticalityBulkUploadResponse = z.infer<typeof AssetCriticalityBulkUploadResponse>;
+export const AssetCriticalityBulkUploadResponse = z.object({
+  errors: z.array(AssetCriticalityBulkUploadErrorItem),
+  stats: AssetCriticalityBulkUploadStats,
+});
