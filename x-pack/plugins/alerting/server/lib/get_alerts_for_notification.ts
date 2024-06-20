@@ -17,7 +17,6 @@ export function getAlertsForNotification<
   RecoveryActionGroupId extends string
 >(
   flappingSettings: RulesSettingsFlappingProperties,
-  notifyOnActionGroupChange: boolean,
   actionGroupId: string,
   alertDelay: number,
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
@@ -54,6 +53,12 @@ export function getAlertsForNotification<
 
   for (const id of keys(currentRecoveredAlerts)) {
     const alert = recoveredAlerts[id];
+    // if alert has not reached the alertDelay threshold don't recover the alert
+    if (alert.getActiveCount() < alertDelay) {
+      // remove from recovered alerts
+      delete recoveredAlerts[id];
+      delete currentRecoveredAlerts[id];
+    }
     alert.resetActiveCount();
     if (flappingSettings.enabled) {
       const flapping = alert.getFlapping();
@@ -77,12 +82,7 @@ export function getAlertsForNotification<
             context
           );
           activeAlerts[id] = newAlert;
-
-          // rule with "on status change" or rule with at least one
-          // action with "on status change" should return notifications
-          if (notifyOnActionGroupChange) {
-            currentActiveAlerts[id] = newAlert;
-          }
+          currentActiveAlerts[id] = newAlert;
 
           // remove from recovered alerts
           delete recoveredAlerts[id];

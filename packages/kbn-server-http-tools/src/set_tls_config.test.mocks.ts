@@ -8,8 +8,8 @@
 
 export const getServerTLSOptionsMock = jest.fn();
 
-jest.doMock('./get_server_options', () => {
-  const actual = jest.requireActual('./get_server_options');
+jest.doMock('./get_tls_options', () => {
+  const actual = jest.requireActual('./get_tls_options');
   return {
     ...actual,
     getServerTLSOptions: getServerTLSOptionsMock,

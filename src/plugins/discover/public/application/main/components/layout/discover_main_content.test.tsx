@@ -18,7 +18,6 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-  RecordRawType,
 } from '../../state_management/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus, SidebarToggleState } from '../../../types';
@@ -31,20 +30,22 @@ import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle'
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DiscoverDocuments } from './discover_documents';
 import { FieldStatisticsTab } from '../field_stats_table';
+import { PatternAnalysisTab } from '../pattern_analysis';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 const mountComponent = async ({
   hideChart = false,
-  isPlainRecord = false,
+  isEsqlMode = false,
   isChartAvailable,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
   storage,
 }: {
   hideChart?: boolean;
-  isPlainRecord?: boolean;
+  isEsqlMode?: boolean;
   isChartAvailable?: boolean;
   viewMode?: VIEW_MODE;
   storage?: Storage;
@@ -66,7 +67,6 @@ const mountComponent = async ({
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
     foundDocuments: true,
   }) as DataMain$;
 
@@ -97,14 +97,17 @@ const mountComponent = async ({
     .getState()
     .searchSource.getField('index') as DataView;
   stateContainer.appState.update({
-    index: dataView?.id!,
+    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
     interval: 'auto',
     hideChart,
     columns: [],
   });
 
+  if (isEsqlMode) {
+    stateContainer.appState.update({ query: { esql: 'from * ' } });
+  }
+
   const props: DiscoverMainContentProps = {
-    isPlainRecord,
     dataView,
     stateContainer,
     onFieldEdited: jest.fn(),
@@ -146,13 +149,13 @@ const mountComponent = async ({
 
 describe('Discover main content component', () => {
   describe('DocumentViewModeToggle', () => {
-    it('should show DocumentViewModeToggle when isPlainRecord is false', async () => {
+    it('should show DocumentViewModeToggle when not in ES|QL mode', async () => {
       const component = await mountComponent();
       expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
     });
 
-    it('should include DocumentViewModeToggle when isPlainRecord is true', async () => {
-      const component = await mountComponent({ isPlainRecord: true });
+    it('should include DocumentViewModeToggle when in ES|QL mode', async () => {
+      const component = await mountComponent({ isEsqlMode: true });
       expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
     });
 
@@ -187,13 +190,22 @@ describe('Discover main content component', () => {
     it('should show DiscoverDocuments when VIEW_MODE is DOCUMENT_LEVEL', async () => {
       const component = await mountComponent();
       expect(component.find(DiscoverDocuments).exists()).toBe(true);
+      expect(component.find(PatternAnalysisTab).exists()).toBe(false);
       expect(component.find(FieldStatisticsTab).exists()).toBe(false);
     });
 
-    it('should show FieldStatisticsTableMemoized when VIEW_MODE is not DOCUMENT_LEVEL', async () => {
+    it('should show FieldStatisticsTab when VIEW_MODE is AGGREGATED_LEVEL', async () => {
       const component = await mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
       expect(component.find(DiscoverDocuments).exists()).toBe(false);
+      expect(component.find(PatternAnalysisTab).exists()).toBe(false);
       expect(component.find(FieldStatisticsTab).exists()).toBe(true);
+    });
+
+    it('should show PatternAnalysisTab when VIEW_MODE is PATTERN_LEVEL', async () => {
+      const component = await mountComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL });
+      expect(component.find(DiscoverDocuments).exists()).toBe(false);
+      expect(component.find(PatternAnalysisTab).exists()).toBe(true);
+      expect(component.find(FieldStatisticsTab).exists()).toBe(false);
     });
   });
 });

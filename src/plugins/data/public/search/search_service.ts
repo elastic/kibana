@@ -113,7 +113,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       management,
     }: SearchServiceSetupDependencies
   ): ISearchSetup {
-    const { http, getStartServices, notifications, uiSettings, executionContext, theme } = core;
+    const { http, getStartServices, notifications, uiSettings, executionContext } = core;
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
     this.sessionsClient = new SessionsClient({ http });
@@ -137,7 +137,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       startServices: getStartServices(),
       usageCollector: this.usageCollector!,
       session: this.sessionService,
-      theme,
       searchConfig: this.initializerContext.config.get().search,
     });
 
@@ -265,6 +264,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
+      dataViews: indexPatterns,
       onResponse: (request, response, options) => {
         if (!options.disableWarningToasts) {
           const { rawResponse } = response;

@@ -43,13 +43,14 @@ export async function createAgentAction(
   newAgentAction: NewAgentAction
 ): Promise<AgentAction> {
   const actionId = newAgentAction.id ?? uuidv4();
-  const timestamp = new Date().toISOString();
+  const now = Date.now();
+  const timestamp = new Date(now).toISOString();
   const body: FleetServerAgentAction = {
     '@timestamp': timestamp,
     expiration:
       newAgentAction.expiration === NO_EXPIRATION
         ? undefined
-        : newAgentAction.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
+        : newAgentAction.expiration ?? new Date(now + ONE_MONTH_IN_MS).toISOString(),
     agents: newAgentAction.agents,
     action_id: actionId,
     data: newAgentAction.data,

@@ -30,7 +30,7 @@ export const findAnonymizationFieldsRoute = (
 ) => {
   router.versioned
     .get({
-      access: 'public',
+      access: 'internal',
       path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
       options: {
         tags: ['access:elasticAssistant'],
@@ -38,7 +38,7 @@ export const findAnonymizationFieldsRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(FindAnonymizationFieldsRequestQuery),

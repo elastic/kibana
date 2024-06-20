@@ -29,7 +29,7 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
   };
   const handleBlur = () => {
     if (baseValue !== value) {
-      usageTracker.click(AnalyticsEvents.instructionsFieldChanged);
+      usageTracker?.click(AnalyticsEvents.instructionsFieldChanged);
     }
     setBaseValue('');
   };

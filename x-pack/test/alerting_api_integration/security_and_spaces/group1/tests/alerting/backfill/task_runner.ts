@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import moment from 'moment';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SecurityAlert } from '@kbn/alerts-as-data-utils';
 import {
@@ -61,28 +62,28 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
   const originalDocTimestamps = [
     // before first backfill run
-    '2023-10-18T10:42:37.452Z',
+    moment().utc().subtract(14, 'days').toISOString(),
 
     // backfill execution set 1
-    '2023-10-19T12:23:54.485Z',
-    '2023-10-19T13:48:11.654Z',
-    '2023-10-19T21:00:03.472Z',
+    moment().utc().startOf('day').subtract(13, 'days').add(64, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(13, 'days').add(65, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(13, 'days').add(66, 'seconds').toISOString(),
 
     // backfill execution set 2
-    '2023-10-20T08:12:34.954Z',
+    moment().utc().startOf('day').subtract(12, 'days').add(89, 'seconds').toISOString(),
 
     // backfill execution set 3
-    '2023-10-20T14:39:41.457Z',
-    '2023-10-20T14:39:41.457Z',
-    '2023-10-20T16:21:01.004Z',
-    '2023-10-20T19:02:12.475Z',
-    '2023-10-20T23:59:59.999Z',
+    moment().utc().startOf('day').subtract(11, 'days').add(785, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(888, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(954, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(1045, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(1145, 'seconds').toISOString(),
 
     // backfill execution set 4 purposely left empty
 
     // after last backfill
-    '2023-10-21T13:36:13.175Z',
-    '2023-10-21T15:42:31.145Z',
+    moment().utc().startOf('day').subtract(9, 'days').add(666, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(9, 'days').add(667, 'seconds').toISOString(),
   ];
 
   describe('ad hoc backfill task', () => {
@@ -91,7 +92,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       await esTestIndexTool.setup();
     });
     afterEach(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
       await esTestIndexTool.destroy();
     });
     after(async () => {
@@ -126,7 +127,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
           tags: [],
           rule_type_id: 'siem.queryRule',
           consumer: 'siem',
-          schedule: { interval: '12h' },
+          schedule: { interval: '24h' },
           actions: [],
           params: {
             author: [],
@@ -165,46 +166,30 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       const ruleId = response1.body.id;
       objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
 
+      const start = moment().utc().startOf('day').subtract(13, 'days').toISOString();
+      const end = moment().utc().startOf('day').subtract(9, 'days').toISOString();
+
       // Schedule backfill for this rule
       const response2 = await supertestWithoutAuth
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([
-          {
-            rule_id: ruleId,
-            start: '2023-10-19T12:00:00.000Z',
-            end: '2023-10-21T12:00:00.000Z',
-          },
-        ])
+        .send([{ rule_id: ruleId, start, end }])
         .expect(200);
 
       const scheduleResult = response2.body;
 
       expect(scheduleResult.length).to.eql(1);
       expect(scheduleResult[0].schedule.length).to.eql(4);
-      expect(scheduleResult[0].schedule).to.eql([
-        {
-          interval: '12h',
-          run_at: '2023-10-20T00:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-20T12:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-21T00:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-21T12:00:00.000Z',
-          status: 'pending',
-        },
-      ]);
+
+      let currentStart = start;
+      scheduleResult[0].schedule.forEach((sched: any) => {
+        expect(sched.interval).to.eql('24h');
+        expect(sched.status).to.eql('pending');
+        const runAt = moment(currentStart).add(24, 'hours').toISOString();
+        expect(sched.run_at).to.eql(runAt);
+        currentStart = runAt;
+      });
 
       const backfillId = scheduleResult[0].id;
 
@@ -250,6 +235,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             namespace: 'space1',
           },
           {
+            rel: 'primary',
             type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
             type_id: 'siem.queryRule',
@@ -414,16 +400,12 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
 
       // schedule backfill for this rule
+      const start = moment().utc().startOf('day').subtract(13, 'days').toISOString();
       const response2 = await supertestWithoutAuth
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([
-          {
-            rule_id: ruleId,
-            start: '2023-10-19T12:00:00.000Z',
-          },
-        ])
+        .send([{ rule_id: ruleId, start }])
         .expect(200);
 
       const scheduleResult = response2.body;
@@ -433,7 +415,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       expect(scheduleResult[0].schedule).to.eql([
         {
           interval: '12h',
-          run_at: '2023-10-20T00:00:00.000Z',
+          run_at: moment(start).add(12, 'hours').toISOString(),
           status: 'pending',
         },
       ]);
@@ -486,6 +468,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             namespace: 'space1',
           },
           {
+            rel: 'primary',
             type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
             type_id: 'test.patternFiringAutoRecoverFalse',
@@ -518,6 +501,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             namespace: 'space1',
           },
           {
+            rel: 'primary',
             type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
             type_id: 'test.patternFiringAutoRecoverFalse',
@@ -556,45 +540,27 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
 
       // schedule backfill for this rule
+      const start = moment().utc().startOf('day').subtract(13, 'days').toISOString();
+      const end = moment().utc().startOf('day').subtract(11, 'days').toISOString();
       const response2 = await supertestWithoutAuth
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([
-          {
-            rule_id: ruleId,
-            start: '2023-10-19T12:00:00.000Z',
-            end: '2023-10-21T12:00:00.000Z',
-          },
-        ])
+        .send([{ rule_id: ruleId, start, end }])
         .expect(200);
 
       const scheduleResult = response2.body;
 
       expect(scheduleResult.length).to.eql(1);
       expect(scheduleResult[0].schedule.length).to.eql(4);
-      expect(scheduleResult[0].schedule).to.eql([
-        {
-          interval: '12h',
-          run_at: '2023-10-20T00:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-20T12:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-21T00:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-21T12:00:00.000Z',
-          status: 'pending',
-        },
-      ]);
+      let currentStart = start;
+      scheduleResult[0].schedule.forEach((sched: any) => {
+        expect(sched.interval).to.eql('12h');
+        expect(sched.status).to.eql('pending');
+        const runAt = moment(currentStart).add(12, 'hours').toISOString();
+        expect(sched.run_at).to.eql(runAt);
+        currentStart = runAt;
+      });
 
       const backfillId = scheduleResult[0].id;
 
@@ -641,6 +607,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             namespace: 'space1',
           },
           {
+            rel: 'primary',
             type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
             type_id: 'test.patternFiringAutoRecoverFalse',

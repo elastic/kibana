@@ -473,7 +473,13 @@
             "text": "FinderAttributes"
           },
           ">,",
-          "IProvidesPanelPlacementSettings",
+          {
+            "pluginId": "dashboard",
+            "scope": "public",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-public.IProvidesLegacyPanelPlacementSettings",
+            "text": "IProvidesLegacyPanelPlacementSettings"
+          },
           "<",
           "LinksInput",
           ", unknown>"
@@ -649,10 +655,10 @@
           },
           {
             "parentPluginId": "links",
-            "id": "def-public.LinksFactoryDefinition.getPanelPlacementSettings",
+            "id": "def-public.LinksFactoryDefinition.getLegacyPanelPlacementSettings",
             "type": "Function",
             "tags": [],
-            "label": "getPanelPlacementSettings",
+            "label": "getLegacyPanelPlacementSettings",
             "description": [],
             "signature": [
               "(input: ",
@@ -673,7 +679,7 @@
             "children": [
               {
                 "parentPluginId": "links",
-                "id": "def-public.LinksFactoryDefinition.getPanelPlacementSettings.$1",
+                "id": "def-public.LinksFactoryDefinition.getLegacyPanelPlacementSettings.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "input",
@@ -688,7 +694,7 @@
               },
               {
                 "parentPluginId": "links",
-                "id": "def-public.LinksFactoryDefinition.getPanelPlacementSettings.$2",
+                "id": "def-public.LinksFactoryDefinition.getLegacyPanelPlacementSettings.$2",
                 "type": "Unknown",
                 "tags": [],
                 "label": "attributes",

@@ -50,6 +50,7 @@ import { timelineActions } from '../../../store';
 import type { TimelineModel } from '../../../store/model';
 import { getFieldsListCreationOptions } from './get_fields_list_creation_options';
 import { defaultUdtHeaders } from './default_headers';
+import type { TimelineDataGridCellContext } from '../types';
 
 const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
   className: `${className}`,
@@ -119,8 +120,8 @@ interface Props {
   dataView: DataView;
   trailingControlColumns?: EuiDataGridProps['trailingControlColumns'];
   leadingControlColumns?: EuiDataGridProps['leadingControlColumns'];
-  pinnedEventIds?: TimelineModel['pinnedEventIds'];
-  eventIdToNoteIds?: TimelineModel['eventIdToNoteIds'];
+  pinnedEventIds: TimelineModel['pinnedEventIds'];
+  eventIdToNoteIds: TimelineModel['eventIdToNoteIds'];
 }
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
@@ -158,17 +159,22 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       dataViews,
       dataViewFieldEditor,
       application: { capabilities },
-      data: dataPluginContract,
       uiActions,
       charts,
       docLinks,
       analytics,
-      timelineFilterManager,
+      timelineDataService,
     },
   } = useKibana();
+  const {
+    query: { filterManager: timelineFilterManager },
+  } = timelineDataService;
+
   const [eventIdsAddingNotes, setEventIdsAddingNotes] = useState<Set<string>>(new Set());
+
   const onToggleShowNotes = useCallback(
-    (eventId: string) => {
+    (eventId?: string) => {
+      if (!eventId) return;
       const newSet = new Set(eventIdsAddingNotes);
       if (newSet.has(eventId)) {
         newSet.delete(eventId);
@@ -179,12 +185,13 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     },
     [eventIdsAddingNotes]
   );
+
   const fieldListSidebarServices: UnifiedFieldListSidebarContainerProps['services'] = useMemo(
     () => ({
       fieldFormats,
       dataViews,
       dataViewFieldEditor,
-      data: dataPluginContract,
+      data: timelineDataService,
       uiActions,
       charts,
       core: {
@@ -197,7 +204,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       fieldFormats,
       dataViews,
       dataViewFieldEditor,
-      dataPluginContract,
+      timelineDataService,
       uiActions,
       charts,
       uiSettings,
@@ -366,7 +373,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     onFieldEdited();
   }, [onFieldEdited]);
 
-  const cellContext = useMemo(() => {
+  const cellContext: TimelineDataGridCellContext = useMemo(() => {
     return {
       events,
       pinnedEventIds,

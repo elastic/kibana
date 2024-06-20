@@ -18,12 +18,10 @@ export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
   selectedTabId: SloTabId;
-  range?: {
-    from: string;
-    to: string;
-  };
+  range?: { from: Date; to: Date };
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
+
 export function HistoricalDataCharts({
   slo,
   range,

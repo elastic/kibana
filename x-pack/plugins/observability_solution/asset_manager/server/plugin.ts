@@ -14,13 +14,21 @@ import {
   PluginConfigDescriptor,
   Logger,
 } from '@kbn/core/server';
-
-import { upsertTemplate } from './lib/manage_index_templates';
+import { upsertComponent, upsertTemplate } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
 import { AssetClient } from './lib/asset_client';
-import { AssetManagerPluginSetupDependencies, AssetManagerPluginStartDependencies } from './types';
+import {
+  AssetManagerPluginSetupDependencies,
+  AssetManagerPluginStartDependencies,
+  AssetManagerServerSetup,
+} from './types';
 import { AssetManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import { entitiesBaseComponentTemplateConfig } from './templates/components/base';
+import { entitiesEventComponentTemplateConfig } from './templates/components/event';
+import { entitiesIndexTemplateConfig } from './templates/entities_template';
+import { entityDefinition, EntityDiscoveryApiKeyType } from './saved_objects';
+import { entitiesEntityComponentTemplateConfig } from './templates/components/entity';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 export type AssetManagerServerPluginStart = ReturnType<AssetManagerServerPlugin['start']>;
@@ -41,6 +49,7 @@ export class AssetManagerServerPlugin
 {
   public config: AssetManagerConfig;
   public logger: Logger;
+  public server?: AssetManagerServerSetup;
 
   constructor(context: PluginInitializerContext<AssetManagerConfig>) {
     this.config = context.config.get();
@@ -56,6 +65,14 @@ export class AssetManagerServerPlugin
 
     this.logger.info('Server is enabled');
 
+    core.savedObjects.registerType(entityDefinition);
+    core.savedObjects.registerType(EntityDiscoveryApiKeyType);
+    plugins.encryptedSavedObjects.registerType({
+      type: EntityDiscoveryApiKeyType.name,
+      attributesToEncrypt: new Set(['apiKey']),
+      attributesToIncludeInAAD: new Set(['id', 'name']),
+    });
+
     const assetClient = new AssetClient({
       sourceIndices: this.config.sourceIndices,
       getApmIndices: plugins.apmDataAccess.getApmIndices,
@@ -63,24 +80,67 @@ export class AssetManagerServerPlugin
     });
 
     const router = core.http.createRouter();
-    setupRoutes<RequestHandlerContext>({ router, assetClient });
+
+    this.server = {
+      config: this.config,
+      logger: this.logger,
+    } as AssetManagerServerSetup;
+
+    setupRoutes<RequestHandlerContext>({
+      router,
+      assetClient,
+      logger: this.logger,
+      spaces: plugins.spaces,
+      server: this.server,
+    });
 
     return {
       assetClient,
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: AssetManagerPluginStartDependencies) {
     // Check for config value and bail out if not "alpha-enabled"
     if (!this.config.alphaEnabled) {
       return;
     }
 
+    if (this.server) {
+      this.server.core = core;
+      this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
+      this.server.security = plugins.security;
+      this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+    }
+
+    const esClient = core.elasticsearch.client.asInternalUser;
     upsertTemplate({
-      esClient: core.elasticsearch.client.asInternalUser,
+      esClient,
       template: assetsIndexTemplateConfig,
       logger: this.logger,
     }).catch(() => {}); // it shouldn't reject, but just in case
+
+    // Install entities compoent templates and index template
+    Promise.all([
+      upsertComponent({
+        esClient,
+        logger: this.logger,
+        component: entitiesBaseComponentTemplateConfig,
+      }),
+      upsertComponent({
+        esClient,
+        logger: this.logger,
+        component: entitiesEventComponentTemplateConfig,
+      }),
+      upsertComponent({
+        esClient,
+        logger: this.logger,
+        component: entitiesEntityComponentTemplateConfig,
+      }),
+    ])
+      .then(() =>
+        upsertTemplate({ esClient, logger: this.logger, template: entitiesIndexTemplateConfig })
+      )
+      .catch(() => {});
 
     return {};
   }

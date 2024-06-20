@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -164,6 +165,7 @@ export class RolesGridPage extends Component<Props, State> {
       <>
         <EuiPageHeader
           bottomBorder
+          data-test-subj="rolesGridPageHeader"
           pageTitle={rolesTitle}
           description={rolesDescription}
           rightSideItems={this.props.readOnly ? undefined : pageRightSideItems}
@@ -182,8 +184,8 @@ export class RolesGridPage extends Component<Props, State> {
         ) : null}
 
         <EuiInMemoryTable
+          data-test-subj="rolesTable"
           itemId="name"
-          responsiveBreakpoint={false}
           columns={this.getColumnConfig()}
           selection={
             this.props.readOnly
@@ -251,6 +253,27 @@ export class RolesGridPage extends Component<Props, State> {
                 {name}
               </EuiLink>
             </EuiText>
+          );
+        },
+      },
+      {
+        field: 'description',
+        name: i18n.translate('xpack.security.management.roles.descriptionColumnName', {
+          defaultMessage: 'Role Description',
+        }),
+        sortable: true,
+        truncateText: { lines: 3 },
+        render: (description: string, record: Role) => {
+          return (
+            <EuiToolTip position="top" content={description} display="block">
+              <EuiText
+                color="subdued"
+                size="s"
+                data-test-subj={`roleRowDescription-${record.name}`}
+              >
+                {description}
+              </EuiText>
+            </EuiToolTip>
           );
         },
       },

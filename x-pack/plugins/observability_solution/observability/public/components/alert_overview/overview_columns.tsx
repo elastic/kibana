@@ -13,11 +13,13 @@ import { AlertStatus } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import React from 'react';
 import { Tooltip as CaseTooltip } from '@kbn/cases-components';
-import type { Group } from '../../../common/custom_threshold_rule/types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside_comparator';
 import { NavigateToCaseView } from '../../hooks/use_case_view_navigation';
-import { Groups } from '../custom_threshold/components/alert_details_app_section/groups';
 import { formatCase } from './helpers/format_cases';
 import { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
+import { Groups } from '../alert_sources/groups';
+import type { Group } from '../../../common/typings';
 
 interface AlertOverviewField {
   id: string;
@@ -124,11 +126,18 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
           return (
             <div>
               {ruleCriteria.map((criteria, criticalIndex) => {
-                const threshold = criteria.threshold;
-                const comparator = criteria.comparator;
+                const { threshold, comparator } = criteria;
+                let formattedComparator = comparator.toUpperCase();
+                if (
+                  comparator === COMPARATORS.NOT_BETWEEN ||
+                  comparator === LEGACY_COMPARATORS.OUTSIDE_RANGE
+                ) {
+                  // No need for i18n as we are using the enum value, we only need a space.
+                  formattedComparator = 'NOT BETWEEN';
+                }
                 return (
                   <EuiText size="s" key={`${threshold}-${criticalIndex}`}>
-                    <h4>{`${comparator.toUpperCase()} ${threshold}`}</h4>
+                    <h4>{`${formattedComparator} ${threshold}`}</h4>
                   </EuiText>
                 );
               })}

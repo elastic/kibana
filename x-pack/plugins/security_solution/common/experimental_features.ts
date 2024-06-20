@@ -12,9 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  tGridEnabled: true,
-  tGridEventRenderedViewEnabled: true,
-
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
 
@@ -30,11 +27,6 @@ export const allowedExperimentalValues = Object.freeze({
    * @see test/security_solution_api_integration/test_suites/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
-
-  /**
-   * Enables the insights module for related alerts by process ancestry
-   */
-  insightsRelatedAlertsByProcessAncestry: true,
 
   /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:
@@ -84,7 +76,7 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Release: v8.14.0
    */
-  responseActionsSentinelOneV2Enabled: false,
+  responseActionsSentinelOneV2Enabled: true,
 
   /** Enables the `get-file` response action for SentinelOne */
   responseActionsSentinelOneGetFileEnabled: false,
@@ -103,6 +95,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: false,
 
   /**
+   * Enables scan response action on Endpoint
+   */
+  responseActionScanEnabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
@@ -113,30 +110,14 @@ export const allowedExperimentalValues = Object.freeze({
   alertTypeEnabled: false,
 
   /**
-   * Enables expandable flyout in create rule page, alert preview
+   * Disables expandable flyout
    */
-  expandableFlyoutInCreateRuleEnabled: true,
+  expandableFlyoutDisabled: false,
 
   /**
-   * Enables expandable flyout for event type documents
+   * Enables new notes
    */
-  expandableEventFlyoutEnabled: true,
-
-  /**
-   * Enables expandable flyout in timeline
-   */
-  expandableTimelineFlyoutEnabled: true,
-  /*
-
-  /**
-   * Enables new Set of filters on the Alerts page.
-   */
-  alertsPageFiltersEnabled: true,
-
-  /**
-   * Enables the Attack discovery feature and API endpoint
-   */
-  attackDiscoveryEnabled: false,
+  notesEnabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -144,20 +125,15 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables the new user details flyout displayed on the Alerts table.
+   * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
    */
-  newUserDetailsFlyout: true,
+  assistantKnowledgeBaseByDefault: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
-   * To see this section you also need newUserDetailsFlyout flag enabled.
+   * To see this section you also need expandableFlyoutDisabled flag set to false.
    */
   newUserDetailsFlyoutManagedUser: false,
-
-  /**
-   * Enables the new host details flyout displayed on the Alerts table.
-   */
-  newHostDetailsFlyout: true,
 
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
@@ -186,6 +162,11 @@ export const allowedExperimentalValues = Object.freeze({
   disableTimelineSaveTour: false,
 
   /**
+   * Enables alerts suppression for ES|QL rules
+   */
+  alertSuppressionForEsqlRuleEnabled: false,
+
+  /**
    * Enables the risk engine privileges route
    * and associated callout in the UI
    */
@@ -207,6 +188,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
   crowdstrikeDataInAnalyzerEnabled: false,
+
+  /**
+   * Enables experimental JAMF integration data to be available in Analyzer
+   */
+  jamfDataInAnalyzerEnabled: false,
 
   /**
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
@@ -250,12 +236,17 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
-  malwareOnWriteScanOptionAvailable: false,
+  malwareOnWriteScanOptionAvailable: true,
+
+  /**
+   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
+   */
+  unifiedManifestEnabled: false,
 
   /**
    *  Enables Security AI Assistant's Flyout mode
    */
-  aiAssistantFlyoutMode: false,
+  aiAssistantFlyoutMode: true,
 
   /**
    * Enables the new modal for the value list items
@@ -266,6 +257,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new rule's bulk action to manage custom highlighted fields
    */
   bulkCustomHighlightedFieldsEnabled: false,
+
+  /**
+   * Enables the manual rule run
+   */
+  manualRuleRunEnabled: false,
+
+  /**
+   * Adds a new option to filter descendants of a process for Management / Event Filters
+   */
+  filterProcessDescendantsForEventFiltersEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

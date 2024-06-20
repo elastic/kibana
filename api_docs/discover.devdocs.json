@@ -117,10 +117,10 @@
           },
           {
             "parentPluginId": "discover",
-            "id": "def-public.DataDocumentsMsg.textBasedQueryColumns",
+            "id": "def-public.DataDocumentsMsg.esqlQueryColumns",
             "type": "Array",
             "tags": [],
-            "label": "textBasedQueryColumns",
+            "label": "esqlQueryColumns",
             "description": [],
             "signature": [
               {
@@ -138,10 +138,10 @@
           },
           {
             "parentPluginId": "discover",
-            "id": "def-public.DataDocumentsMsg.textBasedHeaderWarning",
+            "id": "def-public.DataDocumentsMsg.esqlHeaderWarning",
             "type": "string",
             "tags": [],
-            "label": "textBasedHeaderWarning",
+            "label": "esqlHeaderWarning",
             "description": [],
             "signature": [
               "string | undefined"
@@ -259,15 +259,16 @@
           },
           {
             "parentPluginId": "discover",
-            "id": "def-public.DiscoverAppState.index",
-            "type": "string",
+            "id": "def-public.DiscoverAppState.dataSource",
+            "type": "CompoundType",
             "tags": [],
-            "label": "index",
+            "label": "dataSource",
             "description": [
-              "\nid of the used data view"
+              "\nThe current data source"
             ],
             "signature": [
-              "string | undefined"
+              "DiscoverDataSource",
+              " | undefined"
             ],
             "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
@@ -1706,7 +1707,7 @@
       "tags": [],
       "label": "DiscoverSetup",
       "description": [],
-      "path": "src/plugins/discover/public/plugin.tsx",
+      "path": "src/plugins/discover/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1729,7 +1730,7 @@
             },
             " | undefined"
           ],
-          "path": "src/plugins/discover/public/plugin.tsx",
+          "path": "src/plugins/discover/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1743,7 +1744,7 @@
           "signature": [
             "() => void"
           ],
-          "path": "src/plugins/discover/public/plugin.tsx",
+          "path": "src/plugins/discover/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1759,7 +1760,7 @@
           "signature": [
             "(projectNavId: string, options: { enabled: boolean; showLogsExplorerTabs: boolean; }) => void"
           ],
-          "path": "src/plugins/discover/public/plugin.tsx",
+          "path": "src/plugins/discover/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1773,7 +1774,7 @@
               "signature": [
                 "string"
               ],
-              "path": "src/plugins/discover/public/plugin.tsx",
+              "path": "src/plugins/discover/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1788,7 +1789,7 @@
               "signature": [
                 "{ enabled: boolean; showLogsExplorerTabs: boolean; }"
               ],
-              "path": "src/plugins/discover/public/plugin.tsx",
+              "path": "src/plugins/discover/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1807,7 +1808,7 @@
       "tags": [],
       "label": "DiscoverStart",
       "description": [],
-      "path": "src/plugins/discover/public/plugin.tsx",
+      "path": "src/plugins/discover/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1830,7 +1831,7 @@
             },
             " | undefined"
           ],
-          "path": "src/plugins/discover/public/plugin.tsx",
+          "path": "src/plugins/discover/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1860,7 +1861,7 @@
             },
             ">"
           ],
-          "path": "src/plugins/discover/public/plugin.tsx",
+          "path": "src/plugins/discover/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -2621,14 +2622,6 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/public/pages/configurations/findings_flyout/overview_tab.tsx"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
               },
               {
                 "plugin": "exploratoryView",

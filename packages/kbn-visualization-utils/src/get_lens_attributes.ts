@@ -50,13 +50,7 @@ export const getLensAttributesFromSuggestion = ({
       i18n.translate('visualizationUtils.config.suggestion.title', {
         defaultMessage: 'New suggestion',
       }),
-    references: [
-      {
-        id: dataView?.id ?? '',
-        name: `textBasedLanguages-datasource-layer-suggestion`,
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     state: {
       datasourceStates,
       filters,

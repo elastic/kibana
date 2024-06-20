@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EsqlInTimelineTrigger } from '../../../../../../actions/constants';
+import { EsqlInTimelineTrigger } from '../../../../../../app/actions/constants';
 export { MockEsqlTabContent } from './esql_tab_content';
 
 export const mockApplyFilterTrigger = {

@@ -417,14 +417,14 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                     'xpack.stackConnectors.components.jira.otherFieldsHelpText',
                     {
                       defaultMessage:
-                        'Custom fields are not validated by the connector. To avoid failed actions, ensure compliance with your Jira policies.',
+                        'Additional fields are not validated by the connector. To avoid failed actions, ensure compliance with your Jira policies.',
                     }
                   )}
                 />
               </>
             }
             onDocumentsChange={(json: string) => {
-              editSubActionProperty('otherFields', json);
+              editSubActionProperty('otherFields', json === '' ? null : json);
             }}
           />
         </EuiFormRow>

@@ -14,6 +14,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -126,7 +127,11 @@ describe('SecurityUsageReportingTask', () => {
     mockTaskManagerSetup = tmSetupMock();
     usageRecord = buildUsageRecord();
     reportUsageSpy = jest.spyOn(usageReportingService, 'reportUsage');
-    meteringCallbackMock = jest.fn().mockResolvedValueOnce([usageRecord]);
+    meteringCallbackMock = jest.fn().mockResolvedValueOnce({
+      latestRecordTimestamp: usageRecord.usage_timestamp,
+      records: [usageRecord],
+      shouldRunAgain: false,
+    });
     taskArgs = buildTaskArgs();
     mockTask = new SecurityUsageReportingTask(taskArgs);
   }
@@ -197,6 +202,15 @@ describe('SecurityUsageReportingTask', () => {
       );
     });
 
+    it('should do nothing if task instance id is outdated', async () => {
+      const result = await runTask({ ...buildMockTaskInstance(), id: 'old-id' });
+
+      expect(result).toEqual(getDeleteTaskRunResult());
+
+      expect(reportUsageSpy).not.toHaveBeenCalled();
+      expect(meteringCallbackMock).not.toHaveBeenCalled();
+    });
+
     describe('lastSuccessfulReport', () => {
       it('should set lastSuccessfulReport correctly if report success', async () => {
         reportUsageSpy.mockResolvedValueOnce({ status: 201 });
@@ -236,36 +250,6 @@ describe('SecurityUsageReportingTask', () => {
           const newLastSuccessfulReport = task?.state.lastSuccessfulReport;
 
           expect(newLastSuccessfulReport).toEqual(expect.any(String));
-        });
-
-        describe('and lookBackLimitMinutes is set', () => {
-          it('should limit lastSuccessfulReport if past threshold', async () => {
-            taskArgs = buildTaskArgs({ options: { lookBackLimitMinutes: 5 } });
-            mockTask = new SecurityUsageReportingTask(taskArgs);
-
-            const lastSuccessfulReport = new Date(new Date().setMinutes(-30)).toISOString();
-            const taskInstance = buildMockTaskInstance({ state: { lastSuccessfulReport } });
-            const task = await runTask(taskInstance, 1);
-            const newLastSuccessfulReport = new Date(task?.state.lastSuccessfulReport as string);
-
-            // should be ~5 minutes so asserting between 4-6 minutes ago
-            const sixMinutesAgo = new Date().setMinutes(-6);
-            expect(newLastSuccessfulReport.getTime()).toBeGreaterThanOrEqual(sixMinutesAgo);
-            const fourMinutesAgo = new Date().setMinutes(-4);
-            expect(newLastSuccessfulReport.getTime()).toBeLessThanOrEqual(fourMinutesAgo);
-          });
-
-          it('should NOT limit lastSuccessfulReport if NOT past threshold', async () => {
-            taskArgs = buildTaskArgs({ options: { lookBackLimitMinutes: 30 } });
-            mockTask = new SecurityUsageReportingTask(taskArgs);
-
-            const lastSuccessfulReport = new Date(new Date().setMinutes(-15)).toISOString();
-            const taskInstance = buildMockTaskInstance({ state: { lastSuccessfulReport } });
-            const task = await runTask(taskInstance, 1);
-            const newLastSuccessfulReport = task?.state.lastSuccessfulReport;
-
-            expect(newLastSuccessfulReport).toEqual(taskInstance.state.lastSuccessfulReport);
-          });
         });
       });
     });

@@ -41,6 +41,7 @@ export {
   enableComparisonByDefault,
   apmServiceGroupMaxNumberOfServices,
   enableInfrastructureHostsView,
+  enableInfrastructureContainerAssetView,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
 } from '../common/ui_settings_keys';
@@ -77,7 +78,6 @@ export { useCreateRule } from './hooks/use_create_rule';
 
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { buildEsQuery } from './utils/build_es_query';
-export { KibanaReactStorybookDecorator } from './utils/kibana_react.storybook_decorator';
 
 export type {
   ObservabilityRuleTypeFormatter,
@@ -99,3 +99,6 @@ export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_valu
 export { WithKueryAutocompletion } from './components/rule_kql_filter/with_kuery_autocompletion';
 export { AutocompleteField } from './components/rule_kql_filter/autocomplete_field';
 export { RuleFlyoutKueryBar } from './components/rule_kql_filter/kuery_bar';
+export { RuleConditionChart } from './components/rule_condition_chart/rule_condition_chart';
+export { getGroupFilters } from '../common/custom_threshold_rule/helpers/get_group';
+export type { GenericAggType } from './components/rule_condition_chart/rule_condition_chart';

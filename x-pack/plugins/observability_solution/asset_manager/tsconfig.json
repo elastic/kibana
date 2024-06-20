@@ -26,6 +26,13 @@
     "@kbn/metrics-data-access-plugin",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-api-server-mocks"
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/entities-schema",
+    "@kbn/es-query",
+    "@kbn/zod-helpers",
+    "@kbn/security-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/logging-mocks",
   ]
 }

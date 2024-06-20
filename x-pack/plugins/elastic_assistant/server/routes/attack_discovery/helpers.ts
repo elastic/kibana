@@ -6,17 +6,18 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
+import { Logger } from '@kbn/logging';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   AttackDiscoveryPostRequestBody,
   ExecuteConnectorRequestBody,
   Replacements,
 } from '@kbn/elastic-assistant-common';
-import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { v4 as uuidv4 } from 'uuid';
+import { ActionsClientLlm } from '@kbn/langchain/server';
 
-import { AssistantToolParams, ElasticAssistantApiRequestHandlerContext } from '../../types';
+import { AssistantToolParams } from '../../types';
 
 export const REQUIRED_FOR_ATTACK_DISCOVERY: AnonymizationFieldResponse[] = [
   {
@@ -37,8 +38,10 @@ export const getAssistantToolParams = ({
   alertsIndexPattern,
   anonymizationFields,
   esClient,
+  langChainTimeout,
   latestReplacements,
   llm,
+  logger,
   onNewReplacements,
   request,
   size,
@@ -46,8 +49,10 @@ export const getAssistantToolParams = ({
   alertsIndexPattern: string;
   anonymizationFields?: AnonymizationFieldResponse[];
   esClient: ElasticsearchClient;
+  langChainTimeout: number;
   latestReplacements: Replacements;
   llm: ActionsClientLlm;
+  logger: Logger;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<
     unknown,
@@ -61,22 +66,12 @@ export const getAssistantToolParams = ({
   isEnabledKnowledgeBase: false, // not required for attack discovery
   chain: undefined, // not required for attack discovery
   esClient,
+  langChainTimeout,
   llm,
+  logger,
   modelExists: false, // not required for attack discovery
   onNewReplacements,
   replacements: latestReplacements,
   request,
   size,
 });
-
-export const isAttackDiscoveryFeatureEnabled = ({
-  assistantContext,
-  pluginName,
-}: {
-  assistantContext: ElasticAssistantApiRequestHandlerContext;
-  pluginName: string;
-}): boolean => {
-  const registeredFeatures = assistantContext.getRegisteredFeatures(pluginName);
-
-  return registeredFeatures.attackDiscoveryEnabled === true;
-};

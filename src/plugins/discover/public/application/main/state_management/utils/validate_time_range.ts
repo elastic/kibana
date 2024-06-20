@@ -24,7 +24,7 @@ export function validateTimeRange(
         defaultMessage: `Invalid time range`,
       }),
       text: i18n.translate('discover.notifications.invalidTimeRangeText', {
-        defaultMessage: `The provided time range is invalid. (from: '{from}', to: '{to}')`,
+        defaultMessage: `The provided time range is invalid. (from: ''{from}'', to: ''{to}'')`,
         values: {
           from,
           to,

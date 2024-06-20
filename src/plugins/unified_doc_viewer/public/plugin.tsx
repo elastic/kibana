@@ -18,6 +18,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
@@ -50,6 +51,7 @@ export interface UnifiedDocViewerStartDeps {
   data: DataPublicPluginStart;
   discoverShared: DiscoverSharedPublicStart;
   fieldFormats: FieldFormatsStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export class UnifiedDocViewerPublicPlugin
@@ -82,7 +84,7 @@ export class UnifiedDocViewerPublicPlugin
 
         const LazyDocView = isLegacyTableEnabled({
           uiSettings,
-          isTextBasedQueryMode: Array.isArray(textBasedHits),
+          isEsqlMode: Array.isArray(textBasedHits),
         })
           ? LazyDocViewerLegacyTable
           : LazyDocViewerTable;
@@ -97,7 +99,7 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView, textBasedHits }) => {
+      component: ({ hit, dataView, textBasedHits, decreaseAvailableHeightBy }) => {
         return (
           <LazySourceViewer
             index={hit.raw._index}
@@ -105,6 +107,7 @@ export class UnifiedDocViewerPublicPlugin
             dataView={dataView}
             textBasedHits={textBasedHits}
             hasLineNumbers
+            decreaseAvailableHeightBy={decreaseAvailableHeightBy}
             onRefresh={() => {}}
           />
         );
@@ -118,7 +121,7 @@ export class UnifiedDocViewerPublicPlugin
 
   public start(core: CoreStart, deps: UnifiedDocViewerStartDeps) {
     const { analytics, uiSettings } = core;
-    const { data, discoverShared, fieldFormats } = deps;
+    const { data, discoverShared, fieldFormats, fieldsMetadata } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
@@ -128,6 +131,7 @@ export class UnifiedDocViewerPublicPlugin
       data,
       discoverShared,
       fieldFormats,
+      fieldsMetadata,
       storage,
       uiSettings,
       unifiedDocViewer,

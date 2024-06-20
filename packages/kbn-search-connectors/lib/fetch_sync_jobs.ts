@@ -9,7 +9,7 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { ConnectorsAPISyncJobResponse } from '..';
-import { ConnectorSyncJob } from '../types/connectors';
+import { ConnectorSyncJob, SyncStatus } from '../types/connectors';
 import { Paginate } from '../types/pagination';
 
 export const fetchSyncJobs = async (
@@ -17,13 +17,14 @@ export const fetchSyncJobs = async (
   connectorId?: string,
   from: number = 0,
   size: number = 100,
-  syncJobType: 'content' | 'access_control' | 'all' = 'all'
+  syncJobType: 'content' | 'access_control' | 'all' = 'all',
+  syncStatus?: SyncStatus
 ): Promise<Paginate<ConnectorSyncJob>> => {
   const querystring = `from=${from}&size=${size}${
     connectorId ? '&connector_id=' + connectorId : ''
   }${syncJobType === 'content' ? '&job_type=full,incremental' : ''}${
     syncJobType === 'access_control' ? '&job_type=access_control' : ''
-  }`;
+  }${syncStatus ? '&status=' + syncStatus : ''}`;
   const result = await client.transport.request<ConnectorsAPISyncJobResponse>({
     method: 'GET',
     path: `/_connector/_sync_job`,

@@ -8,12 +8,13 @@
 
 import type { Router } from '@kbn/core-http-router-server-internal';
 import { getResponseValidation } from '@kbn/core-http-server';
-import { ALLOWED_PUBLIC_VERSION as LATEST_SERVERLESS_VERSION } from '@kbn/core-http-router-server-internal';
+import { ALLOWED_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
 import {
-  assignToPathsObject,
+  assignToPaths,
   extractContentType,
+  extractTags,
   extractValidationSchemaFromRoute,
   getPathParameters,
   getVersionedContentTypeString,
@@ -21,19 +22,18 @@ import {
   prepareRoutes,
 } from './util';
 import type { OperationIdCounter } from './operation_id_counter';
+import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 
 export const processRouter = (
   appRouter: Router,
   converter: OasConverter,
   getOpId: OperationIdCounter,
-  pathStartsWith?: string
+  filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
-  const routes = prepareRoutes(
-    appRouter.getRoutes({ excludeVersionedRoutes: true }),
-    pathStartsWith
-  );
-
   const paths: OpenAPIV3.PathsObject = {};
+  if (filters?.version && filters.version !== SERVERLESS_VERSION_2023_10_31) return { paths };
+  const routes = prepareRoutes(appRouter.getRoutes({ excludeVersionedRoutes: true }), filters);
+
   for (const route of routes) {
     try {
       const pathParams = getPathParameters(route.path);
@@ -53,29 +53,35 @@ export const processRouter = (
           queryObjects = converter.convertQuery(reqQuery);
         }
         parameters = [
-          getVersionedHeaderParam(LATEST_SERVERLESS_VERSION, [LATEST_SERVERLESS_VERSION]),
+          getVersionedHeaderParam(SERVERLESS_VERSION_2023_10_31, [SERVERLESS_VERSION_2023_10_31]),
           ...pathObjects,
           ...queryObjects,
         ];
       }
 
-      const path: OpenAPIV3.PathItemObject = {
-        [route.method]: {
-          requestBody: !!validationSchemas?.body
-            ? {
-                content: {
-                  [getVersionedContentTypeString(LATEST_SERVERLESS_VERSION, contentType)]: {
-                    schema: converter.convert(validationSchemas.body),
-                  },
+      const operation: OpenAPIV3.OperationObject = {
+        summary: route.options.summary ?? '',
+        tags: route.options.tags ? extractTags(route.options.tags) : [],
+        ...(route.options.description ? { description: route.options.description } : {}),
+        ...(route.options.deprecated ? { deprecated: route.options.deprecated } : {}),
+        requestBody: !!validationSchemas?.body
+          ? {
+              content: {
+                [getVersionedContentTypeString(SERVERLESS_VERSION_2023_10_31, contentType)]: {
+                  schema: converter.convert(validationSchemas.body),
                 },
-              }
-            : undefined,
-          responses: extractResponses(route, converter),
-          parameters,
-          operationId: getOpId(route.path),
-        },
+              },
+            }
+          : undefined,
+        responses: extractResponses(route, converter),
+        parameters,
+        operationId: getOpId(route.path),
       };
-      assignToPathsObject(paths, route.path, path);
+
+      const path: OpenAPIV3.PathItemObject = {
+        [route.method]: operation,
+      };
+      assignToPaths(paths, route.path, path);
     } catch (e) {
       // Enrich the error message with a bit more context
       e.message = `Error generating OpenAPI for route '${route.path}': ${e.message}`;
@@ -99,11 +105,10 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
         const oasSchema = converter.convert(schema.body());
         acc[statusCode] = {
           ...acc[statusCode],
-          description: route.options.description ?? 'No description',
           content: {
             ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
             [getVersionedContentTypeString(
-              LATEST_SERVERLESS_VERSION,
+              SERVERLESS_VERSION_2023_10_31,
               schema.bodyContentType ? [schema.bodyContentType] : contentType
             )]: {
               schema: oasSchema,

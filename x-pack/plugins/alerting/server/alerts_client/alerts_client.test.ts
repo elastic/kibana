@@ -313,7 +313,6 @@ describe('Alerts Client', () => {
           ruleRunMetricsStore,
           shouldLogAlerts: false,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-          notifyOnActionGroupChange: true,
           maintenanceWindowIds: [],
           alertDelay: 0,
         };

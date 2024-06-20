@@ -22,7 +22,7 @@ import {
   safeExpandLiteralStrings,
   languageForContentType,
 } from '../utilities';
-import { useResizeCheckerUtils } from './use_resize_checker_utils';
+import { useResizeCheckerUtils } from './hooks';
 
 export const MonacoEditorOutput: FunctionComponent = () => {
   const { settings: readOnlySettings } = useEditorReadContext();
@@ -93,6 +93,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         </label>
       </EuiScreenReaderOnly>
       <CodeEditor
+        dataTestSubj={'consoleMonacoOutput'}
         languageId={mode}
         value={value}
         fullWidth={true}

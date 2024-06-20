@@ -16,14 +16,14 @@ import { useNavigationProps } from '../../../hooks/use_navigation_props';
 interface TableRowDetailsProps {
   children: JSX.Element;
   colLength: number;
-  rowIndex: string;
-  rowId: string;
+  rowIndex: string | undefined;
+  rowId: string | undefined;
   columns: string[];
   isTimeBased: boolean;
   dataView: DataView;
   filters?: Filter[];
   savedSearchId?: string;
-  isPlainRecord?: boolean;
+  isEsqlMode?: boolean;
 }
 
 export const TableRowDetails = ({
@@ -36,7 +36,7 @@ export const TableRowDetails = ({
   columns,
   filters,
   savedSearchId,
-  isPlainRecord,
+  isEsqlMode,
 }: TableRowDetailsProps) => {
   const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } = useNavigationProps(
     {
@@ -58,15 +58,15 @@ export const TableRowDetails = ({
               <EuiIcon type="folderOpen" size="m" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs" data-test-subj="docTableRowDetailsTitle">
+              <EuiTitle size="xxs" data-test-subj="docViewerRowDetailsTitle">
                 <h4>
-                  {isPlainRecord && (
+                  {isEsqlMode && (
                     <FormattedMessage
-                      id="discover.grid.tableRow.textBasedDetailHeading"
+                      id="discover.grid.tableRow.esqlDetailHeading"
                       defaultMessage="Expanded result"
                     />
                   )}
-                  {!isPlainRecord && (
+                  {!isEsqlMode && (
                     <FormattedMessage
                       id="discover.docTable.tableRow.detailHeading"
                       defaultMessage="Expanded document"
@@ -77,7 +77,7 @@ export const TableRowDetails = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {!isPlainRecord && (
+        {!isEsqlMode && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>

@@ -80,7 +80,7 @@ const policy = {
   name: 'Elastic APM',
   namespace: 'default',
   enabled: true,
-  policy_id: 'policy-elastic-agent-on-cloud',
+  policy_ids: ['policy-elastic-agent-on-cloud'],
   package: {
     name: 'apm',
     version: '8.3.0',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
+import type { RootSchema } from '@kbn/core/public';
 import type { TelemetryEventTypes } from '../../constants';
 
 export interface ReportAttackDiscoveriesGeneratedParams {
@@ -13,6 +13,7 @@ export interface ReportAttackDiscoveriesGeneratedParams {
   provider?: string;
   model?: string;
   durationMs: number;
+  alertsContextCount: number;
   alertsCount: number;
   configuredAlertsCount: number;
 }

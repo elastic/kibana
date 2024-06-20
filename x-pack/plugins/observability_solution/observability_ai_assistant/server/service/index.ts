@@ -276,12 +276,15 @@ export class ObservabilityAIAssistantService {
     // user will not be found when executed from system connector context
     const user = plugins.security.authc.getCurrentUser(request);
 
+    const soClient = coreStart.savedObjects.getScopedClient(request);
+
     const basePath = coreStart.http.basePath.get(request);
 
     const { spaceId } = getSpaceIdFromPath(basePath, coreStart.http.basePath.serverBasePath);
 
     return new ObservabilityAIAssistantClient({
       actionsClient: await plugins.actions.getActionsClientWithRequest(request),
+      uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
       namespace: spaceId,
       esClient: {
         asInternalUser: coreStart.elasticsearch.client.asInternalUser,

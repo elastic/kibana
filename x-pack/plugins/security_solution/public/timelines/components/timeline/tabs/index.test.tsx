@@ -16,9 +16,18 @@ import { TimelineType } from '../../../../../common/api/timeline';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { render, screen, waitFor } from '@testing-library/react';
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  return {
+    ...original,
+    useLocation: () => ({}),
+  };
+});
+
 jest.mock('../../../../common/hooks/esql/use_esql_availability', () => ({
   useEsqlAvailability: jest.fn().mockReturnValue({
-    isESQLTabInTimelineEnabled: true,
+    isEsqlAdvancedSettingEnabled: true,
+    isTimelineEsqlEnabledByFeatureFlag: true,
   }),
 }));
 
@@ -44,38 +53,79 @@ describe('Timeline', () => {
       expect(screen.getByTestId(esqlTabSubj)).toBeVisible();
     });
 
-    it('should not show the esql tab when the advanced setting is disabled', async () => {
-      useEsqlAvailabilityMock.mockReturnValue({
-        isESQLTabInTimelineEnabled: false,
-      });
-      render(
-        <TestProviders>
-          <TabsContent {...defaultProps} />
-        </TestProviders>
-      );
+    describe('no existing esql query is present', () => {
+      it('should not show the esql tab when the advanced setting is disabled', async () => {
+        useEsqlAvailabilityMock.mockReturnValue({
+          isEsqlAdvancedSettingEnabled: false,
+          isTimelineEsqlEnabledByFeatureFlag: true,
+        });
+        render(
+          <TestProviders>
+            <TabsContent {...defaultProps} />
+          </TestProviders>
+        );
 
-      await waitFor(() => {
-        expect(screen.queryByTestId(esqlTabSubj)).toBeNull();
+        await waitFor(() => {
+          expect(screen.queryByTestId(esqlTabSubj)).toBeNull();
+        });
+      });
+      it('should not show the esql tab when the esql is disabled by feature flag', async () => {
+        useEsqlAvailabilityMock.mockReturnValue({
+          isEsqlAdvancedSettingEnabled: false,
+          isTimelineEsqlEnabledByFeatureFlag: false,
+        });
+        render(
+          <TestProviders>
+            <TabsContent {...defaultProps} />
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          expect(screen.queryByTestId(esqlTabSubj)).toBeNull();
+        });
       });
     });
 
-    it('should show the esql tab when the advanced setting is disabled, but an esql query is present', async () => {
-      useEsqlAvailabilityMock.mockReturnValue({
-        isESQLTabInTimelineEnabled: false,
+    describe('existing esql query is present', () => {
+      let mockStore: ReturnType<typeof createMockStore>;
+      beforeEach(() => {
+        const stateWithSavedSearchId = structuredClone(mockGlobalState);
+        stateWithSavedSearchId.timeline.timelineById[TimelineId.test].savedSearchId = 'test-id';
+        mockStore = createMockStore(stateWithSavedSearchId);
       });
 
-      const stateWithSavedSearchId = structuredClone(mockGlobalState);
-      stateWithSavedSearchId.timeline.timelineById[TimelineId.test].savedSearchId = 'test-id';
-      const mockStore = createMockStore(stateWithSavedSearchId);
+      it('should show the esql tab when the advanced setting is disabled', async () => {
+        useEsqlAvailabilityMock.mockReturnValue({
+          isESQLTabInTimelineEnabled: false,
+          isTimelineEsqlEnabledByFeatureFlag: true,
+        });
 
-      render(
-        <TestProviders store={mockStore}>
-          <TabsContent {...defaultProps} />
-        </TestProviders>
-      );
+        render(
+          <TestProviders store={mockStore}>
+            <TabsContent {...defaultProps} />
+          </TestProviders>
+        );
 
-      await waitFor(() => {
-        expect(screen.queryByTestId(esqlTabSubj)).toBeVisible();
+        await waitFor(() => {
+          expect(screen.queryByTestId(esqlTabSubj)).toBeVisible();
+        });
+      });
+
+      it('should not show the esql tab when the esql is disabled by the feature flag', async () => {
+        useEsqlAvailabilityMock.mockReturnValue({
+          isESQLTabInTimelineEnabled: true,
+          isTimelineEsqlEnabledByFeatureFlag: false,
+        });
+
+        render(
+          <TestProviders store={mockStore}>
+            <TabsContent {...defaultProps} />
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          expect(screen.queryByTestId(esqlTabSubj)).toBeNull();
+        });
       });
     });
   });

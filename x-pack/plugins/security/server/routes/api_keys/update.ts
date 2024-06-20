@@ -9,7 +9,12 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
-import { elasticsearchRoleSchema, getKibanaRoleSchema } from '@kbn/security-plugin-types-server';
+import {
+  crossClusterApiKeySchema,
+  elasticsearchRoleSchema,
+  getKibanaRoleSchema,
+  restApiKeySchema,
+} from '@kbn/security-plugin-types-server';
 
 import type { RouteDefinitionParams } from '..';
 import { UpdateApiKeyValidationError } from '../../authentication/api_keys/api_keys';
@@ -29,56 +34,29 @@ export type UpdateAPIKeyParams =
   | UpdateCrossClusterAPIKeyParams
   | UpdateRestAPIKeyWithKibanaPrivilegesParams;
 
-export type UpdateRestAPIKeyParams = TypeOf<typeof restApiKeySchema>;
-export type UpdateCrossClusterAPIKeyParams = TypeOf<typeof crossClusterApiKeySchema>;
+const updateRestApiKeySchema = restApiKeySchema.extends({
+  name: null,
+  id: schema.string(),
+});
+
+const updateCrossClusterApiKeySchema = crossClusterApiKeySchema.extends({
+  name: null,
+  id: schema.string(),
+});
+
+export type UpdateRestAPIKeyParams = TypeOf<typeof updateRestApiKeySchema>;
+export type UpdateCrossClusterAPIKeyParams = TypeOf<typeof updateCrossClusterApiKeySchema>;
 export type UpdateRestAPIKeyWithKibanaPrivilegesParams = TypeOf<
   ReturnType<typeof getRestApiKeyWithKibanaPrivilegesSchema>
 >;
-
-const restApiKeySchema = schema.object({
-  type: schema.maybe(schema.literal('rest')),
-  id: schema.string(),
-  role_descriptors: schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }), {
-    defaultValue: {},
-  }),
-  metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-});
-
-const crossClusterApiKeySchema = restApiKeySchema.extends({
-  type: schema.literal('cross_cluster'),
-  role_descriptors: null,
-  access: schema.object(
-    {
-      search: schema.maybe(
-        schema.arrayOf(
-          schema.object(
-            {
-              names: schema.arrayOf(schema.string()),
-            },
-            { unknowns: 'allow' }
-          )
-        )
-      ),
-      replication: schema.maybe(
-        schema.arrayOf(
-          schema.object(
-            {
-              names: schema.arrayOf(schema.string()),
-            },
-            { unknowns: 'allow' }
-          )
-        )
-      ),
-    },
-    { unknowns: 'allow' }
-  ),
-});
 
 const getRestApiKeyWithKibanaPrivilegesSchema = (
   getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
 ) =>
   restApiKeySchema.extends({
     role_descriptors: null,
+    name: null,
+    id: schema.string(),
     kibana_role_descriptors: schema.recordOf(
       schema.string(),
       schema.object({
@@ -106,8 +84,8 @@ export function defineUpdateApiKeyRoutes({
       path: '/internal/security/api_key',
       validate: {
         body: schema.oneOf([
-          restApiKeySchema,
-          crossClusterApiKeySchema,
+          updateRestApiKeySchema,
+          updateCrossClusterApiKeySchema,
           bodySchemaWithKibanaPrivileges,
         ]),
       },

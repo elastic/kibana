@@ -13,7 +13,6 @@ import type { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   capabilities: [`${SERVER_APP_ID}.show`],
-  experimentalKey: 'attackDiscoveryEnabled',
   globalNavPosition: 4,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.attackDiscovery', {
