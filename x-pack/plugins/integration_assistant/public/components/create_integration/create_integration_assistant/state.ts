@@ -7,7 +7,6 @@
 import { createContext, useContext } from 'react';
 import type { Pipeline, Docs } from '../../../../common';
 import type { AIConnector, IntegrationSettings } from './types';
-export { initialState } from './fake_state';
 
 export interface State {
   step: number;
@@ -20,13 +19,13 @@ export interface State {
   };
 }
 
-// export const initialState: State = {
-//   step: 1,
-//   connectorId: undefined,
-//   integrationSettings: undefined,
-//   isGenerating: false,
-//   result: undefined,
-// };
+export const initialState: State = {
+  step: 1,
+  connectorId: undefined,
+  integrationSettings: undefined,
+  isGenerating: false,
+  result: undefined,
+};
 
 type Action =
   | { type: 'SET_STEP'; payload: State['step'] }

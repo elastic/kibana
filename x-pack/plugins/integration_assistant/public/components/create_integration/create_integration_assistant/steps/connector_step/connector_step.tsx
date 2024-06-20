@@ -7,7 +7,15 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPopover, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiLink,
+  EuiCallOut,
+  EuiToolTip,
+} from '@elastic/eui';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { ConnectorSelector } from './connector_selector';
@@ -22,21 +30,24 @@ import * as i18n from './translations';
  */
 const AllowedActionTypeIds = ['.bedrock'];
 
+const useCanCreateConnectors = () => {
+  const { capabilities } = useKibana().services.application;
+  return Boolean(capabilities.actions?.save);
+};
+
 interface ConnectorStepProps {
   connectorId: string | undefined;
 }
 export const ConnectorStep = React.memo<ConnectorStepProps>(({ connectorId }) => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http, notifications } = useKibana().services;
+  const canCreateConnectors = useCanCreateConnectors();
   const { setConnectorId } = useActions();
   const [connectors, setConnectors] = useState<AIConnector[]>();
   const {
     isLoading,
     data: aiConnectors,
     refetch: refetchConnectors,
-  } = useLoadConnectors({ http, toasts });
+  } = useLoadConnectors({ http, toasts: notifications.toasts });
 
   useEffect(() => {
     if (aiConnectors != null) {
@@ -72,11 +83,15 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connectorId }) =>
                 <EuiFlexGroup alignItems="stretch" direction="column" gutterSize="s">
                   <ConnectorSelector connectors={connectors} selectedConnectorId={connectorId} />
                 </EuiFlexGroup>
-              ) : (
+              ) : canCreateConnectors ? (
                 <ConnectorSetup
                   actionTypeIds={AllowedActionTypeIds}
                   onConnectorSaved={onConnectorSaved}
                 />
+              ) : (
+                <EuiCallOut iconType="iInCircle" title={i18n.PRIVILEGES_MISSING_TITLE}>
+                  {i18n.CREATE_CONNECTOR_MISSING_PRIVILEGES}
+                </EuiCallOut>
               )}
             </>
           )}
@@ -91,6 +106,7 @@ interface CreateConnectorPopoverProps {
   onConnectorSaved: () => void;
 }
 const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(({ onConnectorSaved }) => {
+  const canCreateConnectors = useCanCreateConnectors();
   const [isOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -100,6 +116,13 @@ const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(({ onConn
     closePopover();
   }, [onConnectorSaved, closePopover]);
 
+  if (!canCreateConnectors) {
+    return (
+      <EuiToolTip content={i18n.CREATE_CONNECTOR_MISSING_PRIVILEGES}>
+        <EuiLink color="subdued">{i18n.CREATE_CONNECTOR}</EuiLink>
+      </EuiToolTip>
+    );
+  }
   return (
     <EuiPopover
       button={<EuiLink onClick={openPopover}>{i18n.CREATE_CONNECTOR}</EuiLink>}
