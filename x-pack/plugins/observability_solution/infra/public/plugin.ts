@@ -47,6 +47,10 @@ import type {
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 import type { LogStreamSerializedState } from './components/log_stream/types';
+import {
+  logStreamEmbeddableDisplayName,
+  LogStreamPanelActionMenuItem,
+} from './components/log_stream_panel_action_menu_item';
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
@@ -126,6 +130,7 @@ export class Plugin implements InfraClientPluginClass {
               ...(capabilities.logs.show
                 ? [
                     {
+                      isBetaFeature: true,
                       label: 'Logs',
                       sortKey: 200,
                       entries: [
@@ -133,7 +138,6 @@ export class Plugin implements InfraClientPluginClass {
                           label: 'Explorer',
                           app: 'observability-logs-explorer',
                           path: '/',
-                          isBetaFeature: true,
                         },
                         ...(this.config.featureFlags.logsUIEnabled
                           ? [
@@ -209,6 +213,7 @@ export class Plugin implements InfraClientPluginClass {
         euiIconType: 'logoObservability',
         order: 8100,
         appRoute: '/app/logs',
+        visibleIn: ['globalSearch'],
         // !! Need to be kept in sync with the routes in x-pack/plugins/observability_solution/infra/public/pages/logs/page_content.tsx
         deepLinks: [
           {
@@ -400,10 +405,8 @@ export class Plugin implements InfraClientPluginClass {
 
     plugins.uiActions.registerAction<EmbeddableApiContext>({
       id: ADD_LOG_STREAM_ACTION_ID,
-      getDisplayName: () =>
-        i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
-          defaultMessage: 'Log stream',
-        }),
+      MenuItem: LogStreamPanelActionMenuItem,
+      getDisplayName: () => logStreamEmbeddableDisplayName,
       getDisplayNameTooltip: () =>
         i18n.translate('xpack.infra.logStreamEmbeddable.description', {
           defaultMessage: 'Add a table of live streaming logs.',

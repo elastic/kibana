@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React from 'react';
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import type {
@@ -48,7 +49,11 @@ export const getAddPanelActionMenuItems = (
   };
 
   const getMenuItem = (item: Action<object>) => {
-    const actionName = item.getDisplayName(context);
+    const actionName = item.MenuItem ? (
+      <item.MenuItem context={context} />
+    ) : (
+      item.getDisplayName(context)
+    );
 
     return {
       name: actionName,
