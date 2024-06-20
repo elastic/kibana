@@ -49,7 +49,7 @@ export interface DataControlFetchContext {
 }
 
 export type ControlGroupApi = PresentationContainer &
-  DefaultEmbeddableApi<ControlGroupSerializedState> &
+  DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
   PublishesFilters &
   PublishesDataViews &
   HasSerializedChildState<ControlPanelState> &
