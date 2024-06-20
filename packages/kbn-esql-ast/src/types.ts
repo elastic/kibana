@@ -10,6 +10,8 @@ export type ESQLAst = ESQLAstCommand[];
 
 export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
 
+export type ESQLAstNode = ESQLAstCommand | ESQLAstItem;
+
 export type ESQLSingleAstItem =
   | ESQLFunction
   | ESQLCommandOption
@@ -21,6 +23,8 @@ export type ESQLSingleAstItem =
   | ESQLCommandMode
   | ESQLInlineCast
   | ESQLUnknownItem;
+
+export type ESQLAstField = ESQLFunction | ESQLColumn;
 
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
@@ -42,9 +46,9 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
 }
 
 export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
-  indices: ESQLSource[];
-  aggregates?: ESQLAstItem[];
-  grouping?: ESQLAstItem[];
+  sources: ESQLSource[];
+  aggregates?: ESQLAstField[];
+  grouping?: ESQLAstField[];
 }
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {
@@ -107,7 +111,8 @@ export type ESQLLiteral =
   | ESQLNumberLiteral
   | ESQLBooleanLiteral
   | ESQLNullLiteral
-  | ESQLStringLiteral;
+  | ESQLStringLiteral
+  | ESQLParamLiteral<string>;
 
 // @internal
 export interface ESQLNumberLiteral extends ESQLAstBaseItem {
@@ -135,6 +140,39 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'string';
   value: string;
+}
+
+// @internal
+export interface ESQLParamLiteral<ParamType extends string = string> extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: 'param';
+  paramType: ParamType;
+  value?: string | number;
+}
+
+/**
+ * *Unnamed* parameter is not named, just a question mark "?".
+ *
+ * @internal
+ */
+export type ESQLUnnamedParamLiteral = ESQLParamLiteral<'unnamed'>;
+
+/**
+ * *Named* parameter is a question mark followed by a name "?name".
+ *
+ * @internal
+ */
+export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
+  value: string;
+}
+
+/**
+ * *Positional* parameter is a question mark followed by a number "?1".
+ *
+ * @internal
+ */
+export interface ESQLPositionalParamLiteral extends ESQLParamLiteral<'positional'> {
+  value: number;
 }
 
 export interface ESQLMessage {

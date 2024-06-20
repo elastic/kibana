@@ -44,7 +44,7 @@ import {
 import { getPosition } from './ast_position_utils';
 import {
   collectAllSourceIdentifiers,
-  collectAllFieldsStatements,
+  collectAllFields,
   visitByOption,
   collectAllColumnIdentifiers,
   visitRenameClauses,
@@ -120,7 +120,7 @@ export class AstListener implements ESQLParserListener {
   exitRowCommand(ctx: RowCommandContext) {
     const command = createCommand('row', ctx);
     this.ast.push(command);
-    command.args.push(...collectAllFieldsStatements(ctx.fields()));
+    command.args.push(...collectAllFields(ctx.fields()));
   }
 
   /**
@@ -153,20 +153,20 @@ export class AstListener implements ESQLParserListener {
       ...createAstBaseItem('metrics', ctx),
       type: 'command',
       args: [],
-      indices: ctx
+      sources: ctx
         .getTypedRuleContexts(IndexIdentifierContext)
         .map((sourceCtx) => createSource(sourceCtx)),
     };
     this.ast.push(node);
-    const aggregates = collectAllFieldsStatements(ctx.fields(0));
-    const grouping = collectAllFieldsStatements(ctx.fields(1));
+    const aggregates = collectAllFields(ctx.fields(0));
+    const grouping = collectAllFields(ctx.fields(1));
     if (aggregates && aggregates.length) {
       node.aggregates = aggregates;
     }
     if (grouping && grouping.length) {
       node.grouping = grouping;
     }
-    node.args.push(...node.indices, ...aggregates, ...grouping);
+    node.args.push(...node.sources, ...aggregates, ...grouping);
   }
 
   /**
@@ -176,7 +176,7 @@ export class AstListener implements ESQLParserListener {
   exitEvalCommand(ctx: EvalCommandContext) {
     const commandAst = createCommand('eval', ctx);
     this.ast.push(commandAst);
-    commandAst.args.push(...collectAllFieldsStatements(ctx.fields()));
+    commandAst.args.push(...collectAllFields(ctx.fields()));
   }
 
   /**
@@ -189,7 +189,7 @@ export class AstListener implements ESQLParserListener {
 
     // STATS expression is optional
     if (ctx._stats) {
-      command.args.push(...collectAllFieldsStatements(ctx.fields(0)));
+      command.args.push(...collectAllFields(ctx.fields(0)));
     }
     if (ctx._grouping) {
       command.args.push(...visitByOption(ctx, ctx._stats ? ctx.fields(1) : ctx.fields(0)));
