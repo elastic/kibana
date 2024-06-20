@@ -7,6 +7,8 @@
 
 import type { ResponseActionAgentType } from '../../endpoint/service/response_actions/constants';
 
+// FIXME:PT Reminder - remove this?
+
 export interface ThirdPartyAgentInfo {
   agent: {
     id: string;
