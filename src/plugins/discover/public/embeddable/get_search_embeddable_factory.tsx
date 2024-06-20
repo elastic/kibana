@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
@@ -123,13 +124,15 @@ export const getSearchEmbeddableFactory = ({
           savedObjectId: savedObjectId$,
           defaultPanelTitle: defaultPanelTitle$,
           defaultPanelDescription: defaultPanelDescription$,
-          // getByValueRuntimeSnapshot: () => {
-          //   const savedSearch = searchEmbeddableApi.getSavedSearch();
-          //   return {
-          //     ...omit(savedSearch, 'searchSource'),
-          //     serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
-          //   };
-          // },
+          getByValueRuntimeSnapshot: () => {
+            const savedSearch = searchEmbeddable.api.savedSearch$.getValue();
+            return {
+              ...serializeTitles(),
+              ...timeRange.serialize(),
+              ...omit(savedSearch, 'searchSource'),
+              serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
+            };
+          },
           hasTimeRange: () => {
             const fetchContext = fetchContext$.getValue();
             return fetchContext?.timeslice !== undefined || fetchContext?.timeRange !== undefined;
