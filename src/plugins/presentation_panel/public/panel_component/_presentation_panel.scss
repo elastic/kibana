@@ -44,10 +44,11 @@
   display: flex;
   // ensure menu button is on the right even if the title doesn't exist
   justify-content: flex-end;
+  height: $euiSizeL;
 }
 
 .embPanel__title {
-  @include euiTitle('xxxs');
+  @include euiTitle("xxxs");
   overflow: hidden;
   line-height: 1.5;
   flex-grow: 1;
@@ -105,14 +106,13 @@
   */
 
 .embPanel__optionsMenuButton {
-  background-color: transparentize($euiColorLightShade, .5);
+  background-color: transparentize($euiColorLightShade, 0.5);
   border-bottom-right-radius: 0;
   border-top-left-radius: 0;
 
   &:focus {
-    background-color: transparentize($euiColorLightestShade, .5);
+    background-color: transparentize($euiColorLightestShade, 0.5);
   }
-
 }
 
 .embPanel__optionsMenuPopover-loading {
@@ -123,7 +123,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  content: '•';
+  content: "•";
   transform: translate(50%, -50%);
   color: $euiColorAccent;
   font-size: $euiSizeL;
@@ -147,12 +147,13 @@
 
 .embPanel--editing {
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+  border: 1px dashed $euiColorLightShade;
 
   .embPanel--dragHandle {
     transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
 
     &:hover {
-      background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
+      background-color: transparentize($euiColorWarning, lightOrDarkTheme(0.9, 0.7));
       cursor: move;
     }
   }
@@ -183,4 +184,65 @@
   position: absolute;
   padding-left: $euiSizeS;
   z-index: $euiZLevel1;
+}
+
+.embPanel__floatingActionsAnchor {
+  position: relative;
+  height: 100%;
+
+  .embPanel__floatingActionsWrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $euiSizeS;
+  }
+
+  .embPanel__floatingActions {
+    position: absolute;
+    padding: $euiSizeXS;
+    display: flex;
+    top: $euiSizeXS;
+
+    background-color: $euiColorEmptyShade;
+    box-shadow: 0 0 0 1px $euiColorLightShade;
+    height: $euiSizeXL;
+
+    &:not(.embPanel__floatingActions--openContextMenu) {
+      z-index: -1;
+      opacity: 0;
+      top: $euiSizeXS;
+      transition: opacity top $euiAnimSpeedSlow;
+      transition-delay: 300ms;
+    }
+  }
+
+  .embPanel--dragHandle {
+    &:hover {
+      cursor: move;
+    }
+
+    img {
+      pointer-events: all !important;
+      -webkit-user-select: all !important;
+      user-select: all !important;
+    }
+  }
+
+  .embPanel__descriptionTooltipAnchor {
+    padding: $euiSizeXS;
+  }
+
+  &:hover .embPanel__floatingActions,
+  &:focus-within .embPanel__floatingActions,
+  .embPanel__floatingActions--openContextMenu {
+    opacity: 1;
+    transition: opacity $euiAnimSpeedFast;
+    z-index: $euiZLevel9;
+    top: -$euiSizeXL;
+  }
 }

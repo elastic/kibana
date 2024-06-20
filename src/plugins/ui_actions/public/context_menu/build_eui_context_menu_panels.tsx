@@ -36,6 +36,7 @@ type ItemDescriptor = EuiContextMenuPanelItemDescriptor & {
 };
 
 type PanelDescriptor = EuiContextMenuPanelDescriptor & {
+  _order?: number;
   _level?: number;
   _icon?: string;
   items: ItemDescriptor[];
@@ -59,35 +60,6 @@ const onClick =
     close();
   };
 
-/**
- * This method adds "More" item to panels, which have more than 4 items; and
- * moves all items after the thrird one into that "More" sub-menu.
- */
-const wrapMainPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, id: string) => {
-  const panel = panels[id];
-  if (!panel) return;
-  const maxItemsBeforeWrapping = 4;
-  if (!panel.items) return;
-  if (panel.items.length <= maxItemsBeforeWrapping) return;
-  const visibleItems = panel.items.slice(0, 3) as ItemDescriptor[];
-  const itemsInSubmenu = panel.items.slice(3) as ItemDescriptor[];
-  const morePanelId = panel.id + '__more';
-  const more: ItemDescriptor = {
-    name: txtMore,
-    panel: morePanelId,
-    icon: 'boxesHorizontal',
-    'data-test-subj': `embeddablePanelMore-${id}`,
-    _order: -1,
-  };
-  panel.items = [...visibleItems, more];
-  const subPanel: PanelDescriptor = {
-    id: morePanelId,
-    title: panel.title || defaultTitle,
-    items: itemsInSubmenu,
-  };
-  panels[morePanelId] = subPanel;
-};
-
 const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemDescriptor[] => {
   const euiItems: EuiContextMenuPanelItemDescriptor[] = [];
   for (const item of items) {
@@ -100,7 +72,7 @@ const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemD
 const removePanelMetaFields = (panels: PanelDescriptor[]): EuiContextMenuPanelDescriptor[] => {
   const euiPanels: EuiContextMenuPanelDescriptor[] = [];
   for (const panel of panels) {
-    const { _level: omit, _icon: omit2, ...rest } = panel;
+    const { _level: omit, _icon: omit2, _order: omit3, ...rest } = panel;
     euiPanels.push({ ...rest, items: removeItemMetaFields(rest.items) });
   }
   return euiPanels;
@@ -123,15 +95,12 @@ export async function buildContextMenuForActions({
   const panels: Record<string, PanelDescriptor> = {
     mainMenu: {
       id: 'mainMenu',
-      title,
       items: [],
     },
   };
   const promises = actions.map(async (item) => {
     const { action } = item;
     const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
-    const isCompatible = await item.action.isCompatible(context);
-    if (!isCompatible) return;
     let parentPanel = '';
     let currentPanel = '';
     if (action.grouping) {
@@ -145,6 +114,7 @@ export async function buildContextMenuForActions({
             title: name,
             items: [],
             _level: i,
+            _order: group.order || 0,
             _icon: group.getIconType ? group.getIconType(context) : 'empty',
           };
           if (parentPanel) {
@@ -187,9 +157,12 @@ export async function buildContextMenuForActions({
     );
   }
 
-  wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
+  const sortedPanels = Object.values(panels).sort((a, b) => {
+    const orderComparison = (b._order || 0) - (a._order || 0);
+    return orderComparison;
+  });
 
-  for (const panel of Object.values(panels)) {
+  for (const panel of sortedPanels) {
     if (panel._level === 0) {
       if (panels.mainMenu.items.length > 0) {
         panels.mainMenu.items.push({
@@ -197,7 +170,7 @@ export async function buildContextMenuForActions({
           key: panel.id + '__separator',
         });
       }
-      if (panel.items.length > 3) {
+      if (panel.items.length > 4) {
         panels.mainMenu.items.push({
           name: panel.title || panel.id,
           icon: panel._icon || 'empty',

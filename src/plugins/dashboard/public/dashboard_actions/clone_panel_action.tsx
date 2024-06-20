@@ -19,6 +19,7 @@ import {
   HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { dashboardActionGroup } from '.';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
@@ -40,6 +41,7 @@ export class ClonePanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_CLONE_PANEL;
   public readonly id = ACTION_CLONE_PANEL;
   public order = 45;
+  public grouping = [dashboardActionGroup];
 
   constructor() {}
 

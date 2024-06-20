@@ -12,7 +12,6 @@ import classNames from 'classnames';
 import React from 'react';
 import { getAriaLabelForTitle } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-import { PresentationPanelContextMenu } from './presentation_panel_context_menu';
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 
@@ -51,11 +50,7 @@ export const PresentationPanelHeader = <
   );
 
   const showPanelBar =
-    !hideTitle ||
-    panelDescription ||
-    viewMode !== 'view' ||
-    badgeElements.length > 0 ||
-    notificationElements.length > 0;
+    (!hideTitle && panelTitle) || badgeElements.length > 0 || notificationElements.length > 0;
 
   const ariaLabel = getAriaLabelForTitle(showPanelBar ? panelTitle : undefined);
   const ariaLabelElement = (
@@ -64,22 +59,15 @@ export const PresentationPanelHeader = <
     </EuiScreenReaderOnly>
   );
 
-  const headerClasses = classNames('embPanel__header', {
+  const headerClasses = classNames('embPanel__header', 'embPanel--dragHandle', {
     'embPanel__header--floater': !showPanelBar,
   });
 
-  const titleClasses = classNames('embPanel__title', {
-    'embPanel--dragHandle': viewMode === 'edit',
-  });
-
-  const contextMenuElement = (
-    <PresentationPanelContextMenu {...{ index, api, getActions, actionPredicate }} />
-  );
+  const titleClasses = classNames('embPanel__title');
 
   if (!showPanelBar) {
     return (
       <div data-test-subj={`embeddablePanelHeading`} className={headerClasses}>
-        {contextMenuElement}
         {ariaLabelElement}
       </div>
     );
@@ -102,7 +90,6 @@ export const PresentationPanelHeader = <
         {showBadges && badgeElements}
       </h2>
       {showNotifications && notificationElements}
-      {contextMenuElement}
     </figcaption>
   );
 };

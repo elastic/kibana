@@ -13,13 +13,9 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import {
-  apiCanAccessViewMode,
   apiPublishesPartialUnifiedSearch,
   apiHasUniqueId,
-  CanAccessViewMode,
   EmbeddableApiContext,
-  getInheritedViewMode,
-  getViewModeSubject,
   HasParentApi,
   PublishesUnifiedSearch,
   HasUniqueId,
@@ -33,17 +29,14 @@ import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_s
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
 export type FiltersNotificationActionApi = HasUniqueId &
-  CanAccessViewMode &
   Partial<PublishesUnifiedSearch> &
   HasParentApi<DashboardPluginInternalFunctions>;
 
 const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
-  Boolean(
-    apiHasUniqueId(api) && apiCanAccessViewMode(api) && apiPublishesPartialUnifiedSearch(api)
-  );
+  Boolean(apiHasUniqueId(api) && apiPublishesPartialUnifiedSearch(api));
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
-  if (!isApiCompatible(api) || getInheritedViewMode(api) !== 'edit') return false;
+  if (!isApiCompatible(api)) return false;
   const query = api.query$?.value;
   return (
     (api.filters$?.value ?? []).length > 0 ||
@@ -102,9 +95,7 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   ) {
     if (!isApiCompatible(embeddable)) return;
     return merge(
-      ...[embeddable.query$, embeddable.filters$, getViewModeSubject(embeddable)].filter((value) =>
-        Boolean(value)
-      )
+      ...[embeddable.query$, embeddable.filters$].filter((value) => Boolean(value))
     ).subscribe(() => onChange(compatibilityCheck(embeddable), this));
   }
 

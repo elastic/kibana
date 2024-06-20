@@ -36,6 +36,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
+import { dashboardActionGroup } from '.';
 
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 
@@ -60,6 +61,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_ADD_TO_LIBRARY;
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 8;
+  public grouping = [dashboardActionGroup];
 
   private toastsService;
 
