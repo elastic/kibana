@@ -46,6 +46,7 @@ import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
+import { initialState as dataViewPickerInitialState } from '../../sourcerer/experimental/redux/reducer';
 
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])
@@ -500,4 +501,5 @@ export const mockGlobalState: State = {
    */
   management: mockManagementState as ManagementState,
   discover: getMockDiscoverInTimelineState(),
+  dataviewPicker: dataViewPickerInitialState,
 };

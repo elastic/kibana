@@ -11,7 +11,7 @@ import '@testing-library/jest-dom';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectDataView } from '../../redux/actions';
-import { DataviewPicker } from '.';
+import { DataViewPicker } from '.';
 
 // Mock the required hooks and dependencies
 jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
@@ -45,7 +45,7 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
   )),
 }));
 
-describe('DataviewPicker', () => {
+describe('DataViewPicker', () => {
   const mockDispatch = jest.fn();
   const mockDataViewEditor = {
     openEditor: jest.fn(),
@@ -76,18 +76,18 @@ describe('DataviewPicker', () => {
   });
 
   test('renders the DataviewPicker component', () => {
-    render(<DataviewPicker />);
+    render(<DataViewPicker />);
     expect(screen.getByText('Dataview')).toBeInTheDocument();
   });
 
   test('calls dispatch on data view change', () => {
-    render(<DataviewPicker />);
+    render(<DataViewPicker />);
     fireEvent.click(screen.getByText('Change DataView'));
     expect(mockDispatch).toHaveBeenCalledWith(selectDataView('new-id'));
   });
 
   test('opens data view editor when creating a new data view', () => {
-    render(<DataviewPicker />);
+    render(<DataViewPicker />);
     fireEvent.click(screen.getByText('Create New DataView'));
     expect(mockDataViewEditor.openEditor).toHaveBeenCalled();
   });

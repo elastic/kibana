@@ -526,6 +526,14 @@ export const query = (specService: SpecDefinitionsService) => {
         },
       },
     },
+    semantic: {
+      __template: {
+        field: '',
+        query: '',
+      },
+      field: '{field}',
+      query: '',
+    },
     span_first: {
       __template: spanFirstTemplate,
       match: SPAN_QUERIES,

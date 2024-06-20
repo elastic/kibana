@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../common/lib/kibana';
-import { DataviewPickerProvider } from './dataview_picker_provider';
+import { DataViewPickerProvider } from './dataview_picker_provider';
 import {
   startAppListening,
   listenerMiddleware,
@@ -55,9 +55,9 @@ describe('DataviewPickerProvider', () => {
 
   test('starts listeners and dispatches init action on mount', () => {
     render(
-      <DataviewPickerProvider>
+      <DataViewPickerProvider>
         <div>{`Test Child`}</div>
-      </DataviewPickerProvider>
+      </DataViewPickerProvider>
     );
 
     expect(startAppListening).toHaveBeenCalledWith(createInitDataviewListener({}));
@@ -69,9 +69,9 @@ describe('DataviewPickerProvider', () => {
 
   test('clears listeners on unmount', () => {
     const { unmount } = render(
-      <DataviewPickerProvider>
+      <DataViewPickerProvider>
         <div>{`Test Child`}</div>
-      </DataviewPickerProvider>
+      </DataViewPickerProvider>
     );
 
     unmount();

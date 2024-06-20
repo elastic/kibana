@@ -20,7 +20,7 @@ import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 
 // NOTE: this can be spawned multiple times, eq. when you need something like a separate data view picker for a subsection of the app -
 // for example, in the timeline.
-export const DataviewPickerProvider: FC<PropsWithChildren<{}>> = memo(({ children }) => {
+export const DataViewPickerProvider: FC<PropsWithChildren<{}>> = memo(({ children }) => {
   const { services } = useKibana();
 
   const dispatch = useDispatch();
@@ -43,4 +43,4 @@ export const DataviewPickerProvider: FC<PropsWithChildren<{}>> = memo(({ childre
   return <>{children}</>;
 });
 
-DataviewPickerProvider.displayName = 'DataviewPickerProvider';
+DataViewPickerProvider.displayName = 'DataviewPickerProvider';

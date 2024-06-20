@@ -22,7 +22,7 @@ import {
   setDataViewData as setDataViewSpec,
   setPatternList,
 } from './actions';
-export { type State } from '../../../common/store/types';
+import { type State } from '../../../common/store/types';
 
 export type AppDispatch = Store<State, Action>['dispatch'];
 

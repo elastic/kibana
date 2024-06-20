@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { DataviewPicker } from '../../../../sourcerer/experimental/components/dataview_picker';
+import { DataViewPicker } from '../../../../sourcerer/experimental/components/dataview_picker';
 import { isExperimentalSourcererEnabled } from '../../../../sourcerer/experimental/is_enabled';
 import { TimelineType } from '../../../../../common/api/timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -106,7 +106,7 @@ export const SearchOrFilter = React.memo<Props>(
     );
 
     const dataviewPicker = isExperimentalSourcererEnabled() ? (
-      <DataviewPicker />
+      <DataViewPicker />
     ) : (
       <Sourcerer scope={SourcererScopeName.timeline} />
     );

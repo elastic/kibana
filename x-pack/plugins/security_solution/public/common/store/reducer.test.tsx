@@ -13,6 +13,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { renderHook } from '@testing-library/react-hooks';
 import { initialGroupingState } from './grouping/reducer';
 import { initialAnalyzerState } from '../../resolver/store/helpers';
+import { initialState as dataViewPickerInitialState } from '../../sourcerer/experimental/redux/reducer';
 
 jest.mock('../hooks/use_selector');
 jest.mock('../lib/kibana', () => {
@@ -69,7 +70,8 @@ describe('createInitialState', () => {
       },
       {
         analyzer: initialAnalyzerState,
-      }
+      },
+      dataViewPickerInitialState
     );
 
     test('indicesExist should be TRUE if patternList is NOT empty', async () => {
@@ -107,7 +109,8 @@ describe('createInitialState', () => {
         },
         {
           analyzer: initialAnalyzerState,
-        }
+        },
+        dataViewPickerInitialState
       );
       const { result } = renderHook(() => useSourcererDataView(), {
         wrapper: ({ children }) => (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { DataViewPicker as USDataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useRef, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -21,7 +21,7 @@ const TRIGGER_CONFIG = {
   iconType: 'beaker',
 } as const;
 
-export const DataviewPicker = memo(() => {
+export const DataViewPicker = memo(() => {
   const dispatch = useDispatch();
 
   const {
@@ -85,7 +85,7 @@ export const DataviewPicker = memo(() => {
   const handleEditDataView = useCallback(() => {}, []);
 
   return (
-    <DataViewPicker
+    <USDataViewPicker
       currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
       trigger={TRIGGER_CONFIG}
       onChangeDataView={handleChangeDataView}
@@ -96,4 +96,4 @@ export const DataviewPicker = memo(() => {
   );
 });
 
-DataviewPicker.displayName = 'DataviewPicker';
+DataViewPicker.displayName = 'DataviewPicker';
