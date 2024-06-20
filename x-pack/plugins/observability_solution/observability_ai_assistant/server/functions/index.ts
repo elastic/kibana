@@ -61,7 +61,7 @@ export const registerFunctions: RegistrationCallback = async ({
   }.
   If the user asks how to change the language, reply in the same language the user asked in.`);
 
-  const isKnowledgeBaseReady = await client.getKnowledgeBaseStatus();
+  const { ready: isKnowledgeBaseReady } = await client.getKnowledgeBaseStatus();
 
   functions.registerInstruction(({ availableFunctionNames }) => {
     const instructions: string[] = [];

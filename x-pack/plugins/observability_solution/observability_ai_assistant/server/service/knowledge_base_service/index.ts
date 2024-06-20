@@ -114,16 +114,20 @@ export class KnowledgeBaseService {
 
   async getStatus() {
     try {
-      const res = await getInferenceEndpoint({
+      const endpoint = await getInferenceEndpoint({
         esClient: this.dependencies.esClient,
         logger: this.dependencies.logger,
       });
 
-      const isReady = res.endpoints.length > 0;
-      return isReady;
+      return {
+        ready: endpoint !== undefined,
+        ...endpoint,
+      };
     } catch (error) {
       if (isNotFoundError(error)) {
-        return false;
+        return {
+          ready: false,
+        };
       }
       throw error;
     }
@@ -135,7 +139,7 @@ export class KnowledgeBaseService {
     }
 
     const kbStatus = await this.getStatus();
-    if (!kbStatus) {
+    if (!kbStatus.ready) {
       this.dependencies.logger.debug(`Bailing on queue task: KB is not ready yet`);
       return;
     }

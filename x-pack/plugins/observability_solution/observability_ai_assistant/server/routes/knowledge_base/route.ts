@@ -10,26 +10,28 @@ import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
+import { InferenceEndpointResponse } from '../../service/create_inference_endpoint';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
   options: {
     tags: ['access:ai_assistant'],
   },
-  handler: async (
-    resources
-  ): Promise<{
-    ready: boolean;
-  }> => {
-    const client = await resources.service.getClient({ request: resources.request });
+  handler: async ({
+    service,
+    request,
+  }): Promise<
+    Partial<InferenceEndpointResponse['endpoints'][0]> & {
+      ready: boolean;
+    }
+  > => {
+    const client = await service.getClient({ request });
 
     if (!client) {
       throw notImplemented();
     }
 
-    return {
-      ready: await client.getKnowledgeBaseStatus(),
-    };
+    return client.getKnowledgeBaseStatus();
   },
 });
 

@@ -64,7 +64,7 @@ export async function deleteInferenceEndpoint({
   }
 }
 
-interface InferenceEndpointResponse {
+export interface InferenceEndpointResponse {
   endpoints: Array<{
     model_id: string;
     task_type: string;
@@ -91,7 +91,9 @@ export async function getInferenceEndpoint({
       path: `_inference/sparse_embedding/${AI_ASSISTANT_KB_INFERENCE_ID}`,
     });
 
-    return response;
+    if (response.endpoints.length > 0) {
+      return response.endpoints[0];
+    }
   } catch (e) {
     logger.error(`Failed to fetch inference endpoint: ${e.message}`);
     throw e;
