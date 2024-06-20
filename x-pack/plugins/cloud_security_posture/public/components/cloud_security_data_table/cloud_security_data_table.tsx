@@ -195,7 +195,7 @@ export const CloudSecurityDataTable = ({
     toastNotifications,
     storage,
     data,
-    dataViewFieldEditor
+    dataViewFieldEditor,
   };
 
   const {
