@@ -27,7 +27,15 @@ import { ControlPanelProps, DefaultControlApi } from './types';
 /**
  * TODO: Handle dragging
  */
-const DragHandle = ({ isEditable, controlTitle }: { isEditable: boolean; controlTitle?: string }) =>
+const DragHandle = ({
+  isEditable,
+  controlTitle,
+  usingTwoLineLayout,
+}: {
+  isEditable: boolean;
+  controlTitle?: string;
+  usingTwoLineLayout?: boolean;
+}) =>
   isEditable ? (
     <button
       aria-label={i18n.translate('controls.controlGroup.ariaActions.moveControlButtonAction', {
@@ -38,7 +46,9 @@ const DragHandle = ({ isEditable, controlTitle }: { isEditable: boolean; control
     >
       <EuiIcon type="grabHorizontal" />
     </button>
-  ) : null;
+  ) : usingTwoLineLayout ? null : (
+    <EuiIcon size="s" type="empty" />
+  );
 
 export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlApi>({
   Component,
@@ -131,19 +141,15 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
               fullWidth
               isLoading={Boolean(dataLoading)}
               prepend={
-                api?.CustomPrependComponent ? (
-                  <api.CustomPrependComponent />
-                ) : usingTwoLineLayout ? (
+                <>
                   <DragHandle
                     isEditable={isEditable}
+                    usingTwoLineLayout={usingTwoLineLayout}
                     controlTitle={panelTitle || defaultPanelTitle}
-                  />
-                ) : (
-                  <>
-                    <DragHandle
-                      isEditable={isEditable}
-                      controlTitle={panelTitle || defaultPanelTitle}
-                    />{' '}
+                  />{' '}
+                  {api?.CustomPrependComponent ? (
+                    <api.CustomPrependComponent />
+                  ) : usingTwoLineLayout ? null : (
                     <EuiFormLabel
                       className="eui-textTruncate"
                       // TODO: Convert this to a class when replacing the legacy control group
@@ -151,20 +157,23 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                         background-color: transparent !important;
                       `}
                     >
-                      {panelTitle || defaultPanelTitle}
+                      {panelTitle || defaultPanelTitle}{' '}
                     </EuiFormLabel>
-                  </>
-                )
+                  )}
+                </>
               }
             >
               <Component
                 // TODO: Convert this to a class when replacing the legacy control group
                 css={css`
+                  width: 100%;
+                  max-inline-size: 100% !important;
                   height: calc(${euiThemeVars.euiButtonHeight} - 2px);
                   box-shadow: none !important;
-                  ${!isEditable && usingTwoLineLayout
-                    ? `border-radius: ${euiThemeVars.euiBorderRadius} !important`
-                    : ''};
+                  ${!api?.CustomPrependComponent && !isEditable && usingTwoLineLayout
+                    ? `border-radius: ${euiThemeVars.euiBorderRadius} !important;`
+                    : `border-radius: 0 ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 !important;`}
+                  background-color: ${euiThemeVars.euiFormBackgroundColor} !important;
                 `}
                 ref={(newApi) => {
                   if (newApi && !api) setApi(newApi);
