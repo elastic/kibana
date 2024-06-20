@@ -7,7 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { TaskStatus } from '../task';
+import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { injectTask, setupTestServers, retry } from './lib';
 import { setupKibanaServer } from './lib/setup_test_servers';
@@ -203,6 +203,161 @@ describe('switch task claiming strategies', () => {
     await retry(async () => {
       expect(mockTaskTypeRunFn).toHaveBeenCalledTimes(2);
     });
+
+    if (kibanaServer) {
+      await kibanaServer.stop();
+    }
+    if (esServer) {
+      await esServer.stop();
+    }
+  });
+
+  it('should switch from default to mget and claim tasks that were running during shutdown', async () => {
+    const setupResultDefault = await setupTestServers();
+    const esServer = setupResultDefault.esServer;
+    let kibanaServer = setupResultDefault.kibanaServer;
+    let taskClaimingOpts: TaskClaimingOpts = TaskClaimingMock.mock.calls[0][0];
+
+    expect(taskClaimingOpts.strategy).toBe('default');
+
+    mockTaskTypeRunFn.mockImplementation(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return { state: {} };
+    });
+
+    // inject a task to run and ensure it is claimed and run
+    const id1 = uuidV4();
+    await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
+      id: id1,
+      taskType: 'fooType',
+      params: { foo: true },
+      state: { foo: 'test', bar: 'test', baz: 'test' },
+      stateVersion: 4,
+      runAt: new Date(),
+      enabled: true,
+      scheduledAt: new Date(),
+      attempts: 0,
+      status: TaskStatus.Idle,
+      startedAt: null,
+      timeoutOverride: '5s',
+      retryAt: null,
+      ownerId: null,
+    });
+
+    await retry(async () => {
+      expect(mockTaskTypeRunFn).toHaveBeenCalledTimes(1);
+    });
+
+    if (kibanaServer) {
+      await kibanaServer.stop();
+    }
+
+    const setupResultMget = await setupKibanaServer({
+      xpack: {
+        task_manager: {
+          claim_strategy: 'unsafe_mget',
+        },
+      },
+    });
+    kibanaServer = setupResultMget.kibanaServer;
+
+    taskClaimingOpts = TaskClaimingMock.mock.calls[1][0];
+    expect(taskClaimingOpts.strategy).toBe('unsafe_mget');
+
+    // task doc should still exist and be running
+    const task = await kibanaServer.coreStart.elasticsearch.client.asInternalUser.get<{
+      task: SerializedConcreteTaskInstance;
+    }>({
+      id: `task:${id1}`,
+      index: '.kibana_task_manager',
+    });
+
+    expect(task._source?.task?.status).toBe(TaskStatus.Running);
+
+    // task manager should pick up and claim the task that was running during shutdown
+    await retry(
+      async () => {
+        expect(mockTaskTypeRunFn).toHaveBeenCalledTimes(2);
+      },
+      { times: 60, intervalMs: 1000 }
+    );
+
+    if (kibanaServer) {
+      await kibanaServer.stop();
+    }
+    if (esServer) {
+      await esServer.stop();
+    }
+  });
+
+  it('should switch from mget to default and claim tasks that were running during shutdown', async () => {
+    const setupResultMget = await setupTestServers({
+      xpack: {
+        task_manager: {
+          claim_strategy: 'unsafe_mget',
+        },
+      },
+    });
+    const esServer = setupResultMget.esServer;
+    let kibanaServer = setupResultMget.kibanaServer;
+    let taskClaimingOpts: TaskClaimingOpts = TaskClaimingMock.mock.calls[0][0];
+
+    expect(taskClaimingOpts.strategy).toBe('unsafe_mget');
+
+    mockTaskTypeRunFn.mockImplementation(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return { state: {} };
+    });
+
+    // inject a task to run and ensure it is claimed and run
+    const id1 = uuidV4();
+    await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
+      id: id1,
+      taskType: 'fooType',
+      params: { foo: true },
+      state: { foo: 'test', bar: 'test', baz: 'test' },
+      stateVersion: 4,
+      runAt: new Date(),
+      enabled: true,
+      scheduledAt: new Date(),
+      attempts: 0,
+      status: TaskStatus.Idle,
+      startedAt: null,
+      timeoutOverride: '5s',
+      retryAt: null,
+      ownerId: null,
+    });
+
+    await retry(async () => {
+      expect(mockTaskTypeRunFn).toHaveBeenCalledTimes(1);
+    });
+
+    if (kibanaServer) {
+      await kibanaServer.stop();
+    }
+
+    const setupResultDefault = await setupKibanaServer();
+    kibanaServer = setupResultDefault.kibanaServer;
+
+    taskClaimingOpts = TaskClaimingMock.mock.calls[1][0];
+    expect(taskClaimingOpts.strategy).toBe('default');
+
+    // task doc should still exist and be running
+    const task = await kibanaServer.coreStart.elasticsearch.client.asInternalUser.get<{
+      task: SerializedConcreteTaskInstance;
+    }>({
+      id: `task:${id1}`,
+      index: '.kibana_task_manager',
+    });
+
+    expect(task._source?.task?.status).toBe(TaskStatus.Running);
+
+    await retry(
+      async () => {
+        expect(mockTaskTypeRunFn).toHaveBeenCalledTimes(2);
+      },
+      { times: 60, intervalMs: 1000 }
+    );
 
     if (kibanaServer) {
       await kibanaServer.stop();
