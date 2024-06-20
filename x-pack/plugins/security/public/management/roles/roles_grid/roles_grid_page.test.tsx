@@ -327,6 +327,10 @@ describe('<RolesGridPage />', () => {
         rolesAPIClient={apiClientMock}
         history={history}
         notifications={coreMock.createStart().notifications}
+        i18n={coreMock.createStart().i18n}
+        buildFlavor={'traditional'}
+        analytics={coreMock.createStart().analytics}
+        theme={coreMock.createStart().theme}
         readOnly
       />
     );
