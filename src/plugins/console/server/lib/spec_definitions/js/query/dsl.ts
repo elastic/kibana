@@ -527,8 +527,12 @@ export const query = (specService: SpecDefinitionsService) => {
       },
     },
     semantic: {
-      field: 'NAME',
-      query: ''
+      __template: {
+        field: '',
+        query: '',
+      },
+      field: '{field}',
+      query: '',
     },
     span_first: {
       __template: spanFirstTemplate,
