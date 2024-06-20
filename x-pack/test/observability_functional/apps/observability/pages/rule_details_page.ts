@@ -163,7 +163,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(timeRangeTitle).to.be('Last 30 days');
       });
 
-      it('handles clicking on active correctly', async () => {
+      it('handles clicking on active alerts correctly', async () => {
         const activeAlerts =
           await observability.components.alertSummaryWidget.getCompactActiveAlertSelector();
         await activeAlerts.click();
@@ -178,10 +178,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
       });
 
-      it('handles clicking on widget correctly', async () => {
-        const compactWidget =
-          await observability.components.alertSummaryWidget.getCompactWidgetSelector();
-        await compactWidget.click();
+      it('handles clicking on all alerts correctly', async () => {
+        const totalAlerts = await observability.components.alertSummaryWidget.getTotalAlertCount();
+        await totalAlerts.click();
 
         const url = await browser.getCurrentUrl();
         const from = 'rangeFrom:now-30d';
