@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { SharePluginStart } from '@kbn/share-plugin/public';
+
 export type { JsonCodeEditorProps } from './components';
 export type { EsDocSearchProps } from './hooks';
 export type { UnifiedDocViewerSetup, UnifiedDocViewerStart } from './plugin';
@@ -28,4 +30,5 @@ export interface UnifiedDocViewerServices {
   storage: Storage;
   uiSettings: IUiSettingsClient;
   unifiedDocViewer: UnifiedDocViewerStart;
+  share: SharePluginStart;
 }

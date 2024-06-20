@@ -18,9 +18,14 @@ import {
   EuiBasicTable,
   useGeneratedHtmlId,
   EuiBasicTableColumn,
+  EuiHeaderLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import { DATA_QUALITY_LOCATOR_ID, DataQualityLocatorParams } from '@kbn/deeplinks-observability';
+import { BrowserUrlService } from '@kbn/share-plugin/public';
+import { getUnifiedDocViewerServices } from '../../plugin';
 
 type Direction = 'asc' | 'desc';
 type SortField = 'issue' | 'values';
@@ -32,6 +37,13 @@ const DEFAULT_ROWS_PER_PAGE = 5;
 interface DegradedField {
   issue: string;
   values: string[];
+}
+
+interface ParamsForLocator {
+  dataStreamType: string;
+  dataStreamName: string;
+  dataStreamNamespace: string;
+  rawName: string;
 }
 
 interface TableOptions {
@@ -91,12 +103,21 @@ const textFieldIgnored = i18n.translate(
   }
 );
 
+export const datasetQualityLinkTitle = i18n.translate(
+  'unifiedDocViewer.docView.logsOverview.accordion.qualityIssues.table.datasetQualityLinkTitle',
+  {
+    defaultMessage: 'Data set details',
+  }
+);
+
 export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord['raw'] }) => {
-  const { ignored_field_values: ignoredFieldValues = {} } = rawDoc;
+  const { ignored_field_values: ignoredFieldValues = {}, fields: sourceFields = {} } = rawDoc;
   const countOfDegradedFields = Object.keys(ignoredFieldValues)?.length;
 
   const columns = getDegradedFieldsColumns();
   const tableData = getDataFormattedForTable(ignoredFieldValues);
+
+  const paramsForLocator = getParamsForLocator(sourceFields);
 
   const accordionId = useGeneratedHtmlId({
     prefix: qualityIssuesAccordionTitle,
@@ -106,7 +127,7 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
 
   const onTableChange = (options: {
     page: { index: number; size: number };
-    sort?: { field: string; direction: Direction };
+    sort?: { field: SortField; direction: Direction };
   }) => {
     setTableOptions({
       page: {
@@ -138,6 +159,9 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
     );
   }, [tableData, tableOptions]);
 
+  const { share } = getUnifiedDocViewerServices();
+  const { url: urlService } = share;
+
   const accordionTitle = (
     <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
       <EuiFlexItem grow={false}>
@@ -161,6 +185,9 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
         buttonContent={accordionTitle}
         paddingSize="m"
         initialIsOpen={false}
+        extraAction={
+          <DatasetQualityLink urlService={urlService} paramsForLocator={paramsForLocator} />
+        }
       >
         <EuiBasicTable
           tableLayout="fixed"
@@ -208,3 +235,78 @@ const getDataFormattedForTable = (
     values,
   }));
 };
+
+const getParamsForLocator = (
+  sourceFields: DataTableRecord['raw']['fields']
+): ParamsForLocator | undefined => {
+  if (sourceFields) {
+    const dataStreamTypeArr = sourceFields['data_stream.type'];
+    const dataStreamType = dataStreamTypeArr ? dataStreamTypeArr[0] : undefined;
+    const dataStreamNameArr = sourceFields['data_stream.dataset'];
+    const dataStreamName = dataStreamNameArr ? dataStreamNameArr[0] : undefined;
+    const dataStreamNamespaceArr = sourceFields['data_stream.namespace'];
+    const dataStreamNamespace = dataStreamNamespaceArr ? dataStreamNamespaceArr[0] : undefined;
+    let rawName;
+
+    if (dataStreamType && dataStreamName && dataStreamNamespace) {
+      rawName = `${dataStreamType}-${dataStreamName}-${dataStreamNamespace}`;
+    }
+
+    if (rawName) {
+      return {
+        dataStreamType,
+        dataStreamName,
+        dataStreamNamespace,
+        rawName,
+      };
+    }
+  }
+};
+
+const DatasetQualityLink = React.memo(
+  ({
+    urlService,
+    paramsForLocator,
+  }: {
+    urlService: BrowserUrlService;
+    paramsForLocator?: ParamsForLocator;
+  }) => {
+    const locator = urlService.locators.get<DataQualityLocatorParams>(DATA_QUALITY_LOCATOR_ID);
+    const locatorParams: DataQualityLocatorParams = paramsForLocator
+      ? {
+          flyout: {
+            dataset: {
+              rawName: paramsForLocator.rawName,
+              type: paramsForLocator.dataStreamType,
+              name: paramsForLocator.dataStreamName,
+              namespace: paramsForLocator.dataStreamNamespace,
+              title: paramsForLocator.dataStreamName,
+            },
+          },
+        }
+      : {};
+
+    const datasetQualityUrl = locator?.getRedirectUrl(locatorParams);
+
+    const navigateToDatasetQuality = () => {
+      locator?.navigate(locatorParams);
+    };
+
+    const datasetQualityLinkProps = getRouterLinkProps({
+      href: datasetQualityUrl,
+      onClick: navigateToDatasetQuality,
+    });
+
+    return paramsForLocator ? (
+      <EuiHeaderLink
+        {...datasetQualityLinkProps}
+        color="primary"
+        data-test-subj="logsFlyourOverviewDatasetQualityLink"
+        iconType="popout"
+        target="_blank"
+      >
+        {datasetQualityLinkTitle}
+      </EuiHeaderLink>
+    ) : null;
+  }
+);

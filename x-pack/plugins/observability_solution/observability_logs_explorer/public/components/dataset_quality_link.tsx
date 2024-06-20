@@ -12,7 +12,7 @@ import { BrowserUrlService } from '@kbn/share-plugin/public';
 import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
 import React from 'react';
-import { DataQualityLocatorParams, DATA_QUALITY_LOCATOR_ID } from '@kbn/data-quality-plugin/common';
+import { DataQualityLocatorParams, DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { datasetQualityLinkTitle } from '../../common/translations';
 import {
   ObservabilityLogsExplorerService,

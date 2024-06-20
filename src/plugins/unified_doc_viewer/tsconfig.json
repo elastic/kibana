@@ -32,7 +32,8 @@
     "@kbn/discover-shared-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/unified-data-table",
-    "@kbn/core-notifications-browser"
+    "@kbn/core-notifications-browser",
+    "@kbn/deeplinks-observability"
   ],
   "exclude": [
     "target/**/*",
