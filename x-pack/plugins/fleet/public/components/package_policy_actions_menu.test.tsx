@@ -12,15 +12,17 @@ import { act } from '@testing-library/react';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
+import { ExperimentalFeaturesService } from '../services';
+
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
 function renderMenu({
-  agentPolicy,
+  agentPolicies,
   packagePolicy,
   showAddAgent = false,
   defaultIsOpen = true,
 }: {
-  agentPolicy: AgentPolicy;
+  agentPolicies: AgentPolicy[];
   packagePolicy: InMemoryPackagePolicy;
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
@@ -29,7 +31,7 @@ function renderMenu({
 
   const utils = renderer.render(
     <PackagePolicyActionsMenu
-      agentPolicy={agentPolicy}
+      agentPolicies={agentPolicies}
       packagePolicy={packagePolicy}
       showAddAgent={showAddAgent}
       upgradePackagePolicyHref="/test/upgrade-link"
@@ -41,23 +43,25 @@ function renderMenu({
   return { utils };
 }
 
-function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
-  return {
-    id: 'some-uuid1',
-    namespace: 'default',
-    monitoring_enabled: [],
-    name: 'Test Policy',
-    description: '',
-    is_preconfigured: false,
-    status: 'active',
-    is_managed: false,
-    revision: 1,
-    updated_at: '',
-    updated_by: 'elastic',
-    package_policies: [],
-    is_protected: false,
-    ...props,
-  };
+function createMockAgentPolicies(props: Partial<AgentPolicy> = {}): AgentPolicy[] {
+  return [
+    {
+      id: 'some-uuid1',
+      namespace: 'default',
+      monitoring_enabled: [],
+      name: 'Test Policy',
+      description: '',
+      is_preconfigured: false,
+      status: 'active',
+      is_managed: false,
+      revision: 1,
+      updated_at: '',
+      updated_by: 'elastic',
+      package_policies: [],
+      is_protected: false,
+      ...props,
+    },
+  ];
 }
 
 function createMockPackagePolicy(
@@ -81,60 +85,67 @@ function createMockPackagePolicy(
     ...props,
   };
 }
-
-test('Should disable upgrade button if package does not have upgrade', async () => {
-  const agentPolicy = createMockAgentPolicy();
-  const packagePolicy = createMockPackagePolicy({ hasUpgrade: false });
-  const { utils } = renderMenu({ agentPolicy, packagePolicy });
-  await act(async () => {
-    const upgradeButton = utils.getByText('Upgrade integration policy').closest('button');
-    expect(upgradeButton).toBeDisabled();
+describe('PackagePolicyActionsMenu', () => {
+  beforeAll(() => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      enableReusableIntegrationPolicies: false,
+    } as any);
   });
-});
 
-test('Should enable upgrade button if package has upgrade', async () => {
-  const agentPolicy = createMockAgentPolicy();
-  const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
-  const { utils } = renderMenu({ agentPolicy, packagePolicy });
-
-  await act(async () => {
-    const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
-    expect(upgradeButton).not.toBeDisabled();
+  it('Should disable upgrade button if package does not have upgrade', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({ hasUpgrade: false });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await act(async () => {
+      const upgradeButton = utils.getByText('Upgrade integration policy').closest('button');
+      expect(upgradeButton).toBeDisabled();
+    });
   });
-});
 
-test('Should not be able to delete integration from a managed policy', async () => {
-  const agentPolicy = createMockAgentPolicy({ is_managed: true });
-  const packagePolicy = createMockPackagePolicy();
-  const { utils } = renderMenu({ agentPolicy, packagePolicy });
-  await act(async () => {
-    expect(utils.queryByText('Delete integration')).toBeNull();
+  it('Should enable upgrade button if package has upgrade', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+
+    await act(async () => {
+      const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
+      expect(upgradeButton).not.toBeDisabled();
+    });
   });
-});
 
-test('Should be able to delete integration from a non-managed policy', async () => {
-  const agentPolicy = createMockAgentPolicy({ is_managed: false });
-  const packagePolicy = createMockPackagePolicy();
-  const { utils } = renderMenu({ agentPolicy, packagePolicy });
-  await act(async () => {
-    expect(utils.queryByText('Delete integration')).not.toBeNull();
+  it('Should not be able to delete integration from a managed policy', async () => {
+    const agentPolicies = createMockAgentPolicies({ is_managed: true });
+    const packagePolicy = createMockPackagePolicy();
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await act(async () => {
+      expect(utils.queryByText('Delete integration')).toBeNull();
+    });
   });
-});
 
-test('Should show add button if the policy is not managed and showAddAgent=true', async () => {
-  const agentPolicy = createMockAgentPolicy();
-  const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
-  const { utils } = renderMenu({ agentPolicy, packagePolicy, showAddAgent: true });
-  await act(async () => {
-    expect(utils.queryByText('Add agent')).not.toBeNull();
+  it('Should be able to delete integration from a non-managed policy', async () => {
+    const agentPolicies = createMockAgentPolicies({ is_managed: false });
+    const packagePolicy = createMockPackagePolicy();
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await act(async () => {
+      expect(utils.queryByText('Delete integration')).not.toBeNull();
+    });
   });
-});
 
-test('Should not show add button if the policy is managed and showAddAgent=true', async () => {
-  const agentPolicy = createMockAgentPolicy({ is_managed: true });
-  const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
-  const { utils } = renderMenu({ agentPolicy, packagePolicy, showAddAgent: true });
-  await act(async () => {
-    expect(utils.queryByText('Add agent')).toBeNull();
+  it('Should show add button if the policy is not managed and showAddAgent=true', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
+    await act(async () => {
+      expect(utils.queryByText('Add agent')).not.toBeNull();
+    });
+  });
+
+  it('Should not show add button if the policy is managed and showAddAgent=true', async () => {
+    const agentPolicies = createMockAgentPolicies({ is_managed: true });
+    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
+    await act(async () => {
+      expect(utils.queryByText('Add agent')).toBeNull();
+    });
   });
 });

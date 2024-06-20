@@ -7,13 +7,13 @@
 
 import nunjucks from 'nunjucks';
 import { join as joinPath } from 'path';
-import type { DataStream } from '../../common';
+import type { Datastream } from '../../common';
 import { copySync, createSync, ensureDirSync, listDirSync } from '../util';
 
 export function createDatastream(
   packageName: string,
   specificDataStreamDir: string,
-  dataStream: DataStream
+  dataStream: Datastream
 ): void {
   const dataStreamName = dataStream.name;
   const pipelineDir = joinPath(specificDataStreamDir, 'elasticsearch', 'ingest_pipeline');
