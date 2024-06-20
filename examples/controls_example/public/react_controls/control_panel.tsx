@@ -131,8 +131,8 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
               fullWidth
               isLoading={Boolean(dataLoading)}
               prepend={
-                api?.getCustomPrepend ? (
-                  <>{api.getCustomPrepend()}</>
+                api?.CustomPrependComponent ? (
+                  <api.CustomPrependComponent />
                 ) : usingTwoLineLayout ? (
                   <DragHandle
                     isEditable={isEditable}

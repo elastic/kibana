@@ -114,7 +114,7 @@ export interface ReactEmbeddableFactory<
     buildApi: (
       apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>,
       comparators: StateComparators<RuntimeState>
-    ) => Api,
+    ) => Api & HasSnapshottableState<RuntimeState>,
     uuid: string,
     parentApi: unknown | undefined,
     /** `setApi` should be used when the unsaved changes logic in `buildApi` is unnecessary */

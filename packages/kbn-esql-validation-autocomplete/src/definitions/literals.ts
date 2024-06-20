@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Literals } from './types';
 
-export const timeLiterals: Literals[] = [
+export const timeUnitsToSuggest: Literals[] = [
   {
     name: 'year',
     description: i18n.translate(
@@ -25,6 +25,24 @@ export const timeLiterals: Literals[] = [
       'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.years',
       {
         defaultMessage: 'Years (Plural)',
+      }
+    ),
+  },
+  {
+    name: 'quarter',
+    description: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.quarter',
+      {
+        defaultMessage: 'Quarter',
+      }
+    ),
+  },
+  {
+    name: 'quarters',
+    description: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.quarters',
+      {
+        defaultMessage: 'Quarters (Plural)',
       }
     ),
   },
@@ -154,6 +172,20 @@ export const timeLiterals: Literals[] = [
       }
     ),
   },
+];
+
+export const timeUnits: string[] = [
+  ...timeUnitsToSuggest.map((literal) => literal.name),
+  'ms',
+  's',
+  'm',
+  'h',
+  'd',
+  'w',
+  'mo',
+  'q',
+  'y',
+  'yr',
 ];
 
 export const chronoLiterals: Literals[] = [
