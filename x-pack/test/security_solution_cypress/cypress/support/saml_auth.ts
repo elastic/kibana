@@ -7,7 +7,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import { ROLES, SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { HostOptions, SamlSessionManager } from '@kbn/test';
 
 export const samlAuthentication = async (
@@ -43,7 +43,9 @@ export const samlAuthentication = async (
       );
       return sessionManager.getSessionCookieForRole(role);
     },
-    getFullname: async (role: string | SecurityRoleName = 'platform_engineer'): Promise<string> => {
+    getFullname: async (
+      role: string | SecurityRoleName = ROLES.platform_engineer
+    ): Promise<string> => {
       const sessionManager = new SamlSessionManager(
         {
           hostOptions,
