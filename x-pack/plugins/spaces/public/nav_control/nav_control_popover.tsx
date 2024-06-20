@@ -13,7 +13,7 @@ import {
   withEuiTheme,
 } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
-import type { Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -37,6 +37,7 @@ interface Props {
   navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
   theme: WithEuiThemeProps['theme'];
+  isSpaceSolutionEnabled$: Observable<boolean>;
 }
 
 interface State {
@@ -44,12 +45,14 @@ interface State {
   loading: boolean;
   activeSpace: Space | null;
   spaces: Space[];
+  isSpaceSolutionEnabled: boolean;
 }
 
 const popoutContentId = 'headerSpacesMenuContent';
 
 class NavControlPopoverUI extends Component<Props, State> {
   private activeSpace$?: Subscription;
+  private spaceSolution$?: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -58,6 +61,7 @@ class NavControlPopoverUI extends Component<Props, State> {
       loading: false,
       activeSpace: null,
       spaces: [],
+      isSpaceSolutionEnabled: false,
     };
   }
 
@@ -69,12 +73,15 @@ class NavControlPopoverUI extends Component<Props, State> {
         });
       },
     });
+
+    this.spaceSolution$ = this.props.isSpaceSolutionEnabled$.subscribe((isEnabled) => {
+      this.setState({ isSpaceSolutionEnabled: isEnabled });
+    });
   }
 
   public componentWillUnmount() {
-    if (this.activeSpace$) {
-      this.activeSpace$.unsubscribe();
-    }
+    this.activeSpace$?.unsubscribe();
+    this.spaceSolution$?.unsubscribe();
   }
 
   public render() {
@@ -103,6 +110,7 @@ class NavControlPopoverUI extends Component<Props, State> {
           navigateToApp={this.props.navigateToApp}
           navigateToUrl={this.props.navigateToUrl}
           activeSpace={this.state.activeSpace}
+          isSpaceSolutionEnabled={this.state.isSpaceSolutionEnabled}
         />
       );
     }

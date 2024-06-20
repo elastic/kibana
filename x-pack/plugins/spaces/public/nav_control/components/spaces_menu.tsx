@@ -47,6 +47,7 @@ interface Props {
   navigateToApp: ApplicationStart['navigateToApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   readonly activeSpace: Space | null;
+  isSpaceSolutionEnabled: boolean;
 }
 class SpacesMenuUI extends Component<Props> {
   public render() {
@@ -126,9 +127,6 @@ class SpacesMenuUI extends Component<Props> {
   }
 
   private getSpaceOptions = (): EuiSelectableOption[] => {
-    // TODO use from https://github.com/elastic/kibana/pull/186178/files#diff-bbd1ade87fa29c63e1504ab5f48924a477882d2bf66e5a656c1b61ea6afb02efR67
-    const isSolutionNavEnabled = true;
-
     return this.props.spaces.map((space) => {
       return {
         'aria-label': space.name,
@@ -140,7 +138,9 @@ class SpacesMenuUI extends Component<Props> {
             <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />
           </Suspense>
         ),
-        ...(isSolutionNavEnabled && { append: <SpaceSolutionBadge solution={space.solution} /> }),
+        ...(this.props.isSpaceSolutionEnabled && {
+          append: <SpaceSolutionBadge solution={space.solution} />,
+        }),
         checked: this.props.activeSpace?.id === space.id ? 'on' : undefined,
         'data-test-subj': `${space.id}-selectableSpaceItem`,
         className: 'selectableSpaceItem',

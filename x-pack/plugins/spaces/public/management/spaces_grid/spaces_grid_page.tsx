@@ -19,6 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
+import type { Observable, Subscription } from 'rxjs';
 
 import type {
   ApplicationStart,
@@ -54,6 +55,7 @@ interface Props {
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
   maxSpaces: number;
+  isSolutionNavEnabled$?: Observable<boolean>;
 }
 
 interface State {
@@ -62,9 +64,12 @@ interface State {
   loading: boolean;
   showConfirmDeleteModal: boolean;
   selectedSpace: Space | null;
+  isSpaceSolutionEnabled: boolean;
 }
 
 export class SpacesGridPage extends Component<Props, State> {
+  private spaceSolution$: Subscription | null = null;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -73,6 +78,7 @@ export class SpacesGridPage extends Component<Props, State> {
       loading: true,
       showConfirmDeleteModal: false,
       selectedSpace: null,
+      isSpaceSolutionEnabled: false,
     };
   }
 
@@ -80,6 +86,16 @@ export class SpacesGridPage extends Component<Props, State> {
     if (this.props.capabilities.spaces.manage) {
       this.loadGrid();
     }
+
+    if (this.props.isSolutionNavEnabled$) {
+      this.spaceSolution$ = this.props.isSolutionNavEnabled$.subscribe((isEnabled) => {
+        this.setState({ isSpaceSolutionEnabled: isEnabled });
+      });
+    }
+  }
+
+  public componentWillUnmount() {
+    this.spaceSolution$?.unsubscribe();
   }
 
   public render() {
@@ -235,9 +251,6 @@ export class SpacesGridPage extends Component<Props, State> {
   };
 
   public getColumnConfig() {
-    // TODO use from https://github.com/elastic/kibana/pull/186178/files#diff-bbd1ade87fa29c63e1504ab5f48924a477882d2bf66e5a656c1b61ea6afb02efR67
-    const isSolutionNavEnabled = true;
-
     const config: Array<EuiBasicTableColumn<Space>> = [
       {
         field: 'initials',
@@ -327,7 +340,7 @@ export class SpacesGridPage extends Component<Props, State> {
       },
     ];
 
-    if (isSolutionNavEnabled) {
+    if (this.state.isSpaceSolutionEnabled) {
       config.push({
         field: 'solution',
         name: i18n.translate('xpack.spaces.management.spacesGridPage.solutionColumnName', {
