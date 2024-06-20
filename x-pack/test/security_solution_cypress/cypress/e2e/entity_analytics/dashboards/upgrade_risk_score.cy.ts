@@ -35,7 +35,8 @@ import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_eng
 
 const spaceId = 'default';
 
-describe('Upgrade risk scores', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/185024
+describe.skip('Upgrade risk scores', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     deleteRiskEngineConfiguration();

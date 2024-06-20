@@ -60,8 +60,10 @@ export const processRouter = (
       }
 
       const operation: OpenAPIV3.OperationObject = {
-        summary: route.options.description ?? '',
+        summary: route.options.summary ?? '',
         tags: route.options.tags ? extractTags(route.options.tags) : [],
+        ...(route.options.description ? { description: route.options.description } : {}),
+        ...(route.options.deprecated ? { deprecated: route.options.deprecated } : {}),
         requestBody: !!validationSchemas?.body
           ? {
               content: {
@@ -103,7 +105,6 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
         const oasSchema = converter.convert(schema.body());
         acc[statusCode] = {
           ...acc[statusCode],
-          description: route.options.description ?? 'No description',
           content: {
             ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
             [getVersionedContentTypeString(

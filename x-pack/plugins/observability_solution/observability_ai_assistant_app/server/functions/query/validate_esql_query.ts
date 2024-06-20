@@ -8,8 +8,9 @@
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ESQLSearchReponse, ESQLRow } from '@kbn/es-types';
-import { esFieldTypeToKibanaFieldType, type KBN_FIELD_TYPES } from '@kbn/field-types';
+import { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { splitIntoCommands } from './correct_common_esql_mistakes';
 
 export async function runAndValidateEsqlQuery({
@@ -19,13 +20,7 @@ export async function runAndValidateEsqlQuery({
   query: string;
   client: ElasticsearchClient;
 }): Promise<{
-  columns?: Array<{
-    id: string;
-    name: string;
-    meta: {
-      type: KBN_FIELD_TYPES;
-    };
-  }>;
+  columns?: DatatableColumn[];
   rows?: ESQLRow[];
   error?: Error;
   errorMessages?: string[];
@@ -57,13 +52,13 @@ export async function runAndValidateEsqlQuery({
       },
     })
     .then((res) => {
-      const esqlResponse = res as ESQLSearchReponse;
+      const esqlResponse = res as ESQLSearchResponse;
 
       const columns =
         esqlResponse.columns?.map(({ name, type }) => ({
           id: name,
           name,
-          meta: { type: esFieldTypeToKibanaFieldType(type) },
+          meta: { type: esFieldTypeToKibanaFieldType(type) as DatatableColumnType },
         })) ?? [];
 
       return { columns, rows: esqlResponse.values };

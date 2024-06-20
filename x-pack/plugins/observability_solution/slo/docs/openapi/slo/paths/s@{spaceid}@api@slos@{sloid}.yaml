@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a SLO
+  summary: Get a SLO
   operationId: getSloOp
   description: >
     You must have the `read` privileges for the **SLOs** feature in the
