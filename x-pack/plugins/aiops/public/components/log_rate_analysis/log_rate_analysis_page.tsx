@@ -283,7 +283,7 @@ export const LogRateAnalysisPage: FC = () => {
   }, [logRateAnalysisParams, observabilityAIAssistant]);
 
   const logRateAnalysisTitle = i18n.translate(
-    'xpack.infra.logs.alertDetails.logRateAnalysisTitle',
+    'xpack.aiops.observabilityAIAssistantContextualInsight.logRateAnalysisTitle',
     {
       defaultMessage: 'Possible causes and remediations',
     }
