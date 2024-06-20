@@ -9,5 +9,3 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { RollupPlugin } from './plugin';
 
 export const plugin = (ctx: PluginInitializerContext) => new RollupPlugin(ctx);
-
-export { rollupBadgeExtension } from './extend_index_management';

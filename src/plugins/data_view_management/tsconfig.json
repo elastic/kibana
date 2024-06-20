@@ -44,7 +44,7 @@
     "@kbn/core-http-browser",
     "@kbn/code-editor",
     "@kbn/react-kibana-mount",
-    "@kbn/rollup-deprecation-tooltip",
+    "@kbn/rollup",
   ],
   "exclude": [
     "target/**/*",

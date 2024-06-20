@@ -5924,11 +5924,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rollup-deprecation-tooltip@link:packages/kbn-rollup-deprecation-tooltip":
+"@kbn/rollup-plugin@link:x-pack/plugins/rollup":
   version "0.0.0"
   uid ""
 
-"@kbn/rollup-plugin@link:x-pack/plugins/rollup":
+"@kbn/rollup@link:x-pack/packages/rollup":
   version "0.0.0"
   uid ""
 

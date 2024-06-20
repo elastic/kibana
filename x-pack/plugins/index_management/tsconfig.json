@@ -51,8 +51,7 @@
     "@kbn/ml-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
-    "@kbn/rollup-deprecation-tooltip",
-    "@kbn/rollup-plugin",
+    "@kbn/rollup",
     "@kbn/ml-error-utils",
   ],
   "exclude": ["target/**/*"]

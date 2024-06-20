@@ -8,10 +8,8 @@
 import React, { Fragment, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, Query } from '@elastic/eui';
-import { isEqual } from 'lodash';
 
-import { rollupBadgeExtension } from '@kbn/rollup-plugin/public';
-import { RollupDeprecationTooltip } from '@kbn/rollup-deprecation-tooltip';
+import { ROLLUP_DEPRECATION_BADGE_LABEL, RollupDeprecationTooltip } from '@kbn/rollup';
 import { ExtensionsService } from '../../services';
 import { Index } from '../..';
 
@@ -43,7 +41,7 @@ export const renderBadges = (
         );
       const badgeItem =
         // If the badge is for Rollups, add a tooltip with deprecation information
-        isEqual(indexBadge, rollupBadgeExtension) ? (
+        indexBadge.label === ROLLUP_DEPRECATION_BADGE_LABEL ? (
           <RollupDeprecationTooltip>{badge}</RollupDeprecationTooltip>
         ) : (
           badge

@@ -694,7 +694,7 @@
     "@kbn/response-ops-feature-flag-service": "link:packages/response-ops/feature_flag_service",
     "@kbn/response-stream-plugin": "link:examples/response_stream",
     "@kbn/rison": "link:packages/kbn-rison",
-    "@kbn/rollup-deprecation-tooltip": "link:packages/kbn-rollup-deprecation-tooltip",
+    "@kbn/rollup": "link:x-pack/packages/rollup",
     "@kbn/rollup-plugin": "link:x-pack/plugins/rollup",
     "@kbn/router-to-openapispec": "link:packages/kbn-router-to-openapispec",
     "@kbn/router-utils": "link:packages/kbn-router-utils",

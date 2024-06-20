@@ -31,7 +31,7 @@ import {
 import { pickBy } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type * as CSS from 'csstype';
-import { RollupDeprecationTooltip } from '@kbn/rollup-deprecation-tooltip';
+import { RollupDeprecationTooltip } from '@kbn/rollup';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
