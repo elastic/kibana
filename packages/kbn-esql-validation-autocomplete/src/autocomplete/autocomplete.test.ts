@@ -16,10 +16,20 @@ import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
-import { FunctionArgSignature } from '../definitions/types';
+import { FunctionParameter } from '../definitions/types';
 import { getParamAtPosition } from './helper';
 import { nonNullable } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
+
+interface Integration {
+  name: string;
+  hidden: boolean;
+  title?: string;
+  dataStreams: Array<{
+    name: string;
+    title?: string;
+  }>;
+}
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -42,13 +52,10 @@ const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
   { name: 'kubernetes.something.something', type: 'number' },
 ];
 
-const indexes = (
-  [] as Array<{ name: string; hidden: boolean; suggestedAs: string | undefined }>
-).concat(
+const indexes = ([] as Array<{ name: string; hidden: boolean; suggestedAs?: string }>).concat(
   ['a', 'index', 'otherIndex', '.secretIndex', 'my-index'].map((name) => ({
     name,
     hidden: name.startsWith('.'),
-    suggestedAs: undefined,
   })),
   ['my-index[quoted]', 'my-index$', 'my_index{}'].map((name) => ({
     name,
@@ -56,6 +63,18 @@ const indexes = (
     suggestedAs: `\`${name}\``,
   }))
 );
+
+const integrations: Integration[] = ['nginx', 'k8s'].map((name) => ({
+  name,
+  hidden: false,
+  title: `integration-${name}`,
+  dataStreams: [
+    {
+      name: `${name}-1`,
+      title: `integration-${name}-1`,
+    },
+  ],
+}));
 const policies = [
   {
     name: 'policy',
@@ -347,9 +366,8 @@ describe('autocomplete', () => {
   });
 
   describe('from', () => {
-    const suggestedIndexes = indexes
-      .filter(({ hidden }) => !hidden)
-      .map(({ name, suggestedAs }) => suggestedAs || name);
+    const suggestedIndexes = indexes.filter(({ hidden }) => !hidden).map(({ name }) => name);
+
     // Monaco will filter further down here
     testSuggestions(
       'f',
@@ -372,6 +390,16 @@ describe('autocomplete', () => {
       METADATA_FIELDS.filter((field) => field !== '_index'),
       ' '
     );
+
+    // with integrations support
+    const dataSources = indexes.concat(integrations);
+    const suggestedDataSources = dataSources
+      .filter(({ hidden }) => !hidden)
+      .map(({ name }) => name);
+
+    testSuggestions('from ', suggestedDataSources, '', [undefined, dataSources, undefined]);
+    testSuggestions('from a,', suggestedDataSources, '', [undefined, dataSources, undefined]);
+    testSuggestions('from *,', suggestedDataSources, '', [undefined, dataSources, undefined]);
   });
 
   describe('show', () => {
@@ -1154,7 +1182,7 @@ describe('autocomplete', () => {
                 (p) => p.constantOnly || /_literal/.test(p.type)
               );
 
-              const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) =>
+              const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) =>
                 Array.from(new Set(paramDefs.map((p) => p.type)));
 
               const suggestedConstants = param.literalSuggestions || param.literalOptions;

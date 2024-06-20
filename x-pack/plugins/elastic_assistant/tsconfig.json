@@ -13,7 +13,6 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    "@kbn/analytics-client",
     "@kbn/core",
     "@kbn/core-http-server",
     "@kbn/licensing-plugin",

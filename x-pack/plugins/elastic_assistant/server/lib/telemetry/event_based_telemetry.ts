@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EventTypeOpts } from '@kbn/analytics-client';
+import type { EventTypeOpts } from '@kbn/core/server';
 
 export const KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   model: string;
