@@ -153,7 +153,10 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
-      if (Math.abs(chartDimensions.width - e.width) > minElemAndChartDiff) {
+      if (
+        Math.abs(chartDimensions.width - e.width) > minElemAndChartDiff ||
+        Math.abs(chartDimensions.height - e.height) > minElemAndChartDiff
+      ) {
         setChartDimensions(e);
       }
     }, RESIZE_THROTTLE_TIME_MS),

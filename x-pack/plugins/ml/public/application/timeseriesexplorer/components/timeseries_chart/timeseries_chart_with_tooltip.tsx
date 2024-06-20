@@ -28,7 +28,7 @@ const percentContextChartLineTopMargin = 0.006;
 const chartSpacing = 25;
 const marginTop = 10;
 const marginBottom = 15;
-const minSvgHeight = 470;
+const minSvgHeight = 350;
 
 interface Heights {
   focusZoomPanelHeight: number;
