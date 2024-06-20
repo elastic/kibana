@@ -10,6 +10,7 @@ import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { DEFAULT_POLL_INTERVAL } from '../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type { AgentStatusInfo, AgentStatusRecords } from '../../../../common/endpoint/types';
@@ -21,7 +22,7 @@ interface ErrorType {
   meta: ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
 }
 
-// TODO: 8.15: Remove `useGetSentinelOneAgentStatus` function when `agentStatusClientEnabled` is enabled/removed
+// FIXME:PT delete
 export const useGetSentinelOneAgentStatus = (
   agentIds: string[],
   agentType?: string,
@@ -48,25 +49,32 @@ export const useGetSentinelOneAgentStatus = (
   });
 };
 
-// 8.14, 8.15 used for fetching agent status
+/**
+ * Retrieve the status of a supported host's agent type
+ * @param agentIds
+ * @param agentType
+ * @param options
+ */
 export const useGetAgentStatus = (
-  agentIds: string[],
+  agentIds: string[] | string,
   agentType: string,
   options: UseQueryOptions<AgentStatusRecords, IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<AgentStatusRecords, IHttpFetchError<ErrorType>> => {
   const http = useHttp();
+  const agentIdList = (Array.isArray(agentIds) ? agentIds : [agentIds]).filter(
+    (agentId) => agentId.trim().length
+  );
 
   return useQuery<AgentStatusRecords, IHttpFetchError<ErrorType>>({
     queryKey: ['get-agent-status', agentIds],
-    // TODO: remove this refetchInterval and instead override it where called, via options.
-    refetchInterval: 5000,
+    refetchInterval: DEFAULT_POLL_INTERVAL,
     ...options,
     queryFn: () =>
       http
         .get<{ data: AgentStatusRecords }>(AGENT_STATUS_ROUTE, {
           version: '1',
           query: {
-            agentIds: agentIds.filter((agentId) => agentId.trim().length),
+            agentIds: agentIdList,
             agentType,
           },
         })
@@ -74,6 +82,7 @@ export const useGetAgentStatus = (
   });
 };
 
+// FIXME:PT delete
 export const useAgentStatusHook = ():
   | typeof useGetAgentStatus
   | typeof useGetSentinelOneAgentStatus => {
