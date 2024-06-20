@@ -45,7 +45,7 @@ paths:
           required: true
           description: The Knowledge Base Entry's `id` value.
           schema:
-            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Successful request returning a Knowledge Base Entry
@@ -72,7 +72,7 @@ paths:
           required: true
           description: The Knowledge Base Entry's `id` value
           schema:
-            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:
@@ -105,7 +105,7 @@ paths:
           required: true
           description: The Knowledge Base Entry's `id` value
           schema:
-            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Successful request returning the deleted Knowledge Base Entry
