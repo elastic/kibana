@@ -16,7 +16,11 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from './internal_contracts';
-import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
+import {
+  getDefaultSecurityImplementation,
+  convertSecurityApi,
+  SecurityServiceConfigType,
+} from './utils';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
@@ -44,7 +48,7 @@ export class SecurityService
 
   public setup(): InternalSecurityServiceSetup {
     const config = this.getConfig();
-    const securityConfig = config.get(['xpack', 'security']);
+    const securityConfig: SecurityServiceConfigType = config.get(['xpack', 'security']);
 
     return {
       registerSecurityDelegate: (api) => {

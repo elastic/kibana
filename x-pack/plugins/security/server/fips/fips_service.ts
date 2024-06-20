@@ -17,7 +17,6 @@ export interface FipsServiceSetupParams {
 
 export interface FipsServiceSetupInternal {
   validateLicenseForFips: () => void;
-  isKibanaFipsModeEnabled: () => boolean;
 }
 
 export class FipsService {
@@ -32,12 +31,7 @@ export class FipsService {
   setup({ config, license }: FipsServiceSetupParams): FipsServiceSetupInternal {
     return {
       validateLicenseForFips: () => this.validateLicenseForFips(config, license),
-      isKibanaFipsModeEnabled: () => this.isKibanaFipsModeEnabled(config),
     };
-  }
-
-  private isKibanaFipsModeEnabled(config: ConfigType): boolean {
-    return config?.experimental.fipsMode.enabled;
   }
 
   private validateLicenseForFips(config: ConfigType, license: SecurityLicense) {

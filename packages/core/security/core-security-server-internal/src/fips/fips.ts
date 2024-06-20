@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ConfigType } from '@kbn/security-plugin/server/config';
+import { SecurityServiceConfigType } from '../utils';
 
-export function isFipsEnabled(config: ConfigType): boolean {
+export function isFipsEnabled(config: SecurityServiceConfigType): boolean {
   return config?.experimental?.fipsMode?.enabled || false;
 }
