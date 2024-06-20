@@ -41,9 +41,13 @@ export async function globTranslationFiles(fileRoot: string, options: Options = 
 }
 
 export async function globNamespacePaths(
-  namespaceRoots: string[],
+  namespaceRoots: string | string[],
   options: Options = {}
 ): Promise<string[]> {
+  if (typeof namespaceRoots === 'string') {
+    return await globTranslationFiles(namespaceRoots, options);
+  }
+
   const filePaths = await Promise.all(
     namespaceRoots.map((fileRoot) => globTranslationFiles(fileRoot, options))
   );

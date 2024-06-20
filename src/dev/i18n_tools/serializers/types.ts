@@ -6,11 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { MessageDescriptor } from '@formatjs/intl';
 import { TranslationInput } from '@kbn/i18n';
 
-export type FileOutput = Omit<TranslationInput, 'locale'>;
+export interface FileOutput {
+  messages: Record<string, string | { text: string; comment: string }>;
+  formats: TranslationInput['formats'];
+}
 
 export type Serializer = (
-  messages: TranslationInput['messages'],
+  messages: MessageDescriptor[],
   formats?: TranslationInput['formats']
 ) => string;

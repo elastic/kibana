@@ -6,20 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
+import { defaultEnFormats } from '@kbn/i18n/src/core';
 import { Serializer, FileOutput } from './types';
 
-export const serializeToJson: Serializer = (messages, formats = i18n.getTranslation().formats) => {
+export const serializeToJson: Serializer = (messages, formats = defaultEnFormats) => {
   const resultJsonObject: FileOutput = {
     formats,
     messages: {},
   };
 
-  for (const [mapKey, mapValue] of messages) {
-    if (mapValue.description) {
-      resultJsonObject.messages[mapKey] = { text: mapValue.message, comment: mapValue.description };
+  for (const { id, defaultMessage, description } of messages) {
+    if (typeof id !== 'string' || typeof defaultMessage !== 'string') {
+      throw new Error(`Unexpected message inputs, id: ${id} message: ${defaultMessage}`);
+    }
+
+    if (description && typeof description === 'string') {
+      resultJsonObject.messages[id] = { text: defaultMessage, comment: description };
     } else {
-      resultJsonObject.messages[mapKey] = mapValue.message;
+      resultJsonObject.messages[id] = defaultMessage;
     }
   }
 

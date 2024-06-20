@@ -13,23 +13,26 @@ import { groupMessagesByNamespace } from './group_messages_by_namespace';
 import { removeUnusedTranslations } from './remove_unused_translations';
 import { removeOutdatedTranslations } from './remove_outdated_translations';
 import { updateTranslationFile } from './update_translation_file';
+import { ErrorReporter } from '../../utils/error_reporter';
+import { getLocalesFromFiles } from './get_locale_from_file';
 
 import { TaskSignature } from '../../types';
 
 export interface TaskOptions {
-  translationFiles: Record<string, string>;
   fix?: boolean;
+  filterNamespaces?: string[];
 }
 export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, task, options) => {
-  const { config, errorReporter } = context;
-  const { translationFiles, fix = false } = options;
-  const taskErrorReporter = errorReporter.withContext({ name: 'Validate Translations' });
+  const { config } = context;
+  const { filterNamespaces, fix = false } = options;
+  const errorReporter = new ErrorReporter({ name: 'Validate Translation Files' });
 
   if (!config || !Object.keys(config.paths).length) {
-    throw taskErrorReporter.reportFailure(
+    throw errorReporter.reportFailure(
       'None of input paths is covered by the mappings in .i18nrc.json'
     );
   }
+
   const namespaces = Object.keys(config.paths);
 
   /**
@@ -41,12 +44,21 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
    * 4. if --fix flag: update file, otherwise just stdout the errors.
    */
 
+  /**
+   * 1. Group translation file messages by namespace
+   * remove unused translations from filtered namespace
+   *    a. if not in the filtered namespace just keep as is
+   * 2.
+   *
+   */
   return task.newListr(
     (parent) => [
       {
         title: `Checking outdated messages inside translation files`,
         task: async () => {
-          for (const [locale, filePath] of Object.entries(translationFiles)) {
+          const translationFiles = getLocalesFromFiles(config.translations);
+
+          for (const [locale, filePath] of translationFiles.entries()) {
             const translationInput = await parseTranslationFile(filePath);
             const namespacedTranslatedMessages = groupMessagesByNamespace(
               translationInput,
@@ -54,12 +66,16 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
             );
             const withoutUnusedTranslation = removeUnusedTranslations({
               namespacedTranslatedMessages,
+              filterNamespaces,
               context,
             });
+
             const withoutOutdatedTranslations = removeOutdatedTranslations({
               namespacedTranslatedMessages: withoutUnusedTranslation,
+              filterNamespaces,
               context,
             });
+
             if (fix) {
               await updateTranslationFile({
                 formats: translationInput.formats,

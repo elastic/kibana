@@ -19,7 +19,8 @@ export function groupMessagesByNamespace(
   for (const [messageId, messageValue] of Object.entries(translationInput.messages)) {
     const namespace = knownNamespaces.find((key) => messageId.startsWith(`${key}.`));
     if (!namespace) {
-      throw new Error(`Unknown namespace in id ${messageId}.`);
+      continue;
+      throw new Error(`Unknown namespace in id ${messageId}`);
     }
 
     if (!localizedMessagesByNamespace.has(namespace)) {

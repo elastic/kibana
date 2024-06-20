@@ -8,7 +8,7 @@
 
 import { readFile as readFileAsync } from 'fs/promises';
 import { globNamespacePaths, makeAbsolutePath } from '../../utils';
-import { extractI18nMessageDescriptors } from '../../formatjs/runner';
+import { extractI18nMessageDescriptors } from '../../extractors/formatjs';
 import { I18nConfig } from '../../types';
 
 export interface Params {

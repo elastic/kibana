@@ -8,7 +8,6 @@
 
 import chalk from 'chalk';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { normalizePath } from './helpers';
 
 export interface Context {
   name: string;
@@ -16,18 +15,23 @@ export interface Context {
 
 export class ErrorReporter {
   static stdoutPrefix = chalk.white.bgRed(' I18N ERROR ');
-
   readonly errors: string[] = [];
-  private formatErrorMessage(message: string): string {
-    return `${ErrorReporter.stdoutPrefix} ${message}`;
-  }
-  private report(error: Error, context: Context) {
-    this.errors.push(
-      `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(context.name)}\n${error}`
-    );
+  private readonly context: Context;
+
+  constructor(context: Context) {
+    this.context = context;
   }
 
-  private reportFailure(err: string | Error) {
+  private formatErrorMessage(message: string): string {
+    return `${ErrorReporter.stdoutPrefix} in ${this.context.name}:\n${message}`;
+  }
+
+  public report(err: string | Error) {
+    const errorMessage = this.formatErrorMessage(typeof err === 'string' ? err : err.message);
+    this.errors.push(errorMessage);
+  }
+
+  public reportFailure(err: string | Error) {
     const failureMessage = this.formatErrorMessage(typeof err === 'string' ? err : err.message);
     return createFailError(failureMessage);
   }
@@ -36,13 +40,7 @@ export class ErrorReporter {
     return this.errors.length > 0;
   }
 
-  public withContext(context: Context) {
-    return {
-      // Creates an error that might be recoverable.
-      reportError: (error: Error) => this.report(error, context),
-
-      // Creates an error with exit code 1
-      reportFailure: (err: string | Error) => this.reportFailure(err),
-    };
+  public throwErrors() {
+    throw this.reportFailure(this.errors.join('\n'));
   }
 }

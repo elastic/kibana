@@ -7,22 +7,14 @@
  */
 
 import { readFile as readFileAsync } from 'fs/promises';
+import { diffStrings } from '@kbn/dev-utils';
 import { MessageDescriptor } from '../../extractors/call_expt';
 import {
   extractI18nMessageDescriptors,
   verifyMessageDescriptor,
   verifyMessageIdStartsWithNamespace,
-} from '../../formatjs/runner';
-import { globNamespacePaths } from '../../utils';
-
-const descriptorDetailsStack = (messageDescriptor: MessageDescriptor, namespaceRoot: string) => {
-  return `
-id: ${messageDescriptor.id}
-message: ${messageDescriptor.defaultMessage}
-file: ${messageDescriptor.file}
-namespace: ${namespaceRoot}
-`;
-};
+} from '../../extractors/formatjs';
+import { globNamespacePaths, descriptorDetailsStack, ErrorReporter } from '../../utils';
 
 const validateFile = ({
   extractedMessages,
@@ -51,7 +43,11 @@ const validateFile = ({
     }
   }
 };
-const formatJsRunner = async (filePaths: string[], namespace: string) => {
+const formatJsRunner = async (
+  filePaths: string[],
+  namespace: string,
+  errorReporter: ErrorReporter
+) => {
   const allNamespaceMessages = new Map();
   for (const filePath of filePaths) {
     const source = await readFileAsync(filePath, 'utf8');
@@ -65,23 +61,41 @@ const formatJsRunner = async (filePaths: string[], namespace: string) => {
 
     extractedMessages.forEach((extractedMessage) => {
       if (allNamespaceMessages.has(extractedMessage.id)) {
-        throw new Error(
-          `Found duplicate i18n message id in files:\n- ${extractedMessage.file}\n- ${
-            allNamespaceMessages.get(extractedMessage.id).file
-          }`
-        );
+        const mismatchMessage =
+          allNamespaceMessages.get(extractedMessage.id).defaultMessage !==
+          extractedMessage.defaultMessage;
+
+        if (mismatchMessage) {
+          const excpectedDescriptor = allNamespaceMessages.get(extractedMessage.id);
+          const expectedMessage = excpectedDescriptor.defaultMessage;
+          const receivedMessage = `${extractedMessage.defaultMessage}`;
+
+          const diffOutput = diffStrings(expectedMessage, receivedMessage);
+
+          errorReporter.report(
+            `Found duplicate i18n message id with mismatching defaultMessages in files:\n- ${extractedMessage.file}\n- ${excpectedDescriptor.file}\nMessage id: ${extractedMessage.id}\nNamespace: ${namespace}\n${diffOutput}`
+          );
+        }
       }
 
       allNamespaceMessages.set(extractedMessage.id, extractedMessage);
     });
+
+    if (errorReporter.hasErrors()) {
+      throw errorReporter.throwErrors();
+    }
   }
 
   return allNamespaceMessages;
 };
 
-export const runForNamespacePath = async (namespace: string, namespaceRoots: string[]) => {
+export const runForNamespacePath = async (
+  namespace: string,
+  namespaceRoots: string[],
+  errorReporter: ErrorReporter
+) => {
   const namespacePaths = await globNamespacePaths(namespaceRoots);
-  const allNamespaceMessages = await formatJsRunner(namespacePaths, namespace);
+  const allNamespaceMessages = await formatJsRunner(namespacePaths, namespace, errorReporter);
 
   return allNamespaceMessages;
 };

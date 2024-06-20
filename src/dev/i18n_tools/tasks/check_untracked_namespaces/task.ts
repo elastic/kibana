@@ -8,6 +8,7 @@
 
 import { PRESET_TIMER } from 'listr2';
 import { TaskSignature } from '../../types';
+import { ErrorReporter } from '../../utils/error_reporter';
 import {
   extractUntrackedMessages,
   getNamespacePathsForRoot,
@@ -21,12 +22,12 @@ export const checkUntrackedNamespacesTask: TaskSignature<TaskOptions> = (
   task,
   options
 ) => {
-  const { config, errorReporter } = context;
+  const { config } = context;
   const { rootPaths } = options;
-  const taskErrorReporter = errorReporter.withContext({ name: 'Untracked Translations' });
+  const errorReporter = new ErrorReporter({ name: 'Untracked Translations' });
 
   if (!config || !Object.keys(config.paths).length) {
-    throw taskErrorReporter.reportFailure(
+    throw errorReporter.reportFailure(
       'None of input paths is covered by the mappings in .i18nrc.json'
     );
   }
@@ -40,10 +41,8 @@ export const checkUntrackedNamespacesTask: TaskSignature<TaskOptions> = (
 
           for (const rootPath of rootPaths) {
             parent.title = `Checking untracked messages inside "${rootPath}"`;
-            const definedPathsForRoot = await getNamespacePathsForRoot(
-              rootPath,
-              definedNamespacesPaths
-            );
+            const definedPathsForRoot = getNamespacePathsForRoot(rootPath, definedNamespacesPaths);
+
             for await (const untrackedMessageDetails of extractUntrackedMessages(
               rootPath,
               definedPathsForRoot
@@ -56,7 +55,7 @@ export const checkUntrackedNamespacesTask: TaskSignature<TaskOptions> = (
                 const error = new Error(
                   `The file ${untrackedFilePath} contains i18n messages but is not defined in the .i18nrc namespaces paths`
                 );
-                taskErrorReporter.reportError(error);
+                errorReporter.report(error);
                 throw error;
               }
             }

@@ -13,11 +13,22 @@ import type { GroupedMessagesByNamespace } from './group_messages_by_namespace';
 export const removeUnusedTranslations = ({
   context,
   namespacedTranslatedMessages,
+  filterNamespaces,
 }: {
   context: I18nCheckTaskContext;
   namespacedTranslatedMessages: GroupedMessagesByNamespace;
+  filterNamespaces?: string[];
 }) => {
   for (const [namespace, translatedMessages] of namespacedTranslatedMessages) {
+    if (filterNamespaces) {
+      const isInFilteredNamespace = filterNamespaces.find((n) => n === namespace);
+      if (!isInFilteredNamespace) {
+        // if not in the targeted namespace then just keep the messages as is.
+        namespacedTranslatedMessages.set(namespace, translatedMessages);
+        continue;
+      }
+    }
+
     const extractedMessages = context.messages.get(namespace);
     if (!extractedMessages) {
       // the whole namespace is removed from the codebase. remove from file.

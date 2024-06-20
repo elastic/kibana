@@ -15,7 +15,15 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { ErrorReporter } from '../utils';
 import { I18nCheckTaskContext } from '../types';
-import { checkConfigs, mergeConfigs, checkUntrackedNamespacesTask } from '../tasks';
+import { KIBANA_TRANSLATIONS_DIR } from '../constants';
+
+import {
+  checkConfigs,
+  mergeConfigs,
+  checkUntrackedNamespacesTask,
+  validateTranslationsTask,
+  validateTranslationFiles,
+} from '../tasks';
 
 const toolingLog = new ToolingLog({
   level: 'info',
@@ -37,6 +45,7 @@ run(
       'ignore-unused': ignoreUnused,
       'include-config': includeConfig,
       'ignore-untracked': ignoreUntracked,
+      namespace: namespace,
       fix = false,
       path,
     },
@@ -53,7 +62,7 @@ run(
       throw createFailError(
         `${chalk.white.bgRed(
           ' I18N ERROR '
-        )} none of the --ignore-incompatible, --ignore-malformed, --ignore-unused or --ignore-missing,  --ignore-untracked is allowed when --fix is set.`
+        )} none of the --ignore-incompatible, --namespace, --ignore-malformed, --ignore-unused or --ignore-missing,  --ignore-untracked is allowed when --fix is set.`
       );
     }
 
@@ -67,8 +76,15 @@ run(
       throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --fix can't have a value`);
     }
 
+    if (typeof namespace === 'boolean') {
+      throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --namespace require a value`);
+    }
+
+    const filterNamespaces = typeof namespace === 'string' ? [namespace] : namespace;
+
     const kibanaRootPaths = ['./src', './packages', './x-pack'];
     const rootPaths = Array().concat(path || kibanaRootPaths);
+    const translationFilesRoots = [KIBANA_TRANSLATIONS_DIR];
 
     const list = new Listr<I18nCheckTaskContext>(
       [
@@ -82,20 +98,21 @@ run(
           task: (context, task) =>
             task.newListr(mergeConfigs(includeConfig), { exitOnError: true }),
         },
-        // {
-        //   title: 'Validating i18n Messages',
-        //   skip: skipOnNoTranslations,
-        //   task: (context, task) => validateTranslationsTask(context, task, {}),
-        // },
-        // {
-        //   title: 'Checking Untracked i18n Messages outside defined namespaces',
-        //   enabled: (_) => !ignoreUntracked,
-        //   task: (context, task) => checkUntrackedNamespacesTask(context, task, { rootPaths }),
-        // },
+        {
+          title: 'Validating i18n Messages',
+          skip: skipOnNoTranslations,
+          task: (context, task) => validateTranslationsTask(context, task, { filterNamespaces }),
+        },
+        {
+          title: 'Checking Untracked i18n Messages outside defined namespaces',
+          enabled: (_) => !ignoreUntracked || !!(filterNamespaces && filterNamespaces.length),
+          task: (context, task) => checkUntrackedNamespacesTask(context, task, { rootPaths }),
+        },
         {
           title: 'Validating translation files',
           skip: skipOnNoTranslations,
-          task: (context, task) => checkUntrackedNamespacesTask(context, task, { rootPaths }),
+          task: (context, task) =>
+            validateTranslationFiles(context, task, { filterNamespaces, fix }),
         },
       ],
       {
@@ -106,9 +123,8 @@ run(
     );
 
     try {
-      const errorReporter = new ErrorReporter();
       const messages: Map<string, { message: string }> = new Map();
-      await list.run({ messages, errorReporter });
+      await list.run({ messages });
 
       reportTime(runStartTime, 'total', {
         success: true,

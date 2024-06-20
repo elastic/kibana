@@ -8,6 +8,7 @@
 
 import path from 'path';
 import normalize from 'normalize-path';
+import { MessageDescriptor } from '../types';
 
 export function normalizePath(inputPath: string) {
   return normalize(path.relative('.', inputPath));
@@ -25,3 +26,15 @@ export function makeAbsolutePath(inputPath: string, withTrailingSlash?: boolean)
 export function arrayify(subj: unknown) {
   return Array.isArray(subj) ? subj : [subj];
 }
+
+export const descriptorDetailsStack = (
+  messageDescriptor: MessageDescriptor,
+  namespaceRoot: string
+) => {
+  return `
+id: ${messageDescriptor.id}
+message: ${messageDescriptor.defaultMessage}
+file: ${messageDescriptor.file}
+namespace: ${namespaceRoot}
+`;
+};

@@ -8,8 +8,6 @@
 
 import { ListrTaskWrapper, DefaultRenderer, SimpleRenderer } from 'listr2';
 
-import { ErrorReporter } from './utils';
-
 export interface MessageDescriptor {
   id: string;
   description?: string | object;
@@ -24,7 +22,6 @@ export interface MessageDescriptor {
 
 export interface I18nCheckTaskContext {
   config?: I18nConfig;
-  errorReporter: ErrorReporter;
   messages: Map<string, MessageDescriptor[]>;
 }
 

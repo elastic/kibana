@@ -7,17 +7,29 @@
  */
 
 import { I18nCheckTaskContext, MessageDescriptor } from '../../types';
-import { verifyMessageDescriptor } from '../../formatjs/runner';
+import { verifyMessageDescriptor } from '../../extractors/formatjs';
 import type { GroupedMessagesByNamespace } from './group_messages_by_namespace';
 export const removeOutdatedTranslations = ({
   context,
   namespacedTranslatedMessages,
+  filterNamespaces,
 }: {
   context: I18nCheckTaskContext;
   namespacedTranslatedMessages: GroupedMessagesByNamespace;
+  filterNamespaces?: string[];
 }) => {
   for (const [namespace, translatedMessages] of namespacedTranslatedMessages) {
+    if (filterNamespaces) {
+      const isInFilteredNamespace = filterNamespaces.find((n) => n === namespace);
+      if (!isInFilteredNamespace) {
+        // if not in the targeted namespace then just keep the messages as is.
+        namespacedTranslatedMessages.set(namespace, translatedMessages);
+        continue;
+      }
+    }
+
     const extractedMessages = context.messages.get(namespace);
+
     if (!extractedMessages) {
       // the whole namespace is removed from the codebase. remove from file.
       namespacedTranslatedMessages.delete(namespace);
@@ -40,7 +52,10 @@ export const removeOutdatedMessages = (
       return true;
     }
     try {
-      verifyMessageDescriptor(translatedMessage, messageDescriptor);
+      verifyMessageDescriptor(
+        typeof translatedMessage === 'string' ? translatedMessage : translatedMessage.message,
+        messageDescriptor
+      );
       return true;
     } catch (err) {
       // failed to verify message against latest descriptor. remove from file.
