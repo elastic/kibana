@@ -14,6 +14,7 @@ describe('Configuration Statistics Aggregator', () => {
   test('merges the static config with the merged configs', async () => {
     const configuration: TaskManagerConfig = {
       max_workers: 10,
+      capacity: 20,
       max_attempts: 9,
       poll_interval: 6000000,
       allow_reading_invalid_state: false,

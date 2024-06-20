@@ -46,6 +46,7 @@ const config: TaskManagerConfig = {
   },
   max_attempts: 9,
   max_workers: 10,
+  capacity: 20,
   metrics_reset_interval: 30000,
   monitored_aggregated_stats_refresh_rate: 5000,
   monitored_stats_health_verbose_log: {

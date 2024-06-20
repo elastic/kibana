@@ -42,6 +42,7 @@ describe('TaskPollingLifecycle', () => {
   const taskManagerOpts = {
     config: {
       enabled: true,
+      capacity: 20,
       max_workers: 10,
       index: 'foo',
       max_attempts: 9,

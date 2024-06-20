@@ -45,6 +45,7 @@ describe('EphemeralTaskLifecycle', () => {
       definitions: new TaskTypeDictionary(taskManagerLogger),
       executionContext,
       config: {
+        capacity: 20,
         max_workers: 10,
         max_attempts: 9,
         poll_interval: 6000000,
@@ -156,7 +157,7 @@ describe('EphemeralTaskLifecycle', () => {
       expect(ephemeralTaskLifecycle.attemptToRun(task)).toMatchObject(asOk(task));
 
       poolCapacity.mockReturnValue({
-        availableWorkers: 10,
+        availableCapacity: 20,
       });
 
       lifecycleEvent$.next(
@@ -179,7 +180,7 @@ describe('EphemeralTaskLifecycle', () => {
       expect(ephemeralTaskLifecycle.attemptToRun(task)).toMatchObject(asOk(task));
 
       poolCapacity.mockReturnValue({
-        availableWorkers: 10,
+        availableCapacity: 20,
       });
 
       lifecycleEvent$.next(
@@ -216,7 +217,7 @@ describe('EphemeralTaskLifecycle', () => {
       expect(ephemeralTaskLifecycle.attemptToRun(tasks[2])).toMatchObject(asOk(tasks[2]));
 
       poolCapacity.mockReturnValue({
-        availableWorkers: 2,
+        availableCapacity: 4,
       });
 
       lifecycleEvent$.next(
@@ -256,9 +257,9 @@ describe('EphemeralTaskLifecycle', () => {
 
       // pool has capacity for both
       poolCapacity.mockReturnValue({
-        availableWorkers: 10,
+        availableCapacity: 20,
       });
-      pool.getOccupiedWorkersByType.mockReturnValue(0);
+      pool.getOccupiedCapacityByType.mockReturnValue(0);
 
       lifecycleEvent$.next(
         asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed }))
@@ -296,10 +297,10 @@ describe('EphemeralTaskLifecycle', () => {
 
       // pool has capacity in general
       poolCapacity.mockReturnValue({
-        availableWorkers: 2,
+        availableCapacity: 4,
       });
       // but when we ask how many it has occupied by type  - wee always have one worker already occupied by that type
-      pool.getOccupiedWorkersByType.mockReturnValue(1);
+      pool.getOccupiedCapacityByType.mockReturnValue(1);
 
       lifecycleEvent$.next(
         asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed }))
@@ -308,7 +309,7 @@ describe('EphemeralTaskLifecycle', () => {
       expect(pool.run).toHaveBeenCalledTimes(0);
 
       // now we release the worker in the pool and cause another cycle in the epheemral queue
-      pool.getOccupiedWorkersByType.mockReturnValue(0);
+      pool.getOccupiedCapacityByType.mockReturnValue(0);
       lifecycleEvent$.next(
         asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed }))
       );
@@ -356,9 +357,9 @@ describe('EphemeralTaskLifecycle', () => {
 
     // pool has capacity for all
     poolCapacity.mockReturnValue({
-      availableWorkers: 10,
+      availableCapacity: 20,
     });
-    pool.getOccupiedWorkersByType.mockReturnValue(0);
+    pool.getOccupiedCapacityByType.mockReturnValue(0);
 
     lifecycleEvent$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed })));
 
@@ -389,7 +390,7 @@ describe('EphemeralTaskLifecycle', () => {
 
     expect(ephemeralTaskLifecycle.queuedTasks).toBe(3);
     poolCapacity.mockReturnValue({
-      availableWorkers: 1,
+      availableCapacity: 2,
     });
     lifecycleEvent$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed })));
     expect(ephemeralTaskLifecycle.queuedTasks).toBe(2);

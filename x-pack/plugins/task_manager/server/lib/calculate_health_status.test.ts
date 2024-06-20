@@ -16,6 +16,7 @@ Date.now = jest.fn().mockReturnValue(new Date(now));
 const logger = loggingSystemMock.create().get();
 const config = {
   enabled: true,
+  capacity: 20,
   max_workers: 10,
   index: 'foo',
   max_attempts: 9,

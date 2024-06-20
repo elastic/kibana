@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { v1 as uuidv1, v4 as uuidv4 } from 'uuid';
 import { filter, take, toArray } from 'rxjs';
 
-import { TaskStatus, ConcreteTaskInstance, TaskPriority } from '../task';
+import { TaskStatus, ConcreteTaskInstance, TaskPriority, TaskCost } from '../task';
 import { SearchOpts, StoreOpts, UpdateByQueryOpts, UpdateByQuerySearchOpts } from '../task_store';
 import { asTaskClaimEvent, TaskEvent } from '../task_events';
 import { asOk, isOk, unwrap } from '../lib/result_type';
@@ -130,7 +130,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes,
         unusedTypes: unusedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
-        getCapacity: taskClaimingOpts.getCapacity ?? (() => 10),
+        getAvailableCapacity: taskClaimingOpts.getAvailableCapacity ?? (() => 20),
         ...taskClaimingOpts,
       });
 
@@ -154,7 +154,7 @@ describe('TaskClaiming', () => {
       excludedTaskTypes?: string[];
       unusedTaskTypes?: string[];
     }) {
-      const getCapacity = taskClaimingOpts.getCapacity ?? (() => 10);
+      const getCapacity = taskClaimingOpts.getAvailableCapacity ?? (() => 20);
       const { taskClaiming, store } = initialiseTestClaiming({
         storeOpts,
         taskClaimingOpts,
@@ -187,7 +187,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(store.updateByQuery.mock.calls[0][1]).toMatchObject({
-        max_docs: getCapacity(),
+        max_docs: Math.round(getCapacity() / TaskCost.Normal),
       });
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: getCapacity() });
       return results.map((result, index) => ({
@@ -443,15 +443,15 @@ if (doc['task.runAt'].size()!=0) {
         },
         taskClaimingOpts: {
           maxAttempts,
-          getCapacity: (type) => {
+          getAvailableCapacity: (type) => {
             switch (type) {
               case 'limitedToOne':
               case 'anotherLimitedToOne':
-                return 1;
-              case 'limitedToTwo':
                 return 2;
+              case 'limitedToTwo':
+                return 4;
               default:
-                return 10;
+                return 20;
             }
           },
         },
@@ -573,14 +573,14 @@ if (doc['task.runAt'].size()!=0) {
         },
         taskClaimingOpts: {
           maxAttempts,
-          getCapacity: (type) => {
+          getAvailableCapacity: (type) => {
             switch (type) {
               case 'limitedToTwo':
-                return 2;
+                return 4;
               case 'limitedToFive':
-                return 5;
-              default:
                 return 10;
+              default:
+                return 20;
             }
           },
         },
@@ -682,15 +682,15 @@ if (doc['task.runAt'].size()!=0) {
         },
         taskClaimingOpts: {
           maxAttempts,
-          getCapacity: (type) => {
+          getAvailableCapacity: (type) => {
             switch (type) {
               case 'limitedToOne':
               case 'anotherLimitedToOne':
-                return 1;
-              case 'limitedToTwo':
                 return 2;
+              case 'limitedToTwo':
+                return 4;
               default:
-                return 10;
+                return 20;
             }
           },
         },
@@ -1135,7 +1135,7 @@ if (doc['task.runAt'].size()!=0) {
         storeOpts: {
           taskManagerId,
         },
-        taskClaimingOpts: { getCapacity: () => maxDocs },
+        taskClaimingOpts: { getAvailableCapacity: () => maxDocs * TaskCost.Normal },
         claimingOpts: {
           claimOwnershipUntil,
         },
@@ -1215,9 +1215,9 @@ if (doc['task.runAt'].size()!=0) {
     function instantiateStoreWithMockedApiResponses({
       taskManagerId = uuidv4(),
       definitions = taskDefinitions,
-      getCapacity = () => 10,
+      getAvailableCapacity = () => 20,
       tasksClaimed,
-    }: Partial<Pick<TaskClaimingOpts, 'definitions' | 'getCapacity'>> & {
+    }: Partial<Pick<TaskClaimingOpts, 'definitions' | 'getAvailableCapacity'>> & {
       taskManagerId?: string;
       tasksClaimed?: ConcreteTaskInstance[][];
     } = {}) {
@@ -1250,7 +1250,7 @@ if (doc['task.runAt'].size()!=0) {
         unusedTypes: [],
         taskStore,
         maxAttempts: 2,
-        getCapacity,
+        getAvailableCapacity,
       });
 
       return { taskManagerId, runAt, taskClaiming };

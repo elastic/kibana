@@ -38,6 +38,7 @@ jest.mock('./ephemeral_task_lifecycle', () => {
 
 const coreStart = coreMock.createStart();
 const pluginInitializerContextParams = {
+  capacity: 20,
   max_workers: 10,
   max_attempts: 9,
   poll_interval: 3000,

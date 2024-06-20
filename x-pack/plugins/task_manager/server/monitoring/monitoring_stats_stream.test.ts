@@ -18,6 +18,7 @@ beforeEach(() => {
 
 describe('createMonitoringStatsStream', () => {
   const configuration: TaskManagerConfig = {
+    capacity: 20,
     max_workers: 10,
     max_attempts: 9,
     poll_interval: 6000000,

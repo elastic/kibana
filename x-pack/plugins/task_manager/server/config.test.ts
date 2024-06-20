@@ -13,6 +13,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "capacity": 20,
         "claim_strategy": "default",
         "ephemeral_tasks": Object {
           "enabled": false,
@@ -71,6 +72,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "capacity": 20,
         "claim_strategy": "default",
         "ephemeral_tasks": Object {
           "enabled": false,
@@ -127,6 +129,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "capacity": 20,
         "claim_strategy": "default",
         "ephemeral_tasks": Object {
           "enabled": false,
