@@ -36,7 +36,11 @@ export const getOverviewPanelTitle = () =>
     defaultMessage: 'SLO Overview',
   });
 export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
-  const factory: ReactEmbeddableFactory<SloOverviewEmbeddableState, SloOverviewApi> = {
+  const factory: ReactEmbeddableFactory<
+    SloOverviewEmbeddableState,
+    SloOverviewEmbeddableState,
+    SloOverviewApi
+  > = {
     type: SLO_OVERVIEW_EMBEDDABLE_ID,
     deserializeState: (state) => {
       return state.rawState as SloOverviewEmbeddableState;
