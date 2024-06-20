@@ -13,23 +13,9 @@
     ],
     "requiredPlugins": [
       "kibanaReact",
-      "licensing",
-      "management",
-      "features",
-      "share",
-      "fileUpload",
       "triggersActionsUi",
       "actions",
       "stackConnectors",
-      "spaces",
     ],
-    "optionalPlugins": [
-      "security",
-      "usageCollection",
-      "console"
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
   }
 }
