@@ -33,7 +33,9 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/unified-data-table",
     "@kbn/core-notifications-browser",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/router-utils",
+    "@kbn/share-plugin"
   ],
   "exclude": [
     "target/**/*",
