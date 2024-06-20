@@ -132,7 +132,7 @@ describe('Spaces plugin', () => {
       const plugin = new SpacesPlugin(mockInitializerContext);
       plugin.setup(coreSetup, {});
 
-      plugin.start(coreStart);
+      plugin.start(coreStart, { features: { getFeatures: jest.fn() } });
 
       expect(coreStart.chrome.navControls.registerLeft).toHaveBeenCalled();
     });
@@ -144,7 +144,7 @@ describe('Spaces plugin', () => {
       const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(coreSetup, {});
 
-      plugin.start(coreStart);
+      plugin.start(coreStart, { features: { getFeatures: jest.fn() } });
 
       expect(coreStart.chrome.navControls.registerLeft).not.toHaveBeenCalled();
     });
@@ -156,7 +156,7 @@ describe('Spaces plugin', () => {
 
     const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1 }));
     const spacesSetup = plugin.setup(coreSetup, {});
-    const spacesStart = plugin.start(coreStart);
+    const spacesStart = plugin.start(coreStart, { features: { getFeatures: jest.fn() } });
 
     expect(spacesSetup.hasOnlyDefaultSpace).toBe(true);
     expect(spacesStart.hasOnlyDefaultSpace).toBe(true);
@@ -168,7 +168,7 @@ describe('Spaces plugin', () => {
 
     const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1000 }));
     const spacesSetup = plugin.setup(coreSetup, {});
-    const spacesStart = plugin.start(coreStart);
+    const spacesStart = plugin.start(coreStart, { features: { getFeatures: jest.fn() } });
 
     expect(spacesSetup.hasOnlyDefaultSpace).toBe(false);
     expect(spacesStart.hasOnlyDefaultSpace).toBe(false);
