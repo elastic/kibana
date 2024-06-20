@@ -153,11 +153,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             const esQueryConfigs = getEsQueryConfig(
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
-            const timeFilter =
-              input.timeRange &&
-              getTime(undefined, input.timeRange, {
-                fieldName: timeField,
-              });
 
             const timeParams = getEarliestLatestParams(query, input.timeRange);
             const namedParams = [];
@@ -171,6 +166,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             if (namedParams.length) {
               params.params = namedParams;
             }
+
+            // don't send the timefilter if the time filter named params are already in the query
+            const timeFilter =
+              input.timeRange &&
+              (!timeParams?.earliest || !timeParams?.latest) &&
+              getTime(undefined, input.timeRange, {
+                fieldName: timeField,
+              });
 
             params.filter = buildEsQuery(
               undefined,
