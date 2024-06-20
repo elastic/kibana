@@ -20,23 +20,30 @@ import {
   goToStep,
   startTour,
 } from '../../../tasks/guided_onboarding';
-import { createRule } from '../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../objects/rule';
 import { ALERTS_URL, DASHBOARDS_URL } from '../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { startAlertsCasesTour } from '../../../tasks/api_calls/tour';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
+const cleanUpKibana = () => {
+  cy.task('esArchiverUnload', { archiveName: 'query_alert' });
+  deleteAlertsAndRules();
+};
+
 describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
   beforeEach(() => {
-    deleteAlertsAndRules();
-    createRule(getNewRule({ query: 'user.name:*' }));
+    cleanUpKibana();
+    cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     login();
     startAlertsCasesTour();
-    visit(ALERTS_URL);
+    visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
+  });
+
+  afterEach(() => {
+    cleanUpKibana();
   });
 
   it('Completes the tour with next button clicks', () => {

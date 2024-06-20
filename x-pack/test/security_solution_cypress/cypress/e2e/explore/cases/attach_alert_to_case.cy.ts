@@ -6,37 +6,43 @@
  */
 import { ROLES, SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 
-import { getNewRule } from '../../../objects/rule';
-
 import { expandFirstAlertActions } from '../../../tasks/alerts';
-import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../../screens/alerts';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
-const loadDetectionsPage = (role: SecurityRoleName) => {
+const loadDetectionsPage = (role?: SecurityRoleName) => {
   login(role);
-  visit(ALERTS_URL);
+  visitWithTimeRange(ALERTS_URL);
   waitForAlertsToPopulate();
+};
+
+const cleanKibana = () => {
+  cy.task('esArchiverUnload', { archiveName: 'query_alert' });
+  deleteAlertsAndRules();
 };
 
 describe('Alerts timeline', { tags: ['@ess'] }, () => {
   beforeEach(() => {
-    // First we login as a privileged user to create alerts.
-    deleteAlertsAndRules();
-    createRule(getNewRule());
-    login();
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
+    cleanKibana();
+
+    cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
+    // First we login as a privileged user so data view can be created.
+    loadDetectionsPage();
   });
 
-  context('Privileges: read only', () => {
+  afterEach(() => {
+    cleanKibana();
+  });
+
+  context('Privileges: read only', { tags: ['@ess'] }, () => {
     beforeEach(() => {
+      // ess only role
       loadDetectionsPage(ROLES.reader);
     });
 

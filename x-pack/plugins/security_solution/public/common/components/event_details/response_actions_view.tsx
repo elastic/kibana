@@ -80,7 +80,7 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
     : undefined;
 
   const responseActions =
-    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
+    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0]?.response_actions;
   const shouldEarlyReturn = !rawEventData || !responseActionsEnabled;
 
   const alertId = rawEventData?._id ?? '';
