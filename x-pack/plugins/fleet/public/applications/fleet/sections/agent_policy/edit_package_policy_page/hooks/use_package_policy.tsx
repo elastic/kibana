@@ -264,7 +264,7 @@ export function usePackagePolicyWithRelatedData(
                 ...restOfInput
               } = input;
 
-              let basePolicyInputVars: any =
+              const basePolicyInputVars: any =
                 isUpgradeScenario &&
                 basePolicy.inputs.find(
                   (i) => i.type === input.type && i.policy_template === input.policy_template
@@ -272,14 +272,7 @@ export function usePackagePolicyWithRelatedData(
               let newInputVars = inputVars;
               if (basePolicyInputVars && inputVars) {
                 // merging vars from dry run with updated ones
-                basePolicyInputVars = Object.keys(inputVars).reduce(
-                  (acc, curr) => ({ ...acc, [curr]: basePolicyInputVars[curr] }),
-                  {}
-                );
-                newInputVars = {
-                  ...inputVars,
-                  ...basePolicyInputVars,
-                };
+                newInputVars = mergeVars(inputVars, basePolicyInputVars);
               }
               // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix
               if (basePackage.name === 'apm') {

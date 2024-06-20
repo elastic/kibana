@@ -5,8 +5,9 @@ info:
 paths:
   /api/detection_engine/rules:
     delete:
-      operationId: DeleteRule
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
+      operationId: DeleteRule
       description: Deletes a single rule using the `rule_id` or `id` field.
       tags:
         - Rules API

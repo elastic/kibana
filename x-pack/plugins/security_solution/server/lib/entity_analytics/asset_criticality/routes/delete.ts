@@ -7,6 +7,7 @@
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import {
   ASSET_CRITICALITY_PUBLIC_URL,
@@ -16,7 +17,6 @@ import {
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { DeleteAssetCriticalityRecord } from '../../../../../common/api/entity_analytics/asset_criticality';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';

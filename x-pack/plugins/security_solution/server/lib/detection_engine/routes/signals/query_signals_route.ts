@@ -9,8 +9,8 @@ import type { MappingRuntimeFields, Sort } from '@elastic/elasticsearch/lib/api/
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
