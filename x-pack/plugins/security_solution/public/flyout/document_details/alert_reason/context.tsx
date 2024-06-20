@@ -6,14 +6,13 @@
  */
 
 import React, { createContext, memo, useContext, useMemo } from 'react';
-import type { DataViewBase } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useEventDetails } from '../shared/hooks/use_event_details';
 import { FlyoutError } from '../../shared/components/flyout_error';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import type { PreviewPanelProps } from '.';
+import type { AlertReasonPanelProps } from '.';
 
-export interface PreviewPanelContext {
+export interface AlertReasonPanelContext {
   /**
    * Id of the document
    */
@@ -27,31 +26,25 @@ export interface PreviewPanelContext {
    */
   scopeId: string;
   /**
-   * Rule id if preview is rule details
-   */
-  ruleId: string;
-  /**
-   * Index pattern for rule details
-   */
-  indexPattern: DataViewBase;
-  /**
    * An object with top level fields from the ECS object
    */
   dataAsNestedObject: Ecs;
 }
 
-export const PreviewPanelContext = createContext<PreviewPanelContext | undefined>(undefined);
+export const AlertReasonPanelContext = createContext<AlertReasonPanelContext | undefined>(
+  undefined
+);
 
-export type PreviewPanelProviderProps = {
+export type AlertReasonPanelProviderProps = {
   /**
    * React components to render
    */
   children: React.ReactNode;
-} & Partial<PreviewPanelProps['params']>;
+} & Partial<AlertReasonPanelProps['params']>;
 
-export const PreviewPanelProvider = memo(
-  ({ id, indexName, scopeId, ruleId, children }: PreviewPanelProviderProps) => {
-    const { dataAsNestedObject, indexPattern, loading } = useEventDetails({
+export const AlertReasonPanelProvider = memo(
+  ({ id, indexName, scopeId, children }: AlertReasonPanelProviderProps) => {
+    const { dataAsNestedObject, loading } = useEventDetails({
       eventId: id,
       indexName,
     });
@@ -63,12 +56,10 @@ export const PreviewPanelProvider = memo(
               eventId: id,
               indexName,
               scopeId,
-              ruleId: ruleId ?? '',
-              indexPattern,
               dataAsNestedObject,
             }
           : undefined,
-      [id, indexName, scopeId, ruleId, indexPattern, dataAsNestedObject]
+      [id, indexName, scopeId, dataAsNestedObject]
     );
 
     if (loading) {
@@ -80,18 +71,22 @@ export const PreviewPanelProvider = memo(
     }
 
     return (
-      <PreviewPanelContext.Provider value={contextValue}>{children}</PreviewPanelContext.Provider>
+      <AlertReasonPanelContext.Provider value={contextValue}>
+        {children}
+      </AlertReasonPanelContext.Provider>
     );
   }
 );
 
-PreviewPanelProvider.displayName = 'PreviewPanelProvider';
+AlertReasonPanelProvider.displayName = 'AlertReasonPanelProvider';
 
-export const usePreviewPanelContext = (): PreviewPanelContext => {
-  const contextValue = useContext(PreviewPanelContext);
+export const useAlertReasonPanelContext = (): AlertReasonPanelContext => {
+  const contextValue = useContext(AlertReasonPanelContext);
 
   if (!contextValue) {
-    throw new Error('PreviewPanelContext can only be used within PreviewPanelContext provider');
+    throw new Error(
+      'AlertReasonPanelContext can only be used within AlertReasonPanelContext provider'
+    );
   }
 
   return contextValue;

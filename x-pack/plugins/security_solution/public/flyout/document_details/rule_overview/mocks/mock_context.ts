@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { getDataTestSubjectSelector } from '../../helpers/common';
+import type { RuleOverviewPanelContext } from '../context';
 
-export const DOCUMENT_DETAILS_FLYOUT_ALERT_REASON_PREVIEW_CONTAINER = getDataTestSubjectSelector(
-  'securitySolutionFlyoutAlertReasonBody'
-);
+/**
+ * Mock contextValue for rule overview panel context
+ */
+export const mockContextValue: RuleOverviewPanelContext = {
+  ruleId: 'rule id',
+};

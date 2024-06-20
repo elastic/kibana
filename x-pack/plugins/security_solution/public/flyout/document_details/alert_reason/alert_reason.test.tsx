@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { PreviewPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
-import { ALERT_REASON_PREVIEW_BODY_TEST_ID } from './test_ids';
-import { AlertReasonPreview } from './alert_reason_preview';
-import { TestProviders } from '../../../../common/mock';
+import { AlertReasonPanelContext } from './context';
+import { mockContextValue } from './mocks/mock_context';
+import { ALERT_REASON_BODY_TEST_ID } from './test_ids';
+import { AlertReason } from './alert_reason';
+import { TestProviders } from '../../../common/mock';
 
 const panelContextValue = {
   ...mockContextValue,
@@ -19,23 +19,23 @@ const panelContextValue = {
 
 const NO_DATA_MESSAGE = 'There was an error displaying data.';
 
-describe('<AlertReasonPreview />', () => {
+describe('<AlertReason />', () => {
   it('should render alert reason preview', () => {
     const { getByTestId } = render(
-      <PreviewPanelContext.Provider value={panelContextValue}>
-        <AlertReasonPreview />
-      </PreviewPanelContext.Provider>,
+      <AlertReasonPanelContext.Provider value={panelContextValue}>
+        <AlertReason />
+      </AlertReasonPanelContext.Provider>,
       { wrapper: TestProviders }
     );
-    expect(getByTestId(ALERT_REASON_PREVIEW_BODY_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ALERT_REASON_PREVIEW_BODY_TEST_ID)).toHaveTextContent('Alert reason');
+    expect(getByTestId(ALERT_REASON_BODY_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ALERT_REASON_BODY_TEST_ID)).toHaveTextContent('Alert reason');
   });
 
   it('should render no data message if alert reason is not available', () => {
     const { getByText } = render(
-      <PreviewPanelContext.Provider value={{} as unknown as PreviewPanelContext}>
-        <AlertReasonPreview />
-      </PreviewPanelContext.Provider>,
+      <AlertReasonPanelContext.Provider value={{} as unknown as AlertReasonPanelContext}>
+        <AlertReason />
+      </AlertReasonPanelContext.Provider>,
       { wrapper: TestProviders }
     );
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();

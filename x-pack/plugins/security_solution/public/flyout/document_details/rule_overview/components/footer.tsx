@@ -8,26 +8,26 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { usePreviewPanelContext } from '../context';
+import { useRuleOverviewPanelContext } from '../context';
 import { FlyoutFooter } from '../../../shared/components/flyout_footer';
-import { RULE_PREVIEW_FOOTER_TEST_ID, RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID } from './test_ids';
+import { RULE_OVERVIEW_FOOTER_TEST_ID, RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID } from './test_ids';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 
 /**
  * Footer in rule preview panel
  */
-export const RulePreviewFooter = memo(() => {
-  const { ruleId } = usePreviewPanelContext();
+export const RuleFooter = memo(() => {
+  const { ruleId } = useRuleOverviewPanelContext();
   const href = useRuleDetailsLink({ ruleId });
 
   return href ? (
-    <FlyoutFooter data-test-subj={RULE_PREVIEW_FOOTER_TEST_ID}>
+    <FlyoutFooter data-test-subj={RULE_OVERVIEW_FOOTER_TEST_ID}>
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiLink
             href={href}
             target="_blank"
-            data-test-subj={RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID}
+            data-test-subj={RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID}
           >
             {i18n.translate('xpack.securitySolution.flyout.preview.rule.viewDetailsLabel', {
               defaultMessage: 'Show rule details',
@@ -39,4 +39,4 @@ export const RulePreviewFooter = memo(() => {
   ) : null;
 });
 
-RulePreviewFooter.displayName = 'RulePreviewFooter';
+RuleFooter.displayName = 'RuleFooter';
