@@ -27,7 +27,7 @@ export class IntegrationAssistantPlugin
     dependencies: IntegrationAssistantPluginStartDependencies
   ): IntegrationAssistantPluginStart {
     const services = { ...core, ...dependencies };
-    const isAuthorized = hasBasicCapabilities(core.application.capabilities);
+    const isAuthorized = hasRequiredCapabilities(core.application.capabilities);
     if (!isAuthorized) {
       return {};
     }
@@ -40,11 +40,11 @@ export class IntegrationAssistantPlugin
   public stop() {}
 }
 
-const hasBasicCapabilities = (capabilities: ApplicationStart['capabilities']): boolean => {
+const hasRequiredCapabilities = (capabilities: ApplicationStart['capabilities']): boolean => {
   const { fleet: integrations, fleetv2: fleet, actions } = capabilities;
   if (
     !fleet?.all ||
-    !integrations?.all ||
+    !integrations?.read ||
     !integrations?.[IntegrationAssistantUICapability] || // create integrations assistant capability from sub-feature
     !actions?.show ||
     !actions?.execute
