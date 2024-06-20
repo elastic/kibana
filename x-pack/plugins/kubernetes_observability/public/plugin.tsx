@@ -409,7 +409,35 @@ const  KubernetesObservabilityComp = ({
   const [assistant, setAssistant] = useState('');
   const [nodeMemAnalysis, setNodeMemAnalysis] = useState('');
   const [nodeCpuAnalysis, setNodeCpuAnalysis] = useState('');
+  const [deployStatusAnalysis, setDeployStatusAnalysis] = useState('');
+  const [fetchDeployStatusAnalysis, setFetchDeployStatusAnalysis] = useState<boolean>(false);
+  const [daemonStatusAnalysis, setDaemonStatusAnalysis] = useState('');
+  const [fetchDaemonStatusAnalysis, setFetchDaemonStatusAnalysis] = useState<boolean>(false);
+  const [deployMemAnalysis, setDeployMemAnalysis] = useState('');
+  const [fetchDeployMemAnalysis, setFetchDeployMemAnalysis] = useState<boolean>(false);
+  const [deployCpuAnalysis, setDeployCpuAnalysis] = useState('');
+  const [fetchDeployCpuAnalysis, setFetchDeployCpuAnalysis] = useState<boolean>(false);
+  const [daemonMemAnalysis, setDaemonMemAnalysis] = useState('');
+  const [fetchDaemonMemAnalysis, setFetchDaemonMemAnalysis] = useState<boolean>(false);
+  const [daemonCpuAnalysis, setDaemonCpuAnalysis] = useState('');
+  const [fetchDaemonCpuAnalysis, setFetchDaemonCpuAnalysis] = useState<boolean>(false);
+  const [podMemAnalysis, setPodMemAnalysis] = useState('');
+  const [fetchPodMemAnalysis, setFetchPodMemAnalysis] = useState<boolean>(false);
+  const [podCpuAnalysis, setPodCpuAnalysis] = useState('');
+  const [fetchPodCpuAnalysis, setFetchPodCpuAnalysis] = useState<boolean>(false);
+  const [podStatusAnalysis, setPodStatusAnalysis] = useState('');
+  const [fetchPodStatusAnalysis, setFetchPodStatusAnalysis] = useState<boolean>(false);
   const [isNodesMemFlyoutOpen, setIsNodesMemFlyoutOpen] = useState<boolean>(false);
+  const [isNodesCpuFlyoutOpen, setIsNodesCpuFlyoutOpen] = useState<boolean>(false);
+  const [isDeployStatusFlyoutOpen, setIsDeployStatusFlyoutOpen] = useState<boolean>(false);
+  const [isDaemonStatusFlyoutOpen, setIsDaemonStatusFlyoutOpen] = useState<boolean>(false);
+  const [isDeployMemFlyoutOpen, setIsDeployMemFlyoutOpen] = useState<boolean>(false);
+  const [isDeployCpuFlyoutOpen, setIsDeployCpuFlyoutOpen] = useState<boolean>(false);
+  const [isDaemonMemFlyoutOpen, setIsDaemonMemFlyoutOpen] = useState<boolean>(false);
+  const [isDaemonCpuFlyoutOpen, setIsDaemonCpuFlyoutOpen] = useState<boolean>(false);
+  const [isPodMemFlyoutOpen, setIsPodMemFlyoutOpen] = useState<boolean>(false);
+  const [isPodCpuFlyoutOpen, setIsPodCpuFlyoutOpen] = useState<boolean>(false);
+  const [isPodStatusFlyoutOpen, setIsPodStatusFlyoutOpen] = useState<boolean>(false);
 
 
   // useEffect(() => {
@@ -508,6 +536,26 @@ const  KubernetesObservabilityComp = ({
   }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   useEffect(() => {
+    console.log("CALLED DUE TO CHANGE in fetchDeployStatusAnalysis");
+    if (deploysStatus.length !== 0 && fetchDeployStatusAnalysis) {
+      var content = JSON.stringify(deploysStatus);
+      content = `What can you tell me about my kubernetes deployments status based on the following json: ${content} \n Return only the analysis and suggestions part"`
+      client.analyze(content, assistant).then(result => {
+        console.log(result);
+        setAssistant(result.assistant);
+        setDeployStatusAnalysis(result.response);
+        setIsDeployStatusFlyoutOpen(true);
+        setFetchDeployStatusAnalysis(false);
+        console.log("The response for deploys status is here");
+        console.log(result.response)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+  }, [fetchDeployStatusAnalysis]); // *** Note the dependency
+
+  useEffect(() => {
     console.log("CALLED DUE TO CHANGE");
     const ns = namespace === 'all' ? undefined : namespace;
     const svc = service === 'all' ? undefined : service;
@@ -536,6 +584,26 @@ const  KubernetesObservabilityComp = ({
   }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   useEffect(() => {
+    console.log("CALLED DUE TO CHANGE in fetchDaemonStatusAnalysis");
+    if (daemonsStatus.length !== 0 && fetchDaemonStatusAnalysis) {
+      var content = JSON.stringify(daemonsStatus);
+      content = `What can you tell me about my kubernetes daemonsets status based on the following json: ${content} \n Return only the analysis and suggestions part"`
+      client.analyze(content, assistant).then(result => {
+        console.log(result);
+        setAssistant(result.assistant);
+        setDaemonStatusAnalysis(result.response);
+        setIsDaemonStatusFlyoutOpen(true);
+        setFetchDaemonStatusAnalysis(false);
+        console.log("The response for daemons status is here");
+        console.log(result.response)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+  }, [fetchDaemonStatusAnalysis]); // *** Note the dependency
+
+  useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
     const svc = service === 'all' ? undefined : service;
     client.getDeploymentsMemory(svc, ns).then(data => {
@@ -559,6 +627,26 @@ const  KubernetesObservabilityComp = ({
           console.log(error)
       });
   }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
+
+  useEffect(() => {
+    console.log("CALLED DUE TO CHANGE in fetchDeployMemAnalysis");
+    if (deploysMem.length !== 0 && fetchDeployMemAnalysis) {
+      var content = JSON.stringify(deploysMem);
+      content = `What can you tell me about my kubernetes deployments memory utilization based on the following json: ${content} \n Return only the analysis and suggestions part"`
+      client.analyze(content, assistant).then(result => {
+        console.log(result);
+        setAssistant(result.assistant);
+        setDeployMemAnalysis(result.response);
+        setIsDeployMemFlyoutOpen(true);
+        setFetchDeployMemAnalysis(false);
+        console.log("The response for deploys mem is here");
+        console.log(result.response)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+  }, [fetchDeployMemAnalysis]); // *** Note the dependency
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
@@ -598,6 +686,27 @@ const  KubernetesObservabilityComp = ({
       });
   }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
+
+  useEffect(() => {
+    console.log("CALLED DUE TO CHANGE in fetchDeployCpuAnalysis");
+    if (deploysCpu.length !== 0 && fetchDeployCpuAnalysis) {
+      var content = JSON.stringify(deploysCpu);
+      content = `What can you tell me about my kubernetes deployments cpu utilization based on the following json: ${content} \n Return only the analysis and suggestions part"`
+      client.analyze(content, assistant).then(result => {
+        console.log(result);
+        setAssistant(result.assistant);
+        setDeployCpuAnalysis(result.response);
+        setIsDeployCpuFlyoutOpen(true);
+        setFetchDeployCpuAnalysis(false);
+        console.log("The response for deploys cpu is here");
+        console.log(result.response)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+  }, [fetchDeployCpuAnalysis]); // *** Note the dependency
+
   useEffect(() => {
     console.log("Triggered to get daemonsets memory");
     console.log(namespace)
@@ -627,6 +736,26 @@ const  KubernetesObservabilityComp = ({
           console.log(error)
       });
   }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
+
+  useEffect(() => {
+    console.log("CALLED DUE TO CHANGE in fetchDaemonMemAnalysis");
+    if (daemonsMem.length !== 0 && fetchDaemonMemAnalysis) {
+      var content = JSON.stringify(daemonsMem);
+      content = `What can you tell me about my kubernetes daemonsets memory utilization based on the following json: ${content} \n Return only the analysis and suggestions part"`
+      client.analyze(content, assistant).then(result => {
+        console.log(result);
+        setAssistant(result.assistant);
+        setDaemonMemAnalysis(result.response);
+        setIsDaemonMemFlyoutOpen(true);
+        setFetchDaemonMemAnalysis(false);
+        console.log("The response for daemons mem is here");
+        console.log(result.response)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+  }, [fetchDaemonMemAnalysis]); // *** Note the dependency
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
@@ -661,6 +790,26 @@ const  KubernetesObservabilityComp = ({
   }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   useEffect(() => {
+    console.log("CALLED DUE TO CHANGE in fetchDaemonCpuAnalysis");
+    if (daemonsCpu.length !== 0 && fetchDaemonCpuAnalysis) {
+      var content = JSON.stringify(daemonsCpu);
+      content = `What can you tell me about my kubernetes daemonsets cpu utilization based on the following json: ${content} \n Return only the analysis and suggestions part"`
+      client.analyze(content, assistant).then(result => {
+        console.log(result);
+        setAssistant(result.assistant);
+        setDaemonCpuAnalysis(result.response);
+        setIsDaemonCpuFlyoutOpen(true);
+        setFetchDaemonCpuAnalysis(false);
+        console.log("The response for daemons cpu is here");
+        console.log(result.response)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+  }, [fetchDaemonCpuAnalysis]); // *** Note the dependency
+
+  useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
     console.log("Get pod memory before");
     console.log(svcIsDeploy);
@@ -684,6 +833,26 @@ const  KubernetesObservabilityComp = ({
         });
     }
   }, [client, namespace, hasTimeElapsed, triggerPodMem]); // *** Note the dependency
+
+  useEffect(() => {
+    console.log("CALLED DUE TO CHANGE in fetchPodMemAnalysis");
+    if (podsMem.length !== 0 && fetchPodMemAnalysis) {
+      var content = JSON.stringify(podsMem);
+      content = `What can you tell me about my kubernetes pods memory utilization based on the following json: ${content} \n Return only the analysis and suggestions part"`
+      client.analyze(content, assistant).then(result => {
+        console.log(result);
+        setAssistant(result.assistant);
+        setPodMemAnalysis(result.response);
+        setIsPodMemFlyoutOpen(true);
+        setFetchPodMemAnalysis(false);
+        console.log("The response for pods mem is here");
+        console.log(result.response)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+  }, [fetchPodMemAnalysis]); // *** Note the dependency
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
@@ -714,6 +883,27 @@ const  KubernetesObservabilityComp = ({
     }
   }, [client, namespace, hasTimeElapsed, triggerPodCpu]); // *** Note the dependency
 
+
+  useEffect(() => {
+    console.log("CALLED DUE TO CHANGE in fetchPodCpuAnalysis");
+    if (podsCpu.length !== 0 && fetchPodCpuAnalysis) {
+      var content = JSON.stringify(podsCpu);
+      content = `What can you tell me about my kubernetes pods cpu utilization based on the following json: ${content} \n Return only the analysis and suggestions part"`
+      client.analyze(content, assistant).then(result => {
+        console.log(result);
+        setAssistant(result.assistant);
+        setPodCpuAnalysis(result.response);
+        setIsPodCpuFlyoutOpen(true);
+        setFetchPodCpuAnalysis(false);
+        console.log("The response for pods cpu is here");
+        console.log(result.response)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+  }, [fetchPodCpuAnalysis]); // *** Note the dependency
+
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
     console.log("Get pod status before");
@@ -738,7 +928,7 @@ const  KubernetesObservabilityComp = ({
         });
         const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
         setPodsStatus(pods);
-        setTriggerPodStatus(false)
+        setTriggerPodStatus(false);
         })
         .catch(error => {
             console.log(error)
@@ -746,6 +936,27 @@ const  KubernetesObservabilityComp = ({
     }
     
   }, [client, namespace, hasTimeElapsed, triggerPodStatus]); // *** Note the dependency
+
+
+  useEffect(() => {
+    console.log("CALLED DUE TO CHANGE in fetchPodStatusAnalysis");
+    if (podsStatus.length !== 0 && fetchPodStatusAnalysis) {
+      var content = JSON.stringify(podsStatus);
+      content = `What can you tell me about my kubernetes pods status based on the following json: ${content} \n Return only the analysis and suggestions part"`
+      client.analyze(content, assistant).then(result => {
+        console.log(result);
+        setAssistant(result.assistant);
+        setPodStatusAnalysis(result.response);
+        setIsPodStatusFlyoutOpen(true);
+        setFetchPodStatusAnalysis(false);
+        console.log("The response for pods status is here");
+        console.log(result.response)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+  }, [fetchPodStatusAnalysis]); // *** Note the dependency
 
   const nodeMemcolumns: Array<EuiBasicTableColumn<any>> = [
     {
@@ -1898,8 +2109,69 @@ const  KubernetesObservabilityComp = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiText size="s"><b>Timestamp</b>: {nodeCpuTime}</EuiText>
-            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiText textAlign="left" size="s"><b>Timestamp</b>: {nodeCpuTime}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+              <div style={{ width: 900 }}>
+                <EuiButton
+                        onClick={() => setIsNodesCpuFlyoutOpen(true)}
+                        isDisabled={nodeCpuAnalysis===""}
+                        size={'s'}
+                        color="primary"
+                      >
+                        <FormattedMessage
+                          id="xpack.aiops.changePointDetection.viewnodecpuanalysis"
+                          defaultMessage="Analyze Results"
+                        />
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isNodesCpuFlyoutOpen && (
+            <EuiPortal>
+              <EuiFlyout onClose={() => setIsNodesCpuFlyoutOpen(false)} size="l" maxWidth={1000}>
+                <EuiFlyoutHeader hasBorder>
+                  <EuiTitle size="m">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.nodecpuanalysFlyoutTitle"
+                        defaultMessage="Nodes Cpu Utilization Analysis"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody>
+                  <EuiText>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.nodecpuanalysFlyoutDescription"
+                        defaultMessage="The analysis below is provided by Azure Openai gpt-4o version 2024-05-01-preview"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="html" isCopyable fontSize="l" whiteSpace="pre" paddingSize="l">
+                    {nodeCpuAnalysis}
+                  </EuiCodeBlock>
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => setIsNodesCpuFlyoutOpen(false)} flush="left">
+                        <FormattedMessage
+                          id="xpack.fleet.agentDetails.nodecpuanalysFlyoutCloseButtonLabel"
+                          defaultMessage="Close"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlyoutFooter>
+            </EuiFlyout>
+            </EuiPortal>
+            )}
+            <EuiSpacer size="m" />
             <EuiInMemoryTable
               items= {nodesCpu}
               columns= {nodeCpucolumns}
@@ -1921,8 +2193,68 @@ const  KubernetesObservabilityComp = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiText size="s"><b>Timestamp</b>: {deploysStatusTime}</EuiText>
-            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiText textAlign="left" size="s"><b>Timestamp</b>: {deploysStatusTime}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+              <div style={{ width: 900 }}>
+                <EuiButton
+                        onClick={() => setFetchDeployStatusAnalysis(true)}
+                        isDisabled={deploysStatus.length===0}
+                        size={'s'}
+                        color="primary"
+                      >
+                        <FormattedMessage
+                          id="xpack.aiops.changePointDetection.viewdeploystatusanalysis"
+                          defaultMessage="Analyze Results"
+                        />
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isDeployStatusFlyoutOpen && (
+            <EuiPortal>
+              <EuiFlyout onClose={() => setIsDeployStatusFlyoutOpen(false)} size="l" maxWidth={1000}>
+                <EuiFlyoutHeader hasBorder>
+                  <EuiTitle size="m">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.deploystatusanalysFlyoutTitle"
+                        defaultMessage="Deployments Status Analysis"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody>
+                  <EuiText>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.deploystatusanalysFlyoutDescription"
+                        defaultMessage="The analysis below is provided by Azure Openai gpt-4o version 2024-05-01-preview"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="html" isCopyable fontSize="l" whiteSpace="pre" paddingSize="l">
+                    {deployStatusAnalysis}
+                  </EuiCodeBlock>
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => setIsDeployStatusFlyoutOpen(false)} flush="left">
+                        <FormattedMessage
+                          id="xpack.fleet.agentDetails.deploystatusanalysFlyoutCloseButtonLabel"
+                          defaultMessage="Close"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlyoutFooter>
+            </EuiFlyout>
+            </EuiPortal>
+            )}
             <EuiInMemoryTable
               items= {deploysStatus}
               columns= {deployStatuscolumns}
@@ -1944,8 +2276,69 @@ const  KubernetesObservabilityComp = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiText size="s"><b>Timestamp</b>: {daemonsStatusTime}</EuiText>
-            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiText textAlign="left" size="s"><b>Timestamp</b>: {daemonsStatusTime}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+              <div style={{ width: 900 }}>
+                <EuiButton
+                        onClick={() => setFetchDaemonStatusAnalysis(true)}
+                        isDisabled={daemonsStatus.length===0}
+                        size={'s'}
+                        color="primary"
+                      >
+                        <FormattedMessage
+                          id="xpack.aiops.changePointDetection.viewdaemonstatusanalysis"
+                          defaultMessage="Analyze Results"
+                        />
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isDaemonStatusFlyoutOpen && (
+            <EuiPortal>
+              <EuiFlyout onClose={() => setIsDaemonStatusFlyoutOpen(false)} size="l" maxWidth={1000}>
+                <EuiFlyoutHeader hasBorder>
+                  <EuiTitle size="m">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.daemonstatusanalysFlyoutTitle"
+                        defaultMessage="Daemonsets Status Analysis"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody>
+                  <EuiText>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.daemonstatusanalysFlyoutDescription"
+                        defaultMessage="The analysis below is provided by Azure Openai gpt-4o version 2024-05-01-preview"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="html" isCopyable fontSize="l" whiteSpace="pre" paddingSize="l">
+                    {daemonStatusAnalysis}
+                  </EuiCodeBlock>
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => setIsDaemonStatusFlyoutOpen(false)} flush="left">
+                        <FormattedMessage
+                          id="xpack.fleet.agentDetails.daemonstatusanalysFlyoutCloseButtonLabel"
+                          defaultMessage="Close"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlyoutFooter>
+            </EuiFlyout>
+            </EuiPortal>
+            )}
+            <EuiSpacer size="m" />
             <EuiInMemoryTable
               items= {daemonsStatus}
               columns= {daemonsStatuscolumns}
@@ -1967,8 +2360,69 @@ const  KubernetesObservabilityComp = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiText size="s"><b>Timestamp</b>: {deploysMemTime}</EuiText>
-            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiText textAlign="left" size="s"><b>Timestamp</b>: {deploysMemTime}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+              <div style={{ width: 900 }}>
+                <EuiButton
+                        onClick={() => setFetchDeployMemAnalysis(true)}
+                        isDisabled={deploysMem.length===0}
+                        size={'s'}
+                        color="primary"
+                      >
+                        <FormattedMessage
+                          id="xpack.aiops.changePointDetection.viewdeploymemanalysis"
+                          defaultMessage="Analyze Results"
+                        />
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isDeployMemFlyoutOpen && (
+            <EuiPortal>
+              <EuiFlyout onClose={() => setIsDeployMemFlyoutOpen(false)} size="l" maxWidth={1000}>
+                <EuiFlyoutHeader hasBorder>
+                  <EuiTitle size="m">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.deploymemanalysFlyoutTitle"
+                        defaultMessage="Deployments Memory Analysis"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody>
+                  <EuiText>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.deploymemanalysFlyoutDescription"
+                        defaultMessage="The analysis below is provided by Azure Openai gpt-4o version 2024-05-01-preview"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="html" isCopyable fontSize="l" whiteSpace="pre" paddingSize="l">
+                    {deployMemAnalysis}
+                  </EuiCodeBlock>
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => setIsDeployMemFlyoutOpen(false)} flush="left">
+                        <FormattedMessage
+                          id="xpack.fleet.agentDetails.deploymemanalysFlyoutCloseButtonLabel"
+                          defaultMessage="Close"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlyoutFooter>
+            </EuiFlyout>
+            </EuiPortal>
+            )}
+            <EuiSpacer size="m" />
             <EuiInMemoryTable
               items= {deploysMem}
               columns= {deploysMemcolumns}
@@ -1990,7 +2444,68 @@ const  KubernetesObservabilityComp = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiText size="s"><b>Timestamp</b>: {deploysCpuTime}</EuiText>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiText textAlign="left" size="s"><b>Timestamp</b>: {deploysCpuTime}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+              <div style={{ width: 900 }}>
+                <EuiButton
+                        onClick={() => setFetchDeployCpuAnalysis(true)}
+                        isDisabled={deploysCpu.length===0}
+                        size={'s'}
+                        color="primary"
+                      >
+                        <FormattedMessage
+                          id="xpack.aiops.changePointDetection.viewdeploycpuanalysis"
+                          defaultMessage="Analyze Results"
+                        />
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isDeployCpuFlyoutOpen && (
+            <EuiPortal>
+              <EuiFlyout onClose={() => setIsDeployCpuFlyoutOpen(false)} size="l" maxWidth={1000}>
+                <EuiFlyoutHeader hasBorder>
+                  <EuiTitle size="m">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.deploycpuanalysFlyoutTitle"
+                        defaultMessage="Deployments Cpu Analysis"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody>
+                  <EuiText>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.deploycpuanalysFlyoutDescription"
+                        defaultMessage="The analysis below is provided by Azure Openai gpt-4o version 2024-05-01-preview"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="html" isCopyable fontSize="l" whiteSpace="pre" paddingSize="l">
+                    {deployCpuAnalysis}
+                  </EuiCodeBlock>
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => setIsDeployCpuFlyoutOpen(false)} flush="left">
+                        <FormattedMessage
+                          id="xpack.fleet.agentDetails.deploycpuanalysFlyoutCloseButtonLabel"
+                          defaultMessage="Close"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlyoutFooter>
+            </EuiFlyout>
+            </EuiPortal>
+            )}
             <EuiSpacer size="s" />
             <EuiInMemoryTable
               items= {deploysCpu}
@@ -2013,8 +2528,69 @@ const  KubernetesObservabilityComp = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiText size="s"><b>Timestamp</b>: {daemonsMemTime}</EuiText>
-            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiText textAlign="left" size="s"><b>Timestamp</b>: {daemonsMemTime}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+              <div style={{ width: 900 }}>
+                <EuiButton
+                        onClick={() => setFetchDaemonMemAnalysis(true)}
+                        isDisabled={daemonsMem.length===0}
+                        size={'s'}
+                        color="primary"
+                      >
+                        <FormattedMessage
+                          id="xpack.aiops.changePointDetection.viewdaemonmemanalysis"
+                          defaultMessage="Analyze Results"
+                        />
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isDaemonMemFlyoutOpen && (
+            <EuiPortal>
+              <EuiFlyout onClose={() => setIsDaemonMemFlyoutOpen(false)} size="l" maxWidth={1000}>
+                <EuiFlyoutHeader hasBorder>
+                  <EuiTitle size="m">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.daemonmemanalysFlyoutTitle"
+                        defaultMessage="Daemonsets Memory Analysis"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody>
+                  <EuiText>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.daemonmemanalysFlyoutDescription"
+                        defaultMessage="The analysis below is provided by Azure Openai gpt-4o version 2024-05-01-preview"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="html" isCopyable fontSize="l" whiteSpace="pre" paddingSize="l">
+                    {daemonMemAnalysis}
+                  </EuiCodeBlock>
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => setIsDaemonMemFlyoutOpen(false)} flush="left">
+                        <FormattedMessage
+                          id="xpack.fleet.agentDetails.daemonmemanalysFlyoutCloseButtonLabel"
+                          defaultMessage="Close"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlyoutFooter>
+            </EuiFlyout>
+            </EuiPortal>
+            )}
+            <EuiSpacer size="m" />
             <EuiInMemoryTable
               items= {daemonsMem}
               columns= {daemonsMemcolumns}
@@ -2036,8 +2612,69 @@ const  KubernetesObservabilityComp = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiText size="s"><b>Timestamp</b>: {daemonsCpuTime}</EuiText>
-            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiText textAlign="left" size="s"><b>Timestamp</b>: {daemonsCpuTime}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+              <div style={{ width: 900 }}>
+                <EuiButton
+                        onClick={() => setFetchDaemonCpuAnalysis(true)}
+                        isDisabled={daemonsCpu.length===0}
+                        size={'s'}
+                        color="primary"
+                      >
+                        <FormattedMessage
+                          id="xpack.aiops.changePointDetection.viewdaemoncpuanalysis"
+                          defaultMessage="Analyze Results"
+                        />
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isDaemonCpuFlyoutOpen && (
+            <EuiPortal>
+              <EuiFlyout onClose={() => setIsDaemonCpuFlyoutOpen(false)} size="l" maxWidth={1000}>
+                <EuiFlyoutHeader hasBorder>
+                  <EuiTitle size="m">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.daemoncpuanalysFlyoutTitle"
+                        defaultMessage="Daemonsets Cpu Analysis"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody>
+                  <EuiText>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.daemoncpuanalysFlyoutDescription"
+                        defaultMessage="The analysis below is provided by Azure Openai gpt-4o version 2024-05-01-preview"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="html" isCopyable fontSize="l" whiteSpace="pre" paddingSize="l">
+                    {daemonCpuAnalysis}
+                  </EuiCodeBlock>
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => setIsDaemonCpuFlyoutOpen(false)} flush="left">
+                        <FormattedMessage
+                          id="xpack.fleet.agentDetails.daemoncpuanalysFlyoutCloseButtonLabel"
+                          defaultMessage="Close"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlyoutFooter>
+            </EuiFlyout>
+            </EuiPortal>
+            )}
+            <EuiSpacer size="m" />
             <EuiInMemoryTable
               items= {daemonsCpu}
               columns= {daemonsCpucolumns}
@@ -2059,8 +2696,69 @@ const  KubernetesObservabilityComp = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiText size="s"><b>Timestamp</b>: {podsMemTime}</EuiText>
-            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiText textAlign="left" size="s"><b>Timestamp</b>: {podsMemTime}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+              <div style={{ width: 900 }}>
+                <EuiButton
+                        onClick={() => setFetchPodMemAnalysis(true)}
+                        isDisabled={podsMem.length===0}
+                        size={'s'}
+                        color="primary"
+                      >
+                        <FormattedMessage
+                          id="xpack.aiops.changePointDetection.viewpodmemanalysis"
+                          defaultMessage="Analyze Results"
+                        />
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isPodMemFlyoutOpen && (
+            <EuiPortal>
+              <EuiFlyout onClose={() => setIsPodMemFlyoutOpen(false)} size="l" maxWidth={1000}>
+                <EuiFlyoutHeader hasBorder>
+                  <EuiTitle size="m">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.podmemanalysFlyoutTitle"
+                        defaultMessage="Pods Memory Analysis"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody>
+                  <EuiText>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.podmemanalysFlyoutDescription"
+                        defaultMessage="The analysis below is provided by Azure Openai gpt-4o version 2024-05-01-preview"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="html" isCopyable fontSize="l" whiteSpace="pre" paddingSize="l">
+                    {podMemAnalysis}
+                  </EuiCodeBlock>
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => setIsPodMemFlyoutOpen(false)} flush="left">
+                        <FormattedMessage
+                          id="xpack.fleet.agentDetails.podmemanalysFlyoutCloseButtonLabel"
+                          defaultMessage="Close"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlyoutFooter>
+            </EuiFlyout>
+            </EuiPortal>
+            )}
+            <EuiSpacer size="m" />
             <EuiInMemoryTable
               items= {podsMem}
               columns= {podsMemcolumns}
@@ -2082,8 +2780,69 @@ const  KubernetesObservabilityComp = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiText size="s"><b>Timestamp</b>: {podsCpuTime}</EuiText>
-            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiText textAlign="left" size="s"><b>Timestamp</b>: {podsCpuTime}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+              <div style={{ width: 900 }}>
+                <EuiButton
+                        onClick={() => setFetchPodCpuAnalysis(true)}
+                        isDisabled={podsCpu.length===0}
+                        size={'s'}
+                        color="primary"
+                      >
+                        <FormattedMessage
+                          id="xpack.aiops.changePointDetection.viewpodcpuanalysis"
+                          defaultMessage="Analyze Results"
+                        />
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isPodCpuFlyoutOpen && (
+            <EuiPortal>
+              <EuiFlyout onClose={() => setIsPodCpuFlyoutOpen(false)} size="l" maxWidth={1000}>
+                <EuiFlyoutHeader hasBorder>
+                  <EuiTitle size="m">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.podcpuanalysFlyoutTitle"
+                        defaultMessage="Pods Cpu Analysis"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody>
+                  <EuiText>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.podcpuanalysFlyoutDescription"
+                        defaultMessage="The analysis below is provided by Azure Openai gpt-4o version 2024-05-01-preview"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="html" isCopyable fontSize="l" whiteSpace="pre" paddingSize="l">
+                    {podCpuAnalysis}
+                  </EuiCodeBlock>
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => setIsPodCpuFlyoutOpen(false)} flush="left">
+                        <FormattedMessage
+                          id="xpack.fleet.agentDetails.podcpuanalysFlyoutCloseButtonLabel"
+                          defaultMessage="Close"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlyoutFooter>
+            </EuiFlyout>
+            </EuiPortal>
+            )}
+            <EuiSpacer size="m" />
             <EuiInMemoryTable
               items= {podsCpu}
               columns= {pocsCpucolumns}
@@ -2105,8 +2864,69 @@ const  KubernetesObservabilityComp = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiText size="s"><b>Timestamp</b>: {podsStatusTime}</EuiText>
-            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiText textAlign="left" size="s"><b>Timestamp</b>: {podsStatusTime}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+              <div style={{ width: 900 }}>
+                <EuiButton
+                        onClick={() => setFetchPodStatusAnalysis(true)}
+                        isDisabled={podsStatus.length===0}
+                        size={'s'}
+                        color="primary"
+                      >
+                        <FormattedMessage
+                          id="xpack.aiops.changePointDetection.viewpodstatusanalysis"
+                          defaultMessage="Analyze Results"
+                        />
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isPodStatusFlyoutOpen && (
+            <EuiPortal>
+              <EuiFlyout onClose={() => setIsPodStatusFlyoutOpen(false)} size="l" maxWidth={1000}>
+                <EuiFlyoutHeader hasBorder>
+                  <EuiTitle size="m">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.podstatusanalysFlyoutTitle"
+                        defaultMessage="Pods Status Analysis"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody>
+                  <EuiText>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.podstatusanalysFlyoutDescription"
+                        defaultMessage="The analysis below is provided by Azure Openai gpt-4o version 2024-05-01-preview"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="html" isCopyable fontSize="l" whiteSpace="pre" paddingSize="l">
+                    {podStatusAnalysis}
+                  </EuiCodeBlock>
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => setIsPodStatusFlyoutOpen(false)} flush="left">
+                        <FormattedMessage
+                          id="xpack.fleet.agentDetails.podstatusanalysFlyoutCloseButtonLabel"
+                          defaultMessage="Close"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlyoutFooter>
+            </EuiFlyout>
+            </EuiPortal>
+            )}
+            <EuiSpacer size="m" />
             <EuiInMemoryTable
               items= {podsStatus}
               columns= {podsStatuscolumns}
