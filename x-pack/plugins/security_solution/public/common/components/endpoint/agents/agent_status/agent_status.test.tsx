@@ -8,10 +8,7 @@
 import React from 'react';
 
 import { AgentStatus } from './agent_status';
-import {
-  useAgentStatusHook,
-  useGetAgentStatus,
-} from '../../../../../management/hooks/agents/use_get_agent_status';
+import { useGetAgentStatus as _useGetAgentStatus } from '../../../../../management/hooks/agents/use_get_agent_status';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
   type ResponseActionAgentType,
@@ -23,8 +20,7 @@ import { HostStatus } from '../../../../../../common/endpoint/types';
 jest.mock('../../../../hooks/use_experimental_features');
 jest.mock('../../../../../management/hooks/agents/use_get_agent_status');
 
-const getAgentStatusMock = useGetAgentStatus as jest.Mock;
-const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
+const useGetAgentStatusMock = _useGetAgentStatus as jest.Mock;
 
 describe('AgentStatus component', () => {
   let render: (agentType?: ResponseActionAgentType) => ReturnType<AppContextTestRender['render']>;
@@ -47,8 +43,7 @@ describe('AgentStatus component', () => {
         <AgentStatus agentId={agentId} agentType={agentType || 'endpoint'} data-test-subj="test" />
       ));
 
-    getAgentStatusMock.mockReturnValue({ data: {} });
-    useAgentStatusHookMock.mockImplementation(() => useGetAgentStatus);
+    useGetAgentStatusMock.mockReturnValue({ data: {} });
   });
 
   afterEach(() => {
@@ -57,7 +52,7 @@ describe('AgentStatus component', () => {
 
   describe.each(RESPONSE_ACTION_AGENT_TYPE)('`%s` agentType', (agentType) => {
     it('should show agent health status info', () => {
-      getAgentStatusMock.mockReturnValue({
+      useGetAgentStatusMock.mockReturnValue({
         data: {
           [agentId]: { ...baseData, agentType, status: HostStatus.OFFLINE },
         },
@@ -74,7 +69,7 @@ describe('AgentStatus component', () => {
     });
 
     it('should show agent health status info and Isolated status', () => {
-      getAgentStatusMock.mockReturnValue({
+      useGetAgentStatusMock.mockReturnValue({
         data: {
           [agentId]: {
             ...baseData,
@@ -95,7 +90,7 @@ describe('AgentStatus component', () => {
     });
 
     it('should show agent health status info and Releasing status', () => {
-      getAgentStatusMock.mockReturnValue({
+      useGetAgentStatusMock.mockReturnValue({
         data: {
           [agentId]: {
             ...baseData,
@@ -119,7 +114,7 @@ describe('AgentStatus component', () => {
     });
 
     it('should show agent health status info and Isolating status', () => {
-      getAgentStatusMock.mockReturnValue({
+      useGetAgentStatusMock.mockReturnValue({
         data: {
           [agentId]: {
             ...baseData,
@@ -142,7 +137,7 @@ describe('AgentStatus component', () => {
     });
 
     it('should show agent health status info and Releasing status also when multiple actions are pending', () => {
-      getAgentStatusMock.mockReturnValue({
+      useGetAgentStatusMock.mockReturnValue({
         data: {
           [agentId]: {
             ...baseData,
@@ -168,7 +163,7 @@ describe('AgentStatus component', () => {
     });
 
     it('should show agent health status info and Isolating status also when multiple actions are pending', () => {
-      getAgentStatusMock.mockReturnValue({
+      useGetAgentStatusMock.mockReturnValue({
         data: {
           [agentId]: {
             ...baseData,
@@ -193,7 +188,7 @@ describe('AgentStatus component', () => {
     });
 
     it('should show agent health status info and pending action status when not isolating/releasing', () => {
-      getAgentStatusMock.mockReturnValue({
+      useGetAgentStatusMock.mockReturnValue({
         data: {
           [agentId]: {
             ...baseData,
@@ -217,7 +212,7 @@ describe('AgentStatus component', () => {
     });
 
     it('should show agent health status info and Isolated when pending actions', () => {
-      getAgentStatusMock.mockReturnValue({
+      useGetAgentStatusMock.mockReturnValue({
         data: {
           [agentId]: {
             ...baseData,
