@@ -15,6 +15,5 @@
     "@kbn/security-plugin-types-common",
     "@kbn/core-user-profile-server",
     "@kbn/core-security-server",
-    "@kbn/security-plugin",
   ]
 }
