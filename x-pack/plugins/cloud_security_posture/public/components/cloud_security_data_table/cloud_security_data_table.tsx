@@ -180,7 +180,6 @@ export const CloudSecurityDataTable = ({
     fieldFormats,
     toastNotifications,
     storage,
-    dataViewFieldEditor,
   } = useKibana().services;
 
   const styles = useStyles();
@@ -195,7 +194,6 @@ export const CloudSecurityDataTable = ({
     toastNotifications,
     storage,
     data,
-    dataViewFieldEditor,
   };
 
   const {
