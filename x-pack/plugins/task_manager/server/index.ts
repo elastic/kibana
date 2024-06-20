@@ -23,7 +23,7 @@ export type {
   IntervalSchedule,
 } from './task';
 
-export { TaskStatus, TaskPriority } from './task';
+export { TaskStatus, TaskPriority, TaskCost } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 

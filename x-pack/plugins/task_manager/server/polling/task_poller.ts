@@ -23,7 +23,7 @@ interface Opts<H> {
   initialPollInterval: number;
   pollInterval$: Observable<number>;
   pollIntervalDelay$?: Observable<number>;
-  getCapacity: () => number;
+  getAvailableCapacity: () => number;
   work: WorkFn<H>;
 }
 
@@ -43,14 +43,14 @@ export function createTaskPoller<T, H>({
   initialPollInterval,
   pollInterval$,
   pollIntervalDelay$,
-  getCapacity,
+  getAvailableCapacity,
   work,
 }: Opts<H>): {
   start: () => void;
   stop: () => void;
   events$: Observable<Result<H, PollingError<T>>>;
 } {
-  const hasCapacity = () => getCapacity() > 0;
+  const hasCapacity = () => getAvailableCapacity() > 0;
   let running: boolean = false;
   let timeoutId: NodeJS.Timeout | null = null;
   let hasSubscribed: boolean = false;

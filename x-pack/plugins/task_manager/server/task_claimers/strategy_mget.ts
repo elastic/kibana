@@ -18,7 +18,7 @@ import { Subject, Observable } from 'rxjs';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskClaimerOpts, ClaimOwnershipResult, getEmptyClaimOwnershipResult } from '.';
-import { ConcreteTaskInstance, TaskStatus, ConcreteTaskInstanceVersion } from '../task';
+import { ConcreteTaskInstance, TaskStatus, ConcreteTaskInstanceVersion, TaskCost } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import {
   isLimited,
@@ -89,13 +89,15 @@ async function claimAvailableTasksApm(opts: TaskClaimerOpts): Promise<ClaimOwner
 }
 
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
-  const { getCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
+  const { getAvailableCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
   const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
   const { logger } = opts;
   const loggerTag = claimAvailableTasksMget.name;
   const logMeta = { tags: [loggerTag] };
-  const initialCapacity = getCapacity();
+  const availableCapacity = getAvailableCapacity();
   const stopTaskTimer = startTaskTimer();
+  // Best case scenario we're claiming all tiny tasks (lowest cost)
+  const tinyTaskCapacity = Math.floor(availableCapacity / TaskCost.Tiny);
 
   const removedTypes = new Set(unusedTypes); // REMOVED_TYPES
   const excludedTypes = new Set(excludedTaskTypes); // excluded via config
@@ -109,7 +111,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     taskStore,
     events$,
     claimOwnershipUntil,
-    size: initialCapacity * SIZE_MULTIPLIER_FOR_TASK_FETCH,
+    size: tinyTaskCapacity * SIZE_MULTIPLIER_FOR_TASK_FETCH,
     taskMaxAttempts,
   });
 
@@ -156,20 +158,24 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const candidateTasks = applyLimitedConcurrency(currentTasks, batches);
 
   // build the updated task objects we'll claim
-  const taskUpdates: ConcreteTaskInstance[] = Array.from(candidateTasks)
-    .slice(0, initialCapacity)
-    .map((task) => {
-      if (task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()) {
-        task.scheduledAt = task.retryAt;
-      } else {
-        task.scheduledAt = task.runAt;
-      }
-      task.retryAt = claimOwnershipUntil;
-      task.ownerId = taskStore.taskManagerId;
-      task.status = TaskStatus.Claiming;
-
-      return task;
-    });
+  let capacityRemaining = availableCapacity;
+  const taskUpdates: ConcreteTaskInstance[] = [];
+  for (const task of candidateTasks) {
+    const taskCost = definitions.get(task.taskType).cost;
+    if (capacityRemaining - definitions.get(task.taskType).cost < 0) {
+      break;
+    }
+    if (task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()) {
+      task.scheduledAt = task.retryAt;
+    } else {
+      task.scheduledAt = task.runAt;
+    }
+    task.retryAt = claimOwnershipUntil;
+    task.ownerId = taskStore.taskManagerId;
+    task.status = TaskStatus.Claiming;
+    taskUpdates.push(task);
+    capacityRemaining -= taskCost;
+  }
 
   // perform the task object updates, deal with errors
   const finalResults: ConcreteTaskInstance[] = [];

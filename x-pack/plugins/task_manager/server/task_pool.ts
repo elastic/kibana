@@ -18,7 +18,7 @@ import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
 import { TaskManagerStat } from './task_events';
 
 interface Opts {
-  maxWorkers$: Observable<number>;
+  totalCapacity: number;
   logger: Logger;
 }
 
@@ -34,13 +34,12 @@ export enum TaskPoolRunResult {
 }
 
 const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana service';
-const MAX_RUN_ATTEMPTS = 3;
 
 /**
  * Runs tasks in batches, taking costs into account.
  */
 export class TaskPool {
-  private maxWorkers: number = 0;
+  private totalCapacity: number = 0;
   private tasksInPool = new Map<string, TaskRunner>();
   private logger: Logger;
   private load$ = new Subject<TaskManagerStat>();
@@ -49,16 +48,13 @@ export class TaskPool {
    * Creates an instance of TaskPool.
    *
    * @param {Opts} opts
-   * @prop {number} maxWorkers - The total number of workers / work slots available
-   *    (e.g. maxWorkers is 4, then 2 tasks of cost 2 can run at a time, or 4 tasks of cost 1)
+   * @prop {number} totalCapacity - The total capacity available based on CPU availability.
    * @prop {Logger} logger - The task manager logger.
    */
   constructor(opts: Opts) {
     this.logger = opts.logger;
-    opts.maxWorkers$.subscribe((maxWorkers) => {
-      this.logger.debug(`Task pool now using ${maxWorkers} as the max worker value`);
-      this.maxWorkers = maxWorkers;
-    });
+    // TODO: Pull this from an observable?
+    this.totalCapacity = opts.totalCapacity;
   }
 
   public get load(): Observable<TaskManagerStat> {
@@ -66,36 +62,43 @@ export class TaskPool {
   }
 
   /**
-   * Gets how many workers are currently in use.
+   * Gets much capacity is currently in use.
    */
-  public get occupiedWorkers() {
-    return this.tasksInPool.size;
+  public get occupiedCapacity() {
+    let result = 0;
+    this.tasksInPool.forEach((task) => {
+      result += task.definition.cost;
+    });
+    return result;
   }
 
   /**
-   * Gets % of workers in use
+   * Gets % of capacity in use
    */
-  public get workerLoad() {
-    return this.maxWorkers ? Math.round((this.occupiedWorkers * 100) / this.maxWorkers) : 100;
+  public get capacityLoad() {
+    return this.totalCapacity
+      ? Math.round((this.occupiedCapacity * 100) / this.totalCapacity)
+      : 100;
   }
 
   /**
-   * Gets how many workers are currently available.
+   * Gets how much capacity is currently available.
    */
-  public get availableWorkers() {
+  public get availableCapacity() {
     // cancel expired task whenever a call is made to check for capacity
     // this ensures that we don't end up with a queue of hung tasks causing both
     // the poller and the pool from hanging due to lack of capacity
     this.cancelExpiredTasks();
-    return this.maxWorkers - this.occupiedWorkers;
+    return this.totalCapacity - this.occupiedCapacity;
   }
 
   /**
-   * Gets how many workers are currently in use by type.
+   * Gets how much capacity is currently in use by type.
    */
-  public getOccupiedWorkersByType(type: string) {
+  public getOccupiedCapacityByType(type: string) {
     return [...this.tasksInPool.values()].reduce(
-      (count, runningTask) => (runningTask.definition.type === type ? ++count : count),
+      (count, runningTask) =>
+        runningTask.definition.type === type ? count + runningTask.definition.cost : count,
       0
     );
   }
@@ -108,26 +111,11 @@ export class TaskPool {
    * @param {TaskRunner[]} tasks
    * @returns {Promise<boolean>}
    */
-  public async run(tasks: TaskRunner[], attempt = 1): Promise<TaskPoolRunResult> {
-    // Note `this.availableWorkers` is a getter with side effects, so we just want
+  public async run(tasks: TaskRunner[]): Promise<TaskPoolRunResult> {
+    // Note `this.availableCapacity` is a getter with side effects, so we just want
     // to call it once for this bit of the code.
-    const availableWorkers = this.availableWorkers;
-    const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, availableWorkers);
-
-    if (attempt > MAX_RUN_ATTEMPTS) {
-      const stats = [
-        `availableWorkers: ${availableWorkers}`,
-        `tasksToRun: ${tasksToRun.length}`,
-        `leftOverTasks: ${leftOverTasks.length}`,
-        `maxWorkers: ${this.maxWorkers}`,
-        `occupiedWorkers: ${this.occupiedWorkers}`,
-        `workerLoad: ${this.workerLoad}`,
-      ].join(', ');
-      this.logger.warn(
-        `task pool run attempts exceeded ${MAX_RUN_ATTEMPTS}; assuming ran out of capacity; ${stats}`
-      );
-      return TaskPoolRunResult.RanOutOfCapacity;
-    }
+    const availableCapacity = this.availableCapacity;
+    const [tasksToRun, leftOverTasks] = partitionTasksByCapacity(tasks, availableCapacity);
 
     if (tasksToRun.length) {
       await Promise.all(
@@ -163,11 +151,8 @@ export class TaskPool {
     }
 
     if (leftOverTasks.length) {
-      if (this.availableWorkers) {
-        return this.run(leftOverTasks, attempt + 1);
-      }
       return TaskPoolRunResult.RanOutOfCapacity;
-    } else if (!this.availableWorkers) {
+    } else if (!this.availableCapacity) {
       return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
@@ -242,9 +227,29 @@ export class TaskPool {
   }
 }
 
-function partitionListByCount<T>(list: T[], count: number): [T[], T[]] {
-  const listInCount = list.splice(0, count);
-  return [listInCount, list];
+function partitionTasksByCapacity(
+  tasks: TaskRunner[],
+  availableCapacity: number
+): [TaskRunner[], TaskRunner[]] {
+  const tasksToRun: TaskRunner[] = [];
+  const leftOverTasks: TaskRunner[] = [];
+
+  let capacityAccumulator = 0;
+  for (const task of tasks) {
+    const cost = task.definition.cost;
+    if (capacityAccumulator + cost <= availableCapacity) {
+      tasksToRun.push(task);
+      capacityAccumulator += cost;
+    } else {
+      leftOverTasks.push(task);
+      // Don't claim further tasks even if lower cost tasks are next.
+      // It may be an extra large task and we need to make room for it
+      // for the next claiming cycle
+      capacityAccumulator = availableCapacity;
+    }
+  }
+
+  return [tasksToRun, leftOverTasks];
 }
 
 function durationAsString(duration: Duration): string {

@@ -127,7 +127,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     this.pool = new TaskPool({
       logger,
-      maxWorkers$: maxWorkersConfiguration$,
+      totalCapacity: config.capacity,
     });
     this.pool.load.subscribe(emitEvent);
 
@@ -139,17 +139,21 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       definitions,
       unusedTypes,
       logger: this.logger,
-      getCapacity: (taskType?: string) =>
-        taskType && this.definitions.get(taskType)?.maxConcurrency
-          ? Math.max(
-              Math.min(
-                this.pool.availableWorkers,
-                this.definitions.get(taskType)!.maxConcurrency! -
-                  this.pool.getOccupiedWorkersByType(taskType)
-              ),
-              0
-            )
-          : this.pool.availableWorkers,
+      getAvailableCapacity: (taskType?: string) => {
+        const taskTypeDef = taskType ? this.definitions.get(taskType) : null;
+        if (taskTypeDef?.maxConcurrency) {
+          return Math.max(
+            Math.min(
+              this.pool.availableCapacity,
+              taskTypeDef.maxConcurrency * taskTypeDef.cost -
+                this.pool.getOccupiedCapacityByType(taskType!)
+            ),
+            0
+          );
+        } else {
+          return this.pool.availableCapacity;
+        }
+      },
     });
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
@@ -172,15 +176,15 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       initialPollInterval: pollInterval,
       pollInterval$: pollIntervalConfiguration$,
       pollIntervalDelay$,
-      getCapacity: () => {
-        const capacity = this.pool.availableWorkers;
+      getAvailableCapacity: () => {
+        const capacity = this.pool.availableCapacity;
         if (!capacity) {
           // if there isn't capacity, emit a load event so that we can expose how often
           // high load causes the poller to skip work (work isn't called when there is no capacity)
-          this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
+          this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.capacityLoad)));
 
           // Emit event indicating task manager utilization
-          this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
+          this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.capacityLoad)));
         }
         return capacity;
       },
@@ -258,7 +262,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         const [result] = await Promise.all([this.pool.run(tasksToRun), ...removeTaskPromises]);
         // Emit the load after fetching tasks, giving us a good metric for evaluating how
         // busy Task manager tends to be in this Kibana instance
-        this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
+        this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.capacityLoad)));
         return result;
       }
     );
@@ -281,7 +285,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
             // Emit event indicating task manager utilization % at the end of a polling cycle
             // Because there was a polling error, no tasks were claimed so this represents the number of workers busy
-            this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
+            this.emitEvent(
+              asTaskManagerStatEvent('workerUtilization', asOk(this.pool.capacityLoad))
+            );
           })
         )
       )
@@ -290,7 +296,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
           mapOk(() => {
             // Emit event indicating task manager utilization % at the end of a polling cycle
             // This represents the number of workers busy + number of tasks claimed in this cycle
-            this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
+            this.emitEvent(
+              asTaskManagerStatEvent('workerUtilization', asOk(this.pool.capacityLoad))
+            );
           })
         )
       )

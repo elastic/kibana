@@ -80,6 +80,8 @@ export const configSchema = schema.object(
       defaultValue: 3,
       min: 1,
     }),
+    // TODO: Calculate default when max workers is set
+    capacity: schema.number({ min: 10, max: 100, defaultValue: 20 }),
     /* The maximum number of tasks that this Kibana instance will run simultaneously. */
     max_workers: schema.number({
       defaultValue: DEFAULT_MAX_WORKERS,
