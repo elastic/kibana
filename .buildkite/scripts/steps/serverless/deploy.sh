@@ -88,7 +88,10 @@ deploy() {
 
     echo "Write to vault..."
 
-    vault_kv_set "cloud-deploy/$VAULT_KEY_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
+    set_in_legacy_vault "$VAULT_KEY_NAME" \
+     username="$PROJECT_USERNAME" \
+     password="$PROJECT_PASSWORD" \
+     id="$PROJECT_ID"
 
   else
     echo "Updating project..."
@@ -109,6 +112,8 @@ deploy() {
   PROJECT_KIBANA_LOGIN_URL="${PROJECT_KIBANA_URL}/login"
   PROJECT_ELASTICSEARCH_URL=$(jq -r '.endpoints.elasticsearch' $PROJECT_INFO_LOGS)
 
+  VAULT_READ_COMMAND=$(print_legacy_vault_read "$VAULT_KEY_NAME")
+
   cat << EOF | buildkite-agent annotate --style "info" --context "project-$PROJECT_TYPE"
 ### $PROJECT_TYPE_LABEL Deployment
 
@@ -116,9 +121,7 @@ Kibana: $PROJECT_KIBANA_LOGIN_URL
 
 Elasticsearch: $PROJECT_ELASTICSEARCH_URL
 
-Credentials: \`vault kv get $VAULT_KV_PREFIX/cloud-deploy/$VAULT_KEY_NAME\`
-
-(Stored in the production vault: VAULT_ADDR=https://vault-ci-prod.elastic.dev, more info: https://docs.elastic.dev/ci/using-secrets)
+Credentials: \`$VAULT_READ_COMMAND\`
 
 Kibana image: \`$KIBANA_IMAGE\`
 EOF
