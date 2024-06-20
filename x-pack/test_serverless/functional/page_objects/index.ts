@@ -21,6 +21,7 @@ import { SvlRuleDetailsPageProvider } from './svl_rule_details_ui_page';
 import { SvlSearchConnectorsPageProvider } from './svl_search_connectors_page';
 import { SvlManagementPageProvider } from './svl_management_page';
 import { SvlIngestPipelines } from './svl_ingest_pipelines';
+import { SvlSearchHomePageProvider } from './svl_search_homepage';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -38,4 +39,5 @@ export const pageObjects = {
   svlRuleDetailsUI: SvlRuleDetailsPageProvider,
   svlManagementPage: SvlManagementPageProvider,
   svlIngestPipelines: SvlIngestPipelines,
+  svlSearchHomePage: SvlSearchHomePageProvider,
 };

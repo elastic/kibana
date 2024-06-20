@@ -6,7 +6,11 @@
 {{~/if~}}
 
 {{~#if $ref~}}
-  {{referenceName}}
+  {{~#if (isCircularRef $ref)~}}
+    z.lazy(() => {{referenceName}})
+  {{~else~}}
+    {{referenceName}}
+  {{~/if~}}
   {{~#if nullable}}.nullable(){{/if~}}
   {{~#if (eq requiredBool false)}}.optional(){{/if~}}
   {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
@@ -87,11 +91,7 @@ z.unknown()
       * {{{description}}} 
       */
       {{/if}}
-      {{#if (startsWithSpecialChar @key)}}
-        '{{@key}}': {{> zod_schema_item requiredBool=(includes ../required @key)}},
-      {{else}}
-        {{@key}}: {{> zod_schema_item requiredBool=(includes ../required @key)}},
-      {{/if}}
+      '{{@key}}':{{~> zod_schema_item requiredBool=(includes ../required @key)~}},
     {{/each}}
   })
   {{~#if (eq additionalProperties false)}}.strict(){{/if~}}
@@ -127,4 +127,3 @@ z.unknown()
   {{~#if pattern}}.regex(/{{pattern}}/){{/if~}}
   {{~/if~}}
 {{~/inline~}}
-
