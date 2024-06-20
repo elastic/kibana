@@ -35,6 +35,9 @@ const createStartMock = (): SecurityStartMock => {
       getCurrentUser: jest.fn(),
     },
     audit: auditServiceMock.create(),
+    experimental: {
+      isFipsEnabled: jest.fn(),
+    },
   };
 
   return mock;
@@ -60,6 +63,9 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
       getCurrentUser: jest.fn(),
     },
     audit: auditServiceMock.create(),
+    experimental: {
+      isFipsEnabled: jest.fn(),
+    },
   };
 
   return mock;

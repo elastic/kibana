@@ -26,3 +26,4 @@ export type {
   AuditRequest,
 } from './src/audit_logging/audit_events';
 export type { AuditLogger } from './src/audit_logging/audit_logger';
+export type { CoreFipsService } from './src/fips';

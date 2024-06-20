@@ -9,6 +9,9 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import { Observable, Subscription } from 'rxjs';
+import { Config } from '@kbn/config';
+import { isFipsEnabled } from './fips/fips';
 import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
@@ -20,18 +23,38 @@ export class SecurityService
 {
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
+  private config$: Observable<Config>;
+  private configSubscription?: Subscription;
+  private config: Config | undefined;
+  private readonly getConfig = () => {
+    if (!this.config) {
+      throw new Error('Config is not available.');
+    }
+    return this.config;
+  };
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('security-service');
+
+    this.config$ = coreContext.configService.getConfig$();
+    this.configSubscription = this.config$.subscribe((config) => {
+      this.config = config;
+    });
   }
 
   public setup(): InternalSecurityServiceSetup {
+    const config = this.getConfig();
+    const securityConfig = config.get(['xpack', 'security']);
+
     return {
       registerSecurityDelegate: (api) => {
         if (this.securityApi) {
           throw new Error('security API can only be registered once');
         }
         this.securityApi = api;
+      },
+      fips: {
+        isEnabled: () => isFipsEnabled(securityConfig),
       },
     };
   }
@@ -44,5 +67,10 @@ export class SecurityService
     return convertSecurityApi(apiContract);
   }
 
-  public stop() {}
+  public stop() {
+    if (this.configSubscription) {
+      this.configSubscription.unsubscribe();
+      this.configSubscription = undefined;
+    }
+  }
 }
