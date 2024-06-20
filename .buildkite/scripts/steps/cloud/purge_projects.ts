@@ -8,6 +8,7 @@
 
 import { execSync } from 'child_process';
 import axios from 'axios';
+import { getKibanaDir } from '#pipeline-utils';
 
 async function getPrProjects() {
   const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability)$/;
@@ -43,12 +44,19 @@ async function getPrProjects() {
 async function deleteProject({
   type,
   id,
+  name,
 }: {
   type: 'elasticsearch' | 'observability' | 'security';
   id: number;
+  name: string;
 }) {
   try {
     await projectRequest.delete(`/api/v1/serverless/projects/${type}/${id}`);
+
+    execSync(`.buildkite/scripts/common/deployment_credentials.sh unset ${name}`, {
+      cwd: getKibanaDir(),
+      stdio: 'inherit',
+    });
   } catch (e) {
     if (e.isAxiosError) {
       const message =
@@ -61,7 +69,7 @@ async function deleteProject({
 
 async function purgeProjects() {
   const prProjects = await getPrProjects();
-  const projectsToPurge = [];
+  const projectsToPurge: typeof prProjects = [];
   for (const project of prProjects) {
     const NOW = new Date().getTime() / 1000;
     const DAY_IN_SECONDS = 60 * 60 * 24;
