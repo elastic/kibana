@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SignalsReindexOptions } from '../../../../common/api/detection_engine/signals_migration';
+import type { AlertsReindexOptions } from '../../../../common/api/detection_engine/signals_migration';
 import { createMigrationIndex } from './create_migration_index';
 
 export interface CreatedMigration {
@@ -24,7 +24,7 @@ export interface CreatedMigration {
  * @param esClient An {@link ElasticsearchClient}
  * @param index name of the concrete signals index to be migrated
  * @param version version of the current signals template/mappings
- * @param reindexOptions object containing reindex options {@link SignalsReindexOptions}
+ * @param reindexOptions object containing reindex options {@link AlertsReindexOptions}
  *
  * @returns identifying information representing the {@link MigrationInfo}
  * @throws if elasticsearch returns an error
@@ -37,7 +37,7 @@ export const createMigration = async ({
 }: {
   esClient: ElasticsearchClient;
   index: string;
-  reindexOptions: SignalsReindexOptions;
+  reindexOptions: AlertsReindexOptions;
   version: number;
 }): Promise<CreatedMigration> => {
   const migrationIndex = await createMigrationIndex({
