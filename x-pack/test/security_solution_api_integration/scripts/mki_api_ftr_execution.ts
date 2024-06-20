@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { exec } from 'child_process';
 import crypto from 'crypto';
-
-import type { ProjectHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_handler';
+import fs from 'fs';
+import type {
+  ProductType,
+  ProjectHandler,
+} from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_handler';
 import { CloudHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/cloud_project_handler';
 import { ProxyHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/proxy_project_handler';
 import {
@@ -25,28 +27,33 @@ const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';
 
 // Function to execute a command and return a Promise with the status code
-function executeCommand(command: string, envVars: any, workDir: string): Promise<number> {
+function executeCommand(
+  command: string,
+  envVars: any,
+  log: ToolingLog,
+  workDir?: string
+): Promise<number> {
   return new Promise((resolve, reject) => {
-    const childProcess = exec(command, { env: envVars, cwd: workDir }, (error, stdout, stderr) => {
+    const childProcess = exec(command, { env: envVars }, (error, stdout, stderr) => {
       if (error) {
-        console.error(`exec error: ${error}`);
+        log.error(`exec error: ${error}`);
         process.exitCode = error.code;
       }
     });
 
     // Listen and print stdout data
     childProcess.stdout?.on('data', (data) => {
-      console.log(data);
+      log.info(data);
     });
 
     // Listen and print stderr data
     childProcess.stderr?.on('data', (data) => {
-      console.log(data);
+      log.info(data);
     });
 
     // Listen for process exit
     childProcess.on('exit', (code) => {
-      console.log(`Node process for target ${process.env.TARGET_SCRIPT} exits with code : ${code}`);
+      log.info(`Node process for target ${process.env.TARGET_SCRIPT} exits with code : ${code}`);
       if (code !== 0) {
         reject(code);
         return;
@@ -54,6 +61,24 @@ function executeCommand(command: string, envVars: any, workDir: string): Promise
       resolve(code);
     });
   });
+}
+
+async function parseProductTypes(log: ToolingLog): Promise<ProductType[] | undefined> {
+  if (!process.env.TARGET_SCRIPT) {
+    log.error('TARGET_SCRIPT environment variable is not provided. Aborting...');
+    return process.exit(1);
+  }
+
+  const apiConfigs = JSON.parse(await fs.promises.readFile('./scripts/api_configs.json', 'utf8'));
+  try {
+    const productTypes: ProductType[] = apiConfigs[process.env.TARGET_SCRIPT]
+      .productTypes as ProductType[];
+    return productTypes && productTypes.length > 0 ? productTypes : undefined;
+  } catch (err) {
+    // If the configuration for the script is not needed, it can be omitted from the json file.
+    log.warning(`Extended configuration was not found for script : ${process.env.TARGET_SCRIPT}`);
+    return undefined;
+  }
 }
 
 export const cli = () => {
@@ -89,14 +114,13 @@ export const cli = () => {
 
       const id = crypto.randomBytes(8).toString('hex');
       const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
+      const productTypes = await parseProductTypes(log);
 
       // Creating project for the test to run
-      const project = await cloudHandler.createSecurityProject(PROJECT_NAME);
-      log.info(project);
+      const project = await cloudHandler.createSecurityProject(PROJECT_NAME, productTypes);
 
       if (!project) {
         log.error('Failed to create project.');
-
         return process.exit(1);
       }
       let statusCode: number = 0;
@@ -132,7 +156,6 @@ export const cli = () => {
         const testCloud = 1;
         const testEsUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_ES_URL}`;
         const testKibanaUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_KB_URL}`;
-        const workDir = 'x-pack/test/security_solution_api_integration';
         const envVars = {
           ...process.env,
           TEST_CLOUD: testCloud.toString(),
@@ -140,7 +163,7 @@ export const cli = () => {
           TEST_KIBANA_URL: testKibanaUrl,
         };
 
-        statusCode = await executeCommand(command, envVars, workDir);
+        statusCode = await executeCommand(command, envVars, log);
       } catch (err) {
         log.error('An error occured when running the test script.');
         log.error(err.message);
