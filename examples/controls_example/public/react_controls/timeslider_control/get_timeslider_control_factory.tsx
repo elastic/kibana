@@ -183,8 +183,7 @@ export const getTimesliderControlFactory = (
       const viewModeSubject =
         getViewModeSubject(controlGroupApi) ?? new BehaviorSubject('view' as ViewMode);
 
-      const { defaultControlApi, defaultControlComparators, serializeDefaultControl } =
-        initializeDefaultControlApi(initialState);
+      const defaultControl = initializeDefaultControlApi(initialState);
 
       const dashboardDataLoading$ =
         apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
@@ -205,10 +204,10 @@ export const getTimesliderControlFactory = (
 
       const api = buildApi(
         {
-          ...defaultControlApi,
+          ...defaultControl.api,
           timeslice$,
           serializeState: () => {
-            const { rawState: defaultControlState } = serializeDefaultControl();
+            const { rawState: defaultControlState } = defaultControl.serialize();
             return {
               rawState: {
                 ...defaultControlState,
@@ -237,7 +236,7 @@ export const getTimesliderControlFactory = (
           },
         },
         {
-          ...defaultControlComparators,
+          ...defaultControl.comparators,
           ...timeRangePercentage.comparators,
           isAnchored: [isAnchored$, setIsAnchored],
         }
