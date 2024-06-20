@@ -83,6 +83,19 @@ describe('Connector', () => {
     expect(await screen.findByTestId('dropdown-connectors')).toBeDisabled();
   });
 
+  it('renders default connector correctly', async () => {
+    appMockRender.render(
+      <FormTestComponent formDefaultValue={{ connectorId: connectorsMock[2].id }}>
+        <Connector {...defaultProps} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
+    expect(await screen.findByText('Jira')).toBeInTheDocument();
+
+    expect(await screen.findByTestId('connector-fields-jira')).toBeInTheDocument();
+  });
+
   it('shows all connectors in dropdown', async () => {
     appMockRender.render(
       <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>

@@ -259,6 +259,26 @@ describe('Jira Fields', () => {
     expect(await screen.findByText('Person Task')).toBeInTheDocument();
   });
 
+  it('resets existing parent correctly', async () => {
+    const newFields = { ...fields, parent: 'personKey' };
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={newFields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    const checkbox = within(await screen.findByTestId('search-parent-issues')).getByTestId(
+      'comboBoxSearchInput'
+    );
+
+    expect(await screen.findByText('Person Task')).toBeInTheDocument();
+
+    userEvent.click(await screen.findByTestId('comboBoxClearButton'));
+
+    expect(checkbox).toHaveValue('');
+  });
+
   it('should submit Jira connector', async () => {
     appMockRenderer.render(
       <MockFormWrapperComponent fields={fields}>
