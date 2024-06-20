@@ -199,15 +199,19 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         return;
       }
 
+      if (!hasMLPermissions) {
+        return;
+      }
+
       await fetchInferenceToModelIdMap();
     } catch (exception) {
       setSaveMappingError(exception.message);
     }
-  }, [fetchInferenceToModelIdMap, isSemanticTextEnabled]);
+  }, [fetchInferenceToModelIdMap, isSemanticTextEnabled, hasMLPermissions]);
 
   const updateMappings = useCallback(async () => {
     try {
-      if (isSemanticTextEnabled) {
+      if (isSemanticTextEnabled && hasMLPermissions) {
         await fetchInferenceToModelIdMap();
 
         if (pendingDeployments.length > 0) {
