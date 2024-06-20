@@ -19,7 +19,7 @@ export default function ({ getService }: APMFtrContextProvider) {
   const synthtrace = getService('synthtrace');
 
   const start = new Date('2024-06-01T00:00:00.000Z').getTime();
-  const end = new Date('2024-06-01T00:05:00.000Z').getTime() - 1;
+  const end = new Date('2024-06-01T00:01:00.000Z').getTime();
 
   describe('APM Service maps', () => {
     let roleAuthc: RoleCredentials;
