@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, sortBy } from 'lodash';
 import { MissingVersion } from './three_way_diff';
 
 /**
@@ -38,7 +38,55 @@ export const determineDiffOutcome = <TValue>(
   const baseEqlTarget = isEqual(baseVersion, targetVersion);
   const currentEqlTarget = isEqual(currentVersion, targetVersion);
 
-  if (baseVersion === MissingVersion) {
+  return getThreeWayDiffOutcome({
+    baseEqlCurrent,
+    baseEqlTarget,
+    currentEqlTarget,
+    hasBaseVersion: baseVersion !== MissingVersion,
+  });
+};
+
+/**
+ * Determines diff outcomes of array fields that do not care about order (e.g. `[1, 2 , 3] === [3, 2, 1]`)
+ */
+export const determineOrderAgnosticDiffOutcome = <TValue>(
+  baseVersion: TValue[] | MissingVersion,
+  currentVersion: TValue[],
+  targetVersion: TValue[]
+): ThreeWayDiffOutcome => {
+  let baseEqlCurrent: boolean;
+  let baseEqlTarget: boolean;
+  if (baseVersion !== MissingVersion) {
+    baseEqlCurrent = isEqual(sortBy(baseVersion), sortBy(currentVersion));
+    baseEqlTarget = isEqual(sortBy(baseVersion), sortBy(targetVersion));
+  } else {
+    baseEqlCurrent = false;
+    baseEqlTarget = false;
+  }
+  const currentEqlTarget = isEqual(sortBy(currentVersion), sortBy(targetVersion));
+
+  return getThreeWayDiffOutcome({
+    baseEqlCurrent,
+    baseEqlTarget,
+    currentEqlTarget,
+    hasBaseVersion: baseVersion !== MissingVersion,
+  });
+};
+
+interface DetermineDiffOutcomeProps {
+  hasBaseVersion: boolean;
+  baseEqlCurrent: boolean;
+  baseEqlTarget: boolean;
+  currentEqlTarget: boolean;
+}
+
+const getThreeWayDiffOutcome = ({
+  hasBaseVersion,
+  baseEqlCurrent,
+  baseEqlTarget,
+  currentEqlTarget,
+}: DetermineDiffOutcomeProps): ThreeWayDiffOutcome => {
+  if (hasBaseVersion) {
     /**
      * We couldn't find the base version of the rule in the package so further
      * version comparison is not possible. We assume that the rule is not

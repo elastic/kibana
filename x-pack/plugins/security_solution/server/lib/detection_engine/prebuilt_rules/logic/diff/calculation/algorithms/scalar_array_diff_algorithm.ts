@@ -12,25 +12,28 @@ import type {
   ThreeWayDiff,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
-  determineDiffOutcome,
+  determineOrderAgnosticDiffOutcome,
   determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   MissingVersion,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 
-export type ScalarArrayDiffAlgorithmType = string[]; // We currently don't have any fields that use any other types than strings
-
-export const scalarArrayDiffAlgorithm = (
-  versions: ThreeVersionsOf<ScalarArrayDiffAlgorithmType>
-): ThreeWayDiff<ScalarArrayDiffAlgorithmType> => {
+/**
+ * Diff algorithm used for arrays of scalar values (eg. numbers, strings, booleans, etc.)
+ *
+ * NOTE: Diffing logic will be agnostic to array order
+ */
+export const scalarArrayDiffAlgorithm = <TValue>(
+  versions: ThreeVersionsOf<TValue[]>
+): ThreeWayDiff<TValue[]> => {
   const {
     base_version: baseVersion,
     current_version: currentVersion,
     target_version: targetVersion,
   } = versions;
 
-  const diffOutcome = determineDiffOutcome(baseVersion, currentVersion, targetVersion);
+  const diffOutcome = determineOrderAgnosticDiffOutcome(baseVersion, currentVersion, targetVersion);
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
   const { mergeOutcome, mergedVersion } = mergeVersions({
@@ -65,12 +68,12 @@ interface MergeArgs<TValue> {
   diffOutcome: ThreeWayDiffOutcome;
 }
 
-const mergeVersions = ({
+const mergeVersions = <TValue>({
   baseVersion,
   currentVersion,
   targetVersion,
   diffOutcome,
-}: MergeArgs<ScalarArrayDiffAlgorithmType>): MergeResult<ScalarArrayDiffAlgorithmType> => {
+}: MergeArgs<TValue[]>): MergeResult<TValue[]> => {
   switch (diffOutcome) {
     case ThreeWayDiffOutcome.StockValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
