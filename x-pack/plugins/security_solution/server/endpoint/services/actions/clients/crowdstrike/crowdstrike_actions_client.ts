@@ -11,6 +11,8 @@ import {
   CROWDSTRIKE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import moment from 'moment';
+import type { CrowdstrikeBaseApiResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
@@ -24,6 +26,7 @@ import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
+  LogsEndpointActionResponse,
 } from '../../../../../../common/endpoint/types';
 import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type {
@@ -37,6 +40,8 @@ import type {
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
 import { ELASTIC_RESPONSE_ACTION_MESSAGE } from '../../utils';
+import { ENDPOINT_ACTION_RESPONSES_DS } from '../../../../../../common/endpoint/constants';
+import { wrapErrorIfNeeded } from '../../../../../../common/endpoint/data_loaders/utils';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -150,45 +155,6 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     return result.hits.hits?.[0]?._source as { crowdstrike: { event: { HostName: string } } };
   }
 
-  // TODO TC: uncomment when working on agent status support
-  // private async getAgentDetails(
-  //   id: string
-  // ): Promise<CrowdstrikeGetAgentsResponse['resources'][number]> {
-  //   const executeOptions: NormalizedExternalConnectorClientExecuteOptions<
-  //     CrowdstrikeGetAgentsParams,
-  //     SUB_ACTION
-  //   > = {
-  //     params: {
-  //       subAction: SUB_ACTION.GET_AGENT_DETAILS,
-  //       subActionParams: {
-  //         ids: [id],
-  //       },
-  //     },
-  //   };
-
-  //   let crowdstrikeApiResponse: CrowdstrikeGetAgentsResponse | undefined;
-
-  //   try {
-  //     const response = await this.connectorActionsClient.execute(executeOptions);
-
-  //     this.log.debug(`Response for Crowdstrike agent id [${id}] returned:\n${stringify(response)}`);
-
-  //     crowdstrikeApiResponse = response.data;
-  //   } catch (err) {
-  //     throw new ResponseActionsClientError(
-  //       `Error while attempting to retrieve Crowdstrike host with agent id [${id}]`,
-  //       500,
-  //       err
-  //     );
-  //   }
-
-  //   if (!crowdstrikeApiResponse || !crowdstrikeApiResponse.resources[0]) {
-  //     throw new ResponseActionsClientError(`Crowdstrike agent id [${id}] not found`, 404);
-  //   }
-
-  //   return crowdstrikeApiResponse.resources[0];
-  // }
-
   protected async validateRequest(
     payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
   ): Promise<ResponseActionsClientValidateRequestResponse> {
@@ -215,17 +181,16 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       ...this.getMethodOptions(options),
       command: 'isolate',
     };
-
+    let actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined;
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
       const actionCommentMessage = ELASTIC_RESPONSE_ACTION_MESSAGE(
         this.options.username,
         reqIndexOptions.actionId
       );
-
       if (!error) {
         try {
-          await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
+          actionResponse = (await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
             ids: actionRequest.endpoint_ids,
             actionParameters: {
               comment: reqIndexOptions.comment
@@ -233,7 +198,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
                 : actionCommentMessage,
             },
             command: 'contain',
-          });
+          })) as ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>;
         } catch (err) {
           error = err;
         }
@@ -247,6 +212,11 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     }
 
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+
+    // Ensure actionResponse is assigned before using it
+    if (actionResponse) {
+      await this.completeCrowdstrikeAction(actionResponse, actionRequestDoc);
+    }
 
     await this.updateCases({
       command: reqIndexOptions.command,
@@ -275,6 +245,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       command: 'unisolate',
     };
 
+    let actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined;
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
       const actionCommentMessage = ELASTIC_RESPONSE_ACTION_MESSAGE(
@@ -283,13 +254,13 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       );
       if (!error) {
         try {
-          await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
+          actionResponse = (await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
             ids: actionRequest.endpoint_ids,
             command: 'lift_containment',
             comment: reqIndexOptions.comment
               ? `${actionCommentMessage}: ${reqIndexOptions.comment}`
               : actionCommentMessage,
-          });
+          })) as ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>;
         } catch (err) {
           error = err;
         }
@@ -303,6 +274,11 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     }
 
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+
+    // Ensure actionResponse is assigned before using it
+    if (actionResponse) {
+      await this.completeCrowdstrikeAction(actionResponse, actionRequestDoc);
+    }
 
     await this.updateCases({
       command: reqIndexOptions.command,
@@ -319,6 +295,41 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+  }
+
+  async completeCrowdstrikeAction(
+    actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined,
+    doc: LogsEndpointAction
+  ): Promise<void> {
+    const createBaseDocument = (): LogsEndpointActionResponse => ({
+      '@timestamp': moment().toISOString(),
+      agent: doc.agent,
+      EndpointActions: {
+        action_id: doc.EndpointActions.action_id,
+        completed_at: moment().toISOString(),
+        started_at: moment().toISOString(),
+        data: doc.EndpointActions.data,
+        input_type: 'crowdstrike',
+      },
+    });
+
+    const document = createBaseDocument();
+
+    if (actionResponse?.data?.errors?.length) {
+      document.error = {
+        code: '500',
+        message: 'Failed to contain a host',
+      };
+    }
+
+    try {
+      await this.options.esClient.index<LogsEndpointActionResponse>({
+        index: `${ENDPOINT_ACTION_RESPONSES_DS}-default`,
+        document,
+      });
+    } catch (error) {
+      this.log.error(wrapErrorIfNeeded(error));
+    }
   }
 
   async processPendingActions({
