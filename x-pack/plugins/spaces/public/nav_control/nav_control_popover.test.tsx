@@ -15,6 +15,7 @@ import {
 import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
+import { of } from 'rxjs';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
@@ -45,7 +46,7 @@ const mockSpaces = [
 ];
 
 describe('NavControlPopover', () => {
-  async function setup(spaces: Space[]) {
+  async function setup(spaces: Space[], isSpaceSolutionEnabled = false) {
     const spacesManager = spacesManagerMock.create();
     spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
 
@@ -57,6 +58,7 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
+        isSpaceSolutionEnabled$={of(isSpaceSolutionEnabled)}
       />
     );
 
@@ -78,6 +80,7 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
+        isSpaceSolutionEnabled$={of(false)}
       />
     );
     expect(baseElement).toMatchSnapshot();
@@ -102,6 +105,7 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
+        isSpaceSolutionEnabled$={of(false)}
       />
     );
 
@@ -240,7 +244,7 @@ describe('NavControlPopover', () => {
       },
     ];
 
-    const wrapper = await setup(spaces);
+    const wrapper = await setup(spaces, true);
 
     await act(async () => {
       wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
