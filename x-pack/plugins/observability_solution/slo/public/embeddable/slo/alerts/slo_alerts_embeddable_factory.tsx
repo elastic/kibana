@@ -33,7 +33,11 @@ export const getAlertsPanelTitle = () =>
   });
 
 export function getAlertsEmbeddableFactory(deps: SloEmbeddableDeps, kibanaVersion: string) {
-  const factory: ReactEmbeddableFactory<SloAlertsEmbeddableState, SloAlertsApi> = {
+  const factory: ReactEmbeddableFactory<
+    SloAlertsEmbeddableState,
+    SloAlertsEmbeddableState,
+    SloAlertsApi
+  > = {
     type: SLO_ALERTS_EMBEDDABLE_ID,
     deserializeState: (state) => {
       return state.rawState as SloAlertsEmbeddableState;

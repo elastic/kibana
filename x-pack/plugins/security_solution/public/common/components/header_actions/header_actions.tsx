@@ -16,8 +16,7 @@ import { TimelineTabs, TimelineId } from '../../../../common/types';
 import { isFullScreen } from '../../../timelines/components/timeline/body/column_headers';
 import { isActiveTimeline } from '../../../helpers';
 import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
-import { timelineActions, timelineSelectors } from '../../../timelines/store';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { timelineActions } from '../../../timelines/store';
 import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
 import { useKibana } from '../../lib/kibana';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
@@ -27,6 +26,8 @@ import { EXIT_FULL_SCREEN } from '../exit_full_screen/translations';
 import { EventsSelect } from '../../../timelines/components/timeline/body/column_headers/events_select';
 import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { selectTimelineById } from '../../../timelines/store/selectors';
 
 const SortingColumnsContainer = styled.div`
   button {
@@ -90,12 +91,12 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
     const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
     const dispatch = useDispatch();
 
-    const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-    const { defaultColumns } = useDeepEqualSelector((state) =>
-      getManageTimeline(state, timelineId)
-    );
     const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
       'unifiedComponentsInTimelineEnabled'
+    );
+
+    const { defaultColumns } = useDeepEqualSelector((state) =>
+      selectTimelineById(state, timelineId)
     );
 
     const toggleFullScreen = useCallback(() => {

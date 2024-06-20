@@ -434,6 +434,12 @@ export function LensEditConfigurationFlyout({
                 flex: 1;
               }
             }
+            .lnsIndexPatternDimensionEditor-advancedOptions {
+              .euiAccordion__childWrapper {
+                flex: none;
+                overflow: hidden !important;
+              }
+            }
           `}
           direction="column"
           gutterSize="none"
@@ -477,18 +483,13 @@ export function LensEditConfigurationFlyout({
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
-                .euiAccordion__childWrapper {
-                  flex: ${isLayerAccordionOpen ? 1 : 'none'}
-                }
+              .euiAccordion__childWrapper {
+                flex: ${isLayerAccordionOpen ? 1 : 'none'};
               }
+              padding: 0 ${euiThemeVars.euiSize};
             `}
           >
             <EuiAccordion
-              css={css`
-                .euiAccordion__triggerWrapper {
-                  padding: 0 ${euiThemeVars.euiSize};
-                }
-              `}
               id="layer-configuration"
               buttonContent={
                 <EuiTitle

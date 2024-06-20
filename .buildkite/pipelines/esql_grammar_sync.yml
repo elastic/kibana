@@ -8,9 +8,9 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
-  - command: .buildkite/scripts/steps/esql_generate_function_definitions.sh
-    label: Generate Function Definitions
-    timeout_in_minutes: 10
+  - command: .buildkite/scripts/steps/esql_generate_function_metadata.sh
+    label: Generate Function Metadata
+    timeout_in_minutes: 15
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod

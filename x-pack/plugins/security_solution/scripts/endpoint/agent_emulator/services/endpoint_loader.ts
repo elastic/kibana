@@ -21,6 +21,7 @@ import { METADATA_DATASTREAM } from '../../../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { getEndpointPackageInfo } from '../../../../common/endpoint/utils/package';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from '../../common/constants';
+import { isServerlessKibanaFlavor } from '../../common/stack_services';
 
 let WAS_FLEET_SETUP_DONE = false;
 
@@ -90,8 +91,9 @@ export const loadEndpoints = async ({
   }
 
   if (!WAS_FLEET_SETUP_DONE) {
+    const isServerless = await isServerlessKibanaFlavor(kbnClient);
     await setupFleetForEndpoint(kbnClient);
-    await enableFleetServerIfNecessary(esClient);
+    await enableFleetServerIfNecessary(esClient, isServerless, kbnClient, log);
     // eslint-disable-next-line require-atomic-updates
     WAS_FLEET_SETUP_DONE = true;
   }

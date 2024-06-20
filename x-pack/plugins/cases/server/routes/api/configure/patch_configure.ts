@@ -17,7 +17,7 @@ export const patchCaseConfigureRoute = createCasesRoute({
   path: CASE_CONFIGURE_DETAILS_URL,
   routerOptions: {
     access: 'public',
-    description: `Update case settings`,
+    summary: `Update case settings`,
   },
   handler: async ({ context, request, response }) => {
     try {

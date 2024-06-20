@@ -110,20 +110,14 @@ export const allowedExperimentalValues = Object.freeze({
   alertTypeEnabled: false,
 
   /**
-   * Enables expandable flyout in create rule page, alert preview
+   * Disables expandable flyout
    */
-  expandableFlyoutInCreateRuleEnabled: true,
+  expandableFlyoutDisabled: false,
 
   /**
-   * Enables expandable flyout for event type documents
+   * Enables new notes
    */
-  expandableEventFlyoutEnabled: true,
-
-  /**
-   * Enables expandable flyout in timeline
-   */
-  expandableTimelineFlyoutEnabled: true,
-  /*
+  notesEnabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -136,20 +130,10 @@ export const allowedExperimentalValues = Object.freeze({
   assistantKnowledgeBaseByDefault: false,
 
   /**
-   * Enables the new user details flyout displayed on the Alerts table.
-   */
-  newUserDetailsFlyout: true,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
-   * To see this section you also need newUserDetailsFlyout flag enabled.
+   * To see this section you also need expandableFlyoutDisabled flag set to false.
    */
   newUserDetailsFlyoutManagedUser: false,
-
-  /**
-   * Enables the new host details flyout displayed on the Alerts table.
-   */
-  newHostDetailsFlyout: true,
 
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
@@ -278,6 +262,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the manual rule run
    */
   manualRuleRunEnabled: false,
+
+  /**
+   * Adds a new option to filter descendants of a process for Management / Event Filters
+   */
+  filterProcessDescendantsForEventFiltersEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
