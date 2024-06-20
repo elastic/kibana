@@ -23,7 +23,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/field-types",
     "@kbn/i18n",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/unified-data-table"
+    "@kbn/core-ui-settings-browser"
   ]
 }

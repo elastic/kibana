@@ -8,9 +8,9 @@
 
 import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import type { CSSObject } from '@emotion/react';
+import { getLogLevelCoalescedValue, getLogLevelColor } from '@kbn/discover-utils';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React from 'react';
-import { getLogLevelCoalescedValue, getLogLevelColor } from '../utils';
 
 const badgeCss: CSSObject = { marginTop: '-4px' };
 
