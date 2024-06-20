@@ -59,8 +59,8 @@ export const readIndexRoute = (
           );
 
           if (indexExists) {
-            let mappingOutdated: boolean | undefined;
-            let aliasesOutdated: boolean | undefined;
+            let mappingOutdated: boolean | null = null;
+            let aliasesOutdated: boolean | null = null;
             try {
               const indexVersion = await getIndexVersion(esClient, index);
               mappingOutdated = isOutdated({
