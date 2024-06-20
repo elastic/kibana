@@ -32,17 +32,12 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TransformFailedCallout } from './components/transform_failed_callout';
 import type { EndpointIndexUIQueryParams } from '../types';
 import { EndpointListNavLink } from './components/endpoint_list_nav_link';
-import {
-  AgentStatus,
-  EndpointAgentStatus,
-} from '../../../../common/components/endpoint/agents/agent_status';
+import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
-import { getEndpointPendingActionsCallback } from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
@@ -82,10 +77,8 @@ const StyledDatePicker = styled.div`
 `;
 
 interface GetEndpointListColumnsProps {
-  agentStatusClientEnabled: boolean;
   canReadPolicyManagement: boolean;
   backToEndpointList: PolicyDetailsRouteState['backLink'];
-  getHostPendingActions: ReturnType<typeof getEndpointPendingActionsCallback>;
   queryParams: Immutable<EndpointIndexUIQueryParams>;
   search: string;
   getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
@@ -107,10 +100,8 @@ const columnWidths: Record<
 };
 
 const getEndpointListColumns = ({
-  agentStatusClientEnabled,
   canReadPolicyManagement,
   backToEndpointList,
-  getHostPendingActions,
   queryParams,
   search,
   getAppUrl,
@@ -158,16 +149,7 @@ const getEndpointListColumns = ({
       }),
       sortable: true,
       render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
-        // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled and removed
-        return agentStatusClientEnabled ? (
-          <AgentStatus agentId={endpointInfo.metadata.agent.id} agentType="endpoint" />
-        ) : (
-          <EndpointAgentStatus
-            endpointHostInfo={endpointInfo}
-            pendingActions={getHostPendingActions(endpointInfo.metadata.agent.id)}
-            data-test-subj="rowHostStatus"
-          />
-        );
+        return <AgentStatus agentId={endpointInfo.metadata.agent.id} agentType="endpoint" />;
       },
     },
     {
@@ -350,8 +332,6 @@ const stateHandleDeployEndpointsClick: AgentPolicyDetailsDeployAgentAction = {
 };
 
 export const EndpointList = () => {
-  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
-
   const history = useHistory();
   const {
     listData,
@@ -375,7 +355,7 @@ export const EndpointList = () => {
     metadataTransformStats,
     isInitialized,
   } = useEndpointSelector(selector);
-  const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
+
   const {
     canReadEndpointList,
     canAccessFleet,
@@ -539,23 +519,13 @@ export const EndpointList = () => {
   const columns = useMemo(
     () =>
       getEndpointListColumns({
-        agentStatusClientEnabled,
         canReadPolicyManagement,
         backToEndpointList,
         getAppUrl,
-        getHostPendingActions,
         queryParams,
         search,
       }),
-    [
-      agentStatusClientEnabled,
-      backToEndpointList,
-      canReadPolicyManagement,
-      getAppUrl,
-      getHostPendingActions,
-      queryParams,
-      search,
-    ]
+    [backToEndpointList, canReadPolicyManagement, getAppUrl, queryParams, search]
   );
 
   const sorting = useMemo(
