@@ -60,7 +60,7 @@ export const getAddPanelActionMenuItems = (
       icon:
         (typeof item.getIconType === 'function' ? item.getIconType(context) : undefined) ?? 'empty',
       onClick: onAddPanelActionClick(item, context, closePopover),
-      'data-test-subj': `create-action-${actionName}`,
+      'data-test-subj': `create-action-${item.getDisplayName(context)}`,
       toolTipContent: item?.getDisplayNameTooltip?.(context),
     };
   };

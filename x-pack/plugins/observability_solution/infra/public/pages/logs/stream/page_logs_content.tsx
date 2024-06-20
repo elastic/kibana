@@ -230,7 +230,6 @@ export const StreamPageLogsContent = React.memo<{
   return (
     <>
       <LogsDeprecationCallout />
-      <EuiSpacer size="m" />
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />

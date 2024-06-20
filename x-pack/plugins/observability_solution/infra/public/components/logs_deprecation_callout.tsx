@@ -11,25 +11,25 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 import { AllDatasetsLocatorParams, ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/css';
+import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
+
+const DISMISSAL_STORAGE_KEY = 'log_stream_deprecation_callout_dismissed';
 
 export const LogsDeprecationCallout = () => {
   const {
     services: { share },
   } = useKibanaContextForPlugin();
 
-  const locator = share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
+  const [isDismissed, setDismissed] = useLocalStorage(DISMISSAL_STORAGE_KEY, false);
 
-  const urlToLogsExplorer = locator.getRedirectUrl({});
-
-  const navigateToLogsExplorer = () => {
-    locator.navigate({});
-  };
-
-  const logsExplorerLinkProps = getRouterLinkProps({
-    href: urlToLogsExplorer,
-    onClick: navigateToLogsExplorer,
-  });
+  if (isDismissed) {
+    return null;
+  }
 
   return (
     <EuiCallOut
@@ -39,6 +39,8 @@ export const LogsDeprecationCallout = () => {
       color="warning"
       iconType="iInCircle"
       heading="h2"
+      onDismiss={() => setDismissed(true)}
+      className={calloutStyle}
     >
       <p>
         {i18n.translate('xpack.infra.logsDeprecationCallout.p.wereExcitedToIntroduceLabel', {
@@ -55,7 +57,7 @@ export const LogsDeprecationCallout = () => {
         fill
         data-test-subj="infraLogsDeprecationCalloutTryLogsExplorerButton"
         color="warning"
-        {...logsExplorerLinkProps}
+        {...getLogsExplorerLinkProps(share)}
       >
         {i18n.translate('xpack.infra.logsDeprecationCallout.tryLogsExplorerButtonLabel', {
           defaultMessage: 'Try Logs Explorer!',
@@ -64,3 +66,16 @@ export const LogsDeprecationCallout = () => {
     </EuiCallOut>
   );
 };
+
+const getLogsExplorerLinkProps = (share: SharePublicStart) => {
+  const locator = share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
+
+  return getRouterLinkProps({
+    href: locator.getRedirectUrl({}),
+    onClick: () => locator.navigate({}),
+  });
+};
+
+const calloutStyle = css`
+  margin-bottom: ${euiThemeVars.euiSizeL};
+`;
