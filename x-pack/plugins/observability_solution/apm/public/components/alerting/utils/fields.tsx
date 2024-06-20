@@ -5,9 +5,9 @@
  * 2.0.
  */
 import moment from 'moment';
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiExpression, EuiFieldNumber, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ERROR_GROUP_ID,
   SERVICE_ENVIRONMENT,
@@ -203,22 +203,50 @@ export function IsAboveField({
   onChange: (value: number) => void;
   step?: number;
 }) {
+  const [thresholdPopoverOpen, serThresholdPopoverOpen] = useState(false);
+  const [isAboveValue, setIsAboveValue] = useState(String(value));
+  const isInvalid = isNaN(Number(isAboveValue));
+
   return (
-    <PopoverExpression
-      value={`${value}${unit}`}
-      title={i18n.translate('xpack.apm.transactionErrorRateRuleType.isAbove', {
-        defaultMessage: 'is above',
-      })}
+    <EuiPopover
+      isOpen={thresholdPopoverOpen}
+      anchorPosition={'downLeft'}
+      ownFocus
+      closePopover={() => {
+        serThresholdPopoverOpen(false);
+      }}
+      button={
+        <EuiExpression
+          value={`${value}${unit}`}
+          description={i18n.translate('xpack.apm.transactionErrorRateRuleType.isAbove', {
+            defaultMessage: 'is above',
+          })}
+          isInvalid={isInvalid}
+          isActive={thresholdPopoverOpen}
+          onClick={() => {
+            serThresholdPopoverOpen(true);
+          }}
+        />
+      }
     >
       <EuiFieldNumber
         data-test-subj="apmIsAboveFieldFieldNumber"
         min={0}
-        value={value ?? 0}
-        onChange={(e) => onChange(Number(parseFloat(e.target.value).toFixed(2)))}
+        value={isAboveValue}
+        onChange={(e) => {
+          const thresholdVal = e.target.value;
+          // Update the value to continue typing (if user stopped at . or ,)
+          setIsAboveValue(thresholdVal);
+          // Only send the value back to the rule if it's a valid number
+          if (!isNaN(Number(thresholdVal))) {
+            onChange(Number(thresholdVal));
+          }
+        }}
         append={unit}
+        isInvalid={isInvalid}
         compressed
         step={step}
       />
-    </PopoverExpression>
+    </EuiPopover>
   );
 }
