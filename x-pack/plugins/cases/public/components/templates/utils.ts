@@ -9,8 +9,9 @@ import { isEmpty } from 'lodash';
 import type { ActionConnector, TemplateConfiguration } from '../../../common/types/domain';
 import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
-import { transformCustomFieldsData } from '../custom_fields/utils';
 import {
+  customFieldsFormDeserializer,
+  customFieldsFormSerializer,
   getConnectorById,
   getConnectorsFormDeserializer,
   getConnectorsFormSerializer,
@@ -54,7 +55,7 @@ export const templateDeserializer = (data: TemplateConfiguration): TemplateFormP
   const { key, name, description, tags: templateTags, caseFields } = data;
   const { connector, customFields, settings, tags, ...rest } = caseFields ?? {};
   const connectorFields = getConnectorsFormDeserializer({ fields: connector?.fields ?? null });
-  const convertedCustomFields = convertTemplateCustomFields(customFields);
+  const convertedCustomFields = customFieldsFormDeserializer(customFields);
 
   return {
     key,
@@ -93,7 +94,7 @@ export const templateSerializer = (
   } = nonEmptyFields;
 
   const transformedCustomFields = templateCustomFields
-    ? transformCustomFieldsData(templateCustomFields, currentConfiguration.customFields)
+    ? customFieldsFormSerializer(templateCustomFields, currentConfiguration.customFields)
     : [];
 
   const templateConnector = connectorId ? getConnectorById(connectorId, connectors) : null;

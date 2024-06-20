@@ -78,7 +78,7 @@ export type CreateCaseFormSchema = Omit<
 > & {
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
-  syncAlerts: boolean;
+  syncAlerts?: boolean;
   customFields: Record<string, string | boolean>;
 };
 

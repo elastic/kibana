@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
+import type { CasePostRequest } from '../../../common';
 import type { ActionConnector } from '../../../common/types/domain';
 import { Title } from '../case_form_fields/title';
 import { Description } from '../case_form_fields/description';
@@ -18,20 +19,15 @@ import { Tags } from '../case_form_fields/tags';
 import { Connector } from '../case_form_fields/connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from '../case_form_fields/sync_alerts_toggle';
-import type {
-  CasesConfigurationUI,
-  CasesConfigurationUITemplate,
-  CaseUICustomField,
-} from '../../containers/types';
+import type { CasesConfigurationUI, CasesConfigurationUITemplate } from '../../containers/types';
 import { removeEmptyFields } from '../utils';
-import { initialCaseValue } from './form_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { Severity } from '../case_form_fields/severity';
 import { Assignees } from '../case_form_fields/assignees';
 import { Category } from '../case_form_fields/category';
 import { TemplateSelector } from './templates';
 import { CustomFields } from '../case_form_fields/custom_fields';
-import type { CreateCaseFormSchema } from './schema';
+import { getInitialCaseValue } from './utils';
 
 export interface CreateCaseFormFieldsProps {
   configuration: CasesConfigurationUI;
@@ -41,38 +37,12 @@ export interface CreateCaseFormFieldsProps {
   draftStorageKey: string;
 }
 
-type CaseUICustomFieldWithNoNullValues = CaseUICustomField & {
-  value: NonNullable<CaseUICustomField['value']>;
-};
-
 const transformTemplateCaseFieldsToCaseFormFields = (
+  owner: string,
   caseTemplateFields: CasesConfigurationUITemplate['caseFields']
-): Partial<CreateCaseFormSchema> => {
-  const customFields = Object.fromEntries(
-    caseTemplateFields?.customFields
-      ?.filter(
-        (customField): customField is CaseUICustomFieldWithNoNullValues => customField.value != null
-      )
-      .map((customField) => [customField.key, customField.value]) ?? []
-  );
-
-  const caseFields = removeEmptyFields({
-    title: caseTemplateFields?.title,
-    assignees: caseTemplateFields?.assignees,
-    tags: caseTemplateFields?.tags,
-    category: caseTemplateFields?.category,
-    severity: caseTemplateFields?.severity,
-    description: caseTemplateFields?.description,
-    connectorId: caseTemplateFields?.connector?.id,
-    customFields,
-  });
-
-  return {
-    ...caseFields,
-    ...(caseTemplateFields?.connector?.id != null && caseTemplateFields?.connector?.fields != null
-      ? { fields: caseTemplateFields?.connector?.fields }
-      : {}),
-  };
+): CasePostRequest => {
+  const caseFields = removeEmptyFields(caseTemplateFields ?? {});
+  return getInitialCaseValue({ owner, ...caseFields });
 };
 
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
@@ -93,11 +63,18 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
 
     const onTemplateChange = useCallback(
       (caseFields: CasesConfigurationUITemplate['caseFields']) => {
-        const caseFormFields = transformTemplateCaseFieldsToCaseFormFields(caseFields);
-        reset({ resetValues: true, defaultValue: initialCaseValue });
+        const caseFormFields = transformTemplateCaseFieldsToCaseFormFields(
+          configurationOwner,
+          caseFields
+        );
+
+        reset({
+          resetValues: true,
+          defaultValue: getInitialCaseValue({ owner: configurationOwner }),
+        });
         updateFieldValues(caseFormFields);
       },
-      [reset, updateFieldValues]
+      [configurationOwner, reset, updateFieldValues]
     );
 
     const firstStep = useMemo(

@@ -12,7 +12,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { useKibana } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 
@@ -103,8 +103,10 @@ const defaultPostCase = {
   mutateAsync: postCase,
 };
 
+const currentConfiguration = useGetAllCaseConfigurationsResponse.data[0];
+
 const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
-  configuration: useGetAllCaseConfigurationsResponse.data[0],
+  configuration: currentConfiguration,
   isLoading: false,
   connectors: [],
   withSteps: true,
@@ -241,7 +243,7 @@ describe('Create case', () => {
   describe('Step 1 - Case Fields', () => {
     it('renders correctly', async () => {
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -266,7 +268,7 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -291,7 +293,7 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -325,7 +327,7 @@ describe('Create case', () => {
       const newCategory = 'First           ';
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -370,7 +372,7 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -405,7 +407,7 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -428,7 +430,7 @@ describe('Create case', () => {
 
     it('should select LOW as the default severity', async () => {
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -464,7 +466,7 @@ describe('Create case', () => {
       }));
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} configuration={configurations[0]} />
           <SubmitCaseButton />
         </FormContext>
@@ -557,7 +559,7 @@ describe('Create case', () => {
       }));
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} configuration={configurations[0]} />
           <SubmitCaseButton />
         </FormContext>
@@ -649,7 +651,7 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields
             {...defaultCreateCaseForm}
             configuration={configuration}
@@ -707,7 +709,7 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields
             {...defaultCreateCaseForm}
             configuration={configuration}
@@ -740,7 +742,7 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -771,7 +773,7 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
           <SubmitCaseButton />
         </FormContext>
@@ -844,7 +846,7 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectors} />
           <SubmitCaseButton />
         </FormContext>
@@ -900,7 +902,7 @@ describe('Create case', () => {
       <FormContext
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
-        selectedOwner={mockedTestProvidersOwner[0]}
+        currentConfiguration={currentConfiguration}
       >
         <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
         <SubmitCaseButton />
@@ -967,7 +969,7 @@ describe('Create case', () => {
       <FormContext
         onSuccess={onFormSubmitSuccess}
         attachments={attachments}
-        selectedOwner={mockedTestProvidersOwner[0]}
+        currentConfiguration={currentConfiguration}
       >
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
@@ -1002,7 +1004,7 @@ describe('Create case', () => {
       <FormContext
         onSuccess={onFormSubmitSuccess}
         attachments={attachments}
-        selectedOwner={mockedTestProvidersOwner[0]}
+        currentConfiguration={currentConfiguration}
       >
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
@@ -1039,7 +1041,7 @@ describe('Create case', () => {
 
     appMockRender.render(
       <FormContext
-        selectedOwner={mockedTestProvidersOwner[0]}
+        currentConfiguration={currentConfiguration}
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
         attachments={attachments}
@@ -1094,7 +1096,7 @@ describe('Create case', () => {
       };
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -1125,7 +1127,7 @@ describe('Create case', () => {
 
     it('should submit assignees', async () => {
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -1164,7 +1166,7 @@ describe('Create case', () => {
       useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -1189,7 +1191,7 @@ describe('Create case', () => {
 
       it('should have session storage value same as draft comment', async () => {
         appMockRender.render(
-          <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+          <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
             <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -1217,7 +1219,7 @@ describe('Create case', () => {
 
       it('should have session storage value same as draft comment', async () => {
         appMockRender.render(
-          <FormContext onSuccess={onFormSubmitSuccess} selectedOwner={mockedTestProvidersOwner[0]}>
+          <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
             <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>

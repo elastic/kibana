@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { customFieldSerializer, transformCustomFieldsData } from './utils';
+import { customFieldSerializer } from './utils';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
-import { customFieldsConfigurationMock } from '../../containers/mock';
 
 describe('utils ', () => {
   describe('customFieldSerializer ', () => {
@@ -97,56 +96,6 @@ describe('utils ', () => {
           "type": "toggle",
         }
       `);
-    });
-  });
-
-  describe('transformCustomFieldsData', () => {
-    it('transforms customFields correctly', () => {
-      const customFields = {
-        test_key_1: 'first value',
-        test_key_2: true,
-        test_key_3: 'second value',
-      };
-
-      expect(transformCustomFieldsData(customFields, customFieldsConfigurationMock)).toEqual([
-        {
-          key: 'test_key_1',
-          type: 'text',
-          value: 'first value',
-        },
-        {
-          key: 'test_key_2',
-          type: 'toggle',
-          value: true,
-        },
-        {
-          key: 'test_key_3',
-          type: 'text',
-          value: 'second value',
-        },
-      ]);
-    });
-
-    it('returns empty array when custom fields are empty', () => {
-      expect(transformCustomFieldsData({}, customFieldsConfigurationMock)).toEqual([]);
-    });
-
-    it('returns empty array when not custom fields in the configuration', () => {
-      const customFields = {
-        test_key_1: 'first value',
-        test_key_2: true,
-        test_key_3: 'second value',
-      };
-
-      expect(transformCustomFieldsData(customFields, [])).toEqual([]);
-    });
-
-    it('returns empty array when custom fields do not match with configuration', () => {
-      const customFields = {
-        random_key: 'first value',
-      };
-
-      expect(transformCustomFieldsData(customFields, customFieldsConfigurationMock)).toEqual([]);
     });
   });
 });
