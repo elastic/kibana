@@ -7,14 +7,38 @@
 
 import type { UseHostIsolationActionProps } from './use_host_isolation_action';
 import { useHostIsolationAction } from './use_host_isolation_action';
-import type { AppContextTestRender } from '../../../../mock/endpoint';
+import type { AppContextTestRender, UserPrivilegesMockSetter } from '../../../../mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../../mock/endpoint';
 import { agentStatusGetHttpMock } from '../../../../../management/mocks';
+import { useUserPrivileges as _useUserPrivileges } from '../../../user_privileges';
+import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
+import type { ResponseActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { agentStatusMocks } from '../../../../../management/hooks/agents/agent_status.mocks';
+import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
+import type React from 'react';
+
+jest.mock('../../../user_privileges');
+
+const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 describe('useHostIsolationAction', () => {
   let appContextMock: AppContextTestRender;
   let hookProps: UseHostIsolationActionProps;
   let apiMock: ReturnType<typeof agentStatusGetHttpMock>;
+  let authMockSetter: UserPrivilegesMockSetter;
+
+  const buildExpectedMenuItemResult = (
+    overrides: Partial<AlertTableContextMenuItem> = {}
+  ): AlertTableContextMenuItem => {
+    return {
+      'data-test-subj': 'isolate-host-action-item',
+      disabled: false,
+      key: 'isolate-host-action-item',
+      name: ISOLATE_HOST,
+      onClick: expect.any(Function),
+      ...overrides,
+    };
+  };
 
   const render = () => {
     return appContextMock.renderHook(() => useHostIsolationAction(hookProps));
@@ -22,10 +46,7 @@ describe('useHostIsolationAction', () => {
 
   beforeEach(() => {
     appContextMock = createAppRootMockRenderer();
-    appContextMock.setExperimentalFlag({
-      responseActionsSentinelOneV1Enabled: true,
-      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-    });
+    authMockSetter = appContextMock.getUserPrivilegesMockSetter(useUserPrivilegesMock);
     hookProps = {
       closePopover: jest.fn(),
       detailsData: endpointAlertDataMock.generateEndpointAlertDetailsItemData(),
@@ -33,15 +54,51 @@ describe('useHostIsolationAction', () => {
       onAddIsolationStatusClick: jest.fn(),
     };
     apiMock = agentStatusGetHttpMock(appContextMock.coreStart.http);
+    appContextMock.setExperimentalFlag({
+      responseActionsSentinelOneV1Enabled: true,
+      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+    });
+    authMockSetter.set({
+      canIsolateHost: true,
+      canUnIsolateHost: true,
+    });
   });
 
-  it('should return menu item for display', () => {
-    const { result } = render();
-
-    expect(result.current).toEqual(['foo']);
+  afterEach(() => {
+    authMockSetter.reset();
   });
 
-  it.todo('should call `closePopover` callback when menu item `onClick` is called');
+  it.each<ResponseActionsApiCommandNames>(['isolate', 'unisolate'])(
+    'should return menu item for displaying %s',
+    async (command) => {
+      if (command === 'unisolate') {
+        apiMock.responseProvider.getAgentStatus.mockReturnValue({
+          data: {
+            'abfe4a35-d5b4-42a0-a539-bd054c791769': agentStatusMocks.generateAgentStatus({
+              isolated: true,
+            }),
+          },
+        });
+      }
+
+      const { result, waitForValueToChange } = render();
+      await waitForValueToChange(() => result.current);
+
+      expect(result.current).toEqual([
+        buildExpectedMenuItemResult({
+          ...(command === 'unisolate' ? { name: UNISOLATE_HOST } : {}),
+        }),
+      ]);
+    }
+  );
+
+  it('should call `closePopover` callback when menu item `onClick` is called', async () => {
+    const { result, waitForValueToChange } = render();
+    await waitForValueToChange(() => result.current);
+    result.current[0].onClick!({} as unknown as React.MouseEvent);
+
+    expect(hookProps.closePopover).toHaveBeenCalled();
+  });
 
   it('should NOT return the menu item for Events', () => {
     hookProps.detailsData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo', {
@@ -52,9 +109,22 @@ describe('useHostIsolationAction', () => {
     expect(result.current).toHaveLength(0);
   });
 
-  it.todo('should NOT return menu item if user does not have authz');
+  it('should NOT return menu item if user does not have authz', async () => {
+    authMockSetter.set({
+      canIsolateHost: false,
+      canUnIsolateHost: false,
+    });
+    const { result } = render();
 
-  it.todo('should NOT attempt to get Agent status if host does not support response actions');
+    expect(result.current).toHaveLength(0);
+  });
+
+  it('should NOT attempt to get Agent status if host does not support response actions', async () => {
+    hookProps.detailsData = [];
+    render();
+
+    expect(apiMock.responseProvider.getAgentStatus).not.toHaveBeenCalled();
+  });
 
   it.todo('should return disabled menu item when host does not support isolation');
 
