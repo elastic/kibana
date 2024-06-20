@@ -6,6 +6,7 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiBasicTableColumn,
   EuiButton,
   EuiConfirmModal,
@@ -23,6 +24,7 @@ import * as i18n from './translations';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { Flyout } from '../../common/components/assistant_settings_management/flyout';
 import { CANCEL, DELETE } from '../../settings/translations';
+import { useQuickPromptEditor } from '../quick_prompt_settings/use_quick_prompt_editor';
 
 interface Props {
   onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
@@ -30,7 +32,7 @@ interface Props {
   selectedQuickPrompt: QuickPrompt | undefined;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
   handleSave: () => void;
-  resetSettings: () => void;
+  onCancelClick: () => void;
 }
 const QuickPromptSettingsManagementComponent = ({
   onSelectedQuickPromptChange,
@@ -38,7 +40,7 @@ const QuickPromptSettingsManagementComponent = ({
   selectedQuickPrompt,
   setUpdatedQuickPromptSettings,
   handleSave,
-  resetSettings,
+  onCancelClick,
 }: Props) => {
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
   const [deletedQuickPrompt, setDeletedQuickPrompt] = useState<QuickPrompt | null>();
@@ -48,47 +50,51 @@ const QuickPromptSettingsManagementComponent = ({
     closeFlyout: closeConfirmModal,
   } = useFlyoutModalVisibility();
 
+  const { onQuickPromptDeleted, onQuickPromptSelectionChange } = useQuickPromptEditor({
+    onSelectedQuickPromptChange,
+    setUpdatedQuickPromptSettings,
+  });
+
   const onEditActionClicked = useCallback(
     (prompt: QuickPrompt) => {
-      onSelectedQuickPromptChange(prompt);
+      onQuickPromptSelectionChange(prompt);
       openFlyout();
     },
-    [onSelectedQuickPromptChange, openFlyout]
+    [onQuickPromptSelectionChange, openFlyout]
   );
 
   const onDeleteActionClicked = useCallback(
     (prompt: QuickPrompt) => {
       setDeletedQuickPrompt(prompt);
+      onQuickPromptDeleted(prompt.title);
       openConfirmModal();
     },
-    [openConfirmModal]
+    [onQuickPromptDeleted, openConfirmModal]
   );
 
   const onDeleteCancelled = useCallback(() => {
     setDeletedQuickPrompt(null);
     closeConfirmModal();
-  }, [closeConfirmModal]);
+    onCancelClick();
+  }, [closeConfirmModal, onCancelClick]);
 
   const onDeleteConfirmed = useCallback(() => {
-    setUpdatedQuickPromptSettings((prev) =>
-      prev.filter((p) => p.title !== deletedQuickPrompt?.title)
-    );
     handleSave();
     closeConfirmModal();
-  }, [closeConfirmModal, deletedQuickPrompt?.title, handleSave, setUpdatedQuickPromptSettings]);
+  }, [closeConfirmModal, handleSave]);
 
   const onCreate = useCallback(() => {
     onSelectedQuickPromptChange();
     openFlyout();
   }, [onSelectedQuickPromptChange, openFlyout]);
 
-  const onCancel = useCallback(() => {
+  const onSaveCancelled = useCallback(() => {
     onSelectedQuickPromptChange();
     closeFlyout();
-    resetSettings();
-  }, [closeFlyout, onSelectedQuickPromptChange, resetSettings]);
+    onCancelClick();
+  }, [closeFlyout, onSelectedQuickPromptChange, onCancelClick]);
 
-  const onSave = useCallback(() => {
+  const onSaveConfirmed = useCallback(() => {
     handleSave();
     onSelectedQuickPromptChange();
     closeFlyout();
@@ -102,6 +108,16 @@ const QuickPromptSettingsManagementComponent = ({
           prompt?.title ? (
             <EuiLink onClick={() => onEditActionClicked(prompt)}>{prompt?.title}</EuiLink>
           ) : null,
+      },
+      {
+        field: 'categories',
+        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CONTEXTS,
+        render: (categories: QuickPrompt['categories']) =>
+          categories?.map((c, idx) => (
+            <EuiBadge color="hollow" id={`${idx}`}>
+              {c}
+            </EuiBadge>
+          )),
       },
       /* TODO: enable when createdAt is added
       {
@@ -118,8 +134,8 @@ const QuickPromptSettingsManagementComponent = ({
           return (
             <RowActions<QuickPrompt>
               rowItem={prompt}
-              onDelete={onDeleteActionClicked}
-              onEdit={isDeletable ? onEditActionClicked : undefined}
+              onDelete={isDeletable ? onDeleteActionClicked : undefined}
+              onEdit={onEditActionClicked}
               isDeletable={isDeletable}
             />
           );
@@ -152,9 +168,9 @@ const QuickPromptSettingsManagementComponent = ({
       <Flyout
         flyoutVisible={editFlyoutVisible}
         title={i18n.QUICK_PROMPT_EDIT_FLYOUT_TITLE}
-        onClose={onCancel}
-        onSaveCancelled={onCancel}
-        onSaveConfirmed={onSave}
+        onClose={onSaveCancelled}
+        onSaveCancelled={onSaveCancelled}
+        onSaveConfirmed={onSaveConfirmed}
       >
         <QuickPromptSettingsEditor
           onSelectedQuickPromptChange={onSelectedQuickPromptChange}

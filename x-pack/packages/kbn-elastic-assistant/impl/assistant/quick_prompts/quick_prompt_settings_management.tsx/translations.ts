@@ -41,6 +41,13 @@ export const QUICK_PROMPT_EDIT_FLYOUT_TITLE = i18n.translate(
   }
 );
 
+export const QUICK_PROMPTS_TABLE_COLUMN_CONTEXTS = i18n.translate(
+  'xpack.elasticAssistant.assistant.quickPromptsTable.quickPromptsTableColumnContexts',
+  {
+    defaultMessage: 'Contexts',
+  }
+);
+
 export const DELETE_QUICK_PROMPT_MODAL_TITLE = (prompt: string) =>
   i18n.translate(
     'xpack.elasticAssistant.assistant.quickPromptsTable.modal.deleteQuickPromptConfirmationTitle',

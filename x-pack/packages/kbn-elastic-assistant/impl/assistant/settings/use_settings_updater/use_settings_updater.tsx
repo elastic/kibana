@@ -72,7 +72,6 @@ export const useSettingsUpdater = (
     useState<Record<string, Conversation>>(conversations);
   const [conversationsSettingsBulkActions, setConversationsSettingsBulkActions] =
     useState<ConversationsBulkActions>({});
-  console.log('updater---', conversationsSettingsBulkActions);
   // Quick Prompts
   const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] =
     useState<QuickPrompt[]>(allQuickPrompts);
@@ -153,7 +152,6 @@ export const useSettingsUpdater = (
     const bulkAnonymizationFieldsResult = hasBulkAnonymizationFields
       ? await bulkUpdateAnonymizationFields(http, anonymizationFieldsBulkActions, toasts)
       : undefined;
-
     return (bulkResult?.success ?? true) && (bulkAnonymizationFieldsResult?.success ?? true);
   }, [
     setAllQuickPrompts,
@@ -165,9 +163,9 @@ export const useSettingsUpdater = (
     toasts,
     knowledgeBase.isEnabledKnowledgeBase,
     knowledgeBase.isEnabledRAGAlerts,
-    updatedAssistantStreamingEnabled,
     updatedKnowledgeBaseSettings,
     assistantStreamingEnabled,
+    updatedAssistantStreamingEnabled,
     setAssistantStreamingEnabled,
     setKnowledgeBase,
     anonymizationFieldsBulkActions,

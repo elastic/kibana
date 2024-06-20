@@ -104,9 +104,8 @@ export const getApiConfig = ({
   connectors?: AIConnector[];
   defaultConnector?: AIConnector;
 }) => {
-  const connector: AIConnector | undefined = connectors?.find(
-    (c) => c.id === conversation.apiConfig?.connectorId || defaultConnector?.id
-  );
+  const connector: AIConnector | undefined =
+    connectors?.find((c) => c.id === conversation.apiConfig?.connectorId) ?? defaultConnector;
   const defaultSystemPrompt = getDefaultSystemPrompt({
     allSystemPrompts,
     conversation,

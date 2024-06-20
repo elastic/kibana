@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { EuiLink, EuiBadge } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import { Conversation } from '../../../../assistant_context/types';
 import { AIConnector } from '../../../../connectorland/connector_selector';
@@ -39,12 +40,15 @@ export const useSystemPromptTable = () => {
     {
       field: 'defaultConversations',
       name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_DEFAULT_CONVERSATIONS,
-      render: (defaultConversations: string[]) =>
-        defaultConversations.map((c, idx) => (
-          <EuiBadge id={`${idx}`} color="hollow">
-            {c}
-          </EuiBadge>
-        )),
+      render: (defaultConversations: string[]) => (
+        <div>
+          {defaultConversations.map((c, idx) => (
+            <EuiBadge id={`${idx}`} color="hollow">
+              {c}
+            </EuiBadge>
+          ))}
+        </div>
+      ),
     },
     /* TODO: enable when createdAt is added
       {

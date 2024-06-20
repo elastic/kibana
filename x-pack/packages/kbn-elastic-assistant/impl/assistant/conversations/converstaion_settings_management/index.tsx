@@ -38,7 +38,7 @@ interface Props {
   isDisabled?: boolean;
   isFlyoutMode: boolean;
   refetchConversations: () => void;
-  resetSettings: () => void;
+  onCancelClick: () => void;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
@@ -62,7 +62,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   isFlyoutMode,
   onSelectedConversationChange,
   refetchConversations,
-  resetSettings,
+  onCancelClick,
   selectedConversation,
   setAssistantStreamingEnabled,
   setConversationSettings,
@@ -138,8 +138,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const onDeleteCancelled = useCallback(() => {
     setDeletedConversation(null);
     closeConfirmModal();
-    resetSettings();
-  }, [closeConfirmModal, resetSettings]);
+    onCancelClick();
+  }, [closeConfirmModal, onCancelClick]);
 
   const { getConversationsList, getColumns } = useConversationsTable();
 
@@ -153,15 +153,13 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const onSaveCancelled = useCallback(() => {
     closeEditFlyout();
-    resetSettings();
-  }, [closeEditFlyout, resetSettings]);
+    onCancelClick();
+  }, [closeEditFlyout, onCancelClick]);
 
   const onSaveConfirmed = useCallback(() => {
-    handleSave();
     closeEditFlyout();
-    refetchConversations();
-    setConversationsSettingsBulkActions({});
-  }, [closeEditFlyout, handleSave, refetchConversations, setConversationsSettingsBulkActions]);
+    handleSave();
+  }, [closeEditFlyout, handleSave]);
 
   const columns = useMemo(
     () =>

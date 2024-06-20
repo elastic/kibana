@@ -43,7 +43,7 @@ interface Props {
   >;
   defaultConnector?: AIConnector;
   handleSave: () => void;
-  resetSettings: () => void;
+  onCancelClick: () => void;
 }
 
 const SystemPromptSettingsManagementComponent = ({
@@ -59,7 +59,7 @@ const SystemPromptSettingsManagementComponent = ({
   setConversationsSettingsBulkActions,
   defaultConnector,
   handleSave,
-  resetSettings,
+  onCancelClick,
 }: Props) => {
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
   const {
@@ -104,19 +104,19 @@ const SystemPromptSettingsManagementComponent = ({
   const onDeleteCancelled = useCallback(() => {
     setDeletedPrompt(null);
     closeConfirmModal();
-    resetSettings();
-  }, [closeConfirmModal, resetSettings]);
+    onCancelClick();
+  }, [closeConfirmModal, onCancelClick]);
 
   const onDeleteConfirmed = useCallback(() => {
     handleSave();
     closeConfirmModal();
-    resetSettings();
-  }, [closeConfirmModal, handleSave, resetSettings]);
+    onCancelClick();
+  }, [closeConfirmModal, handleSave, onCancelClick]);
 
   const onSaveCancelled = useCallback(() => {
     closeFlyout();
-    resetSettings();
-  }, [closeFlyout, resetSettings]);
+    onCancelClick();
+  }, [closeFlyout, onCancelClick]);
 
   const onSaveConfirmed = useCallback(() => {
     handleSave();

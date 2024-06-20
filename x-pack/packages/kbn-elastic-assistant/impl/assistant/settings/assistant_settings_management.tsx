@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageTemplate,
+} from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import { Conversation, Prompt, QuickPrompt } from '../../..';
@@ -250,7 +256,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               handleSave={handleSave}
               isFlyoutMode={isFlyoutMode}
               refetchConversations={refetchConversations}
-              resetSettings={resetSettings}
+              onCancelClick={onCancelClick}
               selectedConversation={selectedConversation}
               setAssistantStreamingEnabled={handleChange(setUpdatedAssistantStreamingEnabled)}
               setConversationSettings={handleChange(setConversationSettings)}
@@ -276,7 +282,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               )}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               setUpdatedSystemPromptSettings={handleChange(setUpdatedSystemPromptSettings)}
-              resetSettings={resetSettings}
+              onCancelClick={onCancelClick}
             />
           )}
           {selectedSettingsTab === QUICK_PROMPTS_TAB && (
@@ -286,7 +292,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               selectedQuickPrompt={selectedQuickPrompt}
               setUpdatedQuickPromptSettings={handleChange(setUpdatedQuickPromptSettings)}
               handleSave={handleSave}
-              resetSettings={resetSettings}
+              onCancelClick={onCancelClick}
             />
           )}
           {selectedSettingsTab === ANONYMIZATION_TAB && (
@@ -306,9 +312,38 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           )}
           {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettingsManagement />}
         </EuiPageTemplate.Section>
+        {hasPendingChanges && (
+          <EuiPageTemplate.BottomBar paddingSize="s" position="fixed">
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  color="text"
+                  iconType="cross"
+                  data-test-subj="cancel-button"
+                  onClick={onCancelClick}
+                >
+                  {i18n.CANCEL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  type="submit"
+                  data-test-subj="save-button"
+                  onClick={handleSave}
+                  iconType="check"
+                  fill
+                >
+                  {i18n.SAVE}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageTemplate.BottomBar>
+        )}
       </>
     );
   }
 );
 
-AssistantSettingsManagement.displayName = 'AssistantSettingsNew';
+AssistantSettingsManagement.displayName = 'AssistantSettingsManagement';

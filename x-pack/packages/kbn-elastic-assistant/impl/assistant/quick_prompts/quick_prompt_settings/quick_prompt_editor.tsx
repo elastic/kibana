@@ -16,6 +16,7 @@ import { QuickPrompt } from '../types';
 import { QuickPromptSelector } from '../quick_prompt_selector/quick_prompt_selector';
 import { PromptContextSelector } from '../prompt_context_selector/prompt_context_selector';
 import { useAssistantContext } from '../../../assistant_context';
+import { useQuickPromptEditor } from './use_quick_prompt_editor';
 
 const DEFAULT_COLOR = '#D36086';
 
@@ -126,41 +127,11 @@ const QuickPromptSettingsEditorComponent = ({
   );
 
   // When top level quick prompt selection changes
-  const onQuickPromptSelectionChange = useCallback(
-    (quickPrompt?: QuickPrompt | string) => {
-      const isNew = typeof quickPrompt === 'string';
-      const newSelectedQuickPrompt: QuickPrompt | undefined = isNew
-        ? {
-            title: quickPrompt ?? '',
-            prompt: '',
-            color: DEFAULT_COLOR,
-            categories: [],
-          }
-        : quickPrompt;
+  const { onQuickPromptDeleted, onQuickPromptSelectionChange } = useQuickPromptEditor({
+    onSelectedQuickPromptChange,
+    setUpdatedQuickPromptSettings,
+  });
 
-      if (newSelectedQuickPrompt != null) {
-        setUpdatedQuickPromptSettings((prev) => {
-          const alreadyExists = prev.some((qp) => qp.title === newSelectedQuickPrompt.title);
-
-          if (!alreadyExists) {
-            return [...prev, newSelectedQuickPrompt];
-          }
-
-          return prev;
-        });
-      }
-
-      onSelectedQuickPromptChange(newSelectedQuickPrompt);
-    },
-    [onSelectedQuickPromptChange, setUpdatedQuickPromptSettings]
-  );
-
-  const onQuickPromptDeleted = useCallback(
-    (title: string) => {
-      setUpdatedQuickPromptSettings((prev) => prev.filter((qp) => qp.title !== title));
-    },
-    [setUpdatedQuickPromptSettings]
-  );
   return (
     <>
       <EuiFormRow label={i18n.QUICK_PROMPT_NAME} display="rowCompressed" fullWidth>
