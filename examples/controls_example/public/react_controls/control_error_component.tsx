@@ -9,13 +9,14 @@
 import React, { useState } from 'react';
 
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/shared-ux-markdown';
 
 /** TODO: This file is duplicated from the controls plugin to avoid exporting it */
 
 interface ControlErrorProps {
   error: Error | string;
+  css: unknown;
 }
 
 export const ControlError = ({ error }: ControlErrorProps) => {
@@ -40,17 +41,15 @@ export const ControlError = ({ error }: ControlErrorProps) => {
   );
 
   return (
-    <I18nProvider>
-      <EuiPopover
-        button={popoverButton}
-        isOpen={isPopoverOpen}
-        className="errorEmbeddableCompact__popover"
-        closePopover={() => setPopoverOpen(false)}
-      >
-        <Markdown data-test-subj="errorMessageMarkdown" readOnly>
-          {errorMessage}
-        </Markdown>
-      </EuiPopover>
-    </I18nProvider>
+    <EuiPopover
+      button={popoverButton}
+      isOpen={isPopoverOpen}
+      className="errorEmbeddableCompact__popover"
+      closePopover={() => setPopoverOpen(false)}
+    >
+      <Markdown data-test-subj="errorMessageMarkdown" readOnly>
+        {errorMessage}
+      </Markdown>
+    </EuiPopover>
   );
 };

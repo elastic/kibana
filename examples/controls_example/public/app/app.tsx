@@ -20,6 +20,7 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ControlsExampleStartDeps } from '../plugin';
 import { ControlGroupRendererExamples } from './control_group_renderer_examples';
 import { ReactControlExample } from './react_control_example';
@@ -71,7 +72,7 @@ const App = ({
 
             <EuiSpacer />
 
-            {renderTabContent()}
+            <I18nProvider>{renderTabContent()}</I18nProvider>
           </EuiPageSection>
         </EuiPageTemplate.Section>
       </EuiPageBody>

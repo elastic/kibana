@@ -115,48 +115,48 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           fullWidth
           label={usingTwoLineLayout ? panelTitle || defaultPanelTitle || '...' : undefined}
         >
-          {blockingError ? (
-            <EuiFormControlLayout>
-              <ControlError
-                error={
-                  blockingError ??
-                  i18n.translate('controls.blockingError', {
-                    defaultMessage: 'There was an error loading this control.',
-                  })
-                }
-              />
-            </EuiFormControlLayout>
-          ) : (
-            <EuiFormControlLayout
-              fullWidth
-              isLoading={Boolean(dataLoading)}
-              prepend={
-                api?.CustomPrependComponent ? (
-                  <api.CustomPrependComponent />
-                ) : usingTwoLineLayout ? (
+          <EuiFormControlLayout
+            fullWidth
+            isLoading={Boolean(dataLoading)}
+            prepend={
+              api?.CustomPrependComponent ? (
+                <api.CustomPrependComponent />
+              ) : usingTwoLineLayout ? (
+                <DragHandle
+                  isEditable={isEditable}
+                  controlTitle={panelTitle || defaultPanelTitle}
+                />
+              ) : (
+                <>
                   <DragHandle
                     isEditable={isEditable}
                     controlTitle={panelTitle || defaultPanelTitle}
-                  />
-                ) : (
-                  <>
-                    <DragHandle
-                      isEditable={isEditable}
-                      controlTitle={panelTitle || defaultPanelTitle}
-                    />{' '}
-                    <EuiFormLabel
-                      className="eui-textTruncate"
-                      // TODO: Convert this to a class when replacing the legacy control group
-                      css={css`
-                        background-color: transparent !important;
-                      `}
-                    >
-                      {panelTitle || defaultPanelTitle}
-                    </EuiFormLabel>
-                  </>
-                )
-              }
-            >
+                  />{' '}
+                  <EuiFormLabel
+                    className="eui-textTruncate"
+                    // TODO: Convert this to a class when replacing the legacy control group
+                    css={css`
+                      background-color: transparent !important;
+                    `}
+                  >
+                    {panelTitle || defaultPanelTitle}
+                  </EuiFormLabel>
+                </>
+              )
+            }
+          >
+            {blockingError ? (
+              <EuiFormControlLayout>
+                <ControlError
+                  error={
+                    blockingError ??
+                    i18n.translate('controls.blockingError', {
+                      defaultMessage: 'There was an error loading this control.',
+                    })
+                  }
+                />
+              </EuiFormControlLayout>
+            ) : (
               <Component
                 // TODO: Convert this to a class when replacing the legacy control group
                 css={css`
@@ -170,8 +170,8 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                   if (newApi && !api) setApi(newApi);
                 }}
               />
-            </EuiFormControlLayout>
-          )}
+            )}
+          </EuiFormControlLayout>
         </EuiFormRow>
       </FloatingActions>
     </EuiFlexItem>
