@@ -7,14 +7,19 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
+import { TaskTypes } from '../../types';
 
 interface TaskTypeProps {
-  type: string;
+  type?: TaskTypes;
 }
 
 export const TaskType: React.FC<TaskTypeProps> = ({ type }) => {
   if (type != null) {
-    return <EuiBadge color="hollow">{type}</EuiBadge>;
+    return (
+      <EuiBadge data-test-subj={`table-column-task-type-${type}`} color="hollow">
+        {type}
+      </EuiBadge>
+    );
   }
 
   return null;

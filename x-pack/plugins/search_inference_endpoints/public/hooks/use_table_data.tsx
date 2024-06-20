@@ -60,10 +60,17 @@ export const useTableData = (
           endpoint.service === ServiceProviderKeys.elasticsearch ||
           endpoint.service === ServiceProviderKeys.elser;
 
+        let deploymentStatusValue = DeploymentStatusEnum.notApplicable;
+        if (isElasticService) {
+          const modelId = endpoint.service_settings?.model_id;
+          deploymentStatusValue =
+            modelId && deploymentStatus[modelId] !== undefined
+              ? deploymentStatus[modelId]
+              : DeploymentStatusEnum.notDeployed;
+        }
+
         return {
-          deployment: isElasticService
-            ? deploymentStatus[endpoint.service_settings?.model_id]
-            : DeploymentStatusEnum.notApplicable,
+          deployment: deploymentStatusValue,
           endpoint,
           provider: endpoint.service,
           type: endpoint.task_type,
