@@ -145,9 +145,7 @@ export const config: PluginConfigDescriptor = {
       agentless: schema.maybe(
         schema.object({
           api: schema.object({
-            url: schema.maybe(
-              schema.uri({ scheme: ['http', 'https'], defaultValue: 'http://agentless-api-url' })
-            ),
+            url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
           }),
         })
       ),
