@@ -191,6 +191,7 @@ export function createDegradedFieldsRecord({
 
 export const datasetNames = ['synth.1', 'synth.2', 'synth.3'];
 export const defaultNamespace = 'default';
+export const productionNamespace = 'production';
 
 // Logs Data logic
 const MESSAGE_LOG_LEVELS: MessageWithLevel[] = [
