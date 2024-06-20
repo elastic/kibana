@@ -41,4 +41,4 @@ export type GetExceptionListItemRequestQueryInput = z.input<
 >;
 
 export type GetExceptionListItemResponse = z.infer<typeof GetExceptionListItemResponse>;
-export const GetExceptionListItemResponse = z.array(ExceptionListItem);
+export const GetExceptionListItemResponse = ExceptionListItem;

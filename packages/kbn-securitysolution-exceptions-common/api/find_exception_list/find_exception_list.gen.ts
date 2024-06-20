@@ -41,7 +41,7 @@ Uses the `so type.field name:field` value syntax, where `so type` can be:
 or available in all spaces (`agnostic` or `single`)
  
       */
-  namespace_type: ArrayFromString(ExceptionNamespaceType).optional().default([]),
+  namespace_type: ArrayFromString(ExceptionNamespaceType).optional().default(['single']),
   /**
    * The page number to return
    */

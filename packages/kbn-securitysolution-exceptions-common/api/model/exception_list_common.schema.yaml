@@ -28,7 +28,7 @@ components:
       $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ExceptionListDescription:
-      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string
 
     ExceptionListMeta:
       type: object
@@ -108,10 +108,12 @@ components:
           type: string
       required:
         - id
+        - list_id
         - type
         - name
         - description
         - immutable
+        - namespace_type
         - version
         - tie_breaker_id
         - created_at
@@ -133,7 +135,7 @@ components:
       $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ExceptionListItemDescription:
-      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string
 
     ExceptionListItemMeta:
       type: object
@@ -236,6 +238,7 @@ components:
         - name
         - description
         - entries
+        - namespace_type
         - comments
         - tie_breaker_id
         - created_at

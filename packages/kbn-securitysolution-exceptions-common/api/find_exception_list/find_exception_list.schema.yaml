@@ -34,7 +34,7 @@ paths:
             type: array
             items:
               $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
-            default: []
+            default: [single]
         - name: page
           in: query
           required: false
