@@ -14,6 +14,7 @@
     "requiredPlugins": [
       "kibanaReact",
       "triggersActionsUi",
+      "actions",
       "stackConnectors",
     ],
   }
