@@ -13,7 +13,11 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { DEFAULT_POLL_INTERVAL } from '../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
-import type { AgentStatusInfo, AgentStatusRecords } from '../../../../common/endpoint/types';
+import type {
+  AgentStatusInfo,
+  AgentStatusRecords,
+  AgentStatusApiResponse,
+} from '../../../../common/endpoint/types';
 import { useHttp } from '../../../common/lib/kibana';
 
 interface ErrorType {
@@ -60,6 +64,8 @@ export const useGetAgentStatus = (
   agentType: string,
   options: UseQueryOptions<AgentStatusRecords, IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<AgentStatusRecords, IHttpFetchError<ErrorType>> => {
+  // FIXME:PT where are the tests for this hook?
+
   const http = useHttp();
   const agentIdList = (Array.isArray(agentIds) ? agentIds : [agentIds]).filter(
     (agentId) => agentId.trim().length
@@ -71,7 +77,7 @@ export const useGetAgentStatus = (
     ...options,
     queryFn: () =>
       http
-        .get<{ data: AgentStatusRecords }>(AGENT_STATUS_ROUTE, {
+        .get<AgentStatusApiResponse>(AGENT_STATUS_ROUTE, {
           version: '1',
           query: {
             agentIds: agentIdList,
