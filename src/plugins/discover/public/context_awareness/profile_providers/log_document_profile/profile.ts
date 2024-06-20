@@ -8,7 +8,7 @@
 
 import { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentProfileProvider, DocumentType } from '../../profiles';
-import { ProfileProviderServices } from '../../profiles/profile_provider_services';
+import { ProfileProviderServices } from '../profile_provider_services';
 
 export const createLogDocumentProfileProvider = (
   services: ProfileProviderServices
