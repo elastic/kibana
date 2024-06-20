@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { LogLevelBadgeCell } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { isDataViewSource, isEsqlSource } from '../../../../common/data_sources';
@@ -33,6 +34,10 @@ export const createLogsDataSourceProfileProvider = (
 
       return { columns, rowHeight: 1 };
     },
+    getCellRenderers: (prev) => () => ({
+      ...prev(),
+      'log.level': LogLevelBadgeCell,
+    }),
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
