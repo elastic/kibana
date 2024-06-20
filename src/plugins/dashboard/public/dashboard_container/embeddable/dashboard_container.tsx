@@ -575,13 +575,9 @@ export class DashboardContainer
       const serialized = apiHasSerializableState(child)
         ? await child.serializeState()
         : { rawState: {} };
-
       return {
         type: panel.type,
-        explicitInput: {
-          ...panel.explicitInput,
-          ...serialized.rawState,
-        },
+        explicitInput: { ...panel.explicitInput, ...serialized.rawState },
         gridData: panel.gridData,
         references: serialized.references,
       };
