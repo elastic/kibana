@@ -10,7 +10,6 @@ import { PresentationContainer } from '@kbn/presentation-containers';
 import {
   HasParentApi,
   HasUniqueId,
-  PhaseEvent,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDisabledActionIds,
@@ -43,8 +42,6 @@ export interface PresentationPanelInternalProps<
 
   hideHeader?: boolean;
   hideInspector?: boolean;
-
-  onPanelStatusChange?: (info: PhaseEvent) => void;
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;

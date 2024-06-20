@@ -9,13 +9,21 @@ import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observ
 import { PLUGIN_ID } from '../../../common';
 
 export function getLocation(params: ObservabilityOnboardingLocatorParams) {
-  const { source } = params;
+  const { source, category } = params;
 
-  const path = ['/', source].filter(Boolean).join('');
+  const path = ['/'];
+
+  if (source) {
+    path.push(source);
+  }
+
+  if (category) {
+    path.push(`?category=${category}`);
+  }
 
   return {
     app: PLUGIN_ID,
-    path,
+    path: path.join(''),
     state: {},
   };
 }

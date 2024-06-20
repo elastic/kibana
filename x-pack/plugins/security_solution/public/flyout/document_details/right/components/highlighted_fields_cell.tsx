@@ -9,12 +9,12 @@ import type { VFC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 import {
   AgentStatus,
   EndpointAgentStatusById,
-} from '../../../../common/components/agents/agent_status';
+} from '../../../../common/components/endpoint/agents/agent_status';
 import { useRightPanelContext } from '../context';
 import {
   AGENT_STATUS_FIELD_NAME,
@@ -30,6 +30,7 @@ import {
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../common/endpoint/service/response_actions/constants';
 
 interface LinkFieldCellProps {
   /**
@@ -81,19 +82,13 @@ export interface HighlightedFieldsCellProps {
 }
 
 const FieldsAgentStatus = memo(
-  ({
-    value,
-    isSentinelOneAgentIdField,
-  }: {
-    value: string | undefined;
-    isSentinelOneAgentIdField: boolean;
-  }) => {
+  ({ value, agentType }: { value: string | undefined; agentType: ResponseActionAgentType }) => {
     const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
-    if (isSentinelOneAgentIdField || agentStatusClientEnabled) {
+    if (agentType !== 'endpoint' || agentStatusClientEnabled) {
       return (
         <AgentStatus
           agentId={String(value ?? '')}
-          agentType={isSentinelOneAgentIdField ? 'sentinel_one' : 'endpoint'}
+          agentType={agentType}
           data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
         />
       );
@@ -121,9 +116,22 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
   originalField,
 }) => {
   const isSentinelOneAgentIdField = useMemo(
-    () => originalField === SENTINEL_ONE_AGENT_ID_FIELD,
+    () => originalField === RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
     [originalField]
   );
+  const isCrowdstrikeAgentIdField = useMemo(
+    () => originalField === RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
+    [originalField]
+  );
+  const agentType: ResponseActionAgentType = useMemo(() => {
+    if (isSentinelOneAgentIdField) {
+      return 'sentinel_one';
+    }
+    if (isCrowdstrikeAgentIdField) {
+      return 'crowdstrike';
+    }
+    return 'endpoint';
+  }, [isCrowdstrikeAgentIdField, isSentinelOneAgentIdField]);
 
   return (
     <>
@@ -138,10 +146,7 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
               {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
                 <LinkFieldCell value={value} />
               ) : field === AGENT_STATUS_FIELD_NAME ? (
-                <FieldsAgentStatus
-                  value={value}
-                  isSentinelOneAgentIdField={isSentinelOneAgentIdField}
-                />
+                <FieldsAgentStatus value={value} agentType={agentType} />
               ) : (
                 <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
               )}

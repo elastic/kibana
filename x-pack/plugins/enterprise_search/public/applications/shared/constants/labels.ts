@@ -53,3 +53,10 @@ export const CONNECTOR_CLIENT_LABEL = i18n.translate(
     defaultMessage: 'Connector Client',
   }
 );
+
+export const EXAMPLE_CONNECTOR_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.exampleConnectorLabel',
+  {
+    defaultMessage: 'Example',
+  }
+);

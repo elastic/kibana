@@ -18,6 +18,8 @@ import {
   ChromeBreadcrumb,
   ScopedHistory,
   IUiSettingsClient,
+  ChromeStart,
+  SecurityServiceStart,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -27,12 +29,14 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
+import type { SearchHomepagePluginStart } from '@kbn/search-homepage/public';
+import { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
-import { ESConfig } from '../../../plugin';
+import { ESConfig, UpdateSideNavDefinitionFn } from '../../../plugin';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
@@ -48,11 +52,14 @@ export interface KibanaLogicProps {
   config: ClientConfigType;
   connectorTypes?: ConnectorDefinition[];
   console?: ConsolePluginStart;
+  coreSecurity?: SecurityServiceStart;
   data?: DataPublicPluginStart;
   esConfig: ESConfig;
+  getChromeStyle$: ChromeStart['getChromeStyle$'];
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   indexMappingComponent?: React.FC<IndexMappingProps>;
+  isSearchHomepageEnabled: boolean;
   isSidebarEnabled: boolean;
   lens?: LensPublicStart;
   ml?: MlPluginStart;
@@ -60,14 +67,16 @@ export interface KibanaLogicProps {
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchHomepage?: SearchHomepagePluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   share?: SharePluginStart;
   uiSettings?: IUiSettingsClient;
-  user: AuthenticatedUser | null;
+  updateSideNavDefinition: UpdateSideNavDefinitionFn;
 }
 
 export interface KibanaValues {
@@ -80,10 +89,12 @@ export interface KibanaValues {
   consolePlugin: ConsolePluginStart | null;
   data: DataPublicPluginStart | null;
   esConfig: ESConfig;
+  getChromeStyle$: ChromeStart['getChromeStyle$'];
   guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
   isCloud: boolean;
+  isSearchHomepageEnabled: boolean;
   isSidebarEnabled: boolean;
   lens: LensPublicStart | null;
   ml: MlPluginStart | null;
@@ -91,17 +102,23 @@ export interface KibanaValues {
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchHomepage: SearchHomepagePluginStart | null;
   searchPlayground: SearchPlaygroundPluginStart | null;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | null;
   security: SecurityPluginStart | null;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   share: SharePluginStart | null;
   uiSettings: IUiSettingsClient | null;
+  updateSideNavDefinition: UpdateSideNavDefinitionFn;
   user: AuthenticatedUser | null;
 }
 
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
+  actions: {
+    setUser: (user: AuthenticatedUser | null) => ({ user }),
+  },
   path: ['enterprise_search', 'kibana_logic'],
   reducers: ({ props }) => ({
     application: [props.application, {}],
@@ -113,9 +130,11 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     consolePlugin: [props.console || null, {}],
     data: [props.data || null, {}],
     esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],
+    getChromeStyle$: [props.getChromeStyle$, {}],
     guidedOnboarding: [props.guidedOnboarding || null, {}],
     history: [props.history, {}],
     indexMappingComponent: [props.indexMappingComponent || null, {}],
+    isSearchHomepageEnabled: [props.isSearchHomepageEnabled, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],
     lens: [props.lens || null, {}],
     ml: [props.ml || null, {}],
@@ -130,14 +149,22 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     productAccess: [props.productAccess, {}],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
+    searchHomepage: [props.searchHomepage || null, {}],
     searchPlayground: [props.searchPlayground || null, {}],
+    searchInferenceEndpoints: [props.searchInferenceEndpoints || null, {}],
     security: [props.security || null, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
     share: [props.share || null, {}],
     uiSettings: [props.uiSettings, {}],
-    user: [props.user || null, {}],
+    updateSideNavDefinition: [props.updateSideNavDefinition, {}],
+    user: [
+      props.user || null,
+      {
+        setUser: (_, { user }) => user || null,
+      },
+    ],
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: CloudSetup) => Boolean(cloud?.isCloudEnabled)],
@@ -147,5 +174,8 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
 export const mountKibanaLogic = (props: KibanaLogicProps) => {
   KibanaLogic(props);
   const unmount = KibanaLogic.mount();
+  props.coreSecurity?.authc.getCurrentUser()?.then((user) => {
+    KibanaLogic.actions.setUser(user);
+  });
   return unmount;
 };

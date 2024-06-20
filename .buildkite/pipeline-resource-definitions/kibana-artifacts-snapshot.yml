@@ -20,6 +20,7 @@ spec:
     spec:
       env:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
       allow_rebuilds: true
       branch_configuration: main 8.14 7.17
       default_branch: main

@@ -36,7 +36,8 @@ import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server'
 import {
   ActionsClientChatOpenAI,
   ActionsClientLlm,
-} from '@kbn/elastic-assistant-common/impl/language_models';
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
 
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
@@ -211,8 +212,10 @@ export interface AssistantToolParams {
   isEnabledKnowledgeBase: boolean;
   chain?: RetrievalQAChain;
   esClient: ElasticsearchClient;
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
-  llm?: ActionsClientLlm | ActionsClientChatOpenAI;
+  llm?: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+  logger: Logger;
   modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements?: Replacements;

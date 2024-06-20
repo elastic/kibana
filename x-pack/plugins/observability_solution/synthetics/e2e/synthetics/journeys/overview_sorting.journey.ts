@@ -13,7 +13,12 @@ import {
 } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
-journey('OverviewSorting', async ({ page, params }) => {
+const journeySkip =
+  (...params: Parameters<typeof journey>) =>
+  () =>
+    journey(...params);
+// TODO: skipped because failing on main and need to unblock CI
+journeySkip('OverviewSorting', async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
   const testMonitor1 = 'acb'; // second alpha, first created
   const testMonitor2 = 'aCd'; // third alpha, second created

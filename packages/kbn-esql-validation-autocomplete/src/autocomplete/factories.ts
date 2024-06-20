@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { evalFunctionsDefinitions } from '../definitions/functions';
+import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import {
@@ -24,7 +24,7 @@ import { buildDocumentation, buildFunctionDocumentation } from './documentation_
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
 const allFunctions = statsAggregationFunctionDefinitions
-  .concat(evalFunctionsDefinitions)
+  .concat(evalFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
 
 export const TRIGGER_SUGGESTION_COMMAND = {
@@ -47,7 +47,7 @@ export function getSuggestionFunctionDefinition(fn: FunctionDefinition): Suggest
     kind: 'Function',
     detail: fn.description,
     documentation: {
-      value: buildFunctionDocumentation(fullSignatures),
+      value: buildFunctionDocumentation(fullSignatures, fn.examples),
     },
     // agg functgions have priority over everything else
     sortText: fn.type === 'agg' ? '1A' : 'C',
@@ -143,14 +143,22 @@ export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDef
     sortText: 'D',
   }));
 
-export const buildSourcesDefinitions = (sources: string[]): SuggestionRawDefinition[] =>
-  sources.map((label) => ({
-    label,
-    text: getSafeInsertText(label, { dashSupported: true }),
-    kind: 'Reference',
-    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
-      defaultMessage: `Index`,
-    }),
+export const buildSourcesDefinitions = (
+  sources: Array<{ name: string; isIntegration: boolean; title?: string }>
+): SuggestionRawDefinition[] =>
+  sources.map(({ name, isIntegration, title }) => ({
+    label: title ?? name,
+    text: name,
+    isSnippet: isIntegration,
+    ...(isIntegration && { command: TRIGGER_SUGGESTION_COMMAND }),
+    kind: isIntegration ? 'Class' : 'Issue',
+    detail: isIntegration
+      ? i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.integrationDefinition', {
+          defaultMessage: `Integration`,
+        })
+      : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
+          defaultMessage: `Index`,
+        }),
     sortText: 'A',
   }));
 

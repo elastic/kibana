@@ -7008,7 +7008,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; onEdit: () => Promise<void>; onPhaseChange: ",
+          "[]; onEdit: () => Promise<void>; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -16039,7 +16039,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"date_histogram\" | \"percentile\" | \"average\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -16069,7 +16069,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"date_histogram\" | \"percentile\" | \"average\" | \"terms\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"terms\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,

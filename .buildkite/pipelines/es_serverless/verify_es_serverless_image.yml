@@ -48,6 +48,7 @@ steps:
           provider: gcp
           machineType: n2-standard-16
         key: build
+        if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
         depends_on: pre-build
         timeout_in_minutes: 60
         retry:

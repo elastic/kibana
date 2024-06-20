@@ -7,14 +7,11 @@
 
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { isEmpty } from 'lodash';
 import * as i18n from './translations';
-import {
-  CasesWebhookPublicConfigurationType,
-  CasesWebhookSecretConfigurationType,
-  ExternalServiceValidation,
-} from './types';
+import { CasesWebhookPublicConfigurationType, CasesWebhookSecretConfigurationType } from './types';
 
-const validateConfig = (
+export const validateCasesWebhookConfig = (
   configObject: CasesWebhookPublicConfigurationType,
   validatorServices: ValidatorServices
 ) => {
@@ -55,26 +52,8 @@ export const validateConnector = (
   configObject: CasesWebhookPublicConfigurationType,
   secrets: CasesWebhookSecretConfigurationType
 ): string | null => {
-  // user and password must be set together (or not at all)
-  if (!configObject.hasAuth) return null;
-  if (secrets.password && secrets.user) return null;
-  return i18n.INVALID_USER_PW;
-};
-
-export const validateSecrets = (
-  secrets: CasesWebhookSecretConfigurationType,
-  validatorServices: ValidatorServices
-) => {
-  // user and password must be set together (or not at all)
-  if (!secrets.password && !secrets.user) return;
-  if (secrets.password && secrets.user) return;
-  throw new Error(i18n.INVALID_USER_PW);
-};
-
-export const validate: ExternalServiceValidation = {
-  config: validateConfig,
-  secrets: validateSecrets,
-  connector: validateConnector,
+  if (configObject.hasAuth && isEmpty(secrets)) return i18n.INVALID_AUTH;
+  return null;
 };
 
 const validProtocols: string[] = ['http:', 'https:'];

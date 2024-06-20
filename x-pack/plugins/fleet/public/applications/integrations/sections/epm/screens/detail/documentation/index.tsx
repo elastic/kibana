@@ -68,52 +68,44 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
   const { docLinks } = useStartServices();
   const showDocumentation = hasDocumentation({ packageInfo, integration });
 
-  const content = (
-    <>
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
-        <EuiFlexItem grow={6}>
-          <EuiText>
-            <FormattedMessage
-              id="xpack.fleet.epm.packageDetails.apiReference.description"
-              defaultMessage="This documents all the inputs, streams, and variables available to use this integration programmatically via the Fleet Kibana API. {learnMore}"
-              values={{
-                learnMore: (
-                  <EuiLink href={docLinks.links.fleet.api} external={true}>
-                    <FormattedMessage
-                      id="xpack.fleet.epm.packageDetails.apiReference.learnMoreLink"
-                      defaultMessage="Learn more"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      {showDocumentation ? (
-        <>
-          <PackageVars vars={packageInfo.vars} />
-          <Inputs packageInfo={packageInfo} integration={integration} />
-        </>
-      ) : (
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.fleet.epm.packageDetails.apiReference.noDocumentationMessage"
-              defaultMessage="This integration has no references available."
-            />
-          }
-        />
-      )}
-      <EuiSpacer size="m" />
-    </>
-  );
-
   return (
     <EuiFlexGroup alignItems="flexStart">
       <EuiFlexItem grow={1} />
-      <EuiFlexItem grow={6}>{content}</EuiFlexItem>
+      <EuiFlexItem grow={7}>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.apiReference.description"
+            defaultMessage="This documents all the inputs, streams, and variables available to use this integration programmatically via the Fleet Kibana API. {learnMore}"
+            values={{
+              learnMore: (
+                <EuiLink href={docLinks.links.fleet.api} external={true}>
+                  <FormattedMessage
+                    id="xpack.fleet.epm.packageDetails.apiReference.learnMoreLink"
+                    defaultMessage="Learn more"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
+        <EuiSpacer size="m" />
+        {showDocumentation ? (
+          <>
+            <PackageVars vars={packageInfo.vars} />
+            <Inputs packageInfo={packageInfo} integration={integration} />
+          </>
+        ) : (
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.fleet.epm.packageDetails.apiReference.noDocumentationMessage"
+                defaultMessage="This integration has no references available."
+              />
+            }
+          />
+        )}
+        <EuiSpacer size="m" />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

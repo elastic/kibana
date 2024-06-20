@@ -166,6 +166,7 @@ const defaultSLO: Omit<SLODefinition, 'id' | 'revision' | 'createdAt' | 'updated
   settings: {
     syncDelay: new Duration(1, DurationUnit.Minute),
     frequency: new Duration(1, DurationUnit.Minute),
+    preventInitialBackfill: false,
   },
   tags: ['critical', 'k8s'],
   enabled: true,

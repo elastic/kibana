@@ -13,7 +13,7 @@ import type { ObservedEntityData } from '../../shared/components/observed_entity
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import type { UserItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { getSourcererScopeId, isActiveTimeline } from '../../../../helpers';

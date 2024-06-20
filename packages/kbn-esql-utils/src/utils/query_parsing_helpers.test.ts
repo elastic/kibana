@@ -10,6 +10,7 @@ import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
+  hasTransformationalCommand,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -52,6 +53,17 @@ describe('esql query helpers', () => {
 
       const idxPattern13 = getIndexPatternFromESQLQuery('ROW a = 1, b = "two", c = null');
       expect(idxPattern13).toBe('');
+
+      const idxPattern14 = getIndexPatternFromESQLQuery('METRICS tsdb');
+      expect(idxPattern14).toBe('tsdb');
+
+      const idxPattern15 = getIndexPatternFromESQLQuery('METRICS tsdb max(cpu) BY host');
+      expect(idxPattern15).toBe('tsdb');
+
+      const idxPattern16 = getIndexPatternFromESQLQuery(
+        'METRICS pods load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
+      );
+      expect(idxPattern16).toBe('pods');
     });
   });
 
@@ -93,6 +105,35 @@ describe('esql query helpers', () => {
           'from a | drop @timestamp | drop a | drop b | keep c | drop d'
         )
       ).toBe('from a | keep c ');
+    });
+  });
+
+  describe('hasTransformationalCommand', () => {
+    it('should return false for non transformational command', () => {
+      expect(hasTransformationalCommand('from a | eval b = 1')).toBeFalsy();
+    });
+
+    it('should return true for stats', () => {
+      expect(hasTransformationalCommand('from a | stats count() as total by a=b')).toBeTruthy();
+    });
+
+    it('should return true for keep', () => {
+      expect(hasTransformationalCommand('from a | keep field1, field2')).toBeTruthy();
+    });
+
+    it('should return false for commented out transformational command', () => {
+      expect(
+        hasTransformationalCommand(`from logstash-*
+      // | stats  var0 = avg(bytes) by geo.dest`)
+      ).toBeFalsy();
+    });
+
+    it('should return false for metrics with no aggregation', () => {
+      expect(hasTransformationalCommand('metrics a')).toBeFalsy();
+    });
+
+    it('should return true for metrics with aggregations', () => {
+      expect(hasTransformationalCommand('metrics a var = avg(b)')).toBeTruthy();
     });
   });
 });

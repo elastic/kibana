@@ -12,6 +12,9 @@ import { TestProviders } from '../../common/mock';
 import { UserActionTimestamp } from './timestamp';
 
 jest.mock('@kbn/i18n-react', () => {
+  const { i18n } = jest.requireActual('@kbn/i18n');
+  i18n.init({ locale: 'en' });
+
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn();
   FormattedRelative.mockImplementationOnce(() => '2 days ago');

@@ -95,6 +95,15 @@ export const initSavedObjects = async ({
   return result;
 };
 
+export const deleteSavedObjects = async ({
+  savedObjectsClient,
+}: SavedObjectsClientArg): Promise<void> => {
+  const configuration = await getConfigurationSavedObject({ savedObjectsClient });
+  if (configuration) {
+    await savedObjectsClient.delete(riskEngineConfigurationTypeName, configuration.id);
+  }
+};
+
 export const getConfiguration = async ({
   savedObjectsClient,
 }: SavedObjectsClientArg): Promise<RiskEngineConfiguration | null> => {

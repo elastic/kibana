@@ -14,7 +14,7 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../../common
 import type { AlertsTableComponentProps } from './alerts_grouping';
 import { GroupedAlertsTable } from './alerts_grouping';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
@@ -22,7 +22,7 @@ import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_que
 import { getQuery, groupingSearchResponse } from './grouping_settings/mock';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
-jest.mock('../../../common/containers/sourcerer');
+jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/utils/normalize_time_range');
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('test-uuid'),
