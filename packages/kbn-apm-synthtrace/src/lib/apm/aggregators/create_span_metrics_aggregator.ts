@@ -42,6 +42,9 @@ export function createSpanMetricsAggregator(flushInterval: string) {
           'processor.name': 'metric',
           'span.destination.service.response_time.count': 0,
           'span.destination.service.response_time.sum.us': 0,
+          'data_stream.type': 'metrics',
+          'data_stream.dataset': 'synth',
+          'data_stream.namespace': 'synth',
         };
       },
     },

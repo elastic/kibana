@@ -34,6 +34,9 @@ export function createServiceSummaryMetricsAggregator(flushInterval: string) {
           'metricset.interval': flushInterval,
           'processor.event': 'metric',
           'processor.name': 'metric',
+          'data_stream.type': 'metrics',
+          'data_stream.dataset': 'synth',
+          'data_stream.namespace': 'synth',
         };
       },
     },

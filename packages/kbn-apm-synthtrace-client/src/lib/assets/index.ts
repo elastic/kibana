@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ServiceAssetDocument } from './service_assets';
+import { ServiceEntityDocument } from './service_entities';
 
-export type AssetDocument = ServiceAssetDocument;
+export type EntityDocument = ServiceEntityDocument;

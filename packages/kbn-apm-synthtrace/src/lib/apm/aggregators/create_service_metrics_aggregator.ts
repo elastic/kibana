@@ -45,6 +45,9 @@ export function createServiceMetricsAggregator(flushInterval: string) {
             sum: 0,
             value_count: 0,
           },
+          'data_stream.type': 'metrics',
+          'data_stream.dataset': 'synth',
+          'data_stream.namespace': 'synth',
         };
       },
     },

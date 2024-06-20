@@ -84,6 +84,9 @@ export function createTransactionMetricsAggregator(flushInterval: string) {
             event['service.name'] === 'synth-node-0'
               ? { custom_label: 'value' }
               : { custom_label: ['value1', 'value2'] },
+          'data_stream.type': 'traces',
+          'data_stream.dataset': 'synth',
+          'data_stream.namespace': 'synth',
         };
       },
     },

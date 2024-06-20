@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ApmFields } from '@kbn/apm-synthtrace-client';
-import { createAssetsAggregatorFactory } from '../../utils/create_assets_aggregator_factory';
+import { LogDocument } from '@kbn/apm-synthtrace-client';
+import { createEntitiesAggregatorFactory } from '../../utils/create_entities_aggregator_factory';
 
-export const createTracesAssetsAggregator = createAssetsAggregatorFactory<ApmFields>();
+export const createLogsAssetsAggregator = createEntitiesAggregatorFactory<LogDocument>();

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { appendHash, AssetDocument, Fields } from '@kbn/apm-synthtrace-client';
+import { appendHash, EntityDocument, Fields } from '@kbn/apm-synthtrace-client';
 import { Duplex, PassThrough } from 'stream';
 
-export function createAssetsAggregatorFactory<TFields extends Fields>() {
-  return function <TAsset extends AssetDocument>(
+export function createEntitiesAggregatorFactory<TFields extends Fields>() {
+  return function <TEntity extends EntityDocument>(
     {
       filter,
       getAggregateKey,
@@ -18,13 +18,13 @@ export function createAssetsAggregatorFactory<TFields extends Fields>() {
     }: {
       filter: (event: TFields) => boolean;
       getAggregateKey: (event: TFields) => string;
-      init: (event: TFields, firstSeen: string, lastSeen: string) => TAsset;
+      init: (event: TFields, firstSeen: string, lastSeen: string) => TEntity;
     },
-    reduce: (asset: TAsset, event: TFields) => void,
-    serialize: (asset: TAsset) => TAsset
+    reduce: (asset: TEntity, event: TFields) => void,
+    serialize: (asset: TEntity) => TEntity
   ) {
-    const assets: Map<string, TAsset> = new Map();
-    let toFlush: TAsset[] = [];
+    const entities: Map<string, TEntity> = new Map();
+    let toFlush: TEntity[] = [];
     let cb: (() => void) | undefined;
 
     function flush(stream: Duplex, includeCurrentAssets: boolean, callback?: () => void) {
@@ -33,8 +33,8 @@ export function createAssetsAggregatorFactory<TFields extends Fields>() {
       toFlush = [];
 
       if (includeCurrentAssets) {
-        allItems.push(...assets.values());
-        assets.clear();
+        allItems.push(...entities.values());
+        entities.clear();
       }
 
       while (allItems.length) {
@@ -75,17 +75,17 @@ export function createAssetsAggregatorFactory<TFields extends Fields>() {
 
         const key = appendHash(getAggregateKey(event), '');
 
-        let asset = assets.get(key);
+        let entity = entities.get(key);
 
-        if (asset) {
+        if (entity) {
           // @ts-ignore
-          asset['asset.last_seen'] = lastSeen;
+          entity['entity.latestTimestamp'] = lastSeen;
         } else {
-          asset = init({ ...event }, firstSeen, lastSeen);
-          assets.set(key, asset);
+          entity = init({ ...event }, firstSeen, lastSeen);
+          entities.set(key, entity);
         }
 
-        reduce(asset, event);
+        reduce(entity, event);
         callback();
       },
     });
