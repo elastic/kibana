@@ -23,6 +23,8 @@ import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common
 
 import * as i18n from './translations';
 
+const MAX_MODAL_WIDTH = 900;
+
 export const MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS = 90;
 
 interface ManualRuleRunModalProps {
@@ -74,21 +76,15 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
       confirmButtonText={i18n.MANUAL_RULE_RUN_CONFIRM_BUTTON}
       cancelButtonText={i18n.MANUAL_RULE_RUN_CANCEL_BUTTON}
       confirmButtonDisabled={isInvalid}
+      maxWidth={MAX_MODAL_WIDTH}
     >
-      <EuiForm data-test-subj="manual-rule-run-modal-form">
+      <EuiForm data-test-subj="manual-rule-run-modal-form" fullWidth>
         <EuiSpacer size="m" />
         <EuiFormRow
           data-test-subj="manual-rule-run-time-range-form"
-          label={
-            <EuiFlexGroup>
-              <EuiFlexItem>{i18n.MANUAL_RULE_RUN_TIME_RANGE_TITLE}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  label={TECHNICAL_PREVIEW}
-                  tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          label={i18n.MANUAL_RULE_RUN_TIME_RANGE_TITLE}
+          labelAppend={
+            <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_TOOLTIP} />
           }
           isInvalid={isInvalid}
           error={errorMessage}
@@ -119,29 +115,37 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
           />
         </EuiFormRow>
         <EuiHorizontalRule />
-        <EuiFormRow data-test-subj="start-date-picker" label={i18n.MANUAL_RULE_RUN_START_AT_TITLE}>
-          <EuiDatePicker
-            aria-label="Start date picker"
-            inline
-            selected={startDate}
-            onChange={(date) => date && setStartDate(date)}
-            startDate={startDate}
-            endDate={endDate}
-            showTimeSelect={true}
-          />
-        </EuiFormRow>
-        <EuiHorizontalRule />
-        <EuiFormRow data-test-subj="end-date-picker" label={i18n.MANUAL_RULE_RUN_END_AT_TITLE}>
-          <EuiDatePicker
-            aria-label="End date picker"
-            inline
-            selected={endDate}
-            onChange={(date) => date && setEndDate(date)}
-            startDate={startDate}
-            endDate={endDate}
-            showTimeSelect={true}
-          />
-        </EuiFormRow>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              data-test-subj="start-date-picker"
+              label={i18n.MANUAL_RULE_RUN_START_AT_TITLE}
+            >
+              <EuiDatePicker
+                aria-label="Start date picker"
+                inline
+                selected={startDate}
+                onChange={(date) => date && setStartDate(date)}
+                startDate={startDate}
+                endDate={endDate}
+                showTimeSelect={true}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow data-test-subj="end-date-picker" label={i18n.MANUAL_RULE_RUN_END_AT_TITLE}>
+              <EuiDatePicker
+                aria-label="End date picker"
+                inline
+                selected={endDate}
+                onChange={(date) => date && setEndDate(date)}
+                startDate={startDate}
+                endDate={endDate}
+                showTimeSelect={true}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiForm>
     </EuiConfirmModal>
   );
