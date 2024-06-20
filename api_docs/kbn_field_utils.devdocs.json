@@ -128,55 +128,6 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.FieldDescriptionIconButton",
-        "type": "Function",
-        "tags": [],
-        "label": "FieldDescriptionIconButton",
-        "description": [],
-        "signature": [
-          "({ field, ...otherProps }: React.PropsWithChildren<",
-          {
-            "pluginId": "@kbn/field-utils",
-            "scope": "common",
-            "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldDescriptionIconButtonProps",
-            "text": "FieldDescriptionIconButtonProps"
-          },
-          ">) => JSX.Element | null"
-        ],
-        "path": "packages/kbn-field-utils/src/components/field_description_icon_button/field_description_icon_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/field-utils",
-            "id": "def-common.FieldDescriptionIconButton.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  field,\n  ...otherProps\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "@kbn/field-utils",
-                "scope": "common",
-                "docId": "kibKbnFieldUtilsPluginApi",
-                "section": "def-common.FieldDescriptionIconButtonProps",
-                "text": "FieldDescriptionIconButtonProps"
-              },
-              ">"
-            ],
-            "path": "packages/kbn-field-utils/src/components/field_description_icon_button/field_description_icon_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/field-utils",
         "id": "def-common.FieldIcon",
         "type": "Function",
         "tags": [],
@@ -868,23 +819,6 @@
       }
     ],
     "misc": [
-      {
-        "parentPluginId": "@kbn/field-utils",
-        "id": "def-common.FieldDescriptionIconButtonProps",
-        "type": "Type",
-        "tags": [],
-        "label": "FieldDescriptionIconButtonProps",
-        "description": [],
-        "signature": [
-          "Pick<",
-          "EuiPopoverProps",
-          ", \"css\"> & { field: { name: string; customDescription?: string | undefined; }; }"
-        ],
-        "path": "packages/kbn-field-utils/src/components/field_description_icon_button/field_description_icon_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/field-utils",
         "id": "def-common.FieldIconProps",

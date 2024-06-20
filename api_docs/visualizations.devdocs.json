@@ -14633,6 +14633,18 @@
     "enums": [
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.LegendLayout",
+        "type": "Enum",
+        "tags": [],
+        "label": "LegendLayout",
+        "description": [],
+        "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.LegendSize",
         "type": "Enum",
         "tags": [],
@@ -16124,10 +16136,13 @@
       {
         "parentPluginId": "visualizations",
         "id": "def-common.PartitionLegendValue",
-        "type": "string",
+        "type": "Type",
         "tags": [],
         "label": "PartitionLegendValue",
         "description": [],
+        "signature": [
+          "\"value\" | \"percent\""
+        ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -16648,10 +16663,13 @@
       {
         "parentPluginId": "visualizations",
         "id": "def-common.XYLegendValue",
-        "type": "string",
+        "type": "Type",
         "tags": [],
         "label": "XYLegendValue",
         "description": [],
+        "signature": [
+          "\"min\" | \"max\" | \"median\" | \"count\" | \"total\" | \"range\" | \"currentAndLastValue\" | \"lastValue\" | \"lastNonNullValue\" | \"average\" | \"firstValue\" | \"firstNonNullValue\" | \"distinctCount\" | \"variance\" | \"stdDeviation\" | \"difference\" | \"differencePercent\""
+        ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
