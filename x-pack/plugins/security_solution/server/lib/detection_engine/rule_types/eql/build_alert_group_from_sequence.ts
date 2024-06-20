@@ -6,7 +6,9 @@
  */
 
 import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
-import { intersection as lodashIntersection, isArray } from 'lodash';
+import { intersection as lodashIntersection, isArray, has, get } from 'lodash';
+import Queue from 'yocto-queue';
+import { set } from '@kbn/safer-lodash-set';
 
 import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
@@ -54,6 +56,8 @@ export const buildAlertGroupFromSequence = (
     return [];
   }
 
+  // console.error('WHAT ARE THE ANCESTORS', ancestors);
+
   // The "building block" alerts start out as regular BaseFields. We'll add the group ID and index fields
   // after creating the shell alert later on, since that's when the group ID is determined.
   let baseAlerts: BaseFieldsLatest[] = [];
@@ -78,6 +82,8 @@ export const buildAlertGroupFromSequence = (
     ruleExecutionLogger.error(error);
     return [];
   }
+
+  // console.error('BASE ALERTS', baseAlerts);
 
   // The ID of each building block alert depends on all of the other building blocks as well,
   // so we generate the IDs after making all the BaseFields
@@ -105,6 +111,8 @@ export const buildAlertGroupFromSequence = (
     alertTimestampOverride,
     publicBaseUrl
   );
+
+  console.error('SHELL ALERT', JSON.stringify(shellAlert, null, 2));
   const sequenceAlert: WrappedFieldsLatest<EqlShellFieldsLatest> = {
     _id: shellAlert[ALERT_UUID],
     _index: '',
@@ -134,6 +142,8 @@ export const buildAlertGroupFromSequence = (
       };
     }
   );
+
+  console.error('WRAPPED BUILDING BLOCKS', JSON.stringify(wrappedBuildingBlocks, null, 2));
 
   return [...wrappedBuildingBlocks, sequenceAlert];
 };
@@ -181,6 +191,27 @@ export const buildAlertRoot = (
   };
 };
 
+export const unFlattenObject = (object: Record<string, unknown>) => {
+  const queue = new Queue<string>();
+  Object.keys(object).forEach((key) => queue.enqueue(key));
+  while (queue.size > 0) {
+    const key = queue.dequeue();
+    if (key != null) {
+      if (typeof key === 'string' && key?.includes('.')) {
+        const val = object[key];
+        delete object[key];
+        set(object, key, val);
+      } else {
+        if (object[key] != null && typeof object[key] === 'object') {
+          const childObj = object[key] as Record<string, unknown>;
+          Object.keys(childObj).forEach((childKey) => queue.enqueue(childKey));
+        }
+      }
+    }
+  }
+  return object;
+};
+
 /**
  * Merges array of alert sources with the first item in the array
  * @param objects array of alert _source objects
@@ -196,7 +227,7 @@ export const objectArrayIntersection = (objects: object[]) => {
       .slice(1)
       .reduce(
         (acc: object | undefined, obj): object | undefined => objectPairIntersection(acc, obj),
-        objects[0]
+        unFlattenObject(objects[0] as Record<string, unknown>)
       );
   }
 };
@@ -207,8 +238,8 @@ export const objectArrayIntersection = (objects: object[]) => {
  * values. If an intersection cannot be found between a key's
  * values, the value will be undefined in the returned object.
  *
- * @param a object
- * @param b object
+ * @param a object accumulated object, no flat keys
+ * @param b object to be intersected with, may contain flat keys
  * @returns intersection of the two objects
  */
 export const objectPairIntersection = (a: object | undefined, b: object | undefined) => {
@@ -216,9 +247,9 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
     return undefined;
   }
   const intersection: Record<string, unknown> = {};
-  Object.entries(a).forEach(([key, aVal]) => {
-    if (key in b) {
-      const bVal = (b as Record<string, unknown>)[key];
+  Object.entries(b).forEach(([key, bVal]) => {
+    if (has(a, key)) {
+      const aVal = get(a, key);
       if (
         typeof aVal === 'object' &&
         !(aVal instanceof Array) &&
@@ -227,15 +258,15 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
         !(bVal instanceof Array) &&
         bVal !== null
       ) {
-        intersection[key] = objectPairIntersection(aVal, bVal);
+        set(intersection, key, objectPairIntersection(aVal, bVal));
       } else if (aVal === bVal) {
-        intersection[key] = aVal;
+        set(intersection, key, bVal);
       } else if (isArray(aVal) && isArray(bVal)) {
-        intersection[key] = lodashIntersection(aVal, bVal);
+        set(intersection, key, lodashIntersection(aVal, bVal));
       } else if (isArray(aVal) && !isArray(bVal)) {
-        intersection[key] = lodashIntersection(aVal, [bVal]);
+        set(intersection, key, lodashIntersection(aVal, [bVal]));
       } else if (!isArray(aVal) && isArray(bVal)) {
-        intersection[key] = lodashIntersection([aVal], bVal);
+        set(intersection, key, lodashIntersection([aVal], bVal));
       }
     }
   });
