@@ -13,13 +13,12 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   Aggregators,
   CustomThresholdSearchSourceFields,
-} from '../../../../../common/custom_threshold_rule/types';
-import { useKibana } from '../../../../utils/kibana_react';
-import { kibanaStartMock } from '../../../../utils/kibana_react.mock';
-import { MetricExpression } from '../../types';
-import { RuleConditionChart } from './rule_condition_chart';
+} from '../../../common/custom_threshold_rule/types';
+import { useKibana } from '../../utils/kibana_react';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
+import { RuleConditionChart, RuleConditionChartExpressions } from './rule_condition_chart';
 
-jest.mock('../../../../utils/kibana_react');
+jest.mock('../../utils/kibana_react');
 
 const useKibanaMock = useKibana as jest.Mock;
 
@@ -34,7 +33,7 @@ describe('Rule condition chart', () => {
     jest.clearAllMocks();
     mockKibana();
   });
-  async function setup(expression: MetricExpression, dataView?: DataView) {
+  async function setup(expression: RuleConditionChartExpressions, dataView?: DataView) {
     const wrapper = mountWithIntl(
       <RuleConditionChart
         metricExpression={expression}
@@ -58,7 +57,7 @@ describe('Rule condition chart', () => {
   }
 
   it('should display no data message', async () => {
-    const expression: MetricExpression = {
+    const expression: RuleConditionChartExpressions = {
       metrics: [
         {
           name: 'A',
@@ -67,7 +66,6 @@ describe('Rule condition chart', () => {
       ],
       timeSize: 1,
       timeUnit: 'm',
-      sourceId: 'default',
       threshold: [1],
       comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
     };
