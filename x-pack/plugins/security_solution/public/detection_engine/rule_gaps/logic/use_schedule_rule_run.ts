@@ -24,11 +24,16 @@ export function useScheduleRuleRun() {
         const results = await mutateAsync(options);
         telemetry.reportManualRuleRunExecute({
           rangeInMs: options.timeRange.endDate.diff(options.timeRange.startDate),
+          status: 'success',
         });
         addSuccess(i18n.BACKFILL_SCHEDULE_SUCCESS(results.length));
         return results;
       } catch (error) {
         addError(error, { title: i18n.BACKFILL_SCHEDULE_ERROR_TITLE });
+        telemetry.reportManualRuleRunExecute({
+          rangeInMs: options.timeRange.endDate.diff(options.timeRange.startDate),
+          status: 'error',
+        });
       }
     },
     [addError, addSuccess, mutateAsync, telemetry]

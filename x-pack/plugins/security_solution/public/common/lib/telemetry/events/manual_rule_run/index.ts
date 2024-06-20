@@ -31,6 +31,13 @@ export const manualRuleRunExecuteEvent: TelemetryEvent = {
         optional: false,
       },
     },
+    status: {
+      type: 'keyword',
+      _meta: {
+        description: 'Execute manual rule run status (success|error)',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -40,21 +47,21 @@ export const manualRuleRunCancelJobEvent: TelemetryEvent = {
     totalTasks: {
       type: 'integer',
       _meta: {
-        description: 'Amount of total tasks on moment of cancel job',
+        description: 'Total number of tasks at the moment of job cancellation',
         optional: false,
       },
     },
     completedTasks: {
       type: 'integer',
       _meta: {
-        description: 'Amount of total tasks on moment of cancel job',
+        description: 'Number of completed tasks at the moment of job cancellation',
         optional: false,
       },
     },
     errorTasks: {
       type: 'integer',
       _meta: {
-        description: 'Amount of error task on moment of cancel job',
+        description: 'Number of error tasks at the moment of job cancellation',
         optional: false,
       },
     },

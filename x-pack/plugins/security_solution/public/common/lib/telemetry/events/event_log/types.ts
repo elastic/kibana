@@ -8,7 +8,7 @@ import type { RootSchema } from '@kbn/core/public';
 import type { TelemetryEventTypes } from '../../constants';
 
 export interface ReportEventLogFilterByRunTypeParams {
-  runType: string;
+  runType: string[];
 }
 export interface ReportEventLogShowSourceEventDateRangeParams {
   isVisible: boolean;

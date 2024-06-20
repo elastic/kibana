@@ -21,6 +21,7 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiDescriptionList,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -455,7 +456,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   });
 
   const handleShowSourceEventTimeRange = useCallback(
-    (e) => {
+    (e: EuiSwitchEvent) => {
       const isVisible = e.target.checked;
       onShowSourceEventTimeRange(isVisible);
       telemetry.reportEventLogShowSourceEventDateRange({
