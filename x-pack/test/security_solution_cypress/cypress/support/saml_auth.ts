@@ -52,8 +52,8 @@ export const samlAuthentication = async (
         },
         rolesFilename
       );
-      const { fullname } = await sessionManager.getUserData(role);
-      return fullname;
+      const { full_name: fullName } = await sessionManager.getUserData(role);
+      return fullName;
     },
   });
 };
