@@ -21,9 +21,10 @@ export const useEBTTelemetry = ({
       const { requests } = inspectorAdapters;
       if (requests && analytics) {
         const listReq = requests.getRequests();
+
         if (listReq.length > 0) {
-          // find the highest query time, since a lens chart can contains more than on query, it doesn't make sense to 
-         // report all of them , only the query with highest latency needs to be reported
+          // find the highest query time, since a lens chart can contains more than on query, it doesn't make sense to
+          // report all of them , only the query with highest latency needs to be reported
           const duration = listReq.reduce((acc, req) => {
             const queryTime = Number(req.stats?.queryTime.value.split('ms')?.[0]);
             return queryTime > acc ? queryTime : acc;
