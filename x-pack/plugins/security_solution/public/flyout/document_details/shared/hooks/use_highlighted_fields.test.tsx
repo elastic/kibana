@@ -127,9 +127,9 @@ describe('useHighlightedFields', () => {
       useHighlightedFields({
         dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat({
           category: 'device',
-          field: 'device.id',
-          values: ['expectedCrowdstrikeAgentId'],
-          originalValue: ['expectedCrowdstrikeAgentId'],
+          field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
+          values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+          originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
           isObjectArray: false,
         }),
         investigationFields: ['agent.status', 'device.id'],

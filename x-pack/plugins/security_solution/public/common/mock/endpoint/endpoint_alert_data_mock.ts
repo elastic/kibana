@@ -90,7 +90,7 @@ const generateEndpointAlertDetailsItemDataMock = (
     },
     {
       category: 'agent',
-      field: 'agent.id',
+      field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.endpoint,
       values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
       originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
       isObjectArray: false,
@@ -119,20 +119,6 @@ const generateEndpointAlertDetailsItemDataMock = (
     {
       category: 'host',
       field: 'host.os.family',
-      values: ['windows'],
-      originalValue: ['windows'],
-      isObjectArray: false,
-    },
-    {
-      category: 'device',
-      field: 'device.id',
-      values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
-      originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
-      isObjectArray: false,
-    },
-    {
-      category: 'host',
-      field: 'host.os.type',
       values: ['windows'],
       originalValue: ['windows'],
       isObjectArray: false,
@@ -207,9 +193,9 @@ const generateCrowdStrikeAlertDetailsItemDataMock = (
     },
     {
       category: 'host',
-      field: 'host.namee',
-      values: ['elastic-host-win'],
-      originalValue: ['windows-native'],
+      field: 'host.os.type',
+      values: ['windows'],
+      originalValue: ['windows'],
       isObjectArray: false,
     },
     {

@@ -134,19 +134,29 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         },
       },
     };
-    const result: SearchResponse<{ host: { name: string } }> = await this.options.esClient
-      .search<{ host: { name: string } }>(search, {
-        ignore: [404],
-      })
-      .catch((err) => {
-        throw new ResponseActionsClientError(
-          `Failed to fetch event document: ${err.message}`,
-          err.statusCode ?? 500,
-          err
-        );
-      });
+    try {
+      const result: SearchResponse<{ host: { name: string } }> =
+        await this.options.esClient.search<{ host: { name: string } }>(search, {
+          ignore: [404],
+        });
 
-    return result.hits.hits?.[0]?._source as { host: { name: string } };
+      // Check if host name exists
+      const hostName = result.hits.hits?.[0]?._source?.host?.name;
+      if (!hostName) {
+        throw new ResponseActionsClientError(
+          `Host name not found in the event document for agentId: ${agentId}`,
+          404
+        );
+      }
+
+      return result.hits.hits[0]._source as { host: { name: string } };
+    } catch (err) {
+      throw new ResponseActionsClientError(
+        `Failed to fetch event document: ${err.message}`,
+        err.statusCode ?? 500,
+        err
+      );
+    }
   }
 
   // TODO TC: uncomment when working on agent status support
