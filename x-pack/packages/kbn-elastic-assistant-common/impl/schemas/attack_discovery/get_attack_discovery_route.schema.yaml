@@ -31,8 +31,11 @@ paths:
                   entryExists:
                     type: boolean
                     description: Indicates if an attack discovery exists for the given connectorId
+                  stats:
+                    $ref: './common_attributes.schema.yaml#/components/schemas/AttackDiscoveryStats'
                 required:
                   - entryExists
+                  - stats
         '400':
           description: Generic Error
           content:

@@ -17,7 +17,7 @@
 import { z } from 'zod';
 
 import { NonEmptyString } from '../common_attributes.gen';
-import { AttackDiscoveryResponse } from './common_attributes.gen';
+import { AttackDiscoveryResponse, AttackDiscoveryStats } from './common_attributes.gen';
 
 export type AttackDiscoveryGetRequestParams = z.infer<typeof AttackDiscoveryGetRequestParams>;
 export const AttackDiscoveryGetRequestParams = z.object({
@@ -35,4 +35,5 @@ export const AttackDiscoveryGetResponse = z.object({
    * Indicates if an attack discovery exists for the given connectorId
    */
   entryExists: z.boolean(),
+  stats: AttackDiscoveryStats,
 });

@@ -87,6 +87,48 @@ export const GenerationInterval = z.object({
   durationMs: z.number().int(),
 });
 
+/**
+ * Attack discovery stats
+ */
+export type AttackDiscoveryStat = z.infer<typeof AttackDiscoveryStat>;
+export const AttackDiscoveryStat = z.object({
+  /**
+   * Whether the user has viewed the results of the attack discovery run
+   */
+  hasViewed: z.boolean(),
+  /**
+   * The number of attack discoveries for the connector
+   */
+  count: z.number().int(),
+  /**
+   * The connector ID for the attack discovery
+   */
+  connectorId: z.string(),
+  /**
+   * The status of the attack discovery.
+   */
+  status: AttackDiscoveryStatus,
+});
+
+/**
+ * Stats on existing attack discovery documents
+ */
+export type AttackDiscoveryStats = z.infer<typeof AttackDiscoveryStats>;
+export const AttackDiscoveryStats = z.object({
+  /**
+   * The number of attack discoveries that have not yet been viewed
+   */
+  newDiscoveriesCount: z.number().int(),
+  /**
+   * The number of connectors with new results that have not yet been viewed
+   */
+  newConnectorResultsCount: z.number().int(),
+  /**
+   * Attack discovery stats per connector
+   */
+  statsPerConnector: z.array(AttackDiscoveryStat),
+});
+
 export type AttackDiscoveryResponse = z.infer<typeof AttackDiscoveryResponse>;
 export const AttackDiscoveryResponse = z.object({
   id: NonEmptyString,

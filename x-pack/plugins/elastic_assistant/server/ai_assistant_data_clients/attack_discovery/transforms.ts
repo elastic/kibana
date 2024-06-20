@@ -17,6 +17,7 @@ export const transformESSearchToAttackDiscovery = (
     .map((hit) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const adSchema = hit._source!;
+      console.log('transformESSearchToAttackDiscovery', adSchema.last_viewed_at);
       const ad: AttackDiscoveryResponse = {
         timestamp: adSchema['@timestamp'],
         id: hit._id,

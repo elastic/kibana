@@ -151,8 +151,8 @@ export const transformToUpdateScheme = (
         }))
       : undefined,
     status,
-    updated_at: updatedAt,
-    ...(lastViewedAt ? { last_viewed_at: lastViewedAt } : {}),
+    // only update updated_at time if this is not an update to last_viewed_at
+    ...(lastViewedAt ? { last_viewed_at: lastViewedAt } : { updated_at: updatedAt }),
     ...averageIntervalMsObj,
   };
 };

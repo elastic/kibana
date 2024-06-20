@@ -656,36 +656,44 @@ describe('helpers', () => {
       expect(stats).toEqual({
         newConnectorResultsCount: 3,
         newDiscoveriesCount: 5,
-        '8abb49bd-2f5d-43d2-bc2f-dd3c3cab25ad': {
-          hasViewed: true,
-          status: 'failed',
-          count: 0,
-        },
-        '9abb49bd-2f5d-43d2-bc2f-dd3c3cab25ad': {
-          hasViewed: false,
-          status: 'failed',
-          count: 0,
-        },
-        '745e005b-7248-4c08-b8b6-4cad263b4be0': {
-          hasViewed: false,
-          status: 'running',
-          count: 1,
-        },
-        'f48da2ca-b63e-4387-82d7-1423a68500aa': {
-          hasViewed: false,
-          status: 'succeeded',
-          count: 1,
-        },
-        '82fced1d-de48-42db-9f56-e45122dee017': {
-          hasViewed: true,
-          status: 'canceled',
-          count: 1,
-        },
-        'a4709094-6116-484b-b096-1e8d151cb4b7': {
-          hasViewed: false,
-          status: 'succeeded',
-          count: 4,
-        },
+        statsPerConnector: [
+          {
+            hasViewed: true,
+            status: 'failed',
+            count: 0,
+            connectorId: 'my-bedrock-old',
+          },
+          {
+            hasViewed: false,
+            status: 'failed',
+            count: 0,
+            connectorId: 'my-bedrock-old',
+          },
+          {
+            hasViewed: false,
+            status: 'running',
+            count: 1,
+            connectorId: 'my-gen-ai',
+          },
+          {
+            hasViewed: false,
+            status: 'succeeded',
+            count: 1,
+            connectorId: 'my-gpt4o-ai',
+          },
+          {
+            hasViewed: true,
+            status: 'canceled',
+            count: 1,
+            connectorId: 'my-bedrock',
+          },
+          {
+            hasViewed: false,
+            status: 'succeeded',
+            count: 4,
+            connectorId: 'my-gen-a2i',
+          },
+        ],
       });
     });
   });

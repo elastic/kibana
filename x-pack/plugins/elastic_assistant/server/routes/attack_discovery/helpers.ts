@@ -12,6 +12,8 @@ import {
   AttackDiscovery,
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryResponse,
+  AttackDiscoveryStat,
+  AttackDiscoveryStats,
   AttackDiscoveryStatus,
   ExecuteConnectorRequestBody,
   GenerationInterval,
@@ -497,31 +499,20 @@ export const findAttackDiscoveryByConnectorId = async ({
     authenticatedUser,
   });
 };
-interface DiscoveryStat {
-  hasViewed: boolean;
-  status: AttackDiscoveryStatus;
-  count: number;
-}
+
+const emptyDiscoveryStat: AttackDiscoveryStat[] = [];
 export const getAttackDiscoveryStats = async ({
   authenticatedUser,
   dataClient,
 }: {
   authenticatedUser: AuthenticatedUser;
   dataClient: AttackDiscoveryDataClient;
-}): Promise<{
-  newDiscoveriesCount: number;
-  newConnectorResultsCount: number;
-  [id: string]:
-    | DiscoveryStat
-    // when the key is the id, we always expect the DiscoveryStat object
-    // by creating a dynamic type, we allow for the property newDiscoveriesCount to be a number
-    | number;
-}> => {
+}): Promise<AttackDiscoveryStats> => {
   const attackDiscoveries = await dataClient.findAllAttackDiscoveries({
     authenticatedUser,
   });
 
-  const discoveryStats = attackDiscoveries.reduce(
+  return attackDiscoveries.reduce(
     (acc, ad) => {
       const updatedAt = moment(ad.updatedAt);
       const lastViewedAt = moment(ad.lastViewedAt);
@@ -530,11 +521,15 @@ export const getAttackDiscoveryStats = async ({
       const discoveryCount = ad.attackDiscoveries.length;
       return {
         ...acc,
-        [ad.id]: {
-          hasViewed,
-          status: ad.status,
-          count: discoveryCount,
-        },
+        statsPerConnector: [
+          ...acc.statsPerConnector,
+          {
+            hasViewed,
+            status: ad.status,
+            count: discoveryCount,
+            connectorId: ad.apiConfig.connectorId,
+          },
+        ],
         newConnectorResultsCount:
           !hasViewed && (ad.status === 'succeeded' || ad.status === 'failed')
             ? acc.newConnectorResultsCount + 1
@@ -545,8 +540,6 @@ export const getAttackDiscoveryStats = async ({
             : acc.newDiscoveriesCount,
       };
     },
-    { newDiscoveriesCount: 0, newConnectorResultsCount: 0 }
+    { newDiscoveriesCount: 0, newConnectorResultsCount: 0, statsPerConnector: emptyDiscoveryStat }
   );
-
-  return discoveryStats;
 };

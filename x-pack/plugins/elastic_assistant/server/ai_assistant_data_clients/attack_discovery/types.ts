@@ -72,6 +72,7 @@ export interface CreateAttackDiscoverySchema {
     id?: string;
     name?: string;
   }>;
-  updated_at?: string;
+  updated_at: string;
+  last_viewed_at: string;
   namespace: string;
 }

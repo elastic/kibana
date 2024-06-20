@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as uuid from 'uuid';
-import type { AttackDiscoveryStatus, AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
+import type {
+  AttackDiscoveryStats,
+  AttackDiscoveryStatus,
+  AttackDiscoveryResponse,
+} from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryCancelResponse,
   AttackDiscoveryGetResponse,
@@ -38,6 +42,7 @@ interface UsePollApi {
   cancelAttackDiscovery: () => Promise<void>;
   status: AttackDiscoveryStatus | null;
   data: AttackDiscoveryData | null;
+  stats: AttackDiscoveryStats | null;
   pollApi: () => void;
 }
 
@@ -48,11 +53,19 @@ export const usePollApi = ({
   connectorId,
 }: Props): UsePollApi => {
   const [status, setStatus] = useState<AttackDiscoveryStatus | null>(null);
+  const [stats, setStats] = useState<AttackDiscoveryStats | null>(null);
   const [data, setData] = useState<AttackDiscoveryData | null>(null);
   const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const connectorIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
+    connectorIdRef.current = connectorId;
     return () => {
+      console.log('DISMOUNT connectorId??????', {
+        currentTimeout: timeoutIdRef.current,
+        connectorId,
+      });
+      connectorIdRef.current = undefined;
       // when a connectorId changes, clear timeout
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
     };
@@ -92,12 +105,14 @@ export const usePollApi = ({
       if (connectorId == null || connectorId === '') {
         throw new Error('Invalid connector id');
       }
-      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-      // temporary to test stats API, revert to cancel API
-      const rawResponse = await http.fetch(`/internal/elastic_assistant/attack_discovery`, {
-        method: 'GET',
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-      });
+      // if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+      const rawResponse = await http.fetch(
+        `/internal/elastic_assistant/attack_discovery/cancel/${connectorId}`,
+        {
+          method: 'PUT',
+          version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        }
+      );
       const parsedResponse = AttackDiscoveryCancelResponse.safeParse(rawResponse);
       if (!parsedResponse.success) {
         throw new Error('Failed to parse the attack discovery cancel response');
@@ -118,6 +133,10 @@ export const usePollApi = ({
       if (connectorId == null || connectorId === '') {
         throw new Error('Invalid connector id');
       }
+      // clearTimeout not working
+      if (connectorId !== connectorIdRef.current) {
+        return;
+      }
       // call the internal API to generate attack discoveries:
       const rawResponse = await http.fetch(
         `/internal/elastic_assistant/attack_discovery/${connectorId}`,
@@ -132,12 +151,17 @@ export const usePollApi = ({
         throw new Error('Failed to parse the attack discovery GET response');
       }
       handleResponse(parsedResponse.data.data ?? null);
-      if (parsedResponse?.data?.data?.status === attackDiscoveryStatus.running) {
-        // poll every 3 seconds if attack discovery is running
-        timeoutIdRef.current = setTimeout(() => {
-          pollApi();
-        }, 3000);
-      }
+      setStats(parsedResponse.data.stats);
+      // poll every 5 seconds, regardless if current connector is running. Need stats object for connector dropdown stats
+      console.log('connectorIds', {
+        connectorId,
+        connectorIdRef: connectorIdRef.current,
+      });
+      console.log('timeoutIdRef.current before', timeoutIdRef.current);
+      timeoutIdRef.current = setTimeout(() => {
+        pollApi();
+      }, 5000);
+      console.log('timeoutIdRef.current after', timeoutIdRef.current);
     } catch (error) {
       setStatus(null);
       setData(null);
@@ -148,8 +172,12 @@ export const usePollApi = ({
       });
     }
   }, [connectorId, handleResponse, http, toasts]);
+  const returnValue = useMemo(() => {
+    console.log('returnValue', { cancelAttackDiscovery, status, data, pollApi, stats });
+    return { cancelAttackDiscovery, status, data, pollApi, stats };
+  }, [cancelAttackDiscovery, status, data, pollApi, stats]);
 
-  return { cancelAttackDiscovery, status, data, pollApi };
+  return returnValue;
 };
 
 export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {

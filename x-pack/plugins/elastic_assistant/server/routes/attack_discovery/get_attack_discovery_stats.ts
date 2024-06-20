@@ -16,7 +16,7 @@ import { ATTACK_DISCOVERY } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 
-export const getAllAttackDiscoveriesRoute = (
+export const getAttackDiscoveryStatsRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
 ) => {
   router.versioned
@@ -58,12 +58,12 @@ export const getAllAttackDiscoveriesRoute = (
               statusCode: 500,
             });
           }
-          const attackDiscovery = await getAttackDiscoveryStats({
+          const stats = await getAttackDiscoveryStats({
             dataClient,
             authenticatedUser,
           });
           return response.ok({
-            body: {},
+            body: stats,
           });
         } catch (err) {
           logger.error(err);

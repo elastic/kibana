@@ -10,6 +10,7 @@ import type {
   AttackDiscoveries,
   Replacements,
   GenerationInterval,
+  AttackDiscoveryStats,
 } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostResponse,
@@ -35,6 +36,7 @@ export interface UseAttackDiscovery {
   lastUpdated: Date | null;
   onCancel: () => Promise<void>;
   replacements: Replacements;
+  stats: AttackDiscoveryStats | null;
 }
 
 export const useAttackDiscovery = ({
@@ -60,6 +62,7 @@ export const useAttackDiscovery = ({
     data: pollData,
     pollApi,
     status: pollStatus,
+    stats,
   } = usePollApi({ http, setApproximateFutureTime, toasts, connectorId });
 
   // loading boilerplate:
@@ -185,5 +188,6 @@ export const useAttackDiscovery = ({
     lastUpdated,
     onCancel: cancelAttackDiscovery,
     replacements,
+    stats,
   };
 };

@@ -12,6 +12,7 @@ import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { noop } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import * as i18n from './translations';
 
@@ -22,6 +23,7 @@ interface Props {
   onGenerate: () => void;
   onCancel: () => void;
   onConnectorIdSelected: (connectorId: string) => void;
+  stats: AttackDiscoveryStats | null;
 }
 
 const HeaderComponent: React.FC<Props> = ({
@@ -31,6 +33,7 @@ const HeaderComponent: React.FC<Props> = ({
   onGenerate,
   onConnectorIdSelected,
   onCancel,
+  stats,
 }) => {
   const isFlyoutMode = false; // always false for attack discovery
   const { hasAssistantPrivilege } = useAssistantAvailability();
@@ -72,6 +75,7 @@ const HeaderComponent: React.FC<Props> = ({
             onConnectorSelected={noop}
             onConnectorIdSelected={onConnectorIdSelected}
             selectedConnectorId={connectorId}
+            stats={stats}
           />
         </EuiFlexItem>
       )}
