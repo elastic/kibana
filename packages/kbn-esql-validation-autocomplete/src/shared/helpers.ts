@@ -23,7 +23,7 @@ import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { timeLiterals } from '../definitions/literals';
 import {
   byOption,
   metadataOption,
@@ -228,9 +228,6 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
     return false;
   }
 
-  if (argType === 'chrono_literal') {
-    return chronoLiterals.some(({ name }) => name === item.text);
-  }
   // date-type parameters accept string literals because of ES auto-casting
   return ['string', 'date'].includes(argType);
 }
