@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { partiallyUpdateAdHocRun } from './partially_update_ad_hoc_run';
-export { processRunResults } from './process_run_result';
-export { withAlertingSpan } from './with_alerting_span';
+import { withSpan } from '@kbn/apm-utils';
+
+export async function withAlertingSpan<T>(name: string, cb: () => Promise<T>): Promise<T> {
+  return withSpan({ name, type: 'rule run', labels: { plugin: 'alerting' } }, cb);
+}
