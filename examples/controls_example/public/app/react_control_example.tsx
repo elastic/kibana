@@ -172,7 +172,7 @@ export const ReactControlExample = ({
     });
 
     return () => {
-      ignore = false;
+      ignore = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
