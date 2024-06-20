@@ -58,6 +58,7 @@ const CaseOwnerSelector: React.FC<Props> = ({
         fullWidth
         valueOfSelected={selectedOwner}
         onChange={(owner) => onChange(owner)}
+        compressed
       />
     </EuiFormRow>
   );

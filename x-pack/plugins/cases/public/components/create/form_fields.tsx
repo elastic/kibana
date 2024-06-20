@@ -6,9 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useEffect } from 'react';
-import { EuiLoadingSpinner, EuiSteps } from '@elastic/eui';
+import {
+  EuiLoadingSpinner,
+  EuiSteps,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
-
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import type { CasePostRequest } from '../../../common';
@@ -168,10 +174,43 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           />
         ) : (
           <>
-            {firstStep.children}
-            {secondStep.children}
-            {isSyncAlertsEnabled && thirdStep.children}
-            {fourthStep.children}
+            <EuiSpacer size="l" />
+            <EuiFlexGroup direction="column">
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h2>{i18n.STEP_ONE_TITLE}</h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem>{firstStep.children}</EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h2>{i18n.STEP_TWO_TITLE}</h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem>{secondStep.children}</EuiFlexItem>
+              </EuiFlexGroup>
+              {isSyncAlertsEnabled && (
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <EuiTitle size="s">
+                      <h2>{i18n.STEP_THREE_TITLE}</h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem>{thirdStep.children}</EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h2>{i18n.STEP_FOUR_TITLE}</h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem>{fourthStep.children}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexGroup>
           </>
         )}
       </>
