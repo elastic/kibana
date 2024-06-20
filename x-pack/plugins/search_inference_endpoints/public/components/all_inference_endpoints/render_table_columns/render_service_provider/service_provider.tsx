@@ -14,7 +14,7 @@ import OpenAIIcon from '../../../../assets/images/providers/open_ai.svg';
 import { ServiceProviderKeys } from '../../types';
 
 interface ServiceProviderProps {
-  providerKey: string;
+  providerKey: ServiceProviderKeys;
 }
 
 interface ServiceProviderRecord {
@@ -22,7 +22,7 @@ interface ServiceProviderRecord {
   name: string;
 }
 
-export const SERVICE_PROVIDERS: Record<string, ServiceProviderRecord> = {
+export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecord> = {
   [ServiceProviderKeys.hugging_face]: {
     icon: huggingFaceIcon,
     name: 'Hugging Face',
@@ -55,7 +55,7 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ providerKey })
   return provider ? (
     <>
       <EuiIcon
-        data-test-subj={`table-column-service-provider-${provider.name}`}
+        data-test-subj={`table-column-service-provider-${providerKey}`}
         type={provider.icon}
         style={{ marginRight: '8px' }}
       />

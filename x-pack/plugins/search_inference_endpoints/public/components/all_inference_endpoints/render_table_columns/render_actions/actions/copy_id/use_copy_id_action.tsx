@@ -17,7 +17,11 @@ export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {
 
   const getAction = (inferenceEndpoint: InferenceEndpointUI) => {
     return {
-      name: <EuiTextColor>{i18n.COPY_ID_ACTION_LABEL}</EuiTextColor>,
+      name: (
+        <EuiTextColor data-test-subj="inference-endpoints-action-copy-id-label">
+          {i18n.COPY_ID_ACTION_LABEL}
+        </EuiTextColor>
+      ),
       onClick: () => {
         navigator.clipboard.writeText(inferenceEndpoint.endpoint.model_id).then(() => {
           onActionSuccess();

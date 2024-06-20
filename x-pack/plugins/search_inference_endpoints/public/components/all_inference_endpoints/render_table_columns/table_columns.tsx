@@ -13,7 +13,7 @@ import { RenderEndpoint } from './render_endpoint/render_endpoint';
 import { ServiceProvider } from './render_service_provider/service_provider';
 import { TaskType } from './render_task_type/task_type';
 import { DeploymentStatus } from './render_deployment_status/deployment_status';
-import { DeploymentStatusEnum } from '../types';
+import { DeploymentStatusEnum, ServiceProviderKeys, TaskTypes } from '../types';
 
 export const useTableColumns = () => {
   const { actions } = useActions();
@@ -47,7 +47,7 @@ export const useTableColumns = () => {
     {
       field: 'provider',
       name: i18n.SERVICE_PROVIDER,
-      render: (provider: string) => {
+      render: (provider: ServiceProviderKeys) => {
         if (provider != null) {
           return <ServiceProvider providerKey={provider} />;
         }
@@ -60,7 +60,7 @@ export const useTableColumns = () => {
     {
       field: 'type',
       name: i18n.TASK_TYPE,
-      render: (type: string) => {
+      render: (type: TaskTypes) => {
         if (type != null) {
           return <TaskType type={type} />;
         }

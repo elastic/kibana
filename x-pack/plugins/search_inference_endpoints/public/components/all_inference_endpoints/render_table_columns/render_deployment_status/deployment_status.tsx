@@ -31,5 +31,5 @@ export const DeploymentStatus: React.FC<DeploymentStatusProps> = ({ status }) =>
       statusColor = 'danger';
   }
 
-  return <EuiHealth color={statusColor} />;
+  return <EuiHealth data-test-subj={`table-column-deployment-${status}`} color={statusColor} />;
 };
