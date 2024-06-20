@@ -85,7 +85,7 @@ export const spacesManagementApp = Object.freeze({
               history={history}
               getUrlForApp={application.getUrlForApp}
               maxSpaces={config.maxSpaces}
-              isSolutionNavEnabled$={isSolutionNavEnabled$}
+              isSpaceSolutionEnabled$={isSolutionNavEnabled$}
             />
           );
         };

@@ -55,7 +55,7 @@ interface Props {
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
   maxSpaces: number;
-  isSolutionNavEnabled$?: Observable<boolean>;
+  isSpaceSolutionEnabled$?: Observable<boolean>;
 }
 
 interface State {
@@ -68,7 +68,7 @@ interface State {
 }
 
 export class SpacesGridPage extends Component<Props, State> {
-  private spaceSolution$: Subscription | null = null;
+  private spaceSolution$?: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -87,11 +87,9 @@ export class SpacesGridPage extends Component<Props, State> {
       this.loadGrid();
     }
 
-    if (this.props.isSolutionNavEnabled$) {
-      this.spaceSolution$ = this.props.isSolutionNavEnabled$.subscribe((isEnabled) => {
-        this.setState({ isSpaceSolutionEnabled: isEnabled });
-      });
-    }
+    this.spaceSolution$ = this.props.isSpaceSolutionEnabled$?.subscribe((isEnabled) => {
+      this.setState({ isSpaceSolutionEnabled: isEnabled });
+    });
   }
 
   public componentWillUnmount() {
@@ -347,7 +345,9 @@ export class SpacesGridPage extends Component<Props, State> {
           defaultMessage: 'Solution View',
         }),
         sortable: true,
-        render: (solution?: Space['solution']) => <SpaceSolutionBadge solution={solution} />,
+        render: (solution: Space['solution'], record: Space) => (
+          <SpaceSolutionBadge solution={solution} data-test-subj={`${record.id}-solution`} />
+        ),
       });
     }
 
