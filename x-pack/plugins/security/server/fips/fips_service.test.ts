@@ -19,7 +19,7 @@ import { BehaviorSubject, of } from 'rxjs';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
-import type { SecurityLicense, SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
+import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
 
 import type { FipsServiceSetupInternal, FipsServiceSetupParams } from './fips_service';
 import { FipsService } from './fips_service';
@@ -75,72 +75,9 @@ describe('FipsService', () => {
 
       expect(fipsServiceSetup).toMatchInlineSnapshot(`
         Object {
-          "isKibanaFipsModeEnabled": [Function],
           "validateLicenseForFips": [Function],
         }
       `);
-    });
-  });
-
-  describe('#isKibanaFipsModeEnabled', () => {
-    let license: SecurityLicense;
-    beforeEach(() => {
-      license = licenseMock.create(of({ allowFips: true }), 'platinum');
-
-      fipsService = new FipsService(logger);
-    });
-
-    it('should return `true` when config `xpack.security.experimental.fipsMode.enabled` is `true`', () => {
-      mockGetFipsFn.mockImplementationOnce(() => {
-        return 1;
-      });
-
-      fipsServiceSetup = fipsService.setup({
-        license,
-        config: createConfig(
-          ConfigSchema.validate({ experimental: { fipsMode: { enabled: true } } }),
-          loggingSystemMock.createLogger(),
-          {
-            isTLSEnabled: false,
-          }
-        ),
-      });
-
-      expect(fipsServiceSetup.isKibanaFipsModeEnabled()).toBe(true);
-    });
-
-    it('should return `false` when config `xpack.security.experimental.fipsMode.enabled` is `false`', () => {
-      mockGetFipsFn.mockImplementationOnce(() => {
-        return 0;
-      });
-
-      fipsServiceSetup = fipsService.setup({
-        license,
-        config: createConfig(
-          ConfigSchema.validate({ experimental: { fipsMode: { enabled: false } } }),
-          loggingSystemMock.createLogger(),
-          {
-            isTLSEnabled: false,
-          }
-        ),
-      });
-
-      expect(fipsServiceSetup.isKibanaFipsModeEnabled()).toBe(false);
-    });
-
-    it('should return `false` when config `xpack.security.experimental.fipsMode.enabled` is `undefined`', () => {
-      mockGetFipsFn.mockImplementationOnce(() => {
-        return 0;
-      });
-
-      fipsServiceSetup = fipsService.setup({
-        license,
-        config: createConfig(ConfigSchema.validate({}), loggingSystemMock.createLogger(), {
-          isTLSEnabled: false,
-        }),
-      });
-
-      expect(fipsServiceSetup.isKibanaFipsModeEnabled()).toBe(false);
     });
   });
 
