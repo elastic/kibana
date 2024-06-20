@@ -160,24 +160,19 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
   const onAddFilter = useCallback(
     (values: Filter, alias?: string) => {
-      if (input.switchToDocumentView === undefined) {
-        return;
-      }
-
       const filter = buildEmptyFilter(false, dataView.id);
       if (alias) {
         filter.meta.alias = alias;
       }
       filter.query = values.query;
-      input.switchToDocumentView();
       filterManager.addFilters([filter]);
     },
-    [dataView.id, filterManager, input]
+    [dataView.id, filterManager]
   );
 
   const openInDiscover = useOpenInDiscover(
     dataView.id!,
-    fieldName ?? undefined,
+    dataView.fields.find((field) => field.name === fieldName),
     selectedCategories,
     appState,
     timefilter,
