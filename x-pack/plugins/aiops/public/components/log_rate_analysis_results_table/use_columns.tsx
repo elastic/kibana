@@ -355,7 +355,7 @@ export const useColumns = (
             />
           </>
         ),
-        render: (_, { bg_count: bgCount }) => {
+        render: (_, { bg_count: bgCount, doc_count: docCount }) => {
           if (
             interval === 0 ||
             windowParameters === undefined ||
@@ -368,7 +368,7 @@ export const useColumns = (
             analysisType,
             buckets.baselineBuckets,
             buckets.deviationBuckets,
-            undefined,
+            docCount,
             bgCount
           );
 
@@ -397,7 +397,7 @@ export const useColumns = (
             />
           </>
         ),
-        render: (_, { doc_count: docCount }) => {
+        render: (_, { doc_count: docCount, bg_count: bgCount }) => {
           if (
             interval === 0 ||
             windowParameters === undefined ||
@@ -411,7 +411,7 @@ export const useColumns = (
             buckets.baselineBuckets,
             buckets.deviationBuckets,
             docCount,
-            undefined
+            bgCount
           );
 
           return <>{deviationBucketRate}</>;
