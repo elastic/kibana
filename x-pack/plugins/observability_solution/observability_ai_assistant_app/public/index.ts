@@ -14,8 +14,6 @@ import type {
   ObservabilityAIAssistantAppPublicStart,
 } from './types';
 
-export { VisualizeESQL } from './functions';
-
 export const plugin: PluginInitializer<
   ObservabilityAIAssistantAppPublicSetup,
   ObservabilityAIAssistantAppPublicStart,

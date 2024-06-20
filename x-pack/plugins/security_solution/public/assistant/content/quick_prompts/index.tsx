@@ -8,6 +8,7 @@
 import type { QuickPrompt } from '@kbn/elastic-assistant';
 import * as i18n from './translations';
 import {
+  KNOWLEDGE_BASE_CATEGORY,
   PROMPT_CONTEXT_ALERT_CATEGORY,
   PROMPT_CONTEXT_DETECTION_RULES_CATEGORY,
   PROMPT_CONTEXT_EVENT_CATEGORY,
@@ -24,6 +25,13 @@ export const BASE_SECURITY_QUICK_PROMPTS: QuickPrompt[] = [
     prompt: i18n.ALERT_SUMMARIZATION_PROMPT,
     color: '#F68FBE',
     categories: [PROMPT_CONTEXT_ALERT_CATEGORY],
+    isDefault: true,
+  },
+  {
+    title: i18n.ESQL_QUERY_GENERATION_TITLE,
+    prompt: i18n.ESQL_QUERY_GENERATION_PROMPT,
+    color: '#9170B8',
+    categories: [KNOWLEDGE_BASE_CATEGORY],
     isDefault: true,
   },
   {

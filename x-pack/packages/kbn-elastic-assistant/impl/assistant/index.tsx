@@ -640,11 +640,12 @@ const AssistantComponent: React.FC<Props> = ({
       </>
     ),
     [
-      getComments,
+      refetchCurrentConversation,
       abortStream,
       currentConversation,
+      editingSystemPromptId,
+      getComments,
       showAnonymizedValues,
-      refetchCurrentConversation,
       handleRegenerateResponse,
       isEnabledKnowledgeBase,
       isEnabledRAGAlerts,
@@ -652,7 +653,6 @@ const AssistantComponent: React.FC<Props> = ({
       currentUserAvatar,
       isFlyoutMode,
       selectedPromptContextsCount,
-      editingSystemPromptId,
       isNewConversation,
       isSettingsModalVisible,
       promptContexts,
