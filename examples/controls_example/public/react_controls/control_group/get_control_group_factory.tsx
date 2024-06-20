@@ -52,8 +52,8 @@ export const getControlGroupEmbeddableFactory = (services: {
 }) => {
   const controlGroupEmbeddableFactory: ReactEmbeddableFactory<
     ControlGroupSerializedState,
-    ControlGroupApi,
-    ControlGroupRuntimeState
+    ControlGroupRuntimeState,
+    ControlGroupApi
   > = {
     type: CONTROL_GROUP_TYPE,
     deserializeState: (state) => deserializeControlGroup(state),
@@ -117,7 +117,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         },
         snapshotRuntimeState: () => {
           // TODO: Remove this if it ends up being unnecessary
-          return {} as unknown as ControlGroupSerializedState;
+          return {} as unknown as ControlGroupRuntimeState;
         },
         dataLoading: dataLoading$,
         children$: children$ as PublishingSubject<{

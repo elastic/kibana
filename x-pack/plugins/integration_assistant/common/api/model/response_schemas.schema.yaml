@@ -1,0 +1,65 @@
+openapi: 3.0.3
+info:
+  title: Response Schemas.
+  version: "not applicable"
+paths: {}
+components:
+  x-codegen-enabled: false
+  schemas:
+    EcsMappingAPIResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - mapping
+            - pipeline
+          properties:
+            mapping:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Mapping"
+            pipeline:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Pipeline"
+
+    CategorizationAPIResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - docs
+            - pipeline
+          properties:
+            docs:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Docs"
+            pipeline:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Pipeline"
+
+    RelatedAPIResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - docs
+            - pipeline
+          properties:
+            docs:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Docs"
+            pipeline:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Pipeline"
+
+    CheckPipelineAPIResponse:
+      type: object
+      required:
+        - pipelineResults
+      properties:
+        pipelineResults:
+          $ref: "./common_attributes.schema.yaml#/components/schemas/PipelineResults"
+        errors:
+          $ref: "./common_attributes.schema.yaml#/components/schemas/Errors"
