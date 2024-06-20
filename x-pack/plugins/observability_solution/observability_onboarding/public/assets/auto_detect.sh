@@ -248,6 +248,8 @@ install_integrations() {
     --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install" \
     --header "Authorization: ApiKey $install_api_key_encoded" \
     --header "Content-Type: text/tab-separated-values" \
+    --header "kbn-xsrf: true" \
+    --header "x-elastic-internal-origin: Kibana" \
     --data "$(echo -e "$install_integrations_api_body_string")" \
     --no-progress-meter \
     --fail
