@@ -8,15 +8,14 @@
 import dateMath from '@kbn/datemath';
 import type { TimeRange } from '../../../types';
 
-export const getEarliestLatestParams = (timeField?: string, time?: TimeRange) => {
-  let earliest = '';
-  let latest = '';
-  if (time && timeField && timeField !== '@timestamp') {
-    earliest = time.from;
-    latest = time.to;
+export const getEarliestLatestParams = (query: string, time?: TimeRange) => {
+  const earliestNamedParams = /\?earliest/i.test(query);
+  const latestNamedParams = /\?latest/i.test(query);
+  if (time && (earliestNamedParams || latestNamedParams)) {
+    return {
+      earliest: earliestNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
+      latest: latestNamedParams ? dateMath.parse(time.to)?.toISOString() : undefined,
+    };
   }
-  return {
-    earliest: dateMath.parse(earliest)?.toISOString(),
-    latest: dateMath.parse(latest)?.toISOString(),
-  };
+  return undefined;
 };

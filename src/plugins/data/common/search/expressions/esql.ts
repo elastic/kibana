@@ -160,8 +160,16 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               });
 
             const timeParams = getEarliestLatestParams(query, input.timeRange);
-            if (timeParams.earliest && timeParams.latest) {
-              params.params = [{ earliest: timeParams.earliest }, { latest: timeParams.latest }];
+            const namedParams = [];
+            if (timeParams?.earliest) {
+              namedParams.push({ earliest: timeParams.earliest });
+            }
+            if (timeParams?.latest) {
+              namedParams.push({ latest: timeParams.latest });
+            }
+
+            if (namedParams.length) {
+              params.params = namedParams;
             }
 
             params.filter = buildEsQuery(
