@@ -128,10 +128,6 @@ export async function duplicateDashboardPanel(this: DashboardContainer, idToDupl
 
   const newPanel = {
     ...duplicatedPanelState,
-    explicitInput: {
-      ...duplicatedPanelState.explicitInput,
-    },
-    references: panelToClone.references,
     gridData: {
       ...newPanelPlacement,
       i: duplicatedPanelState.explicitInput.id,
