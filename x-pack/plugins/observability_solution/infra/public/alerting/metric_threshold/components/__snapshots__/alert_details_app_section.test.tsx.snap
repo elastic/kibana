@@ -3,37 +3,61 @@
 exports[`AlertDetailsAppSection should render annotations 1`] = `
 Array [
   Object {
+    "additionalFilters": undefined,
     "annotations": Array [
-      <AlertAnnotation
-        alertStart={1678716383695}
-        color="#BD271E"
-        dateFormat="YYYY-MM-DD HH:mm"
-        id="alert_start_annotation"
-      />,
-      <AlertActiveTimeRangeAnnotation
-        alertStart={1678716383695}
-        color="#BD271E"
-        id="alert_time_range_annotation"
-      />,
+      Object {
+        "color": "#BD271E",
+        "icon": "alert",
+        "id": "metric_threshold_alert_start_annotation",
+        "key": Object {
+          "timestamp": "2023-03-28T13:40:00.000Z",
+          "type": "point_in_time",
+        },
+        "label": "Alert",
+        "type": "manual",
+      },
+      Object {
+        "color": "#F04E9833",
+        "id": "metric_threshold_active_alert_range_annotation",
+        "key": Object {
+          "endTimestamp": "2024-06-13T07:00:33.381Z",
+          "timestamp": "2023-03-28T13:40:00.000Z",
+          "type": "range",
+        },
+        "label": "Active alert",
+        "type": "manual",
+      },
     ],
-    "chartType": "line",
-    "expression": Object {
-      "aggType": "count",
+    "chartOptions": Object {
+      "seriesType": "bar_stacked",
+    },
+    "dataView": "index",
+    "groupBy": Array [
+      "host.hostname",
+    ],
+    "metricExpression": Object {
       "comparator": ">",
+      "metrics": Array [
+        Object {
+          "aggType": "count",
+          "field": "",
+          "name": "A",
+        },
+      ],
       "threshold": Array [
         2000,
       ],
       "timeSize": 15,
       "timeUnit": "m",
+      "warningComparator": undefined,
+      "warningThreshold": undefined,
     },
-    "filterQuery": undefined,
-    "groupBy": Array [
-      "host.hostname",
-    ],
-    "groupInstance": Array [
-      "host-1",
-    ],
-    "hideTitle": true,
+    "searchConfiguration": Object {
+      "query": Object {
+        "language": "",
+        "query": "",
+      },
+    },
     "timeRange": Object {
       "from": "2023-03-28T10:43:13.802Z",
       "to": "2023-03-29T13:14:09.581Z",

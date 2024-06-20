@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
@@ -26,7 +27,6 @@ import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants'
 import { timelineActions } from '../../timelines/store';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { SourcererScopeName } from '../../sourcerer/store/model';
-import { CaseDetailsRefreshContext } from '../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { getEndpointDetailsPath } from '../../management/common/routing';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
