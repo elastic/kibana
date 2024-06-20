@@ -121,36 +121,36 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       return <>{OUTPUT_MESSAGES.isPending(command)}</>;
     }
 
-    // if has outputs and was not successful, show error code message for each agent
-    if (!wasSuccessful && outputs) {
+    if (!wasSuccessful) {
       return (
         <>
           {OUTPUT_MESSAGES.hasFailed(command)}
-          {agents.map((agentId) => {
-            return outputs[agentId] && hasKnownErrorCode(outputs[agentId]) ? (
-              <>
-                <EuiSpacer size="s" />
-                <EndpointActionFailureMessage
-                  action={action}
-                  isConsoleOutput={false}
-                  data-test-subj={getTestId('failureMessage')}
-                />
-              </>
-            ) : null;
-          })}
-        </>
-      );
-    }
-
-    if (!wasSuccessful && !outputs && errors?.length) {
-      return (
-        // TODO: temporary solution, waiting for UI
-        // for automated actions created that do not have licenses to create actions
-        // we store the actions in the indices but they have error messages associated with them
-        <>
-          {errors.map((error) => (
-            <EuiFlexItem>{error}</EuiFlexItem>
-          ))}
+          <>
+            {/* if has outputs and was not successful, show error code message for each agent */}
+            {outputs &&
+              agents.map(
+                (agentId) =>
+                  outputs[agentId] &&
+                  hasKnownErrorCode(outputs[agentId]) && (
+                    <div key={outputs[agentId].content.code}>
+                      <EuiSpacer size="s" />
+                      <EndpointActionFailureMessage
+                        action={action}
+                        isConsoleOutput={false}
+                        data-test-subj={getTestId('failureMessage')}
+                      />
+                    </div>
+                  )
+              )}
+            {/* if there are errors, show them as well*/}
+            {errors?.length &&
+              errors.map((error) => (
+                <div key={error}>
+                  <EuiSpacer size="s" />
+                  <EuiFlexItem>{error}</EuiFlexItem>
+                </div>
+              ))}
+          </>
         </>
       );
     }
