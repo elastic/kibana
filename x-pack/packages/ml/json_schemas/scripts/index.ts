@@ -5,18 +5,17 @@
  * 2.0.
  */
 
+import { run } from '@kbn/dev-cli-runner';
 import { JsonSchemaService } from '../src/json_schema_service';
 
 const pathToOpenAPI = process.argv[2];
 
-new JsonSchemaService(pathToOpenAPI)
-  .createSchemaFiles()
-  .then(() => {
-    process.stdout.write('Schema files created successfully.');
-  })
-  .catch((e) => {
-    // TODO add kibana logger
-    // eslint-disable-next-line no-console
-    console.log(e);
+run(async ({ log }) => {
+  try {
+    await new JsonSchemaService(pathToOpenAPI).createSchemaFiles();
+    log.success('Schema files created successfully.');
+  } catch (e) {
+    log.error(`Error creating schema files: ${e}`);
     process.exit(1);
-  });
+  }
+});
