@@ -63,7 +63,7 @@ export async function fetchServicePathsFromTraceIds({
     serviceMapParams
   );
   // calculate how many docs we can fetch per shard by dividing the total available bytes by the average doc size
-  const avgDocSizeInBytes = 1600; // avg doc size in bytes
+  const avgDocSizeInBytes = 600; // estimated doc size in bytes
   const totalShards = serviceMapQueryDataResponse._shards.successful;
   const numDocsAllowed = Math.floor(serverlessServiceMapMaxAvailableBytes / avgDocSizeInBytes);
   const numDocsPerShardAllowed = Math.floor(numDocsAllowed / totalShards);
