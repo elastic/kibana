@@ -18,7 +18,7 @@ import { useUserPrivileges } from '../../../user_privileges';
 import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
 import { useGetAgentStatus } from '../../../../../management/hooks/agents/use_get_agent_status';
 
-interface UseHostIsolationActionProps {
+export interface UseHostIsolationActionProps {
   closePopover: () => void;
   detailsData: TimelineEventsDetailsItem[] | null;
   isHostIsolationPanelOpen: boolean;
@@ -42,7 +42,9 @@ export const useHostIsolationAction = ({
     },
   } = useAlertResponseActionsSupport(detailsData);
   const { canIsolateHost, canUnIsolateHost } = useUserPrivileges().endpointPrivileges;
-  const { data, isLoading, isFetched } = useGetAgentStatus(agentId, agentType);
+  const { data, isLoading, isFetched } = useGetAgentStatus(agentId, agentType, {
+    enabled: hostSupportsResponseActions,
+  });
   const agentStatus = data?.[agentId];
 
   const doesHostSupportIsolation = useMemo(() => {

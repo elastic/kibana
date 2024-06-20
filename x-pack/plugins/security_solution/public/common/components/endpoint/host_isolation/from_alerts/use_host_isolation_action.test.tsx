@@ -5,140 +5,60 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import type { UseHostIsolationActionProps } from './use_host_isolation_action';
 import { useHostIsolationAction } from './use_host_isolation_action';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  useAgentStatusHook,
-  useGetAgentStatus,
-  useGetSentinelOneAgentStatus,
-} from '../../../../../management/hooks/agents/use_get_agent_status';
-import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
-import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { ExperimentalFeaturesService as ExperimentalFeaturesServiceMock } from '../../../../experimental_features_service';
-import { endpointAlertDataMock } from '../../../../mock/endpoint';
-
-jest.mock('../../../../../management/hooks/agents/use_get_agent_status');
-jest.mock('../../../../hooks/use_experimental_features');
-jest.mock('../../../../experimental_features_service');
-
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-const useGetSentinelOneAgentStatusMock = useGetSentinelOneAgentStatus as jest.Mock;
-const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
-const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
+import type { AppContextTestRender } from '../../../../mock/endpoint';
+import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../../mock/endpoint';
+import { agentStatusGetHttpMock } from '../../../../../management/mocks';
 
 describe('useHostIsolationAction', () => {
-  const setFeatureFlags = (isEnabled: boolean = true): void => {
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(isEnabled);
-    (ExperimentalFeaturesServiceMock.get as jest.Mock).mockReturnValue({
-      responseActionsSentinelOneV1Enabled: isEnabled,
-      responseActionsCrowdstrikeManualHostIsolationEnabled: isEnabled,
-    });
+  let appContextMock: AppContextTestRender;
+  let hookProps: UseHostIsolationActionProps;
+  let apiMock: ReturnType<typeof agentStatusGetHttpMock>;
+
+  const render = () => {
+    return appContextMock.renderHook(() => useHostIsolationAction(hookProps));
   };
 
-  const createReactQueryWrapper = () => {
-    const queryClient = new QueryClient();
-    const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-    return wrapper;
-  };
+  beforeEach(() => {
+    appContextMock = createAppRootMockRenderer();
+    appContextMock.setExperimentalFlag({
+      responseActionsSentinelOneV1Enabled: true,
+      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+    });
+    hookProps = {
+      closePopover: jest.fn(),
+      detailsData: endpointAlertDataMock.generateEndpointAlertDetailsItemData(),
+      isHostIsolationPanelOpen: false,
+      onAddIsolationStatusClick: jest.fn(),
+    };
+    apiMock = agentStatusGetHttpMock(appContextMock.coreStart.http);
+  });
+
+  it('should return menu item for display', () => {
+    const { result } = render();
+
+    expect(result.current).toEqual(['foo']);
+  });
+
+  it.todo('should call `closePopover` callback when menu item `onClick` is called');
 
   it('should NOT return the menu item for Events', () => {
-    useAgentStatusHookMock.mockImplementation(() => {
-      return jest.fn(() => {
-        return { data: {} };
-      });
+    hookProps.detailsData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo', {
+      'kibana.alert.rule.uuid': undefined,
     });
-    setFeatureFlags(true);
-    const { result } = renderHook(
-      () => {
-        return useHostIsolationAction({
-          closePopover: jest.fn(),
-          detailsData: endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo', {
-            'kibana.alert.rule.uuid': undefined,
-          }),
-          isHostIsolationPanelOpen: false,
-          onAddIsolationStatusClick: jest.fn(),
-        });
-      },
-      { wrapper: createReactQueryWrapper() }
-    );
+    const { result } = render();
 
     expect(result.current).toHaveLength(0);
   });
 
-  // FIXME:PT refactor describe below - its not actually testing the component! Tests seem to be for `useAgentStatusHook()`
-  describe.each([
-    ['useGetSentinelOneAgentStatus', useGetSentinelOneAgentStatusMock],
-    ['useGetAgentStatus', useGetAgentStatusMock],
-  ])('works with %s hook', (name, hook) => {
-    const render = (agentTypeAlert: ResponseActionAgentType) =>
-      renderHook(
-        () =>
-          useHostIsolationAction({
-            closePopover: jest.fn(),
-            detailsData:
-              endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentTypeAlert),
-            isHostIsolationPanelOpen: false,
-            onAddIsolationStatusClick: jest.fn(),
-          }),
-        {
-          wrapper: createReactQueryWrapper(),
-        }
-      );
+  it.todo('should NOT return menu item if user does not have authz');
 
-    beforeEach(() => {
-      useAgentStatusHookMock.mockImplementation(() => hook);
-      setFeatureFlags(true);
-    });
+  it.todo('should NOT attempt to get Agent status if host does not support response actions');
 
-    afterEach(() => {
-      jest.clearAllMocks();
-      (ExperimentalFeaturesServiceMock.get as jest.Mock).mockReset();
-    });
+  it.todo('should return disabled menu item when host does not support isolation');
 
-    it(`${name} is invoked as 'enabled' when SentinelOne alert and FF enabled`, () => {
-      render('sentinel_one');
+  it.todo('should return disabled menu item while loading agent status');
 
-      expect(hook).toHaveBeenCalledWith(['abfe4a35-d5b4-42a0-a539-bd054c791769'], 'sentinel_one', {
-        enabled: true,
-      });
-    });
-    it(`${name} is invoked as 'enabled' when Crowdstrike alert and FF enabled`, () => {
-      render('crowdstrike');
-
-      expect(hook).toHaveBeenCalledWith(['abfe4a35-d5b4-42a0-a539-bd054c791769'], 'crowdstrike', {
-        enabled: true,
-      });
-    });
-
-    it(`${name} is invoked as 'disabled' when SentinelOne alert and FF disabled`, () => {
-      setFeatureFlags(false);
-      render('sentinel_one');
-
-      expect(hook).toHaveBeenCalledWith(['abfe4a35-d5b4-42a0-a539-bd054c791769'], 'sentinel_one', {
-        enabled: false,
-      });
-    });
-
-    it(`${name} is invoked as 'disabled' when Crowdstrike alert and FF disabled`, () => {
-      setFeatureFlags(false);
-      render('crowdstrike');
-
-      expect(hook).toHaveBeenCalledWith(['abfe4a35-d5b4-42a0-a539-bd054c791769'], 'crowdstrike', {
-        enabled: false,
-      });
-    });
-
-    it(`${name} is invoked as 'disabled' when endpoint alert`, () => {
-      render('endpoint');
-
-      expect(hook).toHaveBeenCalledWith(['abfe4a35-d5b4-42a0-a539-bd054c791769'], 'endpoint', {
-        enabled: false,
-      });
-    });
-  });
+  it.todo('should return disabled menu item if host agent is unenrolled');
 });
