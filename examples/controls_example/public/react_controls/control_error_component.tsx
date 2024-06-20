@@ -16,7 +16,6 @@ import { Markdown } from '@kbn/shared-ux-markdown';
 
 interface ControlErrorProps {
   error: Error | string;
-  css: unknown;
 }
 
 export const ControlError = ({ error }: ControlErrorProps) => {

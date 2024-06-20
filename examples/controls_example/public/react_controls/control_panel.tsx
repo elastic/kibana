@@ -146,16 +146,14 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
             }
           >
             {blockingError ? (
-              <EuiFormControlLayout>
-                <ControlError
-                  error={
-                    blockingError ??
-                    i18n.translate('controls.blockingError', {
-                      defaultMessage: 'There was an error loading this control.',
-                    })
-                  }
-                />
-              </EuiFormControlLayout>
+              <ControlError
+                error={
+                  blockingError ??
+                  i18n.translate('controls.blockingError', {
+                    defaultMessage: 'There was an error loading this control.',
+                  })
+                }
+              />
             ) : (
               <Component
                 // TODO: Convert this to a class when replacing the legacy control group
