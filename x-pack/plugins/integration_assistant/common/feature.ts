@@ -21,7 +21,7 @@ export const kibanaSubFeature: SubFeatureConfig = {
       privileges: [
         {
           id: 'integrationAssistant',
-          includeIn: 'all',
+          includeIn: 'none', // This privilege is not included in any Integrations feature, needs to be enabled explicitly
           name: i18n.translate('xpack.integrationAssistant.subFeature.privilege.name', {
             defaultMessage: 'Create integrations',
           }),

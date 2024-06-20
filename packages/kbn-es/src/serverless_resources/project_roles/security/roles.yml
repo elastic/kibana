@@ -589,6 +589,7 @@ platform_engineer:
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_fleet.all
+        - feature_fleet.integrationAssistant
         - feature_fleetv2.all
         - feature_osquery.all
         - feature_indexPatterns.all

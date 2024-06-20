@@ -41,12 +41,13 @@ export class IntegrationAssistantPlugin
 }
 
 const hasBasicCapabilities = (capabilities: ApplicationStart['capabilities']): boolean => {
-  const { fleet, fleetv2, actions } = capabilities;
+  const { fleet: integrations, fleetv2: fleet, actions } = capabilities;
   if (
-    !fleet?.[IntegrationAssistantUICapability] || // create integrations assistant (from "Integrations" sub feature)
-    !fleetv2?.all || // Fleet v2 (real "Fleet" feature) write capability
-    !actions?.show || // Connectors read capability
-    !actions?.execute // Connectors execute capability
+    !fleet?.all ||
+    !integrations?.all ||
+    !integrations?.[IntegrationAssistantUICapability] || // create integrations assistant capability from sub-feature
+    !actions?.show ||
+    !actions?.execute
   ) {
     return false;
   }
