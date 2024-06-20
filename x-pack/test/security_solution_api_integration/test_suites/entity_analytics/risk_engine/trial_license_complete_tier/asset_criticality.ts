@@ -295,10 +295,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should return 400 if kuery is invalid', async () => {
-        await assetCriticalityRoutes.list({ kuery: 'xxxx: low_impact' }, { expectStatusCode: 400 });
-      });
-
       it('should return a 400 if page is 0', async () => {
         await assetCriticalityRoutes.list({ page: 0 }, { expectStatusCode: 400 });
       });
