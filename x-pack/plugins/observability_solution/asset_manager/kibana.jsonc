@@ -14,7 +14,9 @@
     ],
     "requiredPlugins": [
       "apmDataAccess",
-      "metricsDataAccess"
+      "metricsDataAccess",
+      "security",
+      "encryptedSavedObjects",
     ],
     "browser": true,
     "server": true,
