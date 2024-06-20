@@ -21,6 +21,7 @@ import {
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
@@ -35,6 +36,7 @@ export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
   share: SharePluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
@@ -60,6 +62,7 @@ export class ObservabilityOnboardingPlugin
   constructor(private readonly ctx: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ObservabilityOnboardingPluginSetupDeps) {
+    const stackVersion = this.ctx.env.packageInfo.version;
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
@@ -94,6 +97,10 @@ export class ObservabilityOnboardingPlugin
             appMountParameters,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
+            context: {
+              isServerless: Boolean(pluginSetupDeps.cloud?.isServerlessEnabled),
+              stackVersion,
+            },
           });
         },
         visibleIn: [],

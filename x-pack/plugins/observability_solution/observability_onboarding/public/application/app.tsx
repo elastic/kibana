@@ -17,7 +17,7 @@ import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
-import { ConfigSchema } from '..';
+import { AppContext, ConfigSchema } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
@@ -43,6 +43,7 @@ export function ObservabilityOnboardingAppRoot({
   deps,
   corePlugins: { observability, data },
   config,
+  context,
 }: {
   appMountParameters: AppMountParameters;
 } & RenderAppProps) {
@@ -70,6 +71,7 @@ export function ObservabilityOnboardingAppRoot({
               observability,
               data,
               config,
+              context,
             }}
           >
             <KibanaThemeProvider
@@ -109,6 +111,7 @@ interface RenderAppProps {
   appMountParameters: AppMountParameters;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
   config: ConfigSchema;
+  context: AppContext;
 }
 
 export const renderApp = (props: RenderAppProps) => {
