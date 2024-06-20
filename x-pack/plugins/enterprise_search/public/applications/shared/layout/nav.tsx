@@ -49,7 +49,8 @@ import { generateNavLink } from './nav_link_helpers';
  * @returns The Enterprise Search navigation items
  */
 export const useEnterpriseSearchNav = (alwaysReturn = false) => {
-  const { isSidebarEnabled, productAccess } = useValues(KibanaLogic);
+  const { isSearchHomepageEnabled, searchHomepage, isSidebarEnabled, productAccess } =
+    useValues(KibanaLogic);
   const indicesNavItems = useIndicesNav();
   if (!isSidebarEnabled && !alwaysReturn) return undefined;
 
@@ -66,7 +67,10 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
       ...generateNavLink({
         shouldNotCreateHref: true,
         shouldShowActiveForSubroutes: true,
-        to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+        to:
+          isSearchHomepageEnabled && searchHomepage
+            ? searchHomepage.app.appRoute
+            : ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
       }),
     },
     {

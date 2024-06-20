@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsClient } from '@kbn/analytics-client';
+import type { AnalyticsClient } from '@kbn/ebt/client';
 
 /**
  * Exposes the public APIs of the AnalyticsClient during the setup phase.

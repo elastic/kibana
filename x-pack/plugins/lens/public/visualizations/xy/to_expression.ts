@@ -293,6 +293,7 @@ export const buildXYExpression = (
       : state.legend.legendSize
       ? state.legend.legendSize
       : undefined,
+    layout: state.legend.layout,
     horizontalAlignment:
       state.legend.horizontalAlignment && state.legend.isInside
         ? state.legend.horizontalAlignment
@@ -309,6 +310,8 @@ export const buildXYExpression = (
         : [],
     maxLines: state.legend.maxLines,
     legendStats: state.legend.legendStats,
+    title: state.legend.title,
+    isTitleVisible: state.legend.isTitleVisible,
     shouldTruncate:
       state.legend.shouldTruncate ??
       getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
