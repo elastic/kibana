@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
   const svlUserManager = getService('svlUserManager');
-  let role: RoleCredentials;
+  let roleAuthc: RoleCredentials;
   let roleName: string;
 
   const navigateToReportingManagement = async () => {
@@ -56,21 +56,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // Kibana CI and MKI use different users
     before('initialize saved object archive', async () => {
       roleName = 'admin';
-      role = await svlUserManager.createApiKeyForRole(roleName);
+      roleAuthc = await svlUserManager.createApiKeyForRole(roleName);
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
     });
 
     after('clean up archives', async () => {
       await kibanaServer.importExport.unload(savedObjectsArchive);
-      await svlUserManager.invalidateApiKeyForRole(role);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     // Cant auth into the route as it's structured currently
     xit(`user sees a job they've created`, async () => {
       const {
         job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job, role);
+      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job, roleAuthc);
 
       await navigateToReportingManagement();
       await testSubjects.existOrFail(`viewReportingLink-${jobId}`);
@@ -82,7 +82,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const {
         job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job, role);
+      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job, roleAuthc);
 
       await navigateToReportingManagement();
       await testSubjects.missingOrFail(`viewReportingLink-${jobId}`);

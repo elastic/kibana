@@ -30,7 +30,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     /**
      * Use the internal API to create any kind of report job
      */
-    async createReportJobInternal(jobType: string, job: object, role: RoleCredentials) {
+    async createReportJobInternal(jobType: string, job: object, roleAuthc: RoleCredentials) {
       const requestPath = `${INTERNAL_ROUTES.GENERATE_PREFIX}/${jobType}`;
       log.debug(`POST request to ${requestPath}`);
 
@@ -38,7 +38,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         .post(requestPath)
         .set(...API_HEADER)
         .set(...INTERNAL_HEADER)
-        .set(role.apiKeyHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({ jobParams: rison.encode(job) });
 
       expect(status).to.be(200);
@@ -54,7 +54,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
      */
     async waitForJobToFinish(
       downloadReportPath: string,
-      role: RoleCredentials,
+      roleAuthc: RoleCredentials,
       options?: { timeout?: number }
     ) {
       await retry.waitForWithTimeout(
@@ -66,7 +66,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
             .responseType('blob')
             .set(...API_HEADER)
             .set(...INTERNAL_HEADER)
-            .set(role.apiKeyHeader);
+            .set(roleAuthc.apiKeyHeader);
 
           if (response.status === 500) {
             throw new Error(`Report at path ${downloadReportPath} has failed`);
@@ -95,11 +95,11 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     /*
      * This function is only used in the API tests, functional tests we have to click the download link in the UI
      */
-    async getCompletedJobOutput(downloadReportPath: string, role: RoleCredentials) {
+    async getCompletedJobOutput(downloadReportPath: string, roleAuthc: RoleCredentials) {
       const response = await supertestWithoutAuth
         .get(`${downloadReportPath}?elasticInternalOrigin=true`)
         .set(...INTERNAL_HEADER)
-        .set(role.apiKeyHeader);
+        .set(roleAuthc.apiKeyHeader);
 
       return response.text as unknown;
     },
