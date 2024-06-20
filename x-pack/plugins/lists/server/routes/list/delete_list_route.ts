@@ -17,12 +17,13 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { DeleteListRequestQuery, DeleteListResponse } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
 import type { ExceptionListClient } from '../../services/exception_lists/exception_list_client';
 import { escapeQuotes } from '../../services/utils/escape_query';
-import { deleteListRequestQuery, deleteListResponse } from '../../../common/api';
-import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { getExceptionListClient, getListClient } from '..';
 
 export const deleteListRoute = (router: ListsPluginRouter): void => {
@@ -38,7 +39,7 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidation(deleteListRequestQuery),
+            query: buildRouteValidationWithZod(DeleteListRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -49,7 +50,6 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
           const lists = await getListClient(context);
           const exceptionLists = await getExceptionListClient(context);
           const { id, deleteReferences, ignoreReferences } = request.query;
-          let deleteExceptionItemResponses;
 
           // ignoreReferences=true maintains pre-7.11 behavior of deleting value list without performing any additional checks
           if (!ignoreReferences) {
@@ -75,7 +75,7 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
               if (deleteReferences) {
                 // Delete referenced exception list items
                 // TODO: Create deleteListItems to delete in batch
-                deleteExceptionItemResponses = await Promise.all(
+                await Promise.all(
                   referencedExceptionListItems.map(async (listItem) => {
                     // Ensure only the single entry is deleted as there could be a separate value list referenced that is okay to keep // TODO: Add API to delete single entry
                     const remainingEntries = listItem.entries.filter(
@@ -122,16 +122,9 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(deleted, deleteListResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({
-                body: validated ?? {
-                  deleteItemResponses: deleteExceptionItemResponses,
-                },
-              });
-            }
+            return response.ok({
+              body: DeleteListResponse.parse(deleted),
+            });
           }
         } catch (err) {
           const error = transformError(err);

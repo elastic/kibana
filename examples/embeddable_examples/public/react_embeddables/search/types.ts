@@ -20,6 +20,8 @@ import {
 
 export type SearchSerializedState = SerializedTimeRange;
 
+export type SearchRuntimeState = SearchSerializedState;
+
 export type SearchApi = DefaultEmbeddableApi<SearchSerializedState> &
   PublishesDataViews &
   PublishesDataLoading &
