@@ -12,8 +12,11 @@ import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
 import { FETCH_STATUS, isFailure, isPending } from '../../../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { ManagedTable } from '../../../../shared/managed_table';
 import { getServiceColumns } from './get_service_columns';
+
+type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/entities/services'>;
 
 export enum ServiceInventoryFieldName {
   ServiceName = 'serviceName',
@@ -31,7 +34,7 @@ interface Props {
   initialPageSize: number;
   initialSortDirection: 'asc' | 'desc';
   noItemsMessage: React.ReactNode;
-  data: [];
+  data: MainStatisticsApiResponse['services'];
 }
 
 export function MultiSignalServicesTable({

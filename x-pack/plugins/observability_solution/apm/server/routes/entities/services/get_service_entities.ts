@@ -10,7 +10,6 @@ import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/serve
 import { EntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getEntities } from '../get_entities';
-import { EntityServiceListItem } from '../types';
 import { calculateAvgMetrics } from '../utils/calculate_avg_metrics';
 import { mergeEntities } from '../utils/merge_entities';
 
@@ -30,7 +29,7 @@ export async function getServiceEntities({
   kuery: string;
   environment: string;
   logger: Logger;
-}): EntityServiceListItem[] {
+}) {
   return withApmSpan('get_service_entities', async () => {
     try {
       const entities = await getEntities({

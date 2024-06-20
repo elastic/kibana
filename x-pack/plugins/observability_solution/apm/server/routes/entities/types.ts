@@ -9,6 +9,14 @@ import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 export interface EntityMetrics extends TraceMetrics, LogsRatesMetrics {}
 
+export interface EntityMetrics {
+  latency: number;
+  throughput: number;
+  failedTransactionRate: number;
+  logRatePerMinute: number;
+  logErrorRate: number | null;
+}
+
 export interface Entity {
   id: string;
   latestTimestamp: string;
@@ -21,35 +29,22 @@ export interface Entity {
   metrics: EntityMetrics;
 }
 
-export enum SignalTypes {
-  METRICS = 'metrics',
-  LOGS = 'logs',
-}
-
 export interface TraceMetrics {
   latency: number | null;
   throughput: number | null;
   failedTransactionRate: number | null;
 }
 
-export interface EntityServiceListItem {
-  signalTypes: SignalTypes[];
-  metrics: EntityMetrics;
-  environments: string[];
-  serviceName: string;
-  agentName: AgentName;
-}
-
 export interface ServiceEntities {
   serviceName: string;
-  agentName?: string;
+  agentName: AgentName;
   signalTypes: string[];
   entity: Entity;
 }
 
 export interface EntitiesRaw {
   agent: {
-    name: string[];
+    name: AgentName[];
   };
   data_stream: {
     type: string[];
@@ -59,7 +54,7 @@ export interface EntitiesRaw {
 
 export interface MergedServiceEntities {
   serviceName: string;
-  agentName?: string;
+  agentName: AgentName;
   signalTypes: SignalTypes[];
   environments: string[];
   metrics: EntityMetrics[];
