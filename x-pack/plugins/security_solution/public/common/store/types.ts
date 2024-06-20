@@ -26,11 +26,11 @@ import type { GroupState } from './grouping/types';
 import type { SecuritySolutionDiscoverState } from './discover/model';
 import type { AnalyzerState } from '../../resolver/types';
 import { type DataviewPickerState } from '../../sourcerer/experimental/redux/reducer';
+import type { NotesState } from '../../notes/store/notes.slice';
 
 export type State = HostsPluginState &
   UsersPluginState &
   NetworkPluginState &
-  UsersPluginState &
   TimelinePluginState &
   ManagementPluginState & {
     app: AppState;
@@ -42,7 +42,7 @@ export type State = HostsPluginState &
     dataviewPicker: DataviewPickerState;
   } & DataTableState &
   GroupState &
-  AnalyzerState;
+  AnalyzerState & { notes: NotesState };
 /**
  * The Redux store type for the Security app.
  */

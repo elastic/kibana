@@ -7,6 +7,7 @@
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/public';
+import { ReqStatus } from '../../notes/store/notes.slice';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
 import {
@@ -502,4 +503,26 @@ export const mockGlobalState: State = {
   management: mockManagementState as ManagementState,
   discover: getMockDiscoverInTimelineState(),
   dataviewPicker: dataViewPickerInitialState,
+  notes: {
+    ids: ['1'],
+    entities: {
+      '1': {
+        eventId: 'event-id',
+        noteId: '1',
+        note: 'note-1',
+        timelineId: 'timeline-1',
+        created: 1663882629000,
+        createdBy: 'elastic',
+        updated: 1663882629000,
+        updatedBy: 'elastic',
+        version: 'version',
+      },
+    },
+    status: {
+      fetchNotesByDocumentId: ReqStatus.Idle,
+    },
+    error: {
+      fetchNotesByDocumentId: null,
+    },
+  },
 };

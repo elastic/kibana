@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import thunk from 'redux-thunk';
 import type {
   Action,
   Store,
@@ -59,6 +60,7 @@ import {
   initialState as dataviewPickerState,
 } from '../../sourcerer/experimental/redux/reducer';
 import { listenerMiddleware } from '../../sourcerer/experimental/redux/listeners';
+import { initialNotesState } from '../../notes/store/notes.slice';
 
 let store: Store<State, Action> | null = null;
 
@@ -174,7 +176,8 @@ export const createStoreFactory = async (
     dataTableInitialState,
     groupsInitialState,
     analyzerInitialState,
-    dataviewPickerState
+    dataviewPickerState,
+    initialNotesState
   );
 
   const rootReducer = {
@@ -292,7 +295,8 @@ export const createStore = (
   const middlewareEnhancer = applyMiddleware(
     ...createMiddlewares(kibana, storage),
     telemetryMiddleware,
-    ...(additionalMiddleware ?? [])
+    ...(additionalMiddleware ?? []),
+    thunk
   );
 
   store = createReduxStore(

@@ -39,6 +39,8 @@ import {
   type DataviewPickerState,
   reducer as dataviewPickerReducer,
 } from '../../sourcerer/experimental/redux/reducer';
+import type { NotesState } from '../../notes/store/notes.slice';
+import { notesReducer } from '../../notes/store/notes.slice';
 
 enableMapSet();
 
@@ -71,7 +73,8 @@ export const createInitialState = (
   dataTableState: DataTableState,
   groupsState: GroupState,
   analyzerState: AnalyzerState,
-  dataviewPickerState: DataviewPickerState
+  dataviewPickerState: DataviewPickerState,
+  notesState: NotesState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
@@ -134,6 +137,7 @@ export const createInitialState = (
       savedSearch: undefined,
     },
     dataviewPicker: dataviewPickerState,
+    notes: notesState,
   };
 
   return preloadedState;
@@ -157,4 +161,5 @@ export const createReducer: (
     analyzer: analyzerReducer,
     discover: securitySolutionDiscoverReducer,
     ...pluginsReducer,
+    notes: notesReducer,
   });
