@@ -66,7 +66,8 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickVisType(visType: string) {
     this.log.debug('DashboardAddPanel.clickVisType');
-    await this.testSubjects.scrollIntoView(`visType-${visType}`, { topOffset: 80 });
+    const visTypeElement = await this.testSubjects.find(`visType-${visType}`);
+    await visTypeElement.scrollIntoView({ block: 'center' });
     await this.testSubjects.click(`visType-${visType}`);
   }
 
