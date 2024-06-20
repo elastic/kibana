@@ -99,7 +99,7 @@ deploy() {
       -H "Authorization: ApiKey $PROJECT_API_KEY" \
       -H "Content-Type: application/json" \
       "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
-      -XPUT -d "$PROJECT_UPDATE_CONFIGURATION" &> $PROJECT_DEPLOY_LOGS
+      -XPATCH -d "$PROJECT_UPDATE_CONFIGURATION" &> $PROJECT_DEPLOY_LOGS
   fi
 
   echo "Getting project info..."
