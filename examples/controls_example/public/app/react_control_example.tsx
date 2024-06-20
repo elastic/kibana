@@ -237,7 +237,7 @@ export const ReactControlExample = ({
       />
     );
 
-  return loading ? (
+  return loading || !dataView ? (
     <EuiLoadingSpinner />
   ) : (
     <>
@@ -319,12 +319,12 @@ export const ReactControlExample = ({
               {
                 name: `controlGroup_${searchControlId}:${SEARCH_CONTROL_TYPE}DataView`,
                 type: 'index-pattern',
-                id: dataView?.id!,
+                id: dataView.id!,
               },
               {
                 name: `controlGroup_${rangeSliderControlId}:${RANGE_SLIDER_CONTROL_TYPE}DataView`,
                 type: 'index-pattern',
-                id: dataView?.id!,
+                id: dataView.id!,
               },
             ],
           }),
