@@ -119,7 +119,7 @@ const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(({ onConn
   if (!canCreateConnectors) {
     return (
       <EuiToolTip content={i18n.CREATE_CONNECTOR_MISSING_PRIVILEGES}>
-        <EuiLink color="subdued">{i18n.CREATE_CONNECTOR}</EuiLink>
+        <EuiLink disabled>{i18n.CREATE_CONNECTOR}</EuiLink>
       </EuiToolTip>
     );
   }
