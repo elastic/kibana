@@ -24,6 +24,7 @@ import {
 import { RangeSliderStrings } from './range_slider_strings';
 import { RangeSliderControl } from './components/range_slider_control';
 import { getMinMax } from './get_min_max';
+import { getCount } from './get_count';
 
 export const getRangesliderControlFactory = (
   services: Services
@@ -59,7 +60,7 @@ export const getRangesliderControlFactory = (
     },
     buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
-      const loadingValidation$ = new BehaviorSubject<boolean>(false);
+      const loadingCount$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
       const step$ = new BehaviorSubject<number | undefined>(initialState.step);
       const value$ = new BehaviorSubject<RangeValue | undefined>(initialState.value);
@@ -109,7 +110,7 @@ export const getRangesliderControlFactory = (
 
       const dataLoadingSubscription = combineLatest([
         loadingMinMax$,
-        loadingValidation$
+        loadingCount$
       ])
         .pipe(
           map((values) => {
@@ -135,7 +136,7 @@ export const getRangesliderControlFactory = (
 
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
-      let prevRequestAbortController: AbortController | undefined;
+      let prevMinMaxRequestAbortController: AbortController | undefined;
       const minMaxSubscription = combineLatest([
         dataControl.api.dataViews,
         dataControl.stateManager.fieldName,
@@ -143,8 +144,9 @@ export const getRangesliderControlFactory = (
       ])
         .pipe(
           tap(() => {
-            if (prevRequestAbortController) {
-              prevRequestAbortController.abort();
+            if (prevMinMaxRequestAbortController) {
+              prevMinMaxRequestAbortController.abort();
+              prevMinMaxRequestAbortController = undefined;
             }
           }),
           switchMap(async ([dataViews, fieldName, dataControlFetchContext]) => {
@@ -159,7 +161,7 @@ export const getRangesliderControlFactory = (
             try {
               loadingMinMax$.next(true);
               const abortController = new AbortController();
-              prevRequestAbortController = abortController;
+              prevMinMaxRequestAbortController = abortController;
               return await getMinMax({
                 abortSignal: abortController.signal,
                 data: services.data,
@@ -208,29 +210,60 @@ export const getRangesliderControlFactory = (
         api.setOutputFilter(rangeFilter);
       });
 
-      const isInvalidSubscription = combineLatest([
+      const selectionHasNoResults$ = new BehaviorSubject(false);
+      let prevCountRequestAbortController: AbortController | undefined;
+      const countSubscription = combineLatest([
         dataControl.api.filters$,
         controlGroupApi.ignoreParentSettings,
         controlGroupApi.dataControlFetch$,
-      ]).subscribe(([filters, ignoreParentSettings, dataControlFetchContext]) => {
-        /*if (!filters || filters.length === 0 || ignoreParentSettings?.ignoreValidations) {
-          isInvalid$.next(false);
-        }*/
+      ])
+        .pipe(
+          tap(() => {
+            if (prevCountRequestAbortController) {
+              prevCountRequestAbortController.abort();
+              prevCountRequestAbortController = undefined;
+            }
+          }),
+          switchMap(async ([filters, ignoreParentSettings, dataControlFetchContext]) => {
+            const dataView = dataControl.api.dataViews?.value?.[0];
+            const rangeFilter = filters?.[0];
+            if (!dataView || !rangeFilter || ignoreParentSettings?.ignoreValidations) {
+              return undefined;
+            }
 
-        // TODO fetch validation... that the selected range has results
+            try {
+              loadingCount$.next(true);
+              const abortController = new AbortController();
+              prevCountRequestAbortController = abortController;
+              return await getCount({
+                abortSignal: abortController.signal,
+                data: services.data,
+                dataView,
+                rangeFilter,
+                ...dataControlFetchContext,
+              });
+            } catch (error) {
+              // Ignore error, validation is not required for control to function properly
+              return undefined;
+            }
 
-      });
+          })
+        ).subscribe((count) => {
+          loadingCount$.next(false);
+          selectionHasNoResults$.next(typeof count === 'number' && count === 0);
+        });
 
       return {
         api,
         Component: () => {
-          const [dataLoading, dataViews, fieldName, max, min, step, value] =
+          const [dataLoading, dataViews, fieldName, max, min, selectionHasNotResults, step, value] =
             useBatchedPublishingSubjects(
               dataLoading$,
               dataControl.api.dataViews,
               dataControl.stateManager.fieldName,
               max$,
               min$,
+              selectionHasNoResults$,
               step$,
               value$
             );
@@ -239,7 +272,7 @@ export const getRangesliderControlFactory = (
             return () => {
               dataLoadingSubscription.unsubscribe();
               fieldChangedSubscription.unsubscribe();
-              isInvalidSubscription.unsubscribe();
+              countSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
               outputFilterSubscription.unsubscribe();
             };
@@ -259,7 +292,7 @@ export const getRangesliderControlFactory = (
           return (
             <RangeSliderControl
               fieldFormatter={fieldFormatter}
-              isInvalid={false}
+              isInvalid={selectionHasNotResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
               max={max}
               min={min}
