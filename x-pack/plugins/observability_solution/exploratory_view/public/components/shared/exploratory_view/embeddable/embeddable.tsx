@@ -109,7 +109,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
 
   const { reportEvent } = useEBTTelemetry({
     analytics,
-    queryName: `${series.dataType}_${series.name}`,
+    queryName: series ? `${series.dataType}_${series.name}` : title,
   });
 
   const actions = useActions({
