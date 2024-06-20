@@ -63,6 +63,7 @@ export interface AgentPolicySOAttributes {
   package_policies?: PackagePolicy[];
   agents?: number;
   overrides?: any | null;
+  version?: string;
 }
 
 export interface AgentSOAttributes {

@@ -290,26 +290,27 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   const isSingleAgentFleetServer =
     isSingleAgent && fleetServerAgents.map((agent) => agent.id).includes(agents[0].id);
 
-  const isSubmitButtonDisabled = useMemo(
-    () =>
+  const isSubmitButtonDisabled = useMemo(() => {
+    if (!isSubmitting && isUpdating && isSingleAgent && isStuckInUpdating(agents[0])) return false;
+    return (
       isSubmitting ||
       (isUpdating && updatingAgents === 0) ||
       !selectedVersion[0].value ||
       (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)) ||
       (isSingleAgent &&
         !isSingleAgentFleetServer &&
-        !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents)),
-    [
-      agents,
-      fleetServerAgents,
-      isSingleAgent,
-      isSubmitting,
-      isUpdating,
-      selectedVersion,
-      updatingAgents,
-      isSingleAgentFleetServer,
-    ]
-  );
+        !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents))
+    );
+  }, [
+    agents,
+    fleetServerAgents,
+    isSingleAgent,
+    isSubmitting,
+    isUpdating,
+    selectedVersion,
+    updatingAgents,
+    isSingleAgentFleetServer,
+  ]);
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
