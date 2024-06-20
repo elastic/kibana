@@ -8,6 +8,7 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { getEmptyTagValue } from '../../../empty_value';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { EndpointPendingActions } from '../../../../../../common/endpoint/types';
 import { useGetAgentStatus } from '../../../../../management/hooks/agents/use_get_agent_status';
@@ -66,7 +67,7 @@ export const AgentStatus = React.memo(
               {getAgentStatusText(agentStatus.status)}
             </EuiBadge>
           ) : (
-            '-'
+            getEmptyTagValue()
           )}
         </EuiFlexItem>
         {(isCurrentlyIsolated || hasPendingActions) && (
