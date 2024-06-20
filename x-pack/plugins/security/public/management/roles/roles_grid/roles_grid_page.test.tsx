@@ -88,6 +88,10 @@ describe('<RolesGridPage />', () => {
         rolesAPIClient={apiClientMock}
         history={history}
         notifications={coreMock.createStart().notifications}
+        i18n={coreMock.createStart().i18n}
+        buildFlavor={'traditional'}
+        analytics={coreMock.createStart().analytics}
+        theme={coreMock.createStart().theme}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -106,6 +110,10 @@ describe('<RolesGridPage />', () => {
         rolesAPIClient={apiClientMock}
         history={history}
         notifications={coreMock.createStart().notifications}
+        i18n={coreMock.createStart().i18n}
+        buildFlavor={'traditional'}
+        analytics={coreMock.createStart().analytics}
+        theme={coreMock.createStart().theme}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -126,6 +134,10 @@ describe('<RolesGridPage />', () => {
         rolesAPIClient={apiClientMock}
         history={history}
         notifications={coreMock.createStart().notifications}
+        i18n={coreMock.createStart().i18n}
+        buildFlavor={'traditional'}
+        analytics={coreMock.createStart().analytics}
+        theme={coreMock.createStart().theme}
       />
     );
     await waitForRender(wrapper, (updatedWrapper) => {
@@ -140,6 +152,10 @@ describe('<RolesGridPage />', () => {
         rolesAPIClient={apiClientMock}
         history={history}
         notifications={coreMock.createStart().notifications}
+        i18n={coreMock.createStart().i18n}
+        buildFlavor={'traditional'}
+        analytics={coreMock.createStart().analytics}
+        theme={coreMock.createStart().theme}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -180,6 +196,10 @@ describe('<RolesGridPage />', () => {
         rolesAPIClient={apiClientMock}
         history={history}
         notifications={coreMock.createStart().notifications}
+        i18n={coreMock.createStart().i18n}
+        buildFlavor={'traditional'}
+        analytics={coreMock.createStart().analytics}
+        theme={coreMock.createStart().theme}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
