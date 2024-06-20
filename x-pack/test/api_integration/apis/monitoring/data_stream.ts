@@ -38,6 +38,10 @@ export const getLifecycleMethods = (getService: FtrProviderContext['getService']
       // the archiver doesn't have any reference to the template and can't automatically delete it.
       // that's why we manually delete the data stream here to clean up the environment
       await deleteDataStream('.monitoring-*');
+      await deleteDataStream('metrics-elasticsearch.*');
+      await deleteDataStream('metrics-kibana.*');
+      await deleteDataStream('metrics-beats.*');
+      await deleteDataStream('metrics-logstash.*');
     },
   };
 };
