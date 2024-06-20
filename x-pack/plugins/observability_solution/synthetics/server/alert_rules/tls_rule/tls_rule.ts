@@ -10,7 +10,6 @@ import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import {
   GetViewInAppRelativeUrlFnOpts,
   AlertInstanceContext as AlertContext,
-  PluginSetupContract,
   RuleExecutorOptions,
   AlertsClientError,
 } from '@kbn/alerting-plugin/server';
@@ -56,16 +55,15 @@ type TLSAlert = ObservabilityUptimeAlert;
 export const registerSyntheticsTLSCheckRule = (
   server: SyntheticsServerSetup,
   plugins: SyntheticsPluginsSetupDependencies,
-  syntheticsMonitorClient: SyntheticsMonitorClient,
-  alerting: PluginSetupContract
+  syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
-  if (!alerting) {
+  if (!plugins.alerting) {
     throw new Error(
       'Cannot register the synthetics monitor status rule type. The alerting plugin needs to be enabled.'
     );
   }
 
-  alerting.registerType({
+  plugins.alerting.registerType({
     id: SYNTHETICS_ALERT_RULE_TYPES.TLS,
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',

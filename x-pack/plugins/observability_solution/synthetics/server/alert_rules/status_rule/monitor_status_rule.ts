@@ -8,7 +8,6 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import {
   GetViewInAppRelativeUrlFnOpts,
   AlertInstanceContext as AlertContext,
@@ -53,16 +52,15 @@ type MonitorStatusAlert = ObservabilityUptimeAlert;
 export const registerSyntheticsStatusCheckRule = (
   server: SyntheticsServerSetup,
   plugins: SyntheticsPluginsSetupDependencies,
-  syntheticsMonitorClient: SyntheticsMonitorClient,
-  alerting: PluginSetupContract
+  syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
-  if (!alerting) {
+  if (!plugins.alerting) {
     throw new Error(
       'Cannot register the synthetics monitor status rule type. The alerting plugin needs to be enabled.'
     );
   }
 
-  alerting.registerType({
+  plugins.alerting.registerType({
     id: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',
