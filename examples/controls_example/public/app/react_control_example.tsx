@@ -15,28 +15,34 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiSuperDatePicker,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { PresentationContainer } from '@kbn/presentation-containers';
+import { combineCompatibleChildrenApis, PresentationContainer } from '@kbn/presentation-containers';
 import {
+  apiPublishesDataLoading,
   HasUniqueId,
+  PublishesDataLoading,
   PublishesUnifiedSearch,
   PublishesViewMode,
+  useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
   ViewMode as ViewModeType,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import useMount from 'react-use/lib/useMount';
 import { BehaviorSubject } from 'rxjs';
 import { ControlGroupApi } from '../react_controls/control_group/types';
 import { RANGE_SLIDER_CONTROL_TYPE } from '../react_controls/data_controls/range_slider/types';
 import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
+import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
 
 const toggleViewButtons = [
   {
@@ -53,6 +59,7 @@ const toggleViewButtons = [
 
 const searchControlId = 'searchControl1';
 const rangeSliderControlId = 'rangeSliderControl1';
+const timesliderControlId = 'timesliderControl1';
 const controlGroupPanels = {
   [searchControlId]: {
     type: SEARCH_CONTROL_TYPE,
@@ -83,6 +90,17 @@ const controlGroupPanels = {
       enhancements: {},
     },
   },
+  [timesliderControlId]: {
+    type: TIMESLIDER_CONTROL_TYPE,
+    order: 0,
+    grow: true,
+    width: 'medium',
+    explicitInput: {
+      id: timesliderControlId,
+      title: 'Time slider',
+      enhancements: {},
+    },
+  },
 };
 
 /**
@@ -90,6 +108,7 @@ const controlGroupPanels = {
  * data view publishing subject from the control group
  */
 type MockedDashboardApi = PresentationContainer &
+  PublishesDataLoading &
   PublishesViewMode &
   PublishesUnifiedSearch & {
     publishFilters: (newFilters: Filter[] | undefined) => void;
@@ -104,6 +123,20 @@ export const ReactControlExample = ({
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
 }) => {
+  const dataLoading$ = useMemo(() => {
+    return new BehaviorSubject<boolean | undefined>(false);
+  }, []);
+  const timeRange$ = useMemo(() => {
+    return new BehaviorSubject<TimeRange | undefined>({
+      from: 'now-24h',
+      to: 'now',
+    });
+  }, []);
+  const timeslice$ = useMemo(() => {
+    return new BehaviorSubject<[number, number] | undefined>(undefined);
+  }, []);
+  const [dataLoading, timeRange] = useBatchedPublishingSubjects(dataLoading$, timeRange$);
+
   const [dashboardApi, setDashboardApi] = useState<MockedDashboardApi | undefined>(undefined);
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
   const viewModeSelected = useStateFromPublishingSubject(dashboardApi?.viewMode);
@@ -112,14 +145,15 @@ export const ReactControlExample = ({
     const viewMode = new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
     const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
-    const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
     const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
 
     setDashboardApi({
+      dataLoading: dataLoading$,
       viewMode,
       filters$,
       query$,
       timeRange$,
+      timeslice$,
       children$,
       publishFilters: (newFilters) => filters$.next(newFilters),
       setViewMode: (newViewMode) => viewMode.next(newViewMode),
@@ -136,6 +170,25 @@ export const ReactControlExample = ({
       },
     });
   });
+
+  useEffect(() => {
+    const subscription = combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
+      dashboardApi,
+      'dataLoading',
+      apiPublishesDataLoading,
+      undefined,
+      // flatten method
+      (values) => {
+        return values.some((isLoading) => isLoading);
+      }
+    ).subscribe((isAtLeastOneChildLoading) => {
+      dataLoading$.next(isAtLeastOneChildLoading);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [dashboardApi, dataLoading$]);
 
   // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
   const {
@@ -161,6 +214,18 @@ export const ReactControlExample = ({
       subscription.unsubscribe();
     };
   }, [dashboardApi, controlGroupApi]);
+
+  useEffect(() => {
+    if (!controlGroupApi) return;
+
+    const subscription = controlGroupApi.timeslice$.subscribe((timeslice) => {
+      timeslice$.next(timeslice);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [controlGroupApi, timeslice$]);
 
   if (error)
     return (
@@ -220,6 +285,18 @@ export const ReactControlExample = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      <EuiSuperDatePicker
+        isLoading={dataLoading}
+        start={timeRange?.from}
+        end={timeRange?.to}
+        onTimeChange={({ start, end }: OnTimeChangeProps) => {
+          timeRange$.next({
+            from: start,
+            to: end,
+          });
+        }}
+      />
+      <EuiSpacer size="m" />
       <ReactEmbeddableRenderer
         onApiAvailable={(api) => {
           dashboardApi?.setChild(api);
@@ -261,9 +338,7 @@ export const ReactControlExample = ({
           getParentApi={() => ({
             ...dashboardApi,
             getSerializedStateForChild: () => ({
-              rawState: {
-                timeRange: { from: 'now-60d/d', to: 'now+60d/d' },
-              },
+              rawState: {},
               references: [],
             }),
           })}

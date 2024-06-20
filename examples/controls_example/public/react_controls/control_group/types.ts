@@ -17,6 +17,7 @@ import {
   HasParentApi,
   PublishesDataLoading,
   PublishesFilters,
+  PublishesTimeslice,
   PublishesUnifiedSearch,
   PublishesUnsavedChanges,
   PublishingSubject,
@@ -57,9 +58,11 @@ export type ControlGroupApi = PresentationContainer &
   PublishesDataLoading &
   PublishesUnsavedChanges &
   PublishesControlGroupDisplaySettings &
+  PublishesTimeslice &
   Partial<HasParentApi<PublishesUnifiedSearch>> & {
+    autoApplySelections$: PublishingSubject<boolean>;
     dataControlFetch$: Observable<DataControlFetchContext>;
-    ignoreParentSettings: PublishingSubject<ParentIgnoreSettings | undefined>;
+    ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
   };
 
 export interface ControlGroupRuntimeState {
@@ -67,7 +70,7 @@ export interface ControlGroupRuntimeState {
   defaultControlGrow?: boolean;
   defaultControlWidth?: ControlWidth;
   labelPosition: ControlStyle; // TODO: Rename this type to ControlLabelPosition
-  showApplySelections?: boolean;
+  autoApplySelections: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
   initialChildControlState: ControlPanelsState<ControlPanelState>;
@@ -81,7 +84,7 @@ export interface ControlGroupRuntimeState {
 
 export type ControlGroupEditorState = Pick<
   ControlGroupRuntimeState,
-  'chainingSystem' | 'labelPosition' | 'showApplySelections' | 'ignoreParentSettings'
+  'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
 >;
 
 export type ControlGroupSerializedState = Omit<
@@ -92,10 +95,14 @@ export type ControlGroupSerializedState = Omit<
   | 'defaultControlWidth'
   | 'anyChildHasUnsavedChanges'
   | 'initialChildControlState'
+  | 'autoApplySelections'
 > & {
   panelsJSON: string;
   ignoreParentSettingsJSON: string;
-  // In runtime state, we refer to this property as `labelPosition`; however, to avoid migrations, we will
-  // continue to refer to this property as the legacy `controlStyle` in the serialized state
+  // In runtime state, we refer to this property as `labelPosition`;
+  // to avoid migrations, we will continue to refer to this property as `controlStyle` in the serialized state
   controlStyle: ControlStyle;
+  // In runtime state, we refer to the inverse of this property as `autoApplySelections`
+  // to avoid migrations, we will continue to refer to this property as `showApplySelections` in the serialized state
+  showApplySelections: boolean | undefined;
 };

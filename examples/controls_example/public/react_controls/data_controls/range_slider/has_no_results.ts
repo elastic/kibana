@@ -25,7 +25,7 @@ export function hasNoResults$({
   dataControlFetch$: ControlGroupApi['dataControlFetch$'];
   dataViews$?: PublishesDataViews['dataViews'];
   filters$: PublishesFilters['filters$'];
-  ignoreParentSettings$: ControlGroupApi['ignoreParentSettings'];
+  ignoreParentSettings$: ControlGroupApi['ignoreParentSettings$'];
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;

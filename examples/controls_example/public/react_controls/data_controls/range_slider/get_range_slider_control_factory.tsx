@@ -215,7 +215,7 @@ export const getRangesliderControlFactory = (
         data: services.data,
         dataViews$: dataControl.api.dataViews,
         filters$: dataControl.api.filters$,
-        ignoreParentSettings$: controlGroupApi.ignoreParentSettings,
+        ignoreParentSettings$: controlGroupApi.ignoreParentSettings$,
         dataControlFetch$: controlGroupApi.dataControlFetch$,
         setIsLoading: (isLoading: boolean) => {
           loadingHasNotResults$.next(isLoading);
