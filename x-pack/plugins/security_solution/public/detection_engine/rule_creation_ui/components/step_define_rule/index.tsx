@@ -208,9 +208,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     form,
     watch: ['machineLearningJobId'],
   });
+  console.group();
   const { someJobsStarted: someMlJobsStarted, noJobsStarted: noMlJobsStarted } =
     useMlRuleValidations({ machineLearningJobId });
   const { loading: mlFieldsLoading, fields: mlFields } = useRuleFields({ machineLearningJobId });
+  console.log('mlJobId', machineLearningJobId);
+  console.log('someJobsStarted', someMlJobsStarted);
+  console.log('noJobsStarted', noMlJobsStarted);
+  console.groupEnd();
   const mlSuppressionFields = useMemo(
     () => getTermsAggregationFields(mlFields as BrowserField[]),
     [mlFields]

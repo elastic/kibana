@@ -28,12 +28,15 @@ export const useMlRuleValidations = ({
   machineLearningJobId,
 }: UseMlRuleValidationsParams): UseMlRuleValidationsReturn => {
   const { jobs: installedJobs, loading } = useInstalledSecurityJobs();
+  console.log('installedJobs', installedJobs);
   const ruleMlJobs = installedJobs.filter((installedJob) =>
     (machineLearningJobId ?? []).includes(installedJob.id)
   );
+  console.log('ruleMlJobs', ruleMlJobs);
   const numberOfRuleMlJobsStarted = ruleMlJobs.filter((job) =>
     isJobStarted(job.jobState, job.datafeedState)
   ).length;
+  console.log('numberofRuleMlJobsStarted', numberOfRuleMlJobsStarted);
   const noMlJobsStarted = numberOfRuleMlJobsStarted === 0;
   const someMlJobsStarted = !noMlJobsStarted && numberOfRuleMlJobsStarted !== ruleMlJobs.length;
 
