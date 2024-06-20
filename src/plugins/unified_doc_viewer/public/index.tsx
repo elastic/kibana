@@ -9,7 +9,6 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import type { JsonCodeEditorProps } from './components';
 import { UnifiedDocViewerPublicPlugin } from './plugin';
 
@@ -26,14 +25,8 @@ export const JsonCodeEditor = withSuspense<JsonCodeEditorProps>(
   </EuiDelayRender>
 );
 
-const LazyUnifiedDocViewer = React.lazy(() => import('./components/doc_viewer'));
-export const UnifiedDocViewer = withSuspense<DocViewRenderProps>(
-  LazyUnifiedDocViewer,
-  <EuiDelayRender delay={300}>
-    <EuiSkeletonText />
-  </EuiDelayRender>
-);
-
 export { useEsDocSearch } from './hooks';
+export { UnifiedDocViewer } from './components/lazy_doc_viewer';
+export { UnifiedDocViewerFlyout } from './components/lazy_doc_viewer_flyout';
 
 export const plugin = () => new UnifiedDocViewerPublicPlugin();
