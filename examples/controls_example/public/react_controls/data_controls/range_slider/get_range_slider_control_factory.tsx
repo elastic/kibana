@@ -71,12 +71,7 @@ export const getRangesliderControlFactory = (
         value: value$,
       };
 
-      const {
-        dataControlApi,
-        dataControlComparators,
-        dataControlStateManager,
-        serializeDataControl,
-      } = initializeDataControl<Pick<RangesliderControlState, 'step' | 'value'>>(
+      const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step' | 'value'>>(
         uuid,
         RANGE_SLIDER_CONTROL_TYPE,
         initialState,
@@ -87,11 +82,11 @@ export const getRangesliderControlFactory = (
 
       const api = buildApi(
         {
-          ...dataControlApi,
+          ...dataControl.api,
           dataLoading: dataLoading$,
           getTypeDisplayName: RangeSliderStrings.control.getDisplayName,
           serializeState: () => {
-            const { rawState: dataControlState, references } = serializeDataControl();
+            const { rawState: dataControlState, references } = dataControl.serialize();
             return {
               rawState: {
                 ...dataControlState,
@@ -106,7 +101,7 @@ export const getRangesliderControlFactory = (
           },
         },
         {
-          ...dataControlComparators,
+          ...dataControl.comparators,
           step: [step$, (nextStep: number | undefined) => step$.next(nextStep)],
           value: [value$, setValue],
         }
@@ -129,8 +124,8 @@ export const getRangesliderControlFactory = (
 
       // Clear state when the field changes
       const fieldChangedSubscription = combineLatest([
-        dataControlStateManager.fieldName,
-        dataControlStateManager.dataViewId,
+        dataControl.stateManager.fieldName,
+        dataControl.stateManager.dataViewId,
       ])
         .pipe(distinctUntilChanged(deepEqual))
         .subscribe(() => {
@@ -142,8 +137,8 @@ export const getRangesliderControlFactory = (
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       let prevRequestAbortController: AbortController | undefined;
       const minMaxSubscription = combineLatest([
-        dataControlApi.dataViews,
-        dataControlStateManager.fieldName,
+        dataControl.api.dataViews,
+        dataControl.stateManager.fieldName,
         controlGroupApi.dataControlFetch$,
       ])
         .pipe(
@@ -153,7 +148,7 @@ export const getRangesliderControlFactory = (
             }
           }),
           switchMap(async ([dataViews, fieldName, dataControlFetchContext]) => {
-            dataControlApi.setBlockingError(undefined);
+            dataControl.api.setBlockingError(undefined);
             const dataView = dataViews?.[0];
             const dataViewField =
               dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
@@ -186,13 +181,13 @@ export const getRangesliderControlFactory = (
             next?.hasOwnProperty('min') ? (next as { min: number | undefined }).min : undefined
           );
           if (next?.hasOwnProperty('error')) {
-            dataControlApi.setBlockingError((next as { error: Error | undefined }).error);
+            dataControl.api.setBlockingError((next as { error: Error | undefined }).error);
           }
         });
 
       const outputFilterSubscription = value$.subscribe((value) => {
-        const dataView = dataControlApi.dataViews?.value?.[0];
-        const fieldName = dataControlStateManager.fieldName.value;
+        const dataView = dataControl.api.dataViews?.value?.[0];
+        const fieldName = dataControl.stateManager.fieldName.value;
         const dataViewField =
           dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
         const gte = parseFloat(value?.[0] ?? '');
@@ -214,7 +209,7 @@ export const getRangesliderControlFactory = (
       });
 
       const isInvalidSubscription = combineLatest([
-        dataControlApi.filters$,
+        dataControl.api.filters$,
         controlGroupApi.ignoreParentSettings,
         controlGroupApi.dataControlFetch$,
       ]).subscribe(([filters, ignoreParentSettings, dataControlFetchContext]) => {
@@ -231,9 +226,9 @@ export const getRangesliderControlFactory = (
         Component: () => {
           const [dataLoading, dataViews, fieldName, max, min, step, value] =
             useBatchedPublishingSubjects(
-              dataControlApi.dataLoading,
-              dataControlApi.dataViews,
-              dataControlStateManager.fieldName,
+              dataLoading$,
+              dataControl.api.dataViews,
+              dataControl.stateManager.fieldName,
               max$,
               min$,
               step$,
