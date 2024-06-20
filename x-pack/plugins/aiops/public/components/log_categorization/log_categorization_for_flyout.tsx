@@ -46,7 +46,7 @@ import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { InformationText } from './information_text';
-import { SamplingMenu } from './sampling_menu';
+import { SamplingMenu, useRandomSamplerStorage } from './sampling_menu';
 import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
@@ -93,23 +93,21 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
+  const randomSamplerStorage = useRandomSamplerStorage();
   const {
     runCategorizeRequest,
     cancelRequest: cancelCategorizationRequest,
     randomSampler,
-  } = useCategorizeRequest();
+  } = useCategorizeRequest(randomSamplerStorage);
   const [stateFromUrl] = usePageUrlState<LogCategorizationPageUrlState>(
     'logCategorization',
     getDefaultLogCategorizationAppState({
       searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
     })
   );
-  const [highlightedCategory, setHighlightedCategory] = useState<Category | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
   const [loading, setLoading] = useState(true);
   const [eventRate, setEventRate] = useState<EventRate>([]);
-  const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
     categories: Category[];
     categoriesInBucket: Category[] | null;
@@ -139,7 +137,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
-    { dataView, savedSearch: selectedSavedSearch },
+    { dataView, savedSearch },
     stateFromUrl,
     true
   );
@@ -406,10 +404,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                   : data.categories
               }
               eventRate={eventRate}
-              pinnedCategory={pinnedCategory}
-              setPinnedCategory={setPinnedCategory}
-              highlightedCategory={highlightedCategory}
-              setHighlightedCategory={setHighlightedCategory}
               enableRowActions={false}
               displayExamples={data.displayExamples}
               setSelectedCategories={setSelectedCategories}

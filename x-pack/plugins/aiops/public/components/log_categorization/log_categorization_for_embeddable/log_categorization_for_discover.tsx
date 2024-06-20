@@ -5,93 +5,96 @@
  * 2.0.
  */
 import type { FC } from 'react';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, useEuiPaddingSize } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
 
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter } from '@kbn/es-query';
+import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { css } from '@emotion/react';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import { useFilterQueryUpdates } from '../../../hooks/use_filters_query';
-import type { PatternAnalysisProps } from '../../../shared_components/pattern_analysis';
-import { useSearch } from '../../../hooks/use_search';
-import { getDefaultLogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
+import {
+  type LogCategorizationPageUrlState,
+  getDefaultLogCategorizationAppState,
+} from '../../../application/url_state/log_pattern_analysis';
 import { createMergedEsQuery } from '../../../application/utils/search_utils';
 import { useData } from '../../../hooks/use_data';
+import { useSearch } from '../../../hooks/use_search';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 import { useCategorizeRequest } from '../use_categorize_request';
 import type { EventRate } from '../use_categorize_request';
 import { CategoryTable } from '../category_table';
+import { InformationText } from '../information_text';
 import { LoadingCategorization } from '../loading_categorization';
 import { useValidateFieldRequest } from '../use_validate_category_field';
+import { FieldValidationCallout } from '../category_validation_callout';
 import { useMinimumTimeRange } from './use_minimum_time_range';
 
-import { createAdditionalConfigHash, createDocumentStatsHash } from '../utils';
+import { createAdditionalConfigHash, createDocumentStatsHash, getMessageField } from '../utils';
 import { useOpenInDiscover } from '../category_table/use_open_in_discover';
-import { FieldValidationCallout } from '../category_validation_callout';
+import { DiscoverTabs } from './discover_tabs';
+import { useRandomSamplerStorage } from '../sampling_menu';
 
 export interface LogCategorizationEmbeddableProps {
-  input: Readonly<EmbeddablePatternAnalysisInput & PatternAnalysisProps>;
+  input: Readonly<EmbeddablePatternAnalysisInput>;
+  renderViewModeToggle: (patternCount?: number) => React.ReactElement;
 }
 
 const BAR_TARGET = 20;
 
-export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> = ({ input }) => {
+export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> = ({
+  input,
+  renderViewModeToggle,
+}) => {
   const {
     notifications: { toasts },
     data: {
-      query: { filterManager },
+      query: { getState, filterManager },
     },
     uiSettings,
     embeddingOrigin,
   } = useAiopsAppContext();
   const tablePadding = useEuiPaddingSize('xs');
 
-  const {
-    dataView,
-    savedSearch,
-    fieldName,
-    minimumTimeRangeOption,
-    randomSamplerMode,
-    randomSamplerProbability,
-    onChange,
-    onRenderComplete,
-  } = input;
-  const { filters, query } = useFilterQueryUpdates();
+  const { dataView, savedSearch } = input;
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
     useValidateFieldRequest();
-  const { getMinimumTimeRange, cancelRequest: cancelWiderTimeRangeRequest } = useMinimumTimeRange();
+  const {
+    getMinimumTimeRange,
+    cancelRequest: cancelWiderTimeRangeRequest,
+    minimumTimeRangeOption,
+    setMinimumTimeRangeOption,
+  } = useMinimumTimeRange();
+  const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
+  const randomSamplerStorage = useRandomSamplerStorage();
   const {
     runCategorizeRequest,
     cancelRequest: cancelCategorizationRequest,
     randomSampler,
-  } = useCategorizeRequest({
-    randomSamplerMode,
-    setRandomSamplerMode: () => {},
-    randomSamplerProbability,
-    setRandomSamplerProbability: () => {},
-  });
-
-  const appState = getDefaultLogCategorizationAppState({
-    searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
-    filters,
-  });
-  const { searchQuery } = useSearch({ dataView, savedSearch: savedSearch ?? null }, appState, true);
-
+  } = useCategorizeRequest(randomSamplerStorage);
+  const [stateFromUrl] = usePageUrlState<LogCategorizationPageUrlState>(
+    'logCategorization',
+    getDefaultLogCategorizationAppState({
+      searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
+    })
+  );
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [selectedField, setSelectedField] = useState<DataViewField | null>(null);
+  const [fields, setFields] = useState<DataViewField[]>([]);
   const [currentDocumentStatsHash, setCurrentDocumentStatsHash] = useState<number | null>(null);
   const [previousDocumentStatsHash, setPreviousDocumentStatsHash] = useState<number>(0);
   const [currentAdditionalConfigsHash, setCurrentAdditionalConfigsHash] = useState<number | null>(
@@ -115,7 +118,11 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   useEffect(
     function initFields() {
       setCurrentDocumentStatsHash(null);
+      setSelectedField(null);
       setLoading(null);
+      const { dataViewFields, messageField } = getMessageField(dataView);
+      setFields(dataViewFields);
+      setSelectedField(messageField);
     },
     [dataView]
   );
@@ -137,6 +144,12 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     [cancelRequest, mounted]
   );
 
+  const { searchQuery } = useSearch(
+    { dataView, savedSearch: savedSearch ?? null },
+    stateFromUrl,
+    true
+  );
+
   const { documentStats, timefilter, earliest, latest, intervalMs, forceRefresh } = useData(
     dataView,
     'log_categorization',
@@ -146,16 +159,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     undefined,
     BAR_TARGET,
     false
-  );
-
-  useEffect(
-    function forceRefreshDataViewChange() {
-      if (currentDocumentStatsHash === null) {
-        forceRefresh();
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentDocumentStatsHash]
   );
 
   const onAddFilter = useCallback(
@@ -177,9 +180,9 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
   const openInDiscover = useOpenInDiscover(
     dataView.id!,
-    fieldName ?? undefined,
+    selectedField ?? undefined,
     selectedCategories,
-    appState,
+    stateFromUrl,
     timefilter,
     false,
     onAddFilter,
@@ -204,31 +207,18 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
   useEffect(
     function createAdditionalConfigHash2() {
-      if (!fieldName) {
+      if (!selectedField?.name) {
         return;
       }
 
-      const hash = createAdditionalConfigHash([
-        dataView.name,
-        fieldName,
-        minimumTimeRangeOption,
-        randomSamplerMode,
-        String(randomSamplerProbability ?? ''),
-      ]);
+      const hash = createAdditionalConfigHash([selectedField.name, minimumTimeRangeOption]);
       if (hash !== previousAdditionalConfigsHash) {
         setCurrentAdditionalConfigsHash(hash);
         setData(null);
         setFieldValidationResult(null);
       }
     },
-    [
-      dataView.name,
-      fieldName,
-      minimumTimeRangeOption,
-      previousAdditionalConfigsHash,
-      randomSamplerMode,
-      randomSamplerProbability,
-    ]
+    [minimumTimeRangeOption, previousAdditionalConfigsHash, selectedField]
   );
 
   const loadCategories = useCallback(async () => {
@@ -237,7 +227,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
     if (
       loading === true ||
-      fieldName === null ||
+      selectedField === null ||
       timeField === undefined ||
       earliest === undefined ||
       latest === undefined ||
@@ -272,12 +262,12 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       }
 
       const [validationResult, categorizationResult] = await Promise.all([
-        runValidateFieldRequest(index, fieldName, timeField, timeRange, searchQuery, {
+        runValidateFieldRequest(index, selectedField.name, timeField, timeRange, searchQuery, {
           [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
         }),
         runCategorizeRequest(
           index,
-          fieldName,
+          selectedField.name,
           timeField,
           { to: timeRange.to, from: timeRange.from },
           searchQuery,
@@ -331,33 +321,21 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       setLoading(false);
     }
   }, [
-    cancelRequest,
     dataView,
-    earliest,
-    embeddingOrigin,
-    fieldName,
-    getMinimumTimeRange,
-    intervalMs,
-    latest,
     loading,
+    selectedField,
+    earliest,
+    latest,
     minimumTimeRangeOption,
-    runCategorizeRequest,
-    runValidateFieldRequest,
+    cancelRequest,
+    getMinimumTimeRange,
     searchQuery,
+    runValidateFieldRequest,
+    embeddingOrigin,
+    runCategorizeRequest,
+    intervalMs,
     toasts,
   ]);
-
-  useEffect(
-    function setOnChange() {
-      if (typeof onChange === 'function') {
-        onChange(data?.categories ?? []);
-      }
-      if (data !== null) {
-        onRenderComplete();
-      }
-    },
-    [data, onChange, onRenderComplete]
-  );
 
   useEffect(
     function triggerAnalysis() {
@@ -393,7 +371,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       documentStats.documentCountStats?.buckets,
       documentStats.totalCount,
       previousAdditionalConfigsHash,
-      dataView.name,
     ]
   );
 
@@ -417,6 +394,26 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
   return (
     <>
+      <DiscoverTabs
+        data={data}
+        fields={fields}
+        loadCategories={loadCategories}
+        minimumTimeRangeOption={minimumTimeRangeOption}
+        openInDiscover={openInDiscover}
+        randomSampler={randomSampler}
+        selectedCategories={selectedCategories}
+        selectedField={selectedField}
+        setMinimumTimeRangeOption={setMinimumTimeRangeOption}
+        setSelectedField={setSelectedField}
+        renderViewModeToggle={renderViewModeToggle}
+        dataview={dataView}
+        earliest={earliest}
+        latest={latest}
+        query={searchQuery}
+      />
+
+      <EuiSpacer size="s" />
+
       <EuiFlexItem css={style}>
         <EuiFlexGroup
           className="eui-fullHeight"
@@ -430,11 +427,16 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
               {(loading ?? true) === true ? (
                 <LoadingCategorization onCancel={cancelRequest} />
               ) : null}
-
+              <InformationText
+                loading={loading ?? true}
+                categoriesLength={data?.categories?.length ?? null}
+                eventRateLength={eventRate.length}
+                fields={fields}
+              />
               {loading === false &&
               data !== null &&
               data.categories.length > 0 &&
-              fieldName !== null ? (
+              selectedField !== null ? (
                 <CategoryTable
                   categories={data.categories}
                   eventRate={eventRate}
@@ -443,7 +445,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
                   setSelectedCategories={setSelectedCategories}
                   openInDiscover={openInDiscover}
                   tableState={tableState}
-                  selectable={false}
                 />
               ) : null}
             </>

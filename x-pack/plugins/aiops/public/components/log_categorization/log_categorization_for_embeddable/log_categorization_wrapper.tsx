@@ -24,8 +24,8 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 import type { AiopsAppDependencies } from '../../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../../hooks/use_aiops_app_context';
-import type { LogCategorizationEmbeddableProps } from './log_categorization_for_embeddable';
-import { LogCategorizationEmbeddable } from './log_categorization_for_embeddable';
+import type { LogCategorizationEmbeddableProps } from './log_categorization_for_discover';
+import { LogCategorizationEmbeddable } from './log_categorization_for_discover';
 
 export interface EmbeddableLogCategorizationDeps {
   theme: ThemeServiceStart;

@@ -19,11 +19,17 @@ import { RANDOM_SAMPLER_OPTION, RANDOM_SAMPLER_SELECT_OPTIONS } from './random_s
 
 interface Props {
   randomSampler: RandomSampler;
+  displayProbability?: boolean;
   calloutPosition?: 'top' | 'bottom';
   reload: () => void;
 }
 
-export const SamplingPanel: FC<Props> = ({ randomSampler, reload, calloutPosition = 'top' }) => {
+export const SamplingPanel: FC<Props> = ({
+  randomSampler,
+  reload,
+  displayProbability = true,
+  calloutPosition = 'top',
+}) => {
   const samplingProbability = useObservable(
     randomSampler.getProbability$(),
     randomSampler.getProbability()
@@ -68,7 +74,7 @@ export const SamplingPanel: FC<Props> = ({ randomSampler, reload, calloutPositio
           }
         )}
         helpText={
-          randomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_AUTOMATIC ? (
+          displayProbability && randomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_AUTOMATIC ? (
             <ProbabilityUsedMessage samplingProbability={samplingProbability} />
           ) : null
         }
