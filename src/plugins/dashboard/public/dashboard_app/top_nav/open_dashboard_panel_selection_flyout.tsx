@@ -154,7 +154,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
             }}
           >
             <EuiForm component="form" fullWidth>
-              <EuiFormRow>
+              <EuiFormRow css={{ backgroundColor: euiTheme.colors.emptyShade }}>
                 <EuiFieldSearch
                   autoFocus
                   value={searchTerm}

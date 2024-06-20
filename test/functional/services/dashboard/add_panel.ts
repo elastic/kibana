@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { scrollIntoViewIfNecessary } from '@kbn/ftr-common-functional-ui-services/services/web_element_wrapper/scroll_into_view_if_necessary';
 import { FtrService } from '../../ftr_provider_context';
 
 export class DashboardAddPanelService extends FtrService {
@@ -66,7 +67,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickVisType(visType: string) {
     this.log.debug('DashboardAddPanel.clickVisType');
-    await this.testSubjects.scrollIntoView(`visType-${visType}`);
+    await this.testSubjects.scrollIntoView(`visType-${visType}`, { topOffset: 80 });
     await this.testSubjects.click(`visType-${visType}`);
   }
 
