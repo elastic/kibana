@@ -8,16 +8,16 @@
 import { CoreStart } from '@kbn/core/public';
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { ServiceList } from '.';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
-import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
+import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
+import { ApmServicesTable } from './apm_services_table';
+import { ServiceHealthStatus } from '../../../../../../common/service_health_status';
+import { ServiceInventoryFieldName } from '../../../../../../common/service_inventory';
+import type { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
+import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { mockApmApiCallResponse } from '../../../../../services/rest/call_apm_api_spy';
 import { items, overflowItems } from './__fixtures__/service_api_mock_data';
 
-type Args = ComponentProps<typeof ServiceList>;
+type Args = ComponentProps<typeof ApmServicesTable>;
 
 const coreMock = {
   http: {
@@ -29,7 +29,7 @@ const coreMock = {
 
 const stories: Meta<Args> = {
   title: 'app/ServiceInventory/ServiceList',
-  component: ServiceList,
+  component: ApmServicesTable,
   decorators: [
     (StoryComponent) => {
       mockApmApiCallResponse('GET /internal/apm/fallback_to_transactions', () => ({
@@ -49,7 +49,7 @@ const stories: Meta<Args> = {
 export default stories;
 
 export const ServiceListWithItems: Story<Args> = (args) => {
-  return <ServiceList {...args} />;
+  return <ApmServicesTable {...args} />;
 };
 ServiceListWithItems.args = {
   status: FETCH_STATUS.SUCCESS,
@@ -62,7 +62,7 @@ ServiceListWithItems.args = {
 };
 
 export const ServiceListEmptyState: Story<Args> = (args) => {
-  return <ServiceList {...args} />;
+  return <ApmServicesTable {...args} />;
 };
 ServiceListEmptyState.args = {
   status: FETCH_STATUS.SUCCESS,
@@ -75,7 +75,7 @@ ServiceListEmptyState.args = {
 };
 
 export const WithHealthWarnings: Story<Args> = (args) => {
-  return <ServiceList {...args} />;
+  return <ApmServicesTable {...args} />;
 };
 WithHealthWarnings.args = {
   status: FETCH_STATUS.SUCCESS,
@@ -88,7 +88,7 @@ WithHealthWarnings.args = {
 };
 
 export const ServiceListWithOverflowBucket: Story<Args> = (args) => {
-  return <ServiceList {...args} />;
+  return <ApmServicesTable {...args} />;
 };
 
 ServiceListWithOverflowBucket.args = {

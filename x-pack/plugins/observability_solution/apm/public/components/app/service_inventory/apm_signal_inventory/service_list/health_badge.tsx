@@ -11,8 +11,8 @@ import {
   getServiceHealthStatusBadgeColor,
   getServiceHealthStatusLabel,
   ServiceHealthStatus,
-} from '../../../../../common/service_health_status';
-import { useTheme } from '../../../../hooks/use_theme';
+} from '../../../../../../common/service_health_status';
+import { useTheme } from '../../../../../hooks/use_theme';
 
 export function HealthBadge({ healthStatus }: { healthStatus: ServiceHealthStatus }) {
   const theme = useTheme();
