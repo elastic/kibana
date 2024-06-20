@@ -233,6 +233,9 @@ describe('mappingFromFieldMap', () => {
                 maintenance_window_ids: {
                   type: 'keyword',
                 },
+                muted: {
+                  type: 'boolean',
+                },
                 instance: {
                   properties: {
                     id: {

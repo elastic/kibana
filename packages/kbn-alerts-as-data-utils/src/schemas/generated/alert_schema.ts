@@ -93,6 +93,7 @@ const AlertOptional = rt.partial({
   'kibana.alert.flapping_history': schemaBooleanArray,
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
+  'kibana.alert.muted': schemaBoolean,
   'kibana.alert.reason': schemaString,
   'kibana.alert.rule.execution.timestamp': schemaDate,
   'kibana.alert.rule.execution.uuid': schemaString,

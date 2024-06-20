@@ -17,6 +17,7 @@ import {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_MUTED,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -80,6 +81,11 @@ export const alertFieldMap = {
   [ALERT_MAINTENANCE_WINDOW_IDS]: {
     type: 'keyword',
     array: true,
+    required: false,
+  },
+  [ALERT_MUTED]: {
+    type: 'boolean',
+    array: false,
     required: false,
   },
   [ALERT_CONSECUTIVE_MATCHES]: {

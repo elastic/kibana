@@ -137,6 +137,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.host.criticality_level': schemaString,
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
+  'kibana.alert.muted': schemaBoolean,
   'kibana.alert.new_terms': schemaStringArray,
   'kibana.alert.original_event.agent_id_status': schemaString,
   'kibana.alert.original_event.code': schemaString,

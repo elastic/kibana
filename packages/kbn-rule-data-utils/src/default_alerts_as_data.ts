@@ -43,6 +43,9 @@ const ALERT_FLAPPING_HISTORY = `${ALERT_NAMESPACE}.flapping_history` as const;
 // kibana.alert.maintenance_window_ids - IDs of maintenance windows that are affecting this alert
 const ALERT_MAINTENANCE_WINDOW_IDS = `${ALERT_NAMESPACE}.maintenance_window_ids` as const;
 
+// kibana.alert.muted - muted status of the rule when the alert was generated
+const ALERT_MUTED = `${ALERT_NAMESPACE}.muted` as const;
+
 // kibana.alert.consecutive_matches - count of consecutive times the alert has been active
 const ALERT_CONSECUTIVE_MATCHES = `${ALERT_NAMESPACE}.consecutive_matches` as const;
 
@@ -129,6 +132,7 @@ const fields = {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_MUTED,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -171,6 +175,7 @@ export {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_MUTED,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,

@@ -839,6 +839,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -1895,6 +1900,11 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.new_terms": Object {
       "array": true,
@@ -2953,6 +2963,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -4010,6 +4025,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -5066,6 +5086,11 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.new_terms": Object {
       "array": true,
@@ -6130,6 +6155,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -7187,6 +7217,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -8243,6 +8278,11 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.new_terms": Object {
       "array": true,

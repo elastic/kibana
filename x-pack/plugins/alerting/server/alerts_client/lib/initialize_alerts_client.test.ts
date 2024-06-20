@@ -84,6 +84,7 @@ describe('initializeAlertsClient', () => {
       logger,
       maxAlerts: 100,
       rule: mockedRule,
+      muted: false,
       ruleType: ruleTypeWithAlerts,
       startedAt,
       taskInstance: mockedTaskInstance,
@@ -99,6 +100,7 @@ describe('initializeAlertsClient', () => {
         executionId: 'abc',
         id: '1',
         name: 'rule-name',
+        muted: false,
         parameters: {
           bar: true,
         },
@@ -137,6 +139,7 @@ describe('initializeAlertsClient', () => {
       logger,
       maxAlerts: 100,
       rule: mockedRule,
+      muted: false,
       ruleType: ruleTypeWithAlerts,
       startedAt: mockedTaskInstance.startedAt,
       taskInstance: mockedTaskInstance,
@@ -152,6 +155,7 @@ describe('initializeAlertsClient', () => {
         executionId: 'abc',
         id: '1',
         name: 'rule-name',
+        muted: false,
         parameters: {
           bar: true,
         },
@@ -191,6 +195,7 @@ describe('initializeAlertsClient', () => {
       logger,
       maxAlerts: 100,
       rule: mockedRule,
+      muted: false,
       ruleType: ruleTypeWithAlerts,
       startedAt: mockedTaskInstance.startedAt,
       taskInstance: mockedTaskInstance,
@@ -206,6 +211,7 @@ describe('initializeAlertsClient', () => {
         executionId: 'abc',
         id: '1',
         name: 'rule-name',
+        muted: false,
         parameters: {
           bar: true,
         },
@@ -250,6 +256,7 @@ describe('initializeAlertsClient', () => {
       logger,
       maxAlerts: 100,
       rule: mockedRule,
+      muted: false,
       ruleType: ruleTypeWithAlerts,
       startedAt: mockedTaskInstance.startedAt,
       taskInstance: mockedTaskInstance,
@@ -265,6 +272,7 @@ describe('initializeAlertsClient', () => {
         executionId: 'abc',
         id: '1',
         name: 'rule-name',
+        muted: false,
         parameters: {
           bar: true,
         },

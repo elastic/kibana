@@ -21,6 +21,7 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
+  ALERT_MUTED,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -162,6 +163,7 @@ const fetchedAlert1 = {
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MUTED]: false,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
   [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -193,6 +195,7 @@ const fetchedAlert2 = {
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_INSTANCE_ID]: '2',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MUTED]: false,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
   [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -224,6 +227,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MUTED]: false,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
   [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -523,6 +527,39 @@ describe('Alerts Client', () => {
           });
         });
 
+        test('should index a new alert when alert is muted', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            rule: { ...alertsClientParams.rule, muted: true },
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 1 new alert
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+
+          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
+          const uuid1 = alertsToReturn['1'].meta?.uuid;
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith({
+            index: '.alerts-test.alerts-default',
+            refresh: true,
+            require_alias: !useDataStreamForAlerts,
+            body: [
+              {
+                create: { _id: uuid1, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
+              },
+              // new alert doc
+              getNewIndexedAlertDoc({ [ALERT_UUID]: uuid1, [ALERT_MUTED]: true }),
+            ],
+          });
+        });
+
         test('should not index new alerts if the activeCount is less than the rule alertDelay', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
             ...alertsClientParams,
@@ -669,6 +706,7 @@ describe('Alerts Client', () => {
                 kibana: {
                   alert: {
                     instance: { id: '1' },
+                    muted: false,
                     start: '2023-03-28T12:27:28.159Z',
                     uuid: 'abc',
                   },
@@ -951,6 +989,7 @@ describe('Alerts Client', () => {
                 kibana: {
                   alert: {
                     instance: { id: '2' },
+                    muted: false,
                     start: '2023-03-28T02:27:28.159Z',
                     uuid: 'def',
                   },
@@ -1001,6 +1040,7 @@ describe('Alerts Client', () => {
                 kibana: {
                   alert: {
                     instance: { id: '1' },
+                    muted: false,
                     uuid: 'abc',
                   },
                 },

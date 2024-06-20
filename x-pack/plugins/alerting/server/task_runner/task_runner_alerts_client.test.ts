@@ -78,6 +78,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MUTED,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
@@ -316,6 +317,7 @@ describe('Task Runner', () => {
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             id: '1',
             name: 'rule-name',
+            muted: false,
             parameters: {
               bar: true,
             },
@@ -571,6 +573,7 @@ describe('Task Runner', () => {
               [ALERT_FLAPPING_HISTORY]: [true],
               [ALERT_INSTANCE_ID]: '1',
               [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+              [ALERT_MUTED]: false,
               [ALERT_RULE_CATEGORY]: 'My test rule',
               [ALERT_RULE_CONSUMER]: 'bar',
               [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
