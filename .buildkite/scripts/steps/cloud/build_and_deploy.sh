@@ -82,16 +82,9 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
 
   echo "Writing to vault..."
 
-  # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
-  if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-    VAULT_ROLE_ID="$(get_vault_role_id)"
-    VAULT_SECRET_ID="$(get_vault_secret_id)"
-    VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-    retry 5 30 vault login -no-print "$VAULT_TOKEN"
-    vault_set "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
-  else
-    vault_kv_set "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
-  fi
+  set_in_legacy_vault "$CLOUD_DEPLOYMENT_NAME" \
+    username="$CLOUD_DEPLOYMENT_USERNAME" \
+    password="$CLOUD_DEPLOYMENT_PASSWORD"
 
   echo "Enabling Stack Monitoring..."
   jq '
@@ -123,28 +116,23 @@ else
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
 fi
 
-# TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
-if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-  VAULT_READ_COMMAND="vault read $VAULT_PATH_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME"
-else
-  VAULT_READ_COMMAND="vault kv get $VAULT_KV_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME"
-fi
+VAULT_READ_COMMAND=$(print_legacy_vault_read "$CLOUD_DEPLOYMENT_NAME")
 
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
 
 cat << EOF | buildkite-agent annotate --style "info" --context cloud
-  ### Cloud Deployment
+### Cloud Deployment
 
-  Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL
+Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL
 
-  Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
+Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
-  Credentials: \`$VAULT_READ_COMMAND\`
+Credentials: \`$VAULT_READ_COMMAND\`
 
-  Kibana image: \`$KIBANA_CLOUD_IMAGE\`
+Kibana image: \`$KIBANA_CLOUD_IMAGE\`
 
-  Elasticsearch image: \`$ELASTICSEARCH_CLOUD_IMAGE\`
+Elasticsearch image: \`$ELASTICSEARCH_CLOUD_IMAGE\`
 EOF
 
 buildkite-agent meta-data set pr_comment:deploy_cloud:head "* [Cloud Deployment](${CLOUD_DEPLOYMENT_KIBANA_URL})"

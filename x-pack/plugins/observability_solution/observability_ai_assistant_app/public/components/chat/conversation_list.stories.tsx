@@ -7,7 +7,8 @@
 
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
-import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
+import { buildConversation } from '../../utils/builders';
+import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator.stories';
 import { ConversationList as Component } from './conversation_list';
 
 type ConversationListProps = React.ComponentProps<typeof Component>;
@@ -28,25 +29,64 @@ const Wrapper = (props: ConversationListProps) => {
   );
 };
 
-export const ChatHeaderLoading: ComponentStoryObj<typeof Component> = {
-  args: {},
-  render: Wrapper,
-};
-
-export const ChatHeaderError: ComponentStoryObj<typeof Component> = {
-  args: {},
-  render: Wrapper,
-};
-
-export const ChatHeaderLoaded: ComponentStoryObj<typeof Component> = {
+export const ConversationListLoading: ComponentStoryObj<typeof Component> = {
   args: {
+    conversations: {
+      loading: true,
+      error: undefined,
+      value: { conversations: [] },
+      refresh: () => {},
+    },
+    isLoading: true,
+  },
+  render: Wrapper,
+};
+
+export const ConversationListError: ComponentStoryObj<typeof Component> = {
+  args: {
+    conversations: {
+      loading: false,
+      error: new Error('Failed to load conversations'),
+      value: { conversations: [] },
+      refresh: () => {},
+    },
+    isLoading: false,
+  },
+  render: Wrapper,
+};
+
+export const ConversationListLoaded: ComponentStoryObj<typeof Component> = {
+  args: {
+    conversations: {
+      loading: false,
+      error: undefined,
+      value: {
+        conversations: [
+          buildConversation({
+            conversation: {
+              id: 'foo',
+              title: 'Why is database service responding with errors after I did rm -rf /postgres',
+              last_updated: '',
+            },
+          }),
+        ],
+      },
+      refresh: () => {},
+    },
     selectedConversationId: '',
   },
   render: Wrapper,
 };
 
-export const ChatHeaderEmpty: ComponentStoryObj<typeof Component> = {
+export const ConversationListEmpty: ComponentStoryObj<typeof Component> = {
   args: {
+    conversations: {
+      loading: false,
+      error: undefined,
+      value: { conversations: [] },
+      refresh: () => {},
+    },
+    isLoading: false,
     selectedConversationId: '',
   },
   render: Wrapper,

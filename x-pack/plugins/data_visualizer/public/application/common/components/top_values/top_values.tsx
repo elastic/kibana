@@ -43,6 +43,8 @@ interface Props {
 function getPercentLabel(percent: number): string {
   if (percent >= 0.1) {
     return `${roundToDecimalPlace(percent, 1)}%`;
+  } else if (percent === 0) {
+    return '0%';
   } else {
     return '< 0.1%';
   }
@@ -69,7 +71,7 @@ export const TopValues: FC<Props> = ({
   } = useDataVisualizerKibana();
 
   if (stats === undefined || !stats.topValues) return null;
-  const { fieldName, sampleCount } = stats;
+  const { fieldName, sampleCount, approximate } = stats;
 
   const originalTopValues = (showSampledValues ? stats.sampledValues : stats.topValues) ?? [];
   if (originalTopValues?.length === 0) return null;
@@ -96,12 +98,28 @@ export const TopValues: FC<Props> = ({
         />
       );
     }
+    /**
+     * For ES|QL, where are randomly sampling a subset from source data, then query is excuted on top of that data
+     * So the terms we get might not get the initial count
+     */
+    const method = approximate ? (
+      <FormattedMessage
+        id="xpack.dataVisualizer.dataGrid.field.topValues.estimatedMsg"
+        defaultMessage="Estimated"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedMsg"
+        defaultMessage="Calculated"
+      />
+    );
 
     return totalDocuments > (sampleCount ?? 0) ? (
       <FormattedMessage
         id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel"
-        defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
+        defaultMessage="{method} from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
         values={{
+          method,
           sampledDocuments: sampleCount,
           sampledDocumentsFormatted: (
             <strong>
@@ -115,8 +133,9 @@ export const TopValues: FC<Props> = ({
     ) : (
       <FormattedMessage
         id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel"
-        defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
+        defaultMessage="{method} from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
         values={{
+          method,
           totalDocuments,
           totalDocumentsFormatted: (
             <strong>
@@ -141,6 +160,7 @@ export const TopValues: FC<Props> = ({
       typeof bucket.percent === 'number' ? bucket.percent : bucket.doc_count / totalDocuments,
   }));
 
+  const shouldShowOtherCount = approximate !== true;
   const topValuesOtherCountPercent =
     1 - (topValues ? topValues.reduce((acc, bucket) => acc + bucket.percent, 0) : 0);
   const topValuesOtherCount = Math.floor(topValuesOtherCountPercent * (sampleCount ?? 0));
@@ -246,7 +266,7 @@ export const TopValues: FC<Props> = ({
               );
             })
           : null}
-        {topValuesOtherCount > 0 ? (
+        {shouldShowOtherCount && topValuesOtherCount > 0 ? (
           <EuiFlexGroup gutterSize="xs" alignItems="center" key="other">
             <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
               <EuiProgress

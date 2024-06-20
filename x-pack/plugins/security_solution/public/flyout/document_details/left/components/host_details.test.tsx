@@ -63,7 +63,7 @@ jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
-jest.mock('../../../../common/containers/sourcerer', () => ({
+jest.mock('../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ selectedPatterns: ['index'] }),
 }));
 

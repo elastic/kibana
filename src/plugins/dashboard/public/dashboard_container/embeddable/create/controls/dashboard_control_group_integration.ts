@@ -9,10 +9,11 @@
 import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
-import { apiPublishesDataLoading, PublishingSubject } from '@kbn/presentation-publishing';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
+import { apiPublishesDataLoading, PublishesDataLoading } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { isEqual } from 'lodash';
-import { combineLatest, distinctUntilChanged, map, Observable, skip, switchMap } from 'rxjs';
+import { distinctUntilChanged, Observable, skip } from 'rxjs';
 import { DashboardContainerInput } from '../../../../../common';
 import { DashboardContainer } from '../../dashboard_container';
 
@@ -96,20 +97,14 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
 
   // the Control Group needs to know when any dashboard children are loading in order to know when to move on to the next time slice when playing.
   this.integrationSubscriptions.add(
-    this.children$
-      .pipe(
-        switchMap((children) => {
-          const definedDataLoadingSubjects: Array<PublishingSubject<boolean | undefined>> = [];
-          for (const child of Object.values(children)) {
-            if (apiPublishesDataLoading(child)) {
-              definedDataLoadingSubjects.push(child.dataLoading);
-            }
-          }
-          return combineLatest(definedDataLoadingSubjects).pipe(
-            map((values) => values.some(Boolean))
-          );
-        })
-      )
+    combineCompatibleChildrenApis<PublishesDataLoading, boolean>(
+      this,
+      'dataLoading',
+      apiPublishesDataLoading,
+      false,
+      (childrenLoading) => childrenLoading.some(Boolean)
+    )
+      .pipe(skip(1)) // skip the initial output of "false"
       .subscribe((anyChildLoading) =>
         this.controlGroup?.anyControlOutputConsumerLoading$.next(anyChildLoading)
       )

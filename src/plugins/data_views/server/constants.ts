@@ -98,3 +98,22 @@ export const INITIAL_REST_VERSION_INTERNAL = '1';
  * Default field caps cache max-age in seconds
  */
 export const DEFAULT_FIELD_CACHE_FRESHNESS = 5;
+
+/**
+ * Operation summaries
+ */
+export const CREATE_DATA_VIEW_DESCRIPTION = 'Create a data view';
+export const CREATE_RUNTIME_FIELD_DESCRIPTION = 'Create a runtime field';
+export const CREATE_UPDATE_RUNTIME_FIELD_DESCRIPTION = 'Create or update a runtime field';
+export const DELETE_DATA_VIEW_DESCRIPTION = 'Delete a data view';
+export const DELETE_RUNTIME_FIELD_DESCRIPTION = 'Delete a runtime field from a data view';
+export const GET_DATA_VIEW_DESCRIPTION = 'Get a data view';
+export const GET_DATA_VIEWS_DESCRIPTION = 'Get all data views';
+export const GET_DEFAULT_DATA_VIEW_DESCRIPTION = 'Get the default data view';
+export const GET_RUNTIME_FIELD_DESCRIPTION = 'Get a runtime field';
+export const PREVIEW_SWAP_REFERENCES_DESCRIPTION = 'Preview swapping saved object references';
+export const SET_DEFAULT_DATA_VIEW_DESCRIPTION = 'Set the default data view';
+export const SWAP_REFERENCES_DESCRIPTION = 'Swap saved object references for a data view';
+export const UPDATE_DATA_VIEW_DESCRIPTION = 'Update a data view';
+export const UPDATE_DATA_VIEW_FIELDS_DESCRIPTION = 'Update data view fields metadata';
+export const UPDATE_RUNTIME_FIELD_DESCRIPTION = 'Update a runtime field';

@@ -88,16 +88,10 @@ deploy() {
 
     echo "Write to vault..."
 
-    # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
-    if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-      VAULT_ROLE_ID="$(get_vault_role_id)"
-      VAULT_SECRET_ID="$(get_vault_secret_id)"
-      VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-      retry 5 30 vault login -no-print "$VAULT_TOKEN"
-      vault_set "cloud-deploy/$VAULT_KEY_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
-    else
-      vault_kv_set "cloud-deploy/$VAULT_KEY_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
-    fi
+    set_in_legacy_vault "$VAULT_KEY_NAME" \
+     username="$PROJECT_USERNAME" \
+     password="$PROJECT_PASSWORD" \
+     id="$PROJECT_ID"
 
   else
     echo "Updating project..."
@@ -118,12 +112,7 @@ deploy() {
   PROJECT_KIBANA_LOGIN_URL="${PROJECT_KIBANA_URL}/login"
   PROJECT_ELASTICSEARCH_URL=$(jq -r '.endpoints.elasticsearch' $PROJECT_INFO_LOGS)
 
-  # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
-  if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-    VAULT_READ_COMMAND="vault read $VAULT_PATH_PREFIX/cloud-deploy/$VAULT_KEY_NAME"
-  else
-    VAULT_READ_COMMAND="vault kv get $VAULT_KV_PREFIX/cloud-deploy/$VAULT_KEY_NAME"
-  fi
+  VAULT_READ_COMMAND=$(print_legacy_vault_read "$VAULT_KEY_NAME")
 
   cat << EOF | buildkite-agent annotate --style "info" --context "project-$PROJECT_TYPE"
 ### $PROJECT_TYPE_LABEL Deployment

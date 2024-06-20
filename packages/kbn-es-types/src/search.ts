@@ -673,7 +673,7 @@ export interface ESQLColumn {
 
 export type ESQLRow = unknown[];
 
-export interface ESQLSearchReponse {
+export interface ESQLSearchResponse {
   columns: ESQLColumn[];
   // In case of ?drop_null_columns in the query, then
   // all_columns will have available and empty fields
@@ -688,7 +688,6 @@ export interface ESQLSearchParams {
   // https://github.com/elastic/elasticsearch/pull/102767
   // time_zone?: string;
   query: string;
-  version: string;
   filter?: unknown;
   locale?: string;
   dropNullColumns?: boolean;

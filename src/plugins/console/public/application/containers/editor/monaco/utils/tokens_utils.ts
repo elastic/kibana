@@ -25,7 +25,7 @@ export const parseLine = (line: string): ParsedLineTokens => {
   // try to parse into method and url (split on whitespace)
   const parts = line.split(whitespacesRegex);
   // 1st part is the method
-  const method = parts[0];
+  const method = parts[0].toUpperCase();
   // 2nd part is the url
   const url = parts[1];
   // try to parse into url path and url params (split on question mark)
@@ -228,7 +228,7 @@ export const parseBody = (value: string): string[] => {
         break;
       }
       case 'f': {
-        if (peek(1) === 'a' && peek(2) === 'l' && peek(3) === 's' && peek(3) === 'e') {
+        if (peek(1) === 'a' && peek(2) === 'l' && peek(3) === 's' && peek(4) === 'e') {
           next();
           next();
           next();

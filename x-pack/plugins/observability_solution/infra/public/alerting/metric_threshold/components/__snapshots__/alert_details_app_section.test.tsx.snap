@@ -17,10 +17,6 @@ Array [
       />,
     ],
     "chartType": "line",
-    "derivedIndexPattern": Object {
-      "fields": Array [],
-      "title": "metricbeat-*",
-    },
     "expression": Object {
       "aggType": "count",
       "comparator": ">",
@@ -38,9 +34,6 @@ Array [
       "host-1",
     ],
     "hideTitle": true,
-    "source": Object {
-      "id": "default",
-    },
     "timeRange": Object {
       "from": "2023-03-28T10:43:13.802Z",
       "to": "2023-03-29T13:14:09.581Z",
