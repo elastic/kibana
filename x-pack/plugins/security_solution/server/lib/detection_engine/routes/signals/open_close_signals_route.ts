@@ -14,7 +14,7 @@ import {
 } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
