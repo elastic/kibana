@@ -7,7 +7,7 @@
 import {
   Aggregators,
   CustomThresholdExpressionMetric,
-} from '../../../../../common/custom_threshold_rule/types';
+} from '../../../common/custom_threshold_rule/types';
 import { getBufferThreshold, getLensOperationFromRuleMetric, lensFieldFormatter } from './helpers';
 const useCases = [
   [

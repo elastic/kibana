@@ -814,18 +814,22 @@ export class DashboardContainer
   public saveNotification$: Subject<void> = new Subject<void>();
 
   public getSerializedStateForChild = (childId: string) => {
-    const panelState = this.getInput().panels[childId];
-    const references = [
-      ...getReferencesForPanelId(childId, this.savedObjectReferences),
-      ...(panelState.references ?? []),
-    ];
+    const rawState = this.getInput().panels[childId].explicitInput;
+    const { id, ...serializedState } = rawState;
+    if (!rawState || Object.keys(serializedState).length === 0) return;
+    const references = getReferencesForPanelId(childId, this.savedObjectReferences);
     return {
-      rawState: panelState.explicitInput,
+      rawState,
       references,
     };
   };
 
-  public restoredRuntimeState: UnsavedPanelState | undefined = undefined;
+  private restoredRuntimeState: UnsavedPanelState | undefined = undefined;
+  public setRuntimeStateForChild = (childId: string, state: object) => {
+    const runtimeState = this.restoredRuntimeState ?? {};
+    runtimeState[childId] = state;
+    this.restoredRuntimeState = runtimeState;
+  };
   public getRuntimeStateForChild = (childId: string) => {
     return this.restoredRuntimeState?.[childId];
   };

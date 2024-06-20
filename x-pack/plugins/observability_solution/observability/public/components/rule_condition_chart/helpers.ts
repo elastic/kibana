@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import {
-  Aggregators,
-  CustomThresholdExpressionMetric,
-} from '../../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../common/custom_threshold_rule/types';
+import { GenericMetric } from './rule_condition_chart';
 
-export const getLensOperationFromRuleMetric = (metric: CustomThresholdExpressionMetric): string => {
+export const getLensOperationFromRuleMetric = (metric: GenericMetric): string => {
   const { aggType, field, filter } = metric;
   let operation: string = aggType;
   const operationArgs: string[] = [];
@@ -56,7 +54,7 @@ export const LensFieldFormat = {
 } as const;
 
 export const lensFieldFormatter = (
-  metrics: CustomThresholdExpressionMetric[]
+  metrics: GenericMetric[]
 ): typeof LensFieldFormat[keyof typeof LensFieldFormat] => {
   if (metrics.length < 1 || !metrics[0].field) return LensFieldFormat.NUMBER;
   const firstMetricField = metrics[0].field;
@@ -65,5 +63,5 @@ export const lensFieldFormatter = (
   return LensFieldFormat.NUMBER;
 };
 
-export const isRate = (metrics: CustomThresholdExpressionMetric[]): boolean =>
+export const isRate = (metrics: GenericMetric[]): boolean =>
   Boolean(metrics.length > 0 && metrics[0].aggType === Aggregators.RATE);

@@ -26,10 +26,12 @@ import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { EventsAsUnit } from '../../../../../common/constants';
-import { CustomThresholdSearchSourceFields } from '../../../../../common/custom_threshold_rule/types';
-import { useKibana } from '../../../../utils/kibana_react';
-import { MetricExpression } from '../../types';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { TimeUnitChar } from '../../../common';
+import { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside_comparator';
+import { EventsAsUnit } from '../../../common/constants';
+import { Aggregators } from '../../../common/custom_threshold_rule/types';
+import { useKibana } from '../../utils/kibana_react';
 import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
 import {
   lensFieldFormatter,
@@ -38,15 +40,38 @@ import {
   isRate,
   LensFieldFormat,
 } from './helpers';
-
 interface ChartOptions {
   seriesType?: SeriesType;
   interval?: string;
 }
 
+interface GenericSearchSourceFields extends SerializedSearchSourceFields {
+  query?: Query;
+  filter?: Array<Pick<Filter, 'meta' | 'query'>>;
+}
+
+export type GenericAggType = Aggregators | 'custom';
+
+export interface GenericMetric {
+  aggType: GenericAggType;
+  name: string;
+  field?: string;
+  filter?: string;
+}
+
+export interface RuleConditionChartExpressions {
+  metrics: GenericMetric[];
+  threshold: number[];
+  comparator: COMPARATORS | LEGACY_COMPARATORS;
+  warningThreshold?: number[];
+  warningComparator?: COMPARATORS | LEGACY_COMPARATORS;
+  timeSize?: number;
+  timeUnit?: TimeUnitChar;
+  equation?: string;
+}
 interface RuleConditionChartProps {
-  metricExpression: MetricExpression;
-  searchConfiguration: CustomThresholdSearchSourceFields;
+  metricExpression: RuleConditionChartExpressions;
+  searchConfiguration: GenericSearchSourceFields;
   dataView?: DataView;
   groupBy?: string | string[];
   error?: IErrorObject;
@@ -76,11 +101,22 @@ export function RuleConditionChart({
     services: { lens },
   } = useKibana();
   const { euiTheme } = useEuiTheme();
-  const { metrics, timeSize, timeUnit, threshold, comparator, equation } = metricExpression;
+  const {
+    metrics,
+    timeSize,
+    timeUnit,
+    threshold,
+    comparator,
+    equation,
+    warningComparator,
+    warningThreshold,
+  } = metricExpression;
   const [attributes, setAttributes] = useState<LensAttributes>();
   const [aggMap, setAggMap] = useState<AggMap>();
   const [formula, setFormula] = useState<string>('');
   const [thresholdReferenceLine, setThresholdReferenceLine] = useState<XYReferenceLinesLayer[]>();
+  const [warningThresholdReferenceLine, setWarningThresholdReferenceLine] =
+    useState<XYReferenceLinesLayer[]>();
   const [alertAnnotation, setAlertAnnotation] = useState<XYByValueAnnotationsLayer>();
   const [chartLoading, setChartLoading] = useState<boolean>(false);
   const filters = [...(searchConfiguration.filter || []), ...additionalFilters];
@@ -98,13 +134,13 @@ export function RuleConditionChart({
         const paragraphElements = errorDiv.querySelectorAll('p');
         if (!paragraphElements || paragraphElements.length < 2) return;
         paragraphElements[0].innerText = i18n.translate(
-          'xpack.observability.customThreshold.rule..charts.error_equation.title',
+          'xpack.observability.ruleCondition.chart.error_equation.title',
           {
             defaultMessage: 'An error occurred while rendering the chart',
           }
         );
         paragraphElements[1].innerText = i18n.translate(
-          'xpack.observability.customThreshold.rule..charts.error_equation.description',
+          'xpack.observability.ruleCondition.chart.error_equation.description',
           {
             defaultMessage: 'Check the rule equation.',
           }
@@ -112,6 +148,77 @@ export function RuleConditionChart({
       }
     });
   }, [chartLoading, attributes]);
+
+  // Build the warning threshold reference line
+  useEffect(() => {
+    if (!warningThreshold) {
+      if (warningThresholdReferenceLine?.length) {
+        setWarningThresholdReferenceLine([]);
+      }
+      return;
+    }
+    const refLayers = [];
+    if (
+      warningComparator === COMPARATORS.NOT_BETWEEN ||
+      (warningComparator === COMPARATORS.BETWEEN && warningThreshold.length === 2)
+    ) {
+      const refLineStart = new XYReferenceLinesLayer({
+        data: [
+          {
+            value: (warningThreshold[0] || 0).toString(),
+            color: euiTheme.colors.warning,
+            fill: warningComparator === COMPARATORS.NOT_BETWEEN ? 'below' : 'none',
+          },
+        ],
+      });
+      const refLineEnd = new XYReferenceLinesLayer({
+        data: [
+          {
+            value: (warningThreshold[1] || 0).toString(),
+            color: euiTheme.colors.warning,
+            fill: warningComparator === COMPARATORS.NOT_BETWEEN ? 'above' : 'none',
+          },
+        ],
+      });
+
+      refLayers.push(refLineStart, refLineEnd);
+    } else {
+      let fill: FillStyle = 'above';
+      if (
+        warningComparator === COMPARATORS.LESS_THAN ||
+        warningComparator === COMPARATORS.LESS_THAN_OR_EQUALS
+      ) {
+        fill = 'below';
+      }
+      const warningThresholdRefLine = new XYReferenceLinesLayer({
+        data: [
+          {
+            value: (warningThreshold[0] || 0).toString(),
+            color: euiTheme.colors.warning,
+            fill,
+          },
+        ],
+      });
+      // A transparent line to add extra buffer at the top of threshold
+      const bufferRefLine = new XYReferenceLinesLayer({
+        data: [
+          {
+            value: getBufferThreshold(warningThreshold[0]),
+            color: 'transparent',
+            fill,
+          },
+        ],
+      });
+      refLayers.push(warningThresholdRefLine, bufferRefLine);
+    }
+    setWarningThresholdReferenceLine(refLayers);
+  }, [
+    warningThreshold,
+    warningComparator,
+    euiTheme.colors.warning,
+    metrics,
+    warningThresholdReferenceLine?.length,
+  ]);
 
   // Build the threshold reference line
   useEffect(() => {
@@ -225,7 +332,7 @@ export function RuleConditionChart({
     const baseLayer = {
       type: 'formula',
       value: formula,
-      label: 'Custom Threshold',
+      label: formula,
       groupBy,
       format: {
         id: formatId,
@@ -272,6 +379,9 @@ export function RuleConditionChart({
     const layers: Array<XYDataLayer | XYReferenceLinesLayer | XYByValueAnnotationsLayer> = [
       xyDataLayer,
     ];
+    if (warningThresholdReferenceLine) {
+      layers.push(...warningThresholdReferenceLine);
+    }
     if (thresholdReferenceLine) {
       layers.push(...thresholdReferenceLine);
     }
@@ -311,13 +421,14 @@ export function RuleConditionChart({
     timeSize,
     timeUnit,
     seriesType,
+    warningThresholdReferenceLine,
   ]);
 
   if (
     !dataView ||
     !attributes ||
     error?.equation ||
-    Object.keys(error?.metrics || {}).length !== 0 ||
+    Object.keys(error?.metrics || error?.metric || {}).length !== 0 ||
     !timeSize ||
     !timeRange
   ) {
@@ -329,7 +440,7 @@ export function RuleConditionChart({
           data-test-subj="thresholdRuleNoChartData"
           body={
             <FormattedMessage
-              id="xpack.observability.customThreshold.rule..charts.noData.title"
+              id="xpack.observability.customThreshold.rule.charts.noData.title"
               defaultMessage="No chart data available, check the rule {errorSourceField}"
               values={{
                 errorSourceField:
@@ -345,12 +456,11 @@ export function RuleConditionChart({
       </div>
     );
   }
-
   return (
     <div>
       <lens.EmbeddableComponent
         onLoad={setChartLoading}
-        id="customThresholdPreviewChart"
+        id="ruleConditionChart"
         style={{ height: 180 }}
         timeRange={timeRange}
         attributes={attributes}
