@@ -14,7 +14,6 @@ import {
   AlertInstanceContext as AlertContext,
   RuleExecutorOptions,
   AlertsClientError,
-  IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
@@ -171,10 +170,7 @@ export const registerSyntheticsStatusCheckRule = (
         state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
       };
     },
-    alerts: {
-      ...UptimeRuleTypeAlertDefinition,
-      shouldWrite: true,
-    } as IRuleTypeAlerts<MonitorStatusAlert>,
+    alerts: UptimeRuleTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

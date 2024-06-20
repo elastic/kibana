@@ -354,8 +354,9 @@ export const generateFilterDSL = async (
 
 export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
 
-export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts = {
+export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityUptimeAlert> = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
   mappings: { fieldMap: uptimeRuleTypeFieldMap },
   useLegacyAlerts: true,
+  shouldWrite: true,
 };
