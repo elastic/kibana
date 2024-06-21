@@ -6,13 +6,21 @@
  */
 import type { Plugin as PluginClass } from '@kbn/core/public';
 import { GetHostsOptionsPublic } from '../common/types_client';
-import { GetHostAssetsResponse } from '../common/types_api';
+import {
+  DisableManagedEntityResponse,
+  EnableManagedEntityResponse,
+  GetHostAssetsResponse,
+  ManagedEntityEnabledResponse,
+} from '../common/types_api';
+
 export interface AssetManagerPublicPluginSetup {
   publicAssetsClient: IPublicAssetsClient;
+  entityClient: IEntityClient;
 }
 
 export interface AssetManagerPublicPluginStart {
   publicAssetsClient: IPublicAssetsClient;
+  entityClient: IEntityClient;
 }
 
 export type AssetManagerPluginClass = PluginClass<
@@ -22,4 +30,10 @@ export type AssetManagerPluginClass = PluginClass<
 
 export interface IPublicAssetsClient {
   getHosts: (options: GetHostsOptionsPublic) => Promise<GetHostAssetsResponse>;
+}
+
+export interface IEntityClient {
+  isManagedEntityDiscoveryEnabled: () => Promise<ManagedEntityEnabledResponse>;
+  enableManagedEntityDiscovery: () => Promise<EnableManagedEntityResponse>;
+  disableManagedEntityDiscovery: () => Promise<DisableManagedEntityResponse>;
 }

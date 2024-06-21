@@ -17,17 +17,13 @@
 import { z } from 'zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
+import { SortOrder } from '../common_attributes.gen';
 import { PromptResponse } from './bulk_crud_prompts_route.gen';
 
 export type FindPromptsSortField = z.infer<typeof FindPromptsSortField>;
 export const FindPromptsSortField = z.enum(['created_at', 'is_default', 'name', 'updated_at']);
 export type FindPromptsSortFieldEnum = typeof FindPromptsSortField.enum;
 export const FindPromptsSortFieldEnum = FindPromptsSortField.enum;
-
-export type SortOrder = z.infer<typeof SortOrder>;
-export const SortOrder = z.enum(['asc', 'desc']);
-export type SortOrderEnum = typeof SortOrder.enum;
-export const SortOrderEnum = SortOrder.enum;
 
 export type FindPromptsRequestQuery = z.infer<typeof FindPromptsRequestQuery>;
 export const FindPromptsRequestQuery = z.object({

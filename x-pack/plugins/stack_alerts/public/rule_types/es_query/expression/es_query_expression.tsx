@@ -345,7 +345,9 @@ export const EsQueryExpression: React.FC<
         errors={errors}
         hasValidationErrors={hasExpressionValidationErrors(currentRuleParams, isServerless)}
         onTestFetch={onTestQuery}
-        excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
+        excludeHitsFromPreviousRun={
+          excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS
+        }
         onChangeExcludeHitsFromPreviousRun={useCallback(
           (exclude) => setParam('excludeHitsFromPreviousRun', exclude),
           [setParam]
