@@ -4,7 +4,7 @@ exports[`generateLatestTransform(definition) should generate a valid latest tran
 Object {
   "defer_validation": true,
   "dest": Object {
-    "index": ".entities-observability.latest-v1.noop",
+    "index": ".entities-observability.latest-v1.admin-console-services",
     "pipeline": ".entities-observability.latest-v1.admin-console-services",
   },
   "frequency": "30s",
