@@ -27,23 +27,46 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
 
       // Determine if each endpoint returned a response code and if so,
       // see if we have a localized message for it
-      if (action.outputs) {
+      // if there are multiple agents, we need to show the outputs/error message for each agent
+      if (action.outputs || (action.errors && action.errors.length)) {
         for (const agent of action.agents) {
-          const endpointAgentOutput = action.outputs[agent];
-
-          if (
-            endpointAgentOutput &&
+          const endpointAgentOutput = action.outputs?.[agent];
+          const agentState = action.agentState[agent];
+          const hasErrors = agentState && agentState.errors;
+          const hasOutputCode: boolean =
+            !!endpointAgentOutput &&
             endpointAgentOutput.type === 'json' &&
+            !!endpointAgentOutput.content &&
             !!endpointAgentOutput.content.code &&
-            !!endpointActionResponseCodes[endpointAgentOutput.content.code]
-          ) {
-            errors.push(endpointActionResponseCodes[endpointAgentOutput.content.code]);
+            !!endpointActionResponseCodes[endpointAgentOutput.content.code];
+
+          if (action.agents.length > 1) {
+            let errorInfo = `${action.hosts[agent].name}:`;
+
+            if (hasOutputCode && endpointAgentOutput) {
+              errorInfo = errorInfo.concat(
+                `${endpointActionResponseCodes[endpointAgentOutput.content.code]}`
+              );
+            }
+
+            if (hasErrors) {
+              const errorMessages = [...new Set(agentState.errors)];
+              errorInfo = hasOutputCode
+                ? errorInfo.concat(` | ${errorMessages}`)
+                : errorInfo.concat(`${errorMessages}`);
+            }
+
+            errors.push(errorInfo);
+          } else {
+            if (endpointAgentOutput) {
+              errors.push(
+                `${endpointActionResponseCodes[endpointAgentOutput.content.code]} | ${[
+                  ...new Set(action.errors),
+                ]}`
+              );
+            }
           }
         }
-      }
-
-      if (action.errors && action.errors.length) {
-        errors.push(...new Set(action.errors));
       }
 
       if (!errors.length) {
@@ -58,12 +81,14 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
             values={{ errorCount: errors.length }}
           />
           <EuiSpacer size="s" />
-          <div>{errors.join(' | ')}</div>
+          <div>{errors.join('\n\n')}</div>
         </div>
       );
     }, [
+      action.agentState,
       action.agents,
       action.errors,
+      action.hosts,
       action.isCompleted,
       action.outputs,
       action.wasSuccessful,

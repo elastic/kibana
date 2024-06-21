@@ -1133,11 +1133,11 @@ describe('Response actions history', () => {
         const outputs = expandRows();
         if (command === 'scan') {
           expect(outputs.map((n) => n.textContent)).toEqual([
-            `${outputCommand} failedThe following errors were encountered:Invalid absolute file path provided | Error here!`,
+            `${outputCommand} failedThe following error was encountered:Invalid absolute file path provided | Error here!`,
           ]);
         } else if (command === 'get-file') {
           expect(outputs.map((n) => n.textContent)).toEqual([
-            `${outputCommand} failedThe following errors were encountered:The file specified was not found | Error here!`,
+            `${outputCommand} failedThe following error was encountered:The file specified was not found | Error here!`,
           ]);
         } else {
           expect(outputs.map((n) => n.textContent)).toEqual([
