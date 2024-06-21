@@ -8,14 +8,14 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { RenderEndpointProps } from './render_endpoint';
-import { ModelBadge } from './model_badge';
 
 interface ServiceSettings {
-  model_id: string;
-  url: string;
+  target?: string;
+  provider?: string;
+  endpoint_type?: string;
 }
 
-export const RenderOpenAI: React.FC<RenderEndpointProps> = ({ endpoint }) => {
+export const RenderAzureAIStudio: React.FC<RenderEndpointProps> = ({ endpoint }) => {
   const serviceSettings = endpoint.service_settings as ServiceSettings;
 
   return (
@@ -24,14 +24,13 @@ export const RenderOpenAI: React.FC<RenderEndpointProps> = ({ endpoint }) => {
         <strong>{endpoint.model_id}</strong>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s">
-          {serviceSettings?.model_id && (
-            <EuiFlexItem grow={false}>
-              <ModelBadge model={serviceSettings.model_id} />
-            </EuiFlexItem>
-          )}
-          {serviceSettings?.url && <EuiFlexItem grow={false}>{serviceSettings.url}</EuiFlexItem>}
-        </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <span>
+            {[serviceSettings.provider, serviceSettings.endpoint_type, serviceSettings.target]
+              .filter(Boolean)
+              .join(', ')}
+          </span>
+        </EuiFlexItem>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

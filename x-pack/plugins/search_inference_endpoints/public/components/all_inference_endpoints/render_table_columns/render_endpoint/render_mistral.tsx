@@ -11,11 +11,14 @@ import { RenderEndpointProps } from './render_endpoint';
 import { ModelBadge } from './model_badge';
 
 interface ServiceSettings {
-  model_id: string;
-  url: string;
+  model?: string;
+  max_input_tokens?: number;
+  rate_limit?: {
+    requests_per_minute?: number;
+  };
 }
 
-export const RenderOpenAI: React.FC<RenderEndpointProps> = ({ endpoint }) => {
+export const RenderMistral: React.FC<RenderEndpointProps> = ({ endpoint }) => {
   const serviceSettings = endpoint.service_settings as ServiceSettings;
 
   return (
@@ -25,12 +28,23 @@ export const RenderOpenAI: React.FC<RenderEndpointProps> = ({ endpoint }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s">
-          {serviceSettings?.model_id && (
+          {serviceSettings.model && (
             <EuiFlexItem grow={false}>
-              <ModelBadge model={serviceSettings.model_id} />
+              <ModelBadge model={serviceSettings.model} />
             </EuiFlexItem>
           )}
-          {serviceSettings?.url && <EuiFlexItem grow={false}>{serviceSettings.url}</EuiFlexItem>}
+          <EuiFlexItem grow={false}>
+            <span>
+              {[
+                serviceSettings.max_input_tokens &&
+                  `max_input_tokens: ${serviceSettings.max_input_tokens}`,
+                serviceSettings.rate_limit?.requests_per_minute &&
+                  `rate_limit: ${serviceSettings.rate_limit.requests_per_minute}`,
+              ]
+                .filter(Boolean)
+                .join(', ')}
+            </span>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
