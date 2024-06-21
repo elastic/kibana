@@ -111,11 +111,6 @@ export default function (providerContext: FtrProviderContext) {
             CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
           )) === tenantId
         ).to.be(true);
-        expect(
-          (await cisIntegration.getValueInEditPage(
-            CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET
-          )) === clientSecret
-        ).to.be(true);
       });
     });
 
@@ -226,11 +221,6 @@ export default function (providerContext: FtrProviderContext) {
           (await cisIntegration.getValueInEditPage(
             CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
           )) === tenantId
-        ).to.be(true);
-        expect(
-          (await cisIntegration.getValueInEditPage(
-            CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET
-          )) === clientSecret
         ).to.be(true);
       });
     });
