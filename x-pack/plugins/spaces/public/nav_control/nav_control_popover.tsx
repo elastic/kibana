@@ -37,7 +37,7 @@ interface Props {
   navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
   theme: WithEuiThemeProps['theme'];
-  isSpaceSolutionEnabled$: Observable<boolean>;
+  isSolutionNavEnabled$: Observable<boolean>;
 }
 
 interface State {
@@ -45,7 +45,7 @@ interface State {
   loading: boolean;
   activeSpace: Space | null;
   spaces: Space[];
-  isSpaceSolutionEnabled: boolean;
+  isSolutionNavEnabled: boolean;
 }
 
 const popoutContentId = 'headerSpacesMenuContent';
@@ -61,7 +61,7 @@ class NavControlPopoverUI extends Component<Props, State> {
       loading: false,
       activeSpace: null,
       spaces: [],
-      isSpaceSolutionEnabled: false,
+      isSolutionNavEnabled: false,
     };
   }
 
@@ -74,8 +74,8 @@ class NavControlPopoverUI extends Component<Props, State> {
       },
     });
 
-    this.spaceSolution$ = this.props.isSpaceSolutionEnabled$.subscribe((isEnabled) => {
-      this.setState({ isSpaceSolutionEnabled: isEnabled });
+    this.spaceSolution$ = this.props.isSolutionNavEnabled$.subscribe((isEnabled) => {
+      this.setState({ isSolutionNavEnabled: isEnabled });
     });
   }
 
@@ -110,7 +110,7 @@ class NavControlPopoverUI extends Component<Props, State> {
           navigateToApp={this.props.navigateToApp}
           navigateToUrl={this.props.navigateToUrl}
           activeSpace={this.state.activeSpace}
-          isSpaceSolutionEnabled={this.state.isSpaceSolutionEnabled}
+          isSolutionNavEnabled={this.state.isSolutionNavEnabled}
         />
       );
     }

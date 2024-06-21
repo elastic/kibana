@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { from, of, shareReplay } from 'rxjs';
-
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
@@ -16,8 +14,8 @@ import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/pu
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
 import type { ConfigType } from './config';
-import { SOLUTION_NAV_FEATURE_FLAG_NAME } from './constants';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
+import { isSolutionNavEnabled } from './experiments';
 import { ManagementService } from './management';
 import { initSpacesNavControl } from './nav_control';
 import { spaceSelectorApp } from './space_selector';
@@ -115,15 +113,8 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   public start(core: CoreStart, plugins: PluginsStart) {
     if (!this.isServerless) {
       const { cloud, cloudExperiments } = plugins;
-      const isSpaceSolutionEnabled$ =
-        // Only available on Cloud and if the Launch Darkly flag is turned on
-        Boolean(cloud?.isCloudEnabled) && cloudExperiments
-          ? from(
-              cloudExperiments
-                .getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
-                .catch(() => false)
-            ).pipe(shareReplay(1))
-          : of(false);
+      const isSpaceSolutionEnabled$ = isSolutionNavEnabled(cloud, cloudExperiments);
+
       initSpacesNavControl(this.spacesManager, core, isSpaceSolutionEnabled$);
     }
 

@@ -140,7 +140,7 @@ describe('SpacesGridPage', () => {
           spaces: { manage: true },
         }}
         maxSpaces={1000}
-        isSpaceSolutionEnabled$={of(true)}
+        isSolutionNavEnabled$={of(true)}
       />
     );
 
