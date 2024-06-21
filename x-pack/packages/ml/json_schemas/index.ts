@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { JsonSchemaService } from './json_schema_service';
+export { JsonSchemaService } from './src/json_schema_service';
