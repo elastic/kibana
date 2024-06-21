@@ -70,8 +70,7 @@ A "socket hangup" is a generic type of error meaning that a remote service (in t
 Kibana can't foresee when this might happen and can't force the remote service to keep the connection open.
 To work around this situation, consider lowering the size of results that come back in each request or increase the amount of time the remote services will
 allow to keep the request open.
-Considering the evidence in the logs and the results of they are trying to get,
-I would give these recommendations:
+For example:
 
 [source,yml]
 ---------------------------------------
@@ -79,7 +78,7 @@ xpack.reporting.csv.scroll.size: 50
 xpack.reporting.csv.scroll.duration: 2m
 ---------------------------------------
 
-We should be clear this won't guarantee to solve the issue, but hopefully gives the functionality a better
+Such changes aren't guaranteed to solve the issue, but give the functionality a better
 chance of working in this use case.
 Unfortunately, lowering the scroll size will require more requests to Elasticsearch during export, which adds more time overhead, which could unintentionally create more instances of auth token expiration errors.
 
