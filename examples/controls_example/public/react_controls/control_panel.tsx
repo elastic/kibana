@@ -10,7 +10,6 @@ import classNames from 'classnames';
 import React, { useState } from 'react';
 
 import { EuiFlexItem, EuiFormControlLayout, EuiFormLabel, EuiFormRow, EuiIcon } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -31,11 +30,11 @@ import './control_panel.scss';
 const DragHandle = ({
   isEditable,
   controlTitle,
-  usingTwoLineLayout,
+  hideEmptyDragHandle,
 }: {
   isEditable: boolean;
   controlTitle?: string;
-  usingTwoLineLayout?: boolean;
+  hideEmptyDragHandle: boolean;
 }) =>
   isEditable ? (
     <button
@@ -47,7 +46,7 @@ const DragHandle = ({
     >
       <EuiIcon type="grabHorizontal" />
     </button>
-  ) : usingTwoLineLayout ? null : (
+  ) : hideEmptyDragHandle ? null : (
     <EuiIcon size="s" type="empty" />
   );
 
@@ -133,20 +132,14 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
               <>
                 <DragHandle
                   isEditable={isEditable}
-                  usingTwoLineLayout={usingTwoLineLayout}
                   controlTitle={panelTitle || defaultPanelTitle}
-                />{' '}
+                  hideEmptyDragHandle={usingTwoLineLayout || Boolean(api?.CustomPrependComponent)}
+                />
                 {api?.CustomPrependComponent ? (
                   <api.CustomPrependComponent />
                 ) : usingTwoLineLayout ? null : (
-                  <EuiFormLabel
-                    className="eui-textTruncate"
-                    // TODO: Convert this to a class when replacing the legacy control group
-                    css={css`
-                      background-color: transparent !important;
-                    `}
-                  >
-                    {panelTitle || defaultPanelTitle}{' '}
+                  <EuiFormLabel className="controlPanel--label">
+                    {panelTitle || defaultPanelTitle}
                   </EuiFormLabel>
                 )}
               </>
