@@ -22,7 +22,15 @@ export class FilesManagementPlugin
       async mount(params: ManagementAppMountParams) {
         const { mountManagementSection } = await import('./mount_management_section');
         const [coreStart, depsStart] = await core.getStartServices();
-        return mountManagementSection(coreStart, depsStart, params);
+
+        const { docTitle } = coreStart.chrome;
+        docTitle.change(PLUGIN_NAME);
+
+        const unmountAppCallback = mountManagementSection(coreStart, depsStart, params);
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
   }
