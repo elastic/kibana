@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RequestMetricsSchema } from '@kbn/actions-plugin/common';
 import { DEFAULT_BEDROCK_MODEL } from './constants';
 
 // Connector schema
@@ -45,7 +46,15 @@ export const InvokeAIActionParamsSchema = schema.object({
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
-  message: schema.string(),
+  data: schema.object({
+    message: schema.string(),
+  }),
+  metrics: RequestMetricsSchema,
+});
+
+export const InvokeStreamResponseSchema = schema.object({
+  data: schema.stream(),
+  metrics: RequestMetricsSchema,
 });
 
 export const RunApiLatestResponseSchema = schema.object(
@@ -65,19 +74,22 @@ export const RunApiLatestResponseSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export const RunActionResponseSchema = schema.object(
-  {
-    completion: schema.string(),
-    stop_reason: schema.maybe(schema.string()),
-    usage: schema.maybe(
-      schema.object({
-        input_tokens: schema.number(),
-        output_tokens: schema.number(),
-      })
-    ),
-  },
-  { unknowns: 'ignore' }
-);
+export const RunActionResponseSchema = schema.object({
+  data: schema.object(
+    {
+      completion: schema.string(),
+      stop_reason: schema.maybe(schema.string()),
+      usage: schema.maybe(
+        schema.object({
+          input_tokens: schema.number(),
+          output_tokens: schema.number(),
+        })
+      ),
+    },
+    { unknowns: 'ignore' }
+  ),
+  metrics: RequestMetricsSchema,
+});
 
 export const StreamingResponseSchema = schema.any();
 

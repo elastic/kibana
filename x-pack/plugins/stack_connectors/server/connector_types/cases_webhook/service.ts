@@ -11,7 +11,10 @@ import { Logger } from '@kbn/core/server';
 import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import {
+  combineHeadersWithBasicAuthHeader,
+  getRequestMetrics,
+} from '@kbn/actions-plugin/server/lib';
 import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 import {
@@ -33,6 +36,7 @@ import type {
 } from './types';
 
 import * as i18n from './translations';
+import { ExternalServiceCreateIncidentResponse } from './types';
 
 export const createExternalService = (
   actionId: string,
@@ -189,10 +193,13 @@ export const createExternalService = (
         'View case URL'
       );
       return {
-        id: externalId,
-        title: insertedIncident.title,
-        url: normalizedViewUrl,
-        pushedDate: new Date().toISOString(),
+        data: {
+          id: externalId,
+          title: insertedIncident.title,
+          url: normalizedViewUrl,
+          pushedDate: new Date().toISOString(),
+        },
+        metrics: getRequestMetrics(res, json),
       };
     } catch (error) {
       throw createServiceError(error, 'Unable to create case');
@@ -270,20 +277,26 @@ export const createExternalService = (
       );
 
       return {
-        id: incidentId,
-        title: updatedIncident.title,
-        url: normalizedViewUrl,
-        pushedDate: new Date().toISOString(),
+        data: {
+          id: incidentId,
+          title: updatedIncident.title,
+          url: normalizedViewUrl,
+          pushedDate: new Date().toISOString(),
+        },
+        metrics: getRequestMetrics(res, json),
       };
     } catch (error) {
       throw createServiceError(error, `Unable to update case with id ${incidentId}`);
     }
   };
 
-  const createComment = async ({ incidentId, comment }: CreateCommentParams): Promise<unknown> => {
+  const createComment = async ({
+    incidentId,
+    comment,
+  }: CreateCommentParams): Promise<ExternalServiceCreateIncidentResponse> => {
     try {
       if (!createCommentUrl || !createCommentJson || !createCommentMethod) {
-        return;
+        return { metrics: getRequestMetrics(undefined, '') };
       }
 
       const commentUrl = renderMustacheStringNoEscape(createCommentUrl, {
@@ -324,6 +337,8 @@ export const createExternalService = (
       throwDescriptiveErrorIfResponseIsNotValid({
         res,
       });
+
+      return { metrics: getRequestMetrics(res, json) };
     } catch (error) {
       throw createServiceError(error, `Unable to create comment at case with id ${incidentId}`);
     }

@@ -8,9 +8,9 @@
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import { AxiosError, Method } from 'axios';
-import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { getRequestMetrics } from '@kbn/actions-plugin/server/lib';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
@@ -27,6 +27,7 @@ import {
   InvokeAIActionParams,
   InvokeAIActionResponse,
   RunApiLatestResponse,
+  InvokeStreamResponse,
 } from '../../../common/bedrock/types';
 import {
   SUB_ACTION,
@@ -187,7 +188,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     params: SubActionRequestParams<RunActionResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
   ): Promise<RunActionResponse> {
     const response = await this.request(params);
-    return response.data;
+    return { ...response.data, metrics: getRequestMetrics(response, params.data) };
   }
 
   private async runApiLatest(
@@ -197,9 +198,12 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     // keeping the response the same as claude 2 for our APIs
     // adding the usage object for better token tracking
     return {
-      completion: parseContent(response.data.content),
-      stop_reason: response.data.stop_reason,
-      usage: response.data.usage,
+      data: {
+        completion: parseContent(response.data.content),
+        stop_reason: response.data.stop_reason,
+        usage: response.data.usage,
+      },
+      metrics: getRequestMetrics(response, params.data),
     };
   }
 
@@ -282,14 +286,17 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     temperature,
     signal,
     timeout,
-  }: InvokeAIActionParams): Promise<IncomingMessage> {
-    const res = (await this.streamApi({
-      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
+  }: InvokeAIActionParams): Promise<InvokeStreamResponse> {
+    const body = JSON.stringify(
+      formatBedrockBody({ messages, stopSequences, system, temperature })
+    );
+    const res = await this.streamApi({
+      body,
       model,
       signal,
       timeout,
-    })) as unknown as IncomingMessage;
-    return res;
+    });
+    return { data: res, metrics: getRequestMetrics(undefined, body) };
   }
 
   /**
@@ -318,7 +325,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       signal,
       timeout,
     });
-    return { message: res.completion.trim() };
+    return { data: { message: res.data.completion.trim() }, metrics: res.metrics };
   }
 }
 

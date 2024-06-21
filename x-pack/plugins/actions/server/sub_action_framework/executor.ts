@@ -88,7 +88,8 @@ export const buildExecutor = <
       }
     }
 
-    const data = await func.call(service, subActionParams);
-    return { status: 'ok', data: data ?? {}, actionId };
+    const { data, metrics } = await func.call(service, subActionParams);
+
+    return { status: 'ok', data: data ?? {}, actionId, metrics };
   };
 };
