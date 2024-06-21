@@ -52,7 +52,7 @@ interface DataStreamStepProps {
 export const DataStreamStep = React.memo<DataStreamStepProps>(
   ({ integrationSettings, connectorId, isGenerating }) => {
     const { setIntegrationSettings, setIsGenerating, setStep, setResult } = useActions();
-    const { isLoading: isLoadingPackageNames, packageNames } = useLoadPackageNames();
+    const { isLoading: isLoadingPackageNames, packageNames } = useLoadPackageNames(); // this is used to avoid duplicate names
 
     const [name, setName] = useState<string>(integrationSettings?.name ?? '');
     const [dataStreamName, setDataStreamName] = useState<string>(
@@ -101,15 +101,14 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
       };
     }, [setIntegrationValues, setInvalidFields, packageNames]);
 
-    // pre-populate the name from title
     useEffect(() => {
-      if (packageNames != null) {
-        if (integrationSettings?.title && integrationSettings.name == null) {
-          const generatedName = getNameFromTitle(integrationSettings.title);
-          if (!packageNames.has(generatedName)) {
-            setName(generatedName);
-            setIntegrationValues({ name: generatedName });
-          }
+      // Pre-populates the name from the title set in the previous step.
+      // Only executed once when the packageNames are loaded
+      if (packageNames != null && integrationSettings?.name == null && integrationSettings?.title) {
+        const generatedName = getNameFromTitle(integrationSettings.title);
+        if (!packageNames.has(generatedName)) {
+          setName(generatedName);
+          setIntegrationValues({ name: generatedName });
         }
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps

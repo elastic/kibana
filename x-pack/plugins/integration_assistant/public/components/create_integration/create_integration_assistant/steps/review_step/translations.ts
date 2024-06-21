@@ -12,7 +12,7 @@ export const TITLE = i18n.translate('xpack.integrationAssistant.step.review.titl
 });
 export const DESCRIPTION = i18n.translate('xpack.integrationAssistant.step.review.description', {
   defaultMessage:
-    'Review all the fields and their values in your integration. Make any necessary adjustments to ensure accuracy',
+    'Review all the fields and their values in your integration. Make any necessary adjustments to ensure accuracy.',
 });
 
 export const EDIT_PIPELINE_BUTTON = i18n.translate(

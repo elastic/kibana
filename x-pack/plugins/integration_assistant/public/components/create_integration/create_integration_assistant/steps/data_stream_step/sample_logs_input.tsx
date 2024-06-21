@@ -22,7 +22,7 @@ const parseLogsContent = (
   fileType: string
 ): { error?: string; isTruncated?: boolean; logsSampleParsed?: string[] } => {
   if (fileContent == null) {
-    return { error: 'Failed to read the logs sample file' };
+    return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
   }
   let parsedContent;
   try {
@@ -35,14 +35,14 @@ const parseLogsContent = (
         .map((line) => JSON.parse(line));
     }
   } catch (_) {
-    return { error: `The logs sample file has not a valid ${fileType} format` };
+    return { error: i18n.LOGS_SAMPLE_ERROR.FORMAT(fileType) };
   }
 
   if (!Array.isArray(parsedContent)) {
-    return { error: 'The logs sample file is not an array' };
+    return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY };
   }
   if (parsedContent.length === 0) {
-    return { error: 'The logs sample file is empty' };
+    return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
   }
 
   let isTruncated = false;
@@ -52,7 +52,7 @@ const parseLogsContent = (
   }
 
   if (parsedContent.some((log) => !isPlainObject(log))) {
-    return { error: 'The logs sample file contains non-object entries' };
+    return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT };
   }
 
   const logsSampleParsed = parsedContent.map((log) => JSON.stringify(log));
@@ -80,7 +80,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(
 
         const reader = new FileReader();
         reader.onload = function (e) {
-          const fileContent = e.target?.result as string | undefined; // we use readAsText so this should be a string
+          const fileContent = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsText` to load the file.
           const { error, isTruncated, logsSampleParsed } = parseLogsContent(
             fileContent,
             logsSampleFile.type
@@ -93,9 +93,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(
           }
 
           if (isTruncated) {
-            notifications?.toasts.addInfo(
-              `The logs sample has been truncated to ${MaxLogsSampleRows} rows.`
-            );
+            notifications?.toasts.addInfo(i18n.LOGS_SAMPLE_TRUNCATED(MaxLogsSampleRows));
           }
 
           setIntegrationSettings({

@@ -52,7 +52,6 @@ const columns: Array<EuiBasicTableColumn<FieldObject>> = [
   {
     field: 'name',
     name: 'Name',
-    // truncateText: true,
     sortable: true,
     render: (name: string, { type }) => {
       return (
