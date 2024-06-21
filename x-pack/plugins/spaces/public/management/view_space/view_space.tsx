@@ -30,7 +30,7 @@ import type { Role } from '@kbn/security-plugin-types-common';
 import { TAB_ID_CONTENT, TAB_ID_FEATURES, TAB_ID_ROLES } from './constants';
 import { useTabs } from './hooks/use_tabs';
 import { ViewSpaceContextProvider } from './hooks/view_space_context_provider';
-import { getSpaceNavigationURL, type Space } from '../../../common';
+import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import type { SpacesManager } from '../../spaces_manager';
 
@@ -199,7 +199,11 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     return (
       <EuiButton
         iconType="merge"
-        href={getSpaceNavigationURL({ serverBasePath, spaceId: space.id })}
+        href={addSpaceIdToPath(
+          serverBasePath,
+          space.id,
+          `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/view/${space.id}`
+        )}
         data-test-subj="spaceSwitcherButton"
       >
         <FormattedMessage

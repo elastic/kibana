@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../constants';
+import { DEFAULT_SPACE_ID } from '../constants';
 
 const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
 
@@ -73,23 +73,6 @@ export function addSpaceIdToPath(
     return `${normalizedBasePath}/s/${spaceId}${requestedPath}`;
   }
   return `${normalizedBasePath}${requestedPath}` || '/';
-}
-
-/**
- * Builds URL that will navigate a user to the space for the spaceId provided
- */
-export function getSpaceNavigationURL({
-  serverBasePath,
-  spaceId,
-}: {
-  serverBasePath: string;
-  spaceId: string;
-}) {
-  return addSpaceIdToPath(
-    serverBasePath,
-    spaceId,
-    `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/view/${spaceId}`
-  );
 }
 
 function stripServerBasePath(requestBasePath: string, serverBasePath: string) {

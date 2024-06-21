@@ -30,9 +30,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
-import { getSpaceNavigationURL, type Space } from '../../../common';
+import { addSpaceIdToPath, type Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
-import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import type { SpacesManager } from '../../spaces_manager';
@@ -383,7 +383,12 @@ export class SpacesGridPage extends Component<Props, State> {
             type: 'icon',
             icon: 'merge',
             color: 'primary',
-            href: (rowRecord) => getSpaceNavigationURL({ serverBasePath, spaceId: rowRecord.id }),
+            href: (rowRecord) =>
+              addSpaceIdToPath(
+                serverBasePath,
+                rowRecord.id,
+                `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/`
+              ),
             available: (rowRecord) => this.state.activeSpace?.name !== rowRecord.name,
             'data-test-subj': (rowRecord) => `${rowRecord.name}-switchSpace`,
           },

@@ -12,11 +12,7 @@ export {
   ENTER_SPACE_PATH,
   DEFAULT_SPACE_ID,
 } from './constants';
-export {
-  addSpaceIdToPath,
-  getSpaceIdFromPath,
-  getSpaceNavigationURL,
-} from './lib/spaces_url_parser';
+export { addSpaceIdToPath, getSpaceIdFromPath } from './lib/spaces_url_parser';
 export type {
   Space,
   GetAllSpacesOptions,
