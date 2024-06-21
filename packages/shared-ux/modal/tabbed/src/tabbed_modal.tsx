@@ -25,6 +25,7 @@ import {
   EuiTab,
   type EuiTabProps,
   type CommonProps,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   ModalContextProvider,
@@ -70,6 +71,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
   const selectedTabId = state.meta.selectedTabId;
+  const shareModalHeadingId = useGeneratedHtmlId();
 
   const selectedTabState = useMemo(
     () => (selectedTabId ? state[selectedTabId] : {}),
@@ -114,10 +116,10 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
       maxWidth={true}
       data-test-subj="shareContextModal"
-      aria-labelledby={modalTitle}
+      aria-labelledby={shareModalHeadingId}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitle}>{modalTitle}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={shareModalHeadingId}>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <Fragment>
