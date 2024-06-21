@@ -66,7 +66,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickVisType(visType: string) {
     this.log.debug('DashboardAddPanel.clickVisType');
-    await this.testSubjects.click(`visType-${visType}`, undefined, 80);
+    await this.testSubjects.click(`visType-${visType}`);
   }
 
   async verifyEmbeddableFactoryGroupExists(groupId: string) {
