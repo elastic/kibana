@@ -19,7 +19,7 @@ export const LogLevelBadgeCell = (props: DataGridCellValueElementProps) => {
   const value = props.row.flattened['log.level'];
 
   if (!value) {
-    return '-';
+    return <>-</>;
   }
 
   const coalescedValue = getLogLevelCoalescedValue(value);
