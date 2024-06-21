@@ -8,134 +8,22 @@
 
 import { suggest } from './autocomplete';
 import { evalFunctionDefinitions } from '../definitions/functions';
-import { builtinFunctions } from '../definitions/builtin';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { chronoLiterals, timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
 import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { FunctionParameter } from '../definitions/types';
 import { getParamAtPosition } from './helper';
 import { nonNullable } from '../shared/helpers';
-import { METADATA_FIELDS } from '../shared/constants';
 import {
   getPolicyFields,
-  fields,
-  indexes,
-  integrations,
   policies,
   createCustomCallbackMocks,
   createSuggestContext,
+  getFunctionSignaturesByReturnType,
+  getFieldNamesByType,
 } from './__tests__/helpers';
-
-/**
- * Utility to filter down the function list for the given type
- * It is mainly driven by the return type, but it can be filtered upon with the last optional argument "paramsTypes"
- * jsut make sure to pass the arguments in the right order
- * @param command current command context
- * @param expectedReturnType the expected type returned by the function
- * @param functionCategories
- * @param paramsTypes the function argument types (optional)
- * @returns
- */
-function getFunctionSignaturesByReturnType(
-  command: string,
-  _expectedReturnType: string | string[],
-  {
-    agg,
-    grouping,
-    evalMath,
-    builtin,
-    // skipAssign here is used to communicate to not propose an assignment if it's not possible
-    // within the current context (the actual logic has it, but here we want a shortcut)
-    skipAssign,
-  }: {
-    agg?: boolean;
-    grouping?: boolean;
-    evalMath?: boolean;
-    builtin?: boolean;
-    skipAssign?: boolean;
-  } = {},
-  paramsTypes?: string[],
-  ignored?: string[],
-  option?: string
-) {
-  const expectedReturnType = Array.isArray(_expectedReturnType)
-    ? _expectedReturnType
-    : [_expectedReturnType];
-
-  const list = [];
-  if (agg) {
-    list.push(...statsAggregationFunctionDefinitions);
-    // right now all grouping functions are agg functions too
-    list.push(...groupingFunctionDefinitions);
-  }
-  if (grouping) {
-    list.push(...groupingFunctionDefinitions);
-  }
-  // eval functions (eval is a special keyword in JS)
-  if (evalMath) {
-    list.push(...evalFunctionDefinitions);
-  }
-  if (builtin) {
-    list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
-  }
-
-  const deduped = Array.from(new Set(list));
-
-  return deduped
-    .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
-      if (ignoreAsSuggestion) {
-        return false;
-      }
-      if (!supportedCommands.includes(command) && !supportedOptions?.includes(option || '')) {
-        return false;
-      }
-      const filteredByReturnType = signatures.filter(
-        ({ returnType }) =>
-          expectedReturnType.includes('any') || expectedReturnType.includes(returnType)
-      );
-      if (!filteredByReturnType.length) {
-        return false;
-      }
-      if (paramsTypes?.length) {
-        return filteredByReturnType.some(
-          ({ params }) =>
-            !params.length ||
-            (paramsTypes.length <= params.length &&
-              paramsTypes.every(
-                (expectedType, i) =>
-                  expectedType === 'any' ||
-                  params[i].type === 'any' ||
-                  expectedType === params[i].type
-              ))
-        );
-      }
-      return true;
-    })
-    .filter(({ name }) => {
-      if (ignored?.length) {
-        return !ignored?.includes(name);
-      }
-      return true;
-    })
-    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .map(({ type, name, signatures }) => {
-      if (type === 'builtin') {
-        return signatures.some(({ params }) => params.length > 1) ? `${name} $0` : name;
-      }
-      return `${name}($0)`;
-    });
-}
-
-function getFieldNamesByType(_requestedType: string | string[]) {
-  const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  return fields
-    .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
-    .map(({ name, suggestedAs }) => suggestedAs || name);
-}
 
 function getLiteralsByType(_type: string | string[]) {
   const type = Array.isArray(_type) ? _type : [_type];
@@ -520,33 +408,6 @@ describe('autocomplete', () => {
       undefined,
       'by'
     );
-    testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions, ...allEvaFunctions]);
-    testSuggestions('from a | stats a ', ['= $0']);
-    testSuggestions('from a | stats a=', [...allAggFunctions, ...allEvaFunctions]);
-    testSuggestions('from a | stats a=max(b) by ', [
-      'var0 =',
-      ...getFieldNamesByType('any'),
-      ...allEvaFunctions,
-      ...allGroupingFunctions,
-    ]);
-    testSuggestions('from a | stats a=max(b) BY ', [
-      'var0 =',
-      ...getFieldNamesByType('any'),
-      ...allEvaFunctions,
-      ...allGroupingFunctions,
-    ]);
-    testSuggestions('from a | stats a=c by d ', [',', '|']);
-    testSuggestions('from a | stats a=c by d, ', [
-      'var0 =',
-      ...getFieldNamesByType('any'),
-      ...allEvaFunctions,
-      ...allGroupingFunctions,
-    ]);
-    testSuggestions('from a | stats a=max(b), ', [
-      'var0 =',
-      ...allAggFunctions,
-      ...allEvaFunctions,
-    ]);
     testSuggestions(
       'from a | stats a=min()',
       [
