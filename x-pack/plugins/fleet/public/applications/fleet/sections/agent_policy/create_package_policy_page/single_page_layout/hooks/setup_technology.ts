@@ -100,8 +100,8 @@ export function useSetupTechnology({
     }
   }, [isAgentlessEnabled, isAgentlessIntegration, packageInfo]);
 
+  // tech debt: remove this useEffect when Serverless uses the Agentless API and just create a new agentless policy in the handleSetupTechnologyChange
   useEffect(() => {
-    // Tech debt: Remove this fetchAgentlessPolicy when Serverless uses the Agentless API
     const fetchAgentlessPolicy = async () => {
       const { data, error } = await sendGetOneAgentPolicy(AGENTLESS_POLICY_ID);
       const isAgentlessAvailable = !error && data && data.item;
@@ -112,7 +112,6 @@ export function useSetupTechnology({
     };
 
     if (isAgentlessEnabled) {
-      // Tech debt: Remove check isServerless when Serverless uses the Agentless API
       if (cloud?.isServerlessEnabled) {
         fetchAgentlessPolicy();
       } else if (cloud?.isCloudEnabled) {
@@ -133,13 +132,14 @@ export function useSetupTechnology({
       }
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
-        if (agentlessAPI) {
+        if (agentlessAPI && cloud?.isCloudEnabled) {
           updateNewAgentPolicy(agentlessPolicy as NewAgentPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.NEW);
           updateAgentPolicies([agentlessPolicy] as AgentPolicy[]);
         }
         // tech debt: remove this when Serverless uses the Agentless API
         if (cloud?.isServerlessEnabled) {
+          updateNewAgentPolicy(agentlessPolicy as AgentPolicy);
           updateAgentPolicies([agentlessPolicy] as AgentPolicy[]);
           setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
         }
@@ -154,12 +154,13 @@ export function useSetupTechnology({
       isAgentlessEnabled,
       selectedSetupTechnology,
       agentlessAPI,
+      cloud?.isCloudEnabled,
+      cloud?.isServerlessEnabled,
       updateNewAgentPolicy,
+      agentlessPolicy,
       setSelectedPolicyTab,
       updateAgentPolicies,
-      agentlessPolicy,
       newAgentBasedPolicy,
-      cloud,
     ]
   );
 
