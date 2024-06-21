@@ -64,6 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     after('clean up archives', async () => {
       await kibanaServer.importExport.unload(savedObjectsArchive);
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     // Cant auth into the route as it's structured currently

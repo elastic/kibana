@@ -7,12 +7,18 @@
 
 import { expect } from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingApi');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
   const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
@@ -27,6 +33,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Data Stream', () => {
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
 
       await esArchiver.load(archives.ecommerce.data);
@@ -51,15 +59,22 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await reportingAPI.deleteAllReports(roleAuthc, internalReqHeader);
       await reportingAPI.deleteAllReports(roleAuthc);
       await esArchiver.unload(archives.ecommerce.data);
       await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
+    it('uses the datastream configuration with set ILM policy', async () => {
+      const { body } = await supertestWithoutAuth
     it('uses the datastream configuration', async () => {
       const { status, body } = await supertestWithoutAuth
         .get(`/api/index_management/data_streams/.kibana-reporting`)
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
+        .expect(200);
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader);
 

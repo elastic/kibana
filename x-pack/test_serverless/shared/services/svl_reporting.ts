@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
@@ -13,9 +12,9 @@ import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-serve
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 import { RoleCredentials } from './svl_user_manager';
+import { InternalRequestHeader } from './svl_common_api';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
-const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
 /**
  * Services to create roles and users for security testing
@@ -30,14 +29,18 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     /**
      * Use the internal API to create any kind of report job
      */
-    async createReportJobInternal(jobType: string, job: object, roleAuthc: RoleCredentials) {
+    async createReportJobInternal(
+      jobType: string,
+      job: object,
+      roleAuthc: RoleCredentials,
+      internalReqHeader: InternalRequestHeader
+    ) {
       const requestPath = `${INTERNAL_ROUTES.GENERATE_PREFIX}/${jobType}`;
       log.debug(`POST request to ${requestPath}`);
 
       const { status, body } = await supertestWithoutAuth
         .post(requestPath)
-        .set(...API_HEADER)
-        .set(...INTERNAL_HEADER)
+        .set(internalReqHeader)
         .set(roleAuthc.apiKeyHeader)
         .send({ jobParams: rison.encode(job) });
 
@@ -55,6 +58,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     async waitForJobToFinish(
       downloadReportPath: string,
       roleAuthc: RoleCredentials,
+      internalReqHeader: InternalRequestHeader,
       options?: { timeout?: number }
     ) {
       await retry.waitForWithTimeout(
@@ -65,7 +69,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
             .get(`${downloadReportPath}?elasticInternalOrigin=true`)
             .responseType('blob')
             .set(...API_HEADER)
-            .set(...INTERNAL_HEADER)
+            .set(internalReqHeader)
             .set(roleAuthc.apiKeyHeader);
 
           if (response.status === 500) {
@@ -95,23 +99,26 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     /*
      * This function is only used in the API tests, functional tests we have to click the download link in the UI
      */
-    async getCompletedJobOutput(downloadReportPath: string, roleAuthc: RoleCredentials) {
+    async getCompletedJobOutput(
+      downloadReportPath: string,
+      roleAuthc: RoleCredentials,
+      internalReqHeader: InternalRequestHeader
+    ) {
       const response = await supertestWithoutAuth
         .get(`${downloadReportPath}?elasticInternalOrigin=true`)
-        .set(...INTERNAL_HEADER)
+        .set(internalReqHeader)
         .set(roleAuthc.apiKeyHeader);
-
       return response.text as unknown;
     },
-    async deleteAllReports(role: RoleCredentials) {
+    async deleteAllReports(roleAuthc: RoleCredentials, internalReqHeader: InternalRequestHeader) {
       log.debug('ReportingAPI.deleteAllReports');
 
       // ignores 409 errs and keeps retrying
       await retry.tryForTime(5000, async () => {
         await supertestWithoutAuth
           .post(`/${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}/_delete_by_query`)
-          .set(...INTERNAL_HEADER)
-          .set(role.apiKeyHeader)
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({ query: { match_all: {} } });
       });
     },
