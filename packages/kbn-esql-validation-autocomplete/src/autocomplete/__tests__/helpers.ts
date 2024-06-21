@@ -154,8 +154,16 @@ export const setup = async (caret = '?') => {
     );
   };
 
+  const assertSuggestions = async (query: string, expected: string[], opts?: SuggestOptions) => {
+    const result = await suggest(query, opts);
+    const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
+
+    expect(resultTexts).toEqual(expected);
+  };
+
   return {
     callbacks,
     suggest,
+    assertSuggestions,
   };
 };

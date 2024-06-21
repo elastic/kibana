@@ -255,43 +255,6 @@ describe('autocomplete', () => {
     );
   });
 
-  describe('from', () => {
-    const suggestedIndexes = indexes.filter(({ hidden }) => !hidden).map(({ name }) => name);
-
-    // Monaco will filter further down here
-    testSuggestions(
-      'f',
-      sourceCommands.map((name) => name + ' $0')
-    );
-    testSuggestions('from ', suggestedIndexes);
-    testSuggestions('from a,', suggestedIndexes);
-    testSuggestions('from a, b ', ['metadata $0', ',', '|']);
-    testSuggestions('from *,', suggestedIndexes);
-    testSuggestions('from index', suggestedIndexes, 5 /* space before index */);
-    testSuggestions('from a, b [metadata ]', METADATA_FIELDS, ' ]');
-    testSuggestions('from a, b metadata ', METADATA_FIELDS, ' ');
-    testSuggestions(
-      'from a, b [metadata _index, ]',
-      METADATA_FIELDS.filter((field) => field !== '_index'),
-      ' ]'
-    );
-    testSuggestions(
-      'from a, b metadata _index, ',
-      METADATA_FIELDS.filter((field) => field !== '_index'),
-      ' '
-    );
-
-    // with integrations support
-    const dataSources = indexes.concat(integrations);
-    const suggestedDataSources = dataSources
-      .filter(({ hidden }) => !hidden)
-      .map(({ name }) => name);
-
-    testSuggestions('from ', suggestedDataSources, '', [undefined, dataSources, undefined]);
-    testSuggestions('from a,', suggestedDataSources, '', [undefined, dataSources, undefined]);
-    testSuggestions('from *,', suggestedDataSources, '', [undefined, dataSources, undefined]);
-  });
-
   describe('show', () => {
     testSuggestions('show ', ['info']);
     for (const fn of ['info']) {
