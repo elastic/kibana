@@ -919,6 +919,59 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+        "id": "def-common.checkClusterRoutingAllocationEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "checkClusterRoutingAllocationEnabled",
+        "description": [],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "common",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-common.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ") => ",
+          "TaskEither",
+          "<",
+          "RetryableEsClientError",
+          " | ",
+          "IncompatibleClusterRoutingAllocation",
+          ", {}>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/check_cluster_routing_allocation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.checkClusterRoutingAllocationEnabled.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/check_cluster_routing_allocation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
         "id": "def-common.checkForUnknownDocs",
         "type": "Function",
         "tags": [],
@@ -1231,49 +1284,6 @@
               "FetchIndicesParams"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/fetch_indices.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-common.initAction",
-        "type": "Function",
-        "tags": [],
-        "label": "initAction",
-        "description": [],
-        "signature": [
-          "({ client, indices, }: ",
-          "InitActionParams",
-          ") => ",
-          "TaskEither",
-          "<",
-          "RetryableEsClientError",
-          " | ",
-          "IncompatibleClusterRoutingAllocation",
-          ", ",
-          "FetchIndexResponse",
-          ">"
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/initialize_action.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-common.initAction.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  client,\n  indices,\n}",
-            "description": [],
-            "signature": [
-              "InitActionParams"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/initialize_action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
