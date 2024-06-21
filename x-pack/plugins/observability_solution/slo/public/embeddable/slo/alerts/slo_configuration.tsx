@@ -7,11 +7,11 @@
 
 import React, { useState } from 'react';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiTitle,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -45,20 +45,22 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
   const hasGroupBy = selectedSlos?.some((slo) => slo.instanceId !== ALL_VALUE);
 
   return (
-    <EuiModal
+    <EuiFlyout
       onClose={onCancel}
       css={`
         min-width: 550px;
       `}
     >
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
-            defaultMessage: 'SLO configuration',
-          })}{' '}
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h2>
+            {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
+              defaultMessage: 'SLO configuration',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
         <EuiFlexGroup>
           <EuiFlexItem grow>
             <SloSelector
@@ -95,8 +97,8 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
             />
           </>
         )}
-      </EuiModalBody>
-      <EuiModalFooter>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
         <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
           <FormattedMessage
             id="xpack.slo.Embeddable.config.cancelButtonLabel"
@@ -115,7 +117,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
             defaultMessage="Confirm configurations"
           />
         </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 }
