@@ -19,10 +19,11 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { ControlError } from './control_error_component';
 import { ControlPanelProps, DefaultControlApi } from './types';
+
+import './control_panel.scss';
 
 /**
  * TODO: Handle dragging
@@ -125,8 +126,33 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           fullWidth
           label={usingTwoLineLayout ? panelTitle || defaultPanelTitle || '...' : undefined}
         >
-          {blockingError ? (
-            <EuiFormControlLayout>
+          <EuiFormControlLayout
+            fullWidth
+            isLoading={Boolean(dataLoading)}
+            prepend={
+              <>
+                <DragHandle
+                  isEditable={isEditable}
+                  usingTwoLineLayout={usingTwoLineLayout}
+                  controlTitle={panelTitle || defaultPanelTitle}
+                />{' '}
+                {api?.CustomPrependComponent ? (
+                  <api.CustomPrependComponent />
+                ) : usingTwoLineLayout ? null : (
+                  <EuiFormLabel
+                    className="eui-textTruncate"
+                    // TODO: Convert this to a class when replacing the legacy control group
+                    css={css`
+                      background-color: transparent !important;
+                    `}
+                  >
+                    {panelTitle || defaultPanelTitle}{' '}
+                  </EuiFormLabel>
+                )}
+              </>
+            }
+          >
+            {blockingError ? (
               <ControlError
                 error={
                   blockingError ??
@@ -135,52 +161,18 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                   })
                 }
               />
-            </EuiFormControlLayout>
-          ) : (
-            <EuiFormControlLayout
-              fullWidth
-              isLoading={Boolean(dataLoading)}
-              prepend={
-                <>
-                  <DragHandle
-                    isEditable={isEditable}
-                    usingTwoLineLayout={usingTwoLineLayout}
-                    controlTitle={panelTitle || defaultPanelTitle}
-                  />{' '}
-                  {api?.CustomPrependComponent ? (
-                    <api.CustomPrependComponent />
-                  ) : usingTwoLineLayout ? null : (
-                    <EuiFormLabel
-                      className="eui-textTruncate"
-                      // TODO: Convert this to a class when replacing the legacy control group
-                      css={css`
-                        background-color: transparent !important;
-                      `}
-                    >
-                      {panelTitle || defaultPanelTitle}{' '}
-                    </EuiFormLabel>
-                  )}
-                </>
-              }
-            >
+            ) : (
               <Component
-                // TODO: Convert this to a class when replacing the legacy control group
-                css={css`
-                  width: 100%;
-                  max-inline-size: 100% !important;
-                  height: calc(${euiThemeVars.euiButtonHeight} - 2px);
-                  box-shadow: none !important;
-                  ${!api?.CustomPrependComponent && !isEditable && usingTwoLineLayout
-                    ? `border-radius: ${euiThemeVars.euiBorderRadius} !important;`
-                    : `border-radius: 0 ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 !important;`}
-                  background-color: ${euiThemeVars.euiFormBackgroundColor} !important;
-                `}
+                className={classNames('controlPanel', {
+                  'controlPanel--roundedBorders':
+                    !api?.CustomPrependComponent && !isEditable && usingTwoLineLayout,
+                })}
                 ref={(newApi) => {
                   if (newApi && !api) setApi(newApi);
                 }}
               />
-            </EuiFormControlLayout>
-          )}
+            )}
+          </EuiFormControlLayout>
         </EuiFormRow>
       </FloatingActions>
     </EuiFlexItem>
