@@ -10,14 +10,9 @@ import { LlmProxy } from '../../observability_ai_assistant_api_integration/commo
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext) {
-  // const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-
-  const driver = getService('__webdriver__');
-  const toasts = getService('toasts');
-  const retry = getService('retry');
 
   return {
     PlaygroundStartChatPage: {
@@ -30,14 +25,13 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
       async expectPlaygroundHeaderComponentsToExist() {
         await testSubjects.existOrFail('playground-header-actions');
-        expect(await testSubjects.isEnabled('editContextActionButton')).to.be(false);
-        expect(await testSubjects.isEnabled('viewQueryActionButton')).to.be(false);
-        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(false);
         await testSubjects.existOrFail('playground-documentation-link');
       },
 
-      async expectCreateIndexButtonToMissed() {
-        await testSubjects.missingOrFail('createIndexButton');
+      async expectPlaygroundHeaderComponentsToDisabled() {
+        expect(await testSubjects.isEnabled('editContextActionButton')).to.be(false);
+        expect(await testSubjects.isEnabled('viewQueryActionButton')).to.be(false);
+        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(false);
       },
 
       async expectCreateIndexButtonToExists() {
@@ -70,10 +64,6 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('chatPage');
       },
 
-      async expectNoIndicesFieldsWarningExists() {
-        await testSubjects.existOrFail('NoIndicesFieldsMessage');
-      },
-
       async expectAddConnectorButtonExists() {
         await testSubjects.existOrFail('setupGenAIConnectorButton');
       },
@@ -98,15 +88,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
 
       async expectHideGenAIPanelConnector() {
-        // await createConnector();
-        // await browser.refresh();
         await testSubjects.missingOrFail('connectToLLMChatPanel');
-      },
-
-      async expectToStartChatPage() {
-        expect(await testSubjects.isEnabled('startChatButton')).to.be(true);
-        await testSubjects.click('startChatButton');
-        await testSubjects.existOrFail('chatPage');
       },
     },
     PlaygroundChatPage: {
@@ -138,15 +120,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async sendQuestion() {
         await testSubjects.setValue('questionInput', 'test question');
         await testSubjects.click('sendQuestionButton');
-        // await testSubjects.existOrFail('userMessage');
       },
-
-      // async expectChatWorks() {
-      //   await testSubjects.existOrFail('questionInput');
-      //   await testSubjects.setValue('questionInput', 'test question');
-      //   await testSubjects.click('sendQuestionButton');
-      //   await testSubjects.existOrFail('userMessage');
-      // },
 
       async expectChatWorks() {
         const userMessageElement = await testSubjects.find('userMessage');
