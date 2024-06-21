@@ -125,8 +125,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         subActionParams: {
           model: this.model,
           messages: formattedMessages,
-          maxTokens: this.#maxTokens,
-          ...getDefaultArguments(this.llmType, this.temperature, options.stop),
+          ...getDefaultArguments(this.llmType, this.temperature, options.stop, this.#maxTokens),
         },
       },
     };
