@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export interface ReadIndexResponse {
-  name: string;
-  index_mapping_outdated: boolean | null;
-}
+export { JsonSchemaService } from './src/json_schema_service';

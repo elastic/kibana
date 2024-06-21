@@ -14,8 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingApi');
   const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
+
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
 
@@ -60,11 +61,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('uses the datastream configuration with set ILM policy', async () => {
-      const { body } = await supertestWithoutAuth
+      const { status, body } = await supertestWithoutAuth
         .get(`/api/index_management/data_streams/.kibana-reporting`)
         .set(internalReqHeader)
-        .set(roleAuthc.apiKeyHeader)
-        .expect(200);
+        .set(roleAuthc.apiKeyHeader);
+
+      svlCommonApi.assertResponseStatusCode(200, status, body);
 
       expect(body).toEqual({
         _meta: {

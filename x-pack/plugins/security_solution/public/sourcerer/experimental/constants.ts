@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { JsonSchemaService } from './json_schema_service';
+export const DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID = 'security-solution-default';
