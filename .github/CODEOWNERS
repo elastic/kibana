@@ -510,6 +510,7 @@ packages/kbn-ipynb @elastic/search-kibana
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
+x-pack/packages/ml/json_schemas @elastic/ml-ui
 test/health_gateway/plugins/status @elastic/kibana-core
 test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
 test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
@@ -716,6 +717,7 @@ packages/kbn-search-connectors @elastic/search-kibana
 x-pack/plugins/search_connectors @elastic/search-kibana
 packages/kbn-search-errors @elastic/kibana-data-discovery
 examples/search_examples @elastic/kibana-data-discovery
+x-pack/plugins/search_homepage @elastic/search-kibana
 packages/kbn-search-index-documents @elastic/search-kibana
 x-pack/plugins/search_inference_endpoints @elastic/search-kibana
 x-pack/plugins/search_notebooks @elastic/search-kibana
@@ -1444,6 +1446,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/public/detections/components/alerts_info @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/flyout/document_details @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/flyout/shared @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/public/notes @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/resolver @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/threat_intelligence @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/timelines @elastic/security-threat-hunting-investigations

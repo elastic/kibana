@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { useParams } from 'react-router-dom';
+import { from, of, shareReplay } from 'rxjs';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +21,7 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
 import type { Space } from '../../common';
 import type { ConfigType } from '../config';
+import { SOLUTION_NAV_FEATURE_FLAG_NAME } from '../constants';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -44,7 +46,7 @@ export const spacesManagementApp = Object.freeze({
 
       async mount({ element, setBreadcrumbs, history }) {
         const [
-          [coreStart, { features }],
+          [coreStart, { features, cloud, cloudExperiments }],
           { SpacesGridPage },
           { ManageSpacePage },
           { ViewSpacePage },
@@ -62,6 +64,17 @@ export const spacesManagementApp = Object.freeze({
         const { notifications, application, chrome, http } = coreStart;
 
         chrome.docTitle.change(title);
+
+        const onCloud = Boolean(cloud?.isCloudEnabled);
+        const isSolutionNavEnabled$ =
+          // Only available on Cloud and if the Launch Darkly flag is turned on
+          onCloud && cloudExperiments
+            ? from(
+                cloudExperiments
+                  .getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
+                  .catch(() => false)
+              ).pipe(shareReplay(1))
+            : of(false);
 
         const SpacesGridPageWithBreadcrumbs = () => {
           setBreadcrumbs([{ ...spacesFirstBreadcrumb, href: undefined }]);
@@ -97,6 +110,7 @@ export const spacesManagementApp = Object.freeze({
               spacesManager={spacesManager}
               history={history}
               allowFeatureVisibility={config.allowFeatureVisibility}
+              isSolutionNavEnabled$={isSolutionNavEnabled$}
             />
           );
         };
