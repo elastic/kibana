@@ -96,7 +96,7 @@ describe('useSetupTechnology', () => {
     expect(result.current.isAgentlessEnabled).toBeTruthy();
   });
 
-  it('should create agentless policy if agentless feature is enabled and isCloud is true', async () => {
+  it('should create agentless policy if agentless feature is enabled and isCloud is true and agentless.api.url', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         api: {
@@ -132,6 +132,32 @@ describe('useSetupTechnology', () => {
       name: 'mock_new_agentless_policy',
       supports_agentless: true,
     });
+  });
+
+  it('should not create agentless policy if agentless feature is enabled and isCloud is true and agentless.api.url is not defined', async () => {
+    (useConfig as MockFn).mockReturnValue({} as any);
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isCloudEnabled: true,
+      },
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useSetupTechnology({
+        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        newAgentPolicy: newAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
+        setSelectedPolicyTab: setSelectedPolicyTabMock,
+      })
+    );
+
+    expect(result.current.isAgentlessEnabled).toBeFalsy();
+    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+
+    act(() => {
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
+    });
+    waitForNextUpdate();
   });
 
   it('should not fetch agentless policy if agentless is enabled but serverless is disabled', async () => {
