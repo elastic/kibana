@@ -37,7 +37,7 @@ const SCRIPTED_METRICS_FIELDS_TO_COPY = [
   AGENT_NAME,
 ];
 
-const AVG_BYTES_PER_FIELD = 60;
+const AVG_BYTES_PER_FIELD = 55;
 
 export async function fetchServicePathsFromTraceIds({
   apmEventClient,
@@ -111,7 +111,7 @@ export async function fetchServicePathsFromTraceIds({
           lang: 'painless',
           source: `
             if (state.docCount >= state.limit) {
-              /* Stop processing if the document limit is reached */
+              // Stop processing if the document limit is reached
               return; 
             }
 
@@ -120,7 +120,7 @@ export async function fetchServicePathsFromTraceIds({
               id = $('transaction.id', null);
             }
 
-            /* makes sure we don't process the same event twice */
+            // Ensure same event isn't processed twice
             if (id != null && !state.eventsById.containsKey(id)) {
               def copy = new HashMap();
               copy.id = id;
@@ -155,16 +155,22 @@ export async function fetchServicePathsFromTraceIds({
       
             def processAndReturnEvent(def context, def eventId) {
               def stack = new Stack();
+
+              // Avoid reprocessing the same event
+              def visited = new HashSet();
+
               stack.push(eventId);
 
               while (!stack.isEmpty()) {
                 def currentEventId = stack.pop();
-                def event = context.eventsById[currentEventId];
+                def event = context.eventsById.get(currentEventId);
 
-                if (context.processedEvents[currentEventId] != null || event == null) {
+                if (event == null || context.processedEvents.get(currentEventId) != null) {
                   continue;
                 }
         
+                visited.add(currentEventId);
+
                 def service = new HashMap();
                 service['service.name'] = event['service.name'];
                 service['service.environment'] = event['service.environment'];
@@ -175,18 +181,23 @@ export async function fetchServicePathsFromTraceIds({
         
                 if (parentId != null && !parentId.equals(currentEventId)) {
                   def parent = context.processedEvents.get(parentId);
-                  if (parent == null) {
-                    stack.push(currentEventId);
+                  // Only adds the parentId to the stack if it hasn't visited to prevent infinite loop scenarios
+                  // if the parent is null, it means it hasn't been processed yet or it could also mean that the current event
+                  // doesn't have a parent, in which case we should skip it */
+                  if (parent == null && !visited.contains(parentId)) {
+                    visited.add(currentEventId);
+                    // Add currentEventId back to the stack to reprocess it after its parent is processed so that the path is correctly built
+                    stack.push(currentEventId); 
                     stack.push(parentId);
                     continue;
-                  } 
+                  }
 
-                  /* copy the path from the parent */
+                  // copy the path from the parent
                   basePath.addAll(parent.path);
-                  /* flag parent path for removal, as it has children */
+                  // flag parent path for removal, as it has children
                   context.locationsToRemove.add(parent.path);
       
-                  /* if the parent has 'span.destination.service.resource' set, and the service is different, we've discovered a service */
+                  // if the parent has 'span.destination.service.resource' set, and the service is different, we've discovered a service
                   if (parent['span.destination.service.resource'] != null
                     && !parent['span.destination.service.resource'].equals("")
                     && (!parent['service.name'].equals(event['service.name'])
@@ -201,12 +212,12 @@ export async function fetchServicePathsFromTraceIds({
                 def lastLocation = basePath.size() > 0 ? basePath[basePath.size() - 1] : null;
                 def currentLocation = service;
         
-                /* only add the current location to the path if it's different from the last one */
+                // only add the current location to the path if it's different from the last one
                 if (lastLocation == null || !lastLocation.equals(currentLocation)) {
                   basePath.add(currentLocation);
                 }
         
-                /* if there is an outgoing span, create a new path */
+                // if there is an outgoing span, create a new path
                 if (event['span.destination.service.resource'] != null
                   && !event['span.destination.service.resource'].equals("")) {
 
@@ -233,15 +244,15 @@ export async function fetchServicePathsFromTraceIds({
       
             for (state in states) {
               context.eventsById.putAll(state.eventsById);
-              /* release memory */
               state.eventsById.clear();
             }
-      
+
+            states.clear();
+            
             for (entry in context.eventsById.entrySet()) {
               processAndReturnEvent(context, entry.getKey());
             }
 
-            /* release memory */
             context.processedEvents.clear();
             context.eventsById.clear();
       
@@ -255,7 +266,6 @@ export async function fetchServicePathsFromTraceIds({
               }
             }
 
-            /* release memory */
             context.locationsToRemove.clear();
             context.paths.clear();
       
@@ -266,9 +276,7 @@ export async function fetchServicePathsFromTraceIds({
               response.discoveredServices.add(map);
             }
 
-            /* release memory */
             context.externalToServiceMap.clear();
-            context.paths.clear();
 
             return response;
           `,
