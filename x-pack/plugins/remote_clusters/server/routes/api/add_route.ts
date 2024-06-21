@@ -17,7 +17,7 @@ import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory'
 import { RouteDependencies } from '../../types';
 
 const bodyValidation = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   skipUnavailable: schema.boolean(),
   mode: schema.oneOf([schema.literal(PROXY_MODE), schema.literal(SNIFF_MODE)]),
   seeds: schema.nullable(schema.arrayOf(schema.string())),
