@@ -10,6 +10,16 @@
     border-radius: $euiBorderRadius !important;
   }
 
+  &--label {
+    @include euiTextTruncate;
+    max-width: 40%;
+    background-color: transparent;
+    border-radius: $euiBorderRadius;
+
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+
   .controlErrorButton {
     border-radius: 0 $euiBorderRadius $euiBorderRadius 0 !important;
   
