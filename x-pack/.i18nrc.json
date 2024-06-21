@@ -90,7 +90,7 @@
     "xpack.profiling": ["plugins/observability_solution/profiling"],
     "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.reporting": ["plugins/reporting"],
-    "xpack.rollupJobs": ["plugins/rollup"],
+    "xpack.rollupJobs": ["packages/rollup", "plugins/rollup"],
     "xpack.runtimeFields": "plugins/runtime_fields",
     "xpack.screenshotting": "plugins/screenshotting",
     "xpack.searchHomepage": "plugins/search_homepage",

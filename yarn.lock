@@ -5941,6 +5941,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/rollup@link:x-pack/packages/rollup":
+  version "0.0.0"
+  uid ""
+
 "@kbn/router-to-openapispec@link:packages/kbn-router-to-openapispec":
   version "0.0.0"
   uid ""
