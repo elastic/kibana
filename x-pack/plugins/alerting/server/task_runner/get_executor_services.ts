@@ -25,6 +25,7 @@ import {
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { PublicRuleMonitoringService, PublicRuleResultService } from '../types';
+import { withAlertingSpan } from './lib';
 import { TaskRunnerContext } from './types';
 
 interface GetExecutorServicesOpts {
@@ -65,7 +66,9 @@ export const getExecutorServices = async (opts: GetExecutorServicesOpts) => {
     scopedClusterClient,
   });
 
-  const searchSourceClient = await context.data.search.searchSource.asScoped(fakeRequest);
+  const searchSourceClient = await withAlertingSpan('alerting:get-search-source-client', () =>
+    context.data.search.searchSource.asScoped(fakeRequest)
+  );
   const wrappedSearchSourceClient = wrapSearchSourceClient({
     ...wrappedClientOptions,
     searchSourceClient,
@@ -75,9 +78,11 @@ export const getExecutorServices = async (opts: GetExecutorServicesOpts) => {
     includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'action'],
   });
 
-  const dataViews = await context.dataViews.dataViewsServiceFactory(
-    savedObjectsClient,
-    scopedClusterClient.asInternalUser
+  const dataViews = await await withAlertingSpan('alerting:get-data-views-factory', () =>
+    context.dataViews.dataViewsServiceFactory(
+      savedObjectsClient,
+      scopedClusterClient.asInternalUser
+    )
   );
 
   const uiSettingsClient = context.uiSettings.asScopedToClient(savedObjectsClient);
