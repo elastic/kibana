@@ -130,7 +130,6 @@ export class Plugin implements InfraClientPluginClass {
               ...(capabilities.logs.show
                 ? [
                     {
-                      isBetaFeature: true,
                       label: 'Logs',
                       sortKey: 200,
                       entries: [
@@ -138,6 +137,7 @@ export class Plugin implements InfraClientPluginClass {
                           label: 'Explorer',
                           app: 'observability-logs-explorer',
                           path: '/',
+                          isBetaFeature: true,
                         },
                         ...(this.config.featureFlags.logsUIEnabled
                           ? [
