@@ -21,8 +21,15 @@ import {
   ALERT_DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
-import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
-import { type PreviewPanelProps, RulePreviewPanel } from '../../preview';
+import { DocumentDetailsRuleOverviewPanelKey } from '../../shared/constants/panel_keys';
+
+export const RULE_OVERVIEW_BANNER = {
+  title: i18n.translate('xpack.securitySolution.flyout.right.about.description.rulePreviewTitle', {
+    defaultMessage: 'Preview rule details',
+  }),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+};
 
 /**
  * Displays the rule description of a signal document.
@@ -36,22 +43,13 @@ export const AlertDescription: FC = () => {
   );
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const openRulePreview = useCallback(() => {
-    const PreviewPanelRulePreview: PreviewPanelProps['path'] = { tab: RulePreviewPanel };
     openPreviewPanel({
-      id: DocumentDetailsPreviewPanelKey,
-      path: PreviewPanelRulePreview,
+      id: DocumentDetailsRuleOverviewPanelKey,
       params: {
         id: eventId,
         indexName,
         scopeId,
-        banner: {
-          title: i18n.translate(
-            'xpack.securitySolution.flyout.right.about.description.rulePreviewTitle',
-            { defaultMessage: 'Preview rule details' }
-          ),
-          backgroundColor: 'warning',
-          textColor: 'warning',
-        },
+        banner: RULE_OVERVIEW_BANNER,
         ruleId,
       },
     });
