@@ -36,7 +36,6 @@ import {
 import type { ManifestManagerContext } from './manifest_manager';
 import { ManifestManager } from './manifest_manager';
 import type { EndpointArtifactClientInterface } from '../artifact_client';
-import { InvalidInternalManifestError } from '../errors';
 import { EndpointError } from '../../../../../common/endpoint/errors';
 import type { Artifact } from '@kbn/fleet-plugin/server';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
@@ -147,7 +146,6 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(
         buildManifestManagerContextMock({
           savedObjectsClient,
-          experimentalFeatures: ['unifiedManifestEnabled'],
         })
       );
 
@@ -167,7 +165,6 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(
         buildManifestManagerContextMock({
           savedObjectsClient,
-          experimentalFeatures: ['unifiedManifestEnabled'],
         })
       );
 
@@ -239,7 +236,6 @@ describe('ManifestManager', () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const manifestManagerContext = buildManifestManagerContextMock({
         savedObjectsClient,
-        experimentalFeatures: ['unifiedManifestEnabled'],
       });
       const manifestManager = new ManifestManager(manifestManagerContext);
 
@@ -271,186 +267,9 @@ describe('ManifestManager', () => {
     });
   });
 
-  describe('getLastComputedManifest', () => {
-    test('Returns null when saved object not found', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      const manifestManager = new ManifestManager(
-        buildManifestManagerContextMock({ savedObjectsClient })
-      );
-
-      savedObjectsClient.get = jest.fn().mockRejectedValue({ output: { statusCode: 404 } });
-
-      expect(await manifestManager.getLastComputedManifest()).toBe(null);
-    });
-
-    test('Throws error when saved object client responds with 500', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      const manifestManager = new ManifestManager(
-        buildManifestManagerContextMock({ savedObjectsClient })
-      );
-      const error = { message: 'bad request', output: { statusCode: 500 } };
-
-      savedObjectsClient.get = jest.fn().mockRejectedValue(error);
-
-      await expect(manifestManager.getLastComputedManifest()).rejects.toThrow(
-        new EndpointError('bad request', error)
-      );
-    });
-
-    test('Throws error when no version on the manifest', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      const manifestManager = new ManifestManager(
-        buildManifestManagerContextMock({ savedObjectsClient })
-      );
-
-      savedObjectsClient.get = jest.fn().mockResolvedValue({});
-
-      await expect(manifestManager.getLastComputedManifest()).rejects.toStrictEqual(
-        new InvalidInternalManifestError('Internal Manifest map SavedObject is missing version')
-      );
-    });
-
-    test('Retrieves empty manifest successfully', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      const manifestManager = new ManifestManager(
-        buildManifestManagerContextMock({ savedObjectsClient })
-      );
-
-      savedObjectsClient.get = jest.fn().mockResolvedValue({
-        attributes: {
-          created: '20-01-2020 10:00:00.000Z',
-          schemaVersion: 'v2',
-          semanticVersion: '1.0.0',
-          artifacts: [],
-        },
-        version: '2.0.0',
-      });
-
-      const manifest = await manifestManager.getLastComputedManifest();
-
-      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
-      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
-      expect(manifest?.getSavedObjectVersion()).toStrictEqual('2.0.0');
-      expect(manifest?.getAllArtifacts()).toStrictEqual([]);
-    });
-
-    test('Retrieves non empty manifest successfully', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      const manifestManagerContext = buildManifestManagerContextMock({ savedObjectsClient });
-      const manifestManager = new ManifestManager(manifestManagerContext);
-
-      savedObjectsClient.get = jest.fn().mockImplementation(async (objectType: string) => {
-        if (objectType === ManifestConstants.SAVED_OBJECT_TYPE) {
-          return {
-            attributes: {
-              created: '20-01-2020 10:00:00.000Z',
-              schemaVersion: 'v2',
-              semanticVersion: '1.0.0',
-              artifacts: [
-                { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
-                { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
-                { artifactId: ARTIFACT_ID_EXCEPTIONS_LINUX, policyId: undefined },
-                { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_1 },
-                { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
-                { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_1 },
-                { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_2 },
-              ],
-            },
-            version: '2.0.0',
-          };
-        } else {
-          return null;
-        }
-      });
-
-      (
-        manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
-      ).fetchAll.mockReturnValue(createFetchAllArtifactsIterableMock([ARTIFACTS as Artifact[]]));
-
-      const manifest = await manifestManager.getLastComputedManifest();
-
-      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
-      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
-      expect(manifest?.getSavedObjectVersion()).toStrictEqual('2.0.0');
-      expect(manifest?.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(0, 5));
-      expect(manifest?.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(true);
-      expect(manifest?.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_MACOS)).toStrictEqual(
-        new Set()
-      );
-      expect(manifest?.isDefaultArtifact(ARTIFACT_EXCEPTIONS_WINDOWS)).toBe(true);
-      expect(manifest?.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_WINDOWS)).toStrictEqual(
-        new Set([TEST_POLICY_ID_1])
-      );
-      expect(manifest?.isDefaultArtifact(ARTIFACT_TRUSTED_APPS_MACOS)).toBe(false);
-      expect(manifest?.getArtifactTargetPolicies(ARTIFACT_TRUSTED_APPS_MACOS)).toStrictEqual(
-        new Set([TEST_POLICY_ID_1])
-      );
-      expect(manifest?.isDefaultArtifact(ARTIFACT_TRUSTED_APPS_WINDOWS)).toBe(false);
-      expect(manifest?.getArtifactTargetPolicies(ARTIFACT_TRUSTED_APPS_WINDOWS)).toStrictEqual(
-        new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
-      );
-    });
-
-    test("Retrieve non empty manifest and skips over artifacts that can't be found", async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      const manifestManagerContext = buildManifestManagerContextMock({ savedObjectsClient });
-      const manifestManager = new ManifestManager(manifestManagerContext);
-
-      savedObjectsClient.get = jest.fn().mockImplementation(async (objectType: string) => {
-        if (objectType === ManifestConstants.SAVED_OBJECT_TYPE) {
-          return {
-            attributes: {
-              created: '20-01-2020 10:00:00.000Z',
-              schemaVersion: 'v2',
-              semanticVersion: '1.0.0',
-              artifacts: [
-                { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
-                { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
-                { artifactId: ARTIFACT_ID_EXCEPTIONS_LINUX, policyId: undefined },
-                { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_1 },
-                { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
-                { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_1 },
-                { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_2 },
-              ],
-            },
-            version: '2.0.0',
-          };
-        } else {
-          return null;
-        }
-      });
-
-      (
-        manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
-      ).fetchAll.mockReturnValue(
-        createFetchAllArtifactsIterableMock([
-          // report the MACOS Exceptions artifact as not found
-          [
-            ARTIFACT_TRUSTED_APPS_MACOS,
-            ARTIFACT_EXCEPTIONS_WINDOWS,
-            ARTIFACT_TRUSTED_APPS_WINDOWS,
-            ARTIFACTS_BY_ID[ARTIFACT_ID_EXCEPTIONS_LINUX],
-          ] as Artifact[],
-        ])
-      );
-
-      const manifest = await manifestManager.getLastComputedManifest();
-
-      expect(manifest?.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(1, 5));
-
-      expect(manifestManagerContext.logger.warn).toHaveBeenCalledWith(
-        "Missing artifacts detected! Internal artifact manifest (SavedObject version [2.0.0]) references [1] artifact IDs that don't exist.\n" +
-          "First 10 below (run with logging set to 'debug' to see all):\n" +
-          'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3'
-      );
-    });
-  });
-
   describe('commit unified manifest', () => {
     test('Correctly updates, creates and deletes unified manifest so', async () => {
-      const context = buildManifestManagerContextMock({
-        experimentalFeatures: ['unifiedManifestEnabled'],
-      });
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
       const manifest = ManifestManager.createDefaultManifest();
 
@@ -533,106 +352,6 @@ describe('ManifestManager', () => {
       ]);
       // Global manifest wasn't updated, manual bump is required
       expect(manifestManager.bumpGlobalUnifiedManifestVersion).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('commit', () => {
-    test('Creates new saved object if no saved object version', async () => {
-      const context = buildManifestManagerContextMock({});
-      const manifestManager = new ManifestManager(context);
-      const manifest = ManifestManager.createDefaultManifest();
-
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
-      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
-
-      context.savedObjectsClient.create = jest
-        .fn()
-        .mockImplementation((_type: string, object: InternalManifestSchema) => object);
-
-      await expect(manifestManager.commit(manifest)).resolves.toBeUndefined();
-
-      expect(context.savedObjectsClient.create).toHaveBeenCalledTimes(1);
-      expect(context.savedObjectsClient.create).toHaveBeenNthCalledWith(
-        1,
-        ManifestConstants.SAVED_OBJECT_TYPE,
-        {
-          artifacts: [
-            { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
-            { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: TEST_POLICY_ID_1 },
-            { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
-            { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_2 },
-            { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_2 },
-          ],
-          schemaVersion: 'v1',
-          semanticVersion: '1.0.0',
-          created: expect.anything(),
-        },
-        { id: 'endpoint-manifest-v1' }
-      );
-    });
-
-    test('Updates existing saved object if has saved object version', async () => {
-      const context = buildManifestManagerContextMock({});
-      const manifestManager = new ManifestManager(context);
-      const manifest = new Manifest({ soVersion: '1.0.0' });
-
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
-      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
-
-      context.savedObjectsClient.update = jest
-        .fn()
-        .mockImplementation((_type: string, _id: string, object: InternalManifestSchema) => object);
-
-      await expect(manifestManager.commit(manifest)).resolves.toBeUndefined();
-
-      expect(context.savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(context.savedObjectsClient.update).toHaveBeenNthCalledWith(
-        1,
-        ManifestConstants.SAVED_OBJECT_TYPE,
-        'endpoint-manifest-v1',
-        {
-          artifacts: [
-            { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
-            { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: TEST_POLICY_ID_1 },
-            { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
-            { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_2 },
-            { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_2 },
-          ],
-          schemaVersion: 'v1',
-          semanticVersion: '1.0.0',
-        },
-        { version: '1.0.0' }
-      );
-    });
-
-    test('Throws error when saved objects client fails', async () => {
-      const context = buildManifestManagerContextMock({});
-      const manifestManager = new ManifestManager(context);
-      const manifest = new Manifest({ soVersion: '1.0.0' });
-      const error = new Error();
-
-      context.savedObjectsClient.update = jest.fn().mockRejectedValue(error);
-
-      await expect(manifestManager.commit(manifest)).rejects.toBe(error);
-
-      expect(context.savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(context.savedObjectsClient.update).toHaveBeenNthCalledWith(
-        1,
-        ManifestConstants.SAVED_OBJECT_TYPE,
-        'endpoint-manifest-v1',
-        {
-          artifacts: [],
-          schemaVersion: 'v1',
-          semanticVersion: '1.0.0',
-        },
-        { version: '1.0.0' }
-      );
     });
   });
 
