@@ -580,7 +580,7 @@ async function getExpressionSuggestionsByType(
   const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
   // enrich with assignment has some special rules who are handled somewhere else
-  const canHaveAssignments = ['eval', 'stats', 'row'].includes(command.name);
+  const canHaveAssignments = ['eval', 'stats', 'row', 'metrics'].includes(command.name);
 
   const references = { fields: fieldsMap, variables: anyVariables };
 
@@ -914,9 +914,12 @@ async function getExpressionSuggestionsByType(
       suggestions.push(...finalSuggestions);
     }
   }
+
   // Due to some logic overlapping functions can be repeated
   // so dedupe here based on text string (it can differ from name)
-  return uniqBy(suggestions, (suggestion) => suggestion.text);
+  const result = uniqBy(suggestions, (suggestion) => suggestion.text);
+
+  return result;
 }
 
 async function getBuiltinFunctionNextArgument(

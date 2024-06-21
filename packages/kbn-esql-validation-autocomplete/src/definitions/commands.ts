@@ -112,10 +112,7 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [],
     signature: {
       multipleParams: true,
-      params: [
-        { name: 'index', type: 'source', wildcards: true },
-        { name: 'expression', type: 'function', optional: true },
-      ],
+      params: [{ name: 'index', type: 'source', wildcards: true }],
     },
   },
   {

@@ -29,15 +29,20 @@ describe('autocomplete.suggest', () => {
     });
 
     describe('... <sources> ...', () => {
-      test('suggests visible indices', async () => {
+      test('suggests visible indices on space', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from /', visibleIndices);
         await assertSuggestions('FROM /', visibleIndices);
+        await assertSuggestions('from /index', visibleIndices);
+      });
+
+      test('suggests visible indices on comma', async () => {
+        const { assertSuggestions } = await setup();
+
         await assertSuggestions('FROM a,/', visibleIndices);
         await assertSuggestions('FROM a, /', visibleIndices);
         await assertSuggestions('from *,/', visibleIndices);
-        await assertSuggestions('from /index', visibleIndices);
       });
 
       test('can suggest integration data sources', async () => {
