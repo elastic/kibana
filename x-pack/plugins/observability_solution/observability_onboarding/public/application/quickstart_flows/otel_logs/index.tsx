@@ -131,11 +131,13 @@ data:
     exporters:
       debug:
         verbosity: detailed
-      elasticsearch/logs:
+      elasticsearch:
         endpoints: 
         - ${setup?.elasticsearchUrl}
         api_key: ${apiKeyData?.apiKeyEncoded}
-        logs_index: otel_logs_index
+        logs_index: logs-otel.generic-default
+        # Metrics are not supported yet
+        #metrics_index: metrics-otel.generic-default
         mapping:
           mode: ecs
         sending_queue:
@@ -143,6 +145,61 @@ data:
           num_consumers: 20
           queue_size: 1000
     processors:
+      resourcedetection/eks:
+        detectors: [env, eks]
+        timeout: 15s
+        override: true
+        eks:
+          resource_attributes:
+            k8s.cluster.name:
+              enabled: true
+      resource/k8s:
+        attributes:
+          - key: service.name
+            from_attribute: app.label.component
+            action: insert
+      resource/cloud:
+        attributes:
+          - key: cloud.instance.id
+            from_attribute: host.id
+            action: insert
+      resourcedetection/system:
+        detectors: ["system", "ec2"]
+        system:
+          hostname_sources: [ "os" ]
+          resource_attributes:
+            host.name:
+              enabled: true
+            host.id:
+              enabled: false
+            host.arch:
+              enabled: true
+            host.ip:
+              enabled: true
+            host.mac:
+              enabled: true
+            host.cpu.vendor.id:
+              enabled: true
+            host.cpu.family:
+              enabled: true
+            host.cpu.model.id:
+              enabled: true
+            host.cpu.model.name:
+              enabled: true
+            host.cpu.stepping:
+              enabled: true
+            host.cpu.cache.l2.size:
+              enabled: true
+            os.description:
+              enabled: true
+            os.type:
+              enabled: true
+        ec2:
+          resource_attributes:
+            host.name:
+              enabled: false
+            host.id:
+              enabled: true
       k8sattributes:
         filter:
           node_from_env_var: K8S_NODE_NAME
@@ -168,6 +225,10 @@ data:
             - "k8s.pod.name"
             - "k8s.pod.uid"
             - "k8s.pod.start_time"
+          labels:
+            - tag_name: app.label.component
+              key: app.kubernetes.io/component
+              from: pod
     receivers:
       filelog:
         retry_on_failure:
@@ -180,87 +241,99 @@ data:
         include_file_name: false
         include_file_path: true
         operators:
-        - id: get-format
-          routes:
-          - expr: body matches "^\\{"
-            output: parser-docker
-          - expr: body matches "^[^ Z]+ "
-            output: parser-crio
-          - expr: body matches "^[^ Z]+Z"
-            output: parser-containerd
-          type: router
-        - id: parser-crio
-          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
-          timestamp:
-            layout: 2006-01-02T15:04:05.999999999Z07:00
-            layout_type: gotime
-            parse_from: attributes.time
-          type: regex_parser
-        - combine_field: attributes.log
-          combine_with: ""
-          id: crio-recombine
-          is_last_entry: attributes.logtag == 'F'
-          max_log_size: 102400
-          output: extract_metadata_from_filepath
-          source_identifier: attributes["log.file.path"]
-          type: recombine
-        - id: parser-containerd
-          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
-          timestamp:
-            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-            parse_from: attributes.time
-          type: regex_parser
-        - combine_field: attributes.log
-          combine_with: ""
-          id: containerd-recombine
-          is_last_entry: attributes.logtag == 'F'
-          max_log_size: 102400
-          output: extract_metadata_from_filepath
-          source_identifier: attributes["log.file.path"]
-          type: recombine
-        - id: parser-docker
-          output: extract_metadata_from_filepath
-          timestamp:
-            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-            parse_from: attributes.time
-          type: json_parser
-        - id: extract_metadata_from_filepath
-          parse_from: attributes["log.file.path"]
-          regex: ^.*\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[a-f0-9\-]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
-          type: regex_parser
-        - from: attributes.stream
-          to: attributes["log.iostream"]
-          type: move
-        - from: attributes.container_name
-          to: resource["k8s.container.name"]
-          type: move
-        - from: attributes.namespace
-          to: resource["k8s.namespace.name"]
-          type: move
-        - from: attributes.pod_name
-          to: resource["k8s.pod.name"]
-          type: move
-        - from: attributes.restart_count
-          to: resource["k8s.container.restart_count"]
-          type: move
-        - from: attributes.uid
-          to: resource["k8s.pod.uid"]
-          type: move
-        - from: attributes.log
-          to: body
-          type: move
+        - id: container-parser
+          type: container
+      hostmetrics:
+        collection_interval: 10s
+        root_path: /hostfs
+        scrapers:
+          cpu:
+            metrics:
+              system.cpu.utilization:
+                enabled: true
+              system.cpu.logical.count:
+                enabled: true
+          memory:
+            metrics:
+              system.memory.utilization:
+                enabled: true
+          process:
+            metrics:
+              process.threads:
+                enabled: true
+              process.open_file_descriptors:
+                enabled: true
+              process.memory.utilization:
+                enabled: true
+              process.disk.operations:
+                enabled: true
+          network:
+          processes:
+          load:
+          disk:
+      kubeletstats:
+        auth_type: serviceAccount
+        collection_interval: 20s
+        endpoint: \${env:K8S_NODE_NAME}:10250
+        node: '\${env:K8S_NODE_NAME}'
+        k8s_api_config:
+          auth_type: serviceAccount
+        metric_groups:
+          - node
+          - pod
+          - node
+          - volume
+        metrics:
+          k8s.pod.cpu.node.utilization:
+            enabled: true
+          k8s.container.cpu_limit_utilization:
+            enabled: true
+          k8s.pod.cpu_limit_utilization:
+            enabled: true
+          k8s.container.cpu_request_utilization:
+            enabled: true
+          k8s.container.memory_limit_utilization:
+            enabled: true
+          k8s.pod.memory_limit_utilization:
+            enabled: true
+          k8s.container.memory_request_utilization:
+            enabled: true
+          k8s.node.uptime:
+            enabled: true
+          k8s.node.cpu.usage:
+            enabled: true
+          k8s.pod.cpu.usage:
+            enabled: true
+        extra_metadata_labels:
+          - container.id
+
     service:
       pipelines:
         logs:
           exporters:
-          # ES exported is disabled until https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/33454
-          # is included in the distro
-          #- elasticsearch/logs 
-          - debug
+          - elasticsearch 
+          #- debug
           processors:
           - k8sattributes
+          - resourcedetection/system
+          - resourcedetection/eks
+          - resource/k8s
+          - resource/cloud
           receivers:
           - filelog
+#        metrics:
+#          exporters:
+#          #- elasticsearch
+#          - debug
+#          processors:
+#          - k8sattributes
+#          - resourcedetection/system
+#          - resourcedetection/eks
+#          - resource/k8s
+#          - resource/cloud
+#          receivers:
+#          - kubeletstats
+#          - hostmetrics
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -288,7 +361,8 @@ spec:
         - name: elastic-opentelemetry-collector
           command: [/usr/share/elastic-agent/elastic-agent]
           args: ["otel", "-c", "/etc/elastic-agent/otel.yaml"]
-          image: docker.elastic.co/beats/elastic-agent:${agentVersion}
+          image: chrismark/elastic-otel-dev:0.0.1
+          #image: docker.elastic.co/beats/elastic-agent:${agentVersion}
           imagePullPolicy: IfNotPresent
           env:
             - name: MY_POD_IP
@@ -296,6 +370,10 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: status.podIP
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
             - name: ES_ENDPOINT
               valueFrom:
                 secretKeyRef:
@@ -319,6 +397,11 @@ spec:
               readOnly: true
             - name: varlibotelcol
               mountPath: /var/lib/otelcol
+            - name: hostfs
+              mountPath: /hostfs
+              readOnly: true
+              mountPropagation: HostToContainer
+
       volumes:
         - name: opentelemetry-collector-configmap
           configMap:
@@ -334,6 +417,9 @@ spec:
           hostPath:
             path: /var/lib/otelcol
             type: DirectoryOrCreate
+        - name: hostfs
+          hostPath:
+            path: /
       hostNetwork: false
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -347,11 +433,20 @@ rules:
     resources: ["pods", "namespaces", "nodes"]
     verbs: ["get", "watch", "list"]
   - apiGroups: ["apps"]
-    resources: ["replicasets"]
+    resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["extensions"]
-    resources: ["replicasets"]
+    resources: ["daemonsets", "deployments", "replicasets"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: [ "" ]
+    resources: [ "nodes/stats" ]
+    verbs: [ "get", "watch", "list" ]
+  - apiGroups: [ "" ]
+    resources: [ "nodes/proxy" ]
+    verbs: [ "get" ]
+  - apiGroups: [ "" ]
+    resources: ["configmaps"]
+    verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
