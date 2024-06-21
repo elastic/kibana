@@ -43,6 +43,10 @@ const MOCK_TASK_INSTANCE = {
   state: {},
   taskType: TYPE,
 };
+
+const MockCurrentTransformName = 'metadata.endpoint_current-default-8.12.0';
+const MockUnitedTransformName = 'metadata.endpoint_united-default-8.12.0';
+
 const failedTransformId = 'failing-transform';
 const goodTransformId = 'good-transform';
 
@@ -67,8 +71,14 @@ describe('check metadata transforms task', () => {
       .spyOn(mockEndpointAppContext.service.getInternalFleetServices().packages, 'getInstallation')
       .mockResolvedValue({
         installed_es: [
-          { type: ElasticsearchAssetType.transform } as EsAssetReference,
-          { type: ElasticsearchAssetType.transform } as EsAssetReference,
+          {
+            type: ElasticsearchAssetType.transform,
+            id: MockCurrentTransformName,
+          } as EsAssetReference,
+          {
+            type: ElasticsearchAssetType.transform,
+            id: MockUnitedTransformName,
+          } as EsAssetReference,
         ],
         version: '8.11.0',
       } as Installation);
@@ -142,7 +152,7 @@ describe('check metadata transforms task', () => {
         await runTask();
         expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
           {
-            transform_id: ['', ''],
+            transform_id: [MockCurrentTransformName, MockUnitedTransformName],
           },
           { meta: true }
         );
@@ -158,7 +168,7 @@ describe('check metadata transforms task', () => {
 
         expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
           {
-            transform_id: ['', ''],
+            transform_id: [MockCurrentTransformName, MockUnitedTransformName],
           },
           { meta: true }
         );

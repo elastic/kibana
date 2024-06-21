@@ -7,8 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
-
+import { ElasticsearchAssetType, FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import type {
   MetadataListResponse,
   EndpointSortableField,
@@ -111,7 +110,7 @@ export function getMetadataTransformStatsHandler(
       return response.notFound(); // ?
     }
     const transformNames = installation.installed_es
-      .filter((item) => item.type === 'transform')
+      .filter((item) => item.type === ElasticsearchAssetType.transform)
       .map((asset) => asset.id);
 
     try {
