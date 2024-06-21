@@ -25,7 +25,6 @@ import {
 export type DataControlApi = DefaultControlApi &
   Omit<PublishesPanelTitle, 'hidePanelTitle'> & // control titles cannot be hidden
   HasEditCapabilities &
-  CanClearSelections &
   PublishesDataViews &
   PublishesFilters & {
     setOutputFilter: (filter: Filter | undefined) => void; // a control should only ever output a **single** filter
