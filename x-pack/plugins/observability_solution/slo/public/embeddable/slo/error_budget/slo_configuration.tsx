@@ -41,7 +41,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2>
-            {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
+            {i18n.translate('xpack.slo.errorBudgetEmbeddable.config.sloSelector.headerTitle', {
               defaultMessage: 'Error budget burn down configuration',
             })}
           </h2>

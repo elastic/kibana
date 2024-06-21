@@ -206,7 +206,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
           <EuiFlexItem>
             <EuiTitle>
               <h2>
-                {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
+                {i18n.translate('xpack.slo.overviewEmbeddable.config.sloSelector.headerTitle', {
                   defaultMessage: 'Overview configuration',
                 })}
               </h2>
