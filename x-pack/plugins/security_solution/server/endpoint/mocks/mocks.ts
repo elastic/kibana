@@ -48,7 +48,7 @@ import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
 import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
 import type { PluginStartContract } from '@kbn/actions-plugin/server';
-import type { DeepMutable } from '../../../common/endpoint/types';
+import type { Mutable } from 'utility-types';
 import { responseActionsClientMock } from '../services/actions/clients/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 import { createMockConfig, requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
@@ -255,14 +255,6 @@ export function createRouteHandlerContext(
   return context;
 }
 
-type KibanaRequestWithMutablePayloadMock<
-  Params = unknown,
-  Query = unknown,
-  Body = unknown,
-  Method extends RouteMethod = any
-> = Omit<KibanaRequest<Params, Query, Body, Method>, 'params' | 'query' | 'body'> &
-  DeepMutable<Pick<KibanaRequest<Params, Query, Body, Method>, 'params' | 'query' | 'body'>>;
-
 type RouterMethod = Extract<keyof IRouter, RouteMethod>;
 
 export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
@@ -273,9 +265,7 @@ export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
   httpResponseMock: ReturnType<typeof httpServerMock.createResponseFactory>;
   httpHandlerContextMock: ReturnType<typeof requestContextMock.convertContext>;
   getEsClientMock: (type?: 'internalUser' | 'currentUser') => ElasticsearchClientMock;
-  createRequestMock: (
-    options?: RequestFixtureOptions<P, Q, B>
-  ) => KibanaRequestWithMutablePayloadMock<P, Q, B>;
+  createRequestMock: (options?: RequestFixtureOptions<P, Q, B>) => Mutable<KibanaRequest<P, Q, B>>;
   /** Retrieves the handler that was registered with the `router` for a given `method` and `path` */
   getRegisteredRouteHandler: (method: RouterMethod, path: string) => RequestHandler;
   /** Retrieves the route handler configuration that was registered with the router */
@@ -347,10 +337,8 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
 
     createRequestMock: (
       options: RequestFixtureOptions<P, Q, B> = {}
-    ): KibanaRequestWithMutablePayloadMock<P, Q, B> => {
-      return httpServerMock.createKibanaRequest<P, Q, B>(
-        options
-      ) as KibanaRequestWithMutablePayloadMock<P, Q, B>;
+    ): Mutable<KibanaRequest<P, Q, B>> => {
+      return httpServerMock.createKibanaRequest<P, Q, B>(options);
     },
 
     getEsClientMock: (
