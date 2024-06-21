@@ -13,9 +13,11 @@ import { contentManagementMock } from '@kbn/content-management-plugin/public/moc
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
+import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { Reference } from '@kbn/content-management-utils';
 import { setKibanaServices } from './services/kibana_services';
-import { DASHBOARD_LINK_TYPE, LinksAttributes } from '../common/content_management';
-import { LinksApi, LinksParentApi, ResolvedLink } from './embeddable/types';
+import { LinksParentApi, LinksSerializedState } from './types';
 
 export const setStubKibanaServices = () => {
   const mockCore = coreMock.createStart();
@@ -42,43 +44,22 @@ export const setStubKibanaServices = () => {
   });
 };
 
-export const getMockLinksApi = ({
-  attributes,
-  savedObjectId,
-  parentApi,
-}: {
-  attributes?: LinksAttributes;
-  savedObjectId?: string;
-  parentApi: LinksParentApi;
-}): LinksApi => {
-  return {
-    parentApi,
-    type: 'links',
-    uuid: 'mock-uuid',
-    unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
-    resetUnsavedChanges: jest.fn(),
-    serializeState: jest.fn(),
-    onEdit: jest.fn(),
-    isEditingEnabled: () => true,
-    getTypeDisplayName: () => 'Links',
-    canLinkToLibrary: async () => savedObjectId === undefined,
-    canUnlinkFromLibrary: async () => savedObjectId !== undefined,
-    checkForDuplicateTitle: jest.fn(),
-    saveToLibrary: jest.fn(),
-    getByReferenceState: jest.fn(),
-    getByValueState: jest.fn(),
-    attributes$: new BehaviorSubject<LinksAttributes | undefined>({
-      title: 'Mock links',
-      description: 'Mock links description',
-      ...attributes,
-    }),
-    resolvedLinks$: new BehaviorSubject<ResolvedLink[]>(
-      attributes?.links?.map((link, i) => ({
-        ...link,
-        title: link.label ?? `Link ${i}`,
-        description: link.type === DASHBOARD_LINK_TYPE ? `Description ${i}` : undefined,
-      })) ?? []
-    ),
-    savedObjectId$: new BehaviorSubject(savedObjectId),
-  };
-};
+export const getMockLinksParentApi = (
+  serializedState: LinksSerializedState,
+  references?: Reference[]
+): LinksParentApi => ({
+  ...getMockPresentationContainer(),
+  type: 'dashboard',
+  filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+  query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
+  timeRange$: new BehaviorSubject<TimeRange | undefined>({
+    from: 'now-15m',
+    to: 'now',
+  }),
+  timeslice$: new BehaviorSubject<[number, number] | undefined>(undefined),
+  savedObjectId: new BehaviorSubject<string | undefined>('999'),
+  hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
+  panelTitle: new BehaviorSubject<string | undefined>('My Dashboard'),
+  panelDescription: new BehaviorSubject<string | undefined>(''),
+  getSerializedStateForChild: () => ({ rawState: serializedState, references }),
+});

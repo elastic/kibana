@@ -7,12 +7,12 @@
  */
 
 import { memoize } from 'lodash';
+import { ResolvedLink } from '../types';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE, Link } from '../../common/content_management';
-import { DashboardLinkStrings } from '../components/dashboard_link/dashboard_link_strings';
-import { fetchDashboard } from '../components/dashboard_link/dashboard_link_tools';
 import { validateUrl } from '../components/external_link/external_link_tools';
+import { fetchDashboard } from '../components/dashboard_link/dashboard_link_tools';
+import { DashboardLinkStrings } from '../components/dashboard_link/dashboard_link_strings';
 import { LinksStrings } from '../components/links_strings';
-import { ResolvedLink } from './types';
 
 export const getOrderedLinkList = (links: ResolvedLink[]): ResolvedLink[] => {
   return [...links].sort((linkA, linkB) => {
@@ -45,7 +45,7 @@ export async function resolveLinks(links: Link[] = []) {
 
 export async function resolveLinkInfo(
   link: Link
-): Promise<{ title: string; description?: string; error?: Error }> {
+): Promise<{ title: string; label?: string; description?: string; error?: Error }> {
   if (link.type === EXTERNAL_LINK_TYPE) {
     const info = { title: link.label ?? link.destination };
     const { valid, message } = validateUrl(link.destination);
@@ -60,7 +60,7 @@ export async function resolveLinkInfo(
       const {
         attributes: { title, description },
       } = await fetchDashboard(link.destination);
-      return { title: link.label ?? title, description };
+      return { label: link.label || title, title, description };
     } catch (error) {
       return {
         title: DashboardLinkStrings.getDashboardErrorLabel(),

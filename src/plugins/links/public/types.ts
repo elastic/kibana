@@ -10,6 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import {
   HasEditCapabilities,
+  HasInPlaceLibraryTransforms,
   HasParentApi,
   HasType,
   PublishesPanelDescription,
@@ -20,16 +21,17 @@ import {
 } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import { HasLibraryTransforms } from '@kbn/presentation-publishing';
-import { PresentationContainer } from '@kbn/presentation-containers';
+import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '@kbn/dashboard-plugin/public';
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 
-import { CONTENT_ID } from '../../common';
-import { Link, LinksAttributes } from '../../common/content_management';
+import { CONTENT_ID } from '../common';
+import { Link, LinksAttributes, LinksLayoutType } from '../common/content_management';
 
 export type LinksParentApi = PresentationContainer &
+  HasType<typeof DASHBOARD_CONTAINER_TYPE> &
+  HasSerializedChildState<LinksSerializedState> &
   PublishesSavedObjectId &
   PublishesPanelTitle &
   PublishesPanelDescription &
@@ -41,22 +43,37 @@ export type LinksApi = HasType<typeof CONTENT_ID> &
   DefaultEmbeddableApi<LinksSerializedState> &
   HasParentApi<LinksParentApi> &
   HasEditCapabilities &
-  HasLibraryTransforms<LinksSerializedState> & {
-    attributes$: BehaviorSubject<LinksAttributes | undefined>;
-    resolvedLinks$: BehaviorSubject<ResolvedLink[]>;
+  HasInPlaceLibraryTransforms & {
+    layout$: BehaviorSubject<LinksLayoutType | undefined>;
+    links$: BehaviorSubject<ResolvedLink[] | undefined>;
     savedObjectId$: BehaviorSubject<string | undefined>;
   };
 
-export interface LinksSerializedState
-  extends SerializedTitles,
-    Partial<DynamicActionsSerializedState> {
-  attributes?: LinksAttributes;
-  savedObjectId?: string;
-  disabledActions?: string[];
+export interface LinksByReferenceSerializedState {
+  savedObjectId: string;
+}
+
+export interface LinksByValueSerializedState {
+  attributes: LinksAttributes;
+}
+
+export type LinksSerializedState = SerializedTitles &
+  Partial<DynamicActionsSerializedState> &
+  (LinksByReferenceSerializedState | LinksByValueSerializedState);
+
+export interface LinksRuntimeState
+  extends Partial<LinksByReferenceSerializedState>,
+    SerializedTitles {
+  error?: Error;
+  links?: ResolvedLink[];
+  layout?: LinksLayoutType;
+  defaultPanelTitle?: string;
+  defaultPanelDescription?: string;
 }
 
 export type ResolvedLink = Link & {
   title: string;
+  label?: string;
   description?: string;
   error?: Error;
 };

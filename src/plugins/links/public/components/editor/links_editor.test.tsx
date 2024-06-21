@@ -12,7 +12,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import LinksEditor from './links_editor';
 import { LinksStrings } from '../links_strings';
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
-import { ResolvedLink } from '../../embeddable/types';
+import { ResolvedLink } from '../../types';
 
 describe('LinksEditor', () => {
   const defaultProps = {

@@ -14,13 +14,11 @@ import {
   SavedObjectSaveModal,
   SaveResult,
 } from '@kbn/saved-objects-plugin/public';
-
-import { extractReferences } from '../../common/persistable_state';
 import { CONTENT_ID } from '../../common';
-import { LinksAttributes } from '../../common/content_management';
 import { checkForDuplicateTitle } from './duplicate_title_check';
-import { LinksSerializedState } from '../embeddable/types';
 import { linksClient } from './links_content_management_client';
+import { LinksRuntimeState } from '../types';
+import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
   defaultMessage: `Save {contentId} panel to library`,
@@ -29,32 +27,10 @@ const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
   },
 });
 
-export const runQuickSave = async (
-  newAttributes: LinksAttributes,
-  savedObjectId: string
-): Promise<LinksSerializedState | undefined> => {
-  const { attributes, references } = extractReferences({
-    attributes: newAttributes,
-  });
-
-  try {
-    const {
-      item: { id },
-    } = await linksClient.update({
-      id: savedObjectId,
-      data: attributes,
-      options: { references },
-    });
-    return { savedObjectId: id };
-  } catch (error) {
-    throw error;
-  }
-};
-
 export const runSaveToLibrary = async (
-  newAttributes: LinksAttributes
-): Promise<LinksSerializedState | undefined> => {
-  return new Promise<LinksSerializedState | undefined>((resolve, reject) => {
+  newState: LinksRuntimeState
+): Promise<LinksRuntimeState | undefined> => {
+  return new Promise<LinksRuntimeState | undefined>((resolve, reject) => {
     const onSave = async ({
       newTitle,
       newDescription,
@@ -69,7 +45,7 @@ export const runSaveToLibrary = async (
       if (
         !(await checkForDuplicateTitle({
           title: newTitle,
-          lastSavedTitle: newAttributes.title ?? '',
+          lastSavedTitle: newState.title ?? '',
           copyOnSave: false,
           onTitleDuplicate,
           isTitleDuplicateConfirmed,
@@ -78,26 +54,28 @@ export const runSaveToLibrary = async (
         return {};
       }
 
-      const stateToSave = {
-        ...newAttributes,
+      const { attributes, references } = serializeLinksAttributes(newState);
+
+      const newAttributes = {
+        ...attributes,
         ...stateFromSaveModal,
       };
-
-      const { attributes, references } = extractReferences({
-        attributes: stateToSave,
-      });
 
       try {
         const {
           item: { id },
         } = await linksClient.create({
-          data: { ...attributes, title: newTitle },
+          data: { ...newAttributes, title: newTitle },
           options: { references },
         });
-        resolve({ savedObjectId: id });
+        resolve({
+          ...newState,
+          defaultPanelTitle: newTitle,
+          defaultPanelDescription: newDescription,
+        });
         return { id };
       } catch (error) {
-        reject(error);
+        reject();
         return { error };
       }
     };
@@ -106,9 +84,9 @@ export const runSaveToLibrary = async (
       <SavedObjectSaveModal
         onSave={onSave}
         onClose={() => resolve(undefined)}
-        title={newAttributes.title ?? ''}
+        title={newState.title ?? ''}
         customModalTitle={modalTitle}
-        description={newAttributes.description}
+        description={newState.description}
         showDescription
         showCopyOnSave={false}
         objectType={CONTENT_ID}

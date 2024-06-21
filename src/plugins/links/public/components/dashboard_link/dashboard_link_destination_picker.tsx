@@ -21,7 +21,7 @@ import {
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
-import { DashboardItem } from '../../embeddable/types';
+import { DashboardItem } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { fetchDashboard, fetchDashboards } from './dashboard_link_tools';
 

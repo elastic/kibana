@@ -7,7 +7,7 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import { BehaviorSubject, distinctUntilKeyChanged, filter, switchMap } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   apiPublishesPanelDescription,
   apiPublishesPanelTitle,
@@ -15,13 +15,10 @@ import {
   StateComparators,
 } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { PanelIncompatibleError, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
-import { LinksAttributes } from '../../common/content_management';
-import { LinksParentApi, LinksSerializedState, ResolvedLink } from './types';
-import { resolveLinks } from './utils';
-import { openEditorFlyout } from '../editor/open_editor_flyout';
-import { loadFromLibrary } from '../content_management';
-import { CONTENT_ID } from '../../common';
+import { PanelIncompatibleError } from '@kbn/embeddable-plugin/public';
+import { LinksLayoutType, LINKS_VERTICAL_LAYOUT } from '../../common/content_management';
+import { LinksParentApi, LinksRuntimeState, ResolvedLink } from '../types';
+import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
   apiIsPresentationContainer(parentApi) &&
@@ -29,75 +26,36 @@ const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi 
   apiPublishesPanelTitle(parentApi) &&
   apiPublishesPanelDescription(parentApi);
 
-export async function initializeLinks(
-  state: LinksSerializedState,
-  uuid: string,
-  parentApi: unknown
-) {
+export function initializeLinks(state: LinksRuntimeState, parentApi: unknown) {
   if (!isParentApiCompatible(parentApi)) throw new PanelIncompatibleError();
 
-  const error$ = new BehaviorSubject<Error | undefined>(undefined);
-  const isEditable$ = new BehaviorSubject<boolean>(true);
+  const error$ = new BehaviorSubject<Error | undefined>(state.error);
 
-  let attributes: LinksAttributes | undefined;
-  try {
-    const loadedState = state.savedObjectId ? await loadFromLibrary(state.savedObjectId) : state;
-    if (loadedState.attributes) attributes = loadedState.attributes;
-  } catch (e) {
-    error$.next(new PanelNotFoundError());
-    isEditable$.next(false);
-  }
+  const links$ = new BehaviorSubject<ResolvedLink[] | undefined>(state.links);
+  const layout$ = new BehaviorSubject<LinksLayoutType | undefined>(state.layout);
 
-  const resolvedLinks$ = new BehaviorSubject<ResolvedLink[]>([]);
-
-  const attributes$ = new BehaviorSubject<LinksAttributes | undefined>(attributes);
-  const savedObjectId$ = new BehaviorSubject<string | undefined>(state.savedObjectId);
-
-  const defaultPanelTitle = new BehaviorSubject<string | undefined>(attributes?.title);
-  const defaultPanelDescription = new BehaviorSubject<string | undefined>(attributes?.description);
-
-  attributes$
-    .pipe(
-      filter(Boolean),
-      distinctUntilKeyChanged('links'),
-      switchMap(({ links }) => resolveLinks(links))
-    )
-    .subscribe({
-      next: (resolvedLinks) => resolvedLinks$.next(resolvedLinks),
-      error: (error) => error$.next(error),
-    });
-
-  const onEdit = async () => {
-    try {
-      const newState = await openEditorFlyout({
-        initialState: state,
-        parentDashboard: parentApi,
-      });
-      parentApi
-        .replacePanel(uuid, {
-          panelType: CONTENT_ID,
-          initialState: newState,
-        })
-        .catch((e: Error) => {
-          error$.next(e);
-        });
-    } catch {
-      // do nothing, user cancelled
-    }
-  };
+  const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.defaultPanelTitle);
+  const defaultPanelDescription = new BehaviorSubject<string | undefined>(
+    state.defaultPanelDescription
+  );
 
   const getLinksComparators = (): StateComparators<
-    Pick<LinksSerializedState, 'attributes' | 'savedObjectId'>
+    Omit<LinksRuntimeState, 'savedObjectId' | 'title' | 'description' | 'hidePanelTitles'>
   > => {
     return {
-      savedObjectId: [
-        savedObjectId$,
-        (nextSavedObjectId?: string) => savedObjectId$.next(nextSavedObjectId),
+      links: [links$, (nextLinks?: ResolvedLink[]) => links$.next(nextLinks ?? []), fastIsEqual],
+      layout: [
+        layout$,
+        (nextLayout?: LinksLayoutType) => layout$.next(nextLayout ?? LINKS_VERTICAL_LAYOUT),
       ],
-      attributes: [
-        attributes$,
-        (nextAttributes?: LinksAttributes) => attributes$.next(nextAttributes),
-        fastIsEqual,
+      error: [error$, (nextError?: Error) => error$.next(nextError)],
+      defaultPanelDescription: [
+        defaultPanelDescription,
+        (nextDescription?: string) => defaultPanelDescription.next(nextDescription),
+      ],
+      defaultPanelTitle: [
+        defaultPanelTitle,
+        (nextTitle?: string) => defaultPanelTitle.next(nextTitle),
       ],
     };
   };
@@ -107,23 +65,20 @@ export async function initializeLinks(
       defaultPanelTitle,
       defaultPanelDescription,
       blockingError: error$,
-      onEdit,
-      isEditingEnabled: () => isEditable$.value,
-      resolvedLinks$,
-      attributes$,
-      savedObjectId$,
+      isEditingEnabled: () => Boolean(error$.value === undefined),
+      links$,
+      layout$,
       parentApi,
     },
     linksComparators: getLinksComparators(),
     serializeLinks: () => {
-      if (savedObjectId$.value) {
-        return {
-          savedObjectId: savedObjectId$.value,
-        };
-      }
-      return {
-        attributes: attributes$.value,
+      const attributes = {
+        defaultPanelTitle: defaultPanelTitle.value,
+        defaultPanelDescription: defaultPanelDescription.value,
+        layout: layout$.value,
+        links: links$.value,
       };
+      return serializeLinksAttributes(attributes);
     },
   };
 }

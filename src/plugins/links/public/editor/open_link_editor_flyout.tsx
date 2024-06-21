@@ -12,7 +12,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { coreServices } from '../services/kibana_services';
 import { LinkEditor } from '../components/editor/link_editor';
 import { focusMainFlyout } from './links_editor_tools';
-import { ResolvedLink } from '../embeddable/types';
+import { ResolvedLink } from '../types';
 
 export interface LinksEditorProps {
   link?: ResolvedLink;

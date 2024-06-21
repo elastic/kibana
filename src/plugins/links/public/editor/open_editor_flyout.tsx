@@ -18,11 +18,11 @@ import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
 import { LinksLayoutType } from '../../common/content_management';
-import { runQuickSave, runSaveToLibrary } from '../content_management';
+import { linksClient, runSaveToLibrary } from '../content_management';
 import { coreServices } from '../services/kibana_services';
-import { LinksSerializedState, ResolvedLink } from '../embeddable/types';
-import { resolveLinks } from '../embeddable/utils';
-import { loadFromLibrary } from '../content_management';
+import { LinksRuntimeState, ResolvedLink } from '../types';
+import { deserializeLinksSavedObject } from '../lib/deserialize_from_library';
+import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 const LazyLinksEditor = React.lazy(() => import('../components/editor/links_editor'));
 
@@ -40,9 +40,9 @@ export async function openEditorFlyout({
   initialState,
   parentDashboard,
 }: {
-  initialState?: LinksSerializedState;
+  initialState?: LinksRuntimeState;
   parentDashboard?: unknown;
-}): Promise<LinksSerializedState | undefined> {
+}): Promise<LinksRuntimeState | undefined> {
   if (!initialState) {
     /**
      * When creating a new links panel, the tooltip from the "Add panel" popover interacts badly with the flyout
@@ -62,11 +62,10 @@ export async function openEditorFlyout({
     parentDashboard && apiPublishesSavedObjectId(parentDashboard)
       ? parentDashboard.savedObjectId.value
       : undefined;
-  const state = initialState?.savedObjectId
-    ? await loadFromLibrary(initialState.savedObjectId)
-    : initialState;
 
-  const resolvedLinks = await resolveLinks(state?.attributes?.links);
+  const runtimeState = initialState?.savedObjectId
+    ? await deserializeLinksSavedObject({ savedObjectId: initialState?.savedObjectId })
+    : initialState;
 
   return new Promise((resolve, reject) => {
     const flyoutId = `linksEditorFlyout-${uuidv4()}`;
@@ -88,31 +87,36 @@ export async function openEditorFlyout({
     });
 
     const onSaveToLibrary = async (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
-      // remove the title and description state from the resolved links before saving
-      const links = newLinks.map(({ title, description, error, ...linkToSave }) => linkToSave);
-      const newAttributes = {
-        ...state?.attributes,
-        links,
+      const newState = {
+        ...runtimeState,
+        links: newLinks,
         layout: newLayout,
       };
-      const newState = initialState?.savedObjectId
-        ? await runQuickSave(newAttributes, initialState.savedObjectId)
-        : await runSaveToLibrary(newAttributes);
-      resolve(newState);
+
+      try {
+        if (initialState?.savedObjectId) {
+          const { attributes, references } = serializeLinksAttributes(newState);
+          await linksClient.update({
+            id: initialState.savedObjectId,
+            data: attributes,
+            options: { references },
+          });
+          resolve(newState);
+        } else {
+          const saveResult = await runSaveToLibrary(newState);
+          resolve(saveResult);
+        }
+      } catch (e) {
+        reject(e);
+      }
       closeEditorFlyout(editorFlyout);
     };
 
     const onAddToDashboard = (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
-      // remove the title and description state from the resolved links before saving
-      const links = newLinks.map(({ title, description, ...linkToSave }) => linkToSave);
-      const newAttributes = {
-        ...initialState?.attributes,
-        links,
+      const newState = {
+        ...runtimeState,
+        links: newLinks,
         layout: newLayout,
-      };
-      const newState: LinksSerializedState = {
-        ...initialState,
-        attributes: newAttributes,
       };
       resolve(newState);
       closeEditorFlyout(editorFlyout);
@@ -127,8 +131,8 @@ export async function openEditorFlyout({
       toMountPoint(
         <LinksEditor
           flyoutId={flyoutId}
-          initialLinks={resolvedLinks}
-          initialLayout={state?.attributes?.layout}
+          initialLinks={runtimeState?.links}
+          initialLayout={runtimeState?.layout}
           onClose={onCancel}
           onSaveToLibrary={onSaveToLibrary}
           onAddToDashboard={onAddToDashboard}

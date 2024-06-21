@@ -6,119 +6,177 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
 import React, { createContext, useMemo } from 'react';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  getUnchangingComparator,
   initializeTitles,
-  useBatchedPublishingSubjects,
+  useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
+import { BehaviorSubject } from 'rxjs';
+import { cloneDeep } from 'lodash';
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
-  LinksAttributes,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/content_management';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
-import { LinksApi, LinksSerializedState } from './types';
+import {
+  LinksApi,
+  LinksByReferenceSerializedState,
+  LinksByValueSerializedState,
+  LinksRuntimeState,
+  LinksSerializedState,
+} from '../types';
 import { APP_NAME } from '../../common';
-import { intializeLibraryTransforms } from './initialize_library_transforms';
 import { initializeLinks } from './initialize_links';
-import { extractReferences, injectReferences } from '../../common/persistable_state';
+import { injectReferences } from '../../common/persistable_state';
+import { openEditorFlyout } from '../editor/open_editor_flyout';
 
 import '../components/links_component.scss';
+import { checkForDuplicateTitle, linksClient } from '../content_management';
+import { resolveLinks } from '../lib/resolve_links';
+import {
+  deserializeLinksSavedObject,
+  linksSerializeStateIsByReference,
+} from '../lib/deserialize_from_library';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 
 export const getLinksEmbeddableFactory = () => {
-  const linksEmbeddableFactory: ReactEmbeddableFactory<LinksSerializedState, LinksApi> = {
+  const linksEmbeddableFactory: ReactEmbeddableFactory<
+    LinksSerializedState,
+    LinksRuntimeState,
+    LinksApi
+  > = {
     type: CONTENT_ID,
-    deserializeState: (state) => {
-      const serializedState = cloneDeep(state.rawState);
-      if (serializedState === undefined) return {};
+    deserializeState: async (serializedState) => {
+      // Clone the state to avoid an object not extensible error when injecting references
+      const state = cloneDeep(serializedState.rawState);
+      const { title, description } = serializedState.rawState;
 
-      // by-reference embeddable
-      if (!('attributes' in serializedState) || serializedState.attributes === undefined) {
-        return serializedState;
+      if (linksSerializeStateIsByReference(state)) {
+        const attributes = await deserializeLinksSavedObject(state);
+        return {
+          ...attributes,
+          title,
+          description,
+        };
       }
 
       const { attributes: attributesWithInjectedIds } = injectReferences({
-        attributes: serializedState.attributes,
-        references: state.references ?? [],
+        attributes: state.attributes,
+        references: serializedState.references ?? [],
       });
 
+      const resolvedLinks = await resolveLinks(attributesWithInjectedIds.links ?? []);
+
       return {
-        ...serializedState,
-        attributes: attributesWithInjectedIds,
+        title,
+        description,
+        links: resolvedLinks,
+        layout: attributesWithInjectedIds.layout,
+        defaultPanelTitle: attributesWithInjectedIds.title,
+        defaultPanelDescription: attributesWithInjectedIds.description,
       };
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-      const { linksApi, linksComparators, serializeLinks } = await initializeLinks(
-        state,
-        uuid,
-        parentApi
-      );
+      const { linksApi, linksComparators, serializeLinks } = initializeLinks(state, parentApi);
+      const savedObjectId$ = new BehaviorSubject(state.savedObjectId);
 
-      const serializeState = (): SerializedPanelState<LinksSerializedState> => {
-        const newState = {
-          ...state,
-          ...serializeTitles(),
-          ...serializeLinks(),
-        };
-        // by-reference embeddable
-        if (!('attributes' in newState) || newState.attributes === undefined) {
-          // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
-          return { rawState: newState, references: [] };
+      const serializeState = async (): Promise<SerializedPanelState<LinksSerializedState>> => {
+        const { attributes, references } = serializeLinks();
+        if (savedObjectId$.value !== undefined) {
+          const linksByReferenceState: LinksByReferenceSerializedState = {
+            savedObjectId: savedObjectId$.value,
+            ...serializeTitles(),
+          };
+
+          return { rawState: linksByReferenceState, references: [] };
         }
 
-        // by-value embeddable
-        const { attributes, references } = extractReferences({
-          attributes: newState.attributes,
-        });
-
-        return {
-          rawState: { ...state, attributes },
-          references,
+        const linksByValueState: LinksByValueSerializedState = {
+          attributes,
+          ...serializeTitles(),
         };
+        return { rawState: linksByValueState, references };
       };
-
-      const isByReference = state.savedObjectId !== undefined;
 
       const api = buildApi(
         {
           ...titlesApi,
           ...linksApi,
-          ...intializeLibraryTransforms(linksApi.attributes$.value, serializeState, isByReference),
+          libraryId$: savedObjectId$,
+          savedObjectId$,
           getTypeDisplayName: () => APP_NAME,
           getTypeDisplayNameLowerCase: () => 'links',
           serializeState,
+          saveToLibrary: async (newTitle: string) => {
+            const { attributes, references } = await serializeLinks();
+            const {
+              item: { id },
+            } = await linksClient.create({
+              data: {
+                ...attributes,
+                title: newTitle,
+              },
+              options: { references },
+            });
+            savedObjectId$.next(id);
+            return id;
+          },
+          checkForDuplicateTitle: async (
+            newTitle: string,
+            isTitleDuplicateConfirmed: boolean,
+            onTitleDuplicate: () => void
+          ) => {
+            await checkForDuplicateTitle({
+              title: newTitle,
+              copyOnSave: false,
+              lastSavedTitle: '',
+              isTitleDuplicateConfirmed,
+              onTitleDuplicate,
+            });
+          },
+          unlinkFromLibrary: () => {
+            savedObjectId$.next(undefined);
+          },
+          onEdit: async () => {
+            try {
+              const newState = await openEditorFlyout({
+                initialState: state,
+                parentDashboard: parentApi,
+              });
+              if (newState) {
+                linksApi.links$.next(newState.links);
+                linksApi.layout$.next(newState.layout);
+                linksApi.defaultPanelTitle.next(newState.defaultPanelTitle);
+                linksApi.defaultPanelDescription.next(newState.defaultPanelDescription);
+              }
+            } catch {
+              // do nothing, user cancelled
+            }
+          },
         },
         {
           ...linksComparators,
           ...titleComparators,
-          enhancements: getUnchangingComparator(),
-          disabledActions: getUnchangingComparator(),
+          savedObjectId: [savedObjectId$, (val) => savedObjectId$.next(val)],
         }
       );
 
       const Component = () => {
-        const [resolvedLinks, attributes] = useBatchedPublishingSubjects(
-          api.resolvedLinks$,
-          api.attributes$
-        );
-
-        const layout = attributes?.layout ?? LINKS_VERTICAL_LAYOUT;
+        const [links, layout] = useBatchedOptionalPublishingSubjects(api.links$, api.layout$);
 
         const linkItems: { [id: string]: { id: string; content: JSX.Element } } = useMemo(() => {
-          return resolvedLinks.reduce((prev, currentLink) => {
+          if (!links) return {};
+          return links.reduce((prev, currentLink) => {
             return {
               ...prev,
               [currentLink.id]: {
@@ -128,20 +186,20 @@ export const getLinksEmbeddableFactory = () => {
                     <DashboardLinkComponent
                       key={currentLink.id}
                       link={currentLink}
-                      layout={layout}
-                      api={api}
+                      layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                      parentApi={api.parentApi}
                     />
                   ) : (
                     <ExternalLinkComponent
                       key={currentLink.id}
                       link={currentLink}
-                      layout={layout}
+                      layout={layout ?? LINKS_VERTICAL_LAYOUT}
                     />
                   ),
               },
             };
           }, {});
-        }, [resolvedLinks, layout]);
+        }, [links, layout]);
         return (
           <EuiPanel
             className={`linksComponent ${
@@ -157,7 +215,7 @@ export const getLinksEmbeddableFactory = () => {
               className={`${layout ?? LINKS_VERTICAL_LAYOUT}LayoutWrapper`}
               data-test-subj="links--component--listGroup"
             >
-              {resolvedLinks.map((link) => linkItems[link.id].content)}
+              {links?.map((link) => linkItems[link.id].content)}
             </EuiListGroup>
           </EuiPanel>
         );

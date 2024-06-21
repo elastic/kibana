@@ -24,7 +24,7 @@ import { LinkInfo } from './constants';
 import { LinksStrings } from '../links_strings';
 import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
 import { DASHBOARD_LINK_TYPE } from '../../../common/content_management';
-import { ResolvedLink } from '../../embeddable/types';
+import { ResolvedLink } from '../../types';
 
 export const LinksEditorSingleLink = ({
   link,

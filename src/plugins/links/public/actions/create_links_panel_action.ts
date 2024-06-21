@@ -12,6 +12,7 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openEditorFlyout } from '../editor/open_editor_flyout';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import { uiActions } from '../services/kibana_services';
+import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 const ADD_LINKS_PANEL_ACTION_ID = 'create_links_panel';
 
@@ -26,9 +27,13 @@ export const registerCreateLinksPanelAction = () => {
       if (!apiIsPresentationContainer(embeddable)) {
         throw new IncompatibleActionError();
       }
-      const initialState = await openEditorFlyout({
+      const runtimeState = await openEditorFlyout({
         parentDashboard: embeddable,
       });
+      if (!runtimeState) return;
+
+      // We should not extract the references when passing initialState to addNewPanel
+      const initialState = serializeLinksAttributes(runtimeState, false);
 
       await embeddable.addNewPanel({
         panelType: CONTENT_ID,

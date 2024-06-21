@@ -20,7 +20,7 @@ import {
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
-import { ResolvedLink } from '../../embeddable/types';
+import { ResolvedLink } from '../../types';
 
 export const ExternalLinkComponent = ({
   link,

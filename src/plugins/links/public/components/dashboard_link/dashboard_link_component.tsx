@@ -26,16 +26,16 @@ import {
 } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { LinksApi, ResolvedLink } from '../../embeddable/types';
+import { LinksParentApi, ResolvedLink } from '../../types';
 
 export const DashboardLinkComponent = ({
   link,
   layout,
-  api,
+  parentApi,
 }: {
   link: ResolvedLink;
   layout: LinksLayoutType;
-  api: LinksApi;
+  parentApi: LinksParentApi;
 }) => {
   const [
     parentDashboardId,
@@ -45,12 +45,12 @@ export const DashboardLinkComponent = ({
     filters,
     query,
   ] = useBatchedPublishingSubjects(
-    api.parentApi.savedObjectId,
-    api.parentApi.panelTitle,
-    api.parentApi.panelDescription,
-    api.parentApi.timeRange$,
-    api.parentApi.filters$,
-    api.parentApi.query$
+    parentApi.savedObjectId,
+    parentApi.panelTitle,
+    parentApi.panelDescription,
+    parentApi.timeRange$,
+    parentApi.filters$,
+    parentApi.query$
   );
 
   /**
@@ -68,7 +68,7 @@ export const DashboardLinkComponent = ({
    * Memoized link information
    */
   const linkLabel = useMemo(() => {
-    return link.label ?? dashboardTitle ?? DashboardLinkStrings.getDashboardErrorLabel();
+    return link.label || (dashboardTitle ?? DashboardLinkStrings.getDashboardErrorLabel());
   }, [link, dashboardTitle]);
 
   const { tooltipTitle, tooltipMessage } = useMemo(() => {
@@ -109,7 +109,7 @@ export const DashboardLinkComponent = ({
 
     params.filters = linkOptions.useCurrentFilters ? filters : filters?.filter(isFilterPinned);
 
-    const locator = api.parentApi.locator;
+    const locator = parentApi.locator;
     if (!locator) return;
 
     const href = locator.getRedirectUrl(params);
@@ -141,7 +141,7 @@ export const DashboardLinkComponent = ({
     link.options,
     parentDashboardId,
     filters,
-    api.parentApi.locator,
+    parentApi.locator,
     query,
     timeRange,
   ]);

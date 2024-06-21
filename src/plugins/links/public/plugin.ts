@@ -22,13 +22,17 @@ import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import { LinksSerializedState } from './types';
 import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksCrudTypes } from '../common/content_management';
 import { LinksStrings } from './components/links_strings';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { registerCreateLinksPanelAction } from './actions/create_links_panel_action';
-import { LinksSerializedState } from './embeddable/types';
+import {
+  deserializeLinksSavedObject,
+  linksSerializeStateIsByReference,
+} from './lib/deserialize_from_library';
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
@@ -99,7 +103,8 @@ export class LinksPlugin
                 editor: {
                   onEdit: async (savedObjectId: string) => {
                     const { openEditorFlyout } = await import('./editor/open_editor_flyout');
-                    await openEditorFlyout({ initialState: { savedObjectId } });
+                    const initialState = await deserializeLinksSavedObject({ savedObjectId });
+                    await openEditorFlyout({ initialState });
                   },
                 },
                 description,
@@ -123,9 +128,9 @@ export class LinksPlugin
 
       plugins.dashboard.registerDashboardPanelPlacementSetting(
         CONTENT_ID,
-        (serializedState: LinksSerializedState | undefined) => {
-          if (!serializedState) return {};
-          const isHorizontal = serializedState.attributes?.layout === 'horizontal';
+        (serializedState?: LinksSerializedState) => {
+          if (!serializedState || linksSerializeStateIsByReference(serializedState)) return {};
+          const isHorizontal = serializedState.attributes.layout === 'horizontal';
           const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
           const height = isHorizontal
             ? 4

@@ -8,26 +8,28 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { buildMockDashboard } from '@kbn/dashboard-plugin/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { setStubKibanaServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { getLinksEmbeddableFactory } from './links_embeddable';
 import { Link } from '../../common/content_management';
 import { CONTENT_ID } from '../../common';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
-  ReactEmbeddableFactory,
-  ReactEmbeddableRenderer,
-  registerReactEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
-import { LinksApi, LinksSerializedState, ResolvedLink } from './types';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+  LinksApi,
+  LinksParentApi,
+  LinksRuntimeState,
+  LinksSerializedState,
+  ResolvedLink,
+} from '../types';
 import { linksClient } from '../content_management';
+import { getMockLinksParentApi } from '../mocks';
 
 const links: Link[] = [
   {
     id: '001',
     order: 0,
     type: 'dashboardLink',
-    label: 'Dashboard 1',
+    label: '',
     destinationRefName: 'link_001_dashboard',
   },
   {
@@ -57,8 +59,8 @@ const resolvedLinks: ResolvedLink[] = [
     id: '001',
     order: 0,
     type: 'dashboardLink',
-    label: 'Dashboard 1',
-    destinationRefName: 'link_001_dashboard',
+    label: '',
+    destination: '999',
     title: 'Dashboard 1',
     description: 'Dashboard 1 description',
   },
@@ -67,7 +69,7 @@ const resolvedLinks: ResolvedLink[] = [
     order: 1,
     type: 'dashboardLink',
     label: 'Dashboard 2',
-    destinationRefName: 'link_002_dashboard',
+    destination: '888',
     title: 'Dashboard 2',
     description: 'Dashboard 2 description',
   },
@@ -101,44 +103,7 @@ const references = [
   },
 ];
 
-const expectedRuntimeState = {
-  attributes: {
-    layout: 'horizontal',
-    links: [
-      {
-        destination: '999',
-        id: '001',
-        order: 0,
-        type: 'dashboardLink',
-        label: 'Dashboard 1',
-      },
-      {
-        destination: '888',
-        id: '002',
-        order: 1,
-        type: 'dashboardLink',
-        label: 'Dashboard 2',
-      },
-      {
-        destination: 'https://example.com',
-        id: '003',
-        order: 2,
-        type: 'externalLink',
-        label: 'Example homepage',
-      },
-      {
-        destination: 'https://elastic.co',
-        id: '004',
-        order: 3,
-        type: 'externalLink',
-      },
-    ],
-    description: 'just a few links',
-    title: 'my links',
-  },
-};
-
-jest.mock('./utils', () => {
+jest.mock('../lib/resolve_links', () => {
   return {
     resolveLinks: jest.fn().mockResolvedValue(resolvedLinks),
   };
@@ -166,21 +131,19 @@ jest.mock('../content_management', () => {
     }),
     linksClient: {
       create: jest.fn().mockResolvedValue({ item: { id: '333' } }),
+      update: jest.fn().mockResolvedValue({ item: { id: '123' } }),
     },
   };
 });
 
 describe('getLinksEmbeddableFactory', () => {
-  let parent: DashboardContainer;
-  let factory: ReactEmbeddableFactory<LinksSerializedState, LinksApi>;
-
+  const factory = getLinksEmbeddableFactory();
   beforeAll(() => {
-    setStubKibanaServices();
-    parent = buildMockDashboard();
-    factory = getLinksEmbeddableFactory();
-    registerReactEmbeddableFactory(CONTENT_ID, async () => {
+    const embeddable = embeddablePluginMock.createSetupContract();
+    embeddable.registerReactEmbeddableFactory(CONTENT_ID, async () => {
       return factory;
     });
+    setStubKibanaServices();
   });
 
   describe('by reference embeddable', () => {
@@ -190,23 +153,37 @@ describe('getLinksEmbeddableFactory', () => {
       description: 'just a few links',
     } as LinksSerializedState;
 
-    test('deserializeState', () => {
-      const deserializedState = factory.deserializeState({
+    const expectedRuntimeState = {
+      defaultPanelTitle: 'links 001',
+      defaultPanelDescription: 'some links',
+      layout: 'vertical',
+      links: resolvedLinks,
+      description: 'just a few links',
+      title: 'my links',
+      savedObjectId: '123',
+    };
+
+    let parent: LinksParentApi;
+
+    beforeEach(() => {
+      parent = getMockLinksParentApi(rawState, references);
+    });
+
+    test('deserializeState', async () => {
+      const deserializedState = await factory.deserializeState({
         rawState,
         references,
       });
-      expect(deserializedState).toEqual(rawState);
+      expect(deserializedState).toEqual({
+        ...expectedRuntimeState,
+      });
     });
 
     test('component renders', async () => {
       render(
         <ReactEmbeddableRenderer<LinksSerializedState, LinksApi>
           type={CONTENT_ID}
-          state={{
-            rawState,
-            references,
-          }}
-          parentApi={parent}
+          getParentApi={() => parent}
         />
       );
 
@@ -217,20 +194,16 @@ describe('getLinksEmbeddableFactory', () => {
       const onApiAvailable = jest.fn() as jest.MockedFunction<(api: LinksApi) => void>;
 
       render(
-        <ReactEmbeddableRenderer<LinksSerializedState, LinksApi>
+        <ReactEmbeddableRenderer<LinksSerializedState, LinksRuntimeState, LinksApi>
           type={CONTENT_ID}
-          state={{
-            rawState,
-            references,
-          }}
           onApiAvailable={onApiAvailable}
-          parentApi={parent}
+          getParentApi={() => parent}
         />
       );
 
-      await waitFor(() => {
+      await waitFor(async () => {
         const api = onApiAvailable.mock.calls[0][0];
-        expect(api.serializeState()).toEqual({
+        expect(await api.serializeState()).toEqual({
           rawState: {
             savedObjectId: '123',
             title: 'my links',
@@ -239,30 +212,43 @@ describe('getLinksEmbeddableFactory', () => {
           },
           references: [],
         });
-        expect(api.getByValueState()).toEqual({
-          attributes: { links, layout: 'vertical', title: 'links 001', description: 'some links' },
-          title: 'my links',
-          description: 'just a few links',
-          hidePanelTitles: undefined,
-        });
-        expect(api.getByReferenceState('321')).toEqual({
-          savedObjectId: '321',
-          title: 'my links',
-          description: 'just a few links',
-          hidePanelTitles: undefined,
-        });
-        expect(api.canLinkToLibrary()).resolves.toBe(false);
-        expect(api.canUnlinkFromLibrary()).resolves.toBe(true);
-        expect(api.resolvedLinks$.value).toEqual(resolvedLinks);
-        expect(api.attributes$.value).toEqual({
-          title: 'links 001',
-          description: 'some links',
-          links,
-          layout: 'vertical',
-        });
+        expect(api.links$.value).toEqual(resolvedLinks);
+        expect(api.layout$.value).toEqual('vertical');
         expect(api.savedObjectId$.value).toBe('123');
         expect(api.defaultPanelTitle!.value).toBe('links 001');
         expect(api.defaultPanelDescription!.value).toBe('some links');
+      });
+    });
+
+    test('unlink from library', async () => {
+      const onApiAvailable = jest.fn() as jest.MockedFunction<(api: LinksApi) => void>;
+
+      render(
+        <ReactEmbeddableRenderer<LinksSerializedState, LinksRuntimeState, LinksApi>
+          type={CONTENT_ID}
+          onApiAvailable={onApiAvailable}
+          getParentApi={() => parent}
+        />
+      );
+
+      await waitFor(async () => {
+        const api = onApiAvailable.mock.calls[0][0];
+        api.unlinkFromLibrary();
+        expect(await api.serializeState()).toEqual({
+          rawState: {
+            title: 'my links',
+            description: 'just a few links',
+            hidePanelTitles: undefined,
+            attributes: {
+              description: 'some links',
+              title: 'links 001',
+              links,
+              layout: 'vertical',
+            },
+          },
+          references,
+        });
+        expect(api.libraryId$.value).toBeUndefined();
       });
     });
   });
@@ -272,28 +258,40 @@ describe('getLinksEmbeddableFactory', () => {
       attributes: {
         links,
         layout: 'horizontal',
-        title: 'my links',
-        description: 'just a few links',
       },
+      description: 'just a few links',
+      title: 'my links',
     } as LinksSerializedState;
 
-    test('deserializeState', () => {
-      const deserializedState = factory.deserializeState({
+    const expectedRuntimeState = {
+      defaultPanelTitle: undefined,
+      defaultPanelDescription: undefined,
+      layout: 'horizontal',
+      links: resolvedLinks,
+      description: 'just a few links',
+      title: 'my links',
+      savedObjectId: undefined,
+    };
+
+    let parent: LinksParentApi;
+
+    beforeEach(() => {
+      parent = getMockLinksParentApi(rawState, references);
+    });
+
+    test('deserializeState', async () => {
+      const deserializedState = await factory.deserializeState({
         rawState,
         references,
       });
-      expect(deserializedState).toEqual(expectedRuntimeState);
+      expect(deserializedState).toEqual({ ...expectedRuntimeState, layout: 'horizontal' });
     });
 
     test('component renders', async () => {
       render(
         <ReactEmbeddableRenderer<LinksSerializedState, LinksApi>
           type={CONTENT_ID}
-          state={{
-            rawState,
-            references,
-          }}
-          parentApi={parent}
+          getParentApi={() => parent}
         />
       );
 
@@ -304,47 +302,66 @@ describe('getLinksEmbeddableFactory', () => {
       const onApiAvailable = jest.fn() as jest.MockedFunction<(api: LinksApi) => void>;
 
       render(
-        <ReactEmbeddableRenderer<LinksSerializedState, LinksApi>
+        <ReactEmbeddableRenderer<LinksSerializedState, LinksRuntimeState, LinksApi>
           type={CONTENT_ID}
-          state={{
-            rawState,
-            references,
-          }}
           onApiAvailable={onApiAvailable}
-          parentApi={parent}
+          getParentApi={() => parent}
         />
       );
 
       await waitFor(async () => {
         const api = onApiAvailable.mock.calls[0][0];
-        expect(api.serializeState()).toEqual({
+        expect(await api.serializeState()).toEqual({
           rawState: {
+            title: 'my links',
+            description: 'just a few links',
+            hidePanelTitles: undefined,
             attributes: {
-              title: 'my links',
-              description: 'just a few links',
               links,
               layout: 'horizontal',
             },
           },
           references,
         });
-        expect(await api.canLinkToLibrary()).toBe(true);
-        expect(await api.canUnlinkFromLibrary()).toBe(false);
-        expect(api.resolvedLinks$.value).toEqual(resolvedLinks);
-        expect(api.attributes$.value).toEqual(expectedRuntimeState.attributes);
-        expect(api.savedObjectId$.value).toBeUndefined();
 
+        expect(api.links$.value).toEqual(resolvedLinks);
+        expect(api.layout$.value).toEqual('horizontal');
+        expect(api.libraryId$.value).toBeUndefined();
+      });
+    });
+    test('save to library', async () => {
+      const onApiAvailable = jest.fn() as jest.MockedFunction<(api: LinksApi) => void>;
+
+      render(
+        <ReactEmbeddableRenderer<LinksSerializedState, LinksRuntimeState, LinksApi>
+          type={CONTENT_ID}
+          onApiAvailable={onApiAvailable}
+          getParentApi={() => parent}
+        />
+      );
+
+      await waitFor(async () => {
+        const api = onApiAvailable.mock.calls[0][0];
         const newId = await api.saveToLibrary('some new title');
         expect(linksClient.create).toHaveBeenCalledWith({
           data: {
             title: 'some new title',
-            description: 'just a few links',
             links,
             layout: 'horizontal',
           },
           options: { references },
         });
         expect(newId).toBe('333');
+        expect(api.libraryId$.value).toBe('333');
+        expect(await api.serializeState()).toEqual({
+          rawState: {
+            savedObjectId: '333',
+            title: 'my links',
+            description: 'just a few links',
+            hidePanelTitles: undefined,
+          },
+          references: [],
+        });
       });
     });
   });

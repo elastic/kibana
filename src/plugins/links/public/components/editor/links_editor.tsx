@@ -44,8 +44,8 @@ import { LinksEditorSingleLink } from './links_editor_single_link';
 import { TooltipWrapper } from '../tooltip_wrapper';
 
 import './links_editor.scss';
-import { ResolvedLink } from '../../embeddable/types';
-import { getOrderedLinkList } from '../../embeddable/utils';
+import { ResolvedLink } from '../../types';
+import { getOrderedLinkList } from '../../lib/resolve_links';
 
 const layoutOptions: EuiButtonGroupOptionProps[] = [
   {
@@ -88,7 +88,7 @@ const LinksEditor = ({
   );
   const [isSaving, setIsSaving] = useState(false);
   const [orderedLinks, setOrderedLinks] = useState<ResolvedLink[]>([]);
-  const [saveByReference, setSaveByReference] = useState(!initialLinks ? false : isByReference);
+  const [saveByReference, setSaveByReference] = useState(isByReference);
 
   const isEditingExisting = initialLinks || isByReference;
 
