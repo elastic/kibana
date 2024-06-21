@@ -311,7 +311,6 @@ async function executor(
     transport.clientSecret = secrets.clientSecret;
   }
 
-  const isCloud = config.service === AdditionalEmailServices.ELASTIC_CLOUD;
   if (config.service === AdditionalEmailServices.EXCHANGE) {
     transport.clientId = config.clientId!;
     transport.tenantId = config.tenantId!;
@@ -325,7 +324,7 @@ async function executor(
     transport.host = config.host!;
     transport.port = config.port!;
     transport.secure = getSecureValue(config.secure, config.port);
-  } else if (isCloud) {
+  } else if (config.service === AdditionalEmailServices.ELASTIC_CLOUD) {
     // use custom elastic cloud settings
     transport.host = ELASTIC_CLOUD_SERVICE.host!;
     transport.port = ELASTIC_CLOUD_SERVICE.port!;
@@ -379,10 +378,9 @@ async function executor(
       serviceMessage: err.message,
     };
 
-    // Mark cloud errors for rate limiting (SMTP 450) and
-    // recipient address being rejected (SMTP 554) as user errors
+    // Mark 4xx and 5xx errors as user errors
     const statusCode = err?.response?.status;
-    if ((isCloud && statusCode === 450) || statusCode === 554) {
+    if (statusCode >= 400 && statusCode < 600) {
       return {
         ...errorResult,
         errorSource: TaskErrorSource.USER,
