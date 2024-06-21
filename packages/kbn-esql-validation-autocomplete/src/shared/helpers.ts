@@ -127,7 +127,7 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['from', 'row', 'show'].includes(String(label));
+  return ['from', 'row', 'show', 'metrics'].includes(String(label));
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
@@ -196,13 +196,11 @@ const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
 
 function buildCommandLookup() {
   if (!commandLookups) {
-    commandLookups = commandDefinitions.reduce((memo, def) => {
-      memo.set(def.name, def);
-      if (def.alias) {
-        memo.set(def.alias, def);
-      }
-      return memo;
-    }, new Map<string, CommandDefinition>());
+    commandLookups = new Map();
+    for (const command of commandDefinitions) {
+      commandLookups.set(command.name, command);
+      if (command.alias) commandLookups.set(command.alias, command);
+    }
   }
   return commandLookups;
 }
