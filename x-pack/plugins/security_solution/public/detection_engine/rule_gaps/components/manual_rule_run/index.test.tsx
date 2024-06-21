@@ -28,6 +28,11 @@ describe('ManualRuleRunModal', () => {
   });
 
   beforeEach(() => {
+    // This is an attempt to fix the "TypeError: scrollIntoView is not a function" error
+    // According to https://stackoverflow.com/a/53294906 the `scrollIntoView` is not implemented in jsdom,
+    // and proposed solution is coming from https://github.com/jsdom/jsdom/issues/1695
+    window.HTMLElement.prototype.scrollIntoView = () => {};
+
     render(<ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />);
 
     startDatePicker = screen.getByTestId('start-date-picker');
