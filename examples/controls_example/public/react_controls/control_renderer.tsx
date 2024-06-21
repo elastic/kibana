@@ -10,6 +10,7 @@ import React, { useImperativeHandle, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 
+import { SerializedStyles } from '@emotion/react';
 import { StateComparators } from '@kbn/presentation-publishing';
 
 import { getControlFactory } from './control_factory_registry';
@@ -67,7 +68,7 @@ export const ControlRenderer = <
           parentApi
         );
 
-        return React.forwardRef<typeof api, { className: string }>((props, ref) => {
+        return React.forwardRef<typeof api, { css: SerializedStyles }>((props, ref) => {
           // expose the api into the imperative handle
           useImperativeHandle(ref, () => api, []);
           return <Component {...props} />;

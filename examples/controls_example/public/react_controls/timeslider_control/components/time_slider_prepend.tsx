@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
-import { ViewMode } from '@kbn/presentation-publishing';
+import { EuiButtonIcon } from '@elastic/eui';
 import React, { FC, useCallback, useState } from 'react';
-import { first, Observable, Subscription } from 'rxjs';
-import { PlayButton } from './play_button';
+import { Observable, Subscription } from 'rxjs';
+import { first } from 'rxjs';
+import { ViewMode } from '@kbn/presentation-publishing';
 import { TimeSliderStrings } from './time_slider_strings';
+import { PlayButton } from './play_button';
 
 interface Props {
   onNext: () => void;
@@ -65,43 +66,35 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   }, [props, subscription, timeoutId]);
 
   return (
-    <>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          onClick={() => {
-            onPause();
-            props.onPrevious();
-          }}
-          iconType="framePrevious"
-          color="text"
-          className={'timeSlider-prependButton'}
-          aria-label={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
-          data-test-subj="timeSlider-previousTimeWindow"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <PlayButton
-          onPlay={onPlay}
-          onPause={onPause}
-          waitForControlOutputConsumersToLoad$={props.waitForControlOutputConsumersToLoad$}
-          viewMode={props.viewMode}
-          disablePlayButton={props.disablePlayButton}
-          isPaused={isPaused}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          onClick={() => {
-            onPause();
-            props.onNext();
-          }}
-          iconType="frameNext"
-          color="text"
-          className={'timeSlider-prependButton'}
-          aria-label={TimeSliderStrings.control.getNextButtonAriaLabel()}
-          data-test-subj="timeSlider-nextTimeWindow"
-        />
-      </EuiFlexItem>
-    </>
+    <div>
+      <EuiButtonIcon
+        onClick={() => {
+          onPause();
+          props.onPrevious();
+        }}
+        iconType="framePrevious"
+        color="text"
+        aria-label={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
+        data-test-subj="timeSlider-previousTimeWindow"
+      />
+      <PlayButton
+        onPlay={onPlay}
+        onPause={onPause}
+        waitForControlOutputConsumersToLoad$={props.waitForControlOutputConsumersToLoad$}
+        viewMode={props.viewMode}
+        disablePlayButton={props.disablePlayButton}
+        isPaused={isPaused}
+      />
+      <EuiButtonIcon
+        onClick={() => {
+          onPause();
+          props.onNext();
+        }}
+        iconType="frameNext"
+        color="text"
+        aria-label={TimeSliderStrings.control.getNextButtonAriaLabel()}
+        data-test-subj="timeSlider-nextTimeWindow"
+      />
+    </div>
   );
 };
