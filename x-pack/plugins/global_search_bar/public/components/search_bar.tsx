@@ -58,6 +58,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   // These hooks are used when on chromeStyle set to 'project'
   const [isVisible, setIsVisible] = useState(false);
+  const [focus, setFocus] = useState<boolean>(false);
   const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // General hooks
@@ -126,7 +127,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           searchSubscription.current.unsubscribe();
           searchSubscription.current = null;
         }
-
+        setFocus(true);
         setIsLoading(true);
         const suggestions = loadSuggestions(searchValue.toLowerCase());
         setIsLoading(false);
@@ -156,6 +157,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
         setSearchTerm(rawParams.term ?? '');
         setIsLoading(true);
+        setFocus(true);
         searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
           next: ({ results }) => {
             if (searchValue.length > 0) {
@@ -212,10 +214,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         if (isChecked) {
           selectedRank = rank + 1;
         }
+        setFocus(false);
         return isChecked;
       });
 
       if (!selected) {
+        setFocus(false);
         return;
       }
 
@@ -227,6 +231,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       // if the type is a suggestion, we change the query on the input and trigger a new search
       // by setting the searchValue (only setting the field value does not trigger a search)
       if (type === '__suggestion__') {
+        setFocus(false);
         setSearchValue(suggestion);
         return;
       }
@@ -236,6 +241,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         if (type === 'application') {
           const key = selected.key ?? 'unknown';
           const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
+          setFocus(false);
           reportEvent.navigateToApplication({
             application,
             searchValue,
@@ -243,6 +249,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
             selectedRank,
           });
         } else {
+          setFocus(false);
           reportEvent.navigateToSavedObject({
             type,
             searchValue,
@@ -251,6 +258,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           });
         }
       } catch (err) {
+        setFocus(false);
         reportEvent.error({ message: err, searchValue });
         // eslint-disable-next-line no-console
         console.log('Error trying to track searchbar metrics', err);
@@ -259,18 +267,21 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       if (event.shiftKey) {
         window.open(url);
       } else if (event.ctrlKey || event.metaKey) {
+        setFocus(false);
         window.open(url, '_blank');
       } else {
+        setFocus(false);
         navigateToUrl(url);
       }
 
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {
         clearField();
+        setFocus(false);
         searchRef.dispatchEvent(blurEvent);
       }
     },
-    [reportEvent, navigateToUrl, searchRef, searchValue]
+    [reportEvent, navigateToUrl, searchRef, searchValue, setFocus]
   );
 
   const clearField = () => setSearchValue('');
@@ -369,6 +380,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         repositionOnScroll: true,
         popoverRef: setButtonRef,
         panelStyle: { marginTop: '6px' },
+        ownFocus: focus,
       }}
       popoverButton={
         <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
