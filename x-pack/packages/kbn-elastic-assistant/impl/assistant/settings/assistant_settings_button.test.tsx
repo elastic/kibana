@@ -25,6 +25,7 @@ const testProps = {
   isFlyoutMode: false,
   onConversationSelected,
   conversations: {},
+  conversationsLoaded: true,
   refetchConversationsState: jest.fn(),
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   refetchAnonymizationFieldsResults: jest.fn(),

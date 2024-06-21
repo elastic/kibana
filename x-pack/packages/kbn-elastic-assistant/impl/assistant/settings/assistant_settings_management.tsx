@@ -28,7 +28,7 @@ import { ConversationSettingsManagement } from '../conversations/converstaion_se
 import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management.tsx';
 import { SystemPromptSettingsManagement } from '../prompt_editor/system_prompt/system_prompt_settings_management';
 import { AnonymizationSettingsManagement } from '../../data_anonymization/settings/anonomization_settings_management';
-import { EvaluationSettingsManagement } from './evaluation_settings_management';
+import { EvaluationSettings } from './evaluation_settings/evaluation_settings';
 
 export const CONNECTORS_TAB = 'CONNECTORS_TAB' as const;
 export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
@@ -305,7 +305,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               setUpdatedKnowledgeBaseSettings={handleChange(setUpdatedKnowledgeBaseSettings)}
             />
           )}
-          {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettingsManagement />}
+          {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
         </EuiPageTemplate.Section>
         {hasPendingChanges && (
           <EuiPageTemplate.BottomBar paddingSize="s" position="fixed">

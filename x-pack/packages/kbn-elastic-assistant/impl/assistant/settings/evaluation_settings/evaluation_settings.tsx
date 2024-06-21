@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
+  euiPaletteComplementary,
   EuiFormRow,
   EuiTitle,
   EuiText,
@@ -15,8 +16,10 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiButton,
+  EuiComboBoxOptionOption,
   EuiTextArea,
   EuiTextColor,
+  EuiFieldText,
   EuiFlexItem,
   EuiFlexGroup,
   EuiLink,
@@ -24,43 +27,31 @@ import {
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { PostEvaluateResponse } from '@kbn/elastic-assistant-common';
+import type { GetEvaluateResponse, PostEvaluateResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
-
+import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpers';
+import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
 import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
 import { getApmLink, getDiscoverLink } from './utils';
-import { useRunDetails } from './run_details/use_run_details';
-import { useDataset } from './run_details/use_dataset';
-import { useTraceOptions } from './run_details/use_trace_options';
-import { RunDetailsEditor } from './run_details';
-import { PredictionDetails } from './prediction_details';
-import { usePredictionsDetails } from './prediction_details/use_predictions_details';
-import { useEvaluationDetails } from './evaluation_details/use_evaluation_details';
+import { useEvaluationData } from '../../api/evaluate/use_evaluation_data';
 
-const getSection = (title: string, description: string) => (
-  <div>
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h3>{title}</h3>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+const DEFAULT_EVAL_TYPES_OPTIONS = [
+  { label: 'correctness' },
+  { label: 'esql-validator', disabled: true },
+  { label: 'custom', disabled: true },
+];
+const DEFAULT_OUTPUT_INDEX = '.kibana-elastic-ai-assistant-evaluation-results';
 
-    <EuiText size="s">
-      <p>
-        <EuiTextColor color="subdued">{description}</EuiTextColor>
-      </p>
-    </EuiText>
-  </div>
-);
+interface Props {
+  onEvaluationSettingsChange?: () => void;
+}
 
 /**
  * Evaluation Settings -- development-only feature for evaluating models
  */
-export const EvaluationSettings: React.FC = React.memo(() => {
+export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSettingsChange }) => {
   const { actionTypeRegistry, basePath, http, setTraceOptions, traceOptions } =
     useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });
@@ -71,66 +62,246 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   } = usePerformEvaluation({
     http,
   });
+  const { data: evalData } = useEvaluationData({ http });
+  const defaultAgents = useMemo(
+    () => (evalData as GetEvaluateResponse)?.agentExecutors ?? [],
+    [evalData]
+  );
 
   // Run Details
-  const runDetailsSettings = useRunDetails();
+  // Project Name
+  const [projectName, setProjectName] = useState();
+  const onProjectNameChange = useCallback(
+    (e) => {
+      setProjectName(e.target.value);
+    },
+    [setProjectName]
+  );
+  // Run Name
+  const [runName, setRunName] = useState();
+  const onRunNameChange = useCallback(
+    (e) => {
+      setRunName(e.target.value);
+    },
+    [setRunName]
+  );
+  // Local Output Index
+  const [outputIndex, setOutputIndex] = useState(DEFAULT_OUTPUT_INDEX);
+  const onOutputIndexChange = useCallback(
+    (e) => {
+      setOutputIndex(e.target.value);
+    },
+    [setOutputIndex]
+  );
   /** Trace Options **/
-  const tracedOptionsSettings = useTraceOptions({ setTraceOptions, traceOptions });
+  const [showTraceOptions, setShowTraceOptions] = useState(false);
+  const onApmUrlChange = useCallback(
+    (e) => {
+      setTraceOptions({ ...traceOptions, apmUrl: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  const onLangSmithProjectChange = useCallback(
+    (e) => {
+      setTraceOptions({ ...traceOptions, langSmithProject: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  const onLangSmithApiKeyChange = useCallback(
+    (e) => {
+      setTraceOptions({ ...traceOptions, langSmithApiKey: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
   /** Dataset **/
-  const datasetSettings = useDataset();
+  const [useLangSmithDataset, setUseLangSmithDataset] = useState(true);
+  const datasetToggleButton = useMemo(() => {
+    return (
+      <EuiText
+        size={'xs'}
+        css={css`
+          margin-top: 16px;
+        `}
+      >
+        {i18n.EVALUATOR_DATASET_LABEL}
+        {' ('}
+        <EuiLink
+          color={useLangSmithDataset ? 'primary' : 'text'}
+          onClick={() => setUseLangSmithDataset(true)}
+        >
+          {i18n.LANGSMITH_DATASET_LABEL}
+        </EuiLink>
+        {' / '}
+        <EuiLink
+          color={useLangSmithDataset ? 'text' : 'primary'}
+          onClick={() => setUseLangSmithDataset(false)}
+        >
+          {i18n.CUSTOM_DATASET_LABEL}
+        </EuiLink>
+        {')'}
+      </EuiText>
+    );
+  }, [useLangSmithDataset]);
+  const [datasetName, setDatasetName] = useState<string>();
+  const onDatasetNameChange = useCallback(
+    (e) => {
+      setDatasetName(e.target.value);
+    },
+    [setDatasetName]
+  );
+  const sampleDataset = [
+    {
+      input:
+        'As an expert user of Elastic Security, please generate an accurate and valid ESQL query to detect the use case below. Your response should be formatted to be able to use immediately in an Elastic Security timeline or detection rule. Take your time with the answer, and really make sure you check your knowledge really well on all the functions I am asking for. check it multiple times if you need to. I cannot afford for queries to be inaccurate. Assume I am using the Elastic Common Schema. Ensure the answers are formatted in a way which is easily copyable.\n\n' +
+        'Write an ESQL query for detecting cryptomining activity on an AWS EC2 instance.',
+      reference:
+        'FROM metrics-apm*\n| WHERE metricset.name == ""transaction"" AND metricset.interval == ""1m""\n| EVAL bucket = AUTO_BUCKET(transaction.duration.histogram, 50, <start-date>, <end-date>)\n| STATS avg_duration = AVG(transaction.duration.histogram) BY bucket',
+    },
+  ];
+  const [datasetText, setDatasetText] = useState<string>(JSON.stringify(sampleDataset, null, 2));
+  const onDatasetTextChange = useCallback(
+    (e) => {
+      setDatasetText(e.target.value);
+    },
+    [setDatasetText]
+  );
 
   // Predictions
-  const predictionsSettings = usePredictionsDetails({
-    http,
-    connectors,
-    actionTypeRegistry,
-  });
+  // Connectors / Models
+  const [selectedModelOptions, setSelectedModelOptions] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
+  const onModelOptionsChange = useCallback(
+    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedModelOptions(selectedOptions);
+    },
+    [setSelectedModelOptions]
+  );
+  const visColorsBehindText = euiPaletteComplementary(connectors?.length ?? 0);
+  const modelOptions = useMemo(() => {
+    return (
+      connectors?.map((c, index) => {
+        const apiProvider = getGenAiConfig(c)?.apiProvider;
+        const connectorTypeTitle =
+          apiProvider ?? getActionTypeTitle(actionTypeRegistry.get(c.actionTypeId));
+        const connectorDetails = c.isPreconfigured ? PRECONFIGURED_CONNECTOR : connectorTypeTitle;
+        return {
+          key: c.id,
+          label: `${c.name} (${connectorDetails})`,
+          color: visColorsBehindText[index],
+        };
+      }) ?? []
+    );
+  }, [actionTypeRegistry, connectors, visColorsBehindText]);
 
-  const {
-    selectedEvaluationType,
-    onEvaluationTypeChange,
-    onEvaluationTypeOptionsCreate,
-    evaluationTypeOptions,
-    selectedEvaluatorModelOptions,
-    onEvaluatorModelOptionsChange,
-    evalPrompt,
-    onEvalPromptChange,
-  } = useEvaluationDetails();
+  // Agents
+  const [selectedAgentOptions, setSelectedAgentOptions] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
+  const onAgentOptionsChange = useCallback(
+    (agentOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedAgentOptions(agentOptions);
+    },
+    [setSelectedAgentOptions]
+  );
+  const onAgentOptionsCreate = useCallback(
+    (searchValue: string) => {
+      const normalizedSearchValue = searchValue.trim();
+
+      if (!normalizedSearchValue) {
+        return;
+      }
+
+      setSelectedAgentOptions([...selectedAgentOptions, { label: normalizedSearchValue }]);
+    },
+    [selectedAgentOptions]
+  );
+  const agentOptions = useMemo(() => {
+    return defaultAgents.map((label) => ({ label }));
+  }, [defaultAgents]);
+
+  // Evaluation
+  // Evaluation Type
+  const [selectedEvaluationType, setSelectedEvaluationType] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
+  const onEvaluationTypeChange = useCallback(
+    (evaluationType: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedEvaluationType(evaluationType);
+    },
+    [setSelectedEvaluationType]
+  );
+  const onEvaluationTypeOptionsCreate = useCallback(
+    (searchValue: string) => {
+      const normalizedSearchValue = searchValue.trim();
+
+      if (!normalizedSearchValue) {
+        return;
+      }
+
+      setSelectedEvaluationType([{ label: normalizedSearchValue }]);
+    },
+    [setSelectedEvaluationType]
+  );
+  const evaluationTypeOptions = useMemo(() => {
+    return DEFAULT_EVAL_TYPES_OPTIONS;
+  }, []);
+
+  // Eval Model
+  const [selectedEvaluatorModelOptions, setSelectedEvaluatorModelOptions] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
+  const onEvaluatorModelOptionsChange = useCallback(
+    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedEvaluatorModelOptions(selectedOptions);
+    },
+    [setSelectedEvaluatorModelOptions]
+  );
+
+  // Eval Prompt
+  const sampleEvalPrompt: string = `For the below input: \n\n{{input}} \n\na prediction: \n\n{{prediction}} \n\nwas made. How's it stack up against this reference: \n\n{{reference}} \n\nReturn output in a succinct sentence ranking on a simple grading rubric focused on correctness.`;
+  const [evalPrompt, setEvalPrompt] = useState<string>(sampleEvalPrompt);
+  const onEvalPromptChange = useCallback(
+    (e) => {
+      setEvalPrompt(e.target.value);
+    },
+    [setEvalPrompt]
+  );
 
   // Required fields by eval API
   const isPerformEvaluationDisabled =
-    predictionsSettings.selectedModelOptions.length === 0 ||
-    predictionsSettings.selectedAgentOptions.length === 0 ||
-    runDetailsSettings.outputIndex.length === 0;
+    selectedModelOptions.length === 0 ||
+    selectedAgentOptions.length === 0 ||
+    outputIndex.length === 0;
 
   // Perform Evaluation Button
   const handlePerformEvaluation = useCallback(async () => {
     const evalParams = {
-      models: predictionsSettings.selectedModelOptions.flatMap((option) => option.key ?? []),
-      agents: predictionsSettings.selectedAgentOptions.map((option) => option.label),
-      dataset: datasetSettings.useLangSmithDataset ? undefined : datasetSettings.datasetText,
-      datasetName: datasetSettings.useLangSmithDataset ? datasetSettings.datasetName : undefined,
+      models: selectedModelOptions.flatMap((option) => option.key ?? []),
+      agents: selectedAgentOptions.map((option) => option.label),
+      dataset: useLangSmithDataset ? undefined : datasetText,
+      datasetName: useLangSmithDataset ? datasetName : undefined,
       evalModel: selectedEvaluatorModelOptions.flatMap((option) => option.key ?? []),
       evalPrompt,
       evaluationType: selectedEvaluationType.map((option) => option.label),
-      outputIndex: runDetailsSettings.outputIndex,
-      projectName: runDetailsSettings.projectName,
-      runName: runDetailsSettings.runName,
+      outputIndex,
+      projectName,
+      runName,
     };
     performEvaluation(evalParams);
   }, [
-    datasetSettings.datasetName,
-    datasetSettings.datasetText,
-    datasetSettings.useLangSmithDataset,
+    datasetName,
+    datasetText,
     evalPrompt,
+    outputIndex,
     performEvaluation,
-    predictionsSettings.selectedAgentOptions,
-    predictionsSettings.selectedModelOptions,
-    runDetailsSettings.outputIndex,
-    runDetailsSettings.projectName,
-    runDetailsSettings.runName,
+    projectName,
+    runName,
+    selectedAgentOptions,
     selectedEvaluationType,
     selectedEvaluatorModelOptions,
+    selectedModelOptions,
+    useLangSmithDataset,
   ]);
 
   const discoverLink = useMemo(
@@ -141,6 +312,24 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   const apmLink = useMemo(
     () => getApmLink(basePath, (evalResponse as PostEvaluateResponse)?.evaluationId ?? ''),
     [basePath, evalResponse]
+  );
+
+  const getSection = (title: string, description: string) => (
+    <div>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h3>{title}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiText size="s">
+        <p>
+          <EuiTextColor color="subdued">{description}</EuiTextColor>
+        </p>
+      </EuiText>
+    </div>
   );
 
   const runDetailsSection = useMemo(
@@ -180,11 +369,134 @@ export const EvaluationSettings: React.FC = React.memo(() => {
         initialIsOpen={true}
         paddingSize="s"
       >
-        <RunDetailsEditor
-          runDetailsSettings={runDetailsSettings}
-          datasetSettings={datasetSettings}
-          traceOptionsSettings={tracedOptionsSettings}
-        />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.PROJECT_LABEL}
+              helpText={i18n.PROJECT_DESCRIPTION}
+            >
+              <EuiFieldText
+                aria-label="project-textfield"
+                compressed
+                onChange={onProjectNameChange}
+                placeholder={i18n.PROJECT_PLACEHOLDER}
+                value={projectName}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.RUN_NAME_LABEL}
+              helpText={i18n.RUN_NAME_DESCRIPTION}
+            >
+              <EuiFieldText
+                aria-label="run-name-textfield"
+                compressed
+                onChange={onRunNameChange}
+                placeholder={i18n.RUN_NAME_PLACEHOLDER}
+                value={runName}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFormRow
+          display="rowCompressed"
+          label={datasetToggleButton}
+          fullWidth
+          helpText={
+            useLangSmithDataset
+              ? i18n.LANGSMITH_DATASET_DESCRIPTION
+              : i18n.CUSTOM_DATASET_DESCRIPTION
+          }
+        >
+          {useLangSmithDataset ? (
+            <EuiFieldText
+              aria-label="dataset-name-textfield"
+              compressed
+              onChange={onDatasetNameChange}
+              placeholder={i18n.LANGSMITH_DATASET_PLACEHOLDER}
+              value={datasetName}
+            />
+          ) : (
+            <EuiTextArea
+              aria-label={'evaluation-dataset-textarea'}
+              compressed
+              css={css`
+                min-height: 300px;
+              `}
+              fullWidth
+              onChange={onDatasetTextChange}
+              value={datasetText}
+            />
+          )}
+        </EuiFormRow>
+        <EuiFormRow
+          display="rowCompressed"
+          label={i18n.EVALUATOR_OUTPUT_INDEX_LABEL}
+          fullWidth
+          helpText={i18n.EVALUATOR_OUTPUT_INDEX_DESCRIPTION}
+        >
+          <EuiFieldText
+            value={outputIndex}
+            onChange={onOutputIndexChange}
+            aria-label="evaluation-output-index-textfield"
+          />
+        </EuiFormRow>
+        <EuiText
+          size={'xs'}
+          css={css`
+            margin-top: 16px;
+          `}
+        >
+          <EuiLink color={'primary'} onClick={() => setShowTraceOptions(!showTraceOptions)}>
+            {i18n.SHOW_TRACE_OPTIONS}
+          </EuiLink>
+        </EuiText>
+        {showTraceOptions && (
+          <>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.APM_URL_LABEL}
+              fullWidth
+              helpText={i18n.APM_URL_DESCRIPTION}
+              css={css`
+                margin-top: 16px;
+              `}
+            >
+              <EuiFieldText
+                value={traceOptions.apmUrl}
+                onChange={onApmUrlChange}
+                aria-label="apm-url-textfield"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.LANGSMITH_PROJECT_LABEL}
+              fullWidth
+              helpText={i18n.LANGSMITH_PROJECT_DESCRIPTION}
+            >
+              <EuiFieldText
+                value={traceOptions.langSmithProject}
+                onChange={onLangSmithProjectChange}
+                aria-label="langsmith-project-textfield"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.LANGSMITH_API_KEY_LABEL}
+              fullWidth
+              helpText={i18n.LANGSMITH_API_KEY_DESCRIPTION}
+            >
+              <EuiFieldText
+                value={traceOptions.langSmithApiKey}
+                onChange={onLangSmithApiKeyChange}
+                aria-label="langsmith-api-key-textfield"
+              />
+            </EuiFormRow>
+          </>
+        )}
       </EuiAccordion>
       <EuiHorizontalRule margin={'s'} />
       {/* Prediction Details*/}
@@ -197,7 +509,34 @@ export const EvaluationSettings: React.FC = React.memo(() => {
         initialIsOpen={true}
         paddingSize="s"
       >
-        <PredictionDetails predictionsSettings={predictionsSettings} />
+        <EuiFormRow
+          display="rowCompressed"
+          label={i18n.CONNECTORS_LABEL}
+          helpText={i18n.CONNECTORS_DESCRIPTION}
+        >
+          <EuiComboBox
+            aria-label={'model-selector'}
+            compressed
+            options={modelOptions}
+            selectedOptions={selectedModelOptions}
+            onChange={onModelOptionsChange}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          display="rowCompressed"
+          label={i18n.AGENTS_LABEL}
+          helpText={i18n.AGENTS_DESCRIPTION}
+        >
+          <EuiComboBox
+            aria-label={'agent-selector'}
+            compressed
+            onCreateOption={onAgentOptionsCreate}
+            options={agentOptions}
+            selectedOptions={selectedAgentOptions}
+            onChange={onAgentOptionsChange}
+          />
+        </EuiFormRow>
       </EuiAccordion>
       <EuiHorizontalRule margin={'s'} />
       {/* Evaluation Details*/}
@@ -217,7 +556,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
           <EuiComboBox
             aria-label={'evaluation-type-select'}
             compressed
-            options={predictionsSettings.modelOptions}
+            options={modelOptions}
             selectedOptions={selectedEvaluatorModelOptions}
             singleSelection={{ asPlainText: true }}
             onChange={onEvaluatorModelOptionsChange}
