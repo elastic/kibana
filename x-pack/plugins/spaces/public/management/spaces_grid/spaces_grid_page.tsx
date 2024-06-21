@@ -289,6 +289,8 @@ export class SpacesGridPage extends Component<Props, State> {
           defaultMessage: 'Description',
         }),
         sortable: true,
+        truncateText: true,
+        width: '30%',
       },
       {
         field: 'disabledFeatures',
