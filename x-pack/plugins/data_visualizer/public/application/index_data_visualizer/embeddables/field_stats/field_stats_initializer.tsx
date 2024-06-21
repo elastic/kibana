@@ -118,7 +118,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
           <h2 id={'fieldStatsConfig'}>
             <FormattedMessage
               id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.modalTitle"
-              defaultMessage="Edit Field Statistics"
+              defaultMessage="Edit field statistics"
             />
           </h2>
         </EuiTitle>

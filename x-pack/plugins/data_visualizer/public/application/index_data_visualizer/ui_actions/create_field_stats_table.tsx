@@ -39,24 +39,24 @@ const parentApiIsCompatible = async (
 interface FieldStatsActionContext extends EmbeddableApiContext {
   embeddable: FieldStatisticsTableEmbeddableApi;
 }
-interface Context extends FieldStatsActionContext {
+
+async function updatePanelFromFlyoutEdits({
+  api,
+  isNewPanel,
+  deletePanel,
+  coreStart,
+  pluginStart,
+  initialState,
+}: {
+  api: FieldStatisticsTableEmbeddableApi;
   isNewPanel?: boolean;
   deletePanel?: () => void;
   coreStart: CoreStart;
   pluginStart: DataVisualizerStartDependencies;
   initialState: FieldStatsInitialState;
   fieldStatsControlsApi?: FieldStatsControlsApi;
-}
-
-async function updatePanelFromFlyoutEdits({
-  embeddable,
-  isNewPanel,
-  deletePanel,
-  coreStart,
-  pluginStart,
-  initialState,
-}: Context) {
-  const parentApi = embeddable.parentApi;
+}) {
+  const parentApi = api.parentApi;
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
   const services = {
     ...coreStart,
@@ -65,8 +65,8 @@ async function updatePanelFromFlyoutEdits({
   let hasChanged = false;
   const cancelChanges = () => {
     // Reset to initialState in case user has changed the preview state
-    if (hasChanged && embeddable && initialState) {
-      embeddable.updateUserInput(initialState);
+    if (hasChanged && api && initialState) {
+      api.updateUserInput(initialState);
     }
 
     if (isNewPanel && deletePanel) {
@@ -89,6 +89,11 @@ async function updatePanelFromFlyoutEdits({
         nextUpdate.dataViewId = dv.id;
       }
     }
+    // @TODO: remove
+    console.log(`--@@hasChanged`, hasChanged);
+    if (api) {
+      api.updateUserInput(nextUpdate);
+    }
 
     flyoutSession.close();
     overlayTracker?.clearOverlays();
@@ -99,8 +104,8 @@ async function updatePanelFromFlyoutEdits({
         <FieldStatisticsInitializer
           initialInput={initialState}
           onPreview={async (nextUpdate) => {
-            if (embeddable.updateUserInput) {
-              embeddable.updateUserInput(nextUpdate);
+            if (api.updateUserInput) {
+              api.updateUserInput(nextUpdate);
               hasChanged = true;
             }
           }}
@@ -118,7 +123,7 @@ async function updatePanelFromFlyoutEdits({
       onClose: cancelChanges,
     }
   );
-  overlayTracker?.openOverlay(flyoutSession, { focusedPanelId: embeddable.uuid });
+  overlayTracker?.openOverlay(flyoutSession, { focusedPanelId: api.uuid });
 }
 
 export function createAddFieldStatsTableAction(
@@ -161,7 +166,7 @@ export function createAddFieldStatsTableAction(
           };
 
           updatePanelFromFlyoutEdits({
-            embeddable,
+            api: embeddable,
             isNewPanel: true,
             deletePanel,
             coreStart,
