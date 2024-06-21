@@ -58,7 +58,7 @@ export const LinksEditorSingleLink = ({
           })}
         >
           <EuiText size="s" color={'default'} className="eui-textTruncate">
-            {link.label ?? link.title}
+            {link.label || link.title}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
