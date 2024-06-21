@@ -119,8 +119,10 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
 
 const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   ok: jest.fn(),
+  created: jest.fn(),
   accepted: jest.fn(),
   noContent: jest.fn(),
+  multiStatus: jest.fn(),
   notModified: jest.fn(),
   custom: jest.fn(),
   redirected: jest.fn(),
@@ -129,6 +131,7 @@ const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   forbidden: jest.fn(),
   notFound: jest.fn(),
   conflict: jest.fn(),
+  unprocessableContent: jest.fn(),
   customError: jest.fn(),
   file: jest.fn(),
 });
