@@ -25,7 +25,12 @@ import { cloneDeep } from 'lodash';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, skip, Subscription, switchMap } from 'rxjs';
 import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
-import { FieldListApi, Services, FieldListSerializedStateState } from './types';
+import {
+  FieldListApi,
+  Services,
+  FieldListSerializedStateState,
+  FieldListRuntimeState,
+} from './types';
 
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 
@@ -46,6 +51,7 @@ export const getFieldListFactory = (
 ) => {
   const fieldListEmbeddableFactory: ReactEmbeddableFactory<
     FieldListSerializedStateState,
+    FieldListRuntimeState,
     FieldListApi
   > = {
     type: FIELD_LIST_ID,

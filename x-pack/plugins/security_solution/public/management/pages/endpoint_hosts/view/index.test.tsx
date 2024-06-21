@@ -25,7 +25,7 @@ import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_con
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
 import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../../../common/lib/kibana';
-import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
+import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint/endpoint_isolation/mocks';
 import {
   isFailedResourceState,
   isLoadedResourceState,
@@ -385,12 +385,11 @@ describe('when on the endpoint list page', () => {
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
-        const outOfDates = await renderResult.findAllByTestId('rowPolicyOutOfDate');
+        const outOfDates = await renderResult.findAllByTestId('policyNameCellLink-outdatedMsg');
         expect(outOfDates).toHaveLength(4);
 
         outOfDates.forEach((item) => {
           expect(item.textContent).toEqual('Out-of-date');
-          expect(item.querySelector(`[data-euiicon-type][color=warning]`)).not.toBeNull();
         });
       });
 
@@ -399,7 +398,7 @@ describe('when on the endpoint list page', () => {
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
-        const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink'))[0];
+        const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink-link'))[0];
         expect(firstPolicyName).not.toBeNull();
         expect(firstPolicyName.getAttribute('href')).toEqual(
           `${APP_PATH}${MANAGEMENT_PATH}/policy/${firstPolicyID}/settings`
@@ -452,7 +451,9 @@ describe('when on the endpoint list page', () => {
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
-        const firstPolicyRevElement = (await renderResult.findAllByTestId('policyListRevNo'))[0];
+        const firstPolicyRevElement = (
+          await renderResult.findAllByTestId('policyNameCellLink-revision')
+        )[0];
         expect(firstPolicyRevElement).not.toBeNull();
         expect(firstPolicyRevElement.textContent).toEqual(`rev. ${firstPolicyRev}`);
       });
@@ -589,7 +590,7 @@ describe('when on the endpoint list page', () => {
 
     it('should display policy name value as a link', async () => {
       const renderResult = render();
-      const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
+      const policyDetailsLink = await renderResult.findByTestId('policyNameCellLink-link');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
         `${APP_PATH}${MANAGEMENT_PATH}/policy/${hostInfo.metadata.Endpoint.policy.applied.id}/settings`
@@ -598,7 +599,9 @@ describe('when on the endpoint list page', () => {
 
     it('should display policy revision number', async () => {
       const renderResult = render();
-      const policyDetailsRevElement = await renderResult.findByTestId('policyDetailsRevNo');
+      const policyDetailsRevElement = await renderResult.findByTestId(
+        'policyNameCellLink-revision'
+      );
       expect(policyDetailsRevElement).not.toBeNull();
       expect(policyDetailsRevElement.textContent).toEqual(
         `rev. ${hostInfo.metadata.Endpoint.policy.applied.endpoint_policy_version}`
@@ -607,7 +610,7 @@ describe('when on the endpoint list page', () => {
 
     it('should update the URL when policy name link is clicked', async () => {
       const renderResult = render();
-      const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
+      const policyDetailsLink = await renderResult.findByTestId('policyNameCellLink-link');
       const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
       reactTestingLibrary.act(() => {
         reactTestingLibrary.fireEvent.click(policyDetailsLink);

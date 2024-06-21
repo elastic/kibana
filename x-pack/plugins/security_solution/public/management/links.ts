@@ -22,6 +22,7 @@ import {
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
+  NOTES_MANAGEMENT_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
   SecurityPageName,
@@ -39,6 +40,7 @@ import {
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
   ASSET_CRITICALITY,
+  NOTES,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -84,6 +86,12 @@ const categories = [
       defaultMessage: 'Cloud Security',
     }),
     linkIds: [SecurityPageName.cloudDefendPolicies],
+  },
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
+      defaultMessage: 'Investigations',
+    }),
+    linkIds: [SecurityPageName.notesManagement],
   },
 ];
 
@@ -215,6 +223,18 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     cloudDefendLink,
+    {
+      id: SecurityPageName.notesManagement,
+      title: NOTES,
+      description: i18n.translate('xpack.securitySolution.appLinks.notesManagementDescription', {
+        defaultMessage: 'Visualize and delete notes.',
+      }),
+      landingIcon: IconTool, // TODO get new icon
+      path: NOTES_MANAGEMENT_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      experimentalKey: 'notesEnabled',
+    },
   ],
 };
 

@@ -68,7 +68,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     const agentId = actionRequest.endpoint_ids[0];
     const eventDetails = await this.getEventDetailsById(agentId);
 
-    const hostname = eventDetails.crowdstrike.event.HostName;
+    const hostname = eventDetails.host.name;
     return super.writeActionRequestToEndpointIndex({
       ...actionRequest,
       hosts: {
@@ -120,34 +120,43 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   }
 
   private async getEventDetailsById(agentId: string): Promise<{
-    crowdstrike: { event: { HostName: string } };
+    host: { name: string };
   }> {
     const search = {
       index: ['logs-crowdstrike.fdr*', 'logs-crowdstrike.falcon*'],
       size: 1,
-      _source: ['crowdstrike.event.HostName'],
+      _source: ['host.name'],
       body: {
         query: {
           bool: {
-            filter: [{ term: { 'crowdstrike.event.DeviceId': agentId } }],
+            filter: [{ term: { 'device.id': agentId } }],
           },
         },
       },
     };
-    const result: SearchResponse<{ crowdstrike: { event: { HostName: string } } }> =
-      await this.options.esClient
-        .search<{ crowdstrike: { event: { HostName: string } } }>(search, {
+    try {
+      const result: SearchResponse<{ host: { name: string } }> =
+        await this.options.esClient.search<{ host: { name: string } }>(search, {
           ignore: [404],
-        })
-        .catch((err) => {
-          throw new ResponseActionsClientError(
-            `Failed to fetch event document: ${err.message}`,
-            err.statusCode ?? 500,
-            err
-          );
         });
 
-    return result.hits.hits?.[0]?._source as { crowdstrike: { event: { HostName: string } } };
+      // Check if host name exists
+      const hostName = result.hits.hits?.[0]?._source?.host?.name;
+      if (!hostName) {
+        throw new ResponseActionsClientError(
+          `Host name not found in the event document for agentId: ${agentId}`,
+          404
+        );
+      }
+
+      return result.hits.hits[0]._source as { host: { name: string } };
+    } catch (err) {
+      throw new ResponseActionsClientError(
+        `Failed to fetch event document: ${err.message}`,
+        err.statusCode ?? 500,
+        err
+      );
+    }
   }
 
   // TODO TC: uncomment when working on agent status support
