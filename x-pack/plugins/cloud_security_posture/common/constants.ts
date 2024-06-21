@@ -193,4 +193,4 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
   manual: [],
 };
 
-export const CLOUD_SECURITY_PLUGIN_VERSION = '1.8.1';
+export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';

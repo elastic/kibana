@@ -14,7 +14,7 @@ export default createTestConfig({
   },
   kbnServerArgs: [
     `--xpack.fleet.packages.0.name=cloud_security_posture`,
-    `--xpack.fleet.packages.0.version=1.5.2`,
+    `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
     `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
       { product_line: 'security', product_tier: 'essentials' },
       { product_line: 'endpoint', product_tier: 'essentials' },
