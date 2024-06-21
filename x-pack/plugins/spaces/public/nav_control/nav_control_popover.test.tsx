@@ -46,7 +46,7 @@ const mockSpaces = [
 ];
 
 describe('NavControlPopover', () => {
-  async function setup(spaces: Space[], isSpaceSolutionEnabled = false) {
+  async function setup(spaces: Space[], isSolutionNavEnabled = false) {
     const spacesManager = spacesManagerMock.create();
     spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
 
@@ -58,7 +58,7 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
-        isSpaceSolutionEnabled$={of(isSpaceSolutionEnabled)}
+        isSolutionNavEnabled$={of(isSolutionNavEnabled)}
       />
     );
 
@@ -80,7 +80,7 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
-        isSpaceSolutionEnabled$={of(false)}
+        isSolutionNavEnabled$={of(false)}
       />
     );
     expect(baseElement).toMatchSnapshot();
@@ -105,7 +105,7 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
-        isSpaceSolutionEnabled$={of(false)}
+        isSolutionNavEnabled$={of(false)}
       />
     );
 
