@@ -132,7 +132,7 @@ export class SecuritySolutionServerlessPlugin
     this.endpointUsageReportingTask
       ?.start({
         taskManager: pluginsSetup.taskManager,
-        interval: ENDPOINT_METERING_TASK.INTERVAL,
+        interval: this.config.usageReportingTaskInterval,
       })
       .catch(() => {});
 

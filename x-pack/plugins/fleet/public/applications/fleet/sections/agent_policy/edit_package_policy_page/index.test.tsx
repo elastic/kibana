@@ -8,6 +8,8 @@
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 
+import { ExperimentalFeaturesService } from '../../../../../services';
+
 import type { TestRenderer } from '../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../mock';
 
@@ -19,6 +21,9 @@ import {
   sendUpgradePackagePolicyDryRun,
   sendUpdatePackagePolicy,
   useStartServices,
+  sendCreateAgentPolicy,
+  sendBulkGetAgentPolicies,
+  useGetAgentPolicies,
 } from '../../../hooks';
 import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 
@@ -29,7 +34,7 @@ type MockFn = jest.MockedFunction<any>;
 jest.mock('../../../hooks', () => {
   return {
     ...jest.requireActual('../../../hooks'),
-    sendGetAgentStatus: jest.fn().mockResolvedValue({ data: { results: { total: 0 } } }),
+    sendGetAgentStatus: jest.fn(),
     sendUpdatePackagePolicy: jest.fn(),
     sendGetOnePackagePolicy: jest.fn(),
     sendGetOneAgentPolicy: jest.fn(),
@@ -125,6 +130,10 @@ jest.mock('../../../hooks', () => {
       },
     }),
     useLink: jest.fn().mockReturnValue({ getHref: jest.fn().mockReturnValue('/navigate/path') }),
+    useGetAgentPolicies: jest.fn(),
+    sendCreateAgentPolicy: jest.fn(),
+    sendBulkGetAgentPolicies: jest.fn(),
+    sendBulkInstallPackages: jest.fn(),
   };
 });
 
@@ -141,6 +150,7 @@ jest.mock('react-router-dom', () => ({
   useRouteMatch: jest.fn().mockReturnValue({
     params: {
       packagePolicyId: 'nginx-1',
+      policyId: 'agent-policy-1',
     },
   }),
 }));
@@ -222,6 +232,24 @@ describe('edit package policy page', () => {
     (sendUpdatePackagePolicy as MockFn).mockResolvedValue({});
     (useStartServices().application.navigateToUrl as MockFn).mockReset();
     (useStartServices().notifications.toasts.addError as MockFn).mockReset();
+    (sendGetAgentStatus as MockFn).mockResolvedValue({ data: { results: { total: 0 } } });
+    (sendBulkGetAgentPolicies as MockFn).mockResolvedValue({
+      data: { items: [{ id: 'agent-policy-1', name: 'Agent policy 1' }] },
+    });
+    (sendCreateAgentPolicy as MockFn).mockResolvedValue({
+      data: { item: { id: 'agent-policy-2' } },
+    });
+    (useGetAgentPolicies as MockFn).mockReturnValue({
+      data: {
+        items: [
+          { id: 'agent-policy-1', name: 'Agent policy 1' },
+          { id: 'fleet-server-policy', name: 'Fleet Server Policy' },
+        ],
+      },
+      error: undefined,
+      isLoading: false,
+      resendRequest: jest.fn(),
+    });
   });
 
   it('should disable submit button on invalid form with empty package var', async () => {
@@ -454,5 +482,58 @@ describe('edit package policy page', () => {
     });
 
     expect(sendUpdatePackagePolicy).toHaveBeenCalled();
+  });
+
+  describe('modify agent policies', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(ExperimentalFeaturesService, 'get')
+        .mockReturnValue({ enableReusableIntegrationPolicies: true });
+      (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValue({
+        data: { results: { total: 0 } },
+      });
+    });
+
+    it('should create agent policy with sys monitoring when new hosts is selected', async () => {
+      await act(async () => {
+        render();
+      });
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('agentPolicyMultiItem')).toHaveAttribute(
+          'title',
+          'Agent policy 1'
+        );
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByTestId('newHostsTab'));
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByText(/Save integration/).closest('button')!);
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
+      });
+      expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
+        {
+          description: '',
+          monitoring_enabled: ['logs', 'metrics'],
+          name: 'Agent policy 2',
+          namespace: 'default',
+          inactivity_timeout: 1209600,
+          is_protected: false,
+        },
+        { withSysMonitoring: true }
+      );
+      expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
+        'nginx-1',
+        expect.objectContaining({
+          policy_ids: ['agent-policy-1', 'agent-policy-2'],
+        })
+      );
+    });
   });
 });
