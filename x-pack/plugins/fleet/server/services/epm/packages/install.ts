@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
 import moment from 'moment';
+import { omit } from 'lodash';
 import type {
   ElasticsearchClient,
   SavedObject,
@@ -1316,19 +1317,23 @@ export const saveKibanaAssetsRefs = async (
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
+  const spaceId = savedObjectsClient.getCurrentNamespace() || DEFAULT_SPACE_ID;
+
   // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
   // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
   // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
   await pRetry(
     async () => {
-      const installation = await savedObjectsClient
-        .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-        .catch((e) => {
-          if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-            return undefined;
-          }
-          throw e;
-        });
+      const installation = saveAsAdditionnalSpace
+        ? await savedObjectsClient
+            .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
+            .catch((e) => {
+              if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+                return undefined;
+              }
+              throw e;
+            })
+        : undefined;
 
       return savedObjectsClient.update<Installation>(
         PACKAGES_SAVED_OBJECT_TYPE,
@@ -1336,8 +1341,11 @@ export const saveKibanaAssetsRefs = async (
         saveAsAdditionnalSpace
           ? {
               additionnal_spaces_installed_kibana: {
-                ...(installation?.attributes?.additionnal_spaces_installed_kibana ?? {}),
-                [savedObjectsClient.getCurrentNamespace() || DEFAULT_SPACE_ID]: assetRefs,
+                ...omit(
+                  installation?.attributes?.additionnal_spaces_installed_kibana ?? {},
+                  spaceId
+                ),
+                ...(assetRefs.length > 0 ? { [spaceId]: assetRefs } : {}),
               },
             }
           : {

@@ -297,7 +297,7 @@ export async function installKibanaAssetsAndReferences({
     const assets = importedAssets.map(
       ({ id, type, destinationId }) =>
         ({
-          id: destinationId,
+          id: destinationId ?? id,
           originId: id,
           type,
         } as KibanaAssetReference)
@@ -323,6 +323,32 @@ export async function installKibanaAssetsAndReferences({
   );
 
   return installedKibanaAssetsRefs;
+}
+
+export async function deleteKibanaAssetsAndReferencesForSpace({
+  savedObjectsClient,
+  logger,
+  pkgName,
+  installedPkg,
+  spaceId,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
+  pkgName: string;
+  installedPkg: SavedObject<Installation>;
+  spaceId: string;
+}) {
+  if (!installedPkg) {
+    return;
+  }
+
+  if (installedPkg.attributes.installed_kibana_space_id === spaceId) {
+    throw new Error(
+      'Impossible to delete kibana assets from the space where the package was installed, you must uninstall the package.'
+    );
+  }
+  await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
+  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, [], true);
 }
 
 export async function getKibanaAssets(

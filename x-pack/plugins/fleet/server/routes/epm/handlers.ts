@@ -50,7 +50,6 @@ import type {
   GetBulkAssetsRequestSchema,
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
-  InstallKibanaAssetsRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -73,11 +72,7 @@ import {
   FleetTooManyRequestsError,
 } from '../../errors';
 import { appContextService, checkAllowedPackages } from '../../services';
-import {
-  getInstallationObject,
-  getInstalledPackageWithAssets,
-  getPackageUsageStats,
-} from '../../services/epm/packages/get';
+import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
@@ -91,7 +86,6 @@ import { getDataStreams } from '../../services/epm/data_streams';
 import { NamingCollisionError } from '../../services/epm/packages/custom_integrations/validation/check_naming_collision';
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
-import { installKibanaAssetsAndReferences } from '../../services/epm/kibana/assets/install';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -344,64 +338,6 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     return response.ok({ body });
   } else {
     return await defaultFleetErrorHandler({ error: res.error, response });
-  }
-};
-
-export const installPackageKibanaAssetsHandler: FleetRequestHandler<
-  TypeOf<typeof InstallKibanaAssetsRequestSchema.params>,
-  undefined,
-  TypeOf<typeof InstallKibanaAssetsRequestSchema.body>
-> = async (context, request, response) => {
-  // 1. check package is already installed
-  // 2. retrieve space
-  // 3. install kibana assets for that space
-  try {
-    const fleetContext = await context.fleet;
-    const savedObjectsClient = fleetContext.internalSoClient;
-    const logger = appContextService.getLogger();
-    const spaceId = fleetContext.spaceId;
-    const { pkgName, pkgVersion } = request.params;
-
-    const installedPkgWithAssets = await getInstalledPackageWithAssets({
-      savedObjectsClient,
-      pkgName,
-      logger,
-    });
-
-    const installation = await getInstallationObject({
-      pkgName,
-      savedObjectsClient,
-    });
-
-    if (
-      !installation ||
-      !installedPkgWithAssets ||
-      installedPkgWithAssets?.installation.version !== pkgVersion
-    ) {
-      throw new Error('Version is not installed');
-    }
-
-    const { packageInfo } = installedPkgWithAssets;
-
-    await installKibanaAssetsAndReferences({
-      savedObjectsClient,
-      logger,
-      pkgName,
-      pkgTitle: packageInfo.title,
-      installAsAdditionnalSpace: true,
-      spaceId,
-      assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
-      installedPkg: installation,
-      packageInstallContext: {
-        packageInfo,
-        paths: installedPkgWithAssets.paths,
-        assetsMap: installedPkgWithAssets.assetsMap,
-      },
-    });
-
-    return response.ok({ body: { success: true } });
-  } catch (error) {
-    return await defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -705,6 +641,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       ...pick(pkg.savedObject, ['created_at', 'updated_at', 'namespaces', 'type']),
       installed_kibana: attributes.installed_kibana,
       installed_kibana_space_id: attributes.installed_kibana_space_id,
+      additionnal_spaces_installed_kibana: attributes.additionnal_spaces_installed_kibana,
       installed_es: attributes.installed_es,
       install_status: attributes.install_status,
       install_source: attributes.install_source,

@@ -254,6 +254,13 @@ export const InstallKibanaAssetsRequestSchema = {
   ),
 };
 
+export const DeleteKibanaAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+};
+
 export const DeletePackageRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),

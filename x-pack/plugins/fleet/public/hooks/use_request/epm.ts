@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useState } from 'react';
 
@@ -289,6 +289,11 @@ interface UpdatePackageArgs {
   body: UpdatePackageRequest['body'];
 }
 
+interface InstallKibanaAssetsArgs {
+  pkgName: string;
+  pkgVersion: string;
+}
+
 export const useUpdatePackageMutation = () => {
   return useMutation<UpdatePackageResponse, RequestError, UpdatePackageArgs>(
     ({ pkgName, pkgVersion, body }: UpdatePackageArgs) =>
@@ -299,6 +304,22 @@ export const useUpdatePackageMutation = () => {
         body,
       })
   );
+};
+
+export const useInstallKibanaAssetsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<any, RequestError, InstallKibanaAssetsArgs>({
+    mutationFn: ({ pkgName, pkgVersion }: InstallKibanaAssetsArgs) =>
+      sendRequestForRq({
+        path: epmRouteService.getInstallKibanaAssetsPath(pkgName, pkgVersion),
+        method: 'post',
+        version: API_VERSIONS.public.v1,
+      }),
+    onSuccess: (data, { pkgName, pkgVersion }) => {
+      return queryClient.invalidateQueries([pkgName, pkgVersion]);
+    },
+  });
 };
 
 export const sendUpdatePackage = (

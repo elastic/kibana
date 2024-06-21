@@ -49,6 +49,7 @@ import {
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
   InstallKibanaAssetsRequestSchema,
+  DeleteKibanaAssetsRequestSchema,
 } from '../../types';
 
 import {
@@ -69,9 +70,12 @@ import {
   getDataStreamsHandler,
   createCustomIntegrationHandler,
   getInputsHandler,
-  installPackageKibanaAssetsHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
+import {
+  deletePackageKibanaAssetsHandler,
+  installPackageKibanaAssetsHandler,
+} from './kibana_assets_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -233,6 +237,21 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validate: { request: InstallKibanaAssetsRequestSchema },
       },
       installPackageKibanaAssetsHandler
+    );
+
+  router.versioned
+    .delete({
+      path: EPM_API_ROUTES.DELETE_KIBANA_ASSETS_PATTERN,
+      fleetAuthz: {
+        integrations: { installPackages: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: DeleteKibanaAssetsRequestSchema },
+      },
+      deletePackageKibanaAssetsHandler
     );
 
   router.versioned

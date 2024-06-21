@@ -78,6 +78,12 @@ export const epmRouteService = {
       .replace(/\/$/, ''); // trim trailing slash
   },
 
+  getInstallKibanaAssetsPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
+  },
+
   getUpdatePath: (pkgName: string, pkgVersion: string) => {
     return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
       '{pkgVersion}',

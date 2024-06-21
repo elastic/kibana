@@ -670,8 +670,8 @@ export const getSavedObjectTypes = (
             properties: {},
           },
           additionnal_spaces_installed_kibana: {
-            type: 'object',
-            enabled: false,
+            type: 'flattened',
+            index: false,
           },
           install_started_at: { type: 'date' },
           install_version: { type: 'keyword' },
@@ -720,7 +720,7 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
-                additionnal_spaces_installed_kibana: { type: 'object', enabled: false },
+                additionnal_spaces_installed_kibana: { type: 'flattened', index: false },
               },
             },
           ],
