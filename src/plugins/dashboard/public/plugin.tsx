@@ -30,11 +30,7 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import {
-  type UiActionsSetup,
-  type UiActionsStart,
-  addPanelMenuTrigger,
-} from '@kbn/ui-actions-plugin/public';
+import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
