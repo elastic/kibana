@@ -128,13 +128,14 @@ export class LinksPlugin
 
       plugins.dashboard.registerDashboardPanelPlacementSetting(
         CONTENT_ID,
-        (serializedState?: LinksSerializedState) => {
-          if (!serializedState || linksSerializeStateIsByReference(serializedState)) return {};
-          const isHorizontal = serializedState.attributes.layout === 'horizontal';
+        async (serializedState?: LinksSerializedState) => {
+          if (!serializedState) return {};
+          const { links, layout } = linksSerializeStateIsByReference(serializedState)
+            ? await deserializeLinksSavedObject(serializedState)
+            : serializedState.attributes;
+          const isHorizontal = layout === 'horizontal';
           const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
-          const height = isHorizontal
-            ? 4
-            : (serializedState.attributes?.links?.length ?? 1 * 3) + 4;
+          const height = isHorizontal ? 4 : (links?.length ?? 1 * 3) + 4;
           return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
         }
       );
