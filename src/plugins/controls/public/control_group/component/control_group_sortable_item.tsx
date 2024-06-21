@@ -87,7 +87,7 @@ const SortableControlInner = forwardRef<
       </button>
     ) : controlStyle === 'oneLine' ? (
       <EuiIcon type="empty" size="s" />
-    ) : null;
+    ) : undefined;
 
     return (
       <EuiFlexItem
