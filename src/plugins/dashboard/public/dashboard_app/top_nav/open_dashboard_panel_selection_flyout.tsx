@@ -166,6 +166,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
                     { defaultMessage: 'search field for panels' }
                   )}
                   className="nsPanelSelectionFlyout__searchInput"
+                  data-test-subj="dashboardPanelSelectionFlyout__searchInput"
                 />
               </EuiFormRow>
             </EuiForm>
