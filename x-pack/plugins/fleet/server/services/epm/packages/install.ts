@@ -21,7 +21,11 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 
-import type { PackageDataStreamTypes, PackageInstallContext } from '../../../../common/types';
+import type {
+  KibanaAssetReference,
+  PackageDataStreamTypes,
+  PackageInstallContext,
+} from '../../../../common/types';
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
@@ -1294,10 +1298,17 @@ export async function createInstallation(options: {
   return created;
 }
 
+export const kibanaAssetsToAssetsRef = (
+  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
+): KibanaAssetReference[] => {
+  return Object.values(kibanaAssets).flat().map(toAssetReference);
+};
+
 export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
+  assetRefs: KibanaAssetReference[],
+  saveAsAdditionnalSpace = false
 ) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
@@ -1305,20 +1316,36 @@ export const saveKibanaAssetsRefs = async (
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
-  const assetRefs = Object.values(kibanaAssets).flat().map(toAssetReference);
   // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
   // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
   // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
   await pRetry(
-    () =>
-      savedObjectsClient.update(
+    async () => {
+      const installation = await savedObjectsClient
+        .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
+        .catch((e) => {
+          if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+            return undefined;
+          }
+          throw e;
+        });
+
+      return savedObjectsClient.update<Installation>(
         PACKAGES_SAVED_OBJECT_TYPE,
         pkgName,
-        {
-          installed_kibana: assetRefs,
-        },
+        saveAsAdditionnalSpace
+          ? {
+              additionnal_spaces_installed_kibana: {
+                ...(installation?.attributes?.additionnal_spaces_installed_kibana ?? {}),
+                [savedObjectsClient.getCurrentNamespace() || DEFAULT_SPACE_ID]: assetRefs,
+              },
+            }
+          : {
+              installed_kibana: assetRefs,
+            },
         { refresh: false }
-      ),
+      );
+    },
     { retries: 20 } // Use a number of retries higher than the number of es asset update operations
   );
 
