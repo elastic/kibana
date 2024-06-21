@@ -24,15 +24,13 @@ export const ControlError = ({ error }: ControlErrorProps) => {
 
   const popoverButton = (
     <EuiButtonEmpty
-      flush="left"
       color="danger"
       iconSize="m"
       iconType="error"
       data-test-subj="control-frame-error"
       onClick={() => setPopoverOpen((open) => !open)}
-      className="errorEmbeddableCompact__button controlErrorButton"
+      className={'errorEmbeddableCompact__button'}
       textProps={{ className: 'errorEmbeddableCompact__text' }}
-      contentProps={{ className: 'controlErrorButton--content' }}
     >
       <FormattedMessage
         id="controls.frame.error.message"
@@ -46,7 +44,7 @@ export const ControlError = ({ error }: ControlErrorProps) => {
       <EuiPopover
         button={popoverButton}
         isOpen={isPopoverOpen}
-        className="controlPanel errorEmbeddableCompact__popover"
+        className="errorEmbeddableCompact__popover"
         closePopover={() => setPopoverOpen(false)}
       >
         <Markdown data-test-subj="errorMessageMarkdown" readOnly>

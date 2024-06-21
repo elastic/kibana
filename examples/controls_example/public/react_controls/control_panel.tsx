@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import React, { useState } from 'react';
 
 import { EuiFlexItem, EuiFormControlLayout, EuiFormLabel, EuiFormRow, EuiIcon } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -18,24 +19,15 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { ControlError } from './control_error_component';
 import { ControlPanelProps, DefaultControlApi } from './types';
 
-import './control_panel.scss';
-
 /**
  * TODO: Handle dragging
  */
-const DragHandle = ({
-  isEditable,
-  controlTitle,
-  hideEmptyDragHandle,
-}: {
-  isEditable: boolean;
-  controlTitle?: string;
-  hideEmptyDragHandle: boolean;
-}) =>
+const DragHandle = ({ isEditable, controlTitle }: { isEditable: boolean; controlTitle?: string }) =>
   isEditable ? (
     <button
       aria-label={i18n.translate('controls.controlGroup.ariaActions.moveControlButtonAction', {
@@ -46,9 +38,7 @@ const DragHandle = ({
     >
       <EuiIcon type="grabHorizontal" />
     </button>
-  ) : hideEmptyDragHandle ? null : (
-    <EuiIcon size="s" type="empty" />
-  );
+  ) : null;
 
 export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlApi>({
   Component,
@@ -125,27 +115,8 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           fullWidth
           label={usingTwoLineLayout ? panelTitle || defaultPanelTitle || '...' : undefined}
         >
-          <EuiFormControlLayout
-            fullWidth
-            isLoading={Boolean(dataLoading)}
-            prepend={
-              <>
-                <DragHandle
-                  isEditable={isEditable}
-                  controlTitle={panelTitle || defaultPanelTitle}
-                  hideEmptyDragHandle={usingTwoLineLayout || Boolean(api?.CustomPrependComponent)}
-                />
-                {api?.CustomPrependComponent ? (
-                  <api.CustomPrependComponent />
-                ) : usingTwoLineLayout ? null : (
-                  <EuiFormLabel className="controlPanel--label">
-                    {panelTitle || defaultPanelTitle}
-                  </EuiFormLabel>
-                )}
-              </>
-            }
-          >
-            {blockingError ? (
+          {blockingError ? (
+            <EuiFormControlLayout>
               <ControlError
                 error={
                   blockingError ??
@@ -154,18 +125,53 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                   })
                 }
               />
-            ) : (
+            </EuiFormControlLayout>
+          ) : (
+            <EuiFormControlLayout
+              fullWidth
+              isLoading={Boolean(dataLoading)}
+              prepend={
+                api?.CustomPrependComponent ? (
+                  <api.CustomPrependComponent />
+                ) : usingTwoLineLayout ? (
+                  <DragHandle
+                    isEditable={isEditable}
+                    controlTitle={panelTitle || defaultPanelTitle}
+                  />
+                ) : (
+                  <>
+                    <DragHandle
+                      isEditable={isEditable}
+                      controlTitle={panelTitle || defaultPanelTitle}
+                    />{' '}
+                    <EuiFormLabel
+                      className="eui-textTruncate"
+                      // TODO: Convert this to a class when replacing the legacy control group
+                      css={css`
+                        background-color: transparent !important;
+                      `}
+                    >
+                      {panelTitle || defaultPanelTitle}
+                    </EuiFormLabel>
+                  </>
+                )
+              }
+            >
               <Component
-                className={classNames('controlPanel', {
-                  'controlPanel--roundedBorders':
-                    !api?.CustomPrependComponent && !isEditable && usingTwoLineLayout,
-                })}
+                // TODO: Convert this to a class when replacing the legacy control group
+                css={css`
+                  height: calc(${euiThemeVars.euiButtonHeight} - 2px);
+                  box-shadow: none !important;
+                  ${!isEditable && usingTwoLineLayout
+                    ? `border-radius: ${euiThemeVars.euiBorderRadius} !important`
+                    : ''};
+                `}
                 ref={(newApi) => {
                   if (newApi && !api) setApi(newApi);
                 }}
               />
-            )}
-          </EuiFormControlLayout>
+            </EuiFormControlLayout>
+          )}
         </EuiFormRow>
       </FloatingActions>
     </EuiFlexItem>

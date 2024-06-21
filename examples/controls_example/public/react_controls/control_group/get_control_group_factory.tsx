@@ -230,7 +230,7 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       return {
         api,
-        Component: () => {
+        Component: (props, test) => {
           const controlsInOrder = useStateFromPublishingSubject(controlOrder);
 
           useEffect(() => {
