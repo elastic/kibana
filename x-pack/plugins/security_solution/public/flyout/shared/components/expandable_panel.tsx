@@ -35,7 +35,7 @@ export interface ExpandablePanelPanelProps {
       /**
        * Callback function to be called when the title is clicked
        */
-      callback: () => void;
+      callback?: () => void;
       /**
        * Tooltip text to be displayed around the title link
        */

@@ -24,7 +24,7 @@ interface HostPanelContentProps {
   contextID: string;
   scopeId: string;
   isDraggable: boolean;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
   hostName: string;
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;

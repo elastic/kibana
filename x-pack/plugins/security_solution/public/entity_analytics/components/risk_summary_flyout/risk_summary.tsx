@@ -51,7 +51,7 @@ export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
   recalculatingScore: boolean;
   queryId: string;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
 }
 
 const RiskSummaryComponent = <T extends RiskScoreEntity>({
@@ -189,7 +189,9 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           link: riskScoreData.loading
             ? undefined
             : {
-                callback: () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS),
+                callback: openDetailsPanel
+                  ? () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS)
+                  : undefined,
                 tooltip: (
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"

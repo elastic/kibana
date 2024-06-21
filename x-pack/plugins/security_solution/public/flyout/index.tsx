@@ -32,10 +32,14 @@ import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
 import type { UserDetailsPanelProps } from './entity_details/user_details_left';
 import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
+import type { UserPreviewPanelProps } from './entity_details/user_preview';
+import { UserPreviewPanel, UserPreviewPanelKey } from './entity_details/user_preview';
 import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
 import { HostPanel, HostPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
+import type { HostPreviewPanelProps } from './entity_details/host_preview';
+import { HostPreviewPanel, HostPreviewPanelKey } from './entity_details/host_preview';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -93,6 +97,10 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
+    key: UserPreviewPanelKey,
+    component: (props) => <UserPreviewPanel {...({ ...props.params } as UserPreviewPanelProps)} />,
+  },
+  {
     key: HostPanelKey,
     component: (props) => <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} />,
   },
@@ -101,6 +109,10 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => (
       <HostDetailsPanel {...(props as HostDetailsExpandableFlyoutProps).params} />
     ),
+  },
+  {
+    key: HostPreviewPanelKey,
+    component: (props) => <HostPreviewPanel {...({ ...props.params } as HostPreviewPanelProps)} />,
   },
 ];
 

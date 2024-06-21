@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { UserEntityOverview } from './user_entity_overview';
+import { UserEntityOverview, USER_PREVIEW_BANNER } from './user_entity_overview';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
   ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
@@ -24,7 +24,10 @@ import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
+import { UserPreviewPanelKey } from '../../../entity_details/user_preview';
 
 const userName = 'user';
 const domain = 'n54bg2lfc7';
@@ -46,9 +49,13 @@ jest.mock('@kbn/expandable-flyout', () => ({
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
-const flyoutContextValue = {
-  openLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutApi;
+jest.mock('../../../../common/hooks/use_experimental_features');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
 
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
@@ -84,7 +91,8 @@ const renderUserEntityOverview = () =>
 
 describe('<UserEntityOverview />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
 
   describe('license is valid', () => {
@@ -163,7 +171,7 @@ describe('<UserEntityOverview />', () => {
       expect(queryByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).not.toBeInTheDocument();
     });
 
-    it('should navigate to left panel entities tab when clicking on title', () => {
+    it('should navigate to left panel entities tab when clicking on title when feature flag is off', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
@@ -176,13 +184,37 @@ describe('<UserEntityOverview />', () => {
       );
 
       getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID).click();
-      expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
+      expect(mockFlyoutApi.openLeftPanel).toHaveBeenCalledWith({
         id: DocumentDetailsLeftPanelKey,
         path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
         params: {
           id: panelContextValue.eventId,
           indexName: panelContextValue.indexName,
           scopeId: panelContextValue.scopeId,
+        },
+      });
+    });
+
+    it('should open user preview if feature flag is true', () => {
+      mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <DocumentDetailsContext.Provider value={panelContextValue}>
+            <UserEntityOverview userName={userName} />
+          </DocumentDetailsContext.Provider>
+        </TestProviders>
+      );
+
+      getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID).click();
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: UserPreviewPanelKey,
+        params: {
+          userName,
+          scopeId: mockContextValue.scopeId,
+          banner: USER_PREVIEW_BANNER,
         },
       });
     });

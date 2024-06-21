@@ -34,7 +34,7 @@ interface UserPanelContentProps {
   scopeId: string;
   isDraggable: boolean;
   onAssetCriticalityChange: () => void;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
 }
 
 export const UserPanelContent = ({

@@ -18,8 +18,14 @@ import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { TestProviders } from '../../../../common/mock';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useGetAgentStatus } from '../../../../management/hooks/agents/use_get_agent_status';
-import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { HostPreviewPanelKey } from '../../../entity_details/host_preview';
+import { HOST_PREVIEW_BANNER } from './host_entity_overview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_preview';
+import { USER_PREVIEW_BANNER } from './user_entity_overview';
 
 jest.mock('../../../../management/hooks');
 jest.mock('../../../../management/hooks/agents/use_get_agent_status');
@@ -31,9 +37,8 @@ jest.mock('@kbn/expandable-flyout', () => ({
 
 const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 
-const flyoutContextValue = {
-  openLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutApi;
+jest.mock('../../../../common/hooks/use_experimental_features');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const panelContextValue = {
   eventId: 'event id',
@@ -52,7 +57,8 @@ const renderHighlightedFieldsCell = (values: string[], field: string) =>
 
 describe('<HighlightedFieldsCell />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
 
   it('should render a basic cell', () => {
@@ -77,17 +83,47 @@ describe('<HighlightedFieldsCell />', () => {
     expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should open left panel when clicking on the link within a a link cell', () => {
+  it('should open left panel when clicking on the link within a a link cell when feature flag is off', () => {
     const { getByTestId } = renderHighlightedFieldsCell(['value'], 'user.name');
 
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
-    expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
+    expect(mockFlyoutApi.openLeftPanel).toHaveBeenCalledWith({
       id: DocumentDetailsLeftPanelKey,
       path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,
         scopeId: panelContextValue.scopeId,
+      },
+    });
+  });
+
+  it('should open host preview when click on host when feature flag is on', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    const { getByTestId } = renderHighlightedFieldsCell(['test host'], 'host.name');
+
+    getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: HostPreviewPanelKey,
+      params: {
+        hostName: 'test host',
+        scopeId: panelContextValue.scopeId,
+        banner: HOST_PREVIEW_BANNER,
+      },
+    });
+  });
+
+  it('should open user preview when click on user when feature flag is on', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    const { getByTestId } = renderHighlightedFieldsCell(['test user'], 'user.name');
+
+    getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: UserPreviewPanelKey,
+      params: {
+        userName: 'test user',
+        scopeId: panelContextValue.scopeId,
+        banner: USER_PREVIEW_BANNER,
       },
     });
   });
