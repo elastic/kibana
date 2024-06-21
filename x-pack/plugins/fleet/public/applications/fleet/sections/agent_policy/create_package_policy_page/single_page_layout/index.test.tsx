@@ -680,7 +680,7 @@ describe('When on the package policy create page', () => {
             isServerlessEnabled: true,
           },
         });
-        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true });
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true } as any);
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
           getMockPackageInfo({ requiresRoot: false, dataStreamRequiresRoot: false })
         );
@@ -703,7 +703,7 @@ describe('When on the package policy create page', () => {
       });
 
       test('should not force create package policy when not in serverless', async () => {
-        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: false });
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: false } as any);
         (useStartServices as jest.MockedFunction<any>).mockReturnValue({
           ...useStartServices(),
           cloud: {

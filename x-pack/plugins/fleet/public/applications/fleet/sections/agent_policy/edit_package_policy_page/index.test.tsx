@@ -488,7 +488,7 @@ describe('edit package policy page', () => {
     beforeEach(() => {
       jest
         .spyOn(ExperimentalFeaturesService, 'get')
-        .mockReturnValue({ enableReusableIntegrationPolicies: true });
+        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
       (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValue({
         data: { results: { total: 0 } },
       });

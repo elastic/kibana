@@ -60,9 +60,6 @@ import { installIndexTemplatesAndPipelines } from './install_index_template_pipe
 // only the more explicit `installPackage*` functions should be used
 export async function _installPackage({
   savedObjectsClient,
-  savedObjectsImporter,
-  savedObjectTagAssignmentService,
-  savedObjectTagClient,
   esClient,
   logger,
   installedPkg,
@@ -157,9 +154,6 @@ export async function _installPackage({
     const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
       installKibanaAssetsAndReferences({
         savedObjectsClient,
-        savedObjectsImporter,
-        savedObjectTagAssignmentService,
-        savedObjectTagClient,
         pkgName,
         pkgTitle,
         packageInstallContext,

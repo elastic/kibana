@@ -126,7 +126,7 @@ describe('step select agent policy', () => {
     beforeEach(() => {
       jest
         .spyOn(ExperimentalFeaturesService, 'get')
-        .mockReturnValue({ enableReusableIntegrationPolicies: true });
+        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
 
       useGetAgentPoliciesMock.mockReturnValue({
         data: {
