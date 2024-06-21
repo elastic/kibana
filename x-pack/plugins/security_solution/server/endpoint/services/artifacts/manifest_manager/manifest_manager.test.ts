@@ -355,7 +355,7 @@ describe('ManifestManager', () => {
     });
   });
 
-  describe.each([true, false])('buildNewManifest', (unifiedManifestSO) => {
+  describe('buildNewManifest', () => {
     const SUPPORTED_ARTIFACT_NAMES = [
       ARTIFACT_NAME_EXCEPTIONS_MACOS,
       ARTIFACT_NAME_EXCEPTIONS_WINDOWS,
@@ -378,10 +378,8 @@ describe('ManifestManager', () => {
       ...new Set(artifacts.map((artifact) => artifact.identifier)).values(),
     ];
 
-    test(`Fails when exception list client fails when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+    test(`Fails when exception list client fails`, async () => {
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = jest.fn().mockRejectedValue(new Error());
@@ -389,10 +387,8 @@ describe('ManifestManager', () => {
       await expect(manifestManager.buildNewManifest()).rejects.toThrow();
     });
 
-    test(`Builds fully new manifest if no baseline parameter passed and no exception list items when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+    test(`Builds fully new manifest if no baseline parameter passed and no exception list items`, async () => {
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
@@ -420,7 +416,7 @@ describe('ManifestManager', () => {
       }
     });
 
-    test(`Builds fully new manifest if no baseline parameter passed and present exception list items when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
+    test(`Builds fully new manifest if no baseline parameter passed and present exception list items`, async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
@@ -438,9 +434,7 @@ describe('ManifestManager', () => {
         os_types: ['macos'],
         tags: ['policy:all'],
       });
-      const context = buildManifestManagerContextMock({
-        ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -502,7 +496,7 @@ describe('ManifestManager', () => {
       }
     });
 
-    test(`Reuses artifacts when baseline parameter passed and present exception list items when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
+    test(`Reuses artifacts when baseline parameter passed and present exception list items`, async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
@@ -520,9 +514,7 @@ describe('ManifestManager', () => {
         os_types: ['macos'],
         tags: ['policy:all'],
       });
-      const context = buildManifestManagerContextMock({
-        ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -587,7 +579,7 @@ describe('ManifestManager', () => {
       }
     });
 
-    test(`Builds fully new manifest with single entries when they are duplicated when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
+    test(`Builds fully new manifest with single entries when they are duplicated`, async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
@@ -605,9 +597,7 @@ describe('ManifestManager', () => {
         os_types: ['macos'],
         tags: ['policy:all'],
       });
-      const context = buildManifestManagerContextMock({
-        ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       const duplicatedEventFilterInDifferentPolicy = {
@@ -721,7 +711,7 @@ describe('ManifestManager', () => {
       }
     });
 
-    test(`Builds manifest with policy specific exception list items for trusted apps when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
+    test(`Builds manifest with policy specific exception list items for trusted apps`, async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
@@ -734,9 +724,7 @@ describe('ManifestManager', () => {
         ],
         tags: [`policy:${TEST_POLICY_ID_2}`],
       });
-      const context = buildManifestManagerContextMock({
-        ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -795,7 +783,7 @@ describe('ManifestManager', () => {
     });
   });
 
-  describe.each([true, false])('buildNewManifest when using app features', (unifiedManifestSO) => {
+  describe('buildNewManifest when using app features', () => {
     const SUPPORTED_ARTIFACT_NAMES = [
       ARTIFACT_NAME_EXCEPTIONS_MACOS,
       ARTIFACT_NAME_EXCEPTIONS_WINDOWS,
@@ -818,7 +806,7 @@ describe('ManifestManager', () => {
       ...new Set(artifacts.map((artifact) => artifact.identifier)).values(),
     ];
 
-    test(`when it has endpoint artifact management app feature it should not generate host isolation exceptions when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
+    test(`when it has endpoint artifact management app feature it should not generate host isolation exceptions`, async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
@@ -836,10 +824,9 @@ describe('ManifestManager', () => {
         os_types: ['macos'],
         tags: ['policy:all'],
       });
-      const context = buildManifestManagerContextMock(
-        { ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}) },
-        [ProductFeatureSecurityKey.endpointArtifactManagement]
-      );
+      const context = buildManifestManagerContextMock({}, [
+        ProductFeatureSecurityKey.endpointArtifactManagement,
+      ]);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -899,7 +886,7 @@ describe('ManifestManager', () => {
       }
     });
 
-    test(`when it has endpoint artifact management and response actions app features it should generate all exceptions when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
+    test(`when it has endpoint artifact management and response actions app features it should generate all exceptions`, async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
@@ -917,13 +904,10 @@ describe('ManifestManager', () => {
         os_types: ['macos'],
         tags: ['policy:all'],
       });
-      const context = buildManifestManagerContextMock(
-        { ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}) },
-        [
-          ProductFeatureSecurityKey.endpointArtifactManagement,
-          ProductFeatureSecurityKey.endpointResponseActions,
-        ]
-      );
+      const context = buildManifestManagerContextMock({}, [
+        ProductFeatureSecurityKey.endpointArtifactManagement,
+        ProductFeatureSecurityKey.endpointResponseActions,
+      ]);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -985,7 +969,7 @@ describe('ManifestManager', () => {
       }
     });
 
-    test(`when does not have right app features, should not generate any exception when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
+    test(`when does not have right app features, should not generate any exception`, async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
@@ -1003,10 +987,7 @@ describe('ManifestManager', () => {
         os_types: ['macos'],
         tags: ['policy:all'],
       });
-      const context = buildManifestManagerContextMock(
-        { ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}) },
-        []
-      );
+      const context = buildManifestManagerContextMock({}, []);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -1059,102 +1040,93 @@ describe('ManifestManager', () => {
     });
   });
 
-  describe.each([true, false])(
-    'buildNewManifest when Endpoint Exceptions contain `matches`',
-    (unifiedManifestSO) => {
-      test(`when contains only \`wildcard\`, \`event.module=endpoint\` is added when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
-        const exceptionListItem = getExceptionListItemSchemaMock({
-          os_types: ['macos'],
-          entries: [
-            { type: 'wildcard', operator: 'included', field: 'path', value: '*match_me*' },
-            { type: 'wildcard', operator: 'excluded', field: 'not_path', value: '*dont_match_me*' },
-          ],
-        });
-        const expectedExceptionListItem = getExceptionListItemSchemaMock({
-          os_types: ['macos'],
-          entries: [
-            ...exceptionListItem.entries,
-            { type: 'match', operator: 'included', field: 'event.module', value: 'endpoint' },
-          ],
-        });
-
-        const context = buildManifestManagerContextMock({
-          ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-        });
-        const manifestManager = new ManifestManager(context);
-
-        context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-          [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
-        });
-
-        context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
-          TEST_POLICY_ID_1,
-        ]);
-
-        const manifest = await manifestManager.buildNewManifest();
-
-        expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
-        expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
-        expect(manifest?.getSavedObjectVersion()).toBeUndefined();
-
-        const artifacts = manifest.getAllArtifacts();
-
-        expect(artifacts.length).toBe(15);
-
-        expect(getArtifactObject(artifacts[0])).toStrictEqual({
-          entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1'),
-        });
+  describe('buildNewManifest when Endpoint Exceptions contain `matches`', () => {
+    test(`when contains only \`wildcard\`, \`event.module=endpoint\` is added `, async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        entries: [
+          { type: 'wildcard', operator: 'included', field: 'path', value: '*match_me*' },
+          { type: 'wildcard', operator: 'excluded', field: 'not_path', value: '*dont_match_me*' },
+        ],
+      });
+      const expectedExceptionListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        entries: [
+          ...exceptionListItem.entries,
+          { type: 'match', operator: 'included', field: 'event.module', value: 'endpoint' },
+        ],
       });
 
-      test(`when contains anything next to \`wildcard\`, nothing is added when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
-        const exceptionListItem = getExceptionListItemSchemaMock({
-          os_types: ['macos'],
-          entries: [
-            { type: 'wildcard', operator: 'included', field: 'path', value: '*match_me*' },
-            { type: 'wildcard', operator: 'excluded', field: 'path', value: '*dont_match_me*' },
-            { type: 'match', operator: 'included', field: 'path', value: 'something' },
-          ],
-        });
-        const expectedExceptionListItem = getExceptionListItemSchemaMock({
-          os_types: ['macos'],
-          entries: [...exceptionListItem.entries],
-        });
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
 
-        const context = buildManifestManagerContextMock({
-          ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-        });
-        const manifestManager = new ManifestManager(context);
-
-        context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-          [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
-        });
-
-        context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
-          TEST_POLICY_ID_1,
-        ]);
-
-        const manifest = await manifestManager.buildNewManifest();
-
-        expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
-        expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
-        expect(manifest?.getSavedObjectVersion()).toBeUndefined();
-
-        const artifacts = manifest.getAllArtifacts();
-
-        expect(artifacts.length).toBe(15);
-
-        expect(getArtifactObject(artifacts[0])).toStrictEqual({
-          entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1'),
-        });
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
       });
-    }
-  );
 
-  describe.each([true, false])('deleteArtifacts', (unifiedManifestSO) => {
-    test(`Successfully invokes saved objects client when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(15);
+
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({
+        entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1'),
       });
+    });
+
+    test(`when contains anything next to \`wildcard\`, nothing is added `, async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        entries: [
+          { type: 'wildcard', operator: 'included', field: 'path', value: '*match_me*' },
+          { type: 'wildcard', operator: 'excluded', field: 'path', value: '*dont_match_me*' },
+          { type: 'match', operator: 'included', field: 'path', value: 'something' },
+        ],
+      });
+      const expectedExceptionListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        entries: [...exceptionListItem.entries],
+      });
+
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+      });
+
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(15);
+
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({
+        entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1'),
+      });
+    });
+  });
+
+  describe('deleteArtifacts', () => {
+    test(`Successfully invokes saved objects client`, async () => {
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       await expect(
@@ -1170,10 +1142,8 @@ describe('ManifestManager', () => {
       ]);
     });
 
-    test(`Returns errors for partial failures when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+    test(`Returns errors for partial failures`, async () => {
+      const context = buildManifestManagerContextMock({});
       const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
       const error = new Error();
@@ -1200,11 +1170,9 @@ describe('ManifestManager', () => {
     });
   });
 
-  describe.each([true, false])('pushArtifacts', (unifiedManifestSO) => {
-    test(`Successfully invokes artifactClient when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+  describe('pushArtifacts', () => {
+    test(`Successfully invokes artifactClient `, async () => {
+      const context = buildManifestManagerContextMock({});
       const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
       const newManifest = ManifestManager.createDefaultManifest();
@@ -1226,10 +1194,8 @@ describe('ManifestManager', () => {
       ]);
     });
 
-    test(`Returns errors for partial failures when unifiedManifestEnabled feature flag is set to: ${unifiedManifestSO}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedManifestSO ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+    test(`Returns errors for partial failures`, async () => {
+      const context = buildManifestManagerContextMock({});
       const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
       const newManifest = ManifestManager.createDefaultManifest();
@@ -1270,16 +1236,14 @@ describe('ManifestManager', () => {
     });
   });
 
-  describe.each([true, false])('tryDispatch', (unifiedSavedObject) => {
+  describe('tryDispatch', () => {
     const getMockPolicyFetchAllItems = (items: PackagePolicy[]) =>
       jest.fn(async function* () {
         yield items;
       });
 
-    test(`Should not dispatch if no policies when unifiedManifestEnabled feature flag is set to: ${unifiedSavedObject}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedSavedObject ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+    test(`Should not dispatch if no policies`, async () => {
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
       const manifest = new Manifest({ soVersion: '1.0.0' });
 
@@ -1291,10 +1255,8 @@ describe('ManifestManager', () => {
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
     });
 
-    test(`Should return errors if invalid config for package policy when unifiedManifestEnabled feature flag is set to: ${unifiedSavedObject}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedSavedObject ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+    test(`Should return errors if invalid config for package policy`, async () => {
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       const manifest = new Manifest({ soVersion: '1.0.0' });
@@ -1311,10 +1273,8 @@ describe('ManifestManager', () => {
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
     });
 
-    test(`Should not dispatch if semantic version has not changed when unifiedManifestEnabled feature flag is set to: ${unifiedSavedObject}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedSavedObject ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+    test(`Should not dispatch if semantic version has not changed`, async () => {
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       const manifest = new Manifest({ soVersion: '1.0.0' });
@@ -1342,10 +1302,8 @@ describe('ManifestManager', () => {
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
     });
 
-    test(`Should dispatch to only policies where list of artifacts changed when unifiedManifestEnabled feature flag is set to: ${unifiedSavedObject}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedSavedObject ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+    test(`Should dispatch to only policies where list of artifacts changed`, async () => {
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
@@ -1413,10 +1371,8 @@ describe('ManifestManager', () => {
       );
     });
 
-    test(`Should dispatch to only policies where artifact content changed when unifiedManifestEnabled feature flag is set to: ${unifiedSavedObject}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedSavedObject ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+    test(`Should dispatch to only policies where artifact content changed`, async () => {
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
@@ -1486,10 +1442,8 @@ describe('ManifestManager', () => {
       );
     });
 
-    test(`Should return partial errors when unifiedManifestEnabled feature flag is set to: ${unifiedSavedObject}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedSavedObject ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+    test(`Should return partial errors`, async () => {
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
       const error = new Error();
 
@@ -1532,11 +1486,9 @@ describe('ManifestManager', () => {
     });
   });
 
-  describe.each([true, false])('cleanup artifacts', (unifiedSavedObject) => {
-    test(`Successfully removes orphan artifacts when unifiedManifestEnabled feature flag is set to: ${unifiedSavedObject}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedSavedObject ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+  describe('cleanup artifacts', () => {
+    test(`Successfully removes orphan artifacts`, async () => {
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       (context.artifactClient.fetchAll as jest.Mock).mockReturnValue(
@@ -1564,10 +1516,8 @@ describe('ManifestManager', () => {
       ]);
     });
 
-    test(`When there is no artifact to be removed when unifiedManifestEnabled feature flag is set to: ${unifiedSavedObject}`, async () => {
-      const context = buildManifestManagerContextMock({
-        ...(unifiedSavedObject ? { experimentalFeatures: ['unifiedManifestEnabled'] } : {}),
-      });
+    test(`When there is no artifact to be removed`, async () => {
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
