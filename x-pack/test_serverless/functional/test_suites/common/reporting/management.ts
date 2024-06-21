@@ -11,7 +11,7 @@ import {
   JobParamsCsvFromSavedObject,
 } from '@kbn/reporting-export-types-csv-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../shared/services';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
@@ -21,8 +21,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
   const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   let roleAuthc: RoleCredentials;
   let roleName: string;
+  let internalReqHeader: InternalRequestHeader;
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
@@ -57,6 +59,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before('initialize saved object archive', async () => {
       roleName = 'admin';
       roleAuthc = await svlUserManager.createApiKeyForRole(roleName);
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
     });
@@ -71,7 +74,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     xit(`user sees a job they've created`, async () => {
       const {
         job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job, roleAuthc);
+      } = await reportingAPI.createReportJobInternal(
+        CSV_REPORT_TYPE_V2,
+        job,
+        roleAuthc,
+        internalReqHeader
+      );
 
       await navigateToReportingManagement();
       await testSubjects.existOrFail(`viewReportingLink-${jobId}`);
@@ -84,7 +92,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const {
         job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job, roleAuthc);
+      } = await reportingAPI.createReportJobInternal(
+        CSV_REPORT_TYPE_V2,
+        job,
+        roleAuthc,
+        internalReqHeader
+      );
 
       await navigateToReportingManagement();
       await testSubjects.missingOrFail(`viewReportingLink-${jobId}`);

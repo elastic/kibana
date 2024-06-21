@@ -96,6 +96,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         }
       );
     },
+
     /*
      * This function is only used in the API tests, functional tests we have to click the download link in the UI
      */
