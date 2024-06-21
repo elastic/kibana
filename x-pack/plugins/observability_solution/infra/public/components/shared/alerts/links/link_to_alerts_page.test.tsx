@@ -72,7 +72,7 @@ describe('LinkToAlertsPage component', () => {
     );
     const href = screen.getByRole('link', { name: 'Show all' }).getAttribute('href');
     expect(href).toContain(
-      "/app/observability/alerts?_a=(filters:!(),kuery:'foo:bar',rangeFrom:'2024-04-01',rangeTo:'2024-04-15',status:all)"
+      "/app/observability/alerts?_a=(kuery:'foo:bar',rangeFrom:'2024-04-01',rangeTo:'2024-04-15',status:all)"
     );
   });
 });

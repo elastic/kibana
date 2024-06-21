@@ -55,9 +55,7 @@ export {
 } from '../common';
 
 export type { RulesParams } from './locators/rules';
-
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
-export { defaultState as alertsPageUrlDefaultParams } from './components/alert_search_bar/containers/state_container';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 export { DatePicker } from './pages/overview/components/date_picker/date_picker';
 
