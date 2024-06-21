@@ -7,14 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 import type { PresentationContainer } from '@kbn/presentation-containers';
+import { tracksOverlays } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { getESQLWithSafeLimit } from '@kbn/esql-utils';
+import { getESQLWithSafeLimit, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
+import { isDefined } from '@kbn/ml-is-defined';
 import { FIELD_STATS_EMBEDDABLE_TYPE } from '../embeddables/field_stats/constants';
 import type { DataVisualizerStartDependencies } from '../../common/types/data_visualizer_plugin';
-import type { FieldStatisticsTableEmbeddableApi } from '../embeddables/field_stats/types';
+import type {
+  FieldStatisticsTableEmbeddableApi,
+  FieldStatsControlsApi,
+} from '../embeddables/field_stats/types';
+import { FieldStatsInitializerViewType } from '../embeddables/grid_embeddable/types';
+import type { FieldStatsInitialState } from '../embeddables/grid_embeddable/types';
+import { getOrCreateDataViewByIndexPattern } from '../search_strategy/requests/get_data_view_by_index_pattern';
+import { FieldStatisticsInitializer } from '../embeddables/field_stats/field_stats_initializer';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -27,6 +39,88 @@ const parentApiIsCompatible = async (
 interface FieldStatsActionContext extends EmbeddableApiContext {
   embeddable: FieldStatisticsTableEmbeddableApi;
 }
+interface Context extends FieldStatsActionContext {
+  isNewPanel?: boolean;
+  deletePanel?: () => void;
+  coreStart: CoreStart;
+  pluginStart: DataVisualizerStartDependencies;
+  initialState: FieldStatsInitialState;
+  fieldStatsControlsApi?: FieldStatsControlsApi;
+}
+
+async function updatePanelFromFlyoutEdits({
+  embeddable,
+  isNewPanel,
+  deletePanel,
+  coreStart,
+  pluginStart,
+  initialState,
+}: Context) {
+  const parentApi = embeddable.parentApi;
+  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
+  const services = {
+    ...coreStart,
+    ...pluginStart,
+  };
+  let hasChanged = false;
+  const cancelChanges = () => {
+    // Reset to initialState in case user has changed the preview state
+    if (hasChanged && embeddable && initialState) {
+      embeddable.updateUserInput(initialState);
+    }
+
+    if (isNewPanel && deletePanel) {
+      deletePanel();
+    }
+    flyoutSession.close();
+    overlayTracker?.clearOverlays();
+  };
+
+  const update = async (nextUpdate: FieldStatsInitialState) => {
+    const esqlQuery = nextUpdate?.query?.esql;
+    if (isDefined(esqlQuery)) {
+      const indexPatternFromQuery = getIndexPatternFromESQLQuery(esqlQuery);
+      const dv = await getOrCreateDataViewByIndexPattern(
+        pluginStart.data.dataViews,
+        indexPatternFromQuery,
+        undefined
+      );
+      if (dv?.id && nextUpdate.dataViewId !== dv.id) {
+        nextUpdate.dataViewId = dv.id;
+      }
+    }
+
+    flyoutSession.close();
+    overlayTracker?.clearOverlays();
+  };
+  const flyoutSession = services.overlays.openFlyout(
+    toMountPoint(
+      <KibanaContextProvider services={services}>
+        <FieldStatisticsInitializer
+          initialInput={initialState}
+          onPreview={async (nextUpdate) => {
+            if (embeddable.updateUserInput) {
+              embeddable.updateUserInput(nextUpdate);
+              hasChanged = true;
+            }
+          }}
+          onCreate={update}
+          onCancel={cancelChanges}
+        />
+      </KibanaContextProvider>,
+      coreStart
+    ),
+    {
+      ownFocus: true,
+      size: 's',
+      type: 'push',
+      'data-test-subj': 'fieldStatisticsInitializerFlyout',
+      onClose: cancelChanges,
+    }
+  );
+  overlayTracker?.openOverlay(flyoutSession, { focusedPanelId: embeddable.uuid });
+}
+
 export function createAddFieldStatsTableAction(
   coreStart: CoreStart,
   pluginStart: DataVisualizerStartDependencies
@@ -46,30 +140,35 @@ export function createAddFieldStatsTableAction(
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
       try {
-        const { resolveEmbeddableFieldStatsUserInput } = await import(
-          '../embeddables/field_stats/resolve_field_stats_embeddable_input'
-        );
-
         const defaultIndexPattern = await pluginStart.data.dataViews.getDefault();
-
-        const initialState = await resolveEmbeddableFieldStatsUserInput(
-          coreStart,
-          pluginStart,
-          context.embeddable,
-          context.embeddable.uuid,
-          defaultIndexPattern
-            ? {
-                query: {
-                  esql: getESQLWithSafeLimit(`from ${defaultIndexPattern?.getIndexPattern()}`, 10),
-                },
-              }
-            : undefined
-        );
-
-        presentationContainerParent.addNewPanel({
+        const defaultInitialState: FieldStatsInitialState = {
+          viewType: FieldStatsInitializerViewType.ESQL,
+          query: {
+            esql: getESQLWithSafeLimit(`from ${defaultIndexPattern?.getIndexPattern()}`, 10),
+          },
+        };
+        const embeddable = await presentationContainerParent.addNewPanel<
+          object,
+          FieldStatisticsTableEmbeddableApi
+        >({
           panelType: FIELD_STATS_EMBEDDABLE_TYPE,
-          initialState,
+          initialState: defaultInitialState,
         });
+        // open the flyout if embeddable has been created successfully
+        if (embeddable) {
+          const deletePanel = () => {
+            presentationContainerParent.removePanel(embeddable.uuid);
+          };
+
+          updatePanelFromFlyoutEdits({
+            embeddable,
+            isNewPanel: true,
+            deletePanel,
+            coreStart,
+            pluginStart,
+            initialState: defaultInitialState,
+          });
+        }
       } catch (e) {
         return Promise.reject(e);
       }
