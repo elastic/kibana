@@ -74,19 +74,19 @@ export const determineOrderAgnosticDiffOutcome = <TValue>(
 };
 
 interface DetermineDiffOutcomeProps {
-  hasBaseVersion: boolean;
   baseEqlCurrent: boolean;
   baseEqlTarget: boolean;
   currentEqlTarget: boolean;
+  hasBaseVersion: boolean;
 }
 
 const getThreeWayDiffOutcome = ({
-  hasBaseVersion,
   baseEqlCurrent,
   baseEqlTarget,
   currentEqlTarget,
+  hasBaseVersion,
 }: DetermineDiffOutcomeProps): ThreeWayDiffOutcome => {
-  if (hasBaseVersion) {
+  if (!hasBaseVersion) {
     /**
      * We couldn't find the base version of the rule in the package so further
      * version comparison is not possible. We assume that the rule is not
