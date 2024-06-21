@@ -11,6 +11,7 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
@@ -25,6 +26,8 @@ import { useEffect } from 'react';
 import React, { useMemo, useState, useCallback } from 'react';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldStatsESQLEditor } from './field_stats_esql_editor';
 import type {
@@ -34,6 +37,7 @@ import type {
 import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { DataSourceTypeSelector } from './field_stats_initializer_view_type';
+
 export interface FieldStatsInitializerProps {
   initialInput?: Partial<FieldStatisticsTableEmbeddableState>;
   onCreate: (props: FieldStatsInitialState) => Promise<void>;
@@ -46,6 +50,7 @@ const defaultTitle = i18n.translate('xpack.dataVisualizer.fieldStatistics.displa
   defaultMessage: 'Field statistics',
 });
 
+const isScrollable = false;
 export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
   initialInput,
   onCreate,
@@ -102,8 +107,14 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
 
   return (
     <>
-      <EuiFlyoutHeader>
-        <EuiTitle>
+      <EuiFlyoutHeader
+        hasBorder
+        css={css`
+          pointer-events: auto;
+          background-color: ${euiThemeVars.euiColorEmptyShade};
+        `}
+      >
+        <EuiTitle size="xs">
           <h2 id={'fieldStatsConfig'}>
             <FormattedMessage
               id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.modalTitle"
@@ -112,8 +123,32 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-
-      <>
+      <EuiFlyoutBody
+        className="lnsEditFlyoutBody"
+        css={css`
+          // styles needed to display extra drop targets that are outside of the config panel main area
+          overflow-y: auto;
+          padding-left: ${euiThemeVars.euiFormMaxWidth};
+          margin-left: -${euiThemeVars.euiFormMaxWidth};
+          pointer-events: none;
+          .euiFlyoutBody__overflow {
+            -webkit-mask-image: none;
+            padding-left: inherit;
+            margin-left: inherit;
+            ${!isScrollable &&
+            `
+                overflow-y: hidden;
+              `}
+            > * {
+              pointer-events: auto;
+            }
+          }
+          .euiFlyoutBody__overflowContent {
+            padding: 0;
+            block-size: 100%;
+          }
+        `}
+      >
         <EuiForm>
           {initialInput?.viewType === FieldStatsInitializerViewType.ESQL && !isEsqlEnabled ? (
             <>
@@ -162,7 +197,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
             />
           ) : null}
         </EuiForm>
-      </>
+      </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -182,8 +217,8 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               fill
             >
               <FormattedMessage
-                id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.setupModal.confirmButtonLabel"
-                defaultMessage="Confirm"
+                id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.setupModal.applyAndCloseLabel"
+                defaultMessage="Apply and close"
               />
             </EuiButton>
           </EuiFlexItem>
