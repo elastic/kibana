@@ -6,16 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { LogLevelBadgeCell } from '../../../components/data_types/logs/log_level_badge_cell';
-import { isDataViewSource, isEsqlSource } from '../../../../common/data_sources';
-import {
-  DataSourceCategory,
-  DataSourceProfileProvider,
-  DataSourceProfileProviderParams,
-} from '../../profiles';
+import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
+import { extractIndexPatternFrom } from '../extract_index_pattern_from';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
@@ -30,7 +24,7 @@ export const createLogsDataSourceProfileProvider = (
         columns.push({ name: params.dataView.timeFieldName, width: 212 });
       }
 
-      columns.push({ name: 'log.level', width: 100 }, { name: 'message' });
+      columns.push({ name: 'log.level', width: 150 }, { name: 'message' });
 
       return { columns, rowHeight: 0 };
     },
@@ -52,17 +46,3 @@ export const createLogsDataSourceProfileProvider = (
     };
   },
 });
-
-const extractIndexPatternFrom = ({
-  dataSource,
-  dataView,
-  query,
-}: DataSourceProfileProviderParams) => {
-  if (isEsqlSource(dataSource) && isOfAggregateQueryType(query)) {
-    return getIndexPatternFromESQLQuery(query.esql);
-  } else if (isDataViewSource(dataSource) && dataView) {
-    return dataView.getIndexPattern();
-  }
-
-  return null;
-};
