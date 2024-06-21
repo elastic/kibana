@@ -16,6 +16,7 @@ import {
   EuiCallOut,
   EuiToolTip,
 } from '@elastic/eui';
+import { useAuthorization } from '../../../../../common/hooks/use_authorization';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { ConnectorSelector } from './connector_selector';
@@ -30,17 +31,12 @@ import * as i18n from './translations';
  */
 const AllowedActionTypeIds = ['.bedrock'];
 
-const useCanCreateConnectors = () => {
-  const { capabilities } = useKibana().services.application;
-  return Boolean(capabilities.actions?.save);
-};
-
 interface ConnectorStepProps {
   connectorId: string | undefined;
 }
 export const ConnectorStep = React.memo<ConnectorStepProps>(({ connectorId }) => {
   const { http, notifications } = useKibana().services;
-  const canCreateConnectors = useCanCreateConnectors();
+  const { canCreateConnectors } = useAuthorization();
   const { setConnectorId } = useActions();
   const [connectors, setConnectors] = useState<AIConnector[]>();
   const {
@@ -106,7 +102,7 @@ interface CreateConnectorPopoverProps {
   onConnectorSaved: () => void;
 }
 const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(({ onConnectorSaved }) => {
-  const canCreateConnectors = useCanCreateConnectors();
+  const { canCreateConnectors } = useAuthorization();
   const [isOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);

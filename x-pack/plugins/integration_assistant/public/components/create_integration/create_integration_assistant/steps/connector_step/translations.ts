@@ -36,6 +36,6 @@ export const CREATE_CONNECTOR_MISSING_PRIVILEGES = i18n.translate(
   'xpack.integrationAssistant.steps.connector.createConnectorMissingPrivileges',
   {
     defaultMessage:
-      'The required privileges to create a new connector are missing. Contact your administrator for assistance.',
+      'Missing privileges to create a new connector. Contact your administrator for assistance.',
   }
 );

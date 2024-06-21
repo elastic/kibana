@@ -16,12 +16,15 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePageAuthorization } from '../../../common/hooks/use_authorization';
+import { AuthWrapper, PageAuthDescription } from '../../../common/components/auth';
 import { IntegrationImageHeader } from '../../../common/components/integration_image_header';
 import { ButtonsFooter } from '../../../common/components/buttons_footer';
 import { SectionWrapper } from '../../../common/components/section_wrapper';
@@ -37,6 +40,7 @@ const useAssistantCardCss = () => {
 };
 
 export const CreateIntegrationLanding = React.memo(() => {
+  const { canUseIntegrationAssistant } = usePageAuthorization();
   const navigate = useNavigate();
   const assistantCardCss = useAssistantCardCss();
   return (
@@ -44,92 +48,100 @@ export const CreateIntegrationLanding = React.memo(() => {
       <IntegrationImageHeader />
       <KibanaPageTemplate.Section grow>
         <SectionWrapper title={i18n.LANDING_TITLE} subtitle={i18n.LANDING_DESCRIPTION}>
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="l"
-            alignItems="center"
-            justifyContent="flexStart"
-          >
-            <EuiFlexItem>
-              <EuiSpacer size="l" />
-              <EuiCard
-                display="plain"
-                hasBorder={true}
-                paddingSize="l"
-                title={''} // title shown inside the child component
-                betaBadgeProps={{
-                  label: i18n.TECH_PREVIEW,
-                  tooltipContent: i18n.TECH_PREVIEW_TOOLTIP,
-                }}
-              >
+          <AuthWrapper canCreateIntegrations>
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="l"
+              alignItems="center"
+              justifyContent="flexStart"
+            >
+              <EuiFlexItem>
+                <EuiSpacer size="l" />
+                <EuiCard
+                  display="plain"
+                  hasBorder={true}
+                  paddingSize="l"
+                  title={''} // title shown inside the child component
+                  betaBadgeProps={{
+                    label: i18n.TECH_PREVIEW,
+                    tooltipContent: i18n.TECH_PREVIEW_TOOLTIP,
+                  }}
+                >
+                  <EuiFlexGroup
+                    direction="row"
+                    gutterSize="l"
+                    alignItems="center"
+                    justifyContent="center"
+                    css={assistantCardCss}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <AssistantAvatar />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFlexGroup
+                        direction="column"
+                        gutterSize="s"
+                        alignItems="flexStart"
+                        justifyContent="flexStart"
+                      >
+                        <EuiFlexItem>
+                          <EuiTitle size="xs">
+                            <h3>{i18n.ASSISTANT_TITLE}</h3>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="s" color="subdued" textAlign="left">
+                            {i18n.ASSISTANT_DESCRIPTION}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {canUseIntegrationAssistant ? (
+                        <EuiButton onClick={() => navigate(Page.assistant)}>
+                          {i18n.ASSISTANT_BUTTON}
+                        </EuiButton>
+                      ) : (
+                        <EuiToolTip content={<PageAuthDescription page={Page.assistant} />}>
+                          <EuiButton disabled>{i18n.ASSISTANT_BUTTON}</EuiButton>
+                        </EuiToolTip>
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiCard>
+              </EuiFlexItem>
+              <EuiFlexItem>
                 <EuiFlexGroup
                   direction="row"
-                  gutterSize="l"
+                  gutterSize="s"
                   alignItems="center"
-                  justifyContent="center"
-                  css={assistantCardCss}
+                  justifyContent="flexStart"
                 >
                   <EuiFlexItem grow={false}>
-                    <AssistantAvatar />
+                    <EuiIcon type="package" size="l" />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiFlexGroup
-                      direction="column"
-                      gutterSize="s"
-                      alignItems="flexStart"
-                      justifyContent="flexStart"
-                    >
-                      <EuiFlexItem>
-                        <EuiTitle size="xs">
-                          <h3>{i18n.ASSISTANT_TITLE}</h3>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText size="s" color="subdued" textAlign="left">
-                          {i18n.ASSISTANT_DESCRIPTION}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => navigate(Page.assistant)}>
-                      {i18n.ASSISTANT_BUTTON}
-                    </EuiButton>
+                    <EuiText size="s" color="subdued">
+                      <FormattedMessage
+                        id="xpack.integrationAssistant.createIntegrationLanding.uploadPackageDescription"
+                        defaultMessage="If you have an existing integration package, {link}"
+                        values={{
+                          link: (
+                            <EuiLink onClick={() => navigate(Page.upload)}>
+                              <FormattedMessage
+                                id="xpack.integrationAssistant.createIntegrationLanding.uploadPackageLink"
+                                defaultMessage="upload it as a .zip"
+                              />
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiCard>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup
-                direction="row"
-                gutterSize="s"
-                alignItems="center"
-                justifyContent="flexStart"
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="package" size="l" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="s" color="subdued">
-                    <FormattedMessage
-                      id="xpack.integrationAssistant.createIntegrationLanding.uploadPackageDescription"
-                      defaultMessage="If you have an existing integration package, {link}"
-                      values={{
-                        link: (
-                          <EuiLink onClick={() => navigate(Page.upload)}>
-                            <FormattedMessage
-                              id="xpack.integrationAssistant.createIntegrationLanding.uploadPackageLink"
-                              defaultMessage="upload it as a .zip"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </AuthWrapper>
         </SectionWrapper>
       </KibanaPageTemplate.Section>
       <ButtonsFooter />
