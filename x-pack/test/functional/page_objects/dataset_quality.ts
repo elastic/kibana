@@ -221,7 +221,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async refreshTable() {
       const filtersContainer = await testSubjects.find(
         testSubjectSelectors.datasetQualityFiltersContainer,
-        10 * 1000
+        20 * 1000
       );
       const refreshButton = await filtersContainer.findByTestSubject(
         testSubjectSelectors.superDatePickerApplyTimeButton
