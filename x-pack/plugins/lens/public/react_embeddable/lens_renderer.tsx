@@ -7,11 +7,11 @@
 
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useSearchApi } from '@kbn/presentation-publishing';
 import React from 'react';
-import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { useMemo, useRef } from 'react';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
-import type { LensApi, LensSerializedState } from './types';
+import type { LensApi, LensRuntimeState, LensSerializedState } from './types';
 
 export interface Props {
   title?: string;
@@ -20,34 +20,6 @@ export interface Props {
   timeRange?: TimeRange;
 
   onApiAvailable?: (api: LensApi) => void;
-  /*
-   * Set to false to exclude sharing attributes 'data-*'.
-   */
-  isSharable?: boolean;
-}
-
-function useParentApi(props: Pick<Props, 'filters' | 'query' | 'timeRange'>) {
-  const parentApi = useMemo(() => {
-    return {
-      filters$: new BehaviorSubject(props.filters),
-      query$: new BehaviorSubject(props.query),
-      timeRange$: new BehaviorSubject(props.timeRange),
-    };
-    // only run onMount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    parentApi.filters$.next(props.filters);
-  }, [props.filters, parentApi.filters$]);
-  useEffect(() => {
-    parentApi.query$.next(props.query);
-  }, [props.query, parentApi.query$]);
-  useEffect(() => {
-    parentApi.timeRange$.next(props.timeRange);
-  }, [props.timeRange, parentApi.timeRange$]);
-
-  return parentApi;
 }
 
 export function LensRenderer(props: Props) {
@@ -73,24 +45,20 @@ export function LensRenderer(props: Props) {
     // only run onMount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const parentApi = useParentApi(props);
+  const searchApi = useSearchApi(props);
 
   return (
-    <div>
-      <ReactEmbeddableRenderer<LensSerializedState, LensApi>
-        type={LENS_EMBEDDABLE_TYPE}
-        state={initialState}
-        parentApi={parentApi}
-        onApiAvailable={(api) => {
-          apiRef.current = api;
+    <ReactEmbeddableRenderer<LensSerializedState, LensApi, LensRuntimeState>
+      type={LENS_EMBEDDABLE_TYPE}
+      getParentApi={() => ({ ...searchApi, getSerializedStateForChild: () => initialState })}
+      onApiAvailable={(api) => {
+        apiRef.current = api;
 
-          if (props.onApiAvailable) {
-            props.onApiAvailable(api);
-          }
-        }}
-        hidePanelChrome={true}
-      />
-    </div>
+        if (props.onApiAvailable) {
+          props.onApiAvailable(api);
+        }
+      }}
+      hidePanelChrome={true}
+    />
   );
 }

@@ -5,197 +5,41 @@
  * 2.0.
  */
 
-import type {
-  Capabilities,
-  CoreStart,
-  HttpSetup,
-  IUiSettingsClient,
-  ThemeServiceStart,
-} from '@kbn/core/public';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { DataPublicPluginStart, FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import {
-  ExpressionRendererParams,
-  ReactExpressionRendererType,
-} from '@kbn/expressions-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import {
-  initializeTimeRange,
-  initializeTitles,
-  getUnchangingComparator,
-  PublishingSubject,
-  fetch$,
-  apiPublishesUnifiedSearch,
-  apiHasAppContext,
-  apiHasDisableTriggers,
-  apiHasExecutionContext,
-  apiPublishesViewMode,
-  ViewMode,
-} from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, switchMap } from 'rxjs';
 import {
-  EmbeddableStart,
+  getUnchangingComparator,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
+import {
   ReactEmbeddableFactory,
-  ViewMode,
-  ViewMode,
 } from '@kbn/embeddable-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import { ExecutionContextSearch, isOfQueryType, TimeRange } from '@kbn/es-query';
-// import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { get, noop } from 'lodash';
-import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { isChartSizeEvent } from '@kbn/chart-expressions-common';
-import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import { getUiActions } from '@kbn/visualizations-plugin/public/services';
-import type { DatasourceMap, VisualizationMap } from '../types';
-// import { extract, inject } from '../../common/embeddable_factory';
-import type { LensAttributesService } from '../lens_attribute_service';
-import type { Document } from '../persistence/saved_object_store';
-import { DOC_TYPE, LENS_EMBEDDABLE_TYPE } from '../../common/constants';
-import { LensApi, LensSerializedState, LensBasicApi } from './types';
-import type { DocumentToExpressionReturnType } from '../editor_frame_service/editor_frame';
-// import { ExpressionWrapper } from './expression_wrapper';
-import { initializeEditApi } from './inizialize_edit_api';
-import { getLensInspectorService } from '../lens_inspector_service';
+import { DOC_TYPE } from '../../common/constants';
+import { LensApi, LensEmbeddableStartServices, LensRuntimeState, LensSerializedState } from './types';
 
-export interface LensEmbeddableStartServices {
-  data: DataPublicPluginStart;
-  timefilter: TimefilterContract;
-  coreHttp: HttpSetup;
-  coreStart: CoreStart;
-  inspector: InspectorStart;
-  capabilities: RecursiveReadonly<Capabilities>;
-  expressionRenderer: ReactExpressionRendererType;
-  dataViews: DataViewsContract;
-  uiActions?: UiActionsStart;
-  usageCollection?: UsageCollectionSetup;
-  documentToExpression: (doc: Document) => Promise<DocumentToExpressionReturnType>;
-  injectFilterReferences: FilterManager['inject'];
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
-  spaces?: SpacesPluginStart;
-  theme: ThemeServiceStart;
-  uiSettings: IUiSettingsClient;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
-  attributeService: LensAttributesService;
-  embeddable: EmbeddableStart;
-}
-
-function initializePanelSettings(
-  uuid: string,
-  state: LensSerializedState,
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart
-) {
-  const title = initializeTitles(state);
-  const timeRange = initializeTimeRange(state);
-  const defaultPanelTitle$ = new BehaviorSubject<string | undefined>(state.title);
-
-  const actionsConfig = initializeActionApi(uuid, state, title.titlesApi, embeddableEnhanced);
-
-  return {
-    api: {
-      getTypeDisplayName: () => LENS_EMBEDDABLE_TYPE,
-      defaultPanelTitle: defaultPanelTitle$,
-      ...timeRange.api,
-      ...title.titlesApi,
-      ...actionsConfig.api,
-    },
-    comparators: {
-      ...timeRange.comparators,
-      ...title.titleComparators,
-      ...actionsConfig.comparators,
-    },
-    attributes: {
-      ...timeRange.serialize(),
-      ...title.serializeTitles(),
-      ...actionsConfig.serialize(),
-    },
-    cleanup: () => {
-      actionsConfig.cleanup();
-    },
-  };
-}
-
-function initializeInspector(services: LensEmbeddableStartServices) {
-  return {
-    api: getLensInspectorService(services.inspector),
-    comparators: {},
-    attributes: noop,
-    cleanup: noop,
-  };
-}
-
-function initializeActionApi(
-  uuid: string,
-  state: LensSerializedState,
-  titleApi: { panelTitle: PublishingSubject<string | undefined> },
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart
-) {
-  const dynamicActionsApi = embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
-    uuid,
-    () => titleApi.panelTitle.getValue(),
-    state
-  );
-  const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
-
-  return {
-    api: {
-      ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
-    },
-    comparators: {
-      ...(dynamicActionsApi?.dynamicActionsComparator ?? {
-        enhancements: getUnchangingComparator(),
-      }),
-    },
-    serialize: () => ({}),
-    cleanup: () => {
-      maybeStopDynamicActions?.stopDynamicActions();
-    },
-  };
-}
-
-function initializeSearchContext({ data, injectFilterReferences }: LensEmbeddableStartServices) {
-  const searchSessionId$ = new BehaviorSubject<string | undefined>('');
-  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
-  // const context: ExecutionContextSearch = {
-  //   now: data.nowProvider.get().getTime(),
-  //   timeRange:
-  //     state.timeslice != null
-  //       ? {
-  //           from: new Date(state.timeslice[0]).toISOString(),
-  //           to: new Date(state.timeslice[1]).toISOString(),
-  //           mode: 'absolute' as 'absolute',
-  //         }
-  //       : state.timeRange,
-  //   query: [state.state.query],
-  //   filters: injectFilterReferences(state.state.filters, state.references),
-  //   disableWarningToasts: true,
-  // };
-  // merge query and filters
-  return {
-    api: {
-      searchSessionId$,
-      timeRange$,
-    },
-    comparators: {},
-    cleanup: noop,
-    serialize: () => ({
-      searchSessionId: searchSessionId$.getValue(),
-      timeRange: timeRange$.getValue(),
-    }),
-  };
-}
+import { initializeEditApi } from './initializers/inizialize_edit';
+import { ExpressionWrapper } from './expression_wrapper';
+import { loadEmbeddableData, hasExpressionParamsToRender } from './data_loader';
+import { initializeInspector } from './initializers/initialize_inspector';
+import { initializeLibraryServices } from './initializers/initialize_library_services';
+import { initializeObservables } from './initializers/initialize_observables';
+import { initializePanelSettings } from './initializers/initialize_panel_settings';
+import { initializeSearchContext } from './initializers/initialize_search_context';
+import { isTextBasedLanguage } from './helper';
+import { initializeData } from './initializers/initialize_data';
+import { UserMessages } from './userMessages/container';
+import { useMessages } from './userMessages/use_messages';
+import { initializeVisualizationContext } from './initializers/initialize_visualization_context';
+import { initializeActionApi } from './initializers/initialize_actions';
+import { initializeIntegrations } from './initializers/initialize_integrations';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
-): ReactEmbeddableFactory<LensSerializedState, LensApi> => ({
+): ReactEmbeddableFactory<LensSerializedState, LensApi, LensRuntimeState> => ({
   type: DOC_TYPE,
+  /**
+   * This is called before the build and will make sure that the
+   * final state will ALWAYS contain the attributes object
+   */
   deserializeState: async ({ rawState }) => {
     if (rawState.savedObjectId) {
       const { attributes, managed } = await services.attributeService.loadFromLibrary(
@@ -203,125 +47,164 @@ export const createLensEmbeddableFactory = (
       );
       return { ...rawState, attributes, managed };
     }
-    return rawState;
+    return ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState;
   },
   buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-    const { expressionRenderer, embeddableEnhanced, spaces } = services;
 
-    const panelConfig = initializePanelSettings(uuid, state, embeddableEnhanced);
+    /**
+     * Observables declared here are the bridge between the outer world
+     * and the embeddable. They are updated within a subscribe callback
+     * and will trigger a re-render of the component
+     */
+    const observables = initializeObservables(parentApi);
+    // Build an helper to force a re-render for user messages
+    const updateRenderCount = () => observables.variables.renderCount$.next(observables.variables.renderCount$.getValue() + 1);
+
+    const visualizationContextHelper = initializeVisualizationContext()
+
+    /**
+     * Initialize various configurations required to build all the required
+     * parts for the Lens embeddable.
+     * Each initialize call returns an object with the following properties:
+     * - api: a set of methods or observables (also non-serializable) who can be picked up within the component
+     * - serialize: a serializable subset of the Lens runtime state
+     * - comparators: a set of comparators to help Dashboard determine if the state has changed since its saved state
+     * - cleanup: a function to clean up any resources when the component is unmounted
+     * 
+     * Mind: the getState argument is ok to pass as long as it is lazy evaluated (i.e. called within a function).
+     * If there's something that should be immediately computed use the "state" deserialized variable.
+     */
+    const panelConfig = initializePanelSettings(state);
+    const inspectorConfig = initializeInspector(services);
     const editConfig = initializeEditApi(
       uuid,
       getState,
-      (currentState: LensSerializedState) => !isOfQueryType(currentState.attributes?.state.query),
+      isTextBasedLanguage,
+      observables.variables.viewMode$,
       services,
+      inspectorConfig.api,
       parentApi,
-      state.savedObjectId
+      state.savedObjectId,
     );
-    const inspectorConfig = initializeInspector(services);
-    const searchContextConfig = initializeSearchContext(services);
 
-    // const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({
-    //   expression: '',
-    // });
-    // const expressionAbortController$ = new BehaviorSubject<AbortController>(new AbortController());
-    // const viewMode$ = apiPublishesViewMode(parentApi)
-    //   ? parentApi.viewMode
-    //   : new BehaviorSubject(ViewMode.VIEW);
+    const libraryConfig = initializeLibraryServices(getState, services);
+    const searchContextConfig = initializeSearchContext(state);
+    const dataConfig = initializeData(getState, observables.variables)
+    const integrationsConfig = initializeIntegrations(getState);
+    const actionsConfig = initializeActionApi(
+      uuid,
+      state,
+      getState,
+      panelConfig.api,
+      visualizationContextHelper,
+      services
+    );
 
-    // const executionContext = apiHasExecutionContext(parentApi)
-    //   ? parentApi.executionContext
-    //   : undefined;
-    // const disableTriggers = apiHasDisableTriggers(parentApi)
-    //   ? parentApi.disableTriggers
-    //   : undefined;
-    // const parentApiContext = apiHasAppContext(parentApi) ? parentApi.getAppContext() : undefined;
-
-    function getState(): LensSerializedState {
+    /** 
+     * This is useful to have always the latest version of the state
+     * at hand when calling callbacks or performing actions
+     */
+    function getState(): LensRuntimeState {
       return {
         ...state,
-        ...panelConfig.attributes,
-        ...editConfig.attributes,
-        ...inspectorConfig.attributes,
+        ...panelConfig.serialize(),
+        ...actionsConfig.serialize(),
+        ...editConfig.serialize(),
+        ...inspectorConfig.serialize(),
+        ...libraryConfig.serialize(),
+        ...searchContextConfig.serialize(),
+        ...dataConfig.serialize(),
+        ...integrationsConfig.serialize()
       };
     }
 
+
+    /**
+     * Lens API is the object that can be passed to the final component/renderer and
+     * provide access to the services for and by the outside world
+     */
     const api: LensApi = buildApi(
       {
         ...panelConfig.api,
         ...editConfig.api,
         ...inspectorConfig.api,
         ...searchContextConfig.api,
-        serializeState: () => ({ rawState: getState(), references: [] }),
+        ...libraryConfig.api,
+        ...dataConfig.api,
+        ...actionsConfig.api,
+        ...integrationsConfig.api,
       },
       {
         ...panelConfig.comparators,
         ...editConfig.comparators,
         ...inspectorConfig.comparators,
         ...searchContextConfig.comparators,
+        ...observables.comparators,
+        ...actionsConfig.comparators,
+        ...integrationsConfig.comparators,
         attributes: getUnchangingComparator(),
         savedObjectId: getUnchangingComparator(),
+        overrides: getUnchangingComparator(),
       }
     );
+
+    // Compute the expression using the provided parameters
+    // Inside a subscription will be updated based on each unifiedSearch change
+    // and as side effect update few observables as  expressionParams$, expressionAbortController$ and renderCount% with the new values upon updates
+    const { getUserMessages, ...expression } = loadEmbeddableData(uuid, getState, api, parentApi, observables.variables, services, visualizationContextHelper, updateRenderCount);
 
     return {
       api,
       Component: () => {
+        // Pick up updated params from the observable
+        const expressionParams = useStateFromPublishingSubject(observables.variables.expressionParams$);
+        // used for functional tests
+        const renderCount = useStateFromPublishingSubject(observables.variables.renderCount$);
+        const hasRendered = useStateFromPublishingSubject(observables.variables.hasRenderCompleted$);
+        const canEdit = Boolean(api.isEditingEnabled?.() && observables.variables.viewMode$.getValue() === 'edit')
+
+        const [blockingErrors, warningOrErrors, infoMessages] = useMessages(getUserMessages, hasRendered)
+
+        // On unmount call all the cleanups
         useEffect(() => {
           return () => {
             panelConfig.cleanup();
             editConfig.cleanup();
             inspectorConfig.cleanup();
+            searchContextConfig.cleanup();
+            dataConfig.cleanup();
+            expression.cleanup();
+            actionsConfig.cleanup();
+            integrationsConfig.cleanup();
           };
         }, []);
 
-        const currentState = getState();
-
-        try {
-          const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
-            await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
-        } catch (e) {}
-
-        if (!spaces) {
-          return <div>Missing plugin</div>;
-        }
-        if (!state) {
-          return <div>Missing state</div>;
+        // Anything that can go wrong should show the error panel together with all the messages
+        if (!services.spaces || !hasExpressionParamsToRender(expressionParams) || blockingErrors.length) {
+          return (<UserMessages
+            blockingErrors={blockingErrors}
+            warningOrErrors={warningOrErrors}
+            infoMessages={infoMessages}
+            canEdit={canEdit}
+          />);
         }
 
-        return (
-          <ExpressionWrapper
-            ExpressionRenderer={expressionRenderer}
-            expression={this.expression || null}
-            lensInspector={this.lensInspector}
-            searchContext={this.getMergedSearchContext()}
-            variables={{
-              embeddableTitle: this.getTitle(),
-              ...(input.palette ? { theme: { palette: input.palette } } : {}),
-              ...('overrides' in input ? { overrides: input.overrides } : {}),
-              ...getInternalTables(this.savedVis.state.datasourceStates),
-            }}
-            searchSessionId={this.getInput().searchSessionId}
-            handleEvent={this.handleEvent}
-            onData$={this.updateActiveData}
-            onRender$={this.onRender}
-            interactive={!input.disableTriggers && !this.isTextBasedLanguage()}
-            renderMode={input.renderMode}
-            syncColors={input.syncColors}
-            syncTooltips={input.syncTooltips}
-            syncCursor={input.syncCursor}
-            hasCompatibleActions={this.hasCompatibleActions}
-            getCompatibleCellValueActions={this.getCompatibleCellValueActions}
-            className={input.className}
-            style={input.style}
-            executionContext={this.getExecutionContext()}
-            abortController={this.input.abortController}
-            addUserMessages={(messages) => this.addUserMessages(messages)}
-            onRuntimeError={(error) => {
-              this.updateOutput({ error });
-              this.logError('runtime');
-            }}
-            noPadding={this.visDisplayOptions.noPadding}
+        return (<div
+          style={{ width: '100%', height: '100%' }}
+          data-rendering-count={renderCount}
+          data-render-complete={hasRendered}
+          data-title={!api.hidePanelTitle?.getValue() ? api.panelTitle?.getValue() ?? '' : ''}
+          data-description={api.panelDescription?.getValue() ?? ''}
+          data-shared-item
+        >
+          <ExpressionWrapper {...expressionParams} />
+          <UserMessages
+            blockingErrors={blockingErrors}
+            warningOrErrors={warningOrErrors}
+            infoMessages={infoMessages}
+            canEdit={canEdit}
           />
+        </div>
         );
       },
     };

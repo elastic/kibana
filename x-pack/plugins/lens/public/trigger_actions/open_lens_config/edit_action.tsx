@@ -5,16 +5,15 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import type { LensPluginStartDependencies } from '../../plugin';
-import { isLensEmbeddable } from '../utils';
 import type { StartServices } from '../../types';
+import { isLensApi } from '../../react_embeddable/type_guards';
 
 const ACTION_CONFIGURE_IN_LENS = 'ACTION_CONFIGURE_IN_LENS';
 
 interface Context {
-  embeddable: IEmbeddable;
+  api: unknown;
 }
 
 export const getConfigureLensHelpersAsync = async () => await import('../../async_services');
@@ -29,8 +28,8 @@ export class ConfigureInLensPanelAction implements Action<Context> {
     protected readonly startServices: StartServices
   ) {}
 
-  public getDisplayName({ embeddable }: Context): string {
-    const language = isLensEmbeddable(embeddable) ? embeddable.getTextBasedLanguage() : undefined;
+  public getDisplayName({ api }: Context): string {
+    const language = isLensApi(api) ? api.isTextBasedLanguage() : undefined;
     return i18n.translate('xpack.lens.app.editVisualizationLabel', {
       defaultMessage: 'Edit {lang} visualization',
       values: { lang: language },
@@ -41,15 +40,15 @@ export class ConfigureInLensPanelAction implements Action<Context> {
     return 'pencil';
   }
 
-  public async isCompatible({ embeddable }: Context) {
+  public async isCompatible({ api }: Context) {
     const { isEditActionCompatible } = await getConfigureLensHelpersAsync();
-    return isEditActionCompatible(embeddable);
+    return isEditActionCompatible(api);
   }
 
-  public async execute({ embeddable }: Context) {
+  public async execute({ api }: Context) {
     const { executeEditAction } = await getConfigureLensHelpersAsync();
     return executeEditAction({
-      embeddable,
+      api,
       startDependencies: this.startDependencies,
       ...this.startServices,
     });

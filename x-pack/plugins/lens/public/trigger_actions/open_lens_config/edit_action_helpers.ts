@@ -7,41 +7,38 @@
 import React from 'react';
 import './helpers.scss';
 import { tracksOverlays } from '@kbn/presentation-containers';
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { isLensEmbeddable } from '../utils';
+import { hasEditCapabilities, apiHasParentApi } from '@kbn/presentation-publishing';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { StartServices } from '../../types';
+import { isLensApi } from '../../react_embeddable/type_guards';
 
 interface Context extends StartServices {
-  embeddable: IEmbeddable;
+  api: unknown;
   startDependencies: LensPluginStartDependencies;
   isNewPanel?: boolean;
   deletePanel?: () => void;
 }
 
-export async function isEditActionCompatible(embeddable: IEmbeddable) {
-  if (!embeddable?.getInput) return false;
-  // display the action only if dashboard is on editable mode
-  const inDashboardEditMode = embeddable.getInput().viewMode === 'edit';
-  return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);
+export async function isEditActionCompatible(api: unknown) {
+  return hasEditCapabilities(api) && api.isEditingEnabled?.();
 }
 
 export async function executeEditAction({
-  embeddable,
+  api,
   startDependencies,
   isNewPanel,
   deletePanel,
   ...startServices
 }: Context) {
-  const isCompatibleAction = await isEditActionCompatible(embeddable);
-  if (!isCompatibleAction || !isLensEmbeddable(embeddable)) {
+  const isCompatibleAction = await isEditActionCompatible(api);
+  if (!isCompatibleAction || !isLensApi(api) || !apiHasParentApi(api)) {
     throw new IncompatibleActionError();
   }
-  const rootEmbeddable = embeddable.getRoot();
+  const rootEmbeddable = api.parentApi;
   const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-  const ConfigPanel = await embeddable.openConfingPanel(startDependencies, isNewPanel, deletePanel);
+  const ConfigPanel = await api.openConfigPanel(startDependencies, isNewPanel, deletePanel);
 
   if (ConfigPanel) {
     const handle = startServices.overlays.openFlyout(
@@ -68,6 +65,6 @@ export async function executeEditAction({
         outsideClickCloses: true,
       }
     );
-    overlayTracker?.openOverlay(handle, { focusedPanelId: embeddable.id });
+    overlayTracker?.openOverlay(handle, { focusedPanelId: api.uuid });
   }
 }

@@ -35,6 +35,7 @@ import {
   EDITOR_UNKNOWN_DATASOURCE_TYPE,
   EDITOR_UNKNOWN_VIS_TYPE,
 } from '../user_messages_ids';
+import { NonNullable } from '../react_embeddable/helper';
 
 /**
  * Provides a place to register general user messages that don't belong in the datasource or visualization objects
@@ -206,16 +207,14 @@ export const filterAndSortUserMessages = (
   locationId?: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[],
   { dimensionId, severity }: UserMessageFilters = {}
 ) => {
-  const locationIds = Array.isArray(locationId)
-    ? locationId
-    : typeof locationId === 'string'
-    ? [locationId]
-    : [];
+  const locationIds = new Set(
+    (Array.isArray(locationId) ? locationId : [locationId]).filter(NonNullable)
+  );
 
   const filteredMessages = userMessages.filter((message) => {
-    if (locationIds.length) {
+    if (locationIds.size) {
       const hasMatch = message.displayLocations.some((location) => {
-        if (!locationIds.includes(location.id)) {
+        if (!locationIds.has(location.id)) {
           return false;
         }
 
@@ -227,11 +226,7 @@ export const filterAndSortUserMessages = (
       }
     }
 
-    if (severity && message.severity !== severity) {
-      return false;
-    }
-
-    return true;
+    return !severity || message.severity === severity;
   });
 
   return filteredMessages.sort(bySeverity);
@@ -327,7 +322,7 @@ export const useApplicationUserMessages = ({
 
   const getUserMessages: UserMessagesGetter = (locationId, filterArgs) =>
     filterAndSortUserMessages(
-      [...userMessages, ...Object.values(additionalUserMessages)],
+      userMessages.concat(Object.values(additionalUserMessages)),
       locationId,
       filterArgs ?? {}
     );
@@ -349,14 +344,17 @@ export const useApplicationUserMessages = ({
       setAdditionalUserMessages(newMessageMap);
     }
 
-    return () => {
-      const withMessagesRemoved = {
-        ...additionalUserMessages,
-      };
+    return {
+      rerender: addedMessageIds.length > 0,
+      cleanup: () => {
+        const withMessagesRemoved = {
+          ...additionalUserMessages,
+        };
 
-      addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
+        addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
 
-      setAdditionalUserMessages(withMessagesRemoved);
+        setAdditionalUserMessages(withMessagesRemoved);
+      },
     };
   };
   return { getUserMessages, addUserMessages };

@@ -18,7 +18,7 @@ import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
 import { AddUserMessages, EditorFrameInstance, UserMessagesGetter } from '../types';
-import { Document } from '../persistence/saved_object_store';
+import { LensDocument } from '../persistence/saved_object_store';
 
 import {
   setState,
@@ -132,8 +132,8 @@ export function App({
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-  const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
-  const [initialDocFromContext, setInitialDocFromContext] = useState<Document | undefined>(
+  const [lastKnownDoc, setLastKnownDoc] = useState<LensDocument | undefined>(undefined);
+  const [initialDocFromContext, setInitialDocFromContext] = useState<LensDocument | undefined>(
     undefined
   );
   const [isGoBackToVizEditorModalVisible, setIsGoBackToVizEditorModalVisible] = useState(false);

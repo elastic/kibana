@@ -123,7 +123,7 @@ import { visualizeFieldAction } from './trigger_actions/visualize_field_actions'
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
 import type { LensEmbeddableInput } from './embeddable';
-import { LensEmbeddableStartServices } from './react_embeddable/lens_embeddable';
+import { LensEmbeddableStartServices } from './react_embeddable/types';
 import { EmbeddableComponent, getEmbeddableComponent } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
@@ -134,7 +134,7 @@ import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_dril
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
-
+import { LensDocument } from './persistence/saved_object_store';
 import {
   CONTENT_ID,
   LATEST_VERSION,
@@ -370,7 +370,7 @@ export class LensPlugin {
         data: plugins.data,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
-        documentToExpression: (doc) =>
+        documentToExpression: (doc: LensDocument) =>
           this.editorFrameService!.documentToExpression(doc, {
             dataViews: plugins.dataViews,
             storage: new Storage(localStorage),

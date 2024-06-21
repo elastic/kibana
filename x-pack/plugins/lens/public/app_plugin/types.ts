@@ -59,7 +59,7 @@ import type { LensAttributesService } from '../lens_attribute_service';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { LensInspector } from '../lens_inspector_service';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
-import type { Document, SavedObjectIndexStore } from '../persistence/saved_object_store';
+import type { LensDocument, SavedObjectIndexStore } from '../persistence/saved_object_store';
 import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
 
 export interface RedirectToOriginProps {
@@ -124,7 +124,7 @@ export interface LensTopNavMenuProps {
   initialContextIsEmbedded?: boolean;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
-  currentDoc: Document | undefined;
+  currentDoc: LensDocument | undefined;
   indexPatternService: IndexPatternServiceAPI;
   onTextBasedSavedAndExit: ({ onSave }: { onSave: () => void }) => Promise<void>;
   getUserMessages: UserMessagesGetter;

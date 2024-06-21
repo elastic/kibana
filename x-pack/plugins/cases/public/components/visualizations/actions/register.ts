@@ -27,12 +27,12 @@ const registerLensActions = ({
   history,
   storage,
 }: CasesUIActionProps) => {
-  const addToExistingCaseAction = createAddToExistingCaseLensAction({
-    core,
-    plugins,
-    caseContextProps,
-    history,
-    storage,
-  });
-  plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToExistingCaseAction);
+  // const addToExistingCaseAction = createAddToExistingCaseLensAction({
+  //   core,
+  //   plugins,
+  //   caseContextProps,
+  //   history,
+  //   storage,
+  // });
+  // plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToExistingCaseAction);
 };

@@ -28,7 +28,7 @@ export const getLensInspectorService = (inspector: InspectorStartContract) => {
       });
       return overlayRef;
     },
-    close: () => overlayRef?.close(),
+    closeInspector: async () => overlayRef?.close(),
   };
 };
 
