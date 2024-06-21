@@ -45,6 +45,7 @@ export type DefaultControlApi = PublishesDataLoading &
   HasUniqueId &
   HasSerializableState &
   HasParentApi<ControlGroupApi> & {
+    /** TODO: Make these non-public as part of https://github.com/elastic/kibana/issues/174961 */
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
   };
