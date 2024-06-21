@@ -28,7 +28,7 @@ import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
 
 import { LinksMenuUI } from '../../components/anomalies_table/links_menu';
-
+import { RuleEditorFlyout } from '../../components/rule_editor';
 import { formatValue } from '../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -47,7 +47,7 @@ import { CHART_HEIGHT, TRANSPARENT_BACKGROUND } from './constants';
 import { filter } from 'rxjs';
 import { drawCursor } from './utils/draw_anomaly_explorer_charts_cursor';
 
-const popoverMenuOffset = 28;
+const popoverMenuOffset = 0;
 const CONTENT_WRAPPER_HEIGHT = 215;
 const CONTENT_WRAPPER_CLASS = 'ml-explorer-chart-content-wrapper';
 
@@ -643,6 +643,18 @@ export class ExplorerChartSingleMetric extends React.Component {
     this.setState({ popoverData: null, popoverCoords: [0, 0] });
   }
 
+  setShowRuleEditorFlyoutFunction = (func) => {
+    this.setState({
+      showRuleEditorFlyout: func,
+    });
+  };
+
+  unsetShowRuleEditorFlyoutFunction = () => {
+    this.setState({
+      showRuleEditorFlyout: () => {},
+    });
+  };
+
   render() {
     const { seriesConfig } = this.props;
 
@@ -656,6 +668,10 @@ export class ExplorerChartSingleMetric extends React.Component {
 
     return (
       <>
+        <RuleEditorFlyout
+          setShowFunction={this.setShowRuleEditorFlyoutFunction}
+          unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+        />
         {this.state.popoverData !== null && (
           <div
             style={{
