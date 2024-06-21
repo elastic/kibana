@@ -16,6 +16,12 @@ import type { ResponseActionsApiCommandNames } from '../../../../../../common/en
 import { agentStatusMocks } from '../../../../../management/hooks/agents/agent_status.mocks';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import type React from 'react';
+import {
+  HOST_ENDPOINT_UNENROLLED_TOOLTIP,
+  LOADING_ENDPOINT_DATA_TOOLTIP,
+  NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+} from '../..';
+import { HostStatus } from '../../../../../../common/endpoint/types';
 
 jest.mock('../../../user_privileges');
 
@@ -126,9 +132,40 @@ describe('useHostIsolationAction', () => {
     expect(apiMock.responseProvider.getAgentStatus).not.toHaveBeenCalled();
   });
 
-  it.todo('should return disabled menu item when host does not support isolation');
+  it('should return disabled menu item while loading agent status', async () => {
+    const { result } = render();
 
-  it.todo('should return disabled menu item while loading agent status');
+    expect(result.current).toEqual([
+      buildExpectedMenuItemResult({
+        disabled: true,
+        toolTipContent: LOADING_ENDPOINT_DATA_TOOLTIP,
+      }),
+    ]);
+  });
 
-  it.todo('should return disabled menu item if host agent is unenrolled');
+  it.each(['endpoint', 'non-endpoint'])(
+    'should return disabled menu item if %s host agent is unenrolled',
+    async (type) => {
+      apiMock.responseProvider.getAgentStatus.mockReturnValue({
+        data: {
+          'abfe4a35-d5b4-42a0-a539-bd054c791769': agentStatusMocks.generateAgentStatus({
+            status: HostStatus.UNENROLLED,
+          }),
+        },
+      });
+      if (type === 'non-endpoint') {
+        hookProps.detailsData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
+      }
+      const { result, waitForValueToChange } = render();
+      await waitForValueToChange(() => result.current);
+
+      expect(result.current).toEqual([
+        buildExpectedMenuItemResult({
+          disabled: true,
+          toolTipContent:
+            type === 'endpoint' ? HOST_ENDPOINT_UNENROLLED_TOOLTIP : NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+        }),
+      ]);
+    }
+  );
 });
