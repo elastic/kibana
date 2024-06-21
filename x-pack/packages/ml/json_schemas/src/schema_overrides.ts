@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SupportedPath } from '../../../common/api_schemas/json_schema_schema';
+import type { EditorEndpoints } from './json_schema_service';
 import type { PropertyDefinition } from './types';
 
 /**
  * Extension of the schema definition extracted from the Elasticsearch specification.
  */
-export const jsonSchemaOverrides: Record<SupportedPath, Partial<PropertyDefinition>> = {
+export const jsonSchemaOverrides: Partial<Record<EditorEndpoints, Partial<PropertyDefinition>>> = {
   '/_ml/anomaly_detectors/{job_id}': {
     // background_persist_interval is required according to the ES spec
     required: ['analysis_config', 'data_description'],

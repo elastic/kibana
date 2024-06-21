@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export interface CreateIndexResponse {
-  acknowledged: boolean;
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/json_schemas'],
+};
