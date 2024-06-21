@@ -77,7 +77,7 @@ export interface TextBasedLanguagesEditorProps {
    * The text based queries are relying on adhoc dataviews which
    * can have an @timestamp timefield or nothing
    */
-  detectTimestamp?: boolean;
+  detectedTimestamp?: string;
   /** Array of errors */
   errors?: Error[];
   /** Warning string as it comes from ES */
@@ -147,7 +147,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   onTextLangQuerySubmit,
   expandCodeEditor,
   isCodeEditorExpanded,
-  detectTimestamp = false,
+  detectedTimestamp,
   errors: serverErrors,
   warning: serverWarning,
   isLoading,
@@ -967,7 +967,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     onErrorClick={onErrorClick}
                     runQuery={onQuerySubmit}
                     updateQuery={onQueryUpdate}
-                    detectTimestamp={detectTimestamp}
+                    detectedTimestamp={detectedTimestamp}
                     editorIsInline={editorIsInline}
                     disableSubmitAction={disableSubmitAction}
                     hideRunQueryText={hideRunQueryText}
@@ -1066,7 +1066,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           onErrorClick={onErrorClick}
           runQuery={onQuerySubmit}
           updateQuery={onQueryUpdate}
-          detectTimestamp={detectTimestamp}
+          detectedTimestamp={detectedTimestamp}
           hideRunQueryText={hideRunQueryText}
           editorIsInline={editorIsInline}
           disableSubmitAction={disableSubmitAction}
