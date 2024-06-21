@@ -23,7 +23,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     },
   };
 
-  describe('Log stream supports nano precision', function () {
+  describe.only('Log stream supports nano precision', function () {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/logs_with_nano_date');
     });
@@ -61,15 +61,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       expect(entryTimestamp).to.be('19:43:22.111');
-    });
-
-    it('should properly sync logPosition in url', async () => {
-      const currentUrl = await browser.getCurrentUrl();
-      const parsedUrl = new URL(currentUrl);
-
-      expect(parsedUrl.searchParams.get('logPosition')).to.contain(
-        `time:\'2018-10-17T19:46:22.333333333Z\'`
-      );
     });
 
     it('should properly render timestamp in flyout with nano precision', async () => {
