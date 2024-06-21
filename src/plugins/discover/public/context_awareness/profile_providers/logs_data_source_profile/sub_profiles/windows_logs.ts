@@ -25,8 +25,8 @@ export const createWindowsLogsDataSourceProfileProvider = (
 
         columns.push(
           { name: 'log.level', width: 150 },
-          { name: 'message' },
-          { name: 'host.name', width: 250 }
+          { name: 'host.name', width: 200 },
+          { name: 'message' }
         );
 
         return { columns, rowHeight: 0 };
