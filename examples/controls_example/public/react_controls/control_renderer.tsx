@@ -59,7 +59,7 @@ export const ControlRenderer = <
           return fullApi;
         };
 
-        const { rawState: initialState } = parentApi.getSerializedStateForChild(uuid);
+        const { rawState: initialState } = parentApi.getSerializedStateForChild(uuid) ?? {};
 
         const { api, Component } = factory.buildControl(
           initialState as unknown as StateType,
