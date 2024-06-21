@@ -147,25 +147,6 @@ export const createCloudSession = async (
       }
     }
   }
-
-  try {
-    sessionResponse = await axios.request(requestConfig(cloudLoginUrl));
-  } catch (ex) {
-    log.error(`Failed to create the new cloud session with 'POST ${cloudLoginUrl}'`);
-    cleanException(cloudLoginUrl, ex);
-    throw ex;
-  }
-
-  const token = sessionResponse?.data?.token as string;
-  if (!token) {
-    log.error(
-      `Failed to create cloud session, token is missing in response data: ${JSON.stringify(
-        sessionResponse?.data
-      )}`
-    );
-    throw new Error(`Unable to create Cloud session, token is missing.`);
-  }
-  return token;
 };
 
 export const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: ToolingLog) => {
