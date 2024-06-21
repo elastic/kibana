@@ -8,8 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { SerializedStyles } from '@emotion/react';
-import { ControlWidth } from '@kbn/controls-plugin/public/types';
+import { CanClearSelections, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { HasSerializableState } from '@kbn/presentation-containers';
 import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
@@ -41,6 +40,7 @@ export type DefaultControlApi = PublishesDataLoading &
   PublishesUnsavedChanges &
   PublishesControlDisplaySettings &
   Partial<PublishesPanelTitle & PublishesDisabledActionIds & HasCustomPrepend> &
+  CanClearSelections &
   HasType &
   HasUniqueId &
   HasSerializableState &
@@ -90,7 +90,7 @@ export type ControlStateManager<State extends object = object> = {
 
 export interface ControlPanelProps<
   ApiType extends DefaultControlApi = DefaultControlApi,
-  PropsType extends {} = { css: SerializedStyles }
+  PropsType extends {} = { className: string }
 > {
   Component: PanelCompatibleComponent<ApiType, PropsType>;
 }
