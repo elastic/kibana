@@ -306,7 +306,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
 
-  async completeCrowdstrikeAction(
+  private async completeCrowdstrikeAction(
     actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined,
     doc: LogsEndpointAction
   ): Promise<void> {
@@ -327,7 +327,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     if (actionResponse?.data?.errors?.length) {
       document.error = {
         code: '500',
-        message: 'Failed to contain a host',
+        message: 'Crowdstrike action failed',
       };
     }
 
