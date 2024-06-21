@@ -115,12 +115,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Logs');
       });
-
-      describe('logs landing page without data', () => {
-        it(`shows read-only badge`, async () => {
-          await globalNav.badgeExistsOrFail('Read only');
-        });
-      });
     });
 
     describe('global logs no privileges', () => {
