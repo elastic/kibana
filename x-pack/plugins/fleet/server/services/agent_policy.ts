@@ -1037,7 +1037,7 @@ class AgentPolicyService {
       spaceId: soClient.getCurrentNamespace(),
     });
 
-    // cleanup .fleet-policies docs on delete //TODO: check if needs to be modified
+    // cleanup .fleet-policies docs on delete
     await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
 
     logger.debug(`Deleted agent policy ${id}`);
