@@ -7,18 +7,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddableApiContext, apiHasType, type HasType } from '@kbn/presentation-publishing';
+import { EmbeddableApiContext, HasType } from '@kbn/presentation-publishing';
 import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { DASHBOARD_APP_ID } from '../dashboard_constants';
-import { pluginServices } from '../services/plugin_services';
+import { apiHasType } from '@kbn/presentation-publishing';
+import { apiCanAddNewPanel, CanAddNewPanel } from '@kbn/presentation-containers';
+import { showNewVisModal } from '../wizard/show_new_vis';
 
 const ADD_AGG_VIS_ACTION_ID = 'ADD_AGG_VIS';
 
-type AddAggVisualizationPanelActionApi = HasType;
+type AddAggVisualizationPanelActionApi = HasType & CanAddNewPanel;
 
 const isApiCompatible = (api: unknown | null): api is AddAggVisualizationPanelActionApi => {
-  return apiHasType(api) && api.type === 'dashboard';
+  return apiHasType(api) && apiCanAddNewPanel(api);
 };
 
 export class AddAggVisualizationPanelAction implements Action<EmbeddableApiContext> {
@@ -28,13 +29,7 @@ export class AddAggVisualizationPanelAction implements Action<EmbeddableApiConte
 
   public readonly order = 20;
 
-  private showNewVisModal;
-
-  constructor() {
-    ({
-      visualizations: { showNewVisModal: this.showNewVisModal },
-    } = pluginServices.getServices());
-  }
+  constructor() {}
 
   public getIconType() {
     return 'visualizeApp';
@@ -50,18 +45,15 @@ export class AddAggVisualizationPanelAction implements Action<EmbeddableApiConte
     return isApiCompatible(embeddable);
   }
 
-  public execute({ embeddable }: EmbeddableApiContext): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (!isApiCompatible(embeddable)) {
-        return reject(new IncompatibleActionError());
-      }
+  public async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
+    if (!isApiCompatible(embeddable)) {
+      throw new IncompatibleActionError();
+    }
 
-      this.showNewVisModal({
-        originatingApp: DASHBOARD_APP_ID,
-        outsideVisualizeApp: true,
-        showAggsSelection: true,
-        onClose: resolve,
-      });
+    showNewVisModal({
+      originatingApp: embeddable.type,
+      outsideVisualizeApp: true,
+      showAggsSelection: true,
     });
   }
 }

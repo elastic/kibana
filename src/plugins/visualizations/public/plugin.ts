@@ -36,7 +36,7 @@ import type {
   ApplicationStart,
   SavedObjectsClientContract,
 } from '@kbn/core/public';
-import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { UiActionsStart, UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
@@ -47,7 +47,11 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddableSetup,
+  EmbeddableStart,
+} from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -122,6 +126,7 @@ import {
 } from '../common/content_management';
 import { SerializedVisData } from '../common';
 import { VisualizeByValueInput } from './embeddable/visualize_embeddable';
+import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -394,7 +399,9 @@ export class VisualizationsPlugin
     uiActions.registerTrigger(visualizeEditorTrigger);
     uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
-    uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editInLensAction);
+    const addAggVisAction = new AddAggVisualizationPanelAction();
+    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAggVisAction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 

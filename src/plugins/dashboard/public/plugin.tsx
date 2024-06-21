@@ -170,10 +170,6 @@ export class DashboardPlugin
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
 
-    // this trigger enables external consumers to register actions for
-    // adding items to the add panel menu
-    uiActions.registerTrigger(addPanelMenuTrigger);
-
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
       schema: {},

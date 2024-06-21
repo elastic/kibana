@@ -8,8 +8,6 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-
 import { DashboardStartDependencies } from '../plugin';
 import { AddToLibraryAction } from './add_to_library_action';
 import { LegacyAddToLibraryAction } from './legacy_add_to_library_action';
@@ -22,7 +20,6 @@ import { LegacyLibraryNotificationAction } from './legacy_library_notification_a
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { LegacyUnlinkFromLibraryAction } from './legacy_unlink_from_library_action';
 import { LibraryNotificationAction } from './library_notification_action';
-import { AddAggVisualizationPanelAction } from './add_agg_vis_action';
 
 interface BuildAllDashboardActionsProps {
   core: CoreStart;
@@ -47,10 +44,6 @@ export const buildAllDashboardActions = async ({
   const panelLevelFiltersNotificationAction = new FiltersNotificationAction();
   uiActions.registerAction(panelLevelFiltersNotificationAction);
   uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, panelLevelFiltersNotificationAction.id);
-
-  const addAggVisualizationPanelAction = new AddAggVisualizationPanelAction();
-  uiActions.registerAction(addAggVisualizationPanelAction);
-  uiActions.attachAction(ADD_PANEL_TRIGGER, addAggVisualizationPanelAction.id);
 
   if (share) {
     const ExportCSVPlugin = new ExportCSVAction();
