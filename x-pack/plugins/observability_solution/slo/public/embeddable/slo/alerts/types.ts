@@ -24,6 +24,7 @@ import {
   PublishesWritablePanelTitle,
   PublishesPanelTitle,
   EmbeddableApiContext,
+  HasEditCapabilities,
 } from '@kbn/presentation-publishing';
 
 export interface SloItem {
@@ -45,7 +46,8 @@ export type SloAlertsEmbeddableState = SerializedTitles & EmbeddableSloProps;
 export type SloAlertsApi = DefaultEmbeddableApi<SloAlertsEmbeddableState> &
   PublishesWritablePanelTitle &
   PublishesPanelTitle &
-  HasSloAlertsConfig;
+  HasSloAlertsConfig &
+  HasEditCapabilities;
 
 export interface HasSloAlertsConfig {
   getSloAlertsConfig: () => EmbeddableSloProps;
