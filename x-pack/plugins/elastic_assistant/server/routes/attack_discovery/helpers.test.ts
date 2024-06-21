@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { AuthenticatedUser } from '@kbn/core-security-common';
 import moment from 'moment';
 import {
@@ -30,6 +31,12 @@ import {
 import { coreMock } from '@kbn/core/server/mocks';
 import { transformESSearchToAttackDiscovery } from '../../ai_assistant_data_clients/attack_discovery/transforms';
 import { getAttackDiscoverySearchEsMock } from '../../__mocks__/attack_discovery_schema.mock';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+
+import {
+  getAnonymizationFieldMock,
+  getUpdateAnonymizationFieldSchemaMock,
+} from '../../__mocks__/anonymization_fields_schema.mock';
 
 jest.mock('lodash/fp', () => ({
   uniq: jest.fn((arr) => Array.from(new Set(arr))),
@@ -61,6 +68,7 @@ const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();
 const mockTelemetry = coreMock.createSetup().analytics;
 const mockError = new Error('Test error');
+
 const mockAuthenticatedUser = {
   username: 'user',
   profile_uid: '1234',
@@ -69,13 +77,25 @@ const mockAuthenticatedUser = {
     name: 'my_realm_name',
   },
 } as AuthenticatedUser;
+
 const mockApiConfig = {
   connectorId: 'connector-id',
   actionTypeId: '.bedrock',
   model: 'model',
   provider: OpenAiProviderType.OpenAi,
 };
+
 const mockCurrentAd = transformESSearchToAttackDiscovery(getAttackDiscoverySearchEsMock())[0];
+
+const mockActions: ActionsPluginStart = {} as ActionsPluginStart;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockRequest: KibanaRequest<unknown, unknown, any, any> = {} as unknown as KibanaRequest<
+  unknown,
+  unknown,
+  any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  any // eslint-disable-line @typescript-eslint/no-explicit-any
+>;
+
 describe('helpers', () => {
   const date = '2024-03-28T22:27:28.000Z';
   beforeAll(() => {
@@ -92,6 +112,22 @@ describe('helpers', () => {
     updateAttackDiscovery.mockResolvedValue({});
   });
   describe('getAssistantToolParams', () => {
+    const alertsIndexPattern = '.alerts-security.alerts-default';
+    const esClient = elasticsearchClientMock.createElasticsearchClient();
+    const langChainTimeout = 1000;
+    const latestReplacements = {};
+    const llm = new ActionsClientLlm({
+      actions: mockActions,
+      connectorId: 'test-connecter-id',
+      llmType: 'bedrock',
+      logger: mockLogger,
+      request: mockRequest,
+      temperature: 0,
+      timeout: 580000,
+    });
+    const onNewReplacements = jest.fn();
+    const size = 20;
+
     const mockParams = {
       actions: {} as unknown as ActionsPluginStart,
       alertsIndexPattern: 'alerts-*',
@@ -127,364 +163,439 @@ describe('helpers', () => {
         ...REQUIRED_FOR_ATTACK_DISCOVERY,
       ]);
     });
-  });
 
-  describe('addGenerationInterval', () => {
-    const generationInterval = { date: '2024-01-01T00:00:00Z', durationMs: 1000 };
-    const existingIntervals = [
-      { date: '2024-01-02T00:00:00Z', durationMs: 2000 },
-      { date: '2024-01-03T00:00:00Z', durationMs: 3000 },
-    ];
+    it('returns the expected AssistantToolParams when anonymizationFields are provided', () => {
+      const anonymizationFields = [
+        getAnonymizationFieldMock(getUpdateAnonymizationFieldSchemaMock()),
+      ];
 
-    it('should add new interval and maintain length within MAX_GENERATION_INTERVALS', () => {
-      const result = addGenerationInterval(existingIntervals, generationInterval);
-      expect(result.length).toBeLessThanOrEqual(5);
-      expect(result).toContain(generationInterval);
+      const result = getAssistantToolParams({
+        actions: mockParams.actions,
+        alertsIndexPattern,
+        apiConfig: mockApiConfig,
+        anonymizationFields,
+        connectorTimeout: 1000,
+        latestReplacements,
+        esClient,
+        langChainTimeout,
+        logger: mockLogger,
+        onNewReplacements,
+        request: mockRequest,
+        size,
+      });
+
+      expect(result).toEqual({
+        alertsIndexPattern,
+        anonymizationFields: [...anonymizationFields, ...REQUIRED_FOR_ATTACK_DISCOVERY],
+        isEnabledKnowledgeBase: false,
+        chain: undefined,
+        esClient,
+        langChainTimeout,
+        llm,
+        logger: mockLogger,
+        modelExists: false,
+        onNewReplacements,
+        replacements: latestReplacements,
+        request: mockRequest,
+        size,
+      });
     });
 
-    it('should remove the oldest interval if exceeding MAX_GENERATION_INTERVALS', () => {
-      const longExistingIntervals = [...Array(5)].map((_, i) => ({
-        date: `2024-01-0${i + 2}T00:00:00Z`,
-        durationMs: (i + 2) * 1000,
-      }));
-      const result = addGenerationInterval(longExistingIntervals, generationInterval);
-      expect(result.length).toBe(5);
-      expect(result).not.toContain(longExistingIntervals[4]);
-    });
-  });
+    it('returns the expected AssistantToolParams when anonymizationFields is undefined', () => {
+      const anonymizationFields = undefined;
 
-  describe('updateAttackDiscoveryStatusToRunning', () => {
-    it('should update existing attack discovery to running', async () => {
-      const existingAd = { id: 'existing-id', backingIndex: 'index' };
-      findAttackDiscoveryByConnectorId.mockResolvedValue(existingAd);
-      updateAttackDiscovery.mockResolvedValue(existingAd);
-
-      const result = await updateAttackDiscoveryStatusToRunning(
-        mockDataClient,
-        mockAuthenticatedUser,
-        mockApiConfig
-      );
-
-      expect(findAttackDiscoveryByConnectorId).toHaveBeenCalledWith({
-        connectorId: mockApiConfig.connectorId,
-        authenticatedUser: mockAuthenticatedUser,
+      const result = getAssistantToolParams({
+        actions: mockParams.actions,
+        alertsIndexPattern,
+        apiConfig: mockApiConfig,
+        anonymizationFields,
+        connectorTimeout: 1000,
+        latestReplacements,
+        esClient,
+        langChainTimeout,
+        logger: mockLogger,
+        onNewReplacements,
+        request: mockRequest,
+        size,
       });
-      expect(updateAttackDiscovery).toHaveBeenCalledWith({
-        attackDiscoveryUpdateProps: expect.objectContaining({
-          status: attackDiscoveryStatus.running,
-        }),
-        authenticatedUser: mockAuthenticatedUser,
+
+      expect(result).toEqual({
+        alertsIndexPattern,
+        anonymizationFields: [...REQUIRED_FOR_ATTACK_DISCOVERY],
+        isEnabledKnowledgeBase: false,
+        chain: undefined,
+        esClient,
+        langChainTimeout,
+        llm,
+        logger: mockLogger,
+        modelExists: false,
+        onNewReplacements,
+        replacements: latestReplacements,
+        request: mockRequest,
+        size,
       });
-      expect(result).toEqual({ attackDiscoveryId: existingAd.id, currentAd: existingAd });
-    });
-
-    it('should create a new attack discovery if none exists', async () => {
-      const newAd = { id: 'new-id', backingIndex: 'index' };
-      findAttackDiscoveryByConnectorId.mockResolvedValue(null);
-      createAttackDiscovery.mockResolvedValue(newAd);
-
-      const result = await updateAttackDiscoveryStatusToRunning(
-        mockDataClient,
-        mockAuthenticatedUser,
-        mockApiConfig
-      );
-
-      expect(createAttackDiscovery).toHaveBeenCalledWith({
-        attackDiscoveryCreate: expect.objectContaining({
-          status: attackDiscoveryStatus.running,
-        }),
-        authenticatedUser: mockAuthenticatedUser,
-      });
-      expect(result).toEqual({ attackDiscoveryId: newAd.id, currentAd: newAd });
     });
 
-    it('should throw an error if updating or creating attack discovery fails', async () => {
-      findAttackDiscoveryByConnectorId.mockResolvedValue(null);
-      createAttackDiscovery.mockResolvedValue(null);
+    describe('addGenerationInterval', () => {
+      const generationInterval = { date: '2024-01-01T00:00:00Z', durationMs: 1000 };
+      const existingIntervals = [
+        { date: '2024-01-02T00:00:00Z', durationMs: 2000 },
+        { date: '2024-01-03T00:00:00Z', durationMs: 3000 },
+      ];
 
-      await expect(
-        updateAttackDiscoveryStatusToRunning(mockDataClient, mockAuthenticatedUser, mockApiConfig)
-      ).rejects.toThrow('Could not create attack discovery for connectorId: connector-id');
-    });
-  });
-
-  describe('updateAttackDiscoveryStatusToCanceled', () => {
-    const existingAd = {
-      id: 'existing-id',
-      backingIndex: 'index',
-      status: attackDiscoveryStatus.running,
-    };
-    it('should update existing attack discovery to canceled', async () => {
-      findAttackDiscoveryByConnectorId.mockResolvedValue(existingAd);
-      updateAttackDiscovery.mockResolvedValue(existingAd);
-
-      const result = await updateAttackDiscoveryStatusToCanceled(
-        mockDataClient,
-        mockAuthenticatedUser,
-        mockApiConfig.connectorId
-      );
-
-      expect(findAttackDiscoveryByConnectorId).toHaveBeenCalledWith({
-        connectorId: mockApiConfig.connectorId,
-        authenticatedUser: mockAuthenticatedUser,
+      it('should add new interval and maintain length within MAX_GENERATION_INTERVALS', () => {
+        const result = addGenerationInterval(existingIntervals, generationInterval);
+        expect(result.length).toBeLessThanOrEqual(5);
+        expect(result).toContain(generationInterval);
       });
-      expect(updateAttackDiscovery).toHaveBeenCalledWith({
-        attackDiscoveryUpdateProps: expect.objectContaining({
-          status: attackDiscoveryStatus.canceled,
-        }),
-        authenticatedUser: mockAuthenticatedUser,
+
+      it('should remove the oldest interval if exceeding MAX_GENERATION_INTERVALS', () => {
+        const longExistingIntervals = [...Array(5)].map((_, i) => ({
+          date: `2024-01-0${i + 2}T00:00:00Z`,
+          durationMs: (i + 2) * 1000,
+        }));
+        const result = addGenerationInterval(longExistingIntervals, generationInterval);
+        expect(result.length).toBe(5);
+        expect(result).not.toContain(longExistingIntervals[4]);
       });
-      expect(result).toEqual(existingAd);
     });
 
-    it('should throw an error if attack discovery is not running', async () => {
-      findAttackDiscoveryByConnectorId.mockResolvedValue({
-        ...existingAd,
-        status: attackDiscoveryStatus.succeeded,
+    describe('updateAttackDiscoveryStatusToRunning', () => {
+      it('should update existing attack discovery to running', async () => {
+        const existingAd = { id: 'existing-id', backingIndex: 'index' };
+        findAttackDiscoveryByConnectorId.mockResolvedValue(existingAd);
+        updateAttackDiscovery.mockResolvedValue(existingAd);
+
+        const result = await updateAttackDiscoveryStatusToRunning(
+          mockDataClient,
+          mockAuthenticatedUser,
+          mockApiConfig
+        );
+
+        expect(findAttackDiscoveryByConnectorId).toHaveBeenCalledWith({
+          connectorId: mockApiConfig.connectorId,
+          authenticatedUser: mockAuthenticatedUser,
+        });
+        expect(updateAttackDiscovery).toHaveBeenCalledWith({
+          attackDiscoveryUpdateProps: expect.objectContaining({
+            status: attackDiscoveryStatus.running,
+          }),
+          authenticatedUser: mockAuthenticatedUser,
+        });
+        expect(result).toEqual({ attackDiscoveryId: existingAd.id, currentAd: existingAd });
       });
-      await expect(
-        updateAttackDiscoveryStatusToCanceled(
+
+      it('should create a new attack discovery if none exists', async () => {
+        const newAd = { id: 'new-id', backingIndex: 'index' };
+        findAttackDiscoveryByConnectorId.mockResolvedValue(null);
+        createAttackDiscovery.mockResolvedValue(newAd);
+
+        const result = await updateAttackDiscoveryStatusToRunning(
+          mockDataClient,
+          mockAuthenticatedUser,
+          mockApiConfig
+        );
+
+        expect(createAttackDiscovery).toHaveBeenCalledWith({
+          attackDiscoveryCreate: expect.objectContaining({
+            status: attackDiscoveryStatus.running,
+          }),
+          authenticatedUser: mockAuthenticatedUser,
+        });
+        expect(result).toEqual({ attackDiscoveryId: newAd.id, currentAd: newAd });
+      });
+
+      it('should throw an error if updating or creating attack discovery fails', async () => {
+        findAttackDiscoveryByConnectorId.mockResolvedValue(null);
+        createAttackDiscovery.mockResolvedValue(null);
+
+        await expect(
+          updateAttackDiscoveryStatusToRunning(mockDataClient, mockAuthenticatedUser, mockApiConfig)
+        ).rejects.toThrow('Could not create attack discovery for connectorId: connector-id');
+      });
+    });
+
+    describe('updateAttackDiscoveryStatusToCanceled', () => {
+      const existingAd = {
+        id: 'existing-id',
+        backingIndex: 'index',
+        status: attackDiscoveryStatus.running,
+      };
+      it('should update existing attack discovery to canceled', async () => {
+        findAttackDiscoveryByConnectorId.mockResolvedValue(existingAd);
+        updateAttackDiscovery.mockResolvedValue(existingAd);
+
+        const result = await updateAttackDiscoveryStatusToCanceled(
           mockDataClient,
           mockAuthenticatedUser,
           mockApiConfig.connectorId
-        )
-      ).rejects.toThrow(
-        'Connector id connector-id does not have a running attack discovery, and therefore cannot be canceled.'
-      );
-    });
+        );
 
-    it('should throw an error if attack discovery does not exist', async () => {
-      findAttackDiscoveryByConnectorId.mockResolvedValue(null);
-      await expect(
-        updateAttackDiscoveryStatusToCanceled(
-          mockDataClient,
-          mockAuthenticatedUser,
-          mockApiConfig.connectorId
-        )
-      ).rejects.toThrow('Could not find attack discovery for connector id: connector-id');
-    });
-    it('should throw error if updateAttackDiscovery returns null', async () => {
-      findAttackDiscoveryByConnectorId.mockResolvedValue(existingAd);
-      updateAttackDiscovery.mockResolvedValue(null);
+        expect(findAttackDiscoveryByConnectorId).toHaveBeenCalledWith({
+          connectorId: mockApiConfig.connectorId,
+          authenticatedUser: mockAuthenticatedUser,
+        });
+        expect(updateAttackDiscovery).toHaveBeenCalledWith({
+          attackDiscoveryUpdateProps: expect.objectContaining({
+            status: attackDiscoveryStatus.canceled,
+          }),
+          authenticatedUser: mockAuthenticatedUser,
+        });
+        expect(result).toEqual(existingAd);
+      });
 
-      await expect(
-        updateAttackDiscoveryStatusToCanceled(
-          mockDataClient,
-          mockAuthenticatedUser,
-          mockApiConfig.connectorId
-        )
-      ).rejects.toThrow('Could not update attack discovery for connector id: connector-id');
-    });
-  });
-
-  describe('updateAttackDiscoveries', () => {
-    const mockAttackDiscoveryId = 'attack-discovery-id';
-    const mockLatestReplacements = {};
-    const mockRawAttackDiscoveries = JSON.stringify({
-      alertsContextCount: 5,
-      attackDiscoveries: [{ alertIds: ['alert-1', 'alert-2'] }, { alertIds: ['alert-3'] }],
-    });
-    const mockSize = 10;
-    const mockStartTime = moment('2024-03-28T22:25:28.000Z');
-
-    const mockArgs = {
-      apiConfig: mockApiConfig,
-      attackDiscoveryId: mockAttackDiscoveryId,
-      authenticatedUser: mockAuthenticatedUser,
-      dataClient: mockDataClient,
-      latestReplacements: mockLatestReplacements,
-      logger: mockLogger,
-      rawAttackDiscoveries: mockRawAttackDiscoveries,
-      size: mockSize,
-      startTime: mockStartTime,
-      telemetry: mockTelemetry,
-    };
-
-    it('should update attack discoveries and report success telemetry', async () => {
-      await updateAttackDiscoveries(mockArgs);
-
-      expect(updateAttackDiscovery).toHaveBeenCalledWith({
-        attackDiscoveryUpdateProps: {
-          alertsContextCount: 5,
-          attackDiscoveries: [{ alertIds: ['alert-1', 'alert-2'] }, { alertIds: ['alert-3'] }],
+      it('should throw an error if attack discovery is not running', async () => {
+        findAttackDiscoveryByConnectorId.mockResolvedValue({
+          ...existingAd,
           status: attackDiscoveryStatus.succeeded,
-          id: mockAttackDiscoveryId,
-          replacements: mockLatestReplacements,
-          backingIndex: mockCurrentAd.backingIndex,
-          generationIntervals: [{ date, durationMs: 120000 }, ...mockCurrentAd.generationIntervals],
-        },
-        authenticatedUser: mockAuthenticatedUser,
+        });
+        await expect(
+          updateAttackDiscoveryStatusToCanceled(
+            mockDataClient,
+            mockAuthenticatedUser,
+            mockApiConfig.connectorId
+          )
+        ).rejects.toThrow(
+          'Connector id connector-id does not have a running attack discovery, and therefore cannot be canceled.'
+        );
       });
 
-      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
-        actionTypeId: mockApiConfig.actionTypeId,
-        alertsContextCount: 5,
-        alertsCount: 3,
-        configuredAlertsCount: mockSize,
-        discoveriesGenerated: 2,
-        durationMs: 120000,
-        model: mockApiConfig.model,
-        provider: mockApiConfig.provider,
+      it('should throw an error if attack discovery does not exist', async () => {
+        findAttackDiscoveryByConnectorId.mockResolvedValue(null);
+        await expect(
+          updateAttackDiscoveryStatusToCanceled(
+            mockDataClient,
+            mockAuthenticatedUser,
+            mockApiConfig.connectorId
+          )
+        ).rejects.toThrow('Could not find attack discovery for connector id: connector-id');
+      });
+      it('should throw error if updateAttackDiscovery returns null', async () => {
+        findAttackDiscoveryByConnectorId.mockResolvedValue(existingAd);
+        updateAttackDiscovery.mockResolvedValue(null);
+
+        await expect(
+          updateAttackDiscoveryStatusToCanceled(
+            mockDataClient,
+            mockAuthenticatedUser,
+            mockApiConfig.connectorId
+          )
+        ).rejects.toThrow('Could not update attack discovery for connector id: connector-id');
       });
     });
 
-    it('should update attack discoveries without generation interval if no discoveries are found', async () => {
-      const noDiscoveriesRaw = JSON.stringify({
-        alertsContextCount: 0,
-        attackDiscoveries: [],
+    describe('updateAttackDiscoveries', () => {
+      const mockAttackDiscoveryId = 'attack-discovery-id';
+      const mockLatestReplacements = {};
+      const mockRawAttackDiscoveries = JSON.stringify({
+        alertsContextCount: 5,
+        attackDiscoveries: [{ alertIds: ['alert-1', 'alert-2'] }, { alertIds: ['alert-3'] }],
+      });
+      const mockSize = 10;
+      const mockStartTime = moment('2024-03-28T22:25:28.000Z');
+
+      const mockArgs = {
+        apiConfig: mockApiConfig,
+        attackDiscoveryId: mockAttackDiscoveryId,
+        authenticatedUser: mockAuthenticatedUser,
+        dataClient: mockDataClient,
+        latestReplacements: mockLatestReplacements,
+        logger: mockLogger,
+        rawAttackDiscoveries: mockRawAttackDiscoveries,
+        size: mockSize,
+        startTime: mockStartTime,
+        telemetry: mockTelemetry,
+      };
+
+      it('should update attack discoveries and report success telemetry', async () => {
+        await updateAttackDiscoveries(mockArgs);
+
+        expect(updateAttackDiscovery).toHaveBeenCalledWith({
+          attackDiscoveryUpdateProps: {
+            alertsContextCount: 5,
+            attackDiscoveries: [{ alertIds: ['alert-1', 'alert-2'] }, { alertIds: ['alert-3'] }],
+            status: attackDiscoveryStatus.succeeded,
+            id: mockAttackDiscoveryId,
+            replacements: mockLatestReplacements,
+            backingIndex: mockCurrentAd.backingIndex,
+            generationIntervals: [
+              { date, durationMs: 120000 },
+              ...mockCurrentAd.generationIntervals,
+            ],
+          },
+          authenticatedUser: mockAuthenticatedUser,
+        });
+
+        expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
+          actionTypeId: mockApiConfig.actionTypeId,
+          alertsContextCount: 5,
+          alertsCount: 3,
+          configuredAlertsCount: mockSize,
+          discoveriesGenerated: 2,
+          durationMs: 120000,
+          model: mockApiConfig.model,
+          provider: mockApiConfig.provider,
+        });
       });
 
-      await updateAttackDiscoveries({
-        ...mockArgs,
-        rawAttackDiscoveries: noDiscoveriesRaw,
-      });
-
-      expect(updateAttackDiscovery).toHaveBeenCalledWith({
-        attackDiscoveryUpdateProps: {
+      it('should update attack discoveries without generation interval if no discoveries are found', async () => {
+        const noDiscoveriesRaw = JSON.stringify({
           alertsContextCount: 0,
           attackDiscoveries: [],
-          status: attackDiscoveryStatus.succeeded,
-          id: mockAttackDiscoveryId,
-          replacements: mockLatestReplacements,
-          backingIndex: mockCurrentAd.backingIndex,
-        },
+        });
+
+        await updateAttackDiscoveries({
+          ...mockArgs,
+          rawAttackDiscoveries: noDiscoveriesRaw,
+        });
+
+        expect(updateAttackDiscovery).toHaveBeenCalledWith({
+          attackDiscoveryUpdateProps: {
+            alertsContextCount: 0,
+            attackDiscoveries: [],
+            status: attackDiscoveryStatus.succeeded,
+            id: mockAttackDiscoveryId,
+            replacements: mockLatestReplacements,
+            backingIndex: mockCurrentAd.backingIndex,
+          },
+          authenticatedUser: mockAuthenticatedUser,
+        });
+
+        expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
+          actionTypeId: mockApiConfig.actionTypeId,
+          alertsContextCount: 0,
+          alertsCount: 0,
+          configuredAlertsCount: mockSize,
+          discoveriesGenerated: 0,
+          durationMs: 120000,
+          model: mockApiConfig.model,
+          provider: mockApiConfig.provider,
+        });
+      });
+
+      it('should catch and log an error if raw attack discoveries is null', async () => {
+        await updateAttackDiscoveries({
+          ...mockArgs,
+          rawAttackDiscoveries: null,
+        });
+        expect(mockLogger.error).toHaveBeenCalledTimes(1);
+        expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
+          actionTypeId: mockArgs.apiConfig.actionTypeId,
+          errorMessage: 'tool returned no attack discoveries',
+          model: mockArgs.apiConfig.model,
+          provider: mockArgs.apiConfig.provider,
+        });
+      });
+
+      it('should return and not call updateAttackDiscovery when getAttackDiscovery returns a canceled response', async () => {
+        getAttackDiscovery.mockResolvedValue({
+          ...mockCurrentAd,
+          status: attackDiscoveryStatus.canceled,
+        });
+        await updateAttackDiscoveries(mockArgs);
+
+        expect(mockLogger.error).not.toHaveBeenCalled();
+        expect(updateAttackDiscovery).not.toHaveBeenCalled();
+      });
+
+      it('should log the error and report telemetry when getAttackDiscovery rejects', async () => {
+        getAttackDiscovery.mockRejectedValue(mockError);
+        await updateAttackDiscoveries(mockArgs);
+
+        expect(mockLogger.error).toHaveBeenCalledWith(mockError);
+        expect(updateAttackDiscovery).not.toHaveBeenCalled();
+        expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
+          actionTypeId: mockArgs.apiConfig.actionTypeId,
+          errorMessage: mockError.message,
+          model: mockArgs.apiConfig.model,
+          provider: mockArgs.apiConfig.provider,
+        });
+      });
+    });
+
+    describe('handleToolError', () => {
+      const mockArgs = {
+        apiConfig: mockApiConfig,
+        attackDiscoveryId: 'discovery-id',
         authenticatedUser: mockAuthenticatedUser,
+        backingIndex: 'backing-index',
+        dataClient: mockDataClient,
+        err: mockError,
+        latestReplacements: {},
+        logger: mockLogger,
+        telemetry: mockTelemetry,
+      };
+
+      it('should log the error and update attack discovery status to failed', async () => {
+        await handleToolError(mockArgs);
+
+        expect(mockLogger.error).toHaveBeenCalledWith(mockError);
+        expect(updateAttackDiscovery).toHaveBeenCalledWith({
+          attackDiscoveryUpdateProps: {
+            status: attackDiscoveryStatus.failed,
+            attackDiscoveries: [],
+            backingIndex: 'foo',
+            failureReason: 'Test error',
+            id: 'discovery-id',
+            replacements: {},
+          },
+          authenticatedUser: mockArgs.authenticatedUser,
+        });
+        expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
+          actionTypeId: mockArgs.apiConfig.actionTypeId,
+          errorMessage: mockError.message,
+          model: mockArgs.apiConfig.model,
+          provider: mockArgs.apiConfig.provider,
+        });
       });
 
-      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
-        actionTypeId: mockApiConfig.actionTypeId,
-        alertsContextCount: 0,
-        alertsCount: 0,
-        configuredAlertsCount: mockSize,
-        discoveriesGenerated: 0,
-        durationMs: 120000,
-        model: mockApiConfig.model,
-        provider: mockApiConfig.provider,
+      it('should log the error and report telemetry when updateAttackDiscovery rejects', async () => {
+        updateAttackDiscovery.mockRejectedValue(mockError);
+        await handleToolError(mockArgs);
+
+        expect(mockLogger.error).toHaveBeenCalledWith(mockError);
+        expect(updateAttackDiscovery).toHaveBeenCalledWith({
+          attackDiscoveryUpdateProps: {
+            status: attackDiscoveryStatus.failed,
+            attackDiscoveries: [],
+            backingIndex: 'foo',
+            failureReason: 'Test error',
+            id: 'discovery-id',
+            replacements: {},
+          },
+          authenticatedUser: mockArgs.authenticatedUser,
+        });
+        expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
+          actionTypeId: mockArgs.apiConfig.actionTypeId,
+          errorMessage: mockError.message,
+          model: mockArgs.apiConfig.model,
+          provider: mockArgs.apiConfig.provider,
+        });
       });
-    });
 
-    it('should catch and log an error if raw attack discoveries is null', async () => {
-      await updateAttackDiscoveries({
-        ...mockArgs,
-        rawAttackDiscoveries: null,
+      it('should return and not call updateAttackDiscovery when getAttackDiscovery returns a canceled response', async () => {
+        getAttackDiscovery.mockResolvedValue({
+          ...mockCurrentAd,
+          status: attackDiscoveryStatus.canceled,
+        });
+        await handleToolError(mockArgs);
+
+        expect(mockTelemetry.reportEvent).not.toHaveBeenCalled();
+        expect(updateAttackDiscovery).not.toHaveBeenCalled();
       });
-      expect(mockLogger.error).toHaveBeenCalledTimes(1);
-      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
-        actionTypeId: mockArgs.apiConfig.actionTypeId,
-        errorMessage: 'tool returned no attack discoveries',
-        model: mockArgs.apiConfig.model,
-        provider: mockArgs.apiConfig.provider,
-      });
-    });
 
-    it('should return and not call updateAttackDiscovery when getAttackDiscovery returns a canceled response', async () => {
-      getAttackDiscovery.mockResolvedValue({
-        ...mockCurrentAd,
-        status: attackDiscoveryStatus.canceled,
-      });
-      await updateAttackDiscoveries(mockArgs);
+      it('should log the error and report telemetry when getAttackDiscovery rejects', async () => {
+        getAttackDiscovery.mockRejectedValue(mockError);
+        await handleToolError(mockArgs);
 
-      expect(mockLogger.error).not.toHaveBeenCalled();
-      expect(updateAttackDiscovery).not.toHaveBeenCalled();
-    });
-
-    it('should log the error and report telemetry when getAttackDiscovery rejects', async () => {
-      getAttackDiscovery.mockRejectedValue(mockError);
-      await updateAttackDiscoveries(mockArgs);
-
-      expect(mockLogger.error).toHaveBeenCalledWith(mockError);
-      expect(updateAttackDiscovery).not.toHaveBeenCalled();
-      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
-        actionTypeId: mockArgs.apiConfig.actionTypeId,
-        errorMessage: mockError.message,
-        model: mockArgs.apiConfig.model,
-        provider: mockArgs.apiConfig.provider,
-      });
-    });
-  });
-
-  describe('handleToolError', () => {
-    const mockArgs = {
-      apiConfig: mockApiConfig,
-      attackDiscoveryId: 'discovery-id',
-      authenticatedUser: mockAuthenticatedUser,
-      backingIndex: 'backing-index',
-      dataClient: mockDataClient,
-      err: mockError,
-      latestReplacements: {},
-      logger: mockLogger,
-      telemetry: mockTelemetry,
-    };
-
-    it('should log the error and update attack discovery status to failed', async () => {
-      await handleToolError(mockArgs);
-
-      expect(mockLogger.error).toHaveBeenCalledWith(mockError);
-      expect(updateAttackDiscovery).toHaveBeenCalledWith({
-        attackDiscoveryUpdateProps: {
-          status: attackDiscoveryStatus.failed,
-          attackDiscoveries: [],
-          backingIndex: 'foo',
-          failureReason: 'Test error',
-          id: 'discovery-id',
-          replacements: {},
-        },
-        authenticatedUser: mockArgs.authenticatedUser,
-      });
-      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
-        actionTypeId: mockArgs.apiConfig.actionTypeId,
-        errorMessage: mockError.message,
-        model: mockArgs.apiConfig.model,
-        provider: mockArgs.apiConfig.provider,
-      });
-    });
-
-    it('should log the error and report telemetry when updateAttackDiscovery rejects', async () => {
-      updateAttackDiscovery.mockRejectedValue(mockError);
-      await handleToolError(mockArgs);
-
-      expect(mockLogger.error).toHaveBeenCalledWith(mockError);
-      expect(updateAttackDiscovery).toHaveBeenCalledWith({
-        attackDiscoveryUpdateProps: {
-          status: attackDiscoveryStatus.failed,
-          attackDiscoveries: [],
-          backingIndex: 'foo',
-          failureReason: 'Test error',
-          id: 'discovery-id',
-          replacements: {},
-        },
-        authenticatedUser: mockArgs.authenticatedUser,
-      });
-      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
-        actionTypeId: mockArgs.apiConfig.actionTypeId,
-        errorMessage: mockError.message,
-        model: mockArgs.apiConfig.model,
-        provider: mockArgs.apiConfig.provider,
-      });
-    });
-
-    it('should return and not call updateAttackDiscovery when getAttackDiscovery returns a canceled response', async () => {
-      getAttackDiscovery.mockResolvedValue({
-        ...mockCurrentAd,
-        status: attackDiscoveryStatus.canceled,
-      });
-      await handleToolError(mockArgs);
-
-      expect(mockTelemetry.reportEvent).not.toHaveBeenCalled();
-      expect(updateAttackDiscovery).not.toHaveBeenCalled();
-    });
-
-    it('should log the error and report telemetry when getAttackDiscovery rejects', async () => {
-      getAttackDiscovery.mockRejectedValue(mockError);
-      await handleToolError(mockArgs);
-
-      expect(mockLogger.error).toHaveBeenCalledWith(mockError);
-      expect(updateAttackDiscovery).not.toHaveBeenCalled();
-      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
-        actionTypeId: mockArgs.apiConfig.actionTypeId,
-        errorMessage: mockError.message,
-        model: mockArgs.apiConfig.model,
-        provider: mockArgs.apiConfig.provider,
+        expect(mockLogger.error).toHaveBeenCalledWith(mockError);
+        expect(updateAttackDiscovery).not.toHaveBeenCalled();
+        expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
+          actionTypeId: mockArgs.apiConfig.actionTypeId,
+          errorMessage: mockError.message,
+          model: mockArgs.apiConfig.model,
+          provider: mockArgs.apiConfig.provider,
+        });
       });
     });
   });
