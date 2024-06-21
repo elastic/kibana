@@ -31,6 +31,7 @@ interface Props {
   handleSave: () => void;
   onCancelClick: () => void;
 }
+
 const QuickPromptSettingsManagementComponent = ({
   onSelectedQuickPromptChange,
   quickPromptSettings,
@@ -110,6 +111,15 @@ const QuickPromptSettingsManagementComponent = ({
         : i18n.DELETE_QUICK_PROMPT_MODAL_DEFAULT_TITLE,
     [deletedQuickPrompt?.title]
   );
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex: 0,
+      pageSize: 25,
+      totalItemCount: quickPromptSettings.length,
+    }),
+    [quickPromptSettings.length]
+  );
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
@@ -121,7 +131,7 @@ const QuickPromptSettingsManagementComponent = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiInMemoryTable pagination columns={columns} items={quickPromptSettings} />
+        <EuiInMemoryTable pagination={pagination} columns={columns} items={quickPromptSettings} />
       </EuiPanel>
       <Flyout
         flyoutVisible={editFlyoutVisible}

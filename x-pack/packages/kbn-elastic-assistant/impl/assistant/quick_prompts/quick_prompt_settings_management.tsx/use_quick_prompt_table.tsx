@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { BadgesColumn } from '../../common/components/assistant_settings_management/badges';
 import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
 import { QuickPrompt } from '../types';
 import * as i18n from './translations';
@@ -30,14 +31,7 @@ export const useQuickPromptTable = () => {
       {
         field: 'categories',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CONTEXTS,
-        render: (categories: QuickPrompt['categories']) =>
-          categories?.length
-            ? categories.map((c, idx) => (
-                <EuiBadge color="hollow" id={`context-${idx}`}>
-                  {c}
-                </EuiBadge>
-              ))
-            : null,
+        render: (categories: QuickPrompt['categories']) => <BadgesColumn items={categories} />,
       },
       /* TODO: enable when createdAt is added
       {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export const useFlyoutModalVisibility = () => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -18,9 +18,12 @@ export const useFlyoutModalVisibility = () => {
     setIsFlyoutOpen(false);
   };
 
-  return {
-    isFlyoutOpen,
-    openFlyout,
-    closeFlyout,
-  };
+  return useMemo(
+    () => ({
+      isFlyoutOpen,
+      openFlyout,
+      closeFlyout,
+    }),
+    [isFlyoutOpen]
+  );
 };

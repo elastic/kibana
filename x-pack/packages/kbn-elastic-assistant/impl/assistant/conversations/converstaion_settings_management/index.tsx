@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { Conversation } from '../../../assistant_context/types';
-import { ConversationTableItem, useConversationsTable } from './use_conversation_selector_settings';
+import { ConversationTableItem, useConversationsTable } from './use_conversations_table';
 import { ConversationStreamingSwitch } from '../conversation_settings/conversation_streaming_switch';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import * as i18n from './translations';
@@ -37,7 +37,6 @@ interface Props {
   handleSave: () => void;
   isDisabled?: boolean;
   isFlyoutMode: boolean;
-  refetchConversations: () => void;
   onCancelClick: () => void;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
@@ -61,7 +60,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   isDisabled,
   isFlyoutMode,
   onSelectedConversationChange,
-  refetchConversations,
   onCancelClick,
   selectedConversation,
   setAssistantStreamingEnabled,
@@ -122,18 +120,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     if (Object.keys(conversationsSettingsBulkActions).length === 0) {
       return;
     }
-
-    handleSave();
     closeConfirmModal();
-    setConversationsSettingsBulkActions({});
-    refetchConversations();
-  }, [
-    closeConfirmModal,
-    conversationsSettingsBulkActions,
-    handleSave,
-    refetchConversations,
-    setConversationsSettingsBulkActions,
-  ]);
+    handleSave();
+  }, [closeConfirmModal, conversationsSettingsBulkActions, handleSave]);
 
   const onDeleteCancelled = useCallback(() => {
     setDeletedConversation(null);

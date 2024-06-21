@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLink, EuiBadge } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { Conversation } from '../../../../assistant_context/types';
 import { AIConnector } from '../../../../connectorland/connector_selector';
+import { BadgesColumn } from '../../../common/components/assistant_settings_management/badges';
 import { RowActions } from '../../../common/components/assistant_settings_management/row_actions';
 import { Prompt } from '../../../types';
 import { getApiConfig, getDefaultSystemPrompt } from '../../../use_conversation/helpers';
@@ -31,6 +32,7 @@ export const useSystemPromptTable = () => {
   }) => [
     {
       name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_NAME,
+      truncateText: { lines: 3 },
       render: (prompt: SystemPromptTableItem) =>
         prompt?.name ? (
           <EuiLink onClick={() => onEditActionClicked(prompt)}>{prompt?.name}</EuiLink>
@@ -39,16 +41,7 @@ export const useSystemPromptTable = () => {
     {
       field: 'defaultConversations',
       name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_DEFAULT_CONVERSATIONS,
-      render: (defaultConversations: string[]) =>
-        defaultConversations.length ? (
-          <div>
-            {defaultConversations.map((c, idx) => (
-              <EuiBadge id={`conversation-${idx}`} color="hollow">
-                {c}
-              </EuiBadge>
-            ))}
-          </div>
-        ) : null,
+      render: (defaultConversations: string[]) => <BadgesColumn items={defaultConversations} />,
     },
     /* TODO: enable when createdAt is added
       {

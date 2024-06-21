@@ -147,6 +147,15 @@ const SystemPromptSettingsManagementComponent = ({
       }),
     [getSystemPromptsList, connectors, conversationSettings, defaultConnector, systemPromptSettings]
   );
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex: 0,
+      pageSize: 25,
+      totalItemCount: systemPromptSettings.length,
+    }),
+    [systemPromptSettings.length]
+  );
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
@@ -159,7 +168,7 @@ const SystemPromptSettingsManagementComponent = ({
         </EuiFlexGroup>
 
         <EuiSpacer size="s" />
-        <EuiInMemoryTable items={systemPromptListItems} columns={columns} />
+        <EuiInMemoryTable pagination={pagination} items={systemPromptListItems} columns={columns} />
       </EuiPanel>
       <Flyout
         flyoutVisible={editFlyoutVisible}
