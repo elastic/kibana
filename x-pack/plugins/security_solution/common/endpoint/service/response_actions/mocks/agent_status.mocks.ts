@@ -7,12 +7,10 @@
 
 import { merge } from 'lodash';
 import type { DeepPartial } from 'utility-types';
-import type { AgentStatusRecords, AgentStatusApiResponse } from '../../../types';
+import type { AgentStatusRecords, AgentStatusApiResponse, AgentStatusInfo } from '../../../types';
 import { HostStatus } from '../../../types';
 
-const generateAgentStatusMock = (
-  overrides: DeepPartial<AgentStatusRecords[string]> = {}
-): AgentStatusRecords[string] => {
+const generateAgentStatusMock = (overrides: DeepPartial<AgentStatusInfo> = {}): AgentStatusInfo => {
   return merge(
     {
       agentId: 'abfe4a35-d5b4-42a0-a539-bd054c791769',
@@ -24,7 +22,7 @@ const generateAgentStatusMock = (
       status: HostStatus.HEALTHY,
     },
     overrides
-  ) as AgentStatusRecords[string];
+  ) as AgentStatusInfo;
 };
 
 const generateAgentStatusRecordsMock = (
