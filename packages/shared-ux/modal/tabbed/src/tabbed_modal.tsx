@@ -117,7 +117,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       aria-labelledby={modalTitle}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitle}>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <Fragment>
