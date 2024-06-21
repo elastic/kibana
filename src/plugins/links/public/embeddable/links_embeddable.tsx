@@ -116,6 +116,11 @@ export const getLinksEmbeddableFactory = () => {
           savedObjectId$,
           getTypeDisplayName: () => APP_NAME,
           getTypeDisplayNameLowerCase: () => 'links',
+          getByValueRuntimeSnapshot: () => {
+            const snapshot = api.snapshotRuntimeState();
+            delete snapshot.savedObjectId;
+            return snapshot;
+          },
           serializeState,
           saveToLibrary: async (newTitle: string) => {
             const { attributes, references } = await serializeLinks();
@@ -156,8 +161,6 @@ export const getLinksEmbeddableFactory = () => {
               if (newState) {
                 linksApi.links$.next(newState.links);
                 linksApi.layout$.next(newState.layout);
-                linksApi.defaultPanelTitle.next(newState.defaultPanelTitle);
-                linksApi.defaultPanelDescription.next(newState.defaultPanelDescription);
               }
             } catch {
               // do nothing, user cancelled

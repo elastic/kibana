@@ -40,10 +40,10 @@ export type LinksParentApi = PresentationContainer &
   };
 
 export type LinksApi = HasType<typeof CONTENT_ID> &
-  DefaultEmbeddableApi<LinksSerializedState> &
+  DefaultEmbeddableApi<LinksSerializedState, LinksRuntimeState> &
   HasParentApi<LinksParentApi> &
   HasEditCapabilities &
-  HasInPlaceLibraryTransforms & {
+  HasInPlaceLibraryTransforms<LinksRuntimeState> & {
     layout$: BehaviorSubject<LinksLayoutType | undefined>;
     links$: BehaviorSubject<ResolvedLink[] | undefined>;
     savedObjectId$: BehaviorSubject<string | undefined>;
