@@ -11,6 +11,7 @@ import {
   JobParamsCsvFromSavedObject,
 } from '@kbn/reporting-export-types-csv-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
@@ -20,6 +21,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
   const config = getService('config');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
@@ -55,19 +60,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const TEST_PASSWORD = config.get('servers.kibana.password');
 
     before('initialize saved object archive', async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
     });
 
     after('clean up archives', async () => {
       await kibanaServer.importExport.unload(savedObjectsArchive);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     // Cant auth into the route as it's structured currently
     xit(`user sees a job they've created`, async () => {
       const {
         job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job);
+      } = await reportingAPI.createReportJobInternal(
+        CSV_REPORT_TYPE_V2,
+        job,
+        roleAuthc,
+        internalReqHeader
+      );
 
       await navigateToReportingManagement();
       await testSubjects.existOrFail(`viewReportingLink-${jobId}`);
