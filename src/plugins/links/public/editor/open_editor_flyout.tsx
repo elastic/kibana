@@ -21,7 +21,6 @@ import { LinksLayoutType } from '../../common/content_management';
 import { linksClient, runSaveToLibrary } from '../content_management';
 import { coreServices } from '../services/kibana_services';
 import { LinksRuntimeState, ResolvedLink } from '../types';
-import { deserializeLinksSavedObject } from '../lib/deserialize_from_library';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 const LazyLinksEditor = React.lazy(() => import('../components/editor/links_editor'));
@@ -63,10 +62,6 @@ export async function openEditorFlyout({
       ? parentDashboard.savedObjectId.value
       : undefined;
 
-  const runtimeState = initialState?.savedObjectId
-    ? await deserializeLinksSavedObject({ savedObjectId: initialState?.savedObjectId })
-    : initialState;
-
   return new Promise((resolve, reject) => {
     const flyoutId = `linksEditorFlyout-${uuidv4()}`;
 
@@ -88,7 +83,7 @@ export async function openEditorFlyout({
 
     const onSaveToLibrary = async (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
       const newState = {
-        ...runtimeState,
+        ...initialState,
         links: newLinks,
         layout: newLayout,
       };
@@ -114,7 +109,7 @@ export async function openEditorFlyout({
 
     const onAddToDashboard = (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
       const newState = {
-        ...runtimeState,
+        ...initialState,
         links: newLinks,
         layout: newLayout,
       };
@@ -131,8 +126,8 @@ export async function openEditorFlyout({
       toMountPoint(
         <LinksEditor
           flyoutId={flyoutId}
-          initialLinks={runtimeState?.links}
-          initialLayout={runtimeState?.layout}
+          initialLinks={initialState?.links}
+          initialLayout={initialState?.layout}
           onClose={onCancel}
           onSaveToLibrary={onSaveToLibrary}
           onAddToDashboard={onAddToDashboard}
