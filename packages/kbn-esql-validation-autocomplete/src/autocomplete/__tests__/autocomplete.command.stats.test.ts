@@ -57,8 +57,103 @@ describe('autocomplete.suggest', () => {
       test('on space after aggregate field', async () => {
         const { assertSuggestions } = await setup();
 
+        await assertSuggestions('from a | stats a=min(b) /', ['by $0', ',', '|']);
+      });
+
+      test('on space after aggregate field with comma', async () => {
+        const { assertSuggestions } = await setup();
+
         await assertSuggestions('from a | stats a=max(b), /', [
           'var0 =',
+          ...allAggFunctions,
+          ...allEvaFunctions,
+        ]);
+      });
+
+      test('on function left paren', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions(
+          'from a | stats by bucket(/',
+          [
+            ...getFieldNamesByType(['number', 'date']),
+            ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { evalMath: true }),
+          ].map((field) => `${field},`)
+        );
+
+        await assertSuggestions('from a | stats round(/', [
+          ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true, grouping: true }),
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+            'round',
+          ]),
+        ]);
+        await assertSuggestions('from a | stats round(round(/', [
+          ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true }),
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+            'round',
+          ]),
+        ]);
+        await assertSuggestions('from a | stats avg(round(/', [
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+            'round',
+          ]),
+        ]);
+        await assertSuggestions('from a | stats avg(/', [
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+        ]);
+        await assertSuggestions('from a | stats round(avg(/', [
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+            'round',
+          ]),
+        ]);
+      });
+
+      test('when typing inside function left paren', async () => {
+        const { assertSuggestions } = await setup();
+        const expected = [
+          ...getFieldNamesByType(['number', 'date']),
+          ...getFunctionSignaturesByReturnType('stats', ['number', 'date'], {
+            evalMath: true,
+          }),
+        ];
+
+        await assertSuggestions('from a | stats a=min(/)', expected);
+        await assertSuggestions('from a | stats a=min(/b), b=max()', expected);
+        await assertSuggestions('from a | stats a=min(b), b=max(/)', expected);
+      });
+
+      test('inside function argument list', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a | stats avg(b/) by stringField', [
+          ...getFieldNamesByType('number'),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+        ]);
+      });
+
+      test('when typing right paren', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a | stats a = min(b)/ | sort b', ['by $0', ',', '|']);
+      });
+
+      test('increments suggested variable name counter', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a | eval var0=round(b), var1=round(c) | stats /', [
+          'var2 =',
+          ...allAggFunctions,
+          'var0',
+          'var1',
+          ...allEvaFunctions,
+        ]);
+        await assertSuggestions('from a | stats var0=min(b),var1=c,/', [
+          'var2 =',
           ...allAggFunctions,
           ...allEvaFunctions,
         ]);
@@ -66,7 +161,7 @@ describe('autocomplete.suggest', () => {
     });
 
     describe('... BY <grouping>', () => {
-      test('suggestions on <kbd>SPACE</kbd> after "BY" keyword', async () => {
+      test('on space after "BY" keyword', async () => {
         const { assertSuggestions } = await setup();
         const expected = [
           'var0 =',
@@ -77,15 +172,16 @@ describe('autocomplete.suggest', () => {
 
         await assertSuggestions('from a | stats a=max(b) by /', expected);
         await assertSuggestions('from a | stats a=max(b) BY /', expected);
+        await assertSuggestions('from a | stats a=min(b) by /', expected);
       });
 
-      test('suggestions on <kbd>SPACE</kbd> after grouping field', async () => {
+      test('on space after grouping field', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a | stats a=c by d /', [',', '|']);
       });
 
-      test('suggestions on comma "," after grouping field', async () => {
+      test('after comma "," in grouping fields', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a | stats a=c by d, /', [
@@ -94,6 +190,44 @@ describe('autocomplete.suggest', () => {
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
+        await assertSuggestions('from a | stats a=min(b),/', [
+          'var0 =',
+          ...allAggFunctions,
+          ...allEvaFunctions,
+        ]);
+        await assertSuggestions('from a | stats avg(b) by c, /', [
+          'var0 =',
+          ...getFieldNamesByType('any'),
+          ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+          ...allGroupingFunctions,
+        ]);
+      });
+
+      test('on space before expression right hand side operand', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a | stats avg(b) by numberField % /', [
+          ...getFieldNamesByType('number'),
+          '`avg(b)`',
+          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+          ...allGroupingFunctions,
+        ]);
+        await assertSuggestions('from a | stats avg(b) by var0 = /', [
+          ...getFieldNamesByType('any'),
+          ...allEvaFunctions,
+          ...allGroupingFunctions,
+        ]);
+        await assertSuggestions('from a | stats avg(b) by c, var0 = /', [
+          ...getFieldNamesByType('any'),
+          ...allEvaFunctions,
+          ...allGroupingFunctions,
+        ]);
+      });
+
+      test('on space after expression right hand side operand', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a | stats avg(b) by numberField % 2 /', [',', '|']);
       });
     });
   });
