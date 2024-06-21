@@ -5241,6 +5241,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/json-schemas@link:x-pack/packages/ml/json_schemas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kbn-health-gateway-status-plugin@link:test/health_gateway/plugins/status":
   version "0.0.0"
   uid ""
