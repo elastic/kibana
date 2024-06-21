@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -22,10 +21,8 @@ export interface IntegrationAssistantPluginStart {
 
 export interface IntegrationAssistantPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  spaces: SpacesPluginSetup;
 }
 
 export interface IntegrationAssistantPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  spaces: SpacesPluginStart;
 }
