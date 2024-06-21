@@ -1572,7 +1572,7 @@ class AgentPolicyService {
     if (
       (!cloudSetup?.isServerlessEnabled || !cloudSetup?.isCloudEnabled) &&
       !appContextService.getExperimentalFeatures().agentless &&
-      agentPolicy?.supports_agentless !== undefined
+      agentPolicy?.supports_agentless
     ) {
       throw new AgentPolicyInvalidError(
         'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
