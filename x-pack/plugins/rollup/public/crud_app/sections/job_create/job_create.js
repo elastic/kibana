@@ -557,7 +557,7 @@ export class JobCreateUi extends Component {
 
         <EuiSpacer size="l" />
 
-        <DeprecationCallout />
+        <DeprecationCallout linksTestSubjPrefix="createForm" />
 
         <EuiSpacer size="l" />
 

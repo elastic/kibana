@@ -27,13 +27,14 @@ export const entityDefinition: SavedObjectsType = {
       metadata: { type: 'object' },
       metrics: { type: 'object' },
       staticFields: { type: 'object' },
+      managed: { type: 'boolean' },
     },
   },
   management: {
     displayName: 'Entity Definition',
     importableAndExportable: false,
-    getTitle(sloSavedObject: SavedObject<EntityDefinition>) {
-      return `EntityDefinition: [${sloSavedObject.attributes.name}]`;
+    getTitle(savedObject: SavedObject<EntityDefinition>) {
+      return `EntityDefinition: [${savedObject.attributes.name}]`;
     },
   },
 };
