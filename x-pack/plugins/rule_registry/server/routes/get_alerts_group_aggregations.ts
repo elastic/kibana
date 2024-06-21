@@ -21,7 +21,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
       validate: {
         body: buildRouteValidation(
           t.exact(
-            t.interface({
+            t.type({
               featureIds: t.array(t.string),
               groupByField: t.string,
               aggregations: t.union([alertsAggregationsSchema, t.undefined]),
