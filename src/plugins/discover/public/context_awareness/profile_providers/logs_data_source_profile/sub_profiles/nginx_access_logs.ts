@@ -24,11 +24,11 @@ export const createNginxAccessLogsDataSourceProfileProvider = (
         }
 
         columns.push(
-          { name: 'message' },
-          { name: 'url.path', width: 200 },
+          { name: 'url.path', width: 150 },
           { name: 'http.response.status_code', width: 200 },
           { name: 'client.ip', width: 150 },
-          { name: 'host.name', width: 250 }
+          { name: 'host.name', width: 250 },
+          { name: 'message' }
         );
 
         return { columns, rowHeight: 0 };

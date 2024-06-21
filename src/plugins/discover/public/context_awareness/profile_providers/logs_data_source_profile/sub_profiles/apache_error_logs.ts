@@ -24,9 +24,9 @@ export const createApacheErrorLogsDataSourceProfileProvider = (
         }
 
         columns.push(
-          { name: 'message' },
           { name: 'log.level', width: 150 },
-          { name: 'client.ip', width: 150 }
+          { name: 'client.ip', width: 150 },
+          { name: 'message' }
         );
 
         return { columns, rowHeight: 0 };
