@@ -828,12 +828,11 @@ describe('execute()', () => {
     `);
   });
 
-  test('returns expected result when a 450 error is thrown when using elastic_cloud service', async () => {
+  test('returns expected result when a 450 error is thrown', async () => {
     const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
       ...executorOptions,
       config: {
         ...config,
-        service: 'elastic_cloud',
         hasAuth: false,
       },
       secrets: {
@@ -864,12 +863,11 @@ describe('execute()', () => {
     `);
   });
 
-  test('returns expected result when a 554 error is thrown when using elastic_cloud service', async () => {
+  test('returns expected result when a 554 error is thrown', async () => {
     const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
       ...executorOptions,
       config: {
         ...config,
-        service: 'elastic_cloud',
         hasAuth: false,
       },
       secrets: {
