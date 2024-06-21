@@ -24,11 +24,11 @@ export const createAwsS3LogsDataSourceProfileProvider = (
         }
 
         columns.push(
-          { name: 'message' },
           { name: 'aws.s3.bucket.name', width: 200 },
           { name: 'aws.s3.object.key', width: 200 },
           { name: 'aws.s3access.operation', width: 200 },
-          { name: 'client.ip', width: 150 }
+          { name: 'client.ip', width: 150 },
+          { name: 'message' }
         );
 
         return { columns, rowHeight: 0 };

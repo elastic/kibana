@@ -24,11 +24,11 @@ export const createK8ContainerLogsDataSourceProfileProvider = (
         }
 
         columns.push(
-          { name: 'message' },
           { name: 'log.level', width: 150 },
           { name: 'kubernetes.pod.name', width: 200 },
           { name: 'kubernetes.namespace', width: 200 },
-          { name: 'orchestrator.cluster.name', width: 200 }
+          { name: 'orchestrator.cluster.name', width: 200 },
+          { name: 'message' }
         );
 
         return { columns, rowHeight: 0 };
