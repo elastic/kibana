@@ -44,8 +44,6 @@ describe('ManualRuleRunModal', () => {
   });
 
   it('should render confirmation button disabled if invalid time range has been selected', () => {
-    render(<ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />);
-
     expect(confirmModalConfirmButton).toBeEnabled();
 
     fireEvent.click(endDatePicker.querySelector(DATE_PICKER_PREVIOUS_BTN_CLASS)!);
@@ -55,8 +53,6 @@ describe('ManualRuleRunModal', () => {
   });
 
   it('should render confirmation button disabled if selected start date is more than 90 days in the past', () => {
-    render(<ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />);
-
     expect(confirmModalConfirmButton).toBeEnabled();
 
     fireEvent.click(startDatePicker.querySelector(DATE_PICKER_PREVIOUS_BTN_CLASS)!);
@@ -71,8 +67,6 @@ describe('ManualRuleRunModal', () => {
   });
 
   it('should render confirmation button disabled if selected end date is in future', () => {
-    render(<ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />);
-
     expect(confirmModalConfirmButton).toBeEnabled();
 
     fireEvent.click(endDatePicker.querySelector(DATE_PICKER_NEXT_BTN_CLASS)!);
