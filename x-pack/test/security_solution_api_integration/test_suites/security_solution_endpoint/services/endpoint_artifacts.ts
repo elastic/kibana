@@ -20,8 +20,7 @@ import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solutio
 import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/blocklist/constants';
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
 import { FtrService } from '../../../../functional/ftr_provider_context';
-import { InternalManifestSchemaResponseType } from '../apps/integrations/mocks';
-import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations_feature_flag/mocks';
+import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
 
 export interface ArtifactTestData {
   artifact: ExceptionListItemSchema;
@@ -121,19 +120,6 @@ export class EndpointArtifactsTestResources extends FtrService {
     const blocklist = this.exceptionsGenerator.generateBlocklistForCreate(overrides);
 
     return this.createExceptionItem(blocklist);
-  }
-
-  async getArtifacts() {
-    const {
-      hits: { hits: manifestResults },
-    } = await this.esClient.search({
-      index: '.kibana*',
-      query: { bool: { filter: [{ term: { type: ManifestConstants.SAVED_OBJECT_TYPE } }] } },
-      size: 1,
-    });
-
-    const manifestResult = manifestResults[0] as InternalManifestSchemaResponseType;
-    return manifestResult._source['endpoint:user-artifact-manifest'].artifacts;
   }
 
   async getArtifactsFromUnifiedManifestSO(): Promise<

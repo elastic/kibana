@@ -99,18 +99,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     const checkArtifact = (expectedArtifact: object) => {
       return retry.tryForTime(2 * MINUTES, async () => {
-        const artifacts = await endpointArtifactTestResources.getArtifacts();
+        const artifacts = await endpointArtifactTestResources.getArtifactsFromUnifiedManifestSO();
 
-        const manifestArtifact = artifacts.find((artifact) =>
-          artifact.artifactId.startsWith('endpoint-exceptionlist-macos-v1')
-        );
+        const foundArtifactId = artifacts
+          .flatMap((artifact) => artifact.artifactIds)
+          .find((artifactId) => artifactId.startsWith('endpoint-exceptionlist-macos-v1'));
 
-        expect(manifestArtifact).to.not.be(undefined);
+        expect(foundArtifactId).to.not.be(undefined);
 
         // Get fleet artifact
         const artifactResult = await esClient.get({
           index: '.fleet-artifacts-7',
-          id: `endpoint:${manifestArtifact!.artifactId}`,
+          id: `endpoint:${foundArtifactId!}`,
         });
 
         const artifact = artifactResult._source as ArtifactElasticsearchProperties;
