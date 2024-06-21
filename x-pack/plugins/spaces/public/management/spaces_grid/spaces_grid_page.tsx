@@ -397,7 +397,7 @@ export class SpacesGridPage extends Component<Props, State> {
               defaultMessage: `Delete`,
             }),
             description: (rowRecord) =>
-              i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionName', {
+              i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionDescription', {
                 defaultMessage: `Delete {spaceName}.`,
                 values: { spaceName: rowRecord.name },
               }),
