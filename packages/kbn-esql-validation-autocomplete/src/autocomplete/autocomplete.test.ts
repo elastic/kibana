@@ -179,26 +179,21 @@ describe('autocomplete', () => {
         : triggerCharacter;
     const testFn = only ? test.only : skip ? test.skip : test;
 
-    testFn(
-      `${statement} (triggerChar: "${context.triggerCharacter}" @ ${offset})=> ["${expected.join(
-        '","'
-      )}"]`,
-      async () => {
-        const callbackMocks = createCustomCallbackMocks(...customCallbacksArgs);
-        const suggestions = await suggest(
-          statement,
-          offset,
-          context,
-          async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
-          callbackMocks
-        );
+    testFn(statement, async () => {
+      const callbackMocks = createCustomCallbackMocks(...customCallbacksArgs);
+      const suggestions = await suggest(
+        statement,
+        offset,
+        context,
+        async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
+        callbackMocks
+      );
 
-        const sortedSuggestions = suggestions.map((suggestion) => suggestion.text).sort();
-        const sortedExpected = expected.sort();
+      const sortedSuggestions = suggestions.map((suggestion) => suggestion.text).sort();
+      const sortedExpected = expected.sort();
 
-        expect(sortedSuggestions).toEqual(sortedExpected);
-      }
-    );
+      expect(sortedSuggestions).toEqual(sortedExpected);
+    });
   };
 
   // Enrich the function to work with .only and .skip as regular test function
