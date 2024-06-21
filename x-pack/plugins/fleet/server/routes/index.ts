@@ -32,7 +32,7 @@ export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: Fleet
   registerAppRoutes(fleetAuthzRouter);
 
   // The upload package route is only authorized for the superuser
-  registerEPMRoutes(fleetAuthzRouter);
+  registerEPMRoutes(fleetAuthzRouter, config);
 
   registerSetupRoutes(fleetAuthzRouter, config);
   registerAgentPolicyRoutes(fleetAuthzRouter);

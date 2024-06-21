@@ -38,7 +38,6 @@ import {
   useStartServices,
   useUpgradePackagePolicyDryRunQuery,
   useUpdatePackageMutation,
-  useFleetStatus,
 } from '../../../../../hooks';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -54,7 +53,7 @@ import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
-import { InstallKibanaAssetsButton } from './install_kibana_assets_button';
+import { InstallKibanaAssetsPanel } from './install_kibana_assets_panel';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.euiSizeXL};
@@ -125,7 +124,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices 
   const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
-  const { spaceId } = useFleetStatus();
 
   const toggleChangelogModal = useCallback(() => {
     setIsChangelogModalOpen(!isChangelogModalOpen);
@@ -238,11 +236,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices 
     (installationStatus === InstallStatus.installed && installedVersion !== version);
 
   const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
-  const pkgInstallationInfo =
-    'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
-  const kibanaAssetsInstalledInCurrentSpace =
-    !pkgInstallationInfo?.installed_kibana_space_id ||
-    pkgInstallationInfo?.installed_kibana_space_id === spaceId;
 
   const { numOfAssets, numTransformAssets } = useMemo(
     () => ({
@@ -478,33 +471,14 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices 
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     {!hideInstallOptions &&
-                    !kibanaAssetsInstalledInCurrentSpace &&
-                    installedVersion !== null ? (
+                    'installationInfo' in packageInfo &&
+                    packageInfo.installationInfo ? (
                       <>
                         <EuiSpacer size="l" />
-                        <EuiFlexGroup direction="column" gutterSize="m">
-                          <EuiFlexItem>
-                            <EuiTitle>
-                              <h4>
-                                <FormattedMessage
-                                  id="xpack.fleet.integrations.settings.packageInstallAssetsSpaceTitle"
-                                  defaultMessage="Install Kibana assets"
-                                />
-                              </h4>
-                            </EuiTitle>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <FormattedMessage
-                              id="xpack.fleet.integrations.settings.packageInstallAssetsSpaceDescription"
-                              defaultMessage="Install or reinstall Kibana assets in that space."
-                            />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <div>
-                              <InstallKibanaAssetsButton {...packageInfo} />
-                            </div>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
+                        <InstallKibanaAssetsPanel
+                          title={packageInfo.title}
+                          installInfo={packageInfo.installationInfo}
+                        />
                       </>
                     ) : null}
                   </>
