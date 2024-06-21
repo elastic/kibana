@@ -141,3 +141,5 @@ x-pack/test/security_api_integration/plugins/audit_log/audit.log
 # ignore FTR temp directory
 .ftr
 role_users.json
+
+.devcontainer/.env

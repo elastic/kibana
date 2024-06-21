@@ -21,6 +21,6 @@
 		9200,
 		5601
 	],
-	"postCreateCommand": "echo 'Container ready!'",
+	"postCreateCommand": "/workspaces/kibana/.devcontainer/scripts/bootstrap.sh",
 	"remoteUser": "vscode"
 }

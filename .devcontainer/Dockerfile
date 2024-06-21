@@ -32,6 +32,3 @@ RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && \
 
 # Expose ports (Note: This is for documentation. Use `docker run -p` to map ports at runtime.)
 EXPOSE 9200 5601
-
-# Set the default shell to Zsh
-ENV SHELL /usr/bin/zsh
