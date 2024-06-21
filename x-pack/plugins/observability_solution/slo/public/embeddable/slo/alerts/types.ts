@@ -25,6 +25,7 @@ import {
   PublishesPanelTitle,
   EmbeddableApiContext,
 } from '@kbn/presentation-publishing';
+import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 
 export interface SloItem {
   id: string;
@@ -69,6 +70,7 @@ export interface SloEmbeddableDeps {
   http: CoreStart['http'];
   i18n: CoreStart['i18n'];
   application: ApplicationStart;
+  observability: ObservabilityPublicStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   notifications: NotificationsStart;
