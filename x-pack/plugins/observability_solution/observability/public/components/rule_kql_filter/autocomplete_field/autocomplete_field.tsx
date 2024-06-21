@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
+import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel, EuiThemeComputed } from '@elastic/eui';
 import React from 'react';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-
+import { css } from '@emotion/react';
 import { SuggestionItem } from './suggestion_item';
+
 export type StateUpdater<State, Props = {}> = (
   prevState: Readonly<State>,
   prevProps: Readonly<Props>
@@ -34,6 +34,7 @@ interface AutocompleteFieldProps {
   autoFocus?: boolean;
   'aria-label'?: string;
   compressed?: boolean;
+  theme?: EuiThemeComputed;
 }
 
 interface AutocompleteFieldState {
@@ -64,12 +65,17 @@ export class AutocompleteField extends React.Component<
       disabled,
       'aria-label': ariaLabel,
       compressed,
+      theme,
     } = this.props;
     const { areSuggestionsVisible, selectedIndex } = this.state;
 
     return (
       <EuiOutsideClickDetector onOutsideClick={this.handleBlur}>
-        <AutocompleteContainer>
+        <div
+          css={css`
+            position: relative;
+          `}
+        >
           <EuiFieldSearch
             compressed={compressed}
             fullWidth
@@ -85,10 +91,23 @@ export class AutocompleteField extends React.Component<
             placeholder={placeholder}
             value={value}
             aria-label={ariaLabel}
-            data-test-subj="ruleKqlFilterSearchField"
+            data-test-subj="o11ySearchField"
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
-            <SuggestionsPanel data-test-subj="ruleKqlFilterSuggestionsPanel">
+            <EuiPanel
+              data-test-subj="o11ySuggestionsPanel"
+              paddingSize="none"
+              hasShadow
+              css={css`
+                position: absolute;
+                width: 100%;
+                margin-top: 2px;
+                overflow-x: hidden;
+                overflow-y: scroll;
+                z-index: ${theme?.levels.flyout};
+                max-height: 322px;
+              `}
+            >
               {suggestions.map((suggestion, suggestionIndex) => (
                 <SuggestionItem
                   key={suggestion.text}
@@ -96,11 +115,12 @@ export class AutocompleteField extends React.Component<
                   isSelected={suggestionIndex === selectedIndex}
                   onMouseEnter={this.selectSuggestionAt(suggestionIndex)}
                   onClick={this.applySuggestionAt(suggestionIndex)}
+                  onKeyDown={this.selectSuggestionAt(suggestionIndex)}
                 />
               ))}
-            </SuggestionsPanel>
+            </EuiPanel>
           ) : null}
-        </AutocompleteContainer>
+        </div>
       </EuiOutsideClickDetector>
     );
   }
@@ -310,20 +330,3 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   ...state,
   isFocused: false,
 });
-
-const AutocompleteContainer = euiStyled.div`
-  position: relative;
-`;
-
-const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
-  paddingSize: 'none',
-  hasShadow: true,
-}))`
-  position: absolute;
-  width: 100%;
-  margin-top: 2px;
-  overflow-x: hidden;
-  overflow-y: scroll;
-  z-index: ${(props) => props.theme.eui.euiZLevel1};
-  max-height: 322px;
-`;

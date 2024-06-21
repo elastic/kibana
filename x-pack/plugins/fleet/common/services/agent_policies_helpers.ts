@@ -44,3 +44,10 @@ function policyHasIntegration(agentPolicy: AgentPolicy, packageName: string) {
 
   return agentPolicy.package_policies?.some((p) => p.package?.name === packageName);
 }
+
+export function getInheritedNamespace(agentPolicies: AgentPolicy[]): string {
+  if (agentPolicies.length === 1) {
+    return agentPolicies[0].namespace;
+  }
+  return 'default';
+}
