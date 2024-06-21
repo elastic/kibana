@@ -28,6 +28,20 @@
             "path": "x-pack/plugins/observability_solution/asset_manager/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "assetManager",
+            "id": "def-public.AssetManagerPublicPluginSetup.entityClient",
+            "type": "Object",
+            "tags": [],
+            "label": "entityClient",
+            "description": [],
+            "signature": [
+              "IEntityClient"
+            ],
+            "path": "x-pack/plugins/observability_solution/asset_manager/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -52,6 +66,20 @@
             "description": [],
             "signature": [
               "IPublicAssetsClient"
+            ],
+            "path": "x-pack/plugins/observability_solution/asset_manager/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "assetManager",
+            "id": "def-public.AssetManagerPublicPluginStart.entityClient",
+            "type": "Object",
+            "tags": [],
+            "label": "entityClient",
+            "description": [],
+            "signature": [
+              "IEntityClient"
             ],
             "path": "x-pack/plugins/observability_solution/asset_manager/public/types.ts",
             "deprecated": false,
