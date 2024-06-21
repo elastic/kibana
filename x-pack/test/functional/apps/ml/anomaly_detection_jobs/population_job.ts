@@ -132,8 +132,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
-        'Jun 12, 2019 @ 00:04:19.000',
-        'Jul 12, 2019 @ 23:45:36.000'
+        'Jun 12, 2023 @ 00:04:19.000',
+        'Jul 12, 2023 @ 23:45:36.000'
       );
 
       await ml.testExecution.logTestStep('job creation displays the event rate chart');
@@ -285,8 +285,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('job cloning sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
-        'Jun 12, 2019 @ 00:04:19.000',
-        'Jul 12, 2019 @ 23:45:36.000'
+        'Jun 12, 2023 @ 00:04:19.000',
+        'Jul 12, 2023 @ 23:45:36.000'
       );
 
       await ml.testExecution.logTestStep('job cloning displays the event rate chart');
