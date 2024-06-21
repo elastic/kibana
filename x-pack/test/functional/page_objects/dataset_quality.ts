@@ -219,10 +219,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async refreshTable() {
-      await testSubjects.waitForEnabled(
-        testSubjectSelectors.datasetQualityFiltersContainer,
-        10 * 1000
-      );
       const filtersContainer = await testSubjects.find(
         testSubjectSelectors.datasetQualityFiltersContainer
       );
