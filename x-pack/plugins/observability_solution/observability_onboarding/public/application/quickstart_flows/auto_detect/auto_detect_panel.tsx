@@ -30,12 +30,12 @@ import { type DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { useOnboardingFlow } from './use_onboarding_flow';
-import { ProgressIndicator } from './progress_indicator';
-import { AccordionWithIcon } from './accordion_with_icon';
+import { ProgressIndicator } from '../shared/progress_indicator';
+import { AccordionWithIcon } from '../shared/accordion_with_icon';
 import { type ObservabilityOnboardingContextValue } from '../../../plugin';
-import { EmptyPrompt } from './empty_prompt';
-import { CopyToClipboardButton } from './copy_to_clipboard_button';
-import { LocatorButtonEmpty } from './locator_button_empty';
+import { EmptyPrompt } from '../shared/empty_prompt';
+import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
+import { LocatorButtonEmpty } from '../shared/locator_button_empty';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   const {
