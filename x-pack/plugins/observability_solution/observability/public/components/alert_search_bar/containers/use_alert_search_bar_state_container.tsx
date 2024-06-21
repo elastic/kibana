@@ -171,13 +171,11 @@ function initializeUrlAndStateContainer(
     urlStateStorage.get<Partial<AlertSearchBarContainerState>>(urlStorageKey)
   );
   const validUrlState = isRight(urlState) ? pipe(urlState).right : {};
-
-  const { from, to } = timefilterService.getTime();
+  const timeFilterTime = timefilterService.getTime();
   const timeFilterState = timefilterService.isTimeTouched()
     ? {
-        ...defaultState,
-        rangeFrom: from,
-        rangeTo: to,
+        rangeFrom: timeFilterTime.from,
+        rangeTo: timeFilterTime.to,
       }
     : {};
 
