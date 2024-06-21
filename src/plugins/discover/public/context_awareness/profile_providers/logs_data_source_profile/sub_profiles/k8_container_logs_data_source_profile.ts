@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
-import { extendProfileProvider } from '../extend_profile_provider';
-import { extractIndexPatternFrom } from '../extract_index_pattern_from';
+import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { extendProfileProvider } from '../../extend_profile_provider';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
-export const createNginxAccessLogsDataSourceProfileProvider = (
+export const createK8ContainerLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'nginx_access_logs_data_source',
+    profileId: 'k8_container_logs_data_source',
     profile: {
       getDefaultAppState: () => (params) => {
         const columns = [];
@@ -25,10 +25,10 @@ export const createNginxAccessLogsDataSourceProfileProvider = (
 
         columns.push(
           { name: 'message' },
-          { name: 'url.path', width: 200 },
-          { name: 'http.response.status_code', width: 200 },
-          { name: 'client.ip', width: 150 },
-          { name: 'host.name', width: 250 }
+          { name: 'log.level', width: 150 },
+          { name: 'kubernetes.pod.name', width: 200 },
+          { name: 'kubernetes.namespace', width: 200 },
+          { name: 'orchestrator.cluster.name', width: 200 }
         );
 
         return { columns, rowHeight: 0 };
@@ -37,7 +37,7 @@ export const createNginxAccessLogsDataSourceProfileProvider = (
     resolve: (params) => {
       const indexPattern = extractIndexPatternFrom(params);
 
-      if (indexPattern !== 'logs-nginx_access') {
+      if (indexPattern !== 'logs-k8_container') {
         return { isMatch: false };
       }
 

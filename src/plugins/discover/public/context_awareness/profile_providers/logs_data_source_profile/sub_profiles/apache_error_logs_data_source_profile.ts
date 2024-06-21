@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
-import { extendProfileProvider } from '../extend_profile_provider';
-import { extractIndexPatternFrom } from '../extract_index_pattern_from';
+import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { extendProfileProvider } from '../../extend_profile_provider';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
-export const createAwsS3LogsDataSourceProfileProvider = (
+export const createApacheErrorLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'aws_s3_logs_data_source',
+    profileId: 'apache_error_logs_data_source',
     profile: {
       getDefaultAppState: () => (params) => {
         const columns = [];
@@ -25,9 +25,7 @@ export const createAwsS3LogsDataSourceProfileProvider = (
 
         columns.push(
           { name: 'message' },
-          { name: 'aws.s3.bucket.name', width: 200 },
-          { name: 'aws.s3.object.key', width: 200 },
-          { name: 'aws.s3access.operation', width: 200 },
+          { name: 'log.level', width: 150 },
           { name: 'client.ip', width: 150 }
         );
 
@@ -37,7 +35,7 @@ export const createAwsS3LogsDataSourceProfileProvider = (
     resolve: (params) => {
       const indexPattern = extractIndexPatternFrom(params);
 
-      if (indexPattern !== 'logs-aws_s3') {
+      if (indexPattern !== 'logs-apache_error') {
         return { isMatch: false };
       }
 

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
-import { extendProfileProvider } from '../extend_profile_provider';
-import { extractIndexPatternFrom } from '../extract_index_pattern_from';
+import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { extendProfileProvider } from '../../extend_profile_provider';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
-export const createSystemLogsDataSourceProfileProvider = (
+export const createNginxErrorLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'system_logs_data_source',
+    profileId: 'nginx_error_logs_data_source',
     profile: {
       getDefaultAppState: () => (params) => {
         const columns = [];
@@ -23,12 +23,7 @@ export const createSystemLogsDataSourceProfileProvider = (
           columns.push({ name: params.dataView.timeFieldName, width: 212 });
         }
 
-        columns.push(
-          { name: 'message' },
-          { name: 'log.level', width: 150 },
-          { name: 'process.name', width: 150 },
-          { name: 'host.name', width: 250 }
-        );
+        columns.push({ name: 'log.level', width: 150 }, { name: 'message' });
 
         return { columns, rowHeight: 0 };
       },
@@ -36,7 +31,7 @@ export const createSystemLogsDataSourceProfileProvider = (
     resolve: (params) => {
       const indexPattern = extractIndexPatternFrom(params);
 
-      if (!indexPattern?.startsWith('logs-system_')) {
+      if (indexPattern !== 'logs-nginx_error') {
         return { isMatch: false };
       }
 
