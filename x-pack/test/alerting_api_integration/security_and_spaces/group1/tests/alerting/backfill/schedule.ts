@@ -752,7 +752,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           }
         });
 
-        it('should handle schedule request where some requests succeed and some requests fail appropriately', async () => {
+        it('testtest should handle schedule request where some requests succeed and some requests fail appropriately', async () => {
           const start = moment().utc().startOf('day').subtract(7, 'days').toISOString();
           const end = moment().utc().startOf('day').subtract(5, 'days').toISOString();
           // create 2 rules
@@ -896,24 +896,24 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               // error scheduling due to unsupported rule type
               expect(result[2]).to.eql({
                 error: {
-                  error: 'Bad Request',
                   message: `Rule type "test.noop" for rule ${lifecycleRuleId} is not supported`,
+                  rule: { id: lifecycleRuleId, name: 'abc' },
                 },
               });
 
               // error scheduling due to disabled rule
               expect(result[3]).to.eql({
                 error: {
-                  error: 'Bad Request',
                   message: `Rule ${disabledRuleId} is disabled`,
+                  rule: { id: disabledRuleId, name: 'abc' },
                 },
               });
 
               // error scheduling due to deleted rule
               expect(result[4]).to.eql({
                 error: {
-                  error: 'Not Found',
                   message: `Saved object [alert/${deletedRuleId}] not found`,
+                  rule: { id: deletedRuleId },
                 },
               });
 
