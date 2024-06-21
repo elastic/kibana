@@ -8,7 +8,6 @@
 import {
   type EuiBasicTableColumn,
   EuiButton,
-  EuiButtonIcon,
   EuiCallOut,
   EuiInMemoryTable,
   EuiLink,
@@ -352,58 +351,57 @@ export class SpacesGridPage extends Component<Props, State> {
         actions: [
           {
             isPrimary: true,
+            name: i18n.translate('xpack.spaces.management.spacesGridPage.editSpaceActionName', {
+              defaultMessage: `Edit`,
+            }),
+            description: (rowRecord) =>
+              i18n.translate('xpack.spaces.management.spacesGridPage.editSpaceActionDescription', {
+                defaultMessage: `Edit {spaceName}.`,
+                values: { spaceName: rowRecord.name },
+              }),
+            type: 'icon',
+            icon: 'pencil',
+            color: 'primary',
+            href: (rowRecord) =>
+              reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).href,
+            onClick: (rowRecord) =>
+              reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).onClick,
+            'data-test-subj': (rowRecord) => `${rowRecord.name}-editSpace`,
+          },
+          {
+            name: i18n.translate('xpack.spaces.management.spacesGridPage.switchSpaceActionName', {
+              defaultMessage: 'Switch',
+            }),
+            description: (rowRecord) =>
+              i18n.translate(
+                'xpack.spaces.management.spacesGridPage.switchSpaceActionDescription',
+                {
+                  defaultMessage: 'Switch to {spaceName} space',
+                  values: { spaceName: rowRecord.name },
+                }
+              ),
+            type: 'icon',
+            icon: 'merge',
+            color: 'primary',
+            href: (rowRecord) => getSpaceNavigationURL({ serverBasePath, spaceId: rowRecord.id }),
             available: (rowRecord) => this.state.activeSpace?.name !== rowRecord.name,
-            render: (rowRecord: Space) => {
-              return (
-                <EuiButtonIcon
-                  href={getSpaceNavigationURL({ serverBasePath, spaceId: rowRecord.id })}
-                  iconType="merge"
-                  data-test-subj={`${rowRecord.name}-switchSpace`}
-                  aria-label={i18n.translate(
-                    'xpack.spaces.management.spacesGridPage.switchSpaceActionName',
-                    {
-                      defaultMessage: 'Switch to {spaceName} space',
-                      values: { spaceName: rowRecord.name },
-                    }
-                  )}
-                />
-              );
-            },
+            'data-test-subj': (rowRecord) => `${rowRecord.name}-switchSpace`,
           },
           {
-            render: (rowRecord: Space) => (
-              <EuiButtonIcon
-                data-test-subj={`${rowRecord.name}-editSpace`}
-                aria-label={i18n.translate(
-                  'xpack.spaces.management.spacesGridPage.editSpaceActionName',
-                  {
-                    defaultMessage: `Edit {spaceName}.`,
-                    values: { spaceName: rowRecord.name },
-                  }
-                )}
-                color={'primary'}
-                iconType={'pencil'}
-                {...reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord))}
-              />
-            ),
-          },
-          {
+            name: i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionName', {
+              defaultMessage: `Delete`,
+            }),
+            description: (rowRecord) =>
+              i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionName', {
+                defaultMessage: `Delete {spaceName}.`,
+                values: { spaceName: rowRecord.name },
+              }),
+            type: 'icon',
+            icon: 'trash',
+            color: 'danger',
+            onClick: (rowRecord) => this.onDeleteSpaceClick(rowRecord),
             available: (rowRecord: Space) => !isReservedSpace(rowRecord),
-            render: (rowRecord: Space) => (
-              <EuiButtonIcon
-                data-test-subj={`${rowRecord.name}-deleteSpace`}
-                aria-label={i18n.translate(
-                  'xpack.spaces.management.spacesGridPage.deleteActionName',
-                  {
-                    defaultMessage: `Delete {spaceName}.`,
-                    values: { spaceName: rowRecord.name },
-                  }
-                )}
-                color={'danger'}
-                iconType={'trash'}
-                onClick={() => this.onDeleteSpaceClick(rowRecord)}
-              />
-            ),
+            'data-test-subj': (rowRecord) => `${rowRecord.name}-deleteSpace`,
           },
         ],
       },
