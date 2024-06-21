@@ -37,7 +37,7 @@ const SCRIPTED_METRICS_FIELDS_TO_COPY = [
   AGENT_NAME,
 ];
 
-const ESTIMATED_BYTES_PER_FIELD = 60;
+const AVG_BYTES_PER_FIELD = 60;
 
 export async function fetchServicePathsFromTraceIds({
   apmEventClient,
@@ -87,7 +87,7 @@ export async function fetchServicePathsFromTraceIds({
     serviceMapParams
   );
   // calculate how many docs we can fetch per shard by dividing the total available bytes by the average doc size
-  const avgDocSizeInBytes = SCRIPTED_METRICS_FIELDS_TO_COPY.length * ESTIMATED_BYTES_PER_FIELD; // estimated doc size in bytes
+  const avgDocSizeInBytes = SCRIPTED_METRICS_FIELDS_TO_COPY.length * AVG_BYTES_PER_FIELD; // estimated doc size in bytes
   const totalShards = serviceMapQueryDataResponse._shards.successful;
   const numDocsAllowed = Math.floor(serverlessServiceMapMaxAvailableBytes / avgDocSizeInBytes);
   const numDocsPerShardAllowed = Math.floor(numDocsAllowed / totalShards);
@@ -220,7 +220,7 @@ export async function fetchServicePathsFromTraceIds({
                 context.processedEvents[currentEventId] = event;
               }
 
-              return context.processedEvents;
+              return null;
             }
       
             def context = new HashMap();
@@ -233,11 +233,17 @@ export async function fetchServicePathsFromTraceIds({
       
             for (state in states) {
               context.eventsById.putAll(state.eventsById);
+              /* release memory */
+              state.eventsById.clear();
             }
       
             for (entry in context.eventsById.entrySet()) {
               processAndReturnEvent(context, entry.getKey());
             }
+
+            /* release memory */
+            context.processedEvents.clear();
+            context.eventsById.clear();
       
             def response = new HashMap();
             response.paths = new HashSet();
@@ -248,6 +254,10 @@ export async function fetchServicePathsFromTraceIds({
                 response.paths.add(foundPath);
               }
             }
+
+            /* release memory */
+            context.locationsToRemove.clear();
+            context.paths.clear();
       
             for (entry in context.externalToServiceMap.entrySet()) {
               def map = new HashMap();
@@ -255,6 +265,10 @@ export async function fetchServicePathsFromTraceIds({
               map.to = entry.getValue();
               response.discoveredServices.add(map);
             }
+
+            /* release memory */
+            context.externalToServiceMap.clear();
+            context.paths.clear();
 
             return response;
           `,
