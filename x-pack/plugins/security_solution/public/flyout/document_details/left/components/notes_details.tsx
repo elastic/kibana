@@ -5,13 +5,23 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { fetchNotesByDocumentId } from '../../../../notes/store/notes.slice';
+import { useLeftPanelContext } from '../context';
 
 /**
  * List all the notes for a document id and allows to create new notes associated with that document.
  * Displayed in the document details expandable flyout left section.
  */
 export const NotesDetails = memo(() => {
+  const dispatch = useDispatch();
+  const { eventId } = useLeftPanelContext();
+
+  useEffect(() => {
+    dispatch(fetchNotesByDocumentId({ documentId: eventId }));
+  }, [dispatch, eventId]);
+
   return <></>;
 });
 
