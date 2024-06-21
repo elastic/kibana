@@ -44,20 +44,20 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
         const expected = ['var0 =', ...allAggFunctions, ...allEvaFunctions];
 
-        await assertSuggestions('from a | stats ?', expected);
-        await assertSuggestions('FROM a | STATS ?', expected);
+        await assertSuggestions('from a | stats /', expected);
+        await assertSuggestions('FROM a | STATS /', expected);
       });
 
       test('on assignment expression, shows all agg and eval functions', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a=?', [...allAggFunctions, ...allEvaFunctions]);
+        await assertSuggestions('from a | stats a=/', [...allAggFunctions, ...allEvaFunctions]);
       });
 
       test('on space after aggregate field', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a=max(b), ?', [
+        await assertSuggestions('from a | stats a=max(b), /', [
           'var0 =',
           ...allAggFunctions,
           ...allEvaFunctions,
@@ -75,20 +75,20 @@ describe('autocomplete.suggest', () => {
           ...allGroupingFunctions,
         ];
 
-        await assertSuggestions('from a | stats a=max(b) by ?', expected);
-        await assertSuggestions('from a | stats a=max(b) BY ?', expected);
+        await assertSuggestions('from a | stats a=max(b) by /', expected);
+        await assertSuggestions('from a | stats a=max(b) BY /', expected);
       });
 
       test('suggestions on <kbd>SPACE</kbd> after grouping field', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a=c by d ?', [',', '|']);
+        await assertSuggestions('from a | stats a=c by d /', [',', '|']);
       });
 
       test('suggestions on comma "," after grouping field', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a=c by d, ?', [
+        await assertSuggestions('from a | stats a=c by d, /', [
           'var0 =',
           ...getFieldNamesByType('any'),
           ...allEvaFunctions,

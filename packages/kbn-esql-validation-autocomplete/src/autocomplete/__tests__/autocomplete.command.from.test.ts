@@ -21,7 +21,7 @@ describe('autocomplete.suggest', () => {
       test('suggests command on first character', async () => {
         const { suggest } = await setup();
 
-        const suggestions = await suggest('f?');
+        const suggestions = await suggest('f/');
         const hasCommand = !!suggestions.find((s) => s.label === 'from');
 
         expect(hasCommand).toBe(true);
@@ -32,12 +32,12 @@ describe('autocomplete.suggest', () => {
       test('suggests visible indices', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from ?', visibleIndices);
-        await assertSuggestions('FROM ?', visibleIndices);
-        await assertSuggestions('FROM a,?', visibleIndices);
-        await assertSuggestions('FROM a, ?', visibleIndices);
-        await assertSuggestions('from *,?', visibleIndices);
-        await assertSuggestions('from ?index', visibleIndices);
+        await assertSuggestions('from /', visibleIndices);
+        await assertSuggestions('FROM /', visibleIndices);
+        await assertSuggestions('FROM a,/', visibleIndices);
+        await assertSuggestions('FROM a, /', visibleIndices);
+        await assertSuggestions('from *,/', visibleIndices);
+        await assertSuggestions('from /index', visibleIndices);
       });
 
       test('can suggest integration data sources', async () => {
@@ -52,11 +52,11 @@ describe('autocomplete.suggest', () => {
           getSources: jest.fn().mockResolvedValue(dataSources),
         };
 
-        assertSuggestions('from ?', visibleDataSources, { callbacks: cb });
-        assertSuggestions('FROM ?', visibleDataSources, { callbacks: cb });
-        assertSuggestions('FROM a,?', visibleDataSources, { callbacks: cb });
-        assertSuggestions('from a, ?', visibleDataSources, { callbacks: cb });
-        assertSuggestions('from *,?', visibleDataSources, { callbacks: cb });
+        assertSuggestions('from /', visibleDataSources, { callbacks: cb });
+        assertSuggestions('FROM /', visibleDataSources, { callbacks: cb });
+        assertSuggestions('FROM a,/', visibleDataSources, { callbacks: cb });
+        assertSuggestions('from a, /', visibleDataSources, { callbacks: cb });
+        assertSuggestions('from *,/', visibleDataSources, { callbacks: cb });
       });
     });
 
@@ -65,22 +65,22 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
         const expected = ['metadata $0', ',', '|'].sort();
 
-        await assertSuggestions('from a, b ?', expected);
+        await assertSuggestions('from a, b /', expected);
       });
 
       test('on <kbd>SPACE</kbd> after "METADATA" keyword suggests all metadata fields', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a, b [metadata ?]', metadataFields);
-        await assertSuggestions('from a, b metadata ?', metadataFields);
+        await assertSuggestions('from a, b [metadata /]', metadataFields);
+        await assertSuggestions('from a, b metadata /', metadataFields);
       });
 
       test('filters out already used metadata fields', async () => {
         const { assertSuggestions } = await setup();
         const metadataFieldsSandIndex = metadataFields.filter((field) => field !== '_index');
 
-        await assertSuggestions('from a, b [metadata _index, ?]', metadataFieldsSandIndex);
-        await assertSuggestions('from a, b metadata _index, ?', metadataFieldsSandIndex);
+        await assertSuggestions('from a, b [metadata _index, /]', metadataFieldsSandIndex);
+        await assertSuggestions('from a, b metadata _index, /', metadataFieldsSandIndex);
       });
     });
   });

@@ -239,7 +239,7 @@ export function getFieldNamesByType(_requestedType: string | string[]) {
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
-export const setup = async (caret = '?') => {
+export const setup = async (caret = '/') => {
   if (caret.length !== 1) {
     throw new Error('Caret must be a single character');
   }
