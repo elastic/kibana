@@ -2,6 +2,10 @@
   background-color: $euiColorPrimary !important;
 }
 
+.timeSlider-prependButton {
+  background-color: transparent !important;
+}
+
 .timeSlider__anchor {
   width: 100%;
   height: 100%;
@@ -9,7 +13,7 @@
   overflow: hidden;
 
   .euiText {
-    background-color: transparent !important; TODO revert to this rule once control group provides background color
+    background-color: transparent !important;
 
     &:hover {
       text-decoration: underline;
