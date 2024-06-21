@@ -27,8 +27,6 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Data Stream', function () {
-    // see details: https://github.com/elastic/kibana/issues/186648
-    this.tags(['failsOnMKI']);
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -88,7 +86,8 @@ export default function ({ getService }: FtrProviderContext) {
             preferILM: true,
           },
         ],
-        lifecycle: { enabled: true },
+        lifecycle: expect.objectContaining({ enabled: true }),
+        maxTimeStamp: 0,
         nextGenerationManagedBy: 'Data stream lifecycle',
         privileges: { delete_index: true, manage_data_stream_lifecycle: true },
         timeStampField: { name: '@timestamp' },
