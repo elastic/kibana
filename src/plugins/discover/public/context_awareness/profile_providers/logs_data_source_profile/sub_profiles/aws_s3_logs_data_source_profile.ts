@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
-import { extendProfileProvider } from '../extend_profile_provider';
-import { extractIndexPatternFrom } from '../extract_index_pattern_from';
+import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { extendProfileProvider } from '../../extend_profile_provider';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
-export const createK8ContainerLogsDataSourceProfileProvider = (
+export const createAwsS3LogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'k8_container_logs_data_source',
+    profileId: 'aws_s3_logs_data_source',
     profile: {
       getDefaultAppState: () => (params) => {
         const columns = [];
@@ -25,10 +25,10 @@ export const createK8ContainerLogsDataSourceProfileProvider = (
 
         columns.push(
           { name: 'message' },
-          { name: 'log.level', width: 150 },
-          { name: 'kubernetes.pod.name', width: 200 },
-          { name: 'kubernetes.namespace', width: 200 },
-          { name: 'orchestrator.cluster.name', width: 200 }
+          { name: 'aws.s3.bucket.name', width: 200 },
+          { name: 'aws.s3.object.key', width: 200 },
+          { name: 'aws.s3access.operation', width: 200 },
+          { name: 'client.ip', width: 150 }
         );
 
         return { columns, rowHeight: 0 };
@@ -37,7 +37,7 @@ export const createK8ContainerLogsDataSourceProfileProvider = (
     resolve: (params) => {
       const indexPattern = extractIndexPatternFrom(params);
 
-      if (indexPattern !== 'logs-k8_container') {
+      if (indexPattern !== 'logs-aws_s3') {
         return { isMatch: false };
       }
 

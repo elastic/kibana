@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
-import { extendProfileProvider } from '../extend_profile_provider';
-import { extractIndexPatternFrom } from '../extract_index_pattern_from';
+import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { extendProfileProvider } from '../../extend_profile_provider';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
-export const createApacheErrorLogsDataSourceProfileProvider = (
+export const createNginxAccessLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'apache_error_logs_data_source',
+    profileId: 'nginx_access_logs_data_source',
     profile: {
       getDefaultAppState: () => (params) => {
         const columns = [];
@@ -25,8 +25,10 @@ export const createApacheErrorLogsDataSourceProfileProvider = (
 
         columns.push(
           { name: 'message' },
-          { name: 'log.level', width: 150 },
-          { name: 'client.ip', width: 150 }
+          { name: 'url.path', width: 200 },
+          { name: 'http.response.status_code', width: 200 },
+          { name: 'client.ip', width: 150 },
+          { name: 'host.name', width: 250 }
         );
 
         return { columns, rowHeight: 0 };
@@ -35,7 +37,7 @@ export const createApacheErrorLogsDataSourceProfileProvider = (
     resolve: (params) => {
       const indexPattern = extractIndexPatternFrom(params);
 
-      if (indexPattern !== 'logs-apache_error') {
+      if (indexPattern !== 'logs-nginx_access') {
         return { isMatch: false };
       }
 
