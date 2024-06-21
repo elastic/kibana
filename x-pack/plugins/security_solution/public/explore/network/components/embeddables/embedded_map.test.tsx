@@ -16,7 +16,7 @@ import { useIsFieldInIndexPattern } from '../../../containers/fields';
 import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 
 jest.mock('./map_config');
-jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../containers/fields');
 jest.mock('./index_patterns_missing_prompt', () => ({
   IndexPatternsMissingPrompt: jest.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),

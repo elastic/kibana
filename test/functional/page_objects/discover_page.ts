@@ -509,7 +509,9 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public showsErrorCallout() {
-    return this.testSubjects.existOrFail('discoverErrorCalloutTitle');
+    this.retry.try(async () => {
+      await this.testSubjects.existOrFail('discoverErrorCalloutTitle');
+    });
   }
 
   public getDiscoverErrorMessage() {

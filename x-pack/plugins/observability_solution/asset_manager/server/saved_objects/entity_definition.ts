@@ -24,17 +24,17 @@ export const entityDefinition: SavedObjectsType = {
       filter: { type: 'keyword' },
       indexPatterns: { type: 'keyword' },
       identityFields: { type: 'object' },
-      categories: { type: 'keyword' },
       metadata: { type: 'object' },
       metrics: { type: 'object' },
       staticFields: { type: 'object' },
+      managed: { type: 'boolean' },
     },
   },
   management: {
     displayName: 'Entity Definition',
     importableAndExportable: false,
-    getTitle(sloSavedObject: SavedObject<EntityDefinition>) {
-      return `EntityDefinition: [${sloSavedObject.attributes.name}]`;
+    getTitle(savedObject: SavedObject<EntityDefinition>) {
+      return `EntityDefinition: [${savedObject.attributes.name}]`;
     },
   },
 };

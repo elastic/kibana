@@ -247,7 +247,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -353,7 +352,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -415,7 +413,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -761,7 +758,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -874,7 +870,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -981,7 +976,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -1084,7 +1078,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -1187,7 +1180,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,

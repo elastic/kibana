@@ -155,7 +155,7 @@
         "label": "AlertSummary",
         "description": [],
         "signature": [
-          "({ alertSummaryFields }: AlertSummaryProps) => JSX.Element"
+          "({ alert, alertSummaryFields }: AlertSummaryProps) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability/public/pages/alert_details/components/alert_summary.tsx",
         "deprecated": false,
@@ -166,7 +166,7 @@
             "id": "def-public.AlertSummary.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ alertSummaryFields }",
+            "label": "{ alert, alertSummaryFields }",
             "description": [],
             "signature": [
               "AlertSummaryProps"
@@ -799,7 +799,7 @@
         "label": "getElasticsearchQueryOrThrow",
         "description": [],
         "signature": [
-          "(kuery: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }) => never[] | ",
+          "(kuery: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }) => never[] | ",
           "QueryDslQueryContainer",
           " | { bool: ",
           {
@@ -823,7 +823,7 @@
             "label": "kuery",
             "description": [],
             "signature": [
-              "string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }"
+              "string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }"
             ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/parse_kuery.ts",
             "deprecated": false,
@@ -836,32 +836,58 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.KibanaReactStorybookDecorator",
+        "id": "def-public.getGroupFilters",
         "type": "Function",
         "tags": [],
-        "label": "KibanaReactStorybookDecorator",
+        "label": "getGroupFilters",
         "description": [],
         "signature": [
-          "(Story: React.ComponentType<{}>) => JSX.Element"
+          "(groups?: ",
+          "Group",
+          "[] | undefined, groupFieldName?: string | undefined) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]"
         ],
-        "path": "x-pack/plugins/observability_solution/observability/public/utils/kibana_react.storybook_decorator.tsx",
+        "path": "x-pack/plugins/observability_solution/observability/common/custom_threshold_rule/helpers/get_group.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "observability",
-            "id": "def-public.KibanaReactStorybookDecorator.$1",
-            "type": "CompoundType",
+            "id": "def-public.getGroupFilters.$1",
+            "type": "Array",
             "tags": [],
-            "label": "Story",
+            "label": "groups",
             "description": [],
             "signature": [
-              "React.ComponentType<{}>"
+              "Group",
+              "[] | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/observability/public/utils/kibana_react.storybook_decorator.tsx",
+            "path": "x-pack/plugins/observability_solution/observability/common/custom_threshold_rule/helpers/get_group.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.getGroupFilters.$2",
+            "type": "string",
+            "tags": [],
+            "label": "groupFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/common/custom_threshold_rule/helpers/get_group.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1037,6 +1063,39 @@
               ">"
             ],
             "path": "x-pack/plugins/observability_solution/observability/public/utils/test_helper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.RuleConditionChart",
+        "type": "Function",
+        "tags": [],
+        "label": "RuleConditionChart",
+        "description": [],
+        "signature": [
+          "({\n  metricExpression,\n  searchConfiguration,\n  dataView,\n  groupBy,\n  error,\n  annotations,\n  timeRange,\n  chartOptions: { seriesType, interval } = {},\n  additionalFilters = [],\n}: RuleConditionChartProps) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/public/components/rule_condition_chart/rule_condition_chart.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.RuleConditionChart.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  metricExpression,\n  searchConfiguration,\n  dataView,\n  groupBy,\n  error,\n  annotations,\n  timeRange,\n  chartOptions: { seriesType, interval } = {},\n  additionalFilters = [],\n}",
+            "description": [],
+            "signature": [
+              "RuleConditionChartProps"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/components/rule_condition_chart/rule_condition_chart.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2632,7 +2691,7 @@
             "label": "observabilityShared",
             "description": [],
             "signature": [
-              "{ locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
+              "{ registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -2930,26 +2989,26 @@
             "signature": [
               "{ get: (id: string) => ",
               {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "common",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-common.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>; list: () => ",
               {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "common",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-common.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>[]; register: (objectType: ",
               {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "common",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-common.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
@@ -3256,6 +3315,26 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.navigation",
+            "type": "Object",
+            "tags": [],
+            "label": "navigation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "navigation",
+                "scope": "public",
+                "docId": "kibNavigationPluginApi",
+                "section": "def-public.NavigationPublicStart",
+                "text": "NavigationPublicStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.observabilityShared",
             "type": "Object",
             "tags": [],
@@ -3337,9 +3416,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -3353,9 +3432,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -3369,9 +3448,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -4631,6 +4710,22 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.GenericAggType",
+        "type": "Type",
+        "tags": [],
+        "label": "GenericAggType",
+        "description": [],
+        "signature": [
+          "\"custom\" | ",
+          "Aggregators"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/public/components/rule_condition_chart/rule_condition_chart.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -7889,6 +7984,41 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-server.existsQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "existsQuery",
+        "description": [],
+        "signature": [
+          "(field: string) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.existsQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-server.getInspectResponse",
         "type": "Function",
         "tags": [],
@@ -10170,7 +10300,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "false"
+                  "true"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -13830,6 +13960,21 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableContinuousRollups\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmEnableMultiSignal",
+        "type": "string",
+        "tags": [],
+        "label": "apmEnableMultiSignal",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableMultiSignal\""
         ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,

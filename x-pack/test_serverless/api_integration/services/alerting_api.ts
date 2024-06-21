@@ -12,22 +12,26 @@ import type {
 
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { RoleCredentials } from '../../shared/services';
 import { SloBurnRateRuleParams } from './slo_api';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function AlertingApiProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
-  const supertest = getService('supertest');
   const es = getService('es');
   const requestTimeout = 30 * 1000;
   const retryTimeout = 120 * 1000;
   const logger = getService('log');
+  const svlCommonApi = getService('svlCommonApi');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
     async waitForRuleStatus({
+      roleAuthc,
       ruleId,
       expectedStatus,
     }: {
+      roleAuthc: RoleCredentials;
       ruleId: string;
       expectedStatus: string;
     }) {
@@ -35,10 +39,10 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         throw new Error(`'ruleId' is undefined`);
       }
       return await retry.tryForTime(retryTimeout, async () => {
-        const response = await supertest
+        const response = await supertestWithoutAuth
           .get(`/api/alerting/rule/${ruleId}`)
-          .set('kbn-xsrf', 'foo')
-          .set('x-elastic-internal-origin', 'foo')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
           .timeout(requestTimeout);
         const { execution_status: executionStatus } = response.body || {};
         const { status } = executionStatus || {};
@@ -62,7 +66,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
           rest_total_hits_as_int: true,
         });
         logger.debug(`Found ${response.hits.total} docs, looking for atleast ${docCountTarget}.`);
-        if (!response.hits.total || response.hits.total < docCountTarget) {
+        if (!response.hits.total || (response.hits.total as number) < docCountTarget) {
           throw new Error('No hits found');
         }
         return response;
@@ -97,11 +101,19 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async createIndexConnector({ name, indexName }: { name: string; indexName: string }) {
-      const { body } = await supertest
+    async createIndexConnector({
+      roleAuthc,
+      name,
+      indexName,
+    }: {
+      roleAuthc: RoleCredentials;
+      name: string;
+      indexName: string;
+    }) {
+      const { body } = await supertestWithoutAuth
         .post(`/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .send({
           name,
           config: {
@@ -114,6 +126,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
     },
 
     async createRule({
+      roleAuthc,
       name,
       ruleTypeId,
       params,
@@ -122,6 +135,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       schedule,
       consumer,
     }: {
+      roleAuthc: RoleCredentials;
       ruleTypeId: string;
       name: string;
       params: MetricThresholdParams | ThresholdParams | SloBurnRateRuleParams;
@@ -130,10 +144,10 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       schedule?: { interval: string };
       consumer: string;
     }) {
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .post(`/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .send({
           params,
           consumer,
@@ -148,14 +162,14 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       return body;
     },
 
-    async findRule(ruleId: string) {
+    async findRule(roleAuthc: RoleCredentials, ruleId: string) {
       if (!ruleId) {
         throw new Error(`'ruleId' is undefined`);
       }
-      const response = await supertest
+      const response = await supertestWithoutAuth
         .get('/api/alerting/rules/_find')
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader);
       return response.body.data.find((obj: any) => obj.id === ruleId);
     },
   };

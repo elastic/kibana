@@ -7,13 +7,11 @@ properties:
   class:
     description: The class or type of the event.
     type: string
-    examples:
-      - cpu load
+    example: cpu load
   component:
     description: The component of the source machine that is responsible for the event.
     type: string
-    examples:
-      - eth0
+    example: eth0
   customDetails:
     description: Additional details to add to the event.
     type: object
@@ -31,8 +29,7 @@ properties:
   group:
     description: The logical grouping of components of a service.
     type: string
-    examples:
-      - app-stack
+    example: app-stack
   links:
     description: A list of links to add to the event.
     type: array

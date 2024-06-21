@@ -141,6 +141,7 @@ export interface PluginSetupContract {
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
   setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
+  isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
 }
 
 export interface PluginStartContract {
@@ -402,6 +403,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             "Enabled connector types can be set only if they haven't already been set in the config"
           );
         }
+      },
+      isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
+        return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
       },
     };
   }

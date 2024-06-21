@@ -74,6 +74,7 @@ import type {
   InternalRuleUpdate,
   NewTermsRuleParams,
   NewTermsSpecificRuleParams,
+  RuleSourceCamelCased,
 } from '../../rule_schema';
 import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
 import {
@@ -457,6 +458,7 @@ export const convertUpdateAPIToInternalSchema = ({
       from: ruleUpdate.from ?? 'now-6m',
       investigationFields: ruleUpdate.investigation_fields,
       immutable: existingRule.params.immutable,
+      ruleSource: convertImmutableToRuleSource(existingRule.params.immutable),
       license: ruleUpdate.license,
       outputIndex: ruleUpdate.output_index ?? '',
       timelineId: ruleUpdate.timeline_id,
@@ -514,6 +516,7 @@ export const convertPatchAPIToInternalSchema = (
       investigationFields: nextParams.investigation_fields ?? existingParams.investigationFields,
       from: nextParams.from ?? existingParams.from,
       immutable: existingParams.immutable,
+      ruleSource: convertImmutableToRuleSource(existingParams.immutable),
       license: nextParams.license ?? existingParams.license,
       outputIndex: nextParams.output_index ?? existingParams.outputIndex,
       timelineId: nextParams.timeline_id ?? existingParams.timelineId,
@@ -578,6 +581,7 @@ export const convertCreateAPIToInternalSchema = (
       investigationFields: input.investigation_fields,
       from: input.from ?? DEFAULT_FROM,
       immutable,
+      ruleSource: convertImmutableToRuleSource(immutable),
       license: input.license,
       outputIndex: input.output_index ?? '',
       timelineId: input.timeline_id,
@@ -826,13 +830,16 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     author: [],
   };
 
+  const immutable = true;
+
   const ruleResponseSpecificFields = {
     id: uuidv4(),
     updated_at: new Date(0).toISOString(),
     updated_by: '',
     created_at: new Date(0).toISOString(),
     created_by: '',
-    immutable: true,
+    immutable,
+    rule_source: convertObjectKeysToSnakeCase(convertImmutableToRuleSource(immutable)),
     revision: 1,
   };
 
@@ -842,4 +849,17 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     required_fields: addEcsToRequiredFields(prebuiltRuleAsset.required_fields),
     ...ruleResponseSpecificFields,
   });
+};
+
+export const convertImmutableToRuleSource = (immutable: boolean): RuleSourceCamelCased => {
+  if (immutable) {
+    return {
+      type: 'external',
+      isCustomized: false,
+    };
+  }
+
+  return {
+    type: 'internal',
+  };
 };

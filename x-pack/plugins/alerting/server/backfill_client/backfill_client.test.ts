@@ -172,6 +172,21 @@ function getBulkCreateParam(
   };
 }
 
+const mockCreatePointInTimeFinderAsInternalUser = (
+  response = {
+    saved_objects: [
+      { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, attributes: getMockAdHocRunAttributes() },
+    ],
+  }
+) => {
+  unsecuredSavedObjectsClient.createPointInTimeFinder = jest.fn().mockResolvedValue({
+    close: jest.fn(),
+    find: function* asyncGenerator() {
+      yield response;
+    },
+  });
+};
+
 describe('BackfillClient', () => {
   let backfillClient: BackfillClient;
 
@@ -853,6 +868,311 @@ describe('BackfillClient', () => {
           },
         },
       ]);
+    });
+  });
+
+  describe('deleteBackfillForRules()', () => {
+    test('should successfully delete backfill for single rule', async () => {
+      mockCreatePointInTimeFinderAsInternalUser();
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [{ id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true }],
+      });
+      taskManagerStart.bulkRemove.mockResolvedValueOnce({
+        statuses: [{ id: 'abc', type: 'task', success: true }],
+      });
+      await backfillClient.deleteBackfillForRules({
+        ruleIds: ['1'],
+        namespace: 'default',
+        unsecuredSavedObjectsClient,
+      });
+
+      expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        hasReference: [{ id: '1', type: RULE_SAVED_OBJECT_TYPE }],
+        namespaces: ['default'],
+      });
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+      ]);
+      expect(taskManagerStart.bulkRemove).toHaveBeenCalledWith(['abc']);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('should successfully delete multiple backfill for single rule', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            id: 'abc',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: getMockAdHocRunAttributes(),
+          },
+          {
+            id: 'def',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: getMockAdHocRunAttributes(),
+          },
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true },
+          { id: 'def', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+      taskManagerStart.bulkRemove.mockResolvedValueOnce({
+        statuses: [
+          { id: 'abc', type: 'task', success: true },
+          { id: 'def', type: 'task', success: true },
+        ],
+      });
+      await backfillClient.deleteBackfillForRules({
+        ruleIds: ['1'],
+        unsecuredSavedObjectsClient,
+      });
+
+      expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        hasReference: [{ id: '1', type: RULE_SAVED_OBJECT_TYPE }],
+      });
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+        { id: 'def', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+      ]);
+      expect(taskManagerStart.bulkRemove).toHaveBeenCalledWith(['abc', 'def']);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('should successfully delete backfill for multiple rules', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            id: 'abc',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: getMockAdHocRunAttributes(),
+          },
+          {
+            id: 'def',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: getMockAdHocRunAttributes(),
+          },
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true },
+          { id: 'def', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+      taskManagerStart.bulkRemove.mockResolvedValueOnce({
+        statuses: [
+          { id: 'abc', type: 'task', success: true },
+          { id: 'def', type: 'task', success: true },
+        ],
+      });
+      await backfillClient.deleteBackfillForRules({
+        ruleIds: ['1', '2', '3'],
+        namespace: 'default',
+        unsecuredSavedObjectsClient,
+      });
+
+      expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        hasReference: [
+          { id: '1', type: RULE_SAVED_OBJECT_TYPE },
+          { id: '2', type: RULE_SAVED_OBJECT_TYPE },
+          { id: '3', type: RULE_SAVED_OBJECT_TYPE },
+        ],
+        namespaces: ['default'],
+      });
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+        { id: 'def', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+      ]);
+      expect(taskManagerStart.bulkRemove).toHaveBeenCalledWith(['abc', 'def']);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('should not delete backfill if none found to delete', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [] });
+      await backfillClient.deleteBackfillForRules({
+        ruleIds: ['1', '2', '3'],
+        namespace: 'default',
+        unsecuredSavedObjectsClient,
+      });
+
+      expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        hasReference: [
+          { id: '1', type: RULE_SAVED_OBJECT_TYPE },
+          { id: '2', type: RULE_SAVED_OBJECT_TYPE },
+          { id: '3', type: RULE_SAVED_OBJECT_TYPE },
+        ],
+        namespaces: ['default'],
+      });
+      expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      expect(taskManagerStart.bulkRemove).not.toHaveBeenCalled();
+    });
+
+    test('should handle errors from createPointInTimeFinder', async () => {
+      unsecuredSavedObjectsClient.createPointInTimeFinder = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('error!'));
+
+      await backfillClient.deleteBackfillForRules({
+        ruleIds: ['1', '2', '3'],
+        namespace: 'default',
+        unsecuredSavedObjectsClient,
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      expect(taskManagerStart.bulkRemove).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Error deleting backfill jobs for rule IDs: 1,2,3 - error!`
+      );
+    });
+
+    test('should handle errors from bulkDelete', async () => {
+      mockCreatePointInTimeFinderAsInternalUser();
+      unsecuredSavedObjectsClient.bulkDelete.mockRejectedValueOnce(new Error('delete error!'));
+
+      await backfillClient.deleteBackfillForRules({
+        ruleIds: ['1', '2', '3'],
+        namespace: 'default',
+        unsecuredSavedObjectsClient,
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Error deleting backfill jobs for rule IDs: 1,2,3 - delete error!`
+      );
+
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+      ]);
+      expect(taskManagerStart.bulkRemove).not.toHaveBeenCalled();
+    });
+
+    test('should handle errors from bulkRemove', async () => {
+      mockCreatePointInTimeFinderAsInternalUser();
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [{ id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true }],
+      });
+      taskManagerStart.bulkRemove.mockRejectedValueOnce(new Error('delete task error!'));
+
+      await backfillClient.deleteBackfillForRules({
+        ruleIds: ['1', '2', '3'],
+        namespace: 'default',
+        unsecuredSavedObjectsClient,
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Error deleting backfill jobs for rule IDs: 1,2,3 - delete task error!`
+      );
+
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+      ]);
+      expect(taskManagerStart.bulkRemove).toHaveBeenCalledWith(['abc']);
+    });
+
+    test('should handle individual errors from bulkDelete', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            id: 'abc',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: getMockAdHocRunAttributes(),
+          },
+          {
+            id: 'def',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: getMockAdHocRunAttributes(),
+          },
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true },
+          {
+            id: 'def',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            success: false,
+            error: { error: 'Error', message: 'delete failed', statusCode: 409 },
+          },
+        ],
+      });
+      taskManagerStart.bulkRemove.mockResolvedValueOnce({
+        statuses: [{ id: 'abc', type: 'task', success: true }],
+      });
+
+      await backfillClient.deleteBackfillForRules({
+        ruleIds: ['1', '2', '3'],
+        namespace: 'default',
+        unsecuredSavedObjectsClient,
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+        { id: 'def', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+      ]);
+      expect(taskManagerStart.bulkRemove).toHaveBeenCalledWith(['abc']);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Error deleting backfill jobs with IDs: def with errors: delete failed - jobs and associated task were not deleted.`
+      );
+    });
+
+    test('should handle individual errors from bulkRemove', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            id: 'abc',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: getMockAdHocRunAttributes(),
+          },
+          {
+            id: 'def',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: getMockAdHocRunAttributes(),
+          },
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true },
+          { id: 'def', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+      taskManagerStart.bulkRemove.mockResolvedValueOnce({
+        statuses: [
+          { id: 'abc', type: 'task', success: true },
+          {
+            id: 'def',
+            type: 'task',
+            success: false,
+            error: { error: 'Error', message: 'delete failed', statusCode: 409 },
+          },
+        ],
+      });
+
+      await backfillClient.deleteBackfillForRules({
+        ruleIds: ['1', '2', '3'],
+        namespace: 'default',
+        unsecuredSavedObjectsClient,
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+        { id: 'def', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+      ]);
+      expect(taskManagerStart.bulkRemove).toHaveBeenCalledWith(['abc', 'def']);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Error deleting tasks with IDs: def with errors: delete failed`
+      );
     });
   });
 });

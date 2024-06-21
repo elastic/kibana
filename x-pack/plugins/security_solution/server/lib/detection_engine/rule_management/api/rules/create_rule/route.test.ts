@@ -20,6 +20,7 @@ import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detect
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 
 describe('Create rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -31,9 +32,7 @@ describe('Create rule route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
     clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // creation succeeds
-    clients.rulesManagementClient.createCustomRule.mockResolvedValue(
-      getRuleMock(getQueryRuleParams())
-    );
+    clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
@@ -71,7 +70,7 @@ describe('Create rule route', () => {
     });
 
     test('returns a 403 if ML Authz fails', async () => {
-      clients.rulesManagementClient.createCustomRule.mockImplementation(async () => {
+      clients.detectionRulesClient.createCustomRule.mockImplementation(async () => {
         throw new HttpAuthzError('mocked validation message');
       });
 
@@ -103,7 +102,7 @@ describe('Create rule route', () => {
     });
 
     test('catches error if creation throws', async () => {
-      clients.rulesManagementClient.createCustomRule.mockImplementation(async () => {
+      clients.detectionRulesClient.createCustomRule.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(

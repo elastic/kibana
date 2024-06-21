@@ -10,32 +10,32 @@ import { i18n } from '@kbn/i18n';
 export const errorCountMessage = i18n.translate(
   'xpack.apm.alertTypes.errorCount.defaultActionMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} is active with the following conditions:
+'{{rule.name}}' is active with the following conditions:
 
-- Service name: \\{\\{context.serviceName\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Error count: \\{\\{context.triggerValue\\}\\} errors over the last \\{\\{context.interval\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}
+- Service name: '{{context.serviceName}}'
+- Environment: '{{context.environment}}'
+- Error count: '{{context.triggerValue}}' errors over the last '{{context.interval}}'
+- Threshold: '{{context.threshold}}'
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
 export const errorCountRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.errorCount.defaultRecoveryMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} has recovered.
+'{{rule.name}}' has recovered.
 
-- Service name: \\{\\{context.serviceName\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Error count: \\{\\{context.triggerValue\\}\\} errors over the last \\{\\{context.interval\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}
+- Service name: '{{context.serviceName}}'
+- Environment: '{{context.environment}}'
+- Error count: '{{context.triggerValue}}' errors over the last '{{context.interval}}'
+- Threshold: '{{context.threshold}}'
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
@@ -43,36 +43,36 @@ export const errorCountRecoveryMessage = i18n.translate(
 export const transactionDurationMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionDuration.defaultActionMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} is active with the following conditions:
+'{{rule.name}}' is active with the following conditions:
 
-- Service name: \\{\\{context.serviceName\\}\\}
-- Transaction type: \\{\\{context.transactionType\\}\\}
-- Transaction name: \\{\\{context.transactionName\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Latency: \\{\\{context.triggerValue\\}\\} over the last \\{\\{context.interval\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}ms
+- Service name: '{{context.serviceName}}'
+- Transaction type: '{{context.transactionType}}'
+- Transaction name: '{{context.transactionName}}'
+- Environment: '{{context.environment}}'
+- Latency: '{{context.triggerValue}}' over the last '{{context.interval}}'
+- Threshold: '{{context.threshold}}'ms
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
 export const transactionDurationRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionDuration.defaultRecoveryMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} has recovered.
+'{{rule.name}}' has recovered.
 
-- Service name: \\{\\{context.serviceName\\}\\}
-- Transaction type: \\{\\{context.transactionType\\}\\}
-- Transaction name: \\{\\{context.transactionName\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Latency: \\{\\{context.triggerValue\\}\\} over the last \\{\\{context.interval\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}ms
+- Service name: '{{context.serviceName}}'
+- Transaction type: '{{context.transactionType}}'
+- Transaction name: '{{context.transactionName}}'
+- Environment: '{{context.environment}}'
+- Latency: '{{context.triggerValue}}' over the last '{{context.interval}}'
+- Threshold: '{{context.threshold}}'ms
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
@@ -80,34 +80,34 @@ export const transactionDurationRecoveryMessage = i18n.translate(
 export const transactionErrorRateMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionErrorRate.defaultActionMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} is active with the following conditions:
+'{{rule.name}}' is active with the following conditions:
 
-- Service name: \\{\\{context.serviceName\\}\\}
-- Transaction type: \\{\\{context.transactionType\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Failed transaction rate: \\{\\{context.triggerValue\\}\\}% of errors over the last \\{\\{context.interval\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}%
+- Service name: '{{context.serviceName}}'
+- Transaction type: '{{context.transactionType}}'
+- Environment: '{{context.environment}}'
+- Failed transaction rate: '{{context.triggerValue}}'% of errors over the last '{{context.interval}}'
+- Threshold: '{{context.threshold}}'%
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
 export const transactionErrorRateRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionErrorRate.defaultRecoveryMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} has recovered.
+'{{rule.name}}' has recovered.
 
-- Service name: \\{\\{context.serviceName\\}\\}
-- Transaction type: \\{\\{context.transactionType\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Failed transaction rate: \\{\\{context.triggerValue\\}\\}% of errors over the last \\{\\{context.interval\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}%
+- Service name: '{{context.serviceName}}'
+- Transaction type: '{{context.transactionType}}'
+- Environment: '{{context.environment}}'
+- Failed transaction rate: '{{context.triggerValue}}'% of errors over the last '{{context.interval}}'
+- Threshold: '{{context.threshold}}'%
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
@@ -115,34 +115,34 @@ export const transactionErrorRateRecoveryMessage = i18n.translate(
 export const anomalyMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionDurationAnomaly.defaultActionMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} is active with the following conditions:
+'{{rule.name}}' is active with the following conditions:
 
-- Service name: \\{\\{context.serviceName\\}\\}
-- Transaction type: \\{\\{context.transactionType\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Severity: \\{\\{context.triggerValue\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}
+- Service name: '{{context.serviceName}}'
+- Transaction type: '{{context.transactionType}}'
+- Environment: '{{context.environment}}'
+- Severity: '{{context.triggerValue}}'
+- Threshold: '{{context.threshold}}'
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
 export const anomalyRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionDurationAnomaly.defaultRecoveryMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} has recovered.
+'{{rule.name}}' has recovered.
 
-- Service name: \\{\\{context.serviceName\\}\\}
-- Transaction type: \\{\\{context.transactionType\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Severity: \\{\\{context.triggerValue\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}
+- Service name: '{{context.serviceName}}'
+- Transaction type: '{{context.transactionType}}'
+- Environment: '{{context.environment}}'
+- Severity: '{{context.triggerValue}}'
+- Threshold: '{{context.threshold}}'
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );

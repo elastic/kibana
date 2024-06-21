@@ -58,7 +58,7 @@ export class CustomizeSpace extends Component<Props, State> {
     });
 
     return (
-      <SectionPanel title={panelTitle}>
+      <SectionPanel title={panelTitle} dataTestSubj="generalPanel">
         <EuiDescribedFormGroup
           title={
             <EuiTitle size="xs">

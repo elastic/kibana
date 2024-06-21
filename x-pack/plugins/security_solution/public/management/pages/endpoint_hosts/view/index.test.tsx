@@ -25,7 +25,7 @@ import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_con
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
 import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../../../common/lib/kibana';
-import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
+import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint/endpoint_isolation/mocks';
 import {
   isFailedResourceState,
   isLoadedResourceState,
@@ -60,6 +60,8 @@ const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough, it needs to be inline in this one file
 jest.mock('@kbn/i18n-react', () => {
+  const { i18n } = jest.requireActual('@kbn/i18n');
+  i18n.init({ locale: 'en' });
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
@@ -1029,7 +1031,7 @@ describe('when on the endpoint list page', () => {
       const agentPolicy = generator.generateAgentPolicy();
       agentPolicyId = agentPolicy.id;
       agentId = hosts[0].metadata.elastic.agent.id;
-      packagePolicy.policy_id = agentPolicyId;
+      packagePolicy.policy_ids = [agentPolicyId];
 
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: hostInfo,

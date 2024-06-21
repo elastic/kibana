@@ -21,7 +21,7 @@ export async function sendGetAllFleetServerAgents(onlyCount: boolean = false) {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE}`,
   });
   const agentPolicyIds = [
-    ...new Set(packagePoliciesRes?.data?.items.map((p) => p.policy_id) ?? []),
+    ...new Set(packagePoliciesRes?.data?.items.flatMap((p) => p.policy_ids) ?? []),
   ];
 
   if (agentPolicyIds.length === 0) {
