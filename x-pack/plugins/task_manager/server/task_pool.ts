@@ -18,7 +18,7 @@ import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
 import { TaskManagerStat } from './task_events';
 
 interface Opts {
-  totalCapacity: number;
+  totalCapacity$: Observable<number>;
   logger: Logger;
 }
 
@@ -53,8 +53,10 @@ export class TaskPool {
    */
   constructor(opts: Opts) {
     this.logger = opts.logger;
-    // TODO: Pull this from an observable?
-    this.totalCapacity = opts.totalCapacity;
+    opts.totalCapacity$.subscribe((totalCapacity) => {
+      this.logger.debug(`Task pool now using ${totalCapacity} as the total capacity value`);
+      this.totalCapacity = totalCapacity;
+    });
   }
 
   public get load(): Observable<TaskManagerStat> {

@@ -13,6 +13,7 @@ import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring
 import { AveragedStat } from './task_run_calcultors';
 import { TaskPersistenceTypes } from './task_run_statistics';
 import { asErr, asOk, map, Result } from '../lib/result_type';
+import { TaskCost } from '../task';
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {
@@ -61,8 +62,7 @@ export function estimateCapacity(
     non_recurring: percentageOfExecutionsUsedByNonRecurringTasks,
   } = capacityStats.runtime.value.execution.persistence;
   const { overdue, capacity_requirements: capacityRequirements } = workload;
-  const { poll_interval: pollInterval, max_workers: maxWorkers } =
-    capacityStats.configuration.value;
+  const { poll_interval: pollInterval, capacity } = capacityStats.configuration.value;
 
   /**
    * On average, how many polling cycles does it take to execute a task?
@@ -80,8 +80,9 @@ export function estimateCapacity(
   /**
    * Given the current configuration how much task capacity do we have?
    */
+  // TODO: Is this the right formula using Normal cost?
   const capacityPerMinutePerKibana = Math.round(
-    ((60 * 1000) / (averagePollIntervalsPerExecution * pollInterval)) * maxWorkers
+    ((60 * 1000) / (averagePollIntervalsPerExecution * pollInterval)) * (capacity / TaskCost.Normal)
   );
 
   /**

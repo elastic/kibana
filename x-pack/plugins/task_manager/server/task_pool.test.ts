@@ -5,6 +5,7 @@
  * 2.0.
  */
 import sinon from 'sinon';
+import { of } from 'rxjs';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { resolvable, sleep } from './test_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -28,7 +29,7 @@ describe('TaskPool', () => {
 
   test('occupiedCapacity is a sum of running tasks cost', async () => {
     const pool = new TaskPool({
-      totalCapacity: 400,
+      totalCapacity$: of(400),
       logger: loggingSystemMock.create().get(),
     });
 
@@ -40,7 +41,7 @@ describe('TaskPool', () => {
 
   test('availableCapacity is a function of availableCapacity - occupiedCapacity', async () => {
     const pool = new TaskPool({
-      totalCapacity: 20,
+      totalCapacity$: of(20),
       logger: loggingSystemMock.create().get(),
     });
 
@@ -52,7 +53,7 @@ describe('TaskPool', () => {
 
   test('does not run tasks that are beyond its available capacity', async () => {
     const pool = new TaskPool({
-      totalCapacity: 4,
+      totalCapacity$: of(4),
       logger: loggingSystemMock.create().get(),
     });
 
@@ -74,7 +75,7 @@ describe('TaskPool', () => {
   test('should log when marking a Task as running fails', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      totalCapacity: 4,
+      totalCapacity$: of(4),
       logger,
     });
 
@@ -99,7 +100,7 @@ describe('TaskPool', () => {
   test('should log when running a Task fails', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      totalCapacity: 6,
+      totalCapacity$: of(6),
       logger,
     });
 
@@ -122,7 +123,7 @@ describe('TaskPool', () => {
   test('should not log when running a Task fails due to the Task SO having been deleted while in flight', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      totalCapacity: 6,
+      totalCapacity$: of(6),
       logger,
     });
 
@@ -144,7 +145,7 @@ describe('TaskPool', () => {
   test('Running a task which fails still takes up capacity', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      totalCapacity: 2,
+      totalCapacity$: of(2),
       logger,
     });
 
@@ -161,7 +162,7 @@ describe('TaskPool', () => {
 
   test('clears up capacity when a task completes', async () => {
     const pool = new TaskPool({
-      totalCapacity: 2,
+      totalCapacity$: of(2),
       logger: loggingSystemMock.create().get(),
     });
 
@@ -207,7 +208,7 @@ describe('TaskPool', () => {
   test('run cancels expired tasks prior to running new tasks', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      totalCapacity: 4,
+      totalCapacity$: of(4),
       logger,
     });
 
@@ -273,7 +274,7 @@ describe('TaskPool', () => {
 
   test('calls to availableWorkers ensures we cancel expired tasks', async () => {
     const pool = new TaskPool({
-      totalCapacity: 2,
+      totalCapacity$: of(2),
       logger: loggingSystemMock.create().get(),
     });
 
@@ -322,7 +323,7 @@ describe('TaskPool', () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
       logger,
-      totalCapacity: 40,
+      totalCapacity$: of(40),
     });
 
     const cancelled = resolvable();
@@ -358,7 +359,7 @@ describe('TaskPool', () => {
   test('only allows one task with the same id in the task pool', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      totalCapacity: 4,
+      totalCapacity$: of(4),
       logger,
     });
 
@@ -390,7 +391,7 @@ describe('TaskPool', () => {
   test('works when available workers is 0 but there are tasks to run', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      totalCapacity: 4,
+      totalCapacity$: of(4),
       logger,
     });
 

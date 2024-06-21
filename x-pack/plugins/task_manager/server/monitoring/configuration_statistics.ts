@@ -21,7 +21,7 @@ const CONFIG_FIELDS_TO_EXPOSE = [
 
 export type ConfigStat = Pick<
   TaskManagerConfig,
-  'max_workers' | 'poll_interval' | typeof CONFIG_FIELDS_TO_EXPOSE[number]
+  'capacity' | 'poll_interval' | typeof CONFIG_FIELDS_TO_EXPOSE[number]
 >;
 
 export function createConfigurationAggregator(
@@ -36,10 +36,10 @@ export function createConfigurationAggregator(
         poll_interval: pollInterval,
       }))
     ),
-    managedConfig.maxWorkersConfiguration$.pipe(
-      startWith(config.max_workers),
-      map<number, Pick<TaskManagerConfig, 'max_workers'>>((maxWorkers) => ({
-        max_workers: maxWorkers,
+    managedConfig.capacityConfiguration$.pipe(
+      startWith(config.capacity),
+      map<number, Pick<TaskManagerConfig, 'capacity'>>((capacity) => ({
+        capacity,
       }))
     ),
   ]).pipe(

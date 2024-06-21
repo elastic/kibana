@@ -89,7 +89,7 @@ describe('TaskPollingLifecycle', () => {
     unusedTypes: [],
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
-    maxWorkersConfiguration$: of(100),
+    capacityConfiguration$: of(20),
     pollIntervalConfiguration$: of(100),
     executionContext,
   };
@@ -121,7 +121,7 @@ describe('TaskPollingLifecycle', () => {
 
     test('provides TaskClaiming with the capacity available', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      const maxWorkers$ = new Subject<number>();
+      const capacity$ = new Subject<number>();
       taskManagerOpts.definitions.registerTaskDefinitions({
         report: {
           title: 'report',
@@ -138,13 +138,19 @@ describe('TaskPollingLifecycle', () => {
       new TaskPollingLifecycle({
         ...taskManagerOpts,
         elasticsearchAndSOAvailability$,
-        maxWorkersConfiguration$: maxWorkers$,
+        capacityConfiguration$: capacity$,
       });
 
       const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
         .calls[0][0].getAvailableCapacity;
 
+      capacity$.next(20);
       expect(taskClaimingGetCapacity()).toEqual(20);
+      expect(taskClaimingGetCapacity('report')).toEqual(2);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
+
+      capacity$.next(30);
+      expect(taskClaimingGetCapacity()).toEqual(30);
       expect(taskClaimingGetCapacity('report')).toEqual(2);
       expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
     });

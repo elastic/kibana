@@ -99,7 +99,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   constructor({
     logger,
     middleware,
-    maxWorkersConfiguration$,
+    capacityConfiguration$,
     pollIntervalConfiguration$,
     // Elasticsearch and SavedObjects availability status
     elasticsearchAndSOAvailability$,
@@ -127,7 +127,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     this.pool = new TaskPool({
       logger,
-      totalCapacity: config.capacity,
+      totalCapacity$: capacityConfiguration$,
     });
     this.pool.load.subscribe(emitEvent);
 
@@ -163,7 +163,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     let pollIntervalDelay$: Observable<number> | undefined;
     if (claimStrategy === CLAIM_STRATEGY_DEFAULT) {
       pollIntervalDelay$ = delayOnClaimConflicts(
-        maxWorkersConfiguration$,
+        capacityConfiguration$,
         pollIntervalConfiguration$,
         this.events$,
         config.version_conflict_threshold,

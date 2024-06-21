@@ -108,7 +108,7 @@ describe('managed configuration', () => {
 
   afterEach(() => clock.restore());
 
-  test('should lower max workers when Elasticsearch returns 429 error', async () => {
+  test('should lower capacity when Elasticsearch returns 429 error', async () => {
     savedObjectsClient.create.mockRejectedValueOnce(
       SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b')
     );
@@ -124,12 +124,12 @@ describe('managed configuration', () => {
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
     expect(logger.warn).toHaveBeenCalledWith(
-      'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+      'Capacity configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
     );
     expect(logger.debug).toHaveBeenCalledWith(
-      'Max workers configuration changing from 10 to 8 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
+      'Capacity configuration changing from 20 to 16 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
     );
-    expect(logger.debug).toHaveBeenCalledWith('Task pool now using 10 as the max worker value');
+    expect(logger.debug).toHaveBeenCalledWith('Task pool now using 16 as the total capacity value');
   });
 
   test('should increase poll interval when Elasticsearch returns 429 error', async () => {
@@ -156,7 +156,7 @@ describe('managed configuration', () => {
     expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 3600ms');
   });
 
-  test('should lower max workers when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
+  test('should lower capacity when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
     const childEsClient = esStart.client.asInternalUser.child({}) as jest.Mocked<Client>;
     childEsClient.search.mockImplementationOnce(async () => {
       throw inlineScriptError;
@@ -168,12 +168,12 @@ describe('managed configuration', () => {
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
     expect(logger.warn).toHaveBeenCalledWith(
-      'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+      'Capacity configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
     );
     expect(logger.debug).toHaveBeenCalledWith(
-      'Max workers configuration changing from 10 to 8 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
+      'Capacity configuration changing from 20 to 16 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
     );
-    expect(logger.debug).toHaveBeenCalledWith('Task pool now using 10 as the max worker value');
+    expect(logger.debug).toHaveBeenCalledWith('Task pool now using 16 as the total capacity value');
   });
 
   test('should increase poll interval when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {

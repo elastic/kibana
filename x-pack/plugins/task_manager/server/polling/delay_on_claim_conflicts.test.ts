@@ -137,18 +137,14 @@ describe('delayOnClaimConflicts', () => {
     'doesnt emit a new delay when conflicts have reduced',
     fakeSchedulers(async () => {
       const pollInterval = 100;
-      const maxWorkers = 10;
+      const capacity = 20;
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
 
       const handler = jest.fn();
 
-      delayOnClaimConflicts(
-        of(maxWorkers),
-        of(pollInterval),
-        taskLifecycleEvents$,
-        80,
-        2
-      ).subscribe(handler);
+      delayOnClaimConflicts(of(capacity), of(pollInterval), taskLifecycleEvents$, 80, 2).subscribe(
+        handler
+      );
 
       await sleep(0);
       expect(handler).toHaveBeenCalledWith(0);

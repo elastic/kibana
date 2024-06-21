@@ -26,51 +26,51 @@ describe('createManagedConfiguration()', () => {
   afterEach(() => clock.restore());
 
   test('returns observables with initialized values', async () => {
-    const maxWorkersSubscription = jest.fn();
+    const capacitySubscription = jest.fn();
     const pollIntervalSubscription = jest.fn();
-    const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
       logger,
       errors$: new Subject<Error>(),
-      startingMaxWorkers: 1,
+      startingCapacity: 2,
       startingPollInterval: 2,
     });
-    maxWorkersConfiguration$.subscribe(maxWorkersSubscription);
+    capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
-    expect(maxWorkersSubscription).toHaveBeenCalledTimes(1);
-    expect(maxWorkersSubscription).toHaveBeenNthCalledWith(1, 1);
+    expect(capacitySubscription).toHaveBeenCalledTimes(1);
+    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 2);
     expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
     expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
   });
 
   test(`skips errors that aren't about too many requests`, async () => {
-    const maxWorkersSubscription = jest.fn();
+    const capacitySubscription = jest.fn();
     const pollIntervalSubscription = jest.fn();
     const errors$ = new Subject<Error>();
-    const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
       errors$,
       logger,
-      startingMaxWorkers: 100,
+      startingCapacity: 200,
       startingPollInterval: 100,
     });
-    maxWorkersConfiguration$.subscribe(maxWorkersSubscription);
+    capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
     errors$.next(new Error('foo'));
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-    expect(maxWorkersSubscription).toHaveBeenCalledTimes(1);
+    expect(capacitySubscription).toHaveBeenCalledTimes(1);
     expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
   });
 
-  describe('maxWorker configuration', () => {
-    function setupScenario(startingMaxWorkers: number) {
+  describe('capacity configuration', () => {
+    function setupScenario(startingCapacity: number) {
       const errors$ = new Subject<Error>();
       const subscription = jest.fn();
-      const { maxWorkersConfiguration$ } = createManagedConfiguration({
+      const { capacityConfiguration$ } = createManagedConfiguration({
         errors$,
-        startingMaxWorkers,
+        startingCapacity,
         logger,
         startingPollInterval: 1,
       });
-      maxWorkersConfiguration$.subscribe(subscription);
+      capacityConfiguration$.subscribe(subscription);
       return { subscription, errors$ };
     }
 
@@ -96,7 +96,7 @@ describe('createManagedConfiguration()', () => {
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+        'Capacity configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
       );
     });
 
@@ -132,15 +132,10 @@ describe('createManagedConfiguration()', () => {
       expect(subscription).toHaveBeenNthCalledWith(8, 20);
       expect(subscription).toHaveBeenNthCalledWith(9, 16);
       expect(subscription).toHaveBeenNthCalledWith(10, 12);
-      expect(subscription).toHaveBeenNthCalledWith(11, 9);
-      expect(subscription).toHaveBeenNthCalledWith(12, 7);
-      expect(subscription).toHaveBeenNthCalledWith(13, 5);
-      expect(subscription).toHaveBeenNthCalledWith(14, 4);
-      expect(subscription).toHaveBeenNthCalledWith(15, 3);
-      expect(subscription).toHaveBeenNthCalledWith(16, 2);
-      expect(subscription).toHaveBeenNthCalledWith(17, 1);
+      // Stops at the capacity required for an extra large task
+      expect(subscription).toHaveBeenNthCalledWith(11, 10);
       // No new calls due to value not changing and usage of distinctUntilChanged()
-      expect(subscription).toHaveBeenCalledTimes(17);
+      expect(subscription).toHaveBeenCalledTimes(11);
     });
   });
 
@@ -152,7 +147,7 @@ describe('createManagedConfiguration()', () => {
         logger,
         errors$,
         startingPollInterval,
-        startingMaxWorkers: 1,
+        startingCapacity: 2,
       });
       pollIntervalConfiguration$.subscribe(subscription);
       return { subscription, errors$ };

@@ -823,7 +823,7 @@ function mockHealthStats(overrides = {}) {
       configuration: {
         timestamp: new Date().toISOString(),
         value: {
-          max_workers: 10,
+          capacity: 20,
           poll_interval: 3000,
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,

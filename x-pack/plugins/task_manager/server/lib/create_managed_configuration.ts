@@ -10,17 +10,19 @@ import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'r
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
+import { TaskCost } from '../task';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
 export const PREFERRED_MAX_POLL_INTERVAL = 60 * 1000;
-export const MIN_WORKERS = 1;
+// Need at least enough capacity to run an extra large task
+export const MIN_CAPACITY = TaskCost.ExtraLarge;
 
 // When errors occur, reduce maxWorkers by MAX_WORKERS_DECREASE_PERCENTAGE
 // When errors no longer occur, start increasing maxWorkers by MAX_WORKERS_INCREASE_PERCENTAGE
 // until starting value is reached
-const MAX_WORKERS_DECREASE_PERCENTAGE = 0.8;
-const MAX_WORKERS_INCREASE_PERCENTAGE = 1.05;
+const CAPACITY_DECREASE_PERCENTAGE = 0.8;
+const CAPACITY_INCREASE_PERCENTAGE = 1.05;
 
 // When errors occur, increase pollInterval by POLL_INTERVAL_INCREASE_PERCENTAGE
 // When errors no longer occur, start decreasing pollInterval by POLL_INTERVAL_DECREASE_PERCENTAGE
@@ -30,27 +32,27 @@ const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 
 interface ManagedConfigurationOpts {
   logger: Logger;
-  startingMaxWorkers: number;
+  startingCapacity: number;
   startingPollInterval: number;
   errors$: Observable<Error>;
 }
 
 export interface ManagedConfiguration {
-  maxWorkersConfiguration$: Observable<number>;
+  capacityConfiguration$: Observable<number>;
   pollIntervalConfiguration$: Observable<number>;
 }
 
 export function createManagedConfiguration({
   logger,
-  startingMaxWorkers,
+  startingCapacity,
   startingPollInterval,
   errors$,
 }: ManagedConfigurationOpts): ManagedConfiguration {
   const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
   return {
-    maxWorkersConfiguration$: errorCheck$.pipe(
-      createMaxWorkersScan(logger, startingMaxWorkers),
-      startWith(startingMaxWorkers),
+    capacityConfiguration$: errorCheck$.pipe(
+      createCapacityScan(logger, startingCapacity),
+      startWith(startingCapacity),
       distinctUntilChanged()
     ),
     pollIntervalConfiguration$: errorCheck$.pipe(
@@ -61,37 +63,37 @@ export function createManagedConfiguration({
   };
 }
 
-function createMaxWorkersScan(logger: Logger, startingMaxWorkers: number) {
-  return scan((previousMaxWorkers: number, errorCount: number) => {
-    let newMaxWorkers: number;
+function createCapacityScan(logger: Logger, startingCapacity: number) {
+  return scan((previousCapacity: number, errorCount: number) => {
+    let newCapacity: number;
     if (errorCount > 0) {
-      // Decrease max workers by MAX_WORKERS_DECREASE_PERCENTAGE while making sure it doesn't go lower than 1.
+      // Decrease capacity by CAPACITY_DECREASE_PERCENTAGE while making sure it doesn't go lower than MIN_CAPACITY.
       // Using Math.floor to make sure the number is different than previous while not being a decimal value.
-      newMaxWorkers = Math.max(
-        Math.floor(previousMaxWorkers * MAX_WORKERS_DECREASE_PERCENTAGE),
-        MIN_WORKERS
+      newCapacity = Math.max(
+        Math.floor(previousCapacity * CAPACITY_DECREASE_PERCENTAGE),
+        MIN_CAPACITY
       );
     } else {
-      // Increase max workers by MAX_WORKERS_INCREASE_PERCENTAGE while making sure it doesn't go
+      // Increase capacity by CAPACITY_INCREASE_PERCENTAGE while making sure it doesn't go
       // higher than the starting value. Using Math.ceil to make sure the number is different than
       // previous while not being a decimal value
-      newMaxWorkers = Math.min(
-        startingMaxWorkers,
-        Math.ceil(previousMaxWorkers * MAX_WORKERS_INCREASE_PERCENTAGE)
+      newCapacity = Math.min(
+        startingCapacity,
+        Math.ceil(previousCapacity * CAPACITY_INCREASE_PERCENTAGE)
       );
     }
-    if (newMaxWorkers !== previousMaxWorkers) {
+    if (newCapacity !== previousCapacity) {
       logger.debug(
-        `Max workers configuration changing from ${previousMaxWorkers} to ${newMaxWorkers} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
+        `Capacity configuration changing from ${previousCapacity} to ${newCapacity} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
       );
-      if (previousMaxWorkers === startingMaxWorkers) {
+      if (previousCapacity === startingCapacity) {
         logger.warn(
-          `Max workers configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
+          `Capacity configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
         );
       }
     }
-    return newMaxWorkers;
-  }, startingMaxWorkers);
+    return newCapacity;
+  }, startingCapacity);
 }
 
 function createPollIntervalScan(logger: Logger, startingPollInterval: number) {

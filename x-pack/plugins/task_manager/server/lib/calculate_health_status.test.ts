@@ -85,7 +85,7 @@ const getStatsWithTimestamp = ({
             },
           },
           poll_interval: 3000,
-          max_workers: 10,
+          capacity: 20,
         },
         status: HealthStatus.OK,
       },
