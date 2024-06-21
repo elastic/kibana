@@ -189,322 +189,9 @@
       "warning": []
     },
     {
-      "query": "f",
-      "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from ",
-      "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from index,",
-      "error": [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from assignment = 1",
-      "error": [
-        "SyntaxError: mismatched input '=' expecting <EOF>",
-        "Unknown index [assignment]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FrOm index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from `index`",
-      "error": [
-        "SyntaxError: token recognition error at: '`'",
-        "SyntaxError: token recognition error at: '`'"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from index, other_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index, missingIndex",
-      "error": [
-        "Unknown index [missingIndex]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from fn()",
-      "error": [
-        "Unknown index [fn()]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from average()",
-      "error": [
-        "Unknown index [average()]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from index [METADATA _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [metadata _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [METADATA _id, _source]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [METADATA _id, _source2]",
-      "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source]"
-      ],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [metadata _id, _source] [METADATA _id2]",
-      "error": [
-        "SyntaxError: mismatched input '[' expecting <EOF>"
-      ],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from remote-ccs:indexes [METADATA _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from *:indexes [METADATA _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index metadata _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id, _source",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id, _source2",
-      "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from index metadata _id, _source METADATA _id2",
-      "error": [
-        "SyntaxError: mismatched input 'METADATA' expecting <EOF>"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from remote-ccs:indexes METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from *:indexes METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index (metadata _id)",
-      "error": [
-        "SyntaxError: mismatched input '(metadata' expecting <EOF>"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from ind*, other*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from *a_i*dex*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from in*ex*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from *n*ex",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from *n*ex*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from i*d*x*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from i*d*x",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from i***x*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from i****",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from i**",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index**",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from *ex",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from *ex*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from in*ex",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from ind*ex",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from *,-.*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from indexes*",
-      "error": [
-        "Unknown index [indexes*]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from remote-*:indexes*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from remote-*:indexes",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from remote-ccs:indexes",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index, remote-ccs:indexes",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from .secret_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from my-index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from numberField",
-      "error": [
-        "Unknown index [numberField]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from policy",
-      "error": [
-        "Unknown index [policy]"
-      ],
-      "warning": []
-    },
-    {
       "query": "row",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -612,7 +299,7 @@
     {
       "query": "row var = 1 in (",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Error: [in] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
@@ -1362,6 +1049,136 @@
       "error": [
         "Argument of [%] must be [number], found value [now()] type [date]",
         "Argument of [%] must be [number], found value [1 years] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row 1 quarter",
+      "error": [
+        "ROW does not support [date_period] in expression [1 quarter]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row 1                quarter",
+      "error": [
+        "ROW does not support [date_period] in expression [1 quarter]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - 1 quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - 1 QUARTER",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - 1 Quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() + 1 quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row 1 quarter + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() * 1 quarter",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() / 1 quarter",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() % 1 quarter",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row 1 quarters",
+      "error": [
+        "ROW does not support [date_period] in expression [1 quarters]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row 1                quarters",
+      "error": [
+        "ROW does not support [date_period] in expression [1 quarters]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - 1 quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - 1 QUARTERS",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - 1 Quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() + 1 quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row 1 quarters + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() * 1 quarters",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() / 1 quarters",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() % 1 quarters",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 quarters] type [duration]"
       ],
       "warning": []
     },
@@ -2846,7 +2663,7 @@
     {
       "query": "from a_index | dissect",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -2902,7 +2719,7 @@
     {
       "query": "from a_index | dissect stringField \"%{firstWord}\" option = ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', OPENING_BRACKET}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET}",
         "Invalid option for DISSECT: [option]"
       ],
       "warning": []
@@ -2941,7 +2758,7 @@
     {
       "query": "from a_index | grok",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -3743,21 +3560,21 @@
     {
       "query": "from a_index | where *+ numberField",
       "error": [
-        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where /+ numberField",
       "error": [
-        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where %+ numberField",
       "error": [
-        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -4324,7 +4141,7 @@
     {
       "query": "from a_index | eval ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -4367,7 +4184,7 @@
     {
       "query": "from a_index | eval a=b, ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Unknown column [b]"
       ],
       "warning": []
@@ -4394,7 +4211,7 @@
     {
       "query": "from a_index | eval a=round(numberField), ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -5220,21 +5037,21 @@
     {
       "query": "from a_index | eval *+ numberField",
       "error": [
-        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval /+ numberField",
       "error": [
-        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval %+ numberField",
       "error": [
-        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -6558,7 +6375,7 @@
     {
       "query": "from a_index | eval not",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Error: [not] function expects exactly one argument, got 0."
       ],
       "warning": []
@@ -6566,7 +6383,7 @@
     {
       "query": "from a_index | eval in",
       "error": [
-        "SyntaxError: mismatched input 'in' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input 'in' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -6789,6 +6606,146 @@
       "error": [
         "Argument of [%] must be [number], found value [now()] type [date]",
         "Argument of [%] must be [number], found value [1 years] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 quarter",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 quarter]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                quarter",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 quarter]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 QUARTER",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 quarter + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 quarter",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 quarter",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 quarter",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 quarters",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 quarters]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                quarters",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 quarters]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 QUARTERS",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 quarters + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 quarters",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 quarters",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 quarters",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 quarters] type [duration]"
       ],
       "warning": []
     },
@@ -7773,656 +7730,709 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats ",
+      "query": "from a_index | eval 1 ms",
       "error": [
-        "At least one aggregation or grouping expression required in [STATS]"
+        "EVAL does not support [date_period] in expression [1 ms]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats by stringField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats by ",
+      "query": "from a_index | eval 1                ms",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "EVAL does not support [date_period] in expression [1 ms]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats numberField ",
+      "query": "from a_index | eval var = now() - 1 ms",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 ms",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 MS",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Ms",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 ms",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 ms + 1 year",
       "error": [
-        "Expected an aggregate function or group but got [numberField] of type [FieldAttribute]"
+        "Argument of [+] must be [date], found value [1 ms] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats numberField=",
+      "query": "from a_index | eval var = now() * 1 ms",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 ms] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats numberField=5 by ",
+      "query": "from a_index | eval var = now() / 1 ms",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 ms] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField) by wrongField",
+      "query": "from a_index | eval var = now() % 1 ms",
       "error": [
-        "Unknown column [wrongField]"
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 ms] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField) by wrongField + 1",
+      "query": "from a_index | eval 1 s",
       "error": [
-        "Unknown column [wrongField]"
+        "EVAL does not support [date_period] in expression [1 s]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField) by var0 = wrongField + 1",
+      "query": "from a_index | eval 1                s",
       "error": [
-        "Unknown column [wrongField]"
+        "EVAL does not support [date_period] in expression [1 s]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField) by 1",
+      "query": "from a_index | eval var = now() - 1 s",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField) by percentile(numberField)",
+      "query": "from a_index | eval var = dateField - 1 s",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 S",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 S",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 s",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 s + 1 year",
       "error": [
-        "STATS BY does not support function percentile"
+        "Argument of [+] must be [date], found value [1 s] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats count(`numberField`)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats count(stringField == \"a\" or null)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats count(`numberField`) | keep `count(``numberField``)` ",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats count(`numberField`) | drop `count(``numberField``)` ",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats count(`numberField`) | eval `count(``numberField``)` ",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField) by stringField, percentile(numberField) by ipField",
+      "query": "from a_index | eval var = now() * 1 s",
       "error": [
-        "SyntaxError: mismatched input 'by' expecting <EOF>",
-        "STATS BY does not support function percentile"
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 s] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField), percentile(numberField, 50) by ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), percentile(numberField, 50) BY ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField) + percentile(numberField, 50) BY ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField) - percentile(numberField, 50) BY ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField) * percentile(numberField, 50) BY ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField) / percentile(numberField, 50) BY ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField) % percentile(numberField, 50) BY ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats count(* + 1) BY ipField",
+      "query": "from a_index | eval var = now() / 1 s",
       "error": [
-        "SyntaxError: no viable alternative at input 'count(* +'"
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 s] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats count(* + round(numberField)) BY ipField",
+      "query": "from a_index | eval var = now() % 1 s",
       "error": [
-        "SyntaxError: no viable alternative at input 'count(* +'"
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 s] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats count(round(*)) BY ipField",
+      "query": "from a_index | eval 1 m",
       "error": [
-        "Using wildcards (*) in round is not allowed"
+        "EVAL does not support [date_period] in expression [1 m]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats count(count(*)) BY ipField",
+      "query": "from a_index | eval 1                m",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]"
+        "EVAL does not support [date_period] in expression [1 m]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats numberField + 1",
+      "query": "from a_index | eval var = now() - 1 m",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 m",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 M",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 M",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 m",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 m + 1 year",
       "error": [
-        "At least one aggregation function required in [STATS], found [numberField+1]"
+        "Argument of [+] must be [date], found value [1 m] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats 5 + avg(numberField) +1",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats 5 +1 + avg(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats 5 +1 + numberField",
+      "query": "from a_index | eval var = now() * 1 m",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+1+numberField]"
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 m] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats 5 + numberField +1",
+      "query": "from a_index | eval var = now() / 1 m",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+numberField+1]"
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 m] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats 5 + numberField +1, var0 = sum(numberField)",
+      "query": "from a_index | eval var = now() % 1 m",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+numberField+1]"
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 m] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats round( sum(numberField) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round( sum(numberField) ) + round( sum(numberField) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round( numberField + sum(numberField) )",
+      "query": "from a_index | eval 1 h",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [round(numberField+sum(numberField))]"
+        "EVAL does not support [date_period] in expression [1 h]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats round( numberField + sum(numberField) ), var0 = sum(numberField)",
+      "query": "from a_index | eval 1                h",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [round(numberField+sum(numberField))]"
+        "EVAL does not support [date_period] in expression [1 h]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var0 = round( numberField + sum(numberField) ), var1 = sum(numberField)",
+      "query": "from a_index | eval var = now() - 1 h",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 h",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 H",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 H",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 h",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 h + 1 year",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [round(numberField+sum(numberField))]"
+        "Argument of [+] must be [date], found value [1 h] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats round( sum(numberField + numberField) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round( sum(numberField + round(numberField)) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round( sum(numberField + round(numberField)) ) + round( sum(numberField + round(numberField)) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats sum(round( numberField ) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats sum(round( numberField ) ) + sum(round( numberField ) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats 5 + avg(numberField) +1+1",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats 5 +1+1 + avg(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats 5 +1+1 + numberField",
+      "query": "from a_index | eval var = now() * 1 h",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+1+1+numberField]"
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 h] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats 5 + numberField +1+1",
+      "query": "from a_index | eval var = now() / 1 h",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+numberField+1+1]"
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 h] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats 5 + numberField +1+1, var0 = sum(numberField)",
+      "query": "from a_index | eval var = now() % 1 h",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+numberField+1+1]"
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 h] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats round(round( sum(numberField) ))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(round( sum(numberField) )) + round(round( sum(numberField) ))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(round( numberField + sum(numberField) ))",
+      "query": "from a_index | eval 1 d",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [round(round(numberField+sum(numberField)))]"
+        "EVAL does not support [date_period] in expression [1 d]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats round(round( numberField + sum(numberField) )), var0 = sum(numberField)",
+      "query": "from a_index | eval 1                d",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [round(round(numberField+sum(numberField)))]"
+        "EVAL does not support [date_period] in expression [1 d]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var0 = round(round( numberField + sum(numberField) )), var1 = sum(numberField)",
+      "query": "from a_index | eval var = now() - 1 d",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 d",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 D",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 D",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 d",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 d + 1 year",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [round(round(numberField+sum(numberField)))]"
+        "Argument of [+] must be [date], found value [1 d] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats round(round( sum(numberField + numberField) ))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(round( sum(numberField + round(numberField)) ))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(round( sum(numberField + round(numberField)) )) + round(round( sum(numberField + round(numberField)) ))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats sum(round(round( numberField )) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats sum(round(round( numberField )) ) + sum(round(round( numberField )) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats 5 + avg(numberField) +1+1+1",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats 5 +1+1+1 + avg(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats 5 +1+1+1 + numberField",
+      "query": "from a_index | eval var = now() * 1 d",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+1+1+1+numberField]"
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 d] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats 5 + numberField +1+1+1",
+      "query": "from a_index | eval var = now() / 1 d",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+numberField+1+1+1]"
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 d] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats 5 + numberField +1+1+1, var0 = sum(numberField)",
+      "query": "from a_index | eval var = now() % 1 d",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+numberField+1+1+1]"
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 d] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats round(round(round( sum(numberField) )))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(round(round( sum(numberField) ))) + round(round(round( sum(numberField) )))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(round(round( numberField + sum(numberField) )))",
+      "query": "from a_index | eval 1 w",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [round(round(round(numberField+sum(numberField))))]"
+        "EVAL does not support [date_period] in expression [1 w]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats round(round(round( numberField + sum(numberField) ))), var0 = sum(numberField)",
+      "query": "from a_index | eval 1                w",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [round(round(round(numberField+sum(numberField))))]"
+        "EVAL does not support [date_period] in expression [1 w]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var0 = round(round(round( numberField + sum(numberField) ))), var1 = sum(numberField)",
+      "query": "from a_index | eval var = now() - 1 w",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 w",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 W",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 W",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 w",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 w + 1 year",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [round(round(round(numberField+sum(numberField))))]"
+        "Argument of [+] must be [date], found value [1 w] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats round(round(round( sum(numberField + numberField) )))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(round(round( sum(numberField + round(numberField)) )))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(round(round( sum(numberField + round(numberField)) ))) + round(round(round( sum(numberField + round(numberField)) )))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats sum(round(round(round( numberField ))) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats sum(round(round(round( numberField ))) ) + sum(round(round(round( numberField ))) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats 5 + avg(numberField) +1+1+1+1",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats 5 +1+1+1+1 + avg(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats 5 +1+1+1+1 + numberField",
+      "query": "from a_index | eval var = now() * 1 w",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+1+1+1+1+numberField]"
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 w] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats 5 + numberField +1+1+1+1",
+      "query": "from a_index | eval var = now() / 1 w",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+numberField+1+1+1+1]"
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 w] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats 5 + numberField +1+1+1+1, var0 = sum(numberField)",
+      "query": "from a_index | eval var = now() % 1 w",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+numberField+1+1+1+1]"
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 w] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats round(round(round(round( sum(numberField) ))))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(round(round(round( sum(numberField) )))) + round(round(round(round( sum(numberField) ))))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(round(round(round( numberField + sum(numberField) ))))",
+      "query": "from a_index | eval 1 mo",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [round(round(round(round(numberField+sum(numberField)))))]"
+        "EVAL does not support [date_period] in expression [1 mo]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats round(round(round(round( numberField + sum(numberField) )))), var0 = sum(numberField)",
+      "query": "from a_index | eval 1                mo",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [round(round(round(round(numberField+sum(numberField)))))]"
+        "EVAL does not support [date_period] in expression [1 mo]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var0 = round(round(round(round( numberField + sum(numberField) )))), var1 = sum(numberField)",
+      "query": "from a_index | eval var = now() - 1 mo",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 mo",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 MO",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Mo",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 mo",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 mo + 1 year",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [round(round(round(round(numberField+sum(numberField)))))]"
+        "Argument of [+] must be [date], found value [1 mo] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats round(round(round(round( sum(numberField + numberField) ))))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(round(round(round( sum(numberField + round(numberField)) ))))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(round(round(round( sum(numberField + round(numberField)) )))) + round(round(round(round( sum(numberField + round(numberField)) ))))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats sum(round(round(round(round( numberField )))) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats sum(round(round(round(round( numberField )))) ) + sum(round(round(round(round( numberField )))) )",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats 5 + numberField + 1",
+      "query": "from a_index | eval var = now() * 1 mo",
       "error": [
-        "At least one aggregation function required in [STATS], found [5+numberField+1]"
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 mo] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats numberField + 1 by ipField",
+      "query": "from a_index | eval var = now() / 1 mo",
       "error": [
-        "At least one aggregation function required in [STATS], found [numberField+1]"
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 mo] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField), percentile(numberField, 50) + 1 by ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats count(*)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats count()",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = count(*)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = count()",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = avg(numberField), count(*)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = avg(fn(number)), count(*)",
+      "query": "from a_index | eval var = now() % 1 mo",
       "error": [
-        "Unknown function [fn]"
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 mo] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | STATS sum( numberField ) + abs( numberField ) ",
+      "query": "from a_index | eval 1 q",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [sum(numberField)+abs(numberField)]"
+        "EVAL does not support [date_period] in expression [1 q]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | STATS abs( numberField + sum( numberField )) ",
+      "query": "from a_index | eval 1                q",
       "error": [
-        "Cannot combine aggregation and non-aggregation values in [STATS], found [abs(numberField+sum(numberField))]"
+        "EVAL does not support [date_period] in expression [1 q]"
       ],
       "warning": []
     },
     {
-      "query": "FROM index\n    | EVAL numberField * 3.281\n    | STATS avg_numberField = AVG(`numberField * 3.281`)",
+      "query": "from a_index | eval var = now() - 1 q",
       "error": [],
       "warning": []
     },
     {
-      "query": "FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL `round(numberField) + 1` / 2",
+      "query": "from a_index | eval var = dateField - 1 q",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats sum(case(false, 0, 1))",
+      "query": "from a_index | eval var = dateField - 1 Q",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var0 = sum( case(false, 0, 1))",
+      "query": "from a_index | eval var = dateField - 1 Q",
       "error": [],
       "warning": []
     },
     {
-      "query": "from index | stats by bucket(dateField, abs(numberField), \"\", \"\")",
+      "query": "from a_index | eval var = dateField + 1 q",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 q + 1 year",
       "error": [
-        "Argument of [bucket] must be a constant, received [abs(numberField)]"
+        "Argument of [+] must be [date], found value [1 q] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from index | stats by bucket(dateField, abs(length(numberField)), \"\", \"\")",
+      "query": "from a_index | eval var = now() * 1 q",
       "error": [
-        "Argument of [bucket] must be a constant, received [abs(length(numberField))]"
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 q] type [duration]"
       ],
       "warning": []
     },
     {
-      "query": "from index | stats by bucket(dateField, pi(), \"\", \"\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index | stats by bucket(dateField, 1 + 30 / 10, \"\", \"\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index | stats by bucket(dateField, 1 + 30 / 10, concat(\"\", \"\"), \"\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index | stats by bucket(dateField, numberField, stringField, stringField)",
+      "query": "from a_index | eval var = now() / 1 q",
       "error": [
-        "Argument of [bucket] must be a constant, received [numberField]",
-        "Argument of [bucket] must be a constant, received [stringField]",
-        "Argument of [bucket] must be a constant, received [stringField]"
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 q] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 q",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 q] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 y",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 y]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                y",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 y]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 y",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 y",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Y",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Y",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 y",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 y + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 y] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 y",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 y] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 y",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 y] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 y",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 y] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 yr",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 yr]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                yr",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 yr]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 yr",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 yr",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 YR",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Yr",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 yr",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 yr + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 yr] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 yr",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 yr] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 yr",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 yr] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 yr",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 yr] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | sort ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -8441,7 +8451,7 @@
     {
       "query": "from a_index | sort numberField, ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -8941,6 +8951,125 @@
     {
       "query": "from a_index | eval round(numberField) + 1 | eval `round(numberField) + 1` + 1 | eval ```round(numberField) + 1`` + 1` + 1 | eval ```````round(numberField) + 1```` + 1`` + 1` + 1 | eval ```````````````round(numberField) + 1```````` + 1```` + 1`` + 1` + 1 | keep ```````````````````````````````round(numberField) + 1```````````````` + 1```````` + 1```` + 1`` + 1`",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1::string",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1::string::long::double",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval trim(\"23\"::double)",
+      "error": [
+        "Argument of [trim] must be [string], found value [\"23\"::double] type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval trim(23::string)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 + \"2\"::long",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 + \"2\"",
+      "error": [
+        "Argument of [+] must be [number], found value [\"2\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval trim(to_double(\"23\")::string::double::long::string::double)",
+      "error": [
+        "Argument of [trim] must be [string], found value [to_double(\"23\")::string::double::long::string::double] type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::long)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::unsigned_long)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::int)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::integer)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval CEIL(23::double)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval TRIM(23::string)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval TRIM(23::text)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval TRIM(23::keyword)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval true AND \"false\"::boolean",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval true AND \"false\"::bool",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval true AND \"false\"",
+      "error": [
+        "Argument of [and] must be [boolean], found value [\"false\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_lower(trim(numberField)::string)",
+      "error": [
+        "Argument of [trim] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_upper(trim(numberField)::string::string::string::string)",
+      "error": [
+        "Argument of [trim] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_lower(to_upper(trim(numberField)::string)::string)",
+      "error": [
+        "Argument of [trim] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -25770,6 +25899,374 @@
     {
       "query": "row nullVar = null | eval repeat(nullVar, nullVar)",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "f",
+      "error": [
+        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from ",
+      "error": [
+        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FrOm index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index, other_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index, other_index,.secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from ind*, other*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM *a_i*dex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM in*ex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM *n*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM *n*ex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i*d*x*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i*d*x",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i***x*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i****",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i**",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM index**",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM *ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM *ex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM in*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM ind*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM *,-.*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM remote-*:indexes*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM remote-*:indexes",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM remote-ccs:indexes",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM a_index, remote-ccs:indexes",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from my-index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index,",
+      "error": [
+        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM index\n, \tother_index\t,\n \t ",
+      "error": [
+        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from assignment = 1",
+      "error": [
+        "SyntaxError: mismatched input '=' expecting <EOF>",
+        "Unknown index [assignment]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM `index`",
+      "error": [
+        "SyntaxError: token recognition error at: '`'",
+        "SyntaxError: token recognition error at: '`'"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from assignment = 1",
+      "error": [
+        "SyntaxError: mismatched input '=' expecting <EOF>",
+        "Unknown index [assignment]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM index, missingIndex",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from average()",
+      "error": [
+        "Unknown index [average()]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "fRom custom_function()",
+      "error": [
+        "Unknown index [custom_function()]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM indexes*",
+      "error": [
+        "Unknown index [indexes*]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from numberField",
+      "error": [
+        "Unknown index [numberField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM policy",
+      "error": [
+        "Unknown index [policy]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id, \t\n _index\n ",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index (metadata _id)",
+      "error": [
+        "SyntaxError: mismatched input '(metadata' expecting <EOF>"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index [METADATA _id]",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index [METADATA _id]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index [metadata _id]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index [METADATA _id, _source]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from remote-ccs:indexes [METADATA _id]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from *:indexes [METADATA _id]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index [METADATA _id, _source2]",
+      "error": [
+        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored]"
+      ],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index [metadata _id, _source] [METADATA _id2]",
+      "error": [
+        "SyntaxError: mismatched input '[' expecting <EOF>"
+      ],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index METADATA _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index METADATA _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index METADATA _id, _source",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from remote-ccs:indexes METADATA _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from *:indexes METADATA _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index METADATA _id, _source2",
+      "error": [
+        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id, _source METADATA _id2",
+      "error": [
+        "SyntaxError: mismatched input 'METADATA' expecting <EOF>"
+      ],
       "warning": []
     }
   ]

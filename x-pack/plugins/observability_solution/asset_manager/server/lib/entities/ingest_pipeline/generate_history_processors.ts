@@ -14,7 +14,7 @@ function createIdTemplate(definition: EntityDefinition) {
   }, definition.displayNameTemplate);
 }
 
-function mapDesitnationToPainless(destination: string, source: string) {
+function mapDestinationToPainless(destination: string, source: string) {
   const fieldParts = destination.split('.');
   return fieldParts.reduce((acc, _part, currentIndex, parts) => {
     if (currentIndex + 1 === parts.length) {
@@ -39,7 +39,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
     return `${script}if (ctx.entity?.metadata?.${source.replaceAll(
       '.',
       '?.'
-    )} != null) {${mapDesitnationToPainless(destination, source)}\n}\n`;
+    )} != null) {${mapDestinationToPainless(destination, source)}\n}\n`;
   }, '');
 }
 
