@@ -85,7 +85,7 @@ export const forceStopAndCloseJob = ({ jobId }: { jobId: string }) =>
     },
     method: 'POST',
     url: '/internal/ml/jobs/force_stop_and_close_job',
-    failOnStatusCode: true,
+    failOnStatusCode: false,
     body: {
       jobId,
     },
