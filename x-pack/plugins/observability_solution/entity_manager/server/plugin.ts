@@ -90,7 +90,7 @@ export class EntityManagerServerPlugin
 
     const esClient = core.elasticsearch.client.asInternalUser;
 
-    // Install entities compoent templates and index template
+    // Install entities component templates and index template
     Promise.all([
       upsertComponent({
         esClient,
