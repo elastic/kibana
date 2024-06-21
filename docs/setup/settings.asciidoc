@@ -89,6 +89,10 @@ configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enable
 The maximum number of sockets that can be used for communications with {es}.
 *Default: `Infinity`*
 
+[[elasticsearch-maxResponseSize]] `elasticsearch.maxResponseSize`::
+Either `false` or a `byteSize` value. When set, responses from {es} with a size higher than the defined limit will be rejected. 
+This is intended to be used as a circuit-breaker mechanism to avoid memory errors in case of unexpectedly high responses coming from {es}.
+*Default: `false`*
 
 [[elasticsearch-maxIdleSockets]] `elasticsearch.maxIdleSockets`::
 The maximum number of idle sockets to keep open between {kib} and {es}. If more sockets become idle, they will be closed.

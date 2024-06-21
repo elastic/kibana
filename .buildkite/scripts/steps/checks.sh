@@ -5,6 +5,9 @@ set -euo pipefail
 export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/bootstrap.sh
 
+if [[ "${FIPS_ENABLED:-}" == "true" ]]; then
+  .buildkite/scripts/steps/checks/verify_fips_enabled.sh
+fi
 .buildkite/scripts/steps/checks/saved_objects_compat_changes.sh
 .buildkite/scripts/steps/checks/saved_objects_definition_change.sh
 .buildkite/scripts/steps/capture_oas_snapshot.sh

@@ -16,7 +16,6 @@
     "@kbn/std",
     "@kbn/logging",
     "@kbn/i18n",
-    "@kbn/analytics-client",
     "@kbn/core-base-common",
     "@kbn/core-base-server-internal",
     "@kbn/core-http-server",
@@ -42,6 +41,7 @@
     "@kbn/core-analytics-server-mocks",
     "@kbn/core-logging-server-internal",
     "@kbn/core-logging-server-mocks",
+    "@kbn/ebt",
   ],
   "exclude": [
     "target/**/*",
