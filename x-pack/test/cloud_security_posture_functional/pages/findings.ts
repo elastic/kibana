@@ -17,7 +17,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -99,9 +98,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'another lower case cluster id',
     },
   ];
-
-  const ruleName1 = data[0].rule.name;
-  const ruleName2 = data[1].rule.name;
 
   const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
     const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
