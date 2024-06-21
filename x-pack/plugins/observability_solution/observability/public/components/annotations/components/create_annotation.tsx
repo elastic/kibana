@@ -124,7 +124,7 @@ export function CreateAnnotation({
             {editAnnotation?.id && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="observabilitySolutionDeleteButton"
+                  data-test-subj="annotationDeleteButton"
                   type="submit"
                   onClick={() => onDelete()}
                   isLoading={isLoading}
@@ -138,7 +138,7 @@ export function CreateAnnotation({
             )}
             <EuiFlexItem grow={false}>
               <EuiButton
-                data-test-subj="observabilitySolutionSaveButton"
+                data-test-subj="annotationSaveButton"
                 type="submit"
                 onClick={() => onSubmit()}
                 isLoading={isLoading}

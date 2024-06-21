@@ -151,7 +151,7 @@ export const useAnnotations = ({
         }
       };
     },
-    createAnnotation: (start: string | number, end?: string) => {
+    createAnnotation: (start: string | number, end?: string | null, name?: string) => {
       if (isCreateOpen) return;
       reset(getDefaultAnnotation({ sloId, sloInstanceId }));
 
@@ -162,6 +162,9 @@ export const useAnnotations = ({
       }
       if (end) {
         setValue('@timestampEnd', moment(new Date(Number(end))));
+      }
+      if (name) {
+        setValue('name', name);
       }
       setIsCreateOpen(true);
     },

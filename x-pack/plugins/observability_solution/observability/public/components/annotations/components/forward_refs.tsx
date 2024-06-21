@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>((props, ref) => (
-  <EuiFieldText data-test-subj="o11yFieldTextFieldText" {...props} inputRef={ref} />
+  <EuiFieldText data-test-subj={props['data-test-subj']} {...props} inputRef={ref} />
 ));
 
 export const TextArea = React.forwardRef<HTMLTextAreaElement, EuiTextAreaProps>((props, ref) => (

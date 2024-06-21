@@ -20,11 +20,11 @@ import {
   BarSeries,
 } from '@elastic/charts';
 import { EuiButton, EuiHorizontalRule, formatDate } from '@elastic/eui';
-import { AnnotationClickListener } from '@elastic/charts/dist/specs/settings';
 import { InPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 import { parse } from '@kbn/datemath';
 import { TooltipValue } from '@elastic/charts/dist/specs';
+import moment from 'moment';
 import { createAnnotationPortal } from './create_annotation_btn';
 import { useAnnotations } from '../../components/annotations/use_annotations';
 import { Annotation } from '../../../common/annotations';
@@ -34,15 +34,13 @@ export function AnnotationsListChart({
   start,
   end,
   isEditing,
-  setIsEditing,
 }: {
   data: Annotation[];
   start: string;
   end: string;
   isEditing: Annotation | null;
-  setIsEditing: (annotation: Annotation | null) => void;
 }) {
-  const { ObservabilityAnnotations, createAnnotation } = useAnnotations({
+  const { ObservabilityAnnotations, createAnnotation, onAnnotationClick } = useAnnotations({
     editAnnotation: isEditing,
   });
 
@@ -53,16 +51,6 @@ export function AnnotationsListChart({
     const startX = x[0];
     const endX = x[1];
     createAnnotation(String(startX), String(endX));
-  };
-
-  const onAnnotationClick: AnnotationClickListener = ({ rects, lines }) => {
-    const editAnnotation = data.find((d) => {
-      const id = d.id;
-      return rects.find((r) => r.id.includes(id)) || lines.find((l) => l.id.includes(id));
-    });
-    if (editAnnotation) {
-      setIsEditing(editAnnotation);
-    }
   };
 
   const domain = useMemo(() => {
@@ -89,7 +77,13 @@ export function AnnotationsListChart({
           data-test-subj="o11yRenderToolsRightCreateAnnotationButton"
           key="createAnnotation"
           onClick={() => {
-            createAnnotation(new Date().toISOString());
+            createAnnotation(
+              moment().subtract(1, 'day').toISOString(),
+              null,
+              i18n.translate('xpack.observability.renderToolsRight.newAnnotation', {
+                defaultMessage: 'New annotation',
+              })
+            );
           }}
           fill={true}
         >

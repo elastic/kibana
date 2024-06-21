@@ -20,7 +20,10 @@ export interface SloItem {
 
 interface Props {
   initialSlos?: SloItem[];
-  onSelected: (slos: SLOWithSummaryResponse[] | SLOWithSummaryResponse | undefined) => void;
+  onSelected: (vals: {
+    slos?: SLOWithSummaryResponse[] | SLOWithSummaryResponse;
+    all?: boolean;
+  }) => void;
   hasError?: boolean;
   singleSelection?: boolean;
 }
@@ -56,19 +59,27 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
       const selectedSlos = sloList.results.filter((slo) =>
         initialSlos.find((s) => s.id === slo.id && s.instanceId === slo.instanceId)
       );
-      setSelectedOptions(mapSlosToOptions(selectedSlos));
+      const newOpts = mapSlosToOptions(selectedSlos);
+      if (initialSlos[0]?.id === ALL_VALUE) {
+        newOpts.unshift(ALL_OPTION);
+      }
+      setSelectedOptions(newOpts);
     }
   }, [initialSlos, sloList]);
 
   const onChange = (opts: Option[]) => {
     setSelectedOptions(opts);
-    const selectedSlos =
-      opts.length >= 1
-        ? sloList!.results?.filter((slo) =>
-            opts.find((opt) => opt.value === `${slo.id}-${slo.instanceId}`)
-          )
-        : undefined;
-    onSelected(singleSelection ? selectedSlos?.[0] : selectedSlos);
+    if (opts?.[0]?.value === ALL_VALUE) {
+      onSelected({ all: true });
+    } else {
+      const selectedSlos =
+        opts.length >= 1
+          ? sloList!.results?.filter((slo) =>
+              opts.find((opt) => opt.value === `${slo.id}-${slo.instanceId}`)
+            )
+          : undefined;
+      onSelected({ slos: singleSelection ? selectedSlos?.[0] : selectedSlos });
+    }
   };
 
   const onSearchChange = useMemo(
@@ -85,15 +96,7 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
       aria-label={SLO_LABEL}
       placeholder={SLO_SELECTOR}
       data-test-subj="sloSelector"
-      options={[
-        {
-          label: i18n.translate('xpack.observability.sloEmbeddable.config.sloSelector.all', {
-            defaultMessage: 'All',
-          }),
-          value: ALL_VALUE,
-        },
-        ...options,
-      ]}
+      options={[ALL_OPTION, ...options]}
       selectedOptions={selectedOptions}
       async
       isLoading={isLoading}
@@ -106,6 +109,12 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
   );
 }
 
+const ALL_OPTION = {
+  label: i18n.translate('xpack.observability.sloEmbeddable.config.sloSelector.all', {
+    defaultMessage: 'All SLOs',
+  }),
+  value: ALL_VALUE,
+};
 export const SLO_SELECTOR = i18n.translate(
   'xpack.observability.sloEmbeddable.config.sloSelector.placeholder',
   {

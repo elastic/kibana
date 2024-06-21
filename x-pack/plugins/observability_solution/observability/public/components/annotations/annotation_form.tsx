@@ -63,7 +63,12 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
             required: 'Name is required',
           }}
           render={({ field, fieldState }) => (
-            <FieldText {...field} isInvalid={fieldState.invalid} compressed />
+            <FieldText
+              {...field}
+              isInvalid={fieldState.invalid}
+              compressed
+              data-test-subj="annotationName"
+            />
           )}
         />
       </EuiFormRow>
@@ -81,7 +86,13 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
           name="message"
           control={control}
           render={({ field, fieldState }) => (
-            <TextArea {...field} rows={3} isInvalid={fieldState.invalid} compressed />
+            <TextArea
+              {...field}
+              rows={3}
+              isInvalid={fieldState.invalid}
+              compressed
+              data-test-subj="annotationDescription"
+            />
           )}
         />
       </EuiFormRow>

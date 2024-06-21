@@ -7,6 +7,7 @@
 
 import { EuiSpacer, EuiTitle, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { SloSelector } from './slo_selector';
@@ -48,9 +49,16 @@ export function AnnotationApplyTo({ editAnnotation }: { editAnnotation?: Annotat
                     ]
                   : []
               }
-              onSelected={(slo) => {
-                if (slo && 'id' in slo) {
-                  field.onChange({ id: slo.id, instanceId: slo.instanceId });
+              onSelected={(newValue) => {
+                const { slos, all } = newValue;
+                if (all) {
+                  field.onChange({
+                    id: ALL_VALUE,
+                  });
+                } else {
+                  if (slos && 'id' in slos) {
+                    field.onChange({ id: slos.id, instanceId: slos.instanceId });
+                  }
                 }
               }}
               singleSelection={true}
