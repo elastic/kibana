@@ -7,6 +7,8 @@
 
 import { ReactNode } from 'react';
 
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { ModelConfig } from '@kbn/inference_integration_flyout';
 import { GenericObject } from './mappings_editor';
 
 import { PARAMETERS_DEFINITION } from '../constants';
@@ -245,4 +247,17 @@ export interface NormalizedRuntimeField {
 
 export interface NormalizedRuntimeFields {
   [id: string]: NormalizedRuntimeField;
+}
+export enum DefaultInferenceModels {
+  elser_model_2 = 'elser_model_2',
+  e5 = 'e5',
+}
+
+export enum DeploymentState {
+  'DEPLOYED' = 'deployed',
+  'NOT_DEPLOYED' = 'not_deployed',
+}
+export interface CustomInferenceEndpointConfig {
+  taskType: InferenceTaskType;
+  modelConfig: ModelConfig;
 }
