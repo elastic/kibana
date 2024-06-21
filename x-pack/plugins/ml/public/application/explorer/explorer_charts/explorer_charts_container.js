@@ -332,6 +332,7 @@ function ExplorerChartContainer({
               {(tooltipService) => (
                 <ExplorerChartDistribution
                   id={id}
+                  tableData={tableData}
                   timeBuckets={timeBuckets}
                   tooManyBuckets={tooManyBuckets}
                   seriesConfig={series}

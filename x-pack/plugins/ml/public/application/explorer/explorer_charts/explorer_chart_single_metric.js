@@ -71,6 +71,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     this.chartScales = undefined;
     this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
   }
+
   componentDidMount() {
     this.renderChart();
 
@@ -387,7 +388,6 @@ export class ExplorerChartSingleMetric extends React.Component {
         .on('click', function (d) {
           d3.event.preventDefault();
           if (d.anomalyScore === undefined) return;
-          console.log('CLICK', d);
           showAnomalyPopover(d, this);
         })
         // Don't use an arrow function since we need access to `this`.
@@ -493,7 +493,6 @@ export class ExplorerChartSingleMetric extends React.Component {
         // Hide any active tooltip
         that.props.tooltipService.hide();
         // Set the popover state to enable the actions menu
-        console.log('anomaly popover AE', tableItem);
         that.setState({ popoverData: tableItem, popoverCoords: [x, y] });
       }
     }
