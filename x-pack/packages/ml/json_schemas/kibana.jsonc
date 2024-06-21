@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/json-schemas",
+  "owner": "@elastic/ml-ui"
+}
