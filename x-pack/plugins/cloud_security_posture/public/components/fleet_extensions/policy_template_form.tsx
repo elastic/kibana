@@ -599,7 +599,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
-    const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
+    const {
+      data: packagePolicyList,
+      refetch,
+      isLoading: isPackagePolicyLoading,
+    } = usePackagePolicyList(packageInfo.name, {
       enabled: canFetchIntegration,
     });
 
@@ -642,7 +646,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setCanFetchIntegration,
     });
 
-    if (isLoading) {
+    if (isLoading || isPackagePolicyLoading) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
