@@ -41,7 +41,6 @@ const mockGetOnce = (mockedUrl: string, response: any) => {
 };
 
 describe('saml_auth', () => {
-  const attemptsCount = 3;
   describe('createCloudSession', () => {
     afterEach(() => {
       axiosRequestMock.mockClear();
@@ -59,12 +58,12 @@ describe('saml_auth', () => {
       expect(axiosRequestMock).toBeCalledTimes(1);
     });
 
-    test(`retries until response has the token value, up to ${attemptsCount} attempts`, async () => {
+    test('retries until response has the token value', async () => {
       let callCount = 0;
       axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
         if (config.url?.endsWith('/api/v1/saas/auth/_login')) {
           callCount += 1;
-          if (callCount !== attemptsCount) {
+          if (callCount !== 3) {
             return Promise.resolve({ data: { message: 'no token' }, status: 503 });
           } else {
             return Promise.resolve({
@@ -84,7 +83,7 @@ describe('saml_auth', () => {
           log,
         },
         {
-          attemptsCount,
+          attemptsCount: 3,
           attemptDelay: 100,
         }
       );
