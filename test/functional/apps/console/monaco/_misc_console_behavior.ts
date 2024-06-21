@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -91,20 +91,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.console.monaco.getCurrentLineNumber()).to.be(4);
       });
 
-      // flaky
-      it.skip('should open documentation when Ctrl+/ is pressed', async () => {
-        await PageObjects.console.monaco.enterText('GET _search');
-        await PageObjects.console.monaco.pressEscape();
-        await PageObjects.console.monaco.pressCtrlSlash();
-        await retry.tryForTime(10000, async () => {
-          await browser.switchTab(1);
-          tabCount++;
-        });
+      describe.only('open documentation', () => {
+        const requests = ['GET _search', 'GET test_index/_search', 'GET /test_index/_search'];
+        requests.forEach((request) => {
+          it('should open documentation when Ctrl+/ is pressed', async () => {
+            await PageObjects.console.monaco.enterText(request);
+            await PageObjects.console.monaco.pressEscape();
+            await PageObjects.console.monaco.pressCtrlSlash();
+            await retry.tryForTime(10000, async () => {
+              await browser.switchTab(1);
+              tabCount++;
+            });
 
-        // Retry until the documentation is loaded
-        await retry.try(async () => {
-          const url = await browser.getCurrentUrl();
-          expect(url).to.contain('search-search.html');
+            // Retry until the documentation is loaded
+            await retry.try(async () => {
+              const url = await browser.getCurrentUrl();
+              expect(url).to.contain('search-search.html');
+            });
+          });
         });
       });
     });
