@@ -253,7 +253,7 @@ export const getTimesliderControlFactory = (
 
       return {
         api,
-        Component: (controlStyleProps) => {
+        Component: (controlPanelClassNames) => {
           const [isAnchored, isPopoverOpen, timeRangeMeta, timeslice] =
             useBatchedPublishingSubjects(isAnchored$, isPopoverOpen$, timeRangeMeta$, timeslice$);
 
@@ -273,7 +273,7 @@ export const getTimesliderControlFactory = (
 
           return (
             <EuiInputPopover
-              {...controlStyleProps}
+              {...controlPanelClassNames}
               panelClassName="timeSlider__panelOverride"
               input={
                 <TimeSliderPopoverButton
