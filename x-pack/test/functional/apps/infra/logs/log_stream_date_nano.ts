@@ -11,7 +11,6 @@ import { DATES } from '../constants';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
-  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const logsUi = getService('logsUi');
   const find = getService('find');
@@ -22,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     },
   };
 
-  describe.only('Log stream supports nano precision', function () {
+  describe('Log stream supports nano precision', function () {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/logs_with_nano_date');
     });
