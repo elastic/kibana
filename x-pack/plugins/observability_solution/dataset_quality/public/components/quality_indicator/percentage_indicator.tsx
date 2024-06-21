@@ -31,10 +31,12 @@ export function QualityPercentageIndicator({
 const DatasetWithFewDegradedDocs = ({ degradedDocsCount }: { degradedDocsCount?: number }) => {
   return (
     <EuiText size="s">
-      ~0%{' '}
+      {i18n.translate('xpack.datasetQuality.datasetWithFewDegradedDocs.TextLabel', {
+        defaultMessage: '~0%',
+      })}{' '}
       <EuiToolTip
         content={i18n.translate('xpack.datasetQuality.fewDegradedDocsTooltip', {
-          defaultMessage: '{degradedDocsCount} degraded docs in this dataset.',
+          defaultMessage: '{degradedDocsCount} degraded docs in this data set.',
           values: {
             degradedDocsCount,
           },

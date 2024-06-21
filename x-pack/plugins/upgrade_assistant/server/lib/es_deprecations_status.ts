@@ -42,6 +42,7 @@ export function getShardCapacityDeprecationInfo({
         {
           defaultMessage:
             'The number of nodes that are running low on disk and it is likely that they will run out of space. Their disk usage has tripped the <<cluster-routing-watermark-high, high watermark threshold>>.',
+          ignoreTag: true,
         }
       )
     );
@@ -54,6 +55,7 @@ export function getShardCapacityDeprecationInfo({
         {
           defaultMessage:
             'The number of nodes that have run out of disk. Their disk usage has tripped the <<cluster-routing-flood-stage, flood stagewatermark threshold>>.',
+          ignoreTag: true,
         }
       )
     );

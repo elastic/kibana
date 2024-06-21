@@ -33,7 +33,7 @@ check_for_changed_files() {
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
   CUSTOM_FIX_MESSAGE="${3:-}"
-  GIT_CHANGES="$(git status --porcelain -- . ':!:.bazelrc')"
+  GIT_CHANGES="$(git status --porcelain -- . ':!:.bazelrc' ':!:config/node.options')"
 
   if [ "$GIT_CHANGES" ]; then
     if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
@@ -56,7 +56,7 @@ check_for_changed_files() {
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
-      git add -A -- . ':!.bazelrc'
+      git add -A -- . ':!.bazelrc' ':!config/node.options'
 
       git commit -m "$NEW_COMMIT_MESSAGE"
       git push

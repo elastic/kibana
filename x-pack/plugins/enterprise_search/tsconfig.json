@@ -70,6 +70,7 @@
     "@kbn/es-errors",
     "@kbn/search-connectors-plugin",
     "@kbn/search-playground",
+    "@kbn/search-inference-endpoints",
     "@kbn/utility-types",
     "@kbn/index-management",
     "@kbn/deeplinks-search",
@@ -78,6 +79,7 @@
     "@kbn/cloud",
     "@kbn/try-in-console",
     "@kbn/core-chrome-browser",
-    "@kbn/navigation-plugin"
+    "@kbn/navigation-plugin",
+    "@kbn/search-homepage"
   ]
 }
