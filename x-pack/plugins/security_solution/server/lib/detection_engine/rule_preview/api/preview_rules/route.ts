@@ -19,7 +19,7 @@ import type {
 import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,
@@ -40,7 +40,6 @@ import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logge
 import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import { buildRouteValidationWithZod } from '../../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
