@@ -13,13 +13,12 @@ import {
   RULE_SUMMARY_BUTTON_TEST_ID,
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
 } from './test_ids';
-import { AlertDescription } from './alert_description';
+import { AlertDescription, RULE_OVERVIEW_BANNER } from './alert_description';
 import { RightPanelContext } from '../context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { DocumentDetailsRuleOverviewPanelKey } from '../../shared/constants/panel_keys';
 import { TestProviders } from '../../../../common/mock';
-import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
@@ -151,20 +150,12 @@ describe('<AlertDescription />', () => {
       getByTestId(RULE_SUMMARY_BUTTON_TEST_ID).click();
 
       expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
-        id: DocumentDetailsPreviewPanelKey,
-        path: { tab: 'rule-preview' },
+        id: DocumentDetailsRuleOverviewPanelKey,
         params: {
           id: panelContext.eventId,
           indexName: panelContext.indexName,
           scopeId: panelContext.scopeId,
-          banner: {
-            title: i18n.translate(
-              'xpack.securitySolution.flyout.right.about.description.rulePreviewTitle',
-              { defaultMessage: 'Preview rule details' }
-            ),
-            backgroundColor: 'warning',
-            textColor: 'warning',
-          },
+          banner: RULE_OVERVIEW_BANNER,
           ruleId: ruleUuid.values[0],
         },
       });
