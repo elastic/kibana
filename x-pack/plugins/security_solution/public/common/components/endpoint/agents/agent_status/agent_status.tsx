@@ -23,6 +23,9 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   }
 `;
 
+/**
+ * Display the agent status of a host that supports response actions
+ */
 export const AgentStatus = React.memo(
   ({
     agentId,
