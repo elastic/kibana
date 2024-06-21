@@ -89,8 +89,6 @@ async function updatePanelFromFlyoutEdits({
         nextUpdate.dataViewId = dv.id;
       }
     }
-    // @TODO: remove
-    console.log(`--@@hasChanged`, hasChanged);
     if (api) {
       api.updateUserInput(nextUpdate);
     }
