@@ -390,6 +390,7 @@ async function ensureInstalledIntegrations(
           installSource,
           pkgName: pkg.name,
           pkgVersion: pkg.version,
+          title: packageInfo.title,
           inputs: inputs.filter((input) => input.type !== 'httpjson'),
           dataStreams:
             packageInfo.data_streams?.map(({ type, dataset }) => ({ type, dataset })) ?? [],
@@ -405,6 +406,7 @@ async function ensureInstalledIntegrations(
         installSource,
         pkgName,
         pkgVersion: '1.0.0', // Custom integrations are always installed as version `1.0.0`
+        title: pkgName,
         inputs: [
           {
             id: `filestream-${pkgName}`,

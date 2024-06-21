@@ -53,9 +53,10 @@ export interface ObservabilityOnboardingRouteCreateOptions {
 }
 
 export const IntegrationRT = t.type({
-  pkgName: t.string,
   installSource: t.union([t.literal('registry'), t.literal('custom')]),
+  pkgName: t.string,
   pkgVersion: t.string,
+  title: t.string,
   inputs: t.array(t.unknown),
   dataStreams: t.array(
     t.type({
