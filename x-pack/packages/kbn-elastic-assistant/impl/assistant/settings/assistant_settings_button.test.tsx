@@ -11,7 +11,7 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 
 import { AssistantSettingsButton } from './assistant_settings_button';
 import { welcomeConvo } from '../../mock/conversation';
-import { CONVERSATIONS_TAB } from './assistant_settings';
+import { CONVERSATIONS_TAB } from './const';
 
 const setIsSettingsModalVisible = jest.fn();
 const onConversationSelected = jest.fn();

@@ -70,10 +70,6 @@ export const getConnectorTypeTitle = (
   const connectorTypeTitle =
     getGenAiConfig(connector)?.apiProvider ??
     getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
-  console.log('connector', connector);
-  console.log('genaiconfig', getGenAiConfig(connector));
-  console.log('genaiconfig apiProvider', getGenAiConfig(connector)?.apiProvider);
-  console.log('title', getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId)));
   const actionType = connector.isPreconfigured ? PRECONFIGURED_CONNECTOR : connectorTypeTitle;
 
   return actionType;

@@ -205,7 +205,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           onClose={onSaveCancelled}
           onSaveConfirmed={onSaveConfirmed}
           onSaveCancelled={onSaveCancelled}
-          title={selectedConversation?.title ?? i18n.CONVERSATIONS_TABLE_COLUMN_TYPE}
+          title={selectedConversation?.title ?? i18n.CONVERSATIONS_TABLE_COLUMN_CONVERSATIONS}
         >
           <ConversationSettingsEditor
             allSystemPrompts={allSystemPrompts}

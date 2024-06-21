@@ -319,7 +319,6 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
           }
           checked={isNewConversationDefault}
           onChange={handleNewConversationDefaultChange}
-          compressed
         />
       </EuiFormRow>
     </>

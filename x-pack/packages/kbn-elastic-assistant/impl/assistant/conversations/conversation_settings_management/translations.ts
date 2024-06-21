@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CONVERSATIONS_TABLE_COLUMN_TYPE = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSettings.column.type',
+export const CONVERSATIONS_TABLE_COLUMN_CONVERSATIONS = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSettings.column.conversations',
   {
-    defaultMessage: 'Conversation Type',
+    defaultMessage: 'Conversations',
   }
 );
 

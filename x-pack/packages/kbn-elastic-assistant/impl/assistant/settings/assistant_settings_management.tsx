@@ -19,24 +19,25 @@ import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
-import { KnowledgeBaseSettings } from '.';
+import { KnowledgeBaseSettings, EvaluationSettings } from '.';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
 import { ConnectorsSettingsManagement } from '../../connectorland/connector_settings_management';
-import { ConversationSettingsManagement } from '../conversations/converstaion_settings_management';
-import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management.tsx';
+import { ConversationSettingsManagement } from '../conversations/conversation_settings_management';
+import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management';
 import { SystemPromptSettingsManagement } from '../prompt_editor/system_prompt/system_prompt_settings_management';
-import { AnonymizationSettingsManagement } from '../../data_anonymization/settings/anonomization_settings_management';
-import { EvaluationSettings } from './evaluation_settings/evaluation_settings';
+import { AnonymizationSettingsManagement } from '../../data_anonymization/settings/anonymization_settings_management';
 
-export const CONNECTORS_TAB = 'CONNECTORS_TAB' as const;
-export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
-export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
-export const SYSTEM_PROMPTS_TAB = 'SYSTEM_PROMPTS_TAB' as const;
-export const ANONYMIZATION_TAB = 'ANONYMIZATION_TAB' as const;
-export const KNOWLEDGE_BASE_TAB = 'KNOWLEDGE_BASE_TAB' as const;
-export const EVALUATION_TAB = 'EVALUATION_TAB' as const;
+import {
+  ANONYMIZATION_TAB,
+  CONNECTORS_TAB,
+  CONVERSATIONS_TAB,
+  EVALUATION_TAB,
+  KNOWLEDGE_BASE_TAB,
+  QUICK_PROMPTS_TAB,
+  SYSTEM_PROMPTS_TAB,
+} from './const';
 
 interface Props {
   conversations: Record<string, Conversation>;
@@ -68,7 +69,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     const { data: anonymizationFields } = useFetchAnonymizationFields();
 
-    // Connector details
     const { data: connectors } = useLoadConnectors({
       http,
     });
@@ -221,7 +221,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       resetSettings();
       setHasPendingChanges(false);
     }, [resetSettings]);
-
     return (
       <>
         <EuiPageTemplate.Header
@@ -254,10 +253,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               onCancelClick={onCancelClick}
               selectedConversation={selectedConversation}
               setAssistantStreamingEnabled={handleChange(setUpdatedAssistantStreamingEnabled)}
-              setConversationSettings={handleChange(setConversationSettings)}
-              setConversationsSettingsBulkActions={handleChange(
-                setConversationsSettingsBulkActions
-              )}
+              setConversationSettings={setConversationSettings}
+              setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
               onSelectedConversationChange={onHandleSelectedConversationChange}
             />
           )}
@@ -271,10 +268,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               handleSave={handleSave}
               selectedSystemPrompt={selectedSystemPrompt}
               onSelectedSystemPromptChange={onHandleSelectedSystemPromptChange}
-              setConversationSettings={handleChange(setConversationSettings)}
-              setConversationsSettingsBulkActions={handleChange(
-                setConversationsSettingsBulkActions
-              )}
+              setConversationSettings={setConversationSettings}
+              setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               setUpdatedSystemPromptSettings={handleChange(setUpdatedSystemPromptSettings)}
               onCancelClick={onCancelClick}
@@ -285,7 +280,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               quickPromptSettings={quickPromptSettings}
               onSelectedQuickPromptChange={onHandleSelectedQuickPromptChange}
               selectedQuickPrompt={selectedQuickPrompt}
-              setUpdatedQuickPromptSettings={handleChange(setUpdatedQuickPromptSettings)}
+              setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
               handleSave={handleSave}
               onCancelClick={onCancelClick}
             />
@@ -308,7 +303,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
         </EuiPageTemplate.Section>
         {hasPendingChanges && (
-          <EuiPageTemplate.BottomBar paddingSize="s" position="fixed">
+          <EuiPageTemplate.BottomBar paddingSize="s" position="fixed" data-test-subj="bottom-bar">
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty

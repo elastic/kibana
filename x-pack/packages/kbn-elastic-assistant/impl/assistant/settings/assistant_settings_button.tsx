@@ -10,9 +10,10 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
-import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
+import { AssistantSettings } from './assistant_settings';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
+import { CONVERSATIONS_TAB } from './const';
 
 interface Props {
   defaultConnector?: AIConnector;

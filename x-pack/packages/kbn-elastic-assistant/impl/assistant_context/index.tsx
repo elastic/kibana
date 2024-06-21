@@ -38,10 +38,10 @@ import {
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
-import { SettingsTabs } from '../assistant/settings/assistant_settings';
 import { AssistantAvailability, AssistantTelemetry } from './types';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
+import { SettingsTabs } from '../assistant/settings/types';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -139,7 +139,7 @@ export interface UseAssistantContext {
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
+  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
   setTraceOptions: (traceOptions: {

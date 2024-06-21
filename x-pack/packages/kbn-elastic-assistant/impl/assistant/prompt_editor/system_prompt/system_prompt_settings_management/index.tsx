@@ -108,10 +108,9 @@ const SystemPromptSettingsManagementComponent = ({
   }, [closeConfirmModal, onCancelClick]);
 
   const onDeleteConfirmed = useCallback(() => {
-    handleSave();
     closeConfirmModal();
-    onCancelClick();
-  }, [closeConfirmModal, handleSave, onCancelClick]);
+    handleSave();
+  }, [closeConfirmModal, handleSave]);
 
   const onSaveCancelled = useCallback(() => {
     closeFlyout();
@@ -119,8 +118,8 @@ const SystemPromptSettingsManagementComponent = ({
   }, [closeFlyout, onCancelClick]);
 
   const onSaveConfirmed = useCallback(() => {
-    handleSave();
     closeFlyout();
+    handleSave();
   }, [closeFlyout, handleSave]);
 
   const confirmationTitle = useMemo(
