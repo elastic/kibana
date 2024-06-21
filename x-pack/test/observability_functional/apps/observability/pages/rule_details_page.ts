@@ -179,7 +179,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('handles clicking on all alerts correctly', async () => {
-        const totalAlerts = await observability.components.alertSummaryWidget.getTotalAlertCount();
+        const totalAlerts =
+          await observability.components.alertSummaryWidget.getCompactTotalAlertSelector();
         await totalAlerts.click();
 
         const url = await browser.getCurrentUrl();

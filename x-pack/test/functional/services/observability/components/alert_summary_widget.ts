@@ -27,12 +27,16 @@ export function ObservabilityAlertSummaryWidgetProvider({ getService }: FtrProvi
     return (await testSubjects.find(COMPACT_TIME_RANGE_TITLE_SELECTOR)).getVisibleText();
   };
 
+  const getCompactWidgetSelector = async () => {
+    return await testSubjects.find(COMPACT_COMPONENT_SELECTOR);
+  };
+
   const getCompactActiveAlertSelector = async () => {
     return await testSubjects.find(COMPACT_ACTIVE_ALERTS_SELECTOR);
   };
 
-  const getCompactWidgetSelector = async () => {
-    return await testSubjects.find(COMPACT_COMPONENT_SELECTOR);
+  const getCompactTotalAlertSelector = async () => {
+    return await testSubjects.find(TOTAL_ALERT_SELECTOR);
   };
 
   const getFullSizeComponentSelectorOrFail = async () => {
@@ -44,14 +48,15 @@ export function ObservabilityAlertSummaryWidgetProvider({ getService }: FtrProvi
   };
 
   const getTotalAlertCount = async () => {
-    return (await testSubjects.find(TOTAL_ALERT_SELECTOR)).getVisibleText();
+    return (await getCompactTotalAlertSelector()).getVisibleText();
   };
 
   return {
     getCompactActiveAlertSelector,
     getCompactComponentSelectorOrFail,
-    getCompactTimeRangeTitle,
     getCompactWidgetSelector,
+    getCompactTimeRangeTitle,
+    getCompactTotalAlertSelector,
     getFullSizeComponentSelectorOrFail,
     getActiveAlertCount,
     getTotalAlertCount,
