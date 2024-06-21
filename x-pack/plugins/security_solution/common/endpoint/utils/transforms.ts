@@ -35,39 +35,6 @@ export const stopMetadataTransforms = usageTracker.track(
   }
 );
 
-/*
-
-For version "9.0":
-
-              {
-                "id": "logs-endpoint.metadata_current-default-0.1.0",
-                "type": "transform",
-                "deferred": false,
-                "version": "0.1.0"
-              },
-              {
-                "id": "logs-endpoint.metadata_united-default-0.1.0",
-                "type": "transform",
-                "deferred": false,
-                "version": "0.1.0"
-              }
-
-
-
-For current:
-
-              {
-                "id": "endpoint.metadata_current-default-8.15.0-prerelease.0",
-                "type": "transform"
-              },
-              {
-                "id": "endpoint.metadata_united-default-8.15.0-prerelease.0",
-                "type": "transform"
-              }
-
-
-*/
-
 export const startMetadataTransforms = usageTracker.track(
   'startMetadataTransforms',
   async (
