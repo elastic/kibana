@@ -115,7 +115,6 @@ export default function ({ getService }: FtrProviderContext) {
           ({ body, status } = await supertestWithoutAuth
             .put('/internal/security/api_key')
             .set(svlCommonApi.getInternalRequestHeader())
-            // .set(roleAuthc.apiKeyHeader)
             .set(roleAuthc.cookieHeader)
             .send(requestBody));
           // expect success because we're using the internal header
