@@ -174,57 +174,54 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="m">
               {Object.values(panelsSearchResult).map(
-                ({ id, title, items, isDisabled, ['data-test-subj']: dataTestSubj }) => (
-                  <EuiFlexItem
-                    key={id}
-                    data-test-subj={dataTestSubj}
-                    css={isDisabled ? { display: 'none' } : { display: 'flex' }}
-                  >
-                    <EuiTitle id={`${id}-group`} size="xxs">
-                      {typeof title === 'string' ? <h3>{title}</h3> : title}
-                    </EuiTitle>
-                    <EuiListGroup
-                      aria-labelledby={`${id}-group`}
-                      size="s"
-                      gutterSize="none"
-                      maxWidth={false}
-                      flush
-                    >
-                      {items?.map((item, idx) => {
-                        return (
-                          <EuiListGroupItem
-                            key={`${id}.${idx}`}
-                            label={
-                              <EuiToolTip position="right" content={item.description}>
-                                {!item.isDeprecated ? (
-                                  <EuiText size="s">{item.name}</EuiText>
-                                ) : (
-                                  <EuiFlexGroup wrap responsive={false} gutterSize="s">
-                                    <EuiFlexItem grow={false}>
-                                      <EuiText size="s">{item.name}</EuiText>
-                                    </EuiFlexItem>
-                                    <EuiFlexItem grow={false}>
-                                      <EuiBadge color="warning">
-                                        <FormattedMessage
-                                          id="dashboard.editorMenu.deprecatedTag"
-                                          defaultMessage="Deprecated"
-                                        />
-                                      </EuiBadge>
-                                    </EuiFlexItem>
-                                  </EuiFlexGroup>
-                                )}
-                              </EuiToolTip>
-                            }
-                            onClick={item?.onClick}
-                            iconType={item.icon}
-                            data-test-subj={item['data-test-subj']}
-                            isDisabled={item.isDisabled}
-                          />
-                        );
-                      })}
-                    </EuiListGroup>
-                  </EuiFlexItem>
-                )
+                ({ id, title, items, isDisabled, ['data-test-subj']: dataTestSubj }) =>
+                  !isDisabled ? (
+                    <EuiFlexItem key={id} data-test-subj={dataTestSubj}>
+                      <EuiTitle id={`${id}-group`} size="xxs">
+                        {typeof title === 'string' ? <h3>{title}</h3> : title}
+                      </EuiTitle>
+                      <EuiListGroup
+                        aria-labelledby={`${id}-group`}
+                        size="s"
+                        gutterSize="none"
+                        maxWidth={false}
+                        flush
+                      >
+                        {items?.map((item, idx) => {
+                          return (
+                            <EuiListGroupItem
+                              key={`${id}.${idx}`}
+                              label={
+                                <EuiToolTip position="right" content={item.description}>
+                                  {!item.isDeprecated ? (
+                                    <EuiText size="s">{item.name}</EuiText>
+                                  ) : (
+                                    <EuiFlexGroup wrap responsive={false} gutterSize="s">
+                                      <EuiFlexItem grow={false}>
+                                        <EuiText size="s">{item.name}</EuiText>
+                                      </EuiFlexItem>
+                                      <EuiFlexItem grow={false}>
+                                        <EuiBadge color="warning">
+                                          <FormattedMessage
+                                            id="dashboard.editorMenu.deprecatedTag"
+                                            defaultMessage="Deprecated"
+                                          />
+                                        </EuiBadge>
+                                      </EuiFlexItem>
+                                    </EuiFlexGroup>
+                                  )}
+                                </EuiToolTip>
+                              }
+                              onClick={item?.onClick}
+                              iconType={item.icon}
+                              data-test-subj={item['data-test-subj']}
+                              isDisabled={item.isDisabled}
+                            />
+                          );
+                        })}
+                      </EuiListGroup>
+                    </EuiFlexItem>
+                  ) : null
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
