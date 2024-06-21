@@ -102,7 +102,6 @@ export const FieldStatsInfoButton = ({
         className="euiComboBoxOption__content"
         css={{
           paddingBottom: themeVars.euiTheme.euiSizeXS,
-          // @todo : fontWeight: isGroupLabel ? themeVars.euiTheme.euiFontWeightBold : undefined,
         }}
       >
         {label}

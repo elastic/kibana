@@ -704,9 +704,8 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
                     dependentVariable: selectedOptions[0].label || '',
                   });
                 }}
-                // @todo
-                // isClearable={false}
-                // isInvalid={dependentVariable === ''}
+                isClearable={false}
+                isInvalid={dependentVariable === ''}
                 data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
                   loadingDepVarOptions ? ' loading' : ' loaded'
                 }`}
