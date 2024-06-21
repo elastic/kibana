@@ -7,13 +7,37 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { TRACE_ID } from '../../../common/es_fields/apm';
+import {
+  AGENT_NAME,
+  PARENT_ID,
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
+  TRACE_ID,
+} from '../../../common/es_fields/apm';
 import {
   ConnectionNode,
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from '../../../common/service_map';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+
+const SCRIPTED_METRICS_FIELDS_TO_COPY = [
+  PARENT_ID,
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  TRACE_ID,
+  PROCESSOR_EVENT,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  AGENT_NAME,
+];
+
+const ESTIMATED_BYTES_PER_FIELD = 60;
 
 export async function fetchServicePathsFromTraceIds({
   apmEventClient,
@@ -63,7 +87,7 @@ export async function fetchServicePathsFromTraceIds({
     serviceMapParams
   );
   // calculate how many docs we can fetch per shard by dividing the total available bytes by the average doc size
-  const avgDocSizeInBytes = 600; // estimated doc size in bytes
+  const avgDocSizeInBytes = SCRIPTED_METRICS_FIELDS_TO_COPY.length * ESTIMATED_BYTES_PER_FIELD; // estimated doc size in bytes
   const totalShards = serviceMapQueryDataResponse._shards.successful;
   const numDocsAllowed = Math.floor(serverlessServiceMapMaxAvailableBytes / avgDocSizeInBytes);
   const numDocsPerShardAllowed = Math.floor(numDocsAllowed / totalShards);
@@ -73,48 +97,46 @@ export async function fetchServicePathsFromTraceIds({
       scripted_metric: {
         params: {
           limit: numDocsPerShardAllowed,
+          fieldsToCopy: SCRIPTED_METRICS_FIELDS_TO_COPY,
         },
         init_script: {
           lang: 'painless',
-          source: `state.docCount = 0;
-          state.limit = params.limit;
-          state.eventsById = new HashMap();
-          String[] fieldsToCopy = new String[] {
-              'parent.id',
-              'service.name',
-              'service.environment',
-              'span.destination.service.resource',
-              'trace.id',
-              'processor.event',
-              'span.type',
-              'span.subtype',
-              'agent.name'
-            };
-            state.fieldsToCopy = fieldsToCopy;`,
+          source: `
+            state.docCount = 0;
+            state.limit = params.limit;
+            state.eventsById = new HashMap();
+            state.fieldsToCopy = params.fieldsToCopy;`,
         },
         map_script: {
           lang: 'painless',
-          source: `if (state.docCount >= state.limit) {
-            return; // Stop processing if the document limit is reached
-          }
-            def id;
-            id = $('span.id', null);
+          source: `
+            if (state.docCount >= state.limit) {
+              /* Stop processing if the document limit is reached */
+              return; 
+            }
+
+            def id = $('span.id', null);
             if (id == null) {
               id = $('transaction.id', null);
             }
 
-            def copy = new HashMap();
-            copy.id = id;
+            /* makes sure we don't process the same event twice */
+            if (id != null && !state.eventsById.containsKey(id)) {
+              def copy = new HashMap();
+              copy.id = id;
 
-            for(key in state.fieldsToCopy) {
-              def value = $(key, null);
-              if (value != null) {
-                copy[key] = value;
+              for(key in state.fieldsToCopy) {
+                def value = $(key, null);
+                if (value != null) {
+                  copy[key] = value;
+                }
               }
+
+              state.eventsById[id] = copy;
             }
 
-            state.eventsById[id] = copy;
-            state.docCount+=1`,
+            state.docCount++;
+          `,
         },
         combine_script: {
           lang: 'painless',
@@ -131,120 +153,109 @@ export async function fetchServicePathsFromTraceIds({
               return destination;
             }
       
-            def processAndReturnEvent(def context, def eventId, def currentDepth) {
-              int maxDepth = 20;
-              if (currentDepth > maxDepth) {
-                return null;
-              }
-              
-              if (context.processedEvents[eventId] != null) {
-                return context.processedEvents[eventId];
-              }
-      
-              def event = context.eventsById[eventId];
-      
-              if (event == null) {
-                return null;
-              }
-      
-              def service = new HashMap();
-              service['service.name'] = event['service.name'];
-              service['service.environment'] = event['service.environment'];
-              service['agent.name'] = event['agent.name'];
-      
-              def basePath = new ArrayList();
-      
-              def parentId = event['parent.id'];
-              def parent;
-      
-              if (parentId != null && parentId != event['id']) {
-                parent = processAndReturnEvent(context, parentId, currentDepth + 1);
-                if (parent != null) {
+            def processAndReturnEvent(def context, def eventId) {
+              def stack = new Stack();
+              stack.push(eventId);
+
+              while (!stack.isEmpty()) {
+                def currentEventId = stack.pop();
+                def event = context.eventsById[currentEventId];
+
+                if (context.processedEvents[currentEventId] != null || event == null) {
+                  continue;
+                }
+        
+                def service = new HashMap();
+                service['service.name'] = event['service.name'];
+                service['service.environment'] = event['service.environment'];
+                service['agent.name'] = event['agent.name'];
+        
+                def basePath = new ArrayList();
+                def parentId = event['parent.id'];
+        
+                if (parentId != null && !parentId.equals(currentEventId)) {
+                  def parent = context.processedEvents.get(parentId);
+                  if (parent == null) {
+                    stack.push(currentEventId);
+                    stack.push(parentId);
+                    continue;
+                  } 
+
                   /* copy the path from the parent */
                   basePath.addAll(parent.path);
                   /* flag parent path for removal, as it has children */
                   context.locationsToRemove.add(parent.path);
       
-                  /* if the parent has 'span.destination.service.resource' set, and the service is different,
-                  we've discovered a service */
-      
+                  /* if the parent has 'span.destination.service.resource' set, and the service is different, we've discovered a service */
                   if (parent['span.destination.service.resource'] != null
-                    && parent['span.destination.service.resource'] != ""
-                    && (parent['service.name'] != event['service.name']
-                      || parent['service.environment'] != event['service.environment']
+                    && !parent['span.destination.service.resource'].equals("")
+                    && (!parent['service.name'].equals(event['service.name'])
+                      || !parent['service.environment'].equals(event['service.environment'])
                     )
                   ) {
                     def parentDestination = getDestination(parent);
                     context.externalToServiceMap.put(parentDestination, service);
                   }
                 }
+          
+                def lastLocation = basePath.size() > 0 ? basePath[basePath.size() - 1] : null;
+                def currentLocation = service;
+        
+                /* only add the current location to the path if it's different from the last one */
+                if (lastLocation == null || !lastLocation.equals(currentLocation)) {
+                  basePath.add(currentLocation);
+                }
+        
+                /* if there is an outgoing span, create a new path */
+                if (event['span.destination.service.resource'] != null
+                  && !event['span.destination.service.resource'].equals("")) {
+
+                  def outgoingLocation = getDestination(event);
+                  def outgoingPath = new ArrayList(basePath);
+                  outgoingPath.add(outgoingLocation);
+                  context.paths.add(outgoingPath);
+                }
+        
+                event.path = basePath;
+                context.processedEvents[currentEventId] = event;
               }
-      
-              def lastLocation = basePath.size() > 0 ? basePath[basePath.size() - 1] : null;
-      
-              def currentLocation = service;
-      
-              /* only add the current location to the path if it's different from the last one */
-              if (lastLocation == null || !lastLocation.equals(currentLocation)) {
-                basePath.add(currentLocation);
-              }
-      
-              /* if there is an outgoing span, create a new path */
-              if (event['span.destination.service.resource'] != null
-                && event['span.destination.service.resource'] != '') {
-                def outgoingLocation = getDestination(event);
-                def outgoingPath = new ArrayList(basePath);
-                outgoingPath.add(outgoingLocation);
-                context.paths.add(outgoingPath);
-              }
-      
-              event.path = basePath;
-      
-              context.processedEvents[eventId] = event;
-              return event;
+
+              return context.processedEvents;
             }
       
             def context = new HashMap();
       
             context.processedEvents = new HashMap();
             context.eventsById = new HashMap();
-      
             context.paths = new HashSet();
             context.externalToServiceMap = new HashMap();
             context.locationsToRemove = new HashSet();
-            context.totalDocs = 0;
       
             for (state in states) {
               context.eventsById.putAll(state.eventsById);
-              context.totalDocs += state.docCount;
             }
       
             for (entry in context.eventsById.entrySet()) {
-              processAndReturnEvent(context, entry.getKey(), 0);
-            }
-      
-            def paths = new HashSet();
-      
-            for (foundPath in context.paths) {
-              if (!context.locationsToRemove.contains(foundPath)) {
-                paths.add(foundPath);
-              }
+              processAndReturnEvent(context, entry.getKey());
             }
       
             def response = new HashMap();
-            response.paths = paths;
+            response.paths = new HashSet();
+            response.discoveredServices = new HashSet();
       
-            def discoveredServices = new HashSet();
+            for (foundPath in context.paths) {
+              if (!context.locationsToRemove.contains(foundPath)) {
+                response.paths.add(foundPath);
+              }
+            }
       
             for (entry in context.externalToServiceMap.entrySet()) {
               def map = new HashMap();
               map.from = entry.getKey();
               map.to = entry.getValue();
-              discoveredServices.add(map);
+              response.discoveredServices.add(map);
             }
-            response.discoveredServices = discoveredServices;
-            response.totalDocs = context.totalDocs;
-      
+
             return response;
           `,
         },
