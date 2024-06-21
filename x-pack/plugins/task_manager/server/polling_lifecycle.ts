@@ -32,7 +32,7 @@ import {
 import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
-import { ConcreteTaskInstance } from './task';
+import { ConcreteTaskInstance, TaskCost } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_running';
@@ -121,7 +121,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
-      bufferMaxOperations: config.max_workers,
+      bufferMaxOperations: config.capacity / TaskCost.Tiny,
       logger,
     });
 

@@ -64,7 +64,7 @@ describe('Configuration Statistics Aggregator', () => {
       try {
         createConfigurationAggregator(configuration, managedConfig)
           .pipe(take(3), bufferCount(3))
-          .subscribe(([initial, updatedWorkers, updatedInterval]) => {
+          .subscribe(([initial, updatedCapacity, updatedInterval]) => {
             expect(initial.value).toEqual({
               capacity: 20,
               poll_interval: 6000000,
@@ -79,7 +79,7 @@ describe('Configuration Statistics Aggregator', () => {
                 custom: {},
               },
             });
-            expect(updatedWorkers.value).toEqual({
+            expect(updatedCapacity.value).toEqual({
               capacity: 16,
               poll_interval: 6000000,
               request_capacity: 1000,

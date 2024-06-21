@@ -299,7 +299,7 @@ describe('EphemeralTaskLifecycle', () => {
       poolCapacity.mockReturnValue({
         availableCapacity: 4,
       });
-      // but when we ask how many it has occupied by type  - wee always have one worker already occupied by that type
+      // but when we ask how many it has occupied by type  - wee always have one task already occupied by that type
       pool.getOccupiedCapacityByType.mockReturnValue(1);
 
       lifecycleEvent$.next(
@@ -308,7 +308,7 @@ describe('EphemeralTaskLifecycle', () => {
 
       expect(pool.run).toHaveBeenCalledTimes(0);
 
-      // now we release the worker in the pool and cause another cycle in the epheemral queue
+      // now we release the task in the pool and cause another cycle in the epheemral queue
       pool.getOccupiedCapacityByType.mockReturnValue(0);
       lifecycleEvent$.next(
         asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed }))

@@ -18,8 +18,8 @@ export const PREFERRED_MAX_POLL_INTERVAL = 60 * 1000;
 // Need at least enough capacity to run an extra large task
 export const MIN_CAPACITY = TaskCost.ExtraLarge;
 
-// When errors occur, reduce maxWorkers by MAX_WORKERS_DECREASE_PERCENTAGE
-// When errors no longer occur, start increasing maxWorkers by MAX_WORKERS_INCREASE_PERCENTAGE
+// When errors occur, reduce capacity by CAPACITY_DECREASE_PERCENTAGE
+// When errors no longer occur, start increasing capacity by CAPACITY_INCREASE_PERCENTAGE
 // until starting value is reached
 const CAPACITY_DECREASE_PERCENTAGE = 0.8;
 const CAPACITY_INCREASE_PERCENTAGE = 1.05;

@@ -67,7 +67,7 @@ export function estimateCapacity(
   /**
    * On average, how many polling cycles does it take to execute a task?
    * If this is higher than the polling cycle, then a whole cycle is wasted as
-   * we won't use the worker until the next cycle.
+   * we won't use the capacity until the next cycle.
    */
   const averagePollIntervalsPerExecution = Math.ceil(
     map(
@@ -122,7 +122,7 @@ export function estimateCapacity(
    * At times a cluster might experience spikes of NonRecurring/Ephemeral tasks which swamp Task Manager
    * causing it to spend all its capacity on NonRecurring/Ephemeral tasks, which makes it much harder
    * to estimate the required capacity.
-   * This is easy to identify as load will usually max out or all the workers are busy executing non-recurring
+   * This is easy to identify as load will usually max out or all the capacity is taken executing non-recurring
    * or ephemeral tasks, and none are running recurring tasks.
    */
   const hasTooLittleCapacityToEstimateRequiredNonRecurringCapacity =

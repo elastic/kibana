@@ -202,7 +202,7 @@ describe('TaskPollingLifecycle', () => {
   });
 
   describe('claimAvailableTasks', () => {
-    test('should claim Available Tasks when there are available workers', async () => {
+    test('should claim Available Tasks when there is available capacity', async () => {
       const logger = mockLogger();
       const taskClaiming = taskClaimingMock.create({});
       taskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>

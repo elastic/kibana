@@ -241,7 +241,7 @@ describe('TaskPool', () => {
       {
         ...mockTask({ id: '2' }),
         async run() {
-          // halt here so that we can verify that this task is counted in `occupiedWorkers`
+          // halt here so that we can verify that this task is counted in `occupiedCapacity`
           await haltUntilWeAfterFirstRun;
           return asOk({ state: {} });
         },
@@ -272,7 +272,7 @@ describe('TaskPool', () => {
     );
   });
 
-  test('calls to availableWorkers ensures we cancel expired tasks', async () => {
+  test('calls to availableCapacity ensures we cancel expired tasks', async () => {
     const pool = new TaskPool({
       totalCapacity$: of(2),
       logger: loggingSystemMock.create().get(),
@@ -308,7 +308,7 @@ describe('TaskPool', () => {
 
     sinon.assert.notCalled(cancel);
     expect(pool.occupiedCapacity).toEqual(2);
-    // The call to `availableWorkers` will clear the expired task so it's 1 instead of 0
+    // The call to `availableCapacity` will clear the expired task so it's 1 instead of 0
     expect(pool.availableCapacity).toEqual(2);
     sinon.assert.calledOnce(cancel);
 
@@ -388,7 +388,7 @@ describe('TaskPool', () => {
   // reproduce with the wacky test below.  It does log the exact error
   // from that issue, without the corresponding fix in task_pool.ts
   // TODO: Test still needed?
-  test('works when available workers is 0 but there are tasks to run', async () => {
+  test('works when available capacity is 0 but there are tasks to run', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
       totalCapacity$: of(4),
@@ -400,7 +400,7 @@ describe('TaskPool', () => {
     const taskId = uuidv4();
     const task1 = mockTask({ id: taskId, run: shouldRun });
 
-    // we need to alternate the values of `availableWorkers`.  First it
+    // we need to alternate the values of `availableCapacity`.  First it
     // should be 0, then 1, then 0, then 1, etc.  This will cause task_pool.run
     // to partition tasks (0 to run, everything as leftover), then at the
     // end of run(), to check if it should recurse, it should be > 0.
