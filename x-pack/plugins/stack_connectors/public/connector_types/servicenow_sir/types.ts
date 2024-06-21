@@ -9,5 +9,10 @@ import type { ExecutorSubActionPushParamsSIR } from '../../../server/connector_t
 
 export interface ServiceNowSIRActionParams {
   subAction: string;
-  subActionParams: ExecutorSubActionPushParamsSIR;
+  /* We override "additional_fields" to string because when users fill in the form, the structure won't match until done and
+  we need to store the current state. To match with the data structure define in the backend, we make sure users can't
+  send the form while not matching the original object structure. */
+  subActionParams: ExecutorSubActionPushParamsSIR & {
+    incident: { additional_fields: string | null };
+  };
 }
