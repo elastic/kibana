@@ -68,7 +68,7 @@ For more details about CSV export settings, go to <<reporting-csv-settings>>.
 
 A "socket hangup" is a generic type of error meaning that a remote service (in this case Elasticsearch or a proxy in Cloud) closed the connection.
 Kibana can't foresee when this might happen and can't force the remote service to keep the connection open.
-One thing it can do is try the advice @Dosant gave to lower the size of results that come back in each request or increase the amount of time the remote services will
+To work around this situation, consider lowering the size of results that come back in each request or increase the amount of time the remote services will
 allow to keep the request open.
 Considering the evidence in the logs and the results of they are trying to get,
 I would give these recommendations:
