@@ -1510,6 +1510,15 @@
   resolved "https://registry.yarnpkg.com/@csstools/selector-specificity/-/selector-specificity-2.0.1.tgz#b6b8d81780b9a9f6459f4bfe9226ac6aefaefe87"
   integrity sha512-aG20vknL4/YjQF9BSV7ts4EWm/yrjagAN7OWBNmlbEOUiu0llj4OGrFoOKK3g2vey4/p2omKCoHrWtPxSwV3HA==
 
+"@cypress/debugging-proxy@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@cypress/debugging-proxy/-/debugging-proxy-2.0.1.tgz#c0ef569af4c2efb6ceb329e5813bc770b133ab9e"
+  integrity sha512-kUFQSNQfvZUO5yqtiir65FPPJZKPQaA68trYiKlHuWhDu9sopjIAXoZv/ff0GbLSNDHdxIuF0VyJhJIRRHuhAw==
+  dependencies:
+    debug "^4.1.1"
+    http-proxy "^1.17.0"
+    self-signed-cert "^1.0.1"
+
 "@cypress/grep@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@cypress/grep/-/grep-4.0.1.tgz#bce679f85da286c4979bb9ffc79b2782dc5b75c6"
@@ -19489,7 +19498,7 @@ http-proxy-middleware@^2.0.3:
     is-plain-obj "^3.0.0"
     micromatch "^4.0.2"
 
-http-proxy@^1.18.1:
+http-proxy@^1.17.0, http-proxy@^1.18.1:
   version "1.18.1"
   resolved "https://registry.yarnpkg.com/http-proxy/-/http-proxy-1.18.1.tgz#401541f0534884bbf95260334e72f88ee3976549"
   integrity sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==
@@ -28088,6 +28097,11 @@ selenium-webdriver@^4.21.0:
     jszip "^3.10.1"
     tmp "^0.2.3"
     ws ">=8.16.0"
+
+self-signed-cert@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/self-signed-cert/-/self-signed-cert-1.0.1.tgz#9e2fae07503f84fb910f4a87c5c5c6becc207bf6"
+  integrity sha512-86d1jYydqaRdUEyR9tj5nQ0d059RUWB9gdZrzDy2MJaUHii1h9EyzbAepkV1rOLO2AkSkQbXtUrqWRH4FDYWHA==
 
 selfsigned@^2.0.1:
   version "2.0.1"
