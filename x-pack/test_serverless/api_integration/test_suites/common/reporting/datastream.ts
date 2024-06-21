@@ -26,7 +26,9 @@ export default function ({ getService }: FtrProviderContext) {
     },
   };
 
-  describe('Data Stream', () => {
+  describe('Data Stream', function () {
+    // see details: https://github.com/elastic/kibana/issues/186648
+    this.tags(['failsOnMKI']);
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
