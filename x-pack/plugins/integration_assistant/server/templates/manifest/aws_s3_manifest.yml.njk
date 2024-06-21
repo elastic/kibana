@@ -1,7 +1,9 @@
 - input: aws-s3
   template_path: aws-s3.yml.hbs
-  title: {{ data_stream_title }}
-  description: {{ data_stream_description }}
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
   vars:
     - name: bucket_arn
       type: text
