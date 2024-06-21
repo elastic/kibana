@@ -275,7 +275,7 @@ test('pulls panels from override input', async () => {
 
   // instead, the unsaved changes for React embeddables should be applied to the "restored runtime state" property of the Dashboard.
   expect(
-    (dashboard!.restoredRuntimeState!.someReactEmbeddablePanel as { title: string }).title
+    (dashboard!.getRuntimeStateForChild('someReactEmbeddablePanel') as { title: string }).title
   ).toEqual('an elegant override, from a more civilized age');
 });
 

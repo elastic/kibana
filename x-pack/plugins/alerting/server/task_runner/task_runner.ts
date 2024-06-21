@@ -68,7 +68,7 @@ import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_maintenance_windows';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
-import { processRunResults } from './lib';
+import { withAlertingSpan, processRunResults } from './lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -294,11 +294,16 @@ export class TaskRunner<
     const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
     const ruleRunMetricsStore = new RuleRunMetricsStore();
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${rule.name}'`;
-    const queryDelay = await rulesSettingsClient.queryDelay().get();
+    const queryDelay = await withAlertingSpan('alerting:get-query-delay-settings', () =>
+      rulesSettingsClient.queryDelay().get()
+    );
+    const flappingSettings = await withAlertingSpan('alerting:get-flapping-settings', () =>
+      rulesSettingsClient.flapping().get()
+    );
 
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
-      flappingSettings: await rulesSettingsClient.flapping().get(),
+      flappingSettings,
       namespace: this.context.spaceIdToNamespace(spaceId),
       queryDelaySec: queryDelay.delay,
       ruleId,
@@ -306,47 +311,51 @@ export class TaskRunner<
       ruleRunMetricsStore,
       spaceId,
     };
-    const alertsClient = await initializeAlertsClient<
-      Params,
-      AlertData,
-      AlertState,
-      Context,
-      ActionGroupIds,
-      RecoveryActionGroupId
-    >({
-      alertsService: this.context.alertsService,
-      context: ruleTypeRunnerContext,
-      executionId: this.executionId,
-      logger: this.logger,
-      maxAlerts: this.context.maxAlerts,
-      rule: {
-        id: rule.id,
-        name: rule.name,
-        tags: rule.tags,
-        consumer: rule.consumer,
-        revision: rule.revision,
-        alertDelay: rule.alertDelay,
-        params: rule.params,
-      },
-      ruleType: this.ruleType as UntypedNormalizedRuleType,
-      startedAt: this.taskInstance.startedAt,
-      taskInstance: this.taskInstance,
-    });
-    const executorServices = await getExecutorServices({
-      context: this.context,
-      fakeRequest,
-      abortController: this.searchAbortController,
-      logger: this.logger,
-      ruleMonitoringService: this.ruleMonitoring,
-      ruleResultService: this.ruleResult,
-      ruleData: {
-        name: rule.name,
-        alertTypeId: rule.alertTypeId,
-        id: rule.id,
-        spaceId,
-      },
-      ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
-    });
+    const alertsClient = await withAlertingSpan('alerting:initialize-alerts-client', () =>
+      initializeAlertsClient<
+        Params,
+        AlertData,
+        AlertState,
+        Context,
+        ActionGroupIds,
+        RecoveryActionGroupId
+      >({
+        alertsService: this.context.alertsService,
+        context: ruleTypeRunnerContext,
+        executionId: this.executionId,
+        logger: this.logger,
+        maxAlerts: this.context.maxAlerts,
+        rule: {
+          id: rule.id,
+          name: rule.name,
+          tags: rule.tags,
+          consumer: rule.consumer,
+          revision: rule.revision,
+          alertDelay: rule.alertDelay,
+          params: rule.params,
+        },
+        ruleType: this.ruleType as UntypedNormalizedRuleType,
+        startedAt: this.taskInstance.startedAt,
+        taskInstance: this.taskInstance,
+      })
+    );
+    const executorServices = await withAlertingSpan('alerting:get-executor-services', () =>
+      getExecutorServices({
+        context: this.context,
+        fakeRequest,
+        abortController: this.searchAbortController,
+        logger: this.logger,
+        ruleMonitoringService: this.ruleMonitoring,
+        ruleResultService: this.ruleResult,
+        ruleData: {
+          name: rule.name,
+          alertTypeId: rule.alertTypeId,
+          id: rule.id,
+          spaceId,
+        },
+        ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
+      })
+    );
 
     const {
       state: updatedRuleTypeState,
@@ -391,21 +400,23 @@ export class TaskRunner<
 
     let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
 
-    await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
-      if (isRuleSnoozed(rule)) {
-        this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
-      } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
-        this.logger.debug(
-          `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
-        );
-        this.countUsageOfActionExecutionAfterRuleCancellation();
-      } else {
-        executionHandlerRunResult = await executionHandler.run({
-          ...alertsClient.getProcessedAlerts('activeCurrent'),
-          ...alertsClient.getProcessedAlerts('recoveredCurrent'),
-        });
-      }
-    });
+    await withAlertingSpan('alerting:schedule-actions', () =>
+      this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
+        if (isRuleSnoozed(rule)) {
+          this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
+        } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
+          this.logger.debug(
+            `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
+          );
+          this.countUsageOfActionExecutionAfterRuleCancellation();
+        } else {
+          executionHandlerRunResult = await executionHandler.run({
+            ...alertsClient.getProcessedAlerts('activeCurrent'),
+            ...alertsClient.getProcessedAlerts('recoveredCurrent'),
+          });
+        }
+      })
+    );
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
@@ -481,6 +492,7 @@ export class TaskRunner<
         apm.currentTransaction.addLabels({
           alerting_rule_space_id: spaceId,
           alerting_rule_id: ruleId,
+          plugins: 'alerting',
         });
       }
 
@@ -495,7 +507,9 @@ export class TaskRunner<
         this.timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, startedAt);
       }
 
-      const ruleData = await getDecryptedRule(this.context, ruleId, spaceId);
+      const ruleData = await withAlertingSpan('alerting:get-decrypted-rule', () =>
+        getDecryptedRule(this.context, ruleId, spaceId)
+      );
 
       const runRuleParams = validateRuleAndCreateFakeRequest({
         ruleData,
@@ -520,14 +534,16 @@ export class TaskRunner<
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
 
       // Load the maintenance windows
-      this.maintenanceWindows = await getMaintenanceWindows({
-        context: this.context,
-        fakeRequest: runRuleParams.fakeRequest,
-        logger: this.logger,
-        ruleTypeId: this.ruleType.id,
-        ruleId,
-        ruleTypeCategory: this.ruleType.category,
-      });
+      this.maintenanceWindows = await withAlertingSpan('alerting:load-maintenance-windows', () =>
+        getMaintenanceWindows({
+          context: this.context,
+          fakeRequest: runRuleParams.fakeRequest,
+          logger: this.logger,
+          ruleTypeId: this.ruleType.id,
+          ruleId,
+          ruleTypeCategory: this.ruleType.category,
+        })
+      );
 
       // Set the event log MW Id field the first time with MWs without scoped queries
       this.maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
@@ -655,7 +671,10 @@ export class TaskRunner<
     let schedule: Result<IntervalSchedule, Error>;
     try {
       const validatedRuleData = await this.prepareToRun();
-      stateWithMetrics = asOk(await this.runRule(validatedRuleData));
+
+      stateWithMetrics = asOk(
+        await withAlertingSpan('alerting:run', () => this.runRule(validatedRuleData))
+      );
 
       // fetch the rule again to ensure we return the correct schedule as it may have
       // changed during the task execution
@@ -666,7 +685,9 @@ export class TaskRunner<
       schedule = asErr(err);
     }
 
-    await this.processRunResults({ schedule, stateWithMetrics });
+    await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>
+      this.processRunResults({ schedule, stateWithMetrics })
+    );
 
     const transformRunStateToTaskState = (
       runStateWithMetrics: RuleTaskStateAndMetrics
