@@ -689,7 +689,7 @@ export class ExplorerChartSingleMetric extends React.Component {
                 anomaly={this.state.popoverData}
                 bounds={this.props.bounds}
                 showMapsLink={false}
-                showViewSeriesLink={false}
+                showViewSeriesLink={true}
                 isAggregatedData={this.props.tableData.interval !== 'second'}
                 interval={this.props.tableData.interval}
                 showRuleEditorFlyout={this.state.showRuleEditorFlyout}
