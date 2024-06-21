@@ -21,7 +21,7 @@ import {
 import {
   executeSetupModuleRequest,
   forceStartDatafeeds,
-  stopDatafeeds,
+  forceStopAndCloseJob,
 } from '../../../../support/machine_learning';
 import {
   continueFromDefineStep,
@@ -67,7 +67,11 @@ describe(
     describe('with Alert Suppression', () => {
       describe('when no ML jobs have run', () => {
         before(() => {
-          stopDatafeeds({ jobIds: getMachineLearningRule().machine_learning_job_id as string[] });
+          const machineLearningJobIds = ([] as string[]).concat(
+            getMachineLearningRule().machine_learning_job_id
+          );
+          // ensure no ML jobs are started before the suite
+          machineLearningJobIds.forEach((j) => forceStopAndCloseJob({ jobId: j }));
         });
 
         beforeEach(() => {

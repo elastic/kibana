@@ -51,7 +51,7 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
-import { stopDatafeeds } from '../../../../support/machine_learning';
+import { forceStopAndCloseJob } from '../../../../support/machine_learning';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
@@ -64,13 +64,12 @@ describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
     'Anomalous Process for a Linux Population',
   ].join('');
 
-  const machineLearningJobIds = ([] as string[]).concat(
-    getMachineLearningRule().machine_learning_job_id
-  );
-
   before(() => {
-    // ensure no ML datafeeds are started before the suite
-    stopDatafeeds({ jobIds: machineLearningJobIds });
+    const machineLearningJobIds = ([] as string[]).concat(
+      getMachineLearningRule().machine_learning_job_id
+    );
+    // ensure no ML jobs are started before the suite
+    machineLearningJobIds.forEach((jobId) => forceStopAndCloseJob({ jobId }));
     deleteAlertsAndRules();
   });
 

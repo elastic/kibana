@@ -21,7 +21,7 @@ import {
 import {
   executeSetupModuleRequest,
   forceStartDatafeeds,
-  stopDatafeeds,
+  forceStopAndCloseJob,
 } from '../../../../support/machine_learning';
 import { editFirstRule } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
@@ -58,9 +58,12 @@ describe(
     const suppressByFields = ['by_field_name', 'by_field_value'];
     const jobId = 'v3_linux_anomalous_network_activity';
 
-    // ensure no ML datafeeds are started before the test
     before(() => {
-      stopDatafeeds({ jobIds: getMachineLearningRule().machine_learning_job_id as string[] });
+      const machineLearningJobIds = ([] as string[]).concat(
+        getMachineLearningRule().machine_learning_job_id
+      );
+      // ensure no ML jobs are started before the test
+      machineLearningJobIds.forEach((j) => forceStopAndCloseJob({ jobId: j }));
     });
 
     beforeEach(() => {
