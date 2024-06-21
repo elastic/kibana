@@ -77,6 +77,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     // Skipping test for now because functionality is not yet possible to test
+    // See details: https://github.com/elastic/kibana/issues/186558
     xit(`user doesn't see a job another user has created`, async () => {
       log.debug(`creating a csv report job using api keys for role: [${roleName}]`);
 
