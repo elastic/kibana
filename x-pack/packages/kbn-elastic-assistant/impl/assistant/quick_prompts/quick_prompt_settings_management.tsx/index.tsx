@@ -6,25 +6,22 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiBadge,
-  EuiBasicTableColumn,
   EuiButton,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 import { QuickPrompt } from '../types';
-import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
 import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt_editor';
 import * as i18n from './translations';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { Flyout } from '../../common/components/assistant_settings_management/flyout';
 import { CANCEL, DELETE } from '../../settings/translations';
 import { useQuickPromptEditor } from '../quick_prompt_settings/use_quick_prompt_editor';
+import { useQuickPromptTable } from './use_quick_prompt_table';
 
 interface Props {
   onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
@@ -100,50 +97,11 @@ const QuickPromptSettingsManagementComponent = ({
     closeFlyout();
   }, [closeFlyout, handleSave, onSelectedQuickPromptChange]);
 
-  const columns: Array<EuiBasicTableColumn<QuickPrompt>> = useMemo(
-    () => [
-      {
-        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_NAME,
-        render: (prompt: QuickPrompt) =>
-          prompt?.title ? (
-            <EuiLink onClick={() => onEditActionClicked(prompt)}>{prompt?.title}</EuiLink>
-          ) : null,
-      },
-      {
-        field: 'categories',
-        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CONTEXTS,
-        render: (categories: QuickPrompt['categories']) =>
-          categories?.map((c, idx) => (
-            <EuiBadge color="hollow" id={`${idx}`}>
-              {c}
-            </EuiBadge>
-          )),
-      },
-      /* TODO: enable when createdAt is added
-      {
-        field: 'createdAt',
-        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CREATED_AT,
-      },
-      */
-      {
-        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_ACTIONS,
-        width: '120px',
-        align: 'center',
-        render: (prompt: QuickPrompt) => {
-          const isDeletable = !prompt.isDefault;
-          return (
-            <RowActions<QuickPrompt>
-              rowItem={prompt}
-              onDelete={isDeletable ? onDeleteActionClicked : undefined}
-              onEdit={onEditActionClicked}
-              isDeletable={isDeletable}
-            />
-          );
-        },
-      },
-    ],
-    [onDeleteActionClicked, onEditActionClicked]
-  );
+  const { getColumns } = useQuickPromptTable();
+  const columns = getColumns({
+    onEditActionClicked,
+    onDeleteActionClicked,
+  });
 
   const confirmationTitle = useMemo(
     () =>
