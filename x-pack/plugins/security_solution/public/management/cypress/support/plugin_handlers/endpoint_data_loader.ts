@@ -83,7 +83,7 @@ export const cyLoadEndpointDataHandler = async (
     .filter((asset) => asset.type === ElasticsearchAssetType.transform)
     .map((asset) => asset.id);
   if (!transforms) {
-    throw new error('transforms not installed');
+    throw new Error('transforms not installed');
   }
   const currentTransformName = transforms.find((t) => t.includes('current'));
   const unitedTransformName = transforms.find((t) => t.includes('united'));
