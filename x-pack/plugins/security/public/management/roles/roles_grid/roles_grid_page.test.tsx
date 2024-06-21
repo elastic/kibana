@@ -44,6 +44,7 @@ const waitForRender = async (
 describe('<RolesGridPage />', () => {
   let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
   let history: ReturnType<typeof scopedHistoryMock.create>;
+  const { theme, i18n, analytics, notifications } = coreMock.createStart();
 
   beforeEach(() => {
     history = scopedHistoryMock.create();
@@ -87,11 +88,11 @@ describe('<RolesGridPage />', () => {
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
-        notifications={coreMock.createStart().notifications}
-        i18n={coreMock.createStart().i18n}
+        notifications={notifications}
+        i18n={i18n}
         buildFlavor={'traditional'}
-        analytics={coreMock.createStart().analytics}
-        theme={coreMock.createStart().theme}
+        analytics={analytics}
+        theme={theme}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -109,11 +110,11 @@ describe('<RolesGridPage />', () => {
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
-        notifications={coreMock.createStart().notifications}
-        i18n={coreMock.createStart().i18n}
+        notifications={notifications}
+        i18n={i18n}
         buildFlavor={'traditional'}
-        analytics={coreMock.createStart().analytics}
-        theme={coreMock.createStart().theme}
+        analytics={analytics}
+        theme={theme}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -133,11 +134,11 @@ describe('<RolesGridPage />', () => {
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
-        notifications={coreMock.createStart().notifications}
-        i18n={coreMock.createStart().i18n}
+        notifications={notifications}
+        i18n={i18n}
         buildFlavor={'traditional'}
-        analytics={coreMock.createStart().analytics}
-        theme={coreMock.createStart().theme}
+        analytics={analytics}
+        theme={theme}
       />
     );
     await waitForRender(wrapper, (updatedWrapper) => {
@@ -151,11 +152,11 @@ describe('<RolesGridPage />', () => {
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
-        notifications={coreMock.createStart().notifications}
-        i18n={coreMock.createStart().i18n}
+        notifications={notifications}
+        i18n={i18n}
         buildFlavor={'traditional'}
-        analytics={coreMock.createStart().analytics}
-        theme={coreMock.createStart().theme}
+        analytics={analytics}
+        theme={theme}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -195,11 +196,11 @@ describe('<RolesGridPage />', () => {
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
-        notifications={coreMock.createStart().notifications}
-        i18n={coreMock.createStart().i18n}
+        notifications={notifications}
+        i18n={i18n}
         buildFlavor={'traditional'}
-        analytics={coreMock.createStart().analytics}
-        theme={coreMock.createStart().theme}
+        analytics={analytics}
+        theme={theme}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -326,11 +327,11 @@ describe('<RolesGridPage />', () => {
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
-        notifications={coreMock.createStart().notifications}
-        i18n={coreMock.createStart().i18n}
+        notifications={notifications}
+        i18n={i18n}
         buildFlavor={'traditional'}
-        analytics={coreMock.createStart().analytics}
-        theme={coreMock.createStart().theme}
+        analytics={analytics}
+        theme={theme}
         readOnly
       />
     );
