@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { CoreStart } from '@kbn/core/public';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -36,12 +37,12 @@ import {
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useEffect, useMemo, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
 import useMount from 'react-use/lib/useMount';
 import { BehaviorSubject } from 'rxjs';
 import { ControlGroupApi } from '../react_controls/control_group/types';
 import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
+import { DefaultControlApi } from '../react_controls/types';
 
 const toggleViewButtons = [
   {
@@ -124,6 +125,9 @@ export const ReactControlExample = ({
   const [dashboardApi, setDashboardApi] = useState<MockedDashboardApi | undefined>(undefined);
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
   const viewModeSelected = useStateFromPublishingSubject(dashboardApi?.viewMode);
+  const [simulateErrorState, setSimulateErrorState] = useState(false);
+  const [dataView, setDataView] = useState<DataView | undefined>(undefined);
+  const [loadingDataView, setLoadingDataView] = useState<boolean>(true);
 
   useMount(() => {
     const viewMode = new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
@@ -174,14 +178,20 @@ export const ReactControlExample = ({
     };
   }, [dashboardApi, dataLoading$]);
 
-  // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
-  const {
-    loading,
-    value: dataViews,
-    error,
-  } = useAsync(async () => {
-    return await dataViewsService.find('kibana_sample_data_logs');
-  }, []);
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoadingDataView(true);
+      const loadedDataView = await dataViewsService.find('kibana_sample_data_logs');
+      if (mounted) {
+        setDataView(loadedDataView[0]);
+        setLoadingDataView(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [dataViewsService]);
 
   useEffect(() => {
     if (!controlGroupApi) return;
@@ -207,18 +217,15 @@ export const ReactControlExample = ({
     };
   }, [controlGroupApi, timeslice$]);
 
-  if (error || (!dataViews?.[0]?.id && !loading))
-    return (
-      <EuiEmptyPrompt
-        iconType="error"
-        color="danger"
-        title={<h2>There was an error!</h2>}
-        body={<p>{error ? error.message : 'Please add at least one data view.'}</p>}
-      />
-    );
-
-  return loading ? (
+  return loadingDataView ? (
     <EuiLoadingSpinner />
+  ) : !dataView ? (
+    <EuiEmptyPrompt
+      iconType="error"
+      color="danger"
+      title={<h2>There was an error!</h2>}
+      body={<p>{'Please add at least one data view.'}</p>}
+    />
   ) : (
     <>
       <EuiFlexGroup>
@@ -263,6 +270,28 @@ export const ReactControlExample = ({
             }}
           />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            color="danger"
+            isSelected={simulateErrorState}
+            fill={simulateErrorState}
+            iconType={simulateErrorState ? 'errorFilled' : 'error'}
+            onClick={() => {
+              setSimulateErrorState((isOn) => !isOn);
+              Object.keys(controlGroupApi?.children$.getValue() ?? {}).forEach((controlId) => {
+                const control = controlGroupApi?.children$.getValue()[controlId];
+                if (control && (control as DefaultControlApi).setBlockingError) {
+                  (control as DefaultControlApi).setBlockingError(
+                    !simulateErrorState ? new Error('This is a simulated error') : undefined
+                  );
+                }
+              });
+            }}
+          >
+            Simulate blocking error
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiSuperDatePicker
@@ -299,7 +328,7 @@ export const ReactControlExample = ({
               {
                 name: `controlGroup_${searchControlId}:searchControlDataView`,
                 type: 'index-pattern',
-                id: dataViews?.[0].id!,
+                id: dataView.id!,
               },
             ],
           }),
