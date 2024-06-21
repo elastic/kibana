@@ -64,6 +64,7 @@ import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
 import { timeBucketsServiceFactory } from '../../util/time_buckets_service';
 import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explorer_service';
 import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
+import { mlJobServiceFactory } from '../../services/job_service';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -282,9 +283,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       )
       .pipe(
         map((resp) => {
-          const { mlJobService } = this.context.services.mlServices;
           const anomalies = resp.anomalies;
-          const detectorsByJob = mlJobService.detectorsByJob;
+          const detectorsByJob = this.mlJobService.detectorsByJob;
           anomalies.forEach((anomaly) => {
             // Add a detector property to each anomaly.
             // Default to functionDescription if no description available.
@@ -305,8 +305,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
             // Add properties used for building the links menu.
             // TODO - when job_service is moved server_side, move this to server endpoint.
-            if (has(mlJobService.customUrlsByJob, jobId)) {
-              anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
+            if (has(this.mlJobService.customUrlsByJob, jobId)) {
+              anomaly.customUrls = this.mlJobService.customUrlsByJob[jobId];
             }
           });
 
@@ -693,6 +693,13 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         this.props.selectedJob.job_id,
       ]);
     }
+
+    // Populate mlJobService to work with LinksMenuUI.
+    this.mlJobService = mlJobServiceFactory(
+      undefined,
+      this.context.services.mlServices.mlApiServices
+    );
+    await this.mlJobService.loadJobsWrapper();
 
     this.componentDidUpdate();
   }

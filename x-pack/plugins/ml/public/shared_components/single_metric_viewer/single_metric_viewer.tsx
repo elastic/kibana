@@ -26,6 +26,7 @@ import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriese
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
 import type { SingleMetricViewerServices, MlEntity } from '../../embeddables/types';
 import './_index.scss';
+import { mlJobServiceFactory } from '../../application/services/job_service';
 
 const containerPadding = 10;
 const minElemAndChartDiff = 20;
@@ -92,8 +93,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
 
   const isMounted = useMountedState();
 
-  const { mlApiServices, mlJobService, mlTimeSeriesExplorerService, toastNotificationService } =
-    mlServices;
+  const { mlApiServices, mlTimeSeriesExplorerService, toastNotificationService } = mlServices;
   const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
   const datePickerDeps: DatePickerDependencies = {
     ...pick(coreStart, ['http', 'notifications', 'theme', 'uiSettings', 'i18n']),
@@ -101,6 +101,12 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice: false,
   };
+
+  const mlJobService = useMemo(
+    () => mlJobServiceFactory(undefined, mlApiServices),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const previousRefresh = usePrevious(lastRefresh ?? 0);
 

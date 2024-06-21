@@ -42,8 +42,9 @@ import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
 import { isDefined } from '@kbn/ml-is-defined';
 import { escapeQuotes } from '@kbn/es-query';
 import { isQuery } from '@kbn/data-plugin/public';
-
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+
+import { mlJobServiceFactory } from '../../services/job_service';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
@@ -51,7 +52,6 @@ import { parseInterval } from '../../../../common/util/parse_interval';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
 
-import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
@@ -99,12 +99,20 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const kibana = useMlKibana();
   const {
-    services: { data, share, application, uiActions },
+    services: { data, share, application, uiActions, mlServices },
   } = kibana;
+
+  const mlJobService = useMemo(
+    () => mlJobServiceFactory(undefined, mlServices.mlApiServices),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   const { getDataViewById, getDataViewIdFromName } = useMlIndexUtils();
 
   const job = useMemo(() => {
     return mlJobService.getJob(props.anomaly.jobId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.anomaly.jobId]);
 
   const categorizationFieldName = job.analysis_config.categorization_field_name;

@@ -37,6 +37,7 @@ import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/trigge
 import type { MlLocatorParams } from '../../../common/types/locator';
 import { useAnomalyChartsData } from './use_anomaly_charts_data';
 import { useDateFormatTz, loadAnomaliesTableData } from '../../application/explorer/explorer_utils';
+import { mlJobServiceFactory } from '../../application/services/job_service';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -82,8 +83,14 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   const [
     { uiSettings },
     { data: dataServices, share, uiActions, charts: chartsService },
-    { mlJobService },
+    { mlApiServices },
   ] = services;
+
+  const mlJobService = useMemo(
+    () => mlJobServiceFactory(undefined, mlApiServices),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const { timefilter } = dataServices.query.timefilter;
   const timeRange = useObservable(timeRange$);
