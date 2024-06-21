@@ -24,26 +24,16 @@ export interface PanelSelectionMenuItem extends Pick<CommonProps, 'data-test-sub
   description?: string;
   isDisabled?: boolean;
   isDeprecated?: boolean;
+  order: number;
 }
 
 export type GroupedAddPanelActions = Pick<
   PanelSelectionMenuItem,
-  'id' | 'isDisabled' | 'data-test-subj'
+  'id' | 'isDisabled' | 'data-test-subj' | 'order'
 > & {
   title: string;
   items: PanelSelectionMenuItem[];
 };
-
-export interface PlacementPriority {
-  placementPriority: number;
-}
-
-export type PanelSelectionMenuItemIncPriority = PanelSelectionMenuItem & PlacementPriority;
-
-export type GroupedAddPanelActionsIncPriority = Omit<GroupedAddPanelActions, 'items'> &
-  PlacementPriority & {
-    items: PanelSelectionMenuItemIncPriority[];
-  };
 
 const onAddPanelActionClick =
   (action: Action, context: ActionExecutionContext<object>, closePopover: () => void) =>
@@ -67,14 +57,14 @@ export const getAddPanelActionMenuItemsGroup = (
   actions: Array<Action<object>> | undefined,
   closePopover: () => void
 ) => {
-  const grouped: Record<string, GroupedAddPanelActionsIncPriority> = {};
+  const grouped: Record<string, GroupedAddPanelActions> = {};
 
   const context = {
     embeddable: api,
     trigger: addPanelMenuTrigger,
   };
 
-  const getMenuItem = (item: Action<object>): PanelSelectionMenuItemIncPriority => {
+  const getMenuItem = (item: Action<object>): PanelSelectionMenuItem => {
     const actionName = item.getDisplayName(context);
 
     return {
@@ -85,7 +75,7 @@ export const getAddPanelActionMenuItemsGroup = (
       onClick: onAddPanelActionClick(item, context, closePopover),
       'data-test-subj': `create-action-${actionName}`,
       description: item?.getDisplayNameTooltip?.(context),
-      placementPriority: item.order ?? 0,
+      order: item.order ?? 0,
     };
   };
 
@@ -98,7 +88,7 @@ export const getAddPanelActionMenuItemsGroup = (
             id: groupId,
             title: group.getDisplayName ? group.getDisplayName(context) : '',
             'data-test-subj': `dashboardEditorMenu-${groupId}Group`,
-            placementPriority: group.order ?? 0,
+            order: group.order ?? 0,
             items: [],
           };
         }
@@ -114,7 +104,7 @@ export const getAddPanelActionMenuItemsGroup = (
           id: fallbackGroup.id,
           title: fallbackGroup.getDisplayName?.() || '',
           'data-test-subj': `dashboardEditorMenu-${fallbackGroup.id}Group`,
-          placementPriority: fallbackGroup.order,
+          order: fallbackGroup.order,
           items: [],
         };
       }

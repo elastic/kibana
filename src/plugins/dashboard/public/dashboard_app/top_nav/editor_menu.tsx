@@ -19,19 +19,18 @@ import { EmbeddableFactory, COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-p
 import { pluginServices } from '../../services/plugin_services';
 import {
   getAddPanelActionMenuItemsGroup,
-  type PlacementPriority,
-  type PanelSelectionMenuItemIncPriority,
+  type PanelSelectionMenuItem,
   type GroupedAddPanelActions,
-  type GroupedAddPanelActionsIncPriority,
 } from './add_panel_action_menu_items';
 import { openDashboardPanelSelectionFlyout } from './open_dashboard_panel_selection_flyout';
 import type { DashboardServices } from '../../services/types';
 
-export interface FactoryGroup extends PlacementPriority {
+export interface FactoryGroup {
   id: string;
   appName: string;
   icon?: IconType;
   factories: EmbeddableFactory[];
+  order: number;
 }
 
 interface UnwrappedEmbeddableFactory {
@@ -43,7 +42,7 @@ export type GetEmbeddableFactoryMenuItem = ReturnType<typeof getEmbeddableFactor
 
 export const getEmbeddableFactoryMenuItemProvider =
   (api: PresentationContainer, closePopover: () => void) =>
-  (factory: EmbeddableFactory): PanelSelectionMenuItemIncPriority => {
+  (factory: EmbeddableFactory): PanelSelectionMenuItem => {
     const icon = factory?.getIconType ? factory.getIconType() : 'empty';
 
     return {
@@ -56,21 +55,14 @@ export const getEmbeddableFactoryMenuItemProvider =
         api.addNewPanel({ panelType: factory.type }, true);
       },
       'data-test-subj': `createNew-${factory.type}`,
-      placementPriority: factory.order ?? 0,
+      order: factory.order ?? 0,
     };
   };
 
-const sortGroupPanelsByPlacementPriority = <T extends PlacementPriority>(
-  panelGroups: T[]
-): Array<Omit<T, 'placementPriority'>> => {
-  return (
-    panelGroups
-      .sort(
-        // larger number sorted to the top
-        (panelGroupA, panelGroupB) => panelGroupB.placementPriority - panelGroupA.placementPriority
-      )
-      // strip out placement priority before return
-      .map(({ placementPriority, ...group }) => group)
+const sortGroupPanelsByOrder = <T extends { order: number }>(panelGroups: T[]): T[] => {
+  return panelGroups.sort(
+    // larger number sorted to the top
+    (panelGroupA, panelGroupB) => panelGroupB.order - panelGroupA.order
   );
 };
 
@@ -78,9 +70,9 @@ export const mergeGroupedItemsProvider =
   (getEmbeddableFactoryMenuItem: GetEmbeddableFactoryMenuItem) =>
   (
     factoryGroupMap: Record<string, FactoryGroup>,
-    groupedAddPanelAction: Record<string, GroupedAddPanelActionsIncPriority>
+    groupedAddPanelAction: Record<string, GroupedAddPanelActions>
   ) => {
-    const panelGroups: GroupedAddPanelActionsIncPriority[] = [];
+    const panelGroups: GroupedAddPanelActions[] = [];
 
     new Set(Object.keys(factoryGroupMap).concat(Object.keys(groupedAddPanelAction))).forEach(
       (groupId) => {
@@ -94,7 +86,7 @@ export const mergeGroupedItemsProvider =
             id: factoryGroup.id,
             title: factoryGroup.appName,
             'data-test-subj': dataTestSubj,
-            placementPriority: factoryGroup.placementPriority,
+            order: factoryGroup.order,
             items: [
               ...factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
               ...(addPanelGroup?.items ?? []),
@@ -105,7 +97,7 @@ export const mergeGroupedItemsProvider =
             id: factoryGroup.id,
             title: factoryGroup.appName,
             'data-test-subj': dataTestSubj,
-            placementPriority: factoryGroup.placementPriority,
+            order: factoryGroup.order,
             items: factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
           });
         } else if (addPanelGroup) {
@@ -226,7 +218,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
             appName: group.getDisplayName ? group.getDisplayName({ embeddable }) : group.id,
             icon: group.getIconType?.({ embeddable }),
             factories: [factory],
-            placementPriority: group.order ?? 0,
+            order: group.order ?? 0,
           };
         }
       });
@@ -239,7 +231,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
           appName: fallbackGroup.getDisplayName ? fallbackGroup.getDisplayName() : fallbackGroup.id,
           icon: fallbackGroup.getIconType(),
           factories: [],
-          placementPriority: fallbackGroup.order ?? 0,
+          order: fallbackGroup.order ?? 0,
         };
       }
 
@@ -261,7 +253,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
   const getVisTypeMenuItem = (
     onClickCb: () => void,
     visType: BaseVisType
-  ): PanelSelectionMenuItemIncPriority => {
+  ): PanelSelectionMenuItem => {
     const {
       name,
       title,
@@ -279,14 +271,14 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
       onClick: augmentedCreateNewVisType(visType, onClickCb),
       'data-test-subj': `visType-${name}`,
       description,
-      placementPriority: order,
+      order,
     };
   };
 
   const getVisTypeAliasMenuItem = (
     onClickCb: () => void,
     visTypeAlias: VisTypeAlias
-  ): PanelSelectionMenuItemIncPriority => {
+  ): PanelSelectionMenuItem => {
     const { name, title, description, icon = 'empty', order } = visTypeAlias;
 
     return {
@@ -296,7 +288,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
       onClick: augmentedCreateNewVisType(visTypeAlias, onClickCb),
       'data-test-subj': `visType-${name}`,
       description,
-      placementPriority: order ?? 0,
+      order: order ?? 0,
     };
   };
 
@@ -315,14 +307,12 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
     );
 
     // enhance panel groups
-    return sortGroupPanelsByPlacementPriority<GroupedAddPanelActionsIncPriority>(
-      initialPanelGroups
-    ).map((panelGroup) => {
+    return sortGroupPanelsByOrder<GroupedAddPanelActions>(initialPanelGroups).map((panelGroup) => {
       switch (panelGroup.id) {
         case 'visualizations': {
           return {
             ...panelGroup,
-            items: sortGroupPanelsByPlacementPriority<PanelSelectionMenuItemIncPriority>(
+            items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
               (panelGroup.items ?? []).concat(
                 // TODO: actually add grouping to vis type alias so we wouldn't randomly display an unintended item
                 visTypeAliases.map(getVisTypeAliasMenuItem.bind(null, closeFlyout)),
@@ -334,7 +324,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
         case COMMON_EMBEDDABLE_GROUPING.legacy.id: {
           return {
             ...panelGroup,
-            items: sortGroupPanelsByPlacementPriority<PanelSelectionMenuItemIncPriority>(
+            items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
               (panelGroup.items ?? []).concat(
                 legacyVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
               )
@@ -344,7 +334,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
         case COMMON_EMBEDDABLE_GROUPING.annotation.id: {
           return {
             ...panelGroup,
-            items: sortGroupPanelsByPlacementPriority<PanelSelectionMenuItemIncPriority>(
+            items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
               (panelGroup.items ?? []).concat(
                 toolVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
               )
@@ -354,7 +344,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
         default: {
           return {
             ...panelGroup,
-            items: sortGroupPanelsByPlacementPriority(panelGroup.items),
+            items: sortGroupPanelsByOrder(panelGroup.items),
           };
         }
       }

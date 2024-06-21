@@ -8,7 +8,7 @@
 
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import { GroupedAddPanelActionsIncPriority } from './add_panel_action_menu_items';
+import { GroupedAddPanelActions } from './add_panel_action_menu_items';
 import {
   FactoryGroup,
   mergeGroupedItemsProvider,
@@ -37,7 +37,7 @@ describe('mergeGroupedItemsProvider', () => {
       id: 'panel1',
       appName: 'App 1',
       icon: 'icon1',
-      placementPriority: 10,
+      order: 10,
       factories: [mockFactory],
     },
   } as unknown as Record<string, FactoryGroup>;
@@ -47,15 +47,15 @@ describe('mergeGroupedItemsProvider', () => {
       id: 'panel2',
       title: 'Panel 2',
       icon: 'icon2',
-      placementPriority: 10,
+      order: 10,
       items: [
         {
           id: 'addPanelActionId',
-          placementPriority: 0,
+          order: 0,
         },
       ],
     },
-  } as unknown as Record<string, GroupedAddPanelActionsIncPriority>;
+  } as unknown as Record<string, GroupedAddPanelActions>;
 
   it('should merge factoryGroupMap and groupedAddPanelAction correctly', () => {
     const groupedPanels = mergeGroupedItemsProvider(getEmbeddableFactoryMenuItem)(
@@ -75,15 +75,15 @@ describe('mergeGroupedItemsProvider', () => {
             description: 'Factory 1 description',
             'data-test-subj': 'createNew-mockFactory',
             onClick: expect.any(Function),
-            placementPriority: 0,
+            order: 0,
           },
           {
             id: 'addPanelActionId',
-            placementPriority: 0,
+            order: 0,
           },
         ],
         'data-test-subj': 'dashboardEditorMenu-group1Group',
-        placementPriority: 10,
+        order: 10,
       },
     ]);
   });
@@ -102,10 +102,10 @@ describe('mergeGroupedItemsProvider', () => {
         items: [
           {
             id: 'addPanelActionId',
-            placementPriority: 0,
+            order: 0,
           },
         ],
-        placementPriority: 10,
+        order: 10,
       },
     ]);
   });
@@ -128,10 +128,10 @@ describe('mergeGroupedItemsProvider', () => {
             description: 'Factory 1 description',
             'data-test-subj': 'createNew-mockFactory',
             onClick: expect.any(Function),
-            placementPriority: 0,
+            order: 0,
           },
         ],
-        placementPriority: 10,
+        order: 10,
         'data-test-subj': 'dashboardEditorMenu-group1Group',
       },
     ]);
