@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTitles,
@@ -154,21 +154,22 @@ export const getOverviewEmbeddableFactory = (
               const groups = groupFilters?.groups ?? [];
               return (
                 <Wrapper>
-                  <EuiFlexItem
-                    grow={false}
-                    css={`
-                      margin-top: 20px;
-                    `}
-                  >
-                    <GroupSloView
-                      sloView="cardView"
-                      groupBy={groupBy}
-                      groups={groups}
-                      kqlQuery={kqlQuery}
-                      filters={groupFilters?.filters}
-                      reloadSubject={reload$}
-                    />
-                  </EuiFlexItem>
+                  <EuiFlexGroup data-test-subj="sloGroupOverviewPanel" data-shared-item="">
+                    <EuiFlexItem
+                      css={`
+                        margin-top: 20px;
+                      `}
+                    >
+                      <GroupSloView
+                        sloView="cardView"
+                        groupBy={groupBy}
+                        groups={groups}
+                        kqlQuery={kqlQuery}
+                        filters={groupFilters?.filters}
+                        reloadSubject={reload$}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </Wrapper>
               );
             } else {
