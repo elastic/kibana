@@ -10,6 +10,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { UsageRecord } from '@kbn/security-solution-serverless/server/types';
+import type {
+  DeletedEndpointHeartbeats,
+  IndexedEndpointHeartbeats,
+} from '../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
 import type { SecuritySolutionDescribeBlockFtrConfig } from '../../../scripts/run_cypress/utils';
 import type { DeleteAllEndpointDataResponse } from '../../../scripts/endpoint/common/delete_all_endpoint_data';
 import type { IndexedEndpointPolicyResponse } from '../../../common/endpoint/data_loaders/index_endpoint_policy_response';
@@ -118,6 +123,36 @@ declare global {
         arg?: Partial<CasePostRequest>,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<IndexedCase['data']>;
+
+      task(
+        name: 'indexEndpointHeartbeats',
+        arg?: { count?: number },
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<IndexedEndpointHeartbeats['data']>;
+
+      task(
+        name: 'deleteIndexedEndpointHeartbeats',
+        arg: IndexedEndpointHeartbeats['data'],
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<DeletedEndpointHeartbeats>;
+
+      task(
+        name: 'startTransparentApiProxy',
+        arg?: { port?: number },
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<null>;
+
+      task(
+        name: 'getInterceptedRequestsFromTransparentApiProxy',
+        arg?: {},
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<UsageRecord[][]>;
+
+      task(
+        name: 'stopTransparentProxyApi',
+        arg?: {},
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<null>;
 
       task(
         name: 'deleteIndexedCase',
