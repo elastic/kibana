@@ -27,6 +27,7 @@ import type {
   AnomalyChartsAttachmentApi,
 } from '..';
 
+import type { AnomaliesTableData } from '../../application/explorer/explorer_utils';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
@@ -46,7 +47,6 @@ export interface AnomalyChartsContainerProps
   onRenderComplete: () => void;
   onLoading: (v: boolean) => void;
   onError: (error: Error) => void;
-  tableData: any;
 }
 
 const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
@@ -59,6 +59,14 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   onLoading,
   api,
 }) => {
+  const tableData: AnomaliesTableData = {
+    anomalies: [],
+    examplesByJobId: [''],
+    interval: 0,
+    jobIds: [],
+    showViewSeriesLink: false,
+  };
+
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
     optionValueToThreshold(

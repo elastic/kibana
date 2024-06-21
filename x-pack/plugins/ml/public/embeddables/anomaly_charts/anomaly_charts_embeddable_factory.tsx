@@ -186,7 +186,6 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                     onLoading={onLoading}
                     onRenderComplete={onRenderComplete}
                     onError={onError}
-                    tableData={tableData}
                     timeRange$={appliedTimeRange$}
                   />
                 </div>
