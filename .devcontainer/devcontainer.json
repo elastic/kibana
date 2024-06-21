@@ -1,5 +1,5 @@
 {
-	"name": "My Dev Container",
+	"name": "Kibana Dev Container",
 	"build": {
 		"dockerfile": "Dockerfile",
 		"context": "..",
