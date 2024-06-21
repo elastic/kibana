@@ -55,7 +55,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
         <EuiTitle>
           <h2>
             {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
-              defaultMessage: 'SLO configuration',
+              defaultMessage: 'Alerts configuration',
             })}
           </h2>
         </EuiTitle>
@@ -99,24 +99,26 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
-          <FormattedMessage
-            id="xpack.slo.Embeddable.config.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
+            <FormattedMessage
+              id="xpack.slo.Embeddable.config.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
 
-        <EuiButton
-          data-test-subj="sloConfirmButton"
-          isDisabled={!selectedSlos || selectedSlos.length === 0 || hasError}
-          onClick={onConfirmClick}
-          fill
-        >
-          <FormattedMessage
-            id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
-            defaultMessage="Confirm configurations"
-          />
-        </EuiButton>
+          <EuiButton
+            data-test-subj="sloConfirmButton"
+            isDisabled={!selectedSlos || selectedSlos.length === 0 || hasError}
+            onClick={onConfirmClick}
+            fill
+          >
+            <FormattedMessage
+              id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
+              defaultMessage="Confirm configurations"
+            />
+          </EuiButton>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
