@@ -220,13 +220,12 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                 kuery={displayedKuery}
                 rangeFrom={range.from}
                 rangeTo={range.to}
-                onQuerySubmit={({ kuery: nextKuery, dateRange: nextDateRange }) => {
+                onQuerySubmit={async ({ kuery: nextKuery, dateRange: nextDateRange }) => {
                   const nextTimeRange = {
                     from: datemath.parse(nextDateRange.from)!.toISOString(),
                     to: datemath.parse(nextDateRange.to)!.toISOString(),
                   };
-                  setRange(nextDateRange);
-                  setGlobalParameters({
+                  await setGlobalParameters({
                     ...revision.parameters,
                     query: {
                       language: 'kuery',
@@ -234,6 +233,8 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                     },
                     timeRange: nextTimeRange,
                   });
+
+                  setRange(nextDateRange);
                 }}
                 onQueryChange={({ kuery: nextKuery, dateRange }) => {
                   setDisplayedKuery(nextKuery);
