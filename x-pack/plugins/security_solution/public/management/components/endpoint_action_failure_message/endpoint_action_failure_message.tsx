@@ -8,25 +8,16 @@
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { endpointActionResponseCodes } from '../endpoint_responder/lib/endpoint_action_response_codes';
 import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
 
 interface EndpointActionFailureMessageProps {
   action: MaybeImmutable<ActionDetails>;
-  isConsoleOutput?: boolean;
   'data-test-subj'?: string;
 }
 
-export const hasKnownErrorCode = (
-  endpointAgentOutput: Required<Pick<ActionDetails, 'outputs'>>['outputs'][string]
-): boolean =>
-  endpointAgentOutput.type === 'json' &&
-  !!endpointAgentOutput.content.code &&
-  !!endpointActionResponseCodes[endpointAgentOutput.content.code];
-
 export const EndpointActionFailureMessage = memo<EndpointActionFailureMessageProps>(
-  ({ action, isConsoleOutput = true, 'data-test-subj': dataTestSubj }) => {
+  ({ action, 'data-test-subj': dataTestSubj }) => {
     return useMemo(() => {
       if (!action.isCompleted || action.wasSuccessful) {
         return null;
@@ -40,36 +31,33 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
         for (const agent of action.agents) {
           const endpointAgentOutput = action.outputs[agent];
 
-          if (endpointAgentOutput && hasKnownErrorCode(endpointAgentOutput)) {
+          if (
+            endpointAgentOutput &&
+            endpointAgentOutput.type === 'json' &&
+            !!endpointAgentOutput.content.code &&
+            !!endpointActionResponseCodes[endpointAgentOutput.content.code]
+          ) {
             errors.push(endpointActionResponseCodes[endpointAgentOutput.content.code]);
           }
         }
       }
 
+      if (action.errors && action.errors.length) {
+        errors.push(...new Set(action.errors));
+      }
+
       if (!errors.length) {
-        if (action.errors) {
-          errors.push(...action.errors);
-        } else {
-          errors.push(
-            i18n.translate('xpack.securitySolution.endpointActionFailureMessage.unknownFailure', {
-              defaultMessage: 'Action failed',
-            })
-          );
-        }
+        return null;
       }
 
       return (
         <div data-test-subj={dataTestSubj}>
-          {isConsoleOutput && (
-            <>
-              <FormattedMessage
-                id="xpack.securitySolution.endpointResponseActions.actionError.errorMessage"
-                defaultMessage="The following { errorCount, plural, =1 {error was} other {errors were}} encountered:"
-                values={{ errorCount: errors.length }}
-              />
-              <EuiSpacer size="s" />
-            </>
-          )}
+          <FormattedMessage
+            id="xpack.securitySolution.endpointResponseActions.actionError.errorMessage"
+            defaultMessage="The following { errorCount, plural, =1 {error was} other {errors were}} encountered:"
+            values={{ errorCount: errors.length }}
+          />
+          <EuiSpacer size="s" />
           <div>{errors.join(' | ')}</div>
         </div>
       );
@@ -80,7 +68,6 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
       action.outputs,
       action.wasSuccessful,
       dataTestSubj,
-      isConsoleOutput,
     ]);
   }
 );

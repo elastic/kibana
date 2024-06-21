@@ -28,10 +28,7 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { OUTPUT_MESSAGES } from '../translations';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
-import {
-  EndpointActionFailureMessage,
-  hasKnownErrorCode,
-} from '../../endpoint_action_failure_message';
+import { EndpointActionFailureMessage } from '../../endpoint_action_failure_message';
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { type ActionDetails, type MaybeImmutable } from '../../../../../common/endpoint/types';
@@ -102,15 +99,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       canAccessEndpointActionsLogManagement,
     } = useUserPrivileges().endpointPrivileges;
 
-    const {
-      command: _command,
-      isCompleted,
-      isExpired,
-      wasSuccessful,
-      errors,
-      outputs,
-      agents,
-    } = action;
+    const { command: _command, isCompleted, isExpired, wasSuccessful } = action;
     const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
 
     if (isExpired) {
@@ -125,32 +114,11 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       return (
         <>
           {OUTPUT_MESSAGES.hasFailed(command)}
-          <>
-            {/* if has outputs and was not successful, show error code message for each agent */}
-            {outputs &&
-              agents.map(
-                (agentId) =>
-                  outputs[agentId] &&
-                  hasKnownErrorCode(outputs[agentId]) && (
-                    <div key={outputs[agentId].content.code}>
-                      <EuiSpacer size="s" />
-                      <EndpointActionFailureMessage
-                        action={action}
-                        isConsoleOutput={false}
-                        data-test-subj={getTestId('failureMessage')}
-                      />
-                    </div>
-                  )
-              )}
-            {/* if there are errors, show them as well*/}
-            {!!errors?.length &&
-              errors.map((error) => (
-                <div key={error}>
-                  <EuiSpacer size="s" />
-                  <EuiFlexItem>{error}</EuiFlexItem>
-                </div>
-              ))}
-          </>
+          <EuiSpacer size="s" />
+          <EndpointActionFailureMessage
+            action={action}
+            data-test-subj={getTestId('failureMessage')}
+          />
         </>
       );
     }

@@ -58,7 +58,7 @@ export const getActionListMock = async ({
 
     const actionDetails: ActionListApiResponse['data'] = actionIds.map((actionId) => {
       const command = (commands?.[0] ?? 'isolate') as ResponseActionsApiCommandNames;
-      return endpointActionGenerator.generateActionDetails({
+      const actionDetailsOverrides = {
         agents: [id],
         command,
         id: actionId,
@@ -101,7 +101,8 @@ export const getActionListMock = async ({
               }
             : outputs),
         },
-      });
+      };
+      return endpointActionGenerator.generateActionDetails(actionDetailsOverrides);
     });
 
     return actionDetails;
