@@ -174,12 +174,12 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
             <EuiFlexGroup direction="column" gutterSize="m">
               {Object.values(panelsSearchResult).map(
                 ({ id, title, items, isDisabled, ['data-test-subj']: dataTestSubj }) => (
-                  <EuiFlexItem key={id} data-test-subj={dataTestSubj}>
-                    <EuiTitle
-                      id={`${id}-group`}
-                      size="xxs"
-                      css={isDisabled ? { color: euiTheme.colors.disabled } : {}}
-                    >
+                  <EuiFlexItem
+                    key={id}
+                    data-test-subj={dataTestSubj}
+                    css={isDisabled ? { display: 'none' } : { display: 'flex' }}
+                  >
+                    <EuiTitle id={`${id}-group`} size="xxs">
                       {typeof title === 'string' ? <h3>{title}</h3> : title}
                     </EuiTitle>
                     <EuiListGroup
