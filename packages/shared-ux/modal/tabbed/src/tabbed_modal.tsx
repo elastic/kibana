@@ -69,8 +69,8 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
 }) => {
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
-
   const selectedTabId = state.meta.selectedTabId;
+
   const selectedTabState = useMemo(
     () => (selectedTabId ? state[selectedTabId] : {}),
     [selectedTabId, state]
@@ -113,8 +113,8 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       }}
       style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
       maxWidth={true}
-      aria-labelledby="shareContextModal"
       data-test-subj="shareContextModal"
+      aria-labelledby={modalTitle}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
