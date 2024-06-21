@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
-import { extendProfileProvider } from '../extend_profile_provider';
-import { extractIndexPatternFrom } from '../extract_index_pattern_from';
+import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { extendProfileProvider } from '../../extend_profile_provider';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
 export const createWindowsLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
