@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { isEditorFieldSetting } from '../common/management/advanced_settings';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { isEditorFieldSetting } from '../../common/management/advanced_settings';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -18,7 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Security advanced settings', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('admin');
       await pageObjects.common.navigateToApp('settings');
     });
 
