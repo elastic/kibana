@@ -55,13 +55,13 @@ export const ControlGroupEditor = ({
     children,
     selectedLabelPosition,
     selectedChainingSystem,
-    selectedShowApplySelections,
+    selectedAutoApplySelections,
     selectedIgnoreParentSettings,
   ] = useBatchedPublishingSubjects(
     api.children$,
     stateManager.labelPosition,
     stateManager.chainingSystem,
-    stateManager.showApplySelections,
+    stateManager.autoApplySelections,
     stateManager.ignoreParentSettings
   );
 
@@ -172,8 +172,8 @@ export const ControlGroupEditor = ({
                     tooltip={ControlGroupEditorStrings.management.selectionSettings.showApplySelections.getShowApplySelectionsTooltip()}
                   />
                 }
-                checked={!selectedShowApplySelections}
-                onChange={(e) => stateManager.showApplySelections.next(!e.target.checked)}
+                checked={selectedAutoApplySelections}
+                onChange={(e) => stateManager.autoApplySelections.next(e.target.checked)}
               />
             </div>
           </EuiFormRow>
