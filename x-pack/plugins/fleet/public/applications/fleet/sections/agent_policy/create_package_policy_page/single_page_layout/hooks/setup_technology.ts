@@ -101,6 +101,7 @@ export function useSetupTechnology({
   }, [isAgentlessEnabled, isAgentlessIntegration, packageInfo]);
 
   // tech debt: remove this useEffect when Serverless uses the Agentless API and just create a new agentless policy in the handleSetupTechnologyChange
+  // https://github.com/elastic/security-team/issues/9781
   useEffect(() => {
     const fetchAgentlessPolicy = async () => {
       const { data, error } = await sendGetOneAgentPolicy(AGENTLESS_POLICY_ID);
@@ -138,6 +139,7 @@ export function useSetupTechnology({
           updateAgentPolicies([agentlessPolicy] as AgentPolicy[]);
         }
         // tech debt: remove this when Serverless uses the Agentless API
+        // https://github.com/elastic/security-team/issues/9781
         if (cloud?.isServerlessEnabled) {
           updateNewAgentPolicy(agentlessPolicy as AgentPolicy);
           updateAgentPolicies([agentlessPolicy] as AgentPolicy[]);
