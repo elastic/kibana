@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { CanClearSelections } from '@kbn/controls-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import {
