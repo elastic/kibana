@@ -17,6 +17,7 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
+import { MessagesPlaceholder } from '@langchain/core/prompts';
 import { AgentExecutor } from '../executors/types';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
@@ -127,6 +128,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         agentArgs: {
           // this is important to help LangChain correctly format tool input
           humanMessageTemplate: `Question: {input}\n\n{agent_scratchpad}`,
+          memoryPrompts: [new MessagesPlaceholder('chat_history')],
         },
       });
 
