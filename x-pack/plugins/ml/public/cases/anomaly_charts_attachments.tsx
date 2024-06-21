@@ -79,6 +79,7 @@ const AnomalyChartsCaseAttachment = ({
             onLoading={api.onLoading}
             onRenderComplete={api.onRenderComplete}
             onError={api.onError}
+            tableData={tableData}
             timeRange$={api.parentApi.timeRange$}
           />
         </KibanaContextProvider>

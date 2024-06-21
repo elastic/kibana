@@ -46,6 +46,7 @@ export interface AnomalyChartsContainerProps
   onRenderComplete: () => void;
   onLoading: (v: boolean) => void;
   onError: (error: Error) => void;
+  tableData: any;
 }
 
 const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
@@ -207,6 +208,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
               severity={severity}
               setSeverity={setSeverity}
               mlLocator={mlLocator}
+              tableData={tableData}
               timeBuckets={timeBuckets}
               timefilter={timefilter}
               onSelectEntity={addEntityFieldFilter}

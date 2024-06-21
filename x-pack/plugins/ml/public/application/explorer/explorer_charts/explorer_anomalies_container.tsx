@@ -27,6 +27,7 @@ interface ExplorerAnomaliesContainerProps {
   severity: TableSeverity;
   setSeverity: (severity: TableSeverity) => void;
   mlLocator: MlLocator;
+  tableData: any;
   timeBuckets: TimeBuckets;
   timefilter: TimefilterContract;
   onSelectEntity: (
@@ -54,6 +55,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   severity,
   setSeverity,
   mlLocator,
+  tableData,
   timeBuckets,
   timefilter,
   onSelectEntity,
@@ -91,6 +93,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             ...chartsData,
             severity: severity.val,
             mlLocator,
+            tableData,
             timeBuckets,
             timefilter,
             timeRange,
