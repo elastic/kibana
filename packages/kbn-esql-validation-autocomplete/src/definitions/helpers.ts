@@ -25,7 +25,7 @@ export function getFunctionSignatures(
     const minParamsToAdd = Math.max((minParams || 0) - params.length, 0);
     const extraArg = Array(minParamsToAdd || 1).fill(params[Math.max(params.length - 1, 0)]);
     return {
-      declaration: `${name.toUpperCase()}(${params
+      declaration: `${name}(${params
         .map((arg) => printArguments(arg, withTypes))
         .join(', ')}${handleAdditionalArgs(minParamsToAdd > 0, extraArg, withTypes)})${
         withTypes ? `: ${returnType}` : ''

@@ -290,12 +290,13 @@ export function areFieldAndVariableTypesCompatible(
   return fieldType === variableType;
 }
 
-export function printFunctionSignature(arg: ESQLFunction): string {
+export function printFunctionSignature(arg: ESQLFunction, useCaps = true): string {
   const fnDef = getFunctionDefinition(arg.name);
   if (fnDef) {
     const signature = getFunctionSignatures(
       {
         ...fnDef,
+        name: useCaps ? fnDef.name.toUpperCase() : fnDef.name,
         signatures: [
           {
             ...fnDef?.signatures[0],
