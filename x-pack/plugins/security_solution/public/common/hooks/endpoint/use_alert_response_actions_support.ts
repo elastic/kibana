@@ -132,7 +132,7 @@ export const useAlertResponseActionsSupport = (
 
     if (agentType === 'crowdstrike') {
       return getAlertDetailsFieldValue(
-        { category: 'crowdstrike', field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike },
+        { category: 'device', field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike },
         eventData
       );
     }
@@ -172,23 +172,15 @@ export const useAlertResponseActionsSupport = (
   }, [agentType, isFeatureEnabled]);
 
   const hostName = useMemo(() => {
-    // TODO:PT need to check if crowdstrike event has `host.name`
-    if (agentType === 'crowdstrike') {
-      return getAlertDetailsFieldValue(
-        { category: 'crowdstrike', field: 'crowdstrike.event.HostName' },
-        eventData
-      );
-    }
-
     return getAlertDetailsFieldValue({ category: 'host', field: 'host.name' }, eventData);
-  }, [agentType, eventData]);
+  }, [eventData]);
 
   const platform = useMemo(() => {
-    // TODO:PT need to check if crowdstrike event has `host.os.family`
+    // TODO:TC I couldn't find host.os.family in the example data, thus using host.os.type and host.os.platform which are present one at a time in different type of events
     if (agentType === 'crowdstrike') {
-      return getAlertDetailsFieldValue(
-        { category: 'crowdstrike', field: 'crowdstrike.event.Platform' },
-        eventData
+      return (
+        getAlertDetailsFieldValue({ category: 'host', field: 'host.os.type' }, eventData) ||
+        getAlertDetailsFieldValue({ category: 'host', field: 'host.os.platform' }, eventData)
       );
     }
 
