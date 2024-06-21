@@ -13,7 +13,7 @@ export const IntegrationAssistantUICapability = 'integrationAssistant';
 
 export const kibanaSubFeature: SubFeatureConfig = {
   name: i18n.translate('xpack.integrationAssistant.subFeature.name', {
-    defaultMessage: 'Integration Assistant',
+    defaultMessage: 'AI-driven Integration creation',
   }),
   privilegeGroups: [
     {
@@ -21,14 +21,9 @@ export const kibanaSubFeature: SubFeatureConfig = {
       privileges: [
         {
           id: 'integrationAssistant',
-          includeIn: 'none', // This privilege is not included in any Integrations feature, needs to be enabled explicitly
-          name: i18n.translate('xpack.integrationAssistant.subFeature.privilege.name', {
-            defaultMessage: 'Create integrations',
-          }),
-          savedObject: {
-            all: [],
-            read: [],
-          },
+          includeIn: 'all',
+          name: 'Create integrations',
+          savedObject: { all: [], read: [] },
           api: [IntegrationAssistantAPIAction],
           ui: [IntegrationAssistantUICapability],
         },
