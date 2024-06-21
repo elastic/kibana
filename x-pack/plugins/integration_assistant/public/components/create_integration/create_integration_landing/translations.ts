@@ -18,7 +18,7 @@ export const LANDING_DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.createIntegrationLanding.description',
   {
     defaultMessage:
-      'Start an AI-driven process to build your integration step-by-step, or you can either upload a .zip package with an already created integration',
+      'Start an AI-driven process to build your integration step-by-step, or upload a .zip package of a previously created integration',
   }
 );
 
@@ -75,6 +75,6 @@ export const TECH_PREVIEW_TOOLTIP = i18n.translate(
   'xpack.integrationAssistant.createIntegrationLanding.assistant.techPreviewTooltip',
   {
     defaultMessage:
-      'This functionality is in technical preview and is subject to change. Please use it with caution in production environments.',
+      'This functionality is in technical preview and is subject to change. Please use with caution in production environments.',
   }
 );

@@ -46,6 +46,12 @@ export const NO_SPACES_HELP = i18n.translate(
     defaultMessage: 'Name can only contain lowercase letters, numbers, and underscore (_)',
   }
 );
+export const PACKAGE_NAMES_FETCH_ERROR = i18n.translate(
+  'xpack.integrationAssistant.step.dataStream.packageNamesFetchError',
+  {
+    defaultMessage: 'Error fetching package names',
+  }
+);
 export const NAME_ALREADY_EXISTS_ERROR = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.nameAlreadyExistsError',
   {
@@ -108,6 +114,36 @@ export const LOGS_SAMPLE_DESCRIPTION_2 = i18n.translate(
     defaultMessage: 'JSON/NDJSON format',
   }
 );
+export const LOGS_SAMPLE_TRUNCATED = (maxRows: number) =>
+  i18n.translate('xpack.integrationAssistant.step.dataStream.logsSample.truncatedWarning', {
+    values: { maxRows },
+    defaultMessage: `The logs sample has been truncated to {maxRows} rows.`,
+  });
+export const LOGS_SAMPLE_ERROR = {
+  CAN_NOT_READ: i18n.translate(
+    'xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotRead',
+    {
+      defaultMessage: 'Failed to read the logs sample file',
+    }
+  ),
+  FORMAT: (fileType: string) =>
+    i18n.translate('xpack.integrationAssistant.step.dataStream.logsSample.errorFormat', {
+      values: { fileType },
+      defaultMessage: 'The logs sample file has not a valid {fileType} format',
+    }),
+  NOT_ARRAY: i18n.translate('xpack.integrationAssistant.step.dataStream.logsSample.errorNotArray', {
+    defaultMessage: 'The logs sample file is not an array',
+  }),
+  EMPTY: i18n.translate('xpack.integrationAssistant.step.dataStream.logsSample.errorEmpty', {
+    defaultMessage: 'The logs sample file is empty',
+  }),
+  NOT_OBJECT: i18n.translate(
+    'xpack.integrationAssistant.step.dataStream.logsSample.errorNotObject',
+    {
+      defaultMessage: 'The logs sample file contains non-object entries',
+    }
+  ),
+};
 
 export const ANALYZING = i18n.translate('xpack.integrationAssistant.step.dataStream.analyzing', {
   defaultMessage: 'Analyzing',

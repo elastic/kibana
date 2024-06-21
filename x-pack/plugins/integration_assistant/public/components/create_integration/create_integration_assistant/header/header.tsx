@@ -40,6 +40,7 @@ interface HeaderProps {
 }
 export const Header = React.memo<HeaderProps>(({ currentStep, isGenerating }) => {
   const { setStep } = useActions();
+  const { euiTheme } = useEuiTheme();
   const avatarCss = useAvatarCss();
   return (
     <KibanaPageTemplate.Header>
@@ -59,7 +60,7 @@ export const Header = React.memo<HeaderProps>(({ currentStep, isGenerating }) =>
                     name={i18n.ASSISTANT_AVATAR}
                     size="m"
                     iconType={AssistantAvatar}
-                    color="#ffffff"
+                    color={euiTheme.colors.emptyShade}
                     css={avatarCss}
                   />
                 </EuiFlexItem>
