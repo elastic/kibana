@@ -122,7 +122,10 @@ describe('saml_auth', () => {
     test('retries and throws error when response has no token value', async () => {
       axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
         if (config.url?.endsWith('/api/v1/saas/auth/_login')) {
-          return Promise.resolve({ data: {}, status: 200 });
+          return Promise.resolve({
+            data: { user_id: 1234, okta_session_id: 5678, authenticated: false },
+            status: 200,
+          });
         }
         return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
       });
@@ -141,7 +144,7 @@ describe('saml_auth', () => {
           }
         )
       ).rejects.toThrow(
-        `Failed to create the new cloud session: token is missing in response data`
+        `Failed to create the new cloud session: token is missing in response data\n{"user_id":"REDACTED","okta_session_id":"REDACTED","authenticated":false}`
       );
       expect(axiosRequestMock).toBeCalledTimes(3);
     });

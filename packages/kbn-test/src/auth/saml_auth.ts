@@ -123,9 +123,18 @@ export const createCloudSession = async (
       }
       const token = sessionResponse?.data?.token as string;
       if (!token) {
+        const keysToRedact = ['user_id', 'okta_session_id'];
+        const data = sessionResponse?.data;
+        if (data !== null && typeof data === 'object') {
+          Object.keys(data).forEach((key) => {
+            if (keysToRedact.includes(key)) {
+              data[key] = 'REDACTED';
+            }
+          });
+        }
         throw new Error(
           `Failed to create the new cloud session: token is missing in response data\n${JSON.stringify(
-            sessionResponse?.data
+            data
           )}`
         );
       }
