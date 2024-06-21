@@ -9,19 +9,22 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
 
 export enum ServiceProviderKeys {
-  hugging_face = 'hugging_face',
-  elser = 'elser',
+  azureopenai = 'azureopenai',
+  azureaistudio = 'azureaistudio',
   cohere = 'cohere',
   elasticsearch = 'elasticsearch',
+  elser = 'elser',
+  googleaistudio = 'googleaistudio',
+  hugging_face = 'hugging_face',
+  mistral = 'mistral',
   openai = 'openai',
-  azureopenai = 'azureopenai',
 }
 
 export enum TaskTypes {
-  text_embedding = 'text_embedding',
-  sparse_embedding = 'sparse_embedding',
   completion = 'completion',
   rerank = 'rerank',
+  sparse_embedding = 'sparse_embedding',
+  text_embedding = 'text_embedding',
 }
 
 export enum SortFieldInferenceEndpoint {

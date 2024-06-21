@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import * as i18n from './translations';
 import { RenderEndpointProps } from './render_endpoint';
+import { ModelBadge } from './model_badge';
 
 interface ModelSettings {
   num_allocations: number;
@@ -20,7 +21,7 @@ const ModelSettingsBadge: React.FC<{ modelSettings: ModelSettings }> = ({ modelS
   <EuiFlexGroup gutterSize="s">
     {modelSettings.model_id && (
       <EuiFlexItem grow={false}>
-        <EuiBadge color="default">{modelSettings.model_id}</EuiBadge>
+        <ModelBadge model={modelSettings.model_id} />
       </EuiFlexItem>
     )}
     {(modelSettings.num_threads || modelSettings.num_allocations) && (

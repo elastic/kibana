@@ -10,7 +10,11 @@ import React from 'react';
 import elasticIcon from '../../../../assets/images/providers/elastic.svg';
 import huggingFaceIcon from '../../../../assets/images/providers/hugging_face.svg';
 import cohereIcon from '../../../../assets/images/providers/cohere.svg';
-import OpenAIIcon from '../../../../assets/images/providers/open_ai.svg';
+import openAIIcon from '../../../../assets/images/providers/open_ai.svg';
+import azureAIStudioIcon from '../../../../assets/images/providers/azure_ai_studio.svg';
+import azureOpenAIIcon from '../../../../assets/images/providers/azure_open_ai.svg';
+import googleAIStudioIcon from '../../../../assets/images/providers/google_ai_studio.svg';
+import mistralIcon from '../../../../assets/images/providers/mistral.svg';
 import { ServiceProviderKeys } from '../../types';
 
 interface ServiceProviderProps {
@@ -23,29 +27,41 @@ interface ServiceProviderRecord {
 }
 
 export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecord> = {
-  [ServiceProviderKeys.hugging_face]: {
-    icon: huggingFaceIcon,
-    name: 'Hugging Face',
+  [ServiceProviderKeys.azureaistudio]: {
+    icon: azureAIStudioIcon,
+    name: 'Azure AI Studio',
   },
-  [ServiceProviderKeys.elser]: {
-    icon: elasticIcon,
-    name: 'Elser',
-  },
-  [ServiceProviderKeys.elasticsearch]: {
-    icon: elasticIcon,
-    name: 'elasticsearch',
+  [ServiceProviderKeys.azureopenai]: {
+    icon: azureOpenAIIcon,
+    name: 'Azure OpenAI',
   },
   [ServiceProviderKeys.cohere]: {
     icon: cohereIcon,
     name: 'Cohere',
   },
-  [ServiceProviderKeys.openai]: {
-    icon: OpenAIIcon,
-    name: 'OpenAI',
+  [ServiceProviderKeys.elasticsearch]: {
+    icon: elasticIcon,
+    name: 'Elasticsearch',
   },
-  [ServiceProviderKeys.azureopenai]: {
-    icon: OpenAIIcon,
-    name: 'Azure OpenAI',
+  [ServiceProviderKeys.elser]: {
+    icon: elasticIcon,
+    name: 'ELSER',
+  },
+  [ServiceProviderKeys.googleaistudio]: {
+    icon: googleAIStudioIcon,
+    name: 'Google AI Studio',
+  },
+  [ServiceProviderKeys.hugging_face]: {
+    icon: huggingFaceIcon,
+    name: 'Hugging Face',
+  },
+  [ServiceProviderKeys.mistral]: {
+    icon: mistralIcon,
+    name: 'Mistral',
+  },
+  [ServiceProviderKeys.openai]: {
+    icon: openAIIcon,
+    name: 'OpenAI',
   },
 };
 

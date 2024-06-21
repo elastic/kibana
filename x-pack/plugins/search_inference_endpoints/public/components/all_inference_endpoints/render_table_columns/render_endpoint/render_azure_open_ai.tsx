@@ -8,14 +8,14 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { RenderEndpointProps } from './render_endpoint';
-import { ModelBadge } from './model_badge';
 
 interface ServiceSettings {
-  model_id: string;
-  url: string;
+  resource_name: string;
+  deployment_id: string;
+  api_version: string;
 }
 
-export const RenderOpenAI: React.FC<RenderEndpointProps> = ({ endpoint }) => {
+export const RenderAzureOpenAI: React.FC<RenderEndpointProps> = ({ endpoint }) => {
   const serviceSettings = endpoint.service_settings as ServiceSettings;
 
   return (
@@ -24,14 +24,9 @@ export const RenderOpenAI: React.FC<RenderEndpointProps> = ({ endpoint }) => {
         <strong>{endpoint.model_id}</strong>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s">
-          {serviceSettings?.model_id && (
-            <EuiFlexItem grow={false}>
-              <ModelBadge model={serviceSettings.model_id} />
-            </EuiFlexItem>
-          )}
-          {serviceSettings?.url && <EuiFlexItem grow={false}>{serviceSettings.url}</EuiFlexItem>}
-        </EuiFlexGroup>
+        <span>
+          {`${serviceSettings.resource_name}, ${serviceSettings.deployment_id}, ${serviceSettings.api_version}`}
+        </span>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -205,12 +205,39 @@ export type InferenceServiceSettings =
       };
     }
   | {
+      service: 'mistral';
+      service_settings: {
+        api_key: string;
+        model: string;
+        max_input_tokens: string;
+        rate_limit: {
+          requests_per_minute: number;
+        };
+      };
+    }
+  | {
       service: 'cohere';
       service_settings: {
         similarity: string;
         dimensions: string;
         model_id: string;
         embedding_type: string;
+      };
+    }
+  | {
+      service: 'azureaistudio';
+      service_settings: {
+        target: string;
+        provider: string;
+        embedding_type: string;
+      };
+    }
+  | {
+      service: 'azureopenai';
+      service_settings: {
+        resource_name: string;
+        deployment_id: string;
+        api_version: string;
       };
     }
   | {

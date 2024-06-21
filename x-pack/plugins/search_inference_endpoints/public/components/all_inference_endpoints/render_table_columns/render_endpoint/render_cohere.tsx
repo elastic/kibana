@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { RenderEndpointProps } from './render_endpoint';
+import { ModelBadge } from './model_badge';
 
 interface ServiceSettings {
   embedding_type: string;
@@ -32,13 +33,19 @@ export const RenderCohere: React.FC<RenderEndpointProps> = ({ endpoint }) => {
         <EuiFlexGroup gutterSize="s">
           {serviceSettings.model_id && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="default">{serviceSettings.model_id}</EuiBadge>
+              <ModelBadge model={serviceSettings.model_id} />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            {serviceSettings.embedding_type && <span>{serviceSettings.embedding_type}</span>}
-            {taskSettings.input_type && <span>, {taskSettings.input_type}</span>}
-            {taskSettings.truncate && <span>, truncate: {taskSettings.truncate}</span>}
+            <span>
+              {[
+                serviceSettings.embedding_type,
+                taskSettings.input_type,
+                taskSettings.truncate && `truncate: ${taskSettings.truncate}`,
+              ]
+                .filter(Boolean)
+                .join(', ')}
+            </span>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

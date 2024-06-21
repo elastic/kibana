@@ -12,6 +12,9 @@ import { RenderCohere } from './render_cohere';
 import { ServiceProviderKeys } from '../../types';
 import { RenderHuggingFace } from './render_hugging_face';
 import { RenderOpenAI } from './render_open_ai';
+import { RenderAzureAIStudio } from './render_azure_ai_studio';
+import { RenderMistral } from './render_mistral';
+import { RenderAzureOpenAI } from './render_azure_open_ai';
 
 export interface RenderEndpointProps {
   endpoint: InferenceAPIConfigResponse;
@@ -28,6 +31,9 @@ export const RenderEndpoint: React.FC<RenderEndpointProps> = ({ endpoint }) => {
     [ServiceProviderKeys.cohere]: <RenderCohere endpoint={endpoint} />,
     [ServiceProviderKeys.hugging_face]: <RenderHuggingFace endpoint={endpoint} />,
     [ServiceProviderKeys.openai]: <RenderOpenAI endpoint={endpoint} />,
+    [ServiceProviderKeys.azureaistudio]: <RenderAzureAIStudio endpoint={endpoint} />,
+    [ServiceProviderKeys.azureopenai]: <RenderAzureOpenAI endpoint={endpoint} />,
+    [ServiceProviderKeys.mistral]: <RenderMistral endpoint={endpoint} />,
   };
 
   return renderMap[endpoint.service] || <strong>{endpoint.model_id}</strong>;
