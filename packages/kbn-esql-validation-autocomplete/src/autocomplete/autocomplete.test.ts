@@ -20,77 +20,15 @@ import { FunctionParameter } from '../definitions/types';
 import { getParamAtPosition } from './helper';
 import { nonNullable } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
-
-interface Integration {
-  name: string;
-  hidden: boolean;
-  title?: string;
-  dataStreams: Array<{
-    name: string;
-    title?: string;
-  }>;
-}
-
-const triggerCharacters = [',', '(', '=', ' '];
-
-const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
-  ...[
-    'string',
-    'number',
-    'date',
-    'boolean',
-    'ip',
-    'geo_point',
-    'geo_shape',
-    'cartesian_point',
-    'cartesian_shape',
-  ].map((type) => ({
-    name: `${camelCase(type)}Field`,
-    type,
-  })),
-  { name: 'any#Char$Field', type: 'number', suggestedAs: '`any#Char$Field`' },
-  { name: 'kubernetes.something.something', type: 'number' },
-];
-
-const indexes = ([] as Array<{ name: string; hidden: boolean; suggestedAs?: string }>).concat(
-  ['a', 'index', 'otherIndex', '.secretIndex', 'my-index'].map((name) => ({
-    name,
-    hidden: name.startsWith('.'),
-  })),
-  ['my-index[quoted]', 'my-index$', 'my_index{}'].map((name) => ({
-    name,
-    hidden: false,
-    suggestedAs: `\`${name}\``,
-  }))
-);
-
-const integrations: Integration[] = ['nginx', 'k8s'].map((name) => ({
-  name,
-  hidden: false,
-  title: `integration-${name}`,
-  dataStreams: [
-    {
-      name: `${name}-1`,
-      title: `integration-${name}-1`,
-    },
-  ],
-}));
-const policies = [
-  {
-    name: 'policy',
-    sourceIndices: ['enrichIndex1'],
-    matchField: 'otherStringField',
-    enrichFields: ['otherField', 'yetAnotherField', 'yet-special-field'],
-    suggestedAs: undefined,
-  },
-  ...['my-policy[quoted]', 'my-policy$', 'my_policy{}'].map((name) => ({
-    name,
-    sourceIndices: ['enrichIndex1'],
-    matchField: 'otherStringField',
-    enrichFields: ['otherField', 'yetAnotherField', 'yet-special-field'],
-    suggestedAs: `\`${name}\``,
-  })),
-];
+import {
+  getPolicyFields,
+  fields,
+  indexes,
+  integrations,
+  policies,
+  createCustomCallbackMocks,
+  createSuggestContext,
+} from './__tests__/helpers';
 
 /**
  * Utility to filter down the function list for the given type
@@ -209,49 +147,6 @@ function getLiteralsByType(_type: string | string[]) {
     return chronoLiterals.map(({ name }) => name);
   }
   return [];
-}
-
-function createCustomCallbackMocks(
-  customFields: Array<{ name: string; type: string }> | undefined,
-  customSources: Array<{ name: string; hidden: boolean }> | undefined,
-  customPolicies:
-    | Array<{
-        name: string;
-        sourceIndices: string[];
-        matchField: string;
-        enrichFields: string[];
-      }>
-    | undefined
-) {
-  const finalFields = customFields || fields;
-  const finalSources = customSources || indexes;
-  const finalPolicies = customPolicies || policies;
-  return {
-    getFieldsFor: jest.fn(async () => finalFields),
-    getSources: jest.fn(async () => finalSources),
-    getPolicies: jest.fn(async () => finalPolicies),
-  };
-}
-
-function createSuggestContext(text: string, triggerCharacter?: string) {
-  if (triggerCharacter) {
-    return { triggerCharacter, triggerKind: 1 }; // any number is fine here
-  }
-  const foundTriggerCharIndexes = triggerCharacters.map((char) => text.lastIndexOf(char));
-  const maxIndex = Math.max(...foundTriggerCharIndexes);
-  return {
-    triggerCharacter: text[maxIndex],
-    triggerKind: 1,
-  };
-}
-
-function getPolicyFields(policyName: string) {
-  return policies
-    .filter(({ name }) => name === policyName)
-    .flatMap(({ enrichFields }) =>
-      // ok, this is a bit of cheating as it's using the same logic as in the helper
-      enrichFields.map((field) => (/[^a-zA-Z\d_\.@]/.test(field) ? `\`${field}\`` : field))
-    );
 }
 
 describe('autocomplete', () => {
