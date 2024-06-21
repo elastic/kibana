@@ -79,7 +79,7 @@ export const cyLoadEndpointDataHandler = async (
   });
 
   const endpointPackage = await getEndpointPackageInfo(kbnClient);
-  const transforms = endpointPackage.installationInfo.installed_es
+  const transforms = endpointPackage?.installationInfo?.installed_es
     .filter((asset) => asset.type === ElasticsearchAssetType.transform)
     .map((asset) => asset.id);
   if (!transforms) {
