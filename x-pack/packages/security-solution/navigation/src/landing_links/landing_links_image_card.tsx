@@ -4,7 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
 import { withLink } from '../links';
@@ -26,15 +34,11 @@ const useStyles = () => {
   return {
     card: css`
       height: ${CARD_HEIGHT}px;
-      display: flex;
-      justify-content: flex-start;
     `,
     cardWrapper: css`
       height: 100%;
     `,
     titleContainer: css`
-      display: flex;
-      align-items: center;
       height: ${euiTheme.size.l};
     `,
     title: css`
@@ -77,36 +81,50 @@ export const LandingLinksImageCard: React.FC<LandingLinksImageCardProps> = React
           <EuiFlexGroup
             gutterSize="s"
             direction="row"
-            wrap
             justifyContent="flexStart"
             alignItems="flexStart"
             css={styles.cardWrapper}
           >
-            {landingImage && (
-              <EuiPanel
-                paddingSize="none"
-                hasShadow={false}
-                hasBorder
-                borderRadius="m"
-                css={styles.imageContainer}
-              >
-                <EuiImage
-                  data-test-subj="LandingImageCard-image"
-                  alt={title}
-                  src={landingImage}
-                  css={styles.image}
-                />
-              </EuiPanel>
-            )}
-            <EuiFlexGroup css={styles.cardInfoContainer} gutterSize="s" direction="column">
-              <div css={styles.titleContainer}>
-                <EuiTitle size="xxxs" css={styles.title}>
-                  <h3>{title}</h3>
-                </EuiTitle>
-                {isBeta && <BetaBadge text={betaOptions?.text} />}
-              </div>
-              <span css={styles.description}>{description}</span>
-            </EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              {landingImage && (
+                <EuiPanel
+                  paddingSize="none"
+                  hasShadow={false}
+                  hasBorder
+                  borderRadius="m"
+                  css={styles.imageContainer}
+                >
+                  <EuiImage
+                    data-test-subj="LandingImageCard-image"
+                    alt={title}
+                    src={landingImage}
+                    css={styles.image}
+                  />
+                </EuiPanel>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" direction="column">
+                <EuiFlexItem>
+                  <EuiFlexGroup
+                    gutterSize="none"
+                    direction="row"
+                    css={styles.titleContainer}
+                    alignItems="center"
+                  >
+                    <EuiFlexItem component="span" grow={false}>
+                      <EuiTitle size="xxxs" css={styles.title}>
+                        <h3>{title}</h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem>{isBeta && <BetaBadge text={betaOptions?.text} />}</EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="xs">{description}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanelWithLink>
       </EuiFlexItem>
