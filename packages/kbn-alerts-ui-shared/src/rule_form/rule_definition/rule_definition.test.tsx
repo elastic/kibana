@@ -16,9 +16,13 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { RuleDefinition } from './rule_definition';
-import { RuleTypeModel } from '../../common';
-import { RuleType } from '@kbn/triggers-actions-ui-types';
-import { ALERT_DELAY_TITLE } from '../translations';
+import { RuleType } from '@kbn/alerting-types';
+import { RuleTypeModel } from '../../common/types';
+
+jest.mock('../hooks', () => ({
+  useRuleFormState: jest.fn(),
+  useRuleFormDispatch: jest.fn(),
+}));
 
 const ruleType = {
   id: '.es-query',
@@ -40,6 +44,8 @@ const ruleType = {
   authorizedConsumers: {
     alerting: { read: true, all: true },
     test: { read: true, all: true },
+    stackAlerts: { read: true, all: true },
+    logs: { read: true, all: true },
   },
   actionVariables: {
     params: [],
@@ -60,7 +66,7 @@ const ruleModel: RuleTypeModel = {
   requiresAppContext: false,
 };
 
-const requiredPlugins = {
+const plugins = {
   charts: {} as ChartsPluginSetup,
   data: {} as DataPublicPluginStart,
   dataViews: {} as DataViewsPublicPluginStart,
@@ -68,152 +74,156 @@ const requiredPlugins = {
   docLinks: {} as DocLinksStart,
 };
 
+const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+
 const mockOnChange = jest.fn();
 
 describe('Rule Definition', () => {
+  beforeEach(() => {
+    useRuleFormDispatch.mockReturnValue(mockOnChange);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('Renders correctly', () => {
-    render(
-      <RuleDefinition
-        requiredPlugins={requiredPlugins}
-        formValues={{
-          id: 'test-id',
-          params: {},
-          schedule: {
-            interval: '1m',
-          },
-          alertDelay: {
-            active: 5,
-          },
-          notifyWhen: null,
-          consumer: 'stackAlerts',
-        }}
-        selectedRuleType={ruleType as RuleType}
-        selectedRuleTypeModel={ruleModel as RuleTypeModel}
-        canShowConsumerSelection
-        authorizedConsumers={['logs', 'stackAlerts']}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      canShowConsumerSelection: true,
+      validConsumers: ['logs', 'stackAlerts'],
+    });
+
+    render(<RuleDefinition />);
     expect(screen.getByTestId('ruleDefinition')).toBeInTheDocument();
     expect(screen.getByTestId('ruleSchedule')).toBeInTheDocument();
     expect(screen.getByTestId('ruleConsumerSelection')).toBeInTheDocument();
     expect(screen.getByTestId('ruleDefinitionHeaderDocsLink')).toBeInTheDocument();
+    expect(screen.getByTestId('alertDelay')).not.toBeVisible();
 
-    expect(screen.getByText(ALERT_DELAY_TITLE)).not.toBeVisible();
     expect(screen.getByText('Expression')).toBeInTheDocument();
   });
 
   test('Hides doc link if not provided', () => {
-    render(
-      <RuleDefinition
-        requiredPlugins={requiredPlugins}
-        formValues={{
-          id: 'test-id',
-          params: {},
-          schedule: {
-            interval: '1m',
-          },
-          alertDelay: {
-            active: 5,
-          },
-          notifyWhen: null,
-          consumer: 'stackAlerts',
-        }}
-        selectedRuleType={ruleType}
-        selectedRuleTypeModel={{
-          ...ruleModel,
-          documentationUrl: null,
-        }}
-        canShowConsumerSelection
-        authorizedConsumers={['logs', 'stackAlerts']}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: {
+        ...ruleModel,
+        documentationUrl: null,
+      },
+    });
+    render(<RuleDefinition />);
 
     expect(screen.queryByTestId('ruleDefinitionHeaderDocsLink')).not.toBeInTheDocument();
   });
 
   test('Hides consumer selection if canShowConsumerSelection is false', () => {
-    render(
-      <RuleDefinition
-        requiredPlugins={requiredPlugins}
-        formValues={{
-          id: 'test-id',
-          params: {},
-          schedule: {
-            interval: '1m',
-          },
-          alertDelay: {
-            active: 5,
-          },
-          notifyWhen: null,
-          consumer: 'stackAlerts',
-        }}
-        selectedRuleType={ruleType}
-        selectedRuleTypeModel={ruleModel}
-        authorizedConsumers={['logs', 'stackAlerts']}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+    });
+
+    render(<RuleDefinition />);
 
     expect(screen.queryByTestId('ruleConsumerSelection')).not.toBeInTheDocument();
   });
 
   test('Can toggle advanced options', async () => {
-    render(
-      <RuleDefinition
-        requiredPlugins={requiredPlugins}
-        formValues={{
-          id: 'test-id',
-          params: {},
-          schedule: {
-            interval: '1m',
-          },
-          alertDelay: {
-            active: 5,
-          },
-          notifyWhen: null,
-          consumer: 'stackAlerts',
-        }}
-        selectedRuleType={ruleType}
-        selectedRuleTypeModel={ruleModel}
-        authorizedConsumers={['logs', 'stackAlerts']}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+    });
+
+    render(<RuleDefinition />);
 
     fireEvent.click(screen.getByTestId('advancedOptionsAccordionButton'));
-    expect(screen.getByText(ALERT_DELAY_TITLE)).toBeVisible();
+    expect(screen.getByTestId('alertDelay')).toBeVisible();
   });
 
   test('Calls onChange when inputs are modified', () => {
-    render(
-      <RuleDefinition
-        requiredPlugins={requiredPlugins}
-        formValues={{
-          id: 'test-id',
-          params: {},
-          schedule: {
-            interval: '1m',
-          },
-          alertDelay: {
-            active: 5,
-          },
-          notifyWhen: null,
-          consumer: 'stackAlerts',
-        }}
-        selectedRuleType={ruleType}
-        selectedRuleTypeModel={ruleModel}
-        authorizedConsumers={['logs', 'stackAlerts']}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+    });
+
+    render(<RuleDefinition />);
 
     fireEvent.change(screen.getByTestId('ruleScheduleNumberInput'), {
       target: {
         value: '10',
       },
     });
-    expect(mockOnChange).toHaveBeenCalledWith('interval', '10m');
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setSchedule',
+      payload: {
+        interval: '10m',
+      },
+    });
   });
 });

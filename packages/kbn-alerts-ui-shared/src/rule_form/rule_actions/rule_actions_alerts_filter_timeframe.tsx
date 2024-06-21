@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment, { Moment } from 'moment';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -20,18 +21,19 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import { AlertsFilterTimeframe, ISO_WEEKDAYS, IsoWeekday } from '@kbn/alerting-plugin/common';
-import { I18N_WEEKDAY_OPTIONS_DDD } from '../../../common/constants';
+import { ISO_WEEKDAYS, type IsoWeekday, type AlertsFilterTimeframe } from '@kbn/alerting-types';
+import { I18N_WEEKDAY_OPTIONS_DDD } from '../../common/constants';
 
-interface ActionAlertsFilterTimeframeProps {
+interface RuleActionsAlertsFilterTimeframeProps {
   state?: AlertsFilterTimeframe;
+  settings: SettingsStart;
   onChange: (update?: AlertsFilterTimeframe) => void;
 }
 
 const TIMEZONE_OPTIONS = moment.tz?.names().map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
 
-const useSortedWeekdayOptions = () => {
-  const kibanaDow: string = useUiSetting('dateFormat:dow');
+const useSortedWeekdayOptions = (settings: SettingsStart) => {
+  const kibanaDow: string = settings.client.get('dateFormat:dow');
   const startDow = kibanaDow ?? 'Sunday';
   const startDowIndex = I18N_WEEKDAY_OPTIONS_DDD.findIndex((o) => o.label.startsWith(startDow));
   return [
@@ -40,14 +42,20 @@ const useSortedWeekdayOptions = () => {
   ];
 };
 
-const useDefaultTimezone = () => {
-  const kibanaTz: string = useUiSetting('dateFormat:tz');
+const useDefaultTimezone = (settings: SettingsStart) => {
+  const kibanaTz: string = settings.client.get('dateFormat:tz');
   if (!kibanaTz || kibanaTz === 'Browser') return moment.tz?.guess() ?? 'UTC';
   return kibanaTz;
 };
 
-const useTimeframe = (initialTimeframe?: AlertsFilterTimeframe) => {
-  const timezone = useDefaultTimezone();
+const useTimeframe = ({
+  initialTimeframe,
+  settings,
+}: {
+  initialTimeframe?: AlertsFilterTimeframe;
+  settings: SettingsStart;
+}) => {
+  const timezone = useDefaultTimezone(settings);
   const DEFAULT_TIMEFRAME = {
     days: [],
     timezone,
@@ -58,25 +66,29 @@ const useTimeframe = (initialTimeframe?: AlertsFilterTimeframe) => {
   };
   return useState<AlertsFilterTimeframe>(initialTimeframe || DEFAULT_TIMEFRAME);
 };
-const useTimeFormat = () => {
-  const dateFormatScaled: Array<[string, string]> = useUiSetting('dateFormat:scaled') ?? [
+const useTimeFormat = (settings: SettingsStart) => {
+  const dateFormatScaled: Array<[string, string]> = settings.client.get('dateFormat:scaled') ?? [
     ['PT1M', 'HH:mm'],
   ];
   const [, PT1M] = dateFormatScaled.find(([key]) => key === 'PT1M') ?? ['', 'HH:mm'];
   return PT1M;
 };
 
-export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframeProps> = ({
+export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterTimeframeProps> = ({
   state,
+  settings,
   onChange,
 }) => {
-  const timeFormat = useTimeFormat();
-  const [timeframe, setTimeframe] = useTimeframe(state);
+  const timeFormat = useTimeFormat(settings);
+  const [timeframe, setTimeframe] = useTimeframe({
+    initialTimeframe: state,
+    settings,
+  });
   const [selectedTimezone, setSelectedTimezone] = useState([{ label: timeframe.timezone }]);
 
   const timeframeEnabled = useMemo(() => Boolean(state), [state]);
 
-  const weekdayOptions = useSortedWeekdayOptions();
+  const weekdayOptions = useSortedWeekdayOptions(settings);
 
   useEffect(() => {
     const nextState = timeframeEnabled ? timeframe : undefined;
@@ -144,7 +156,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
     <>
       <EuiSwitch
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterTimeframeToggleLabel',
+          'alertsUIShared.ruleForm.ruleActionsAlertsFilterTimeframeToggleLabel',
           {
             defaultMessage: 'If alert is generated during timeframe',
           }
@@ -160,7 +172,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
             <EuiButtonGroup
               isFullWidth
               legend={i18n.translate(
-                'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterTimeframeWeekdays',
+                'alertsUIShared.ruleForm.ruleActionsAlertsFilterTimeframeWeekdays',
                 {
                   defaultMessage: 'Days of week',
                 }
@@ -204,7 +216,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
             <EuiFlexItem grow={1}>
               <EuiComboBox
                 prepend={i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterTimeframeTimezoneLabel',
+                  'alertsUIShared.ruleForm.ruleActionsAlertsFilterTimeframeTimezoneLabel',
                   { defaultMessage: 'Timezone' }
                 )}
                 singleSelection={{ asPlainText: true }}

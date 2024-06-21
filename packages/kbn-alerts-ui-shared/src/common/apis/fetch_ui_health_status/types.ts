@@ -13,3 +13,12 @@ export interface UiHealthCheck {
 export interface UiHealthCheckResponse {
   isAlertsAvailable: boolean;
 }
+
+export const healthCheckErrors = {
+  ALERTS_ERROR: 'alertsError',
+  ENCRYPTION_ERROR: 'encryptionError',
+  API_KEYS_DISABLED_ERROR: 'apiKeysDisabledError',
+  API_KEYS_AND_ENCRYPTION_ERROR: 'apiKeysAndEncryptionError',
+} as const;
+
+export type HealthCheckErrors = typeof healthCheckErrors[keyof typeof healthCheckErrors];

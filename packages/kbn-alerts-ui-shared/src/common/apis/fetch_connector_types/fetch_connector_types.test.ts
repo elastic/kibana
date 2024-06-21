@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { ActionType } from '../../../types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { loadActionTypes } from '.';
+import { fetchConnectorTypes } from './fetch_connector_types';
+import { ActionType } from '@kbn/actions-types';
 
 const http = httpServiceMock.createStartContract();
 
@@ -42,7 +43,7 @@ describe('loadActionTypes', () => {
       },
     ];
 
-    const result = await loadActionTypes({ http });
+    const result = await fetchConnectorTypes({ http });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -80,7 +81,7 @@ describe('loadActionTypes', () => {
       },
     ];
 
-    const result = await loadActionTypes({ http, featureId: 'alerting' });
+    const result = await fetchConnectorTypes({ http, featureId: 'alerting' });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -143,7 +144,7 @@ describe('loadActionTypes', () => {
       },
     ];
 
-    const result = await loadActionTypes({ http, includeSystemActions: true });
+    const result = await fetchConnectorTypes({ http, includeSystemActions: true });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -202,7 +203,7 @@ describe('loadActionTypes', () => {
       },
     ];
 
-    const result = await loadActionTypes({
+    const result = await fetchConnectorTypes({
       http,
       featureId: 'alerting',
       includeSystemActions: true,

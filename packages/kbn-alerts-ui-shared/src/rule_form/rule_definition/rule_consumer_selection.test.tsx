@@ -14,78 +14,72 @@ import { RuleConsumerSelection } from './rule_consumer_selection';
 const mockOnChange = jest.fn();
 const mockConsumers: RuleCreationValidConsumer[] = ['logs', 'infrastructure', 'stackAlerts'];
 
-describe('RuleConsumerSelection', () => {
-  test('Renders correctly', () => {
-    render(
-      <RuleConsumerSelection
-        consumers={mockConsumers}
-        selectedConsumer={'stackAlerts'}
-        onChange={mockOnChange}
-      />
-    );
+jest.mock('../hooks', () => ({
+  useRuleFormState: jest.fn(),
+  useRuleFormDispatch: jest.fn(),
+}));
 
+const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+
+describe('RuleConsumerSelection', () => {
+  beforeEach(() => {
+    useRuleFormState.mockReturnValue({
+      multiConsumerSelection: 'stackAlerts',
+    });
+    useRuleFormDispatch.mockReturnValue(mockOnChange);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('Renders correctly', () => {
+    render(<RuleConsumerSelection validConsumers={mockConsumers} />);
     expect(screen.getByTestId('ruleConsumerSelection')).toBeInTheDocument();
   });
 
   test('Should default to the selected consumer', () => {
-    render(
-      <RuleConsumerSelection
-        consumers={mockConsumers}
-        selectedConsumer={'stackAlerts'}
-        onChange={mockOnChange}
-      />
-    );
-
+    render(<RuleConsumerSelection validConsumers={mockConsumers} />);
     expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('Stack Rules');
   });
 
   it('Should not display the initial selected consumer if it is not a selectable option', () => {
-    render(
-      <RuleConsumerSelection
-        consumers={['stackAlerts', 'infrastructure']}
-        selectedConsumer={'logs'}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      multiConsumerSelection: 'logs',
+    });
+    render(<RuleConsumerSelection validConsumers={['stackAlerts', 'infrastructure']} />);
     expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('');
   });
 
   it('should display nothing if there is only 1 consumer to select', () => {
-    render(
-      <RuleConsumerSelection
-        selectedConsumer={null}
-        consumers={['stackAlerts']}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      multiConsumerSelection: null,
+    });
+    render(<RuleConsumerSelection validConsumers={['stackAlerts']} />);
 
     expect(screen.queryByTestId('ruleConsumerSelection')).not.toBeInTheDocument();
   });
 
   it('should be able to select logs and call onChange', () => {
-    render(
-      <RuleConsumerSelection
-        selectedConsumer={null}
-        consumers={mockConsumers}
-        onChange={mockOnChange}
-        errors={{}}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      multiConsumerSelection: null,
+    });
+    render(<RuleConsumerSelection validConsumers={mockConsumers} />);
 
     fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
     fireEvent.click(screen.getByTestId('ruleConsumerSelectionOption-logs'));
-    expect(mockOnChange).toHaveBeenLastCalledWith('consumer', 'logs');
+    expect(mockOnChange).toHaveBeenLastCalledWith({
+      type: 'setMultiConsumer',
+      payload: 'logs',
+    });
   });
 
   it('should be able to show errors when there is one', () => {
-    render(
-      <RuleConsumerSelection
-        selectedConsumer={null}
-        consumers={mockConsumers}
-        onChange={mockOnChange}
-        errors={{ consumer: ['Scope is required'] }}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      multiConsumerSelection: null,
+      baseErrors: { consumer: ['Scope is required'] },
+    });
+    render(<RuleConsumerSelection validConsumers={mockConsumers} />);
     expect(screen.queryAllByText('Scope is required')).toHaveLength(1);
   });
 });

@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { ActionConnectorProps } from '../../../types';
-import { loadAllActions } from '.';
+import { ActionConnectorProps } from '../../types';
+import { fetchConnectors } from './fetch_connectors';
 
 const http = httpServiceMock.createStartContract();
 
 beforeEach(() => jest.resetAllMocks());
 
-describe('loadAllActions', () => {
+describe('fetchConnectors', () => {
   test('should call getAll actions API', async () => {
     const apiResponseValue = [
       {
@@ -47,7 +48,7 @@ describe('loadAllActions', () => {
 
     http.get.mockResolvedValueOnce(apiResponseValue);
 
-    const result = await loadAllActions({ http });
+    const result = await fetchConnectors({ http });
 
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
@@ -90,7 +91,7 @@ describe('loadAllActions', () => {
 
     http.get.mockResolvedValueOnce(apiResponseValue);
 
-    const result = await loadAllActions({ http, includeSystemActions: true });
+    const result = await fetchConnectors({ http, includeSystemActions: true });
 
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
