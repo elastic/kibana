@@ -39,7 +39,7 @@ export type State = HostsPluginState &
     sourcerer: SourcererState;
     globalUrlParam: GlobalUrlParam;
     discover: SecuritySolutionDiscoverState;
-    dataviewPicker: DataviewPickerState;
+    dataViewPicker: DataviewPickerState;
   } & DataTableState &
   GroupState &
   AnalyzerState & { notes: NotesState };

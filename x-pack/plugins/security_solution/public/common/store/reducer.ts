@@ -136,7 +136,7 @@ export const createInitialState = (
       internal: undefined,
       savedSearch: undefined,
     },
-    dataviewPicker: dataviewPickerState,
+    dataViewPicker: dataviewPickerState,
     notes: notesState,
   };
 
@@ -156,7 +156,7 @@ export const createReducer: (
     sourcerer: sourcererReducer,
     globalUrlParam: globalUrlParamReducer,
     dataTable: dataTableReducer,
-    dataviewPicker: dataviewPickerReducer,
+    dataViewPicker: dataviewPickerReducer,
     groups: groupsReducer,
     analyzer: analyzerReducer,
     discover: securitySolutionDiscoverReducer,

@@ -56,8 +56,8 @@ import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import {
-  reducer as dataviewPickerReducer,
-  initialState as dataviewPickerState,
+  reducer as dataViewPickerReducer,
+  initialState as dataViewPickerState,
 } from '../../sourcerer/experimental/redux/reducer';
 import { listenerMiddleware } from '../../sourcerer/experimental/redux/listeners';
 import { initialNotesState } from '../../notes/store/notes.slice';
@@ -176,7 +176,7 @@ export const createStoreFactory = async (
     dataTableInitialState,
     groupsInitialState,
     analyzerInitialState,
-    dataviewPickerState,
+    dataViewPickerState,
     initialNotesState
   );
 
@@ -184,7 +184,7 @@ export const createStoreFactory = async (
     ...subPlugins.explore.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
-    dataviewPicker: dataviewPickerReducer,
+    dataViewPicker: dataViewPickerReducer,
   };
 
   return createStore(initialState, rootReducer, coreStart, storage, [

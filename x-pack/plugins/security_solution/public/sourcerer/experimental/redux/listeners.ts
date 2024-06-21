@@ -63,7 +63,7 @@ export const createInitDataviewListener: ListenerCreator<{}> = (): ListenerOptio
         return;
       }
       // NOTE: We should only run this once, when particular sourcerer instance is in pristine state (not touched by the user)
-      if (listenerApi.getState().dataviewPicker.state !== 'pristine') {
+      if (listenerApi.getState().dataViewPicker.state !== 'pristine') {
         return;
       }
 

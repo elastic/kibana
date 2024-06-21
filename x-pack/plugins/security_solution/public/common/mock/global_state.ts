@@ -502,7 +502,7 @@ export const mockGlobalState: State = {
    */
   management: mockManagementState as ManagementState,
   discover: getMockDiscoverInTimelineState(),
-  dataviewPicker: dataViewPickerInitialState,
+  dataViewPicker: dataViewPickerInitialState,
   notes: {
     ids: ['1'],
     entities: {

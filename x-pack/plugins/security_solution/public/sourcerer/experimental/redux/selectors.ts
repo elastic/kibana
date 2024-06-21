@@ -14,7 +14,7 @@ import { type State } from '../../../common/store/types';
  * It is used in useSecuritySolutionDataView hook as alternative data source (behind a flag)
  */
 export const sourcererAdapterSelector = createSelector(
-  [(state: State) => state.dataviewPicker],
+  [(state: State) => state.dataViewPicker],
   (dataViewPicker): SelectedDataView => {
     return {
       loading: dataViewPicker.state === 'loading',

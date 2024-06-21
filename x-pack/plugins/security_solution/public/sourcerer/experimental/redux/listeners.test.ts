@@ -33,7 +33,7 @@ describe('Listeners', () => {
       listenerOptions = createInitDataviewListener({});
       listenerApi = {
         dispatch: jest.fn(),
-        getState: jest.fn(() => ({ dataviewPicker: { state: 'pristine' } })),
+        getState: jest.fn(() => ({ dataViewPicker: { state: 'pristine' } })),
       } as unknown as ListenerApi;
     });
 
@@ -51,7 +51,7 @@ describe('Listeners', () => {
     test('does not dispatch if state is not pristine', async () => {
       jest.mocked(isExperimentalSourcererEnabled).mockReturnValue(true);
       listenerApi.getState = jest.fn(() => ({
-        dataviewPicker: { state: 'not_pristine' },
+        dataViewPicker: { state: 'not_pristine' },
       })) as unknown as ListenerApi['getState'];
 
       await listenerOptions.effect(init('test-view'), listenerApi);
