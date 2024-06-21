@@ -26,9 +26,8 @@ export function useCustomCardsForCategory(
   } = useKibana();
   const getUrlForApp = application?.getUrlForApp;
 
-  const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect${location.search}`);
-  const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs${location.search}`);
-  const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs${location.search}`);
+  const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
+  const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
 
   switch (category) {
     case 'apm':
@@ -136,23 +135,6 @@ export function useCustomCardsForCategory(
     case 'logs':
       return [
         {
-          id: 'auto-detect',
-          type: 'virtual',
-          title: 'Auto-detect logs and metrics',
-          description: 'Scan your host to detect and collect logs and metrics',
-          name: 'auto-detect-virtual',
-          categories: ['observability'],
-          icons: [
-            {
-              type: 'eui',
-              src: 'searchProfilerApp',
-            },
-          ],
-          url: autoDetectUrl,
-          version: '',
-          integration: '',
-        },
-        {
           id: 'system-logs',
           type: 'virtual',
           title: 'Stream host system logs',
@@ -186,6 +168,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
+        toFeaturedCard('nginx'),
         {
           id: 'azure-logs-virtual',
           type: 'virtual',
