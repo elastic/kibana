@@ -11,13 +11,8 @@ import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { DEFAULT_POLL_INTERVAL } from '../../common/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
-import type {
-  AgentStatusInfo,
-  AgentStatusRecords,
-  AgentStatusApiResponse,
-} from '../../../../common/endpoint/types';
+import type { AgentStatusRecords, AgentStatusApiResponse } from '../../../../common/endpoint/types';
 import { useHttp } from '../../../common/lib/kibana';
 
 interface ErrorType {
@@ -25,33 +20,6 @@ interface ErrorType {
   message: string;
   meta: ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
 }
-
-// FIXME:PT delete
-export const useGetSentinelOneAgentStatus = (
-  agentIds: string[],
-  agentType?: string,
-  options: UseQueryOptions<AgentStatusInfo, IHttpFetchError<ErrorType>> = {}
-): UseQueryResult<AgentStatusInfo, IHttpFetchError<ErrorType>> => {
-  const http = useHttp();
-
-  return useQuery<AgentStatusInfo, IHttpFetchError<ErrorType>>({
-    queryKey: ['get-agent-status', agentIds],
-    refetchInterval: 5000,
-    ...options,
-    enabled: agentType === 'sentinel_one',
-    queryFn: () =>
-      http
-        .get<{ data: AgentStatusInfo }>(AGENT_STATUS_ROUTE, {
-          version: '1',
-          query: {
-            agentIds,
-            // 8.13 sentinel_one support via internal API
-            agentType: agentType ? agentType : 'sentinel_one',
-          },
-        })
-        .then((response) => response.data),
-  });
-};
 
 /**
  * Retrieve the status of a supported host's agent type
@@ -86,13 +54,4 @@ export const useGetAgentStatus = (
         })
         .then((response) => response.data),
   });
-};
-
-// FIXME:PT delete
-export const useAgentStatusHook = ():
-  | typeof useGetAgentStatus
-  | typeof useGetSentinelOneAgentStatus => {
-  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
-  // 8.15 use agent status client hook if `agentStatusClientEnabled` FF enabled
-  return !agentStatusClientEnabled ? useGetSentinelOneAgentStatus : useGetAgentStatus;
 };
