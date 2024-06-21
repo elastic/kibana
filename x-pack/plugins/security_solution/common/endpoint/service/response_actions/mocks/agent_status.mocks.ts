@@ -7,8 +7,8 @@
 
 import { merge } from 'lodash';
 import type { DeepPartial } from 'utility-types';
-import type { AgentStatusRecords, AgentStatusApiResponse } from '../../../../common/endpoint/types';
-import { HostStatus } from '../../../../common/endpoint/types';
+import type { AgentStatusRecords, AgentStatusApiResponse } from '../../../types';
+import { HostStatus } from '../../../types';
 
 const generateAgentStatusMock = (
   overrides: DeepPartial<AgentStatusRecords[string]> = {}

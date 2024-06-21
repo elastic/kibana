@@ -7,7 +7,7 @@
 
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import type { Mutable } from 'utility-types';
-import { agentStatusMocks } from '../hooks/agents/agent_status.mocks';
+import { agentStatusMocks } from '../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../common/api/endpoint/agent/get_agent_status_route';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint';
 import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';

@@ -13,7 +13,7 @@ import { agentStatusGetHttpMock } from '../../../../../management/mocks';
 import { useUserPrivileges as _useUserPrivileges } from '../../../user_privileges';
 import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
 import type { ResponseActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { agentStatusMocks } from '../../../../../management/hooks/agents/agent_status.mocks';
+import { agentStatusMocks } from '../../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import type React from 'react';
 import {
