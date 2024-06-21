@@ -15,6 +15,19 @@ paths:
       x-labels: [ess, serverless]
       x-internal: true
       operationId: AssetCriticalityDeleteRecord
+      summary: Deprecated Internal Delete Criticality Record
+      parameters:
+        - $ref: './common.schema.yaml#/components/parameters/id_value'
+        - $ref: './common.schema.yaml#/components/parameters/id_field'
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          description: Invalid request
+  /api/asset_criticality:
+    delete:
+      x-labels: [ess, serverless]
+      operationId: AssetCriticalityDeleteRecord
       summary: Delete Criticality Record
       parameters:
         - $ref: './common.schema.yaml#/components/parameters/id_value'
