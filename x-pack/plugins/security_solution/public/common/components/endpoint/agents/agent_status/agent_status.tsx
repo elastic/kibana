@@ -23,6 +23,8 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   }
 `;
 
+// FIXME:PT component needs to be enhanced so that it also accepts agentStatusInfo (for use on lists UIs)
+
 /**
  * Display the agent status of a host that supports response actions
  */

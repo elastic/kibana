@@ -149,7 +149,13 @@ const getEndpointListColumns = ({
       }),
       sortable: true,
       render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
-        return <AgentStatus agentId={endpointInfo.metadata.agent.id} agentType="endpoint" />;
+        return (
+          <AgentStatus
+            agentId={endpointInfo.metadata.agent.id}
+            agentType="endpoint"
+            data-test-subj="rowHostStatus"
+          />
+        );
       },
     },
     {
