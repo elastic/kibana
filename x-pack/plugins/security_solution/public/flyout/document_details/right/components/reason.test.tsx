@@ -9,13 +9,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { REASON_DETAILS_PREVIEW_BUTTON_TEST_ID, REASON_TITLE_TEST_ID } from './test_ids';
-import { Reason } from './reason';
+import { Reason, ALERT_REASON_BANNER } from './reason';
 import { RightPanelContext } from '../context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
 import { TestProviders } from '../../../../common/mock';
-import { i18n } from '@kbn/i18n';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
@@ -105,22 +104,12 @@ describe('<Reason />', () => {
     getByTestId(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID).click();
 
     expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsPreviewPanelKey,
-      path: { tab: 'alert-reason-preview' },
+      id: DocumentDetailsAlertReasonPanelKey,
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,
         scopeId: panelContextValue.scopeId,
-        banner: {
-          title: i18n.translate(
-            'xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle',
-            {
-              defaultMessage: 'Preview alert reason',
-            }
-          ),
-          backgroundColor: 'warning',
-          textColor: 'warning',
-        },
+        banner: ALERT_REASON_BANNER,
       },
     });
   });
