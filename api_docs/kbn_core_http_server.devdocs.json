@@ -4759,6 +4759,14 @@
                 "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/assets/pods.ts"
               },
               {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/get.ts"
+              },
+              {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/enablement/check.ts"
+              },
+              {
                 "plugin": "profiling",
                 "path": "x-pack/plugins/observability_solution/profiling/server/routes/apm.ts"
               },
@@ -8751,6 +8759,10 @@
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/enablement/enable.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
@@ -9679,6 +9691,10 @@
                 "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/delete.ts"
               },
               {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/enablement/disable.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
@@ -10529,6 +10545,65 @@
               {
                 "parentPluginId": "@kbn/core-http-server",
                 "id": "def-common.KibanaErrorResponseFactory.conflict.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- {@link HttpResponseOptions } configures HTTP response headers, error message and other error details to pass to the client"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.ErrorHttpResponseOptions",
+                    "text": "ErrorHttpResponseOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.KibanaErrorResponseFactory.unprocessableContent",
+            "type": "Function",
+            "tags": [],
+            "label": "unprocessableContent",
+            "description": [
+              "\nThe server understands the content type of the request entity, and the syntax of the request entity is correct, but it was unable to process the contained instructions.\nStatus code: `422`."
+            ],
+            "signature": [
+              "(options?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ErrorHttpResponseOptions",
+                "text": "ErrorHttpResponseOptions"
+              },
+              " | undefined) => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<any>"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-common.KibanaErrorResponseFactory.unprocessableContent.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -11489,6 +11564,75 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.KibanaSuccessResponseFactory.created",
+            "type": "Function",
+            "tags": [],
+            "label": "created",
+            "description": [
+              "\nThe request has succeeded and has led to the creation of a resource.\nStatus code: `201`."
+            ],
+            "signature": [
+              "<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; } | undefined = any>(options?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              "<T> | undefined) => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<T>"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-common.KibanaSuccessResponseFactory.created.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- {@link HttpResponseOptions } configures HTTP response body & headers."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.HttpResponseOptions",
+                    "text": "HttpResponseOptions"
+                  },
+                  "<T> | undefined"
+                ],
+                "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.KibanaSuccessResponseFactory.accepted",
             "type": "Function",
             "tags": [],
@@ -11591,6 +11735,65 @@
               {
                 "parentPluginId": "@kbn/core-http-server",
                 "id": "def-common.KibanaSuccessResponseFactory.noContent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- {@link HttpResponseOptions } configures HTTP response body & headers."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.HttpResponseOptions",
+                    "text": "HttpResponseOptions"
+                  },
+                  "<any> | undefined"
+                ],
+                "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.KibanaSuccessResponseFactory.multiStatus",
+            "type": "Function",
+            "tags": [],
+            "label": "multiStatus",
+            "description": [
+              "\nThe server indicates that there might be a mixture of responses (some tasks succeeded, some failed).\nStatus code: `207`."
+            ],
+            "signature": [
+              "(options?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              "<any> | undefined) => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<any>"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-common.KibanaSuccessResponseFactory.multiStatus.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -16048,6 +16251,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upload_csv.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/bulk_upload.ts"
               },
               {
                 "plugin": "securitySolution",
