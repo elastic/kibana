@@ -9,39 +9,22 @@ import type { FC } from 'react';
 import React, { useContext, useState, useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
-import type { Field, Aggregation, AggFieldPair } from '@kbn/ml-anomaly-utils';
+import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
-import type { OptionWithFieldStats } from '../../../../../../../components/field_stats_flyout/eui_combo_box_with_field_stats';
+import type { DropDownLabel } from '../../../../../../../components/field_stats_flyout/eui_combo_box_with_field_stats';
 import { EuiComboBoxWithFieldStats } from '../../../../../../../components/field_stats_flyout';
 import { FieldStatsInfoButton } from '../../../../../../../components/field_stats_flyout/field_stats_info_button';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
 
-// The display label used for an aggregation e.g. sum(bytes).
-export type Label = string;
-
-// Label object structured for EUI's ComboBox.
-export interface DropDownLabel {
-  label: Label;
-  agg: Aggregation;
-  field: Field;
-}
-
-// Label object structure for EUI's ComboBox with support for nesting.
-export interface DropDownOption extends EuiComboBoxOptionOption {
-  label: Label;
-  options: DropDownLabel[];
-  isEmpty?: boolean;
-}
-
 export type DropDownProps = DropDownLabel[] | EuiComboBoxOptionOption[];
 
 interface Props {
   fields: Field[];
-  changeHandler(d: OptionWithFieldStats[]): void;
-  selectedOptions: OptionWithFieldStats[];
+  changeHandler(d: DropDownLabel[]): void;
+  selectedOptions: DropDownLabel[];
   removeOptions: AggFieldPair[];
 }
 
@@ -53,12 +36,12 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   const removeLabels = removeOptions.map(createLabel);
   const { handleFieldStatsButtonClick, populatedFields } = useFieldStatsTrigger();
 
-  const options: OptionWithFieldStats[] = useMemo(
+  const options: DropDownLabel[] = useMemo(
     () => {
-      const opts: OptionWithFieldStats[] = [];
+      const opts: DropDownLabel[] = [];
       fields.forEach((f) => {
         const isEmpty = f.id === EVENT_RATE_FIELD_ID ? false : !populatedFields?.has(f.name);
-        const aggOption: OptionWithFieldStats = {
+        const aggOption: DropDownLabel = {
           isGroupLabel: true,
           key: f.name,
           searchableLabel: f.name,
@@ -81,11 +64,12 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
             const label = `${a.title}(${f.name})`;
             if (removeLabels.includes(label) === true) return;
             if (a.dslName !== null) {
-              const agg: OptionWithFieldStats = {
+              const agg: DropDownLabel = {
                 key: label,
+                isEmpty,
                 isGroupLabel: false,
-                isEmpty: f.id === EVENT_RATE_FIELD_ID ? false : !populatedFields?.has(f.name),
                 label,
+                agg: omit(a, 'fields'),
                 field: omit(f, 'aggs'),
               };
               opts.push(agg);
@@ -118,8 +102,8 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
         options={options}
         selectedOptions={selectedOptions}
         onChange={changeHandler}
-        // @todo isClearable={false}
-        // @todo isInvalid={validation.valid === false}
+        isClearable={false}
+        isInvalid={validation.valid === false}
       />
     </EuiFormRow>
   );
