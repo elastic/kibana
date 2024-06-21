@@ -31,13 +31,7 @@ import {
   type UnifiedQueryRuleParams,
 } from '../../rule_schema';
 import { type BulkError, createBulkErrorObject } from '../../routes/utils';
-import { transform } from './utils';
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
-
-export const transformValidate = (rule: PartialRule<RuleParams>): RuleResponse => {
-  const transformed = transform(rule);
-  return RuleResponse.parse(transformed);
-};
 
 export const transformValidateBulkError = (
   ruleId: string,
