@@ -737,7 +737,10 @@ export class ExplorerChartDistribution extends React.Component {
             >
               <LinksMenuUI
                 anomaly={this.state.popoverData}
-                bounds={this.props.bounds}
+                bounds={{
+                  min: moment(seriesConfig.plotEarliest),
+                  max: moment(seriesConfig.plotLatest),
+                }}
                 showMapsLink={false}
                 showViewSeriesLink={true}
                 isAggregatedData={this.props.tableData.interval !== 'second'}
