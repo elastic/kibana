@@ -86,6 +86,7 @@ const App: FC<AppProps> = ({
       lens: deps.lens,
       licenseManagement: deps.licenseManagement,
       maps: deps.maps,
+      observabilityAIAssistant: deps.observabilityAIAssistant,
       presentationUtil: deps.presentationUtil,
       savedObjectsManagement: deps.savedObjectsManagement,
       savedSearch: deps.savedSearch,

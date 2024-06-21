@@ -16,6 +16,7 @@ import type {
 import { BehaviorSubject, mergeMap } from 'rxjs';
 import { take } from 'rxjs';
 
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -88,6 +89,7 @@ export interface MlStartDependencies {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   maps?: MapsStartApi;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
@@ -180,6 +182,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             licensing: pluginsStart.licensing,
             management: pluginsSetup.management,
             maps: pluginsStart.maps,
+            observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
             presentationUtil: pluginsStart.presentationUtil,
             savedObjectsManagement: pluginsStart.savedObjectsManagement,
             savedSearch: pluginsStart.savedSearch,
