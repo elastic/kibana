@@ -74,6 +74,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
           }}
           iconType="framePrevious"
           color="text"
+          className={'timeSlider-prependButton'}
           aria-label={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
           data-test-subj="timeSlider-previousTimeWindow"
         />
@@ -96,6 +97,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
           }}
           iconType="frameNext"
           color="text"
+          className={'timeSlider-prependButton'}
           aria-label={TimeSliderStrings.control.getNextButtonAriaLabel()}
           data-test-subj="timeSlider-nextTimeWindow"
         />
