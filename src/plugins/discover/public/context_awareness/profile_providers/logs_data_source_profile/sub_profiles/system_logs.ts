@@ -24,10 +24,10 @@ export const createSystemLogsDataSourceProfileProvider = (
         }
 
         columns.push(
-          { name: 'message' },
           { name: 'log.level', width: 150 },
           { name: 'process.name', width: 150 },
-          { name: 'host.name', width: 250 }
+          { name: 'host.name', width: 250 },
+          { name: 'message' }
         );
 
         return { columns, rowHeight: 0 };
