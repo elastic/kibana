@@ -22,7 +22,6 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { TRANSFORM_STATES } from '../../../../common/constants';
-import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
 import type { RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { EsAssetReference, Installation } from '@kbn/fleet-plugin/common';
 import { ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
@@ -143,7 +142,7 @@ describe('check metadata transforms task', () => {
         await runTask();
         expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
           {
-            transform_id: METADATA_TRANSFORMS_PATTERN,
+            transform_id: ['', ''],
           },
           { meta: true }
         );
@@ -159,7 +158,7 @@ describe('check metadata transforms task', () => {
 
         expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
           {
-            transform_id: METADATA_TRANSFORMS_PATTERN,
+            transform_id: ['', ''],
           },
           { meta: true }
         );

@@ -19,11 +19,10 @@ import type {
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { ElasticsearchAssetType, FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import type { EndpointAppContext } from '../../types';
-import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
 import { WARNING_TRANSFORM_STATES } from '../../../../common/constants';
 import { wrapErrorIfNeeded } from '../../utils';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
-import { isEndpointPackageV2 } from '../../../../common/endpoint/utils/package_v2';
+import { isTransformUnattended } from '../../../../common/endpoint/utils/package_v2';
 
 const SCOPE = ['securitySolution'];
 const INTERVAL = '2h';
@@ -123,17 +122,21 @@ export class CheckMetadataTransformsTask {
       return { state: taskInstance.state };
     }
 
-    if (isEndpointPackageV2(installation.version)) {
+    if (isTransformUnattended(installation)) {
       this.logger.debug('endpoint package spec v2 detected, stopping health checks');
       await this.taskManagerStart?.bulkDisable([taskInstance.id]);
       return { state: taskInstance.state };
     }
 
+    const expectedTransforms = installation.installed_es
+      .filter((asset) => asset.type === ElasticsearchAssetType.transform)
+      .map((asset) => asset.id);
+
     let transformStatsResponse: TransportResult<TransformGetTransformStatsResponse>;
     try {
       transformStatsResponse = await esClient?.transform.getTransformStats(
         {
-          transform_id: METADATA_TRANSFORMS_PATTERN,
+          transform_id: expectedTransforms,
         },
         { meta: true }
       );
@@ -144,10 +147,6 @@ export class CheckMetadataTransformsTask {
 
       return { state: taskInstance.state };
     }
-
-    const expectedTransforms = installation.installed_es.filter(
-      (asset) => asset.type === ElasticsearchAssetType.transform
-    );
 
     const { transforms } = transformStatsResponse.body;
     let { reinstallAttempts } = taskInstance.state as LatestTaskStateSchema;

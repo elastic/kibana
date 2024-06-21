@@ -26,10 +26,7 @@ import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
   ENDPOINT_DEFAULT_SORT_DIRECTION,
   ENDPOINT_DEFAULT_SORT_FIELD,
-  METADATA_TRANSFORMS_PATTERN,
-  METADATA_TRANSFORMS_PATTERN_V2,
 } from '../../../../common/endpoint/constants';
-import { isEndpointPackageV2 } from '../../../../common/endpoint/utils/package_v2';
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
@@ -110,14 +107,16 @@ export function getMetadataTransformStatsHandler(
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const packageClient = endpointAppContext.service.getInternalFleetServices().packages;
     const installation = await packageClient.getInstallation(FLEET_ENDPOINT_PACKAGE);
-    const transformName =
-      installation?.version && !isEndpointPackageV2(installation.version)
-        ? METADATA_TRANSFORMS_PATTERN
-        : METADATA_TRANSFORMS_PATTERN_V2;
+    if (!installation) {
+      return response.notFound(); // ?
+    }
+    const transformNames = installation.installed_es
+      .filter((item) => item.type === 'transform')
+      .map((asset) => asset.id);
 
     try {
       const transformStats = await esClient.transform.getTransformStats({
-        transform_id: transformName,
+        transform_id: transformNames,
         allow_no_match: true,
       });
       return response.ok({

@@ -29,21 +29,6 @@ export const metadataIndexPattern = 'metrics-endpoint.metadata-*';
 /** index that the metadata transform writes to (destination) and that is used by endpoint APIs */
 export const metadataCurrentIndexPattern = 'metrics-endpoint.metadata_current_*';
 
-// endpoint package V2 has an additional prefix in the transform names
-const PACKAGE_V2_PREFIX = 'logs-';
-
-/** The metadata Transform Name prefix with NO (package) version) */
-export const metadataTransformPrefix = 'endpoint.metadata_current-default';
-export const METADATA_CURRENT_TRANSFORM_V2 = `${PACKAGE_V2_PREFIX}${metadataTransformPrefix}`;
-
-// metadata transforms pattern for matching all metadata transform ids
-export const METADATA_TRANSFORMS_PATTERN = 'endpoint.metadata_*';
-export const METADATA_TRANSFORMS_PATTERN_V2 = `${PACKAGE_V2_PREFIX}${METADATA_TRANSFORMS_PATTERN}`;
-
-// united metadata transform id
-export const METADATA_UNITED_TRANSFORM = 'endpoint.metadata_united-default';
-export const METADATA_UNITED_TRANSFORM_V2 = `${PACKAGE_V2_PREFIX}${METADATA_UNITED_TRANSFORM}`;
-
 // united metadata transform destination index
 export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default';
 
