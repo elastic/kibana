@@ -88,6 +88,7 @@ describe('actionTypeRegistry', () => {
             'actions:my-action-type': {
               createTaskRunner: expect.any(Function),
               maxAttempts: 3,
+              cost: 1,
               title: 'My action type',
             },
           },
