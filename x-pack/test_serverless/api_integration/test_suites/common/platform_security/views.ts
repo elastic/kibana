@@ -26,20 +26,23 @@ export default function ({ getService }: FtrProviderContext) {
     });
     describe('route access', () => {
       describe('disabled', () => {
-        // ToDo: uncomment these when we disable login routes
-        // it('login', async () => {
-        //   const { body, status } = await supertestWithoutAuth
-        //     .get('/login')
-        //     .set(svlCommonApi.getInternalRequestHeader()).set(roleAuthc.apiKeyHeader)
-        //   svlCommonApi.assertApiNotFound(body, status);
-        // });
+        // ToDo: unskip these when we disable login routes
+        xit('login', async () => {
+          const { body, status } = await supertestWithoutAuth
+            .get('/login')
+            .set(svlCommonApi.getInternalRequestHeader())
+            .set(roleAuthc.apiKeyHeader);
+          svlCommonApi.assertApiNotFound(body, status);
+        });
 
-        // it('get login state', async () => {
-        //   const { body, status } = await supertestWithoutAuth
-        //     .get('/internal/security/login_state')
-        //     .set(svlCommonApi.getInternalRequestHeader()).set(roleAuthc.apiKeyHeader)
-        //   svlCommonApi.assertApiNotFound(body, status);
-        // });
+        // ToDo: unskip these when we disable login routes
+        xit('get login state', async () => {
+          const { body, status } = await supertestWithoutAuth
+            .get('/internal/security/login_state')
+            .set(svlCommonApi.getInternalRequestHeader())
+            .set(roleAuthc.apiKeyHeader);
+          svlCommonApi.assertApiNotFound(body, status);
+        });
 
         it('access agreement', async () => {
           const { body, status } = await supertestWithoutAuth
