@@ -45,7 +45,7 @@ export const getTabs = (space: Space, features: KibanaFeature[], roles: Role[]):
         defaultMessage: 'Feature visibility',
       }),
       append: (
-        <EuiNotificationBadge className="eui-alignCenter" size="m">
+        <EuiNotificationBadge className="eui-alignCenter" color="subdued" size="m">
           {enabledFeatureCount} / {totalFeatureCount}
         </EuiNotificationBadge>
       ),
@@ -57,7 +57,7 @@ export const getTabs = (space: Space, features: KibanaFeature[], roles: Role[]):
         defaultMessage: 'Assigned roles',
       }),
       append: (
-        <EuiNotificationBadge className="eui-alignCenter" size="m">
+        <EuiNotificationBadge className="eui-alignCenter" color="subdued" size="m">
           {roles.length}
         </EuiNotificationBadge>
       ),
