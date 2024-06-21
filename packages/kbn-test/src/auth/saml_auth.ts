@@ -17,6 +17,7 @@ import {
   CloudSamlSessionParams,
   CreateSamlSessionParams,
   LocalSamlSessionParams,
+  RetryParams,
   SAMLResponseValueParams,
   UserProfile,
 } from './types';
@@ -33,6 +34,8 @@ export class Session {
     return this.cookie.value;
   }
 }
+
+const REQUEST_TIMEOUT_MS = 60_000;
 
 const cleanException = (url: string, ex: any) => {
   if (ex.isAxiosError) {
@@ -81,7 +84,13 @@ const getCloudUrl = (hostname: string, pathname: string) => {
   });
 };
 
-export const createCloudSession = async (params: CreateSamlSessionParams) => {
+export const createCloudSession = async (
+  params: CreateSamlSessionParams,
+  retryParams: RetryParams = {
+    attemptsCount: 3,
+    attemptDelay: 15_000,
+  }
+) => {
   const { hostname, email, password, log } = params;
   const cloudLoginUrl = getCloudUrl(hostname, '/api/v1/saas/auth/_login');
   let sessionResponse: AxiosResponse | undefined;
@@ -89,6 +98,7 @@ export const createCloudSession = async (params: CreateSamlSessionParams) => {
     return {
       url: cloudUrl,
       method: 'post',
+      timeout: REQUEST_TIMEOUT_MS,
       data: {
         email,
         password,
@@ -101,6 +111,42 @@ export const createCloudSession = async (params: CreateSamlSessionParams) => {
       maxRedirects: 0,
     };
   };
+
+  let attemptsLeft = retryParams.attemptsCount;
+  while (attemptsLeft > 0) {
+    try {
+      sessionResponse = await axios.request(requestConfig(cloudLoginUrl));
+      if (sessionResponse?.status !== 200) {
+        throw new Error(
+          `Failed to create the new cloud session: 'POST ${cloudLoginUrl}' returned ${sessionResponse?.status}`
+        );
+      }
+      const token = sessionResponse?.data?.token as string;
+      if (!token) {
+        throw new Error(
+          `Failed to create the new cloud session: token is missing in response data\n${JSON.stringify(
+            sessionResponse?.data
+          )}`
+        );
+      }
+      return token;
+    } catch (ex) {
+      cleanException(cloudLoginUrl, ex);
+
+      attemptsLeft--;
+      if (attemptsLeft > 0) {
+        // log only error message
+        log.error(`${ex.message}\nWaiting ${retryParams.attemptDelay} ms before the next attempt`);
+        await new Promise((resolve) => setTimeout(resolve, retryParams.attemptDelay));
+      } else {
+        log.error(
+          `Failed to create the new cloud session with ${retryParams.attemptsCount} attempts`
+        );
+        // throw original error with stacktrace
+        throw ex;
+      }
+    }
+  }
 
   try {
     sessionResponse = await axios.request(requestConfig(cloudLoginUrl));
