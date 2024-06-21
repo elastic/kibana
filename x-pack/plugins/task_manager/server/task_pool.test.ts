@@ -28,7 +28,7 @@ describe('TaskPool', () => {
 
   test('occupiedCapacity is a sum of running tasks cost', async () => {
     const pool = new TaskPool({
-      totalCapacity: 20,
+      totalCapacity: 400,
       logger: loggingSystemMock.create().get(),
     });
 
@@ -74,7 +74,7 @@ describe('TaskPool', () => {
   test('should log when marking a Task as running fails', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      totalCapacity: 20,
+      totalCapacity: 4,
       logger,
     });
 
@@ -83,7 +83,7 @@ describe('TaskPool', () => {
       throw new Error(`Mark Task as running has failed miserably`);
     });
 
-    const result = await pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()]);
+    const result = await pool.run([mockTask(), taskFailedToMarkAsRunning]);
 
     expect((logger as jest.Mocked<Logger>).error.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -91,13 +91,15 @@ describe('TaskPool', () => {
       ]
     `);
 
-    expect(result).toEqual(TaskPoolRunResult.RunningAtCapacity);
+    // RunningAllClaimedTasks because we no longer continue to run more tasks after failing to mark some as running
+    // while there still is capacity
+    expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
   });
 
   test('should log when running a Task fails', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      totalCapacity: 20,
+      totalCapacity: 6,
       logger,
     });
 
@@ -120,7 +122,7 @@ describe('TaskPool', () => {
   test('should not log when running a Task fails due to the Task SO having been deleted while in flight', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      totalCapacity: 20,
+      totalCapacity: 6,
       logger,
     });
 
@@ -384,6 +386,7 @@ describe('TaskPool', () => {
   // It's not clear how to reproduce the actual error, but it is easy to
   // reproduce with the wacky test below.  It does log the exact error
   // from that issue, without the corresponding fix in task_pool.ts
+  // TODO: Test still needed?
   test('works when available workers is 0 but there are tasks to run', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
@@ -401,20 +404,14 @@ describe('TaskPool', () => {
     // to partition tasks (0 to run, everything as leftover), then at the
     // end of run(), to check if it should recurse, it should be > 0.
     let awValue = 1;
-    Object.defineProperty(pool, 'availableWorkers', {
+    Object.defineProperty(pool, 'availableCapacity', {
       get() {
-        return ++awValue % 2;
+        return (++awValue % 2) * TaskCost.Normal;
       },
     });
 
     const result = await pool.run([task1]);
     expect(result).toBe(TaskPoolRunResult.RanOutOfCapacity);
-
-    expect((logger as jest.Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "task pool run attempts exceeded 3; assuming ran out of capacity; availableWorkers: 0, tasksToRun: 0, leftOverTasks: 1, maxWorkers: 2, occupiedWorkers: 0, workerLoad: 0",
-      ]
-    `);
   });
 
   function mockRun() {

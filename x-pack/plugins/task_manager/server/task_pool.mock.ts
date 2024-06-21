@@ -8,16 +8,16 @@ import { TaskPool } from './task_pool';
 
 const defaultGetCapacityOverride: () => Partial<{
   load: number;
-  occupiedWorkers: number;
-  workerLoad: number;
+  occupiedCapacity: number;
+  capacityLoad: number;
   max: number;
-  availableWorkers: number;
+  availableCapacity: number;
 }> = () => ({
   load: 0,
-  occupiedWorkers: 0,
-  workerLoad: 0,
+  occupiedCapacity: 0,
+  capacityLoad: 0,
   max: 10,
-  availableWorkers: 10,
+  availableCapacity: 20,
 });
 
 const createTaskPoolMock = (getCapacityOverride = defaultGetCapacityOverride) => {
@@ -25,19 +25,19 @@ const createTaskPoolMock = (getCapacityOverride = defaultGetCapacityOverride) =>
     get load() {
       return getCapacityOverride().load ?? 0;
     },
-    get occupiedWorkers() {
-      return getCapacityOverride().occupiedWorkers ?? 0;
+    get occupiedCapacity() {
+      return getCapacityOverride().occupiedCapacity ?? 0;
     },
-    get workerLoad() {
-      return getCapacityOverride().workerLoad ?? 0;
+    get capacityLoad() {
+      return getCapacityOverride().capacityLoad ?? 0;
     },
     get max() {
       return getCapacityOverride().max ?? 10;
     },
-    get availableWorkers() {
-      return getCapacityOverride().availableWorkers ?? 10;
+    get availableCapacity() {
+      return getCapacityOverride().availableCapacity ?? 10;
     },
-    getOccupiedWorkersByType: jest.fn(),
+    getOccupiedCapacityByType: jest.fn(),
     run: jest.fn(),
     cancelRunningTasks: jest.fn(),
   } as unknown as jest.Mocked<TaskPool>;

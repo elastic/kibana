@@ -396,13 +396,13 @@ describe('EphemeralTaskLifecycle', () => {
     expect(ephemeralTaskLifecycle.queuedTasks).toBe(2);
 
     poolCapacity.mockReturnValue({
-      availableWorkers: 1,
+      availableCapacity: 2,
     });
     lifecycleEvent$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed })));
     expect(ephemeralTaskLifecycle.queuedTasks).toBe(1);
 
     poolCapacity.mockReturnValue({
-      availableWorkers: 1,
+      availableCapacity: 2,
     });
     lifecycleEvent$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed })));
     expect(ephemeralTaskLifecycle.queuedTasks).toBe(0);

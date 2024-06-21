@@ -187,9 +187,11 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(store.updateByQuery.mock.calls[0][1]).toMatchObject({
-        max_docs: Math.round(getCapacity() / TaskCost.Normal),
+        max_docs: Math.floor(getCapacity() / TaskCost.Normal),
       });
-      expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: getCapacity() });
+      expect(store.fetch.mock.calls[0][0]).toMatchObject({
+        size: Math.floor(getCapacity() / TaskCost.Normal),
+      });
       return results.map((result, index) => ({
         result,
         args: {
