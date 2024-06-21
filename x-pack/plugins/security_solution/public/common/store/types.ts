@@ -25,11 +25,11 @@ import type { GlobalUrlParam } from './global_url_param';
 import type { GroupState } from './grouping/types';
 import type { SecuritySolutionDiscoverState } from './discover/model';
 import type { AnalyzerState } from '../../resolver/types';
+import type { NotesState } from '../../notes/store/notes.slice';
 
 export type State = HostsPluginState &
   UsersPluginState &
   NetworkPluginState &
-  UsersPluginState &
   TimelinePluginState &
   ManagementPluginState & {
     app: AppState;
@@ -40,7 +40,7 @@ export type State = HostsPluginState &
     discover: SecuritySolutionDiscoverState;
   } & DataTableState &
   GroupState &
-  AnalyzerState;
+  AnalyzerState & { notes: NotesState };
 /**
  * The Redux store type for the Security app.
  */
