@@ -13,7 +13,7 @@ import {
   EuiFormRow,
   EuiSwitch,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { HttpSetup } from '@kbn/core-http-browser';
 
@@ -29,10 +29,12 @@ import { ConversationsBulkActions } from '../../api';
 import { useConversationDeleted } from './use_conversation_deleted';
 import { ConversationSettingsEditor } from './conversation_settings_editor';
 import { useConversationChanged } from './use_conversation_changed';
+import { getApiConfig } from '../../use_conversation/helpers';
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   allSystemPrompts: Prompt[];
+  connectors?: AIConnector[];
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   defaultConnector?: AIConnector;
@@ -56,6 +58,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
   ({
     allSystemPrompts,
     assistantStreamingEnabled,
+    connectors,
     defaultConnector,
     selectedConversation,
     onSelectedConversationChange,
@@ -85,6 +88,22 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       setConversationsSettingsBulkActions,
     });
 
+    const selectedConversationWithApiConfig = useMemo(
+      () =>
+        selectedConversation
+          ? {
+              ...selectedConversation,
+              ...getApiConfig({
+                allSystemPrompts,
+                conversation: selectedConversation,
+                connectors,
+                defaultConnector,
+              }),
+            }
+          : selectedConversation,
+      [allSystemPrompts, connectors, defaultConnector, selectedConversation]
+    );
+
     return (
       <>
         <EuiTitle size={'s'}>
@@ -108,7 +127,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           http={http}
           isDisabled={isDisabled}
           isFlyoutMode={isFlyoutMode}
-          selectedConversation={selectedConversation}
+          selectedConversation={selectedConversationWithApiConfig}
           setConversationSettings={setConversationSettings}
           setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
         />

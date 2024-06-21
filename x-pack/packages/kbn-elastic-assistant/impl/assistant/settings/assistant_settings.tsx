@@ -320,6 +320,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                   (selectedSettingsTab === CONVERSATIONS_TAB && (
                     <ConversationSettings
                       actionTypeRegistry={actionTypeRegistry}
+                      connectors={connectors}
                       defaultConnector={defaultConnector}
                       conversationSettings={conversationSettings}
                       setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}

@@ -66,7 +66,7 @@ jest.mock('../../assistant_context');
 jest.mock('.', () => {
   return {
     AnonymizationSettings: () => <span data-test-subj="ANONYMIZATION_TAB-tab" />,
-    ConversationSettings: () => <span data-test-subj={`CONVERSATIONS_TAB-tab`} />,
+    ConversationSettings: () => <span data-test-subj="CONVERSATIONS_TAB-tab" />,
     EvaluationSettings: () => <span data-test-subj="EVALUATION_TAB-tab" />,
     KnowledgeBaseSettings: () => <span data-test-subj="KNOWLEDGE_BASE_TAB-tab" />,
     QuickPromptSettings: () => <span data-test-subj="QUICK_PROMPTS_TAB-tab" />,
