@@ -230,7 +230,9 @@ export interface SingleMetricViewerComponentApi {
 export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;
   anomalyExplorerService: AnomalyExplorerChartsService;
+  mlCapabilities: MlCapabilitiesService;
   mlFieldFormatService: MlFieldFormatService;
+  mlJobService: MlJobService;
   mlResultsService: MlResultsService;
   mlApiServices?: MlApiServices;
 }
