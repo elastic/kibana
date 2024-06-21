@@ -421,7 +421,6 @@ export const useColumns = (
       },
       ['Log rate change']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnLogRateChange',
-        field: 'pValue',
         name: (
           <>
             <FormattedMessage
@@ -439,7 +438,7 @@ export const useColumns = (
             />
           </>
         ),
-        render: (_, { doc_count: docCount, bg_count: bgCount }) => {
+        render: ({ doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
           if (
             interval === 0 ||
             windowParameters === undefined ||
@@ -475,7 +474,6 @@ export const useColumns = (
             </>
           );
         },
-        sortable: true,
         valign: 'middle',
       },
       ['p-value']: {
