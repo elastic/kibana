@@ -13,7 +13,6 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "capacity": 20,
         "claim_strategy": "default",
         "ephemeral_tasks": Object {
           "enabled": false,
@@ -24,7 +23,6 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "max_attempts": 3,
-        "max_workers": 10,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
@@ -72,7 +70,6 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "capacity": 20,
         "claim_strategy": "default",
         "ephemeral_tasks": Object {
           "enabled": false,
@@ -83,7 +80,6 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "max_attempts": 3,
-        "max_workers": 10,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
@@ -129,7 +125,6 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "capacity": 20,
         "claim_strategy": "default",
         "ephemeral_tasks": Object {
           "enabled": false,
@@ -140,7 +135,6 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "max_attempts": 3,
-        "max_workers": 10,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {

@@ -8,6 +8,7 @@
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { TaskManagerConfig } from '../config';
 import {
   createManagedConfiguration,
   ADJUST_THROUGHPUT_INTERVAL,
@@ -31,8 +32,10 @@ describe('createManagedConfiguration()', () => {
     const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
       logger,
       errors$: new Subject<Error>(),
-      startingCapacity: 2,
-      startingPollInterval: 2,
+      config: {
+        capacity: 2,
+        poll_interval: 2,
+      } as TaskManagerConfig,
     });
     capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
@@ -49,8 +52,10 @@ describe('createManagedConfiguration()', () => {
     const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
       errors$,
       logger,
-      startingCapacity: 200,
-      startingPollInterval: 100,
+      config: {
+        capacity: 200,
+        poll_interval: 100,
+      } as TaskManagerConfig,
     });
     capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
@@ -66,9 +71,11 @@ describe('createManagedConfiguration()', () => {
       const subscription = jest.fn();
       const { capacityConfiguration$ } = createManagedConfiguration({
         errors$,
-        startingCapacity,
         logger,
-        startingPollInterval: 1,
+        config: {
+          capacity: startingCapacity,
+          poll_interval: 1,
+        } as TaskManagerConfig,
       });
       capacityConfiguration$.subscribe(subscription);
       return { subscription, errors$ };
@@ -146,8 +153,10 @@ describe('createManagedConfiguration()', () => {
       const { pollIntervalConfiguration$ } = createManagedConfiguration({
         logger,
         errors$,
-        startingPollInterval,
-        startingCapacity: 2,
+        config: {
+          capacity: 2,
+          poll_interval: startingPollInterval,
+        } as TaskManagerConfig,
       });
       pollIntervalConfiguration$.subscribe(subscription);
       return { subscription, errors$ };

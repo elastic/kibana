@@ -13,7 +13,6 @@ import { TaskManagerConfig } from '../config';
 describe('Configuration Statistics Aggregator', () => {
   test('merges the static config with the merged configs', async () => {
     const configuration: TaskManagerConfig = {
-      max_workers: 10,
       capacity: 20,
       max_attempts: 9,
       poll_interval: 6000000,
@@ -56,6 +55,8 @@ describe('Configuration Statistics Aggregator', () => {
     };
 
     const managedConfig = {
+      startingCapacity: configuration.capacity!,
+      startingPollInterval: configuration.poll_interval,
       capacityConfiguration$: new Subject<number>(),
       pollIntervalConfiguration$: new Subject<number>(),
     };

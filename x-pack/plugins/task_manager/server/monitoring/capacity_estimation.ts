@@ -14,6 +14,7 @@ import { AveragedStat } from './task_run_calcultors';
 import { TaskPersistenceTypes } from './task_run_statistics';
 import { asErr, asOk, map, Result } from '../lib/result_type';
 import { TaskCost } from '../task';
+import { DEFAULT_CAPACITY } from '../config';
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {
@@ -82,7 +83,8 @@ export function estimateCapacity(
    */
   // TODO: Is this the right formula using Normal cost?
   const capacityPerMinutePerKibana = Math.round(
-    ((60 * 1000) / (averagePollIntervalsPerExecution * pollInterval)) * (capacity / TaskCost.Normal)
+    ((60 * 1000) / (averagePollIntervalsPerExecution * pollInterval)) *
+      ((capacity || DEFAULT_CAPACITY) / TaskCost.Normal)
   );
 
   /**

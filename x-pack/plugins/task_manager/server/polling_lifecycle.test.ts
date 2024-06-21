@@ -43,7 +43,6 @@ describe('TaskPollingLifecycle', () => {
     config: {
       enabled: true,
       capacity: 20,
-      max_workers: 10,
       index: 'foo',
       max_attempts: 9,
       poll_interval: 6000000,
@@ -89,6 +88,8 @@ describe('TaskPollingLifecycle', () => {
     unusedTypes: [],
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
+    startingCapacity: 20,
+    startingPollInterval: 100,
     capacityConfiguration$: of(20),
     pollIntervalConfiguration$: of(100),
     executionContext,

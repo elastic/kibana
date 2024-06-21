@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, TaskManagerConfig, MAX_WORKERS_LIMIT } from './config';
+import { configSchema, TaskManagerConfig } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { TaskManagerPlugin } = await import('./plugin');
@@ -55,9 +55,6 @@ export type {
 
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,
-  exposeToUsage: {
-    max_workers: true,
-  },
   deprecations: ({ deprecate }) => {
     return [
       deprecate('ephemeral_tasks.enabled', 'a future version', {
@@ -67,6 +64,11 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
       deprecate('ephemeral_tasks.request_capacity', 'a future version', {
         level: 'warning',
         message: `Configuring "xpack.task_manager.ephemeral_tasks.request_capacity" is deprecated and will be removed in a future version. Remove this setting to increase task execution resiliency.`,
+      }),
+      deprecate('max_workers', 'a future version', {
+        level: 'warning',
+        message:
+          'Configuring "xpack.task_manager.max_workers" is deprecated and will be removed in a future version. Remove this setting and use "xpack.task_manager.capacity" instead.',
       }),
       (settings, fromPath, addDeprecation) => {
         const taskManager = get(settings, fromPath);
@@ -80,22 +82,6 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
               manualSteps: [
                 `If you rely on this setting to achieve multitenancy you should use Spaces, cross-cluster replication, or cross-cluster search instead.`,
                 `To migrate to Spaces, we encourage using saved object management to export your saved objects from a tenant into the default tenant in a space.`,
-              ],
-            },
-          });
-        }
-      },
-      (settings, fromPath, addDeprecation) => {
-        const taskManager = get(settings, fromPath);
-        if (taskManager?.max_workers > MAX_WORKERS_LIMIT) {
-          addDeprecation({
-            level: 'critical',
-            configPath: `${fromPath}.max_workers`,
-            message: `setting "${fromPath}.max_workers" (${taskManager?.max_workers}) greater than ${MAX_WORKERS_LIMIT} is deprecated.`,
-            correctiveActions: {
-              manualSteps: [
-                `Maximum allowed value of "${fromPath}.max_workers" is ${MAX_WORKERS_LIMIT}.` +
-                  `Replace "${fromPath}.max_workers: ${taskManager?.max_workers}" with (${MAX_WORKERS_LIMIT}).`,
               ],
             },
           });

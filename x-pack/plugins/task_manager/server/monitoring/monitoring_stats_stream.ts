@@ -42,6 +42,7 @@ import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
 import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import { calculateStartingCapacity } from '../lib/create_managed_configuration';
 
 export interface MonitoringStats {
   last_update: string;
@@ -118,7 +119,7 @@ export function createAggregators(
       createEphemeralTaskAggregator(
         ephemeralTaskLifecycle,
         config.monitored_stats_running_average_window,
-        config.max_workers
+        calculateStartingCapacity(config)
       )
     );
   }

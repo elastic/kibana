@@ -32,7 +32,7 @@ import {
 import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
-import { ConcreteTaskInstance, TaskCost } from './task';
+import { ConcreteTaskInstance } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_running';
@@ -43,6 +43,8 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import { ClaimOwnershipResult } from './task_claimers';
+
+const MAX_BUFFER_OPERATIONS = 100;
 
 export interface ITaskEventEmitter<T> {
   get events(): Observable<T>;
@@ -121,7 +123,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
-      bufferMaxOperations: config.capacity / TaskCost.Tiny,
+      bufferMaxOperations: MAX_BUFFER_OPERATIONS,
       logger,
     });
 

@@ -19,7 +19,6 @@ beforeEach(() => {
 describe('createMonitoringStatsStream', () => {
   const configuration: TaskManagerConfig = {
     capacity: 20,
-    max_workers: 10,
     max_attempts: 9,
     poll_interval: 6000000,
     allow_reading_invalid_state: false,
@@ -83,7 +82,7 @@ describe('createMonitoringStatsStream', () => {
             stats: {
               configuration: {
                 value: {
-                  max_workers: 10,
+                  capacity: 20,
                   poll_interval: 6000000,
                   request_capacity: 1000,
                   monitored_aggregated_stats_refresh_rate: 5000,
@@ -116,7 +115,7 @@ describe('createMonitoringStatsStream', () => {
               configuration: {
                 timestamp: expect.any(String),
                 value: {
-                  max_workers: 10,
+                  capacity: 20,
                   poll_interval: 6000000,
                   request_capacity: 1000,
                   monitored_aggregated_stats_refresh_rate: 5000,
@@ -149,7 +148,7 @@ describe('createMonitoringStatsStream', () => {
               configuration: {
                 timestamp: expect.any(String),
                 value: {
-                  max_workers: 10,
+                  capacity: 20,
                   poll_interval: 6000000,
                   request_capacity: 1000,
                   monitored_aggregated_stats_refresh_rate: 5000,

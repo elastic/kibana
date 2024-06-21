@@ -31,13 +31,13 @@ export function createConfigurationAggregator(
   return combineLatest([
     of(pick(config, ...CONFIG_FIELDS_TO_EXPOSE)),
     managedConfig.pollIntervalConfiguration$.pipe(
-      startWith(config.poll_interval),
+      startWith(managedConfig.startingPollInterval),
       map<number, Pick<TaskManagerConfig, 'poll_interval'>>((pollInterval) => ({
         poll_interval: pollInterval,
       }))
     ),
     managedConfig.capacityConfiguration$.pipe(
-      startWith(config.capacity),
+      startWith(managedConfig.startingCapacity),
       map<number, Pick<TaskManagerConfig, 'capacity'>>((capacity) => ({
         capacity,
       }))

@@ -22,10 +22,10 @@ describe('delayOnClaimConflicts', () => {
     'initializes with a delay of 0',
     fakeSchedulers(async () => {
       const pollInterval = 100;
-      const maxWorkers = 10;
+      const capacity = 20;
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
       const delays = delayOnClaimConflicts(
-        of(maxWorkers),
+        of(capacity),
         of(pollInterval),
         taskLifecycleEvents$,
         80,
@@ -39,14 +39,14 @@ describe('delayOnClaimConflicts', () => {
   );
 
   test(
-    'emits a random delay whenever p50 of claim clashes exceed 80% of available max_workers',
+    'emits a random delay whenever p50 of claim clashes exceed 80% of available capacity',
     fakeSchedulers(async () => {
       const pollInterval = 100;
-      const maxWorkers = 10;
+      const capacity = 20;
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
 
       const delays$ = firstValueFrom<number[]>(
-        delayOnClaimConflicts(of(maxWorkers), of(pollInterval), taskLifecycleEvents$, 80, 2).pipe(
+        delayOnClaimConflicts(of(capacity), of(pollInterval), taskLifecycleEvents$, 80, 2).pipe(
           take(2),
           bufferCount(2)
         )
@@ -188,7 +188,7 @@ describe('delayOnClaimConflicts', () => {
       await sleep(0);
       expect(handler.mock.calls.length).toEqual(2);
 
-      // shift average back up to threshold (7 + 9) / 2 = 80% of maxWorkers
+      // shift average back up to threshold (7 + 9) / 2 = 80% of capacity
       taskLifecycleEvents$.next(
         asTaskPollingCycleEvent(
           asOk({

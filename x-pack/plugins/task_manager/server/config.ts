@@ -7,11 +7,10 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const MAX_WORKERS_LIMIT = 100;
-export const DEFAULT_MAX_WORKERS = 10;
+export const DEFAULT_CAPACITY = 20;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
-export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
+export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = 100;
 
 // Monitoring Constants
 // ===================
@@ -80,14 +79,15 @@ export const configSchema = schema.object(
       defaultValue: 3,
       min: 1,
     }),
-    // TODO: Calculate default when max workers is set
-    capacity: schema.number({ min: 10, max: 100, defaultValue: 20 }),
-    /* The maximum number of tasks that this Kibana instance will run simultaneously. */
-    max_workers: schema.number({
-      defaultValue: DEFAULT_MAX_WORKERS,
-      // disable the task manager rather than trying to specify it with 0 workers
-      min: 1,
-    }),
+    // Min capacity must be equivalent of the biggest cost task
+    capacity: schema.maybe(schema.number({ min: 10, max: 100 })),
+    /* Deprecated: The maximum number of tasks that this Kibana instance will run simultaneously. */
+    max_workers: schema.maybe(
+      schema.number({
+        // disable the task manager rather than trying to specify it with 0 workers
+        min: 1,
+      })
+    ),
     /* The interval at which monotonically increasing metrics counters will reset */
     metrics_reset_interval: schema.number({
       defaultValue: DEFAULT_METRICS_RESET_INTERVAL,
@@ -166,6 +166,10 @@ export const configSchema = schema.object(
         config.monitored_stats_required_freshness < config.poll_interval
       ) {
         return `The specified monitored_stats_required_freshness (${config.monitored_stats_required_freshness}) is invalid, as it is below the poll_interval (${config.poll_interval})`;
+      }
+
+      if (config.max_workers !== undefined && config.capacity !== undefined) {
+        return `"max_workers" cannot be defined when using "capacity"`;
       }
     },
   }

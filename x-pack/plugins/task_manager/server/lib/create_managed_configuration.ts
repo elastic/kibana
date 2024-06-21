@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
 import { TaskCost } from '../task';
+import { TaskManagerConfig, DEFAULT_CAPACITY } from '../config';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
@@ -32,32 +33,35 @@ const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 
 interface ManagedConfigurationOpts {
   logger: Logger;
-  startingCapacity: number;
-  startingPollInterval: number;
+  config: TaskManagerConfig;
   errors$: Observable<Error>;
 }
 
 export interface ManagedConfiguration {
+  startingPollInterval: number;
+  startingCapacity: number;
   capacityConfiguration$: Observable<number>;
   pollIntervalConfiguration$: Observable<number>;
 }
 
 export function createManagedConfiguration({
   logger,
-  startingCapacity,
-  startingPollInterval,
+  config,
   errors$,
 }: ManagedConfigurationOpts): ManagedConfiguration {
   const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
+  const startingCapacity = calculateStartingCapacity(config);
   return {
+    startingCapacity,
+    startingPollInterval: config.poll_interval,
     capacityConfiguration$: errorCheck$.pipe(
       createCapacityScan(logger, startingCapacity),
       startWith(startingCapacity),
       distinctUntilChanged()
     ),
     pollIntervalConfiguration$: errorCheck$.pipe(
-      createPollIntervalScan(logger, startingPollInterval),
-      startWith(startingPollInterval),
+      createPollIntervalScan(logger, config.poll_interval),
+      startWith(config.poll_interval),
       distinctUntilChanged()
     ),
   };
@@ -187,4 +191,10 @@ function resetErrorCount() {
     tag: 'initial',
     count: 0,
   };
+}
+
+export function calculateStartingCapacity(config: TaskManagerConfig) {
+  return config.max_workers !== undefined
+    ? Math.min(Math.max(config.max_workers * TaskCost.Normal, 10), 100)
+    : config.capacity || DEFAULT_CAPACITY;
 }
