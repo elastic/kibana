@@ -274,11 +274,13 @@ async function main() {
     },
   }).argv;
 
+  const logger = createToolingLogger();
+
   let ca: Buffer;
   let clientOptions: ClientOptions;
   let url: string;
-  let node: string;
-  const logger = createToolingLogger();
+  let node: string = Array.isArray(argv.node) ? argv.node[argv.node.length - 1] : argv.node;
+
   const toolingLogOptions = { log: logger };
 
   let kbnClientOptions: KbnClientOptions = {
@@ -298,8 +300,11 @@ async function main() {
 
     clientOptions = { node, tls: { ca: [ca] } };
   } else {
-    clientOptions = { node: argv.node };
+    clientOptions = { node };
   }
+
+  logger.info(`ES URL: ${JSON.stringify({ clientOptions })}`);
+
   let client = new Client(clientOptions);
   let kbnClient = new KbnClient({ ...kbnClientOptions });
   let user: UserInfo | undefined;
