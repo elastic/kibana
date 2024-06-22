@@ -233,18 +233,3 @@ export interface UpdateListProps {
 export interface UpdateListItemProps {
   body: UpdateListItemRequestBodyInput;
 }
-
-/**
- * Replaces placeholders in a path string with provided param value
- *
- * @param path Path string with placeholders for params
- * @param params Object with params to replace
- * @returns Path string with params replaced
- */
-function replaceParams(path: string, params: Record<string, string | number>): string {
-  let output = path;
-  Object.entries(params).forEach(([param, value]) => {
-    output = path.replace(`{${param}}`, `${value}`);
-  });
-  return output;
-}
