@@ -18,9 +18,6 @@ export function registerIntegrationBuilderRoutes(
     .post({
       path: INTEGRATION_BUILDER_PATH,
       access: 'internal',
-      options: {
-        tags: [`access:integrations-all`],
-      },
     })
     .addVersion(
       {

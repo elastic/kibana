@@ -41,10 +41,67 @@ const useAssistantCardCss = () => {
   `;
 };
 
-export const CreateIntegrationLanding = React.memo(() => {
+const IntegrationAssistantCard = React.memo(() => {
   const { canExecuteConnectors } = useAuthorization();
   const navigate = useNavigate();
   const assistantCardCss = useAssistantCardCss();
+  return (
+    <EuiCard
+      display="plain"
+      hasBorder={true}
+      paddingSize="l"
+      title={''} // title shown inside the child component
+      betaBadgeProps={{
+        label: i18n.TECH_PREVIEW,
+        tooltipContent: i18n.TECH_PREVIEW_TOOLTIP,
+      }}
+    >
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="l"
+        alignItems="center"
+        justifyContent="center"
+        css={assistantCardCss}
+      >
+        <EuiFlexItem grow={false}>
+          <AssistantAvatar />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="s"
+            alignItems="flexStart"
+            justifyContent="flexStart"
+          >
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>{i18n.ASSISTANT_TITLE}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s" color="subdued" textAlign="left">
+                {i18n.ASSISTANT_DESCRIPTION}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {canExecuteConnectors ? (
+            <EuiButton onClick={() => navigate(Page.assistant)}>{i18n.ASSISTANT_BUTTON}</EuiButton>
+          ) : (
+            <MissingPrivilegesTooltip canExecuteConnectors>
+              <EuiButton disabled>{i18n.ASSISTANT_BUTTON}</EuiButton>
+            </MissingPrivilegesTooltip>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiCard>
+  );
+});
+IntegrationAssistantCard.displayName = 'IntegrationAssistantCard';
+
+export const CreateIntegrationLanding = React.memo(() => {
+  const navigate = useNavigate();
   return (
     <KibanaPageTemplate>
       <IntegrationImageHeader />
@@ -59,58 +116,7 @@ export const CreateIntegrationLanding = React.memo(() => {
             >
               <EuiFlexItem>
                 <EuiSpacer size="l" />
-                <EuiCard
-                  display="plain"
-                  hasBorder={true}
-                  paddingSize="l"
-                  title={''} // title shown inside the child component
-                  betaBadgeProps={{
-                    label: i18n.TECH_PREVIEW,
-                    tooltipContent: i18n.TECH_PREVIEW_TOOLTIP,
-                  }}
-                >
-                  <EuiFlexGroup
-                    direction="row"
-                    gutterSize="l"
-                    alignItems="center"
-                    justifyContent="center"
-                    css={assistantCardCss}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <AssistantAvatar />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiFlexGroup
-                        direction="column"
-                        gutterSize="s"
-                        alignItems="flexStart"
-                        justifyContent="flexStart"
-                      >
-                        <EuiFlexItem>
-                          <EuiTitle size="xs">
-                            <h3>{i18n.ASSISTANT_TITLE}</h3>
-                          </EuiTitle>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="s" color="subdued" textAlign="left">
-                            {i18n.ASSISTANT_DESCRIPTION}
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {canExecuteConnectors ? (
-                        <EuiButton onClick={() => navigate(Page.assistant)}>
-                          {i18n.ASSISTANT_BUTTON}
-                        </EuiButton>
-                      ) : (
-                        <MissingPrivilegesTooltip canExecuteConnectors>
-                          <EuiButton disabled>{i18n.ASSISTANT_BUTTON}</EuiButton>
-                        </MissingPrivilegesTooltip>
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiCard>
+                <IntegrationAssistantCard />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup
