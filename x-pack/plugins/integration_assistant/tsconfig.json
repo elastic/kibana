@@ -31,6 +31,5 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/shared-ux-router",
     "@kbn/zod-helpers",
-    "@kbn/core-application-browser"
   ]
 }
