@@ -6,3 +6,4 @@
  */
 
 export * from './preview_rules_route';
+export * from './rule_preview.gen';
