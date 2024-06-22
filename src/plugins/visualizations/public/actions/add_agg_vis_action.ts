@@ -36,7 +36,7 @@ export class AddAggVisualizationPanelAction implements Action<EmbeddableApiConte
   }
 
   public getDisplayName() {
-    return i18n.translate('dashboard.uiAction.addAggVis.displayName', {
+    return i18n.translate('visulizations.uiAction.addAggVis.displayName', {
       defaultMessage: 'Aggregation based',
     });
   }
