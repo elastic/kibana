@@ -14,7 +14,7 @@ import { Conversation } from '../../../assistant_context/types';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';
 import { Prompt } from '../../../..';
-import { getApiConfig } from '../../use_conversation/helpers';
+import { getConversationApiConfig } from '../../use_conversation/helpers';
 import * as i18n from './translations';
 import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
 import { SystemPromptColumn } from './system_prompt_column';
@@ -108,7 +108,7 @@ export const useConversationsTable = () => {
       defaultConnector,
     }: GetConversationsListParams): ConversationTableItem[] => {
       return Object.values(conversations).map((conversation) => {
-        const conversationApiConfig = getApiConfig({
+        const conversationApiConfig = getConversationApiConfig({
           allSystemPrompts,
           connectors,
           conversation,

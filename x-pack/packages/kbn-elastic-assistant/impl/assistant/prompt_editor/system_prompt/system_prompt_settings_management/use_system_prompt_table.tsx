@@ -11,7 +11,7 @@ import { AIConnector } from '../../../../connectorland/connector_selector';
 import { BadgesColumn } from '../../../common/components/assistant_settings_management/badges';
 import { RowActions } from '../../../common/components/assistant_settings_management/row_actions';
 import { Prompt } from '../../../types';
-import { getApiConfig, getDefaultSystemPrompt } from '../../../use_conversation/helpers';
+import { getConversationApiConfig, getDefaultSystemPrompt } from '../../../use_conversation/helpers';
 import * as i18n from './translations';
 import { getSelectedConversations } from './utils';
 
@@ -86,7 +86,7 @@ export const useSystemPromptTable = () => {
       });
       acc[key] = {
         ...conversation,
-        ...getApiConfig({
+        ...getConversationApiConfig({
           allSystemPrompts: systemPromptSettings,
           connectors,
           conversation,

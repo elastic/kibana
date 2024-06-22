@@ -93,7 +93,7 @@ export const getDefaultSystemPrompt = ({
   return conversationSystemPrompt ?? defaultNewSystemPrompt;
 };
 
-export const getApiConfig = ({
+export const getConversationApiConfig = ({
   allSystemPrompts,
   conversation,
   connectors,

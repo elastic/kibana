@@ -29,7 +29,7 @@ import { ConversationsBulkActions } from '../../api';
 import { useConversationDeleted } from './use_conversation_deleted';
 import { ConversationSettingsEditor } from './conversation_settings_editor';
 import { useConversationChanged } from './use_conversation_changed';
-import { getApiConfig } from '../../use_conversation/helpers';
+import { getConversationApiConfig } from '../../use_conversation/helpers';
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -93,7 +93,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         selectedConversation
           ? {
               ...selectedConversation,
-              ...getApiConfig({
+              ...getConversationApiConfig({
                 allSystemPrompts,
                 conversation: selectedConversation,
                 connectors,

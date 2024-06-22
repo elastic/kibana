@@ -24,9 +24,9 @@ import * as i18n from '../translations';
 import type { Prompt } from '../../../types';
 import { useAssistantContext } from '../../../../assistant_context';
 import { useConversation } from '../../../use_conversation';
-import { SYSTEM_PROMPTS_TAB } from '../../../settings/assistant_settings';
 import { TEST_IDS } from '../../../constants';
 import { PROMPT_CONTEXT_SELECTOR_PREFIX } from '../../../quick_prompts/prompt_context_selector/translations';
+import { SYSTEM_PROMPTS_TAB } from '../../../settings/const';
 
 export interface Props {
   allSystemPrompts: Prompt[];

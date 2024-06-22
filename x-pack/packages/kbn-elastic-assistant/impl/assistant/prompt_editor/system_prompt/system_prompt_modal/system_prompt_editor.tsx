@@ -28,7 +28,10 @@ import { TEST_IDS } from '../../../constants';
 import { ConversationsBulkActions } from '../../../api';
 import { getSelectedConversations } from '../system_prompt_settings_management/utils';
 import { useSystemPromptEditor } from './use_system_prompt_editor';
-import { getApiConfig, getDefaultNewSystemPrompt } from '../../../use_conversation/helpers';
+import {
+  getConversationApiConfig,
+  getDefaultNewSystemPrompt,
+} from '../../../use_conversation/helpers';
 
 interface Props {
   connectors: AIConnector[] | undefined;
@@ -96,7 +99,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   >((acc, [key, conversation]) => {
     acc[key] = {
       ...conversation,
-      ...getApiConfig({
+      ...getConversationApiConfig({
         allSystemPrompts: systemPromptSettings,
         connectors,
         conversation,
@@ -174,7 +177,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
             if (convo.apiConfig) {
               return {
                 apiConfig: {
-                  ...getApiConfig({
+                  ...getConversationApiConfig({
                     allSystemPrompts: systemPromptSettings,
                     connectors,
                     conversation: convo,
