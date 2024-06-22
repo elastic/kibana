@@ -24,6 +24,8 @@
       "navigation",
       "share",
       "unifiedSearch",
+      "logsShared",
+      "unifiedDocViewer",
     ],
     "optionalPlugins": [],
     "requiredBundles": [],
