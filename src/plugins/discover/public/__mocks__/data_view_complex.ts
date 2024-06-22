@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewLazy } from '@kbn/data-views-plugin/public';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 const fields = [
@@ -426,6 +426,8 @@ export const dataViewAdHoc = {
   }),
   isPersisted: () => false,
 } as DataView;
+
+export const dataViewLazyAdHoc = dataViewAdHoc as unknown as DataViewLazy;
 
 export const dataViewWithDefaultColumnMock = buildDataViewMock({
   name: 'data-view-with-user-default-column',
