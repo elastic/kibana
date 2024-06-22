@@ -21,12 +21,16 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { buildResponse } from '../utils';
 import {
+  DEFAULT_PLUGIN_NAME,
   UPGRADE_LICENSE_MESSAGE,
   appendAssistantMessageToConversation,
   createOrUpdateConversationWithUserInput,
+  getPluginNameFromRequest,
   hasAIAssistantLicense,
   langChainExecute,
 } from '../helpers';
+import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
+import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
@@ -103,16 +107,22 @@ export const chatCompleteRoute = (
 
           if (request.body.messages) {
             // replacements
-            const systemAnonymizationFields = await anonymizationFieldsDataClient?.findDocuments({
-              page: 1,
-              perPage: 1000,
-            });
+            const anonymizationFieldsRes =
+              await anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
+                perPage: 1000,
+                page: 1,
+              });
 
+            const anonymizationFields = anonymizationFieldsRes
+              ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
+              : undefined;
+
+            // anonymize messages before sending to LLM
             messages = request.body.messages.map((m) => {
               let content = m.content ?? '';
               if (m.data && m.data.length > 0) {
                 const anonymizedData = transformRawData({
-                  anonymizationFields: systemAnonymizationFields?.data,
+                  anonymizationFields,
                   currentReplacements: latestReplacements,
                   getAnonymizedValue,
                   onNewReplacements,
@@ -131,11 +141,20 @@ export const chatCompleteRoute = (
             });
           }
 
-          if (request.body.persist && conversationsDataClient) {
+          // Fetch any tools registered by the request's originating plugin
+          const pluginName = getPluginNameFromRequest({
+            request,
+            defaultPluginName: DEFAULT_PLUGIN_NAME,
+            logger,
+          });
+          const enableKnowledgeBaseByDefault = (
+            await context.elasticAssistant
+          ).getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          // TODO: remove non-graph persistance when KB will be enabled by default
+          if (!enableKnowledgeBaseByDefault && request.body.persist && conversationsDataClient) {
             const updatedConversation = await createOrUpdateConversationWithUserInput({
               actionsClient,
               actionTypeId,
-              authenticatedUser,
               connectorId,
               conversationId,
               conversationsDataClient,
@@ -178,7 +197,6 @@ export const chatCompleteRoute = (
             abortSignal,
             actionsClient,
             actionTypeId,
-            assistantContext: ctx.elasticAssistant,
             connectorId,
             context,
             getElser,
@@ -190,6 +208,7 @@ export const chatCompleteRoute = (
             request,
             response,
             telemetry,
+            responseLanguage: request.body.responseLanguage,
           });
         } catch (err) {
           const error = transformError(err as Error);

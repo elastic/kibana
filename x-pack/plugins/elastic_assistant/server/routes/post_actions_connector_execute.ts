@@ -17,14 +17,18 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import {
-  INVOKE_ASSISTANT_ERROR_EVENT,
-} from '../lib/telemetry/event_based_telemetry';
+import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
-import { appendAssistantMessageToConversation, langChainExecute, nonLangChainExecute, updateConversationWithUserInput } from './helpers';
-
+import {
+  DEFAULT_PLUGIN_NAME,
+  appendAssistantMessageToConversation,
+  getPluginNameFromRequest,
+  langChainExecute,
+  nonLangChainExecute,
+  updateConversationWithUserInput,
+} from './helpers';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -72,7 +76,7 @@ export const postActionsConnectorExecuteRoute = (
           };
 
           let messages;
-          let newMessage: Pick<Message, 'content' | 'role' | 'timestamp'> | undefined;
+          let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
           const actionTypeId = request.body.actionTypeId;
           const connectorId = decodeURIComponent(request.params.connectorId);
@@ -82,7 +86,6 @@ export const postActionsConnectorExecuteRoute = (
             newMessage = {
               content: request.body.message,
               role: 'user',
-              timestamp: new Date().toISOString(),
             };
           }
 
@@ -93,11 +96,20 @@ export const postActionsConnectorExecuteRoute = (
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
 
-          if (conversationId && conversationsDataClient) {
+          // Fetch any tools registered by the request's originating plugin
+          const pluginName = getPluginNameFromRequest({
+            request,
+            defaultPluginName: DEFAULT_PLUGIN_NAME,
+            logger,
+          });
+          const enableKnowledgeBaseByDefault =
+            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+
+          // TODO: remove non-graph persistance when KB will be enabled by default
+          if (!enableKnowledgeBaseByDefault && conversationId && conversationsDataClient) {
             const updatedConversation = await updateConversationWithUserInput({
               actionsClient,
               actionTypeId,
-              authenticatedUser,
               connectorId,
               conversationId,
               conversationsDataClient,
@@ -155,12 +167,12 @@ export const postActionsConnectorExecuteRoute = (
             abortSignal,
             actionsClient,
             actionTypeId,
-            assistantContext,
             connectorId,
+            conversationId,
             context,
             getElser,
             logger,
-            messages: messages ?? [],
+            messages: (enableKnowledgeBaseByDefault && newMessage ? [newMessage] : messages) ?? [],
             onLlmResponse,
             onNewReplacements,
             replacements: latestReplacements,

@@ -17,6 +17,8 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
+import { EsAnonymizationFieldsSchema } from '../../../ai_assistant_data_clients/anonymization_fields/types';
+import { transformESSearchToAnonymizationFields } from '../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { AgentExecutor } from '../executors/types';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
@@ -32,7 +34,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   abortSignal,
   actionsClient,
   alertsIndexPattern,
-  anonymizationFields,
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
@@ -48,6 +49,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   request,
   size,
   traceOptions,
+  dataClients,
 }) => {
   const isOpenAI = llmType === 'openai';
   const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
@@ -69,6 +71,16 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     // failure could be due to bad connector, we should deliver that result to the client asap
     maxRetries: 0,
   });
+
+  const anonymizationFieldsRes =
+    await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
+      perPage: 1000,
+      page: 1,
+    });
+
+  const anonymizationFields = anonymizationFieldsRes
+    ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
+    : undefined;
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message

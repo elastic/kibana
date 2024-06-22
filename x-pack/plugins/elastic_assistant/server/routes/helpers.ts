@@ -7,7 +7,6 @@
 
 import {
   AnalyticsServiceSetup,
-  AuthenticatedUser,
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
@@ -30,21 +29,19 @@ import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
 import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
 import { getLlmType } from './utils';
-import { AgentExecutorParams, AssistantDataClients, StaticReturnType } from '../lib/langchain/executors/types';
+import {
+  AgentExecutorParams,
+  AssistantDataClients,
+  StaticReturnType,
+} from '../lib/langchain/executors/types';
 import { executeAction, StaticResponse } from '../lib/executor';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 
 import { getLangSmithTracer } from './evaluate/utils';
-import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
-import { transformESSearchToAnonymizationFields } from '../ai_assistant_data_clients/anonymization_fields/helpers';
 import { ElasticsearchStore } from '../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
-import {
-  ElasticAssistantApiRequestHandlerContext,
-  ElasticAssistantRequestHandlerContext,
-  GetElser,
-} from '../types';
+import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
 
 interface GetPluginNameFromRequestParams {
@@ -190,7 +187,7 @@ export const generateTitleForNewChatConversation = async ({
 
 export interface AppendMessageToConversationParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
-  messages: Array<Pick<Message, 'content' | 'role' | 'timestamp'>>;
+  messages: Array<Pick<Message, 'content' | 'role'>>;
   replacements: Replacements;
   conversation: ConversationResponse;
 }
@@ -210,7 +207,7 @@ export const appendMessageToConversation = async ({
         }),
         role: m.role ?? 'user',
       },
-      timestamp: m.timestamp ?? new Date().toISOString(),
+      timestamp: new Date().toISOString(),
     })),
   });
   return updatedConversation;
@@ -323,7 +320,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
-  assistantContext: ElasticAssistantApiRequestHandlerContext;
+  conversationId?: string;
   context: ElasticAssistantRequestHandlerContext;
   actionsClient: PublicMethodsOf<ActionsClient>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -336,6 +333,7 @@ export interface LangChainExecuteParams {
   ) => Promise<void>;
   getElser: GetElser;
   response: KibanaResponseFactory;
+  responseLanguage?: string;
 }
 export const langChainExecute = async ({
   messages,
@@ -345,14 +343,15 @@ export const langChainExecute = async ({
   telemetry,
   actionTypeId,
   connectorId,
-  assistantContext,
   context,
   actionsClient,
   request,
   logger,
+  conversationId,
   onLlmResponse,
   getElser,
   response,
+  responseLanguage,
 }: LangChainExecuteParams) => {
   // TODO: Add `traceId` to actions request when calling via langchain
   logger.debug(
@@ -364,6 +363,7 @@ export const langChainExecute = async ({
     defaultPluginName: DEFAULT_PLUGIN_NAME,
     logger,
   });
+  const assistantContext = await context.elasticAssistant;
   const assistantTools = assistantContext
     .getRegisteredTools(pluginName)
     .filter((x) => x.id !== 'attack-discovery'); // We don't (yet) support asking the assistant for NEW attack discoveries from a conversation
@@ -378,12 +378,6 @@ export const langChainExecute = async ({
 
   const anonymizationFieldsDataClient =
     await assistantContext.getAIAssistantAnonymizationFieldsDataClient();
-  const anonymizationFieldsRes =
-    await anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
-      perPage: 1000,
-      page: 1,
-    });
-
   const conversationsDataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
   // Create an ElasticsearchStore for KB interactions
@@ -418,12 +412,10 @@ export const langChainExecute = async ({
     abortSignal,
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
-    anonymizationFields: anonymizationFieldsRes
-      ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
-      : undefined,
     actionsClient,
     isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
     assistantTools,
+    conversationId,
     connectorId,
     esClient,
     esStore,
@@ -435,6 +427,7 @@ export const langChainExecute = async ({
     onLlmResponse,
     request,
     replacements,
+    responseLanguage,
     size: request.body.size,
     traceOptions: {
       projectName: request.body.langSmithProject,
@@ -454,7 +447,6 @@ export const langChainExecute = async ({
     result = await callAgentExecutor(executorParams);
   }
 
-
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
     isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
@@ -464,7 +456,6 @@ export const langChainExecute = async ({
     // tracked here: https://github.com/elastic/security-team/issues/7363
     assistantStreamingEnabled: request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
   });
-
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };
 
@@ -479,7 +470,6 @@ export interface CreateOrUpdateConversationWithParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
   newMessages?: Array<Pick<Message, 'content' | 'role' | 'timestamp'>>;
   model?: string;
-  authenticatedUser: AuthenticatedUser;
   responseLanguage?: string;
 }
 export const createOrUpdateConversationWithUserInput = async ({
@@ -493,7 +483,6 @@ export const createOrUpdateConversationWithUserInput = async ({
   actionsClient,
   newMessages,
   model,
-  authenticatedUser,
   responseLanguage,
 }: CreateOrUpdateConversationWithParams) => {
   if (!conversationId) {
@@ -528,7 +517,6 @@ export const createOrUpdateConversationWithUserInput = async ({
   return updateConversationWithUserInput({
     actionsClient,
     actionTypeId,
-    authenticatedUser,
     connectorId,
     conversationId,
     conversationsDataClient,
@@ -547,10 +535,8 @@ export interface UpdateConversationWithParams {
   actionTypeId: string;
   connectorId: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
-  newMessages?: Array<Pick<Message, 'content' | 'role' | 'timestamp'>>;
+  newMessages?: Array<Pick<Message, 'content' | 'role'>>;
   model?: string;
-  authenticatedUser: AuthenticatedUser;
-  responseLanguage?: string;
 }
 export const updateConversationWithUserInput = async ({
   logger,
@@ -562,32 +548,7 @@ export const updateConversationWithUserInput = async ({
   actionsClient,
   newMessages,
   model,
-  authenticatedUser,
-  responseLanguage,
 }: UpdateConversationWithParams) => {
-  if (!conversationId) {
-    if (newMessages && newMessages.length > 0) {
-      const title = await generateTitleForNewChatConversation({
-        message: newMessages[0],
-        actionsClient,
-        actionTypeId,
-        connectorId,
-        logger,
-        responseLanguage,
-        model,
-      });
-      if (title) {
-        return conversationsDataClient.createConversation({
-          conversation: {
-            title,
-            messages: newMessages,
-            replacements,
-          },
-        });
-      }
-    }
-    return;
-  }
   const conversation = await conversationsDataClient?.getConversation({
     id: conversationId,
   });
@@ -603,8 +564,6 @@ export const updateConversationWithUserInput = async ({
   }));
 
   const lastMessage = newMessages?.[0] ?? messages?.[0];
-  console.log(conversation?.title)
-  console.log(lastMessage)
 
   if (conversation?.title === NEW_CHAT && lastMessage) {
     const title = await generateTitleForNewChatConversation({

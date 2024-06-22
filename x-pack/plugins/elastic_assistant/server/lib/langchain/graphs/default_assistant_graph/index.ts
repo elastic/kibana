@@ -13,12 +13,14 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import { createOpenAIFunctionsAgent, createStructuredChatAgent } from 'langchain/agents';
+import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
 import { openAIFunctionAgentPrompt, structuredChatAgentPrompt } from './prompts';
 import { APMTracer } from '../../tracers/apm_tracer';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
+import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 
 /**
  * Drop in replacement for the existing `callAgentExecutor` that uses LangGraph
@@ -27,7 +29,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
   actionsClient,
   alertsIndexPattern,
-  anonymizationFields,
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
@@ -45,6 +46,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   request,
   size,
   traceOptions,
+  responseLanguage = 'English',
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpenAI = llmType === 'openai';
@@ -67,7 +69,16 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     // failure could be due to bad connector, we should deliver that result to the client asap
     maxRetries: 0,
   });
-  const model = llm;
+
+  const anonymizationFieldsRes =
+    await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
+      perPage: 1000,
+      page: 1,
+    });
+
+  const anonymizationFields = anonymizationFieldsRes
+    ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
+    : undefined;
 
   const messages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
@@ -75,7 +86,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const modelExists = await esStore.isModelInstalled();
 
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
-  const chain = RetrievalQAChain.fromLLM(model, esStore.asRetriever(10));
+  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
@@ -85,7 +96,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     esClient,
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,
-    llm: model,
+    llm,
     logger,
     modelExists,
     onNewReplacements,
@@ -120,8 +131,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     dataClients,
     llm,
     logger,
-    messages,
     tools,
+    responseLanguage,
+    replacements,
   });
   const inputs = { input: latestMessage[0].content as string };
 

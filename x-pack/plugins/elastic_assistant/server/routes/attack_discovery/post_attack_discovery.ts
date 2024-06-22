@@ -64,6 +64,7 @@ export const postAttackDiscoveryRoute = (
         try {
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;
+          const actionsClient = await actions.getActionsClientWithRequest(request);
           const pluginName = getPluginNameFromRequest({
             request,
             defaultPluginName: DEFAULT_PLUGIN_NAME,
@@ -110,11 +111,10 @@ export const postAttackDiscoveryRoute = (
           };
 
           const llm = new ActionsClientLlm({
-            actions,
+            actionsClient,
             connectorId,
             llmType: getLlmType(actionTypeId),
             logger,
-            request,
             temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
             timeout: CONNECTOR_TIMEOUT,
             traceOptions,
