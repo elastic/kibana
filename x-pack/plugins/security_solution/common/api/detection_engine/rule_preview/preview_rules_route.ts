@@ -7,18 +7,12 @@
 
 import * as z from 'zod';
 import { SharedCreateProps, TypeSpecificCreateProps } from '../model/rule_schema';
+import type { RulePreviewLogs } from './rule_preview.gen';
 
 export type PreviewRulesSchema = z.infer<typeof PreviewRulesSchema>;
 export const PreviewRulesSchema = SharedCreateProps.and(TypeSpecificCreateProps).and(
   z.object({ invocationCount: z.number(), timeframeEnd: z.string() })
 );
-
-export interface RulePreviewLogs {
-  errors: string[];
-  warnings: string[];
-  startedAt?: string;
-  duration: number;
-}
 
 export interface PreviewResponse {
   previewId: string | undefined;
