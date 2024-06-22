@@ -18,26 +18,28 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { replaceParams } from '@kbn/openapi-common/shared';
 
-import { CreateExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/create_exception_list/create_exception_list.gen';
-import { CreateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/create_exception_list_item/create_exception_list_item.gen';
+import { CreateExceptionListRequestBodyInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/create_exception_list/create_exception_list.gen';
+import { CreateExceptionListItemRequestBodyInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/create_exception_list_item/create_exception_list_item.gen';
 import {
   CreateRuleExceptionListItemsRequestParamsInput,
   CreateRuleExceptionListItemsRequestBodyInput,
-} from '@kbn/securitysolution-exceptions-common/api/create_rule_exceptions/create_rule_exceptions.gen';
-import { CreateSharedExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/create_shared_exceptions_list/create_shared_exceptions_list.gen';
-import { DeleteExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/delete_exception_list/delete_exception_list.gen';
-import { DeleteExceptionListItemRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/delete_exception_list_item/delete_exception_list_item.gen';
-import { DuplicateExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/duplicate_exception_list/duplicate_exception_list.gen';
-import { ExportExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/export_exception_list/export_exception_list.gen';
-import { FindExceptionListItemsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/find_exception_list_item/find_exception_list_item.gen';
-import { FindExceptionListsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/find_exception_list/find_exception_list.gen';
-import { GetExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list/read_exception_list.gen';
-import { GetExceptionListItemRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_item/read_exception_list_item.gen';
-import { GetExceptionListSummaryRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/summary_exception_list/summary_exception_list.gen';
-import { ImportExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/import_exceptions/import_exceptions.gen';
-import { UpdateExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list/update_exception_list.gen';
-import { UpdateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list_item/update_exception_list_item.gen';
+} from '../../../../packages/kbn-securitysolution-exceptions-common/api/create_rule_exceptions/create_rule_exceptions.gen';
+import { CreateSharedExceptionListRequestBodyInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/create_shared_exceptions_list/create_shared_exceptions_list.gen';
+import { DeleteExceptionListRequestQueryInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/delete_exception_list/delete_exception_list.gen';
+import { DeleteExceptionListItemRequestQueryInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/delete_exception_list_item/delete_exception_list_item.gen';
+import { DuplicateExceptionListRequestQueryInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/duplicate_exception_list/duplicate_exception_list.gen';
+import { ExportExceptionListRequestQueryInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/export_exception_list/export_exception_list.gen';
+import { FindExceptionListItemsRequestQueryInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/find_exception_list_item/find_exception_list_item.gen';
+import { FindExceptionListsRequestQueryInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/find_exception_list/find_exception_list.gen';
+import { GetExceptionListRequestQueryInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/read_exception_list/read_exception_list.gen';
+import { GetExceptionListItemRequestQueryInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/read_exception_list_item/read_exception_list_item.gen';
+import { GetExceptionListSummaryRequestQueryInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/summary_exception_list/summary_exception_list.gen';
+import { ImportExceptionListRequestQueryInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/import_exceptions/import_exceptions.gen';
+import { UpdateExceptionListRequestBodyInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/update_exception_list/update_exception_list.gen';
+import { UpdateExceptionListItemRequestBodyInput } from '../../../../packages/kbn-securitysolution-exceptions-common/api/update_exception_list_item/update_exception_list_item.gen';
+
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
@@ -229,19 +231,4 @@ export interface UpdateExceptionListProps {
 }
 export interface UpdateExceptionListItemProps {
   body: UpdateExceptionListItemRequestBodyInput;
-}
-
-/**
- * Replaces placeholders in a path string with provided param value
- *
- * @param path Path string with placeholders for params
- * @param params Object with params to replace
- * @returns Path string with params replaced
- */
-function replaceParams(path: string, params: Record<string, string | number>): string {
-  let output = path;
-  Object.entries(params).forEach(([param, value]) => {
-    output = path.replace(`{${param}}`, `${value}`);
-  });
-  return output;
 }

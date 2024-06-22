@@ -170,7 +170,8 @@
     "@kbn/alerting-state-types",
     "@kbn/reporting-server",
     "@kbn/data-quality-plugin",
-    "@kbn/securitysolution-exceptions-common",
-    "@kbn/securitysolution-lists-common"
+    "@kbn/openapi-common",
+    "@kbn/securitysolution-lists-common",
+    "@kbn/securitysolution-exceptions-common"
   ]
 }
