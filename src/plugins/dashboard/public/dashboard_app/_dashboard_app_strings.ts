@@ -263,3 +263,22 @@ export const getAddTimeSliderControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addTimeSliderControlButtonTitle', {
     defaultMessage: 'Add time slider control',
   });
+
+export const filterTourStrings = {
+  title: i18n.translate('dashboard.topNav.filterTour.tourTitle', {
+    defaultMessage: 'Filter logic changes',
+  }),
+  description: i18n.translate('dashboard.topNav.filterTour.tourDescription', {
+    defaultMessage:
+      "If a dashboard has multiple data views, filters are ignored by visualizations that don't contain that filter field.",
+  }),
+  tourOptOut: i18n.translate('dashboard.topNav.filterTour.tourOptOutCheckboxLabel', {
+    defaultMessage: "Don't show again",
+  }),
+  closeButton: i18n.translate('dashboard.topNav.filterTour.closeButtonLabel', {
+    defaultMessage: 'Dismiss',
+  }),
+  advancedSettingsLink: i18n.translate('dashboard.topNav.filterTour.advancedSettingsLink', {
+    defaultMessage: 'Change in Advanced Settings',
+  }),
+};

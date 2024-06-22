@@ -54,8 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         to: 'Oct 23, 2018 @ 08:00:00.000',
       });
 
-      await kibanaServer.uiSettings.update({ 'courier:ignoreFilterIfFieldNotInIndex': true });
-
       await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
@@ -96,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData]);
     });
 
-    it('ignores global filters on layers using a data view without the filter field', async () => {
+    it('ignores global filters on layers using a data view without the filter field by default', async () => {
       await filterBar.addFilter({ field: 'Carrier', operation: 'exists' });
       const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData]);

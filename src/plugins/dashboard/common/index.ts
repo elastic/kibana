@@ -38,4 +38,5 @@ export {
 
 export const UI_SETTINGS = {
   ENABLE_LABS_UI: 'labs:dashboard:enable_ui',
+  COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: 'courier:ignoreFilterIfFieldNotInIndex',
 };

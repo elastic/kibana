@@ -41,9 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-        'courier:ignoreFilterIfFieldNotInIndex': true,
       });
-
       await common.setTime({
         from: 'Apr 10, 2018 @ 00:00:00.000',
         to: 'Nov 15, 2018 @ 00:00:00.000',
@@ -98,8 +96,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.unset('defaultIndex');
     });
 
-    it('ignores global filters on controls using a data view without the filter field', async () => {
+    it('ignores global filters on controls using a data view without the filter field by default', async () => {
       await filterBar.addFilter({ field: 'Carrier', operation: 'exists' });
+      await testSubjects.existOrFail('ignore_filter_tour');
+      await dashboard.dismissFilterTour();
 
       await dashboardControls.optionsListOpenPopover(controlIds[0]);
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('4');

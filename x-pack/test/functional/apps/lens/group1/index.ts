@@ -64,11 +64,11 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     after(async () => {
-      await esNode.unload(esArchive);
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
-      await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
-      await kibanaServer.savedObjects.cleanStandardList();
+      // await esNode.unload(esArchive);
+      // await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      // await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
+      // await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
+      // await kibanaServer.savedObjects.cleanStandardList();
     });
 
     if (config.get('esTestCluster.ccs')) {
