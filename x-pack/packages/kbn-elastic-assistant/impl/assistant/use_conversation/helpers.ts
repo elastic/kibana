@@ -69,6 +69,11 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
   return result;
 };
 
+/**
+ * Returns the default system prompt
+ *
+ * @param allSystemPrompts All available System Prompts
+ */
 export const getDefaultNewSystemPrompt = (allSystemPrompts: Prompt[]) =>
   allSystemPrompts.find((prompt) => prompt.isNewConversationDefault) ?? allSystemPrompts?.[0];
 
@@ -93,6 +98,14 @@ export const getDefaultSystemPrompt = ({
   return conversationSystemPrompt ?? defaultNewSystemPrompt;
 };
 
+/**
+ * Returns the API config for a conversation
+ *
+ * @param allSystemPrompts All available System Prompts
+ * @param conversation Conversation to get the API config for
+ * @param connectors All available connectors
+ * @param defaultConnector Default connector to use
+ */
 export const getConversationApiConfig = ({
   allSystemPrompts,
   conversation,
