@@ -90,7 +90,7 @@ export const createCloudSession = async (
     attemptsCount: 3,
     attemptDelay: 15_000,
   }
-) => {
+): Promise<string> => {
   const { hostname, email, password, log } = params;
   const cloudLoginUrl = getCloudUrl(hostname, '/api/v1/saas/auth/_login');
   let sessionResponse: AxiosResponse | undefined;
@@ -120,30 +120,30 @@ export const createCloudSession = async (
         throw new Error(
           `Failed to create the new cloud session: 'POST ${cloudLoginUrl}' returned ${sessionResponse?.status}`
         );
-      }
-      const token = sessionResponse?.data?.token as string;
-      if (!token) {
-        const keysToRedact = ['user_id', 'okta_session_id'];
-        const data = sessionResponse?.data;
-        if (data !== null && typeof data === 'object') {
-          Object.keys(data).forEach((key) => {
-            if (keysToRedact.includes(key)) {
-              data[key] = 'REDACTED';
-            }
-          });
+      } else {
+        const token = sessionResponse?.data?.token as string;
+        if (token) {
+          return token;
+        } else {
+          const keysToRedact = ['user_id', 'okta_session_id'];
+          const data = sessionResponse?.data;
+          if (data !== null && typeof data === 'object') {
+            Object.keys(data).forEach((key) => {
+              if (keysToRedact.includes(key)) {
+                data[key] = 'REDACTED';
+              }
+            });
+          }
+          throw new Error(
+            `Failed to create the new cloud session: token is missing in response data\n${JSON.stringify(
+              data
+            )}`
+          );
         }
-        throw new Error(
-          `Failed to create the new cloud session: token is missing in response data\n${JSON.stringify(
-            data
-          )}`
-        );
       }
-      return token;
     } catch (ex) {
       cleanException(cloudLoginUrl, ex);
-
-      attemptsLeft--;
-      if (attemptsLeft > 0) {
+      if (--attemptsLeft > 0) {
         // log only error message
         log.error(`${ex.message}\nWaiting ${retryParams.attemptDelay} ms before the next attempt`);
         await new Promise((resolve) => setTimeout(resolve, retryParams.attemptDelay));
@@ -156,6 +156,11 @@ export const createCloudSession = async (
       }
     }
   }
+
+  // should never be reached
+  throw new Error(
+    `Failed to create the new cloud session, check retry arguments: ${JSON.stringify(retryParams)}`
+  );
 };
 
 export const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: ToolingLog) => {

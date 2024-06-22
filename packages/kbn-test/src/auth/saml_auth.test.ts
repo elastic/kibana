@@ -148,6 +148,25 @@ describe('saml_auth', () => {
       );
       expect(axiosRequestMock).toBeCalledTimes(3);
     });
+
+    test(`throws error when retry 'attemptsCount' is below 1`, async () => {
+      await expect(
+        createCloudSession(
+          {
+            hostname: 'cloud',
+            email: 'viewer@elastic.co',
+            password: 'changeme',
+            log,
+          },
+          {
+            attemptsCount: 0,
+            attemptDelay: 100,
+          }
+        )
+      ).rejects.toThrow(
+        'Failed to create the new cloud session, check retry arguments: {"attemptsCount":0,"attemptDelay":100}'
+      );
+    });
   });
 
   describe('createSAMLRequest', () => {
