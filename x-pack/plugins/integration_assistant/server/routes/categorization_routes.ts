@@ -44,7 +44,7 @@ export function registerCategorizationRoutes(
         },
       },
       async (context, req, res): Promise<IKibanaResponse<CategorizationResponse>> => {
-        const { packageName, datastreamName, rawSamples, currentPipeline } = req.body;
+        const { packageName, dataStreamName, rawSamples, currentPipeline } = req.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
         const { getStartServices, logger } = await context.integrationAssistant;
@@ -78,7 +78,7 @@ export function registerCategorizationRoutes(
           const graph = await getCategorizationGraph(client, model);
           const results = await graph.invoke({
             packageName,
-            datastreamName,
+            dataStreamName,
             rawSamples,
             currentPipeline,
           });

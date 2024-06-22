@@ -62,7 +62,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     ) => (
       <RowViewer
         dataView={props.dataView}
-        toastNotifications={props.core.notifications}
+        notifications={props.core.notifications}
         hit={hit}
         hits={displayedRows}
         columns={displayedColumns}
