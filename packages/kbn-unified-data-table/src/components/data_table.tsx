@@ -1084,6 +1084,15 @@ export const UnifiedDataTable = ({
           ) : (
             <EuiDataGridMemoized
               id={dataGridId}
+              css={
+                getRowIndicatorColor
+                  ? {
+                      '.euiDataGridRowCell--firstColumn .euiDataGridRowCell__content': {
+                        borderBottomWidth: '0 !important',
+                      },
+                    }
+                  : undefined
+              }
               aria-describedby={randomId}
               aria-labelledby={ariaLabelledBy}
               columns={euiGridColumns}

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { getLogLevelCoalescedValue, getLogLevelColor } from '@kbn/discover-utils';
+import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { LogLevelBadgeCell } from '../../../components/data_types/logs/log_level_badge_cell';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
 import { extractIndexPatternFrom } from '../extract_index_pattern_from';
-import { getLogLevelCoalescedValue, getLogLevelColor } from '@kbn/discover-utils';
-import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
@@ -49,7 +49,6 @@ export const createLogsDataSourceProfileProvider = (
     };
   },
 });
-};
 
 const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row, euiTheme) => {
   const logLevel = row.flattened['log.level'] || row.flattened.log_level;
@@ -60,3 +59,4 @@ const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row
   }
 
   return undefined;
+};
