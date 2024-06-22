@@ -15,38 +15,33 @@ export type ResolveProfileResult<TContext> =
   | { isMatch: true; context: TContext }
   | { isMatch: false };
 
-export type ProfileProviderMode = 'sync' | 'async';
+export type ContextWithProfileId<TContext> = TContext & { profileId: string };
 
-export interface ProfileProvider<
-  TProfile extends PartialProfile,
-  TParams,
-  TContext,
-  TMode extends ProfileProviderMode
-> {
+export interface BaseProfileProvider<TProfile extends PartialProfile> {
   profileId: string;
   profile: ComposableProfile<TProfile>;
-  resolve: (
-    params: TParams
-  ) => TMode extends 'sync'
-    ? ResolveProfileResult<TContext>
-    : ResolveProfileResult<TContext> | Promise<ResolveProfileResult<TContext>>;
 }
 
-export type ContextWithProfileId<TContext> = TContext & { profileId: string };
+export interface ProfileProvider<TProfile extends PartialProfile, TParams, TContext>
+  extends BaseProfileProvider<TProfile> {
+  resolve: (params: TParams) => ResolveProfileResult<TContext>;
+}
+
+export interface AsyncProfileProvider<TProfile extends PartialProfile, TParams, TContext>
+  extends BaseProfileProvider<TProfile> {
+  resolve: (
+    params: TParams
+  ) => ResolveProfileResult<TContext> | Promise<ResolveProfileResult<TContext>>;
+}
 
 const EMPTY_PROFILE = {};
 
-abstract class BaseProfileService<
-  TProfile extends PartialProfile,
-  TParams,
-  TContext,
-  TMode extends ProfileProviderMode
-> {
-  protected readonly providers: Array<ProfileProvider<TProfile, TParams, TContext, TMode>> = [];
+export abstract class BaseProfileService<TProvider extends BaseProfileProvider<{}>, TContext> {
+  protected readonly providers: TProvider[] = [];
 
   protected constructor(public readonly defaultContext: ContextWithProfileId<TContext>) {}
 
-  public registerProvider(provider: ProfileProvider<TProfile, TParams, TContext, TMode>) {
+  public registerProvider(provider: TProvider) {
     this.providers.push(provider);
   }
 
@@ -54,19 +49,13 @@ abstract class BaseProfileService<
     const provider = this.providers.find((current) => current.profileId === context.profileId);
     return provider?.profile ?? EMPTY_PROFILE;
   }
-
-  public abstract resolve(
-    params: TParams
-  ): TMode extends 'sync'
-    ? ContextWithProfileId<TContext>
-    : Promise<ContextWithProfileId<TContext>>;
 }
 
 export class ProfileService<
   TProfile extends PartialProfile,
   TParams,
   TContext
-> extends BaseProfileService<TProfile, TParams, TContext, 'sync'> {
+> extends BaseProfileService<ProfileProvider<TProfile, TParams, TContext>, TContext> {
   public resolve(params: TParams) {
     for (const provider of this.providers) {
       const result = provider.resolve(params);
@@ -87,7 +76,7 @@ export class AsyncProfileService<
   TProfile extends PartialProfile,
   TParams,
   TContext
-> extends BaseProfileService<TProfile, TParams, TContext, 'async'> {
+> extends BaseProfileService<AsyncProfileProvider<TProfile, TParams, TContext>, TContext> {
   public async resolve(params: TParams) {
     for (const provider of this.providers) {
       const result = await provider.resolve(params);

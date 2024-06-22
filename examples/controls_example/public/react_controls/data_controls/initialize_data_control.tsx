@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, combineLatestWith, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { DataView, DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
@@ -15,6 +15,7 @@ import { Filter } from '@kbn/es-query';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { StateComparators } from '@kbn/presentation-publishing';
 
+import { i18n } from '@kbn/i18n';
 import { ControlGroupApi } from '../control_group/types';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { ControlApiInitialization, ControlStateManager, DefaultControlState } from '../types';
@@ -32,17 +33,13 @@ export const initializeDataControl = <EditorState extends object = {}>(
     dataViews: DataViewsPublicPluginStart;
   }
 ): {
-  dataControlApi: ControlApiInitialization<DataControlApi>;
-  dataControlComparators: StateComparators<DefaultDataControlState>;
-  dataControlStateManager: ControlStateManager<DefaultDataControlState>;
-  serializeDataControl: () => SerializedPanelState<DefaultControlState>;
+  api: ControlApiInitialization<DataControlApi>;
+  cleanup: () => void;
+  comparators: StateComparators<DefaultDataControlState>;
+  stateManager: ControlStateManager<DefaultDataControlState>;
+  serialize: () => SerializedPanelState<DefaultControlState>;
 } => {
-  const {
-    defaultControlApi,
-    defaultControlComparators,
-    defaultControlStateManager,
-    serializeDefaultControl,
-  } = initializeDefaultControlApi(state);
+  const defaultControl = initializeDefaultControlApi(state);
 
   const panelTitle = new BehaviorSubject<string | undefined>(state.title);
   const defaultPanelTitle = new BehaviorSubject<string | undefined>(undefined);
@@ -51,41 +48,65 @@ export const initializeDataControl = <EditorState extends object = {}>(
   const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
   const filters = new BehaviorSubject<Filter[] | undefined>(undefined);
 
-  const dataControlComparators: StateComparators<DefaultDataControlState> = {
-    ...defaultControlComparators,
-    title: [panelTitle, (value: string | undefined) => panelTitle.next(value)],
-    dataViewId: [dataViewId, (value: string) => dataViewId.next(value)],
-    fieldName: [fieldName, (value: string) => fieldName.next(value)],
-  };
-
   const stateManager: ControlStateManager<DefaultDataControlState> = {
-    ...defaultControlStateManager,
+    ...defaultControl.stateManager,
     dataViewId,
     fieldName,
     title: panelTitle,
   };
 
-  /**
-   * Fetch the data view + field whenever the selected data view ID or field name changes; use the
-   * fetched field spec to set the default panel title, which is always equal to either the field
-   * name or the field's display name.
-   */
-  dataViewId
+  function clearBlockingError() {
+    if (defaultControl.api.blockingError.value) {
+      defaultControl.api.setBlockingError(undefined);
+    }
+  }
+
+  const dataViewIdSubscription = dataViewId
     .pipe(
-      combineLatestWith(fieldName),
-      switchMap(async ([currentDataViewId, currentFieldName]) => {
-        defaultControlApi.setDataLoading(true);
-        const dataView = await services.dataViews.get(currentDataViewId);
-        const field = dataView.getFieldByName(currentFieldName);
-        defaultControlApi.setDataLoading(false);
-        return { dataView, field };
+      switchMap(async (currentDataViewId) => {
+        let dataView: DataView | undefined;
+        try {
+          dataView = await services.dataViews.get(currentDataViewId);
+          return { dataView };
+        } catch (error) {
+          return { error };
+        }
       })
     )
-    .subscribe(async ({ dataView, field }) => {
-      if (!dataView || !field) return;
-      dataViews.next([dataView]);
-      defaultPanelTitle.next(field.displayName || field.name);
+    .subscribe(({ dataView, error }) => {
+      if (error) {
+        defaultControl.api.setBlockingError(error);
+      } else {
+        clearBlockingError();
+      }
+      dataViews.next(dataView ? [dataView] : undefined);
     });
+
+  const fieldNameSubscription = combineLatest([dataViews, fieldName]).subscribe(
+    ([nextDataViews, nextFieldName]) => {
+      const dataView = nextDataViews
+        ? nextDataViews.find(({ id }) => dataViewId.value === id)
+        : undefined;
+      if (!dataView) {
+        return;
+      }
+
+      const field = dataView.getFieldByName(nextFieldName);
+      if (!field) {
+        defaultControl.api.setBlockingError(
+          new Error(
+            i18n.translate('controlsExamples.errors.fieldNotFound', {
+              defaultMessage: 'Could not locate field: {fieldName}',
+              values: { fieldName: nextFieldName },
+            })
+          )
+        );
+      } else {
+        clearBlockingError();
+      }
+      defaultPanelTitle.next(field ? field.displayName || field.name : nextFieldName);
+    }
+  );
 
   const onEdit = async () => {
     openDataControlEditor<DefaultDataControlState & EditorState>(
@@ -99,8 +120,8 @@ export const initializeDataControl = <EditorState extends object = {}>(
     );
   };
 
-  const dataControlApi: ControlApiInitialization<DataControlApi> = {
-    ...defaultControlApi,
+  const api: ControlApiInitialization<DataControlApi> = {
+    ...defaultControl.api,
     panelTitle,
     defaultPanelTitle,
     dataViews,
@@ -113,13 +134,22 @@ export const initializeDataControl = <EditorState extends object = {}>(
   };
 
   return {
-    dataControlApi,
-    dataControlComparators,
-    dataControlStateManager: stateManager,
-    serializeDataControl: () => {
+    api,
+    cleanup: () => {
+      dataViewIdSubscription.unsubscribe();
+      fieldNameSubscription.unsubscribe();
+    },
+    comparators: {
+      ...defaultControl.comparators,
+      title: [panelTitle, (value: string | undefined) => panelTitle.next(value)],
+      dataViewId: [dataViewId, (value: string) => dataViewId.next(value)],
+      fieldName: [fieldName, (value: string) => fieldName.next(value)],
+    },
+    stateManager,
+    serialize: () => {
       return {
         rawState: {
-          ...serializeDefaultControl().rawState,
+          ...defaultControl.serialize().rawState,
           dataViewId: dataViewId.getValue(),
           fieldName: fieldName.getValue(),
           title: panelTitle.getValue(),

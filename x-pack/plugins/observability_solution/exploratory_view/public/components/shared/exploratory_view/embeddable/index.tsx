@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { CoreStart } from '@kbn/core/public';
+import type { AnalyticsServiceSetup, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiErrorBoundary } from '@elastic/eui';
 import styled from 'styled-components';
@@ -31,7 +31,8 @@ function ExploratoryViewEmbeddable(props: ExploratoryEmbeddableComponentProps) {
 }
 
 export function getExploratoryViewEmbeddable(
-  services: CoreStart & ExploratoryViewPublicPluginsStart
+  services: CoreStart & ExploratoryViewPublicPluginsStart,
+  analytics?: AnalyticsServiceSetup
 ) {
   const { lens, dataViews: dataViewsService, theme } = services;
 
@@ -141,6 +142,7 @@ export function getExploratoryViewEmbeddable(
                 lensFormulaHelper={lensHelper?.formula}
                 searchSessionId={services.data.search.session.getSessionId()}
                 onLoad={onLensLoaded}
+                analytics={analytics}
               />
             </Wrapper>
           </KibanaContextProvider>
