@@ -39,11 +39,7 @@ export const DataViewEditorLazy = (props: DataViewEditorProps) => {
   } else {
     return (
       <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-        <DataViewFlyoutContentContainer
-          {...props}
-          onSave={() => {}}
-          editData={editDataAsDataView}
-        />
+        <DataViewFlyoutContentContainer {...props} editData={editDataAsDataView} />
       </Suspense>
     );
   }
