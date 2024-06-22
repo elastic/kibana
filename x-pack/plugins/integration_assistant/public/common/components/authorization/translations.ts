@@ -35,13 +35,13 @@ export const REQUIRED_PRIVILEGES = {
     }
   ),
   CONNECTORS_READ: i18n.translate(
-    'xpack.integrationAssistant.missingPrivileges.requiredPrivileges.connectors',
+    'xpack.integrationAssistant.missingPrivileges.requiredPrivileges.connectorsRead',
     {
       defaultMessage: 'Management > Connectors: Read',
     }
   ),
   CONNECTORS_ALL: i18n.translate(
-    'xpack.integrationAssistant.missingPrivileges.requiredPrivileges.connectors',
+    'xpack.integrationAssistant.missingPrivileges.requiredPrivileges.connectorsAll',
     {
       defaultMessage: 'Management > Connectors: All',
     }
