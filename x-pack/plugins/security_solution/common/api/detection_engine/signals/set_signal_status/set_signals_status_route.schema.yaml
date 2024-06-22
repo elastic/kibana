@@ -1,0 +1,81 @@
+openapi: 3.0.0
+info:
+  title: Set alerts status API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/signals/status:
+    post:
+      x-labels: [serverless, ess]
+      operationId: SetAlertsStatus
+      x-codegen-enabled: true
+      summary: Sets the status of one or more alerts
+      tags:
+        - Alerts API
+      requestBody:
+        description: An object containing desired status and explicit alert ids or a query to select alerts
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/SetAlertsStatusByIds'
+                - $ref: '#/components/schemas/SetAlertsStatusByQuery'
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                description: Elasticsearch update by query response
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  schemas:
+    SetAlertsStatusByIds:
+      type: object
+      properties:
+        signal_ids:
+          type: array
+          items:
+            $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          minItems: 1
+        status:
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
+      required: [signal_ids, status]
+
+    SetAlertsStatusByQuery:
+      type: object
+      properties:
+        query:
+          type: object
+          additionalProperties: true
+        status:
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
+        conflicts:
+          type: string
+          enum:
+            - abort
+            - proceed
+          default: abort
+      required: [query, status]

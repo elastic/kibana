@@ -19,6 +19,7 @@ import {
   GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyRequest,
+  GetEnrollmentSettingsResponse,
 } from '@kbn/fleet-plugin/common/types';
 import {
   GetUninstallTokenResponse,
@@ -30,6 +31,15 @@ export class SpaceTestApiClient {
   private getBaseUrl(spaceId?: string) {
     return spaceId ? `/s/${spaceId}` : '';
   }
+  async setup(spaceId?: string): Promise<CreateAgentPolicyResponse> {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/setup`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({})
+      .expect(200);
+
+    return res;
+  }
   // Agent policies
   async createAgentPolicy(spaceId?: string): Promise<CreateAgentPolicyResponse> {
     const { body: res } = await this.supertest
@@ -40,6 +50,22 @@ export class SpaceTestApiClient {
         description: '',
         namespace: 'default',
         inactivity_timeout: 24 * 1000,
+      })
+      .expect(200);
+
+    return res;
+  }
+  async createFleetServerPolicy(spaceId?: string): Promise<CreateAgentPolicyResponse> {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({
+        name: `test ${uuidV4()}`,
+        description: '',
+        namespace: 'default',
+        inactivity_timeout: 24 * 1000,
+        has_fleet_server: true,
+        force: true,
       })
       .expect(200);
 
@@ -135,6 +161,14 @@ export class SpaceTestApiClient {
   async getAgents(spaceId?: string): Promise<GetAgentsResponse> {
     const { body: res } = await this.supertest
       .get(`${this.getBaseUrl(spaceId)}/api/fleet/agents`)
+      .expect(200);
+
+    return res;
+  }
+  // Enrollment Settings
+  async getEnrollmentSettings(spaceId?: string): Promise<GetEnrollmentSettingsResponse> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/internal/fleet/settings/enrollment`)
       .expect(200);
 
     return res;

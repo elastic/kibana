@@ -414,10 +414,20 @@ class AgentPolicyService {
 
   public async getByIDs(
     soClient: SavedObjectsClientContract,
-    ids: string[],
+    ids: Array<string | { id: string; spaceId?: string }>,
     options: { fields?: string[]; withPackagePolicies?: boolean; ignoreMissing?: boolean } = {}
   ): Promise<AgentPolicy[]> {
-    const objects = ids.map((id) => ({ ...options, id, type: SAVED_OBJECT_TYPE }));
+    const objects = ids.map((id) => {
+      if (typeof id === 'string') {
+        return { ...options, id, type: SAVED_OBJECT_TYPE };
+      }
+      return {
+        ...options,
+        id: id.id,
+        namespaces: id.spaceId ? [id.spaceId] : undefined,
+        type: SAVED_OBJECT_TYPE,
+      };
+    });
     const bulkGetResponse = await soClient.bulkGet<AgentPolicySOAttributes>(objects);
 
     const agentPolicies = await pMap(
@@ -432,7 +442,6 @@ class AgentPolicyService {
             throw new FleetError(agentPolicySO.error.message);
           }
         }
-
         const agentPolicy = mapAgentPolicySavedObjectToAgentPolicy(agentPolicySO);
         if (options.withPackagePolicies) {
           const agentPolicyWithPackagePolicies = await this.get(
