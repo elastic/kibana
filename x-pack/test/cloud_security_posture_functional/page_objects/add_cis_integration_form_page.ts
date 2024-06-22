@@ -257,10 +257,10 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const doesStringExist = async (str: string) => {
-    const flyout = await testSubjects.find('editPackagePolicy_page');
-    const codeBlock = await flyout.findByXpath(`//span[text()="${str}"]`);
+    const textBlock = await testSubjects.find('editPackagePolicy_page');
+    const stringToFind = await textBlock.findByXpath(`//span[text()="${str}"]`);
 
-    return codeBlock;
+    return stringToFind;
   };
 
   return {
