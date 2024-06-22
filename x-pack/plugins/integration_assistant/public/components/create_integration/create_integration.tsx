@@ -13,7 +13,7 @@ import { CreateIntegrationLanding } from './create_integration_landing';
 import { CreateIntegrationUpload } from './create_integration_upload';
 import { CreateIntegrationAssistant } from './create_integration_assistant';
 import { Page, PagePath } from '../../common/constants';
-import { usePageAuthorization } from '../../common/hooks/use_authorization';
+import { useRoutesAuthorization } from '../../common/hooks/use_authorization';
 
 interface CreateIntegrationProps {
   services: CreateIntegrationServices;
@@ -26,7 +26,7 @@ export const CreateIntegration = React.memo<CreateIntegrationProps>(({ services 
 CreateIntegration.displayName = 'CreateIntegration';
 
 const CreateIntegrationRouter = React.memo(() => {
-  const { canUseIntegrationAssistant, canUseIntegrationUpload } = usePageAuthorization();
+  const { canUseIntegrationAssistant, canUseIntegrationUpload } = useRoutesAuthorization();
 
   return (
     <Switch>

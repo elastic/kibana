@@ -6,7 +6,6 @@
  */
 
 import type { IKibanaResponse, IRouter } from '@kbn/core/server';
-import { IntegrationAssistantAPIAction } from '../../common/feature';
 import { CheckPipelineRequestBody, CheckPipelineResponse, CHECK_PIPELINE_PATH } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
@@ -19,7 +18,6 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
       path: CHECK_PIPELINE_PATH,
       access: 'internal',
       options: {
-        tags: [`access:${IntegrationAssistantAPIAction}`],
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },

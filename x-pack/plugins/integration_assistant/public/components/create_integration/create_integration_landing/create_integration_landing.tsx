@@ -16,15 +16,17 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { usePageAuthorization } from '../../../common/hooks/use_authorization';
-import { AuthWrapper, PageAuthDescription } from '../../../common/components/auth';
+import { useAuthorization } from '../../../common/hooks/use_authorization';
+import {
+  AuthorizationWrapper,
+  MissingPrivilegesTooltip,
+} from '../../../common/components/authorization';
 import { IntegrationImageHeader } from '../../../common/components/integration_image_header';
 import { ButtonsFooter } from '../../../common/components/buttons_footer';
 import { SectionWrapper } from '../../../common/components/section_wrapper';
@@ -40,7 +42,7 @@ const useAssistantCardCss = () => {
 };
 
 export const CreateIntegrationLanding = React.memo(() => {
-  const { canUseIntegrationAssistant } = usePageAuthorization();
+  const { canExecuteConnectors } = useAuthorization();
   const navigate = useNavigate();
   const assistantCardCss = useAssistantCardCss();
   return (
@@ -48,7 +50,7 @@ export const CreateIntegrationLanding = React.memo(() => {
       <IntegrationImageHeader />
       <KibanaPageTemplate.Section grow>
         <SectionWrapper title={i18n.LANDING_TITLE} subtitle={i18n.LANDING_DESCRIPTION}>
-          <AuthWrapper canCreateIntegrations>
+          <AuthorizationWrapper canCreateIntegrations>
             <EuiFlexGroup
               direction="column"
               gutterSize="l"
@@ -97,14 +99,14 @@ export const CreateIntegrationLanding = React.memo(() => {
                       </EuiFlexGroup>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      {canUseIntegrationAssistant ? (
+                      {canExecuteConnectors ? (
                         <EuiButton onClick={() => navigate(Page.assistant)}>
                           {i18n.ASSISTANT_BUTTON}
                         </EuiButton>
                       ) : (
-                        <EuiToolTip content={<PageAuthDescription page={Page.assistant} />}>
+                        <MissingPrivilegesTooltip canExecuteConnectors>
                           <EuiButton disabled>{i18n.ASSISTANT_BUTTON}</EuiButton>
-                        </EuiToolTip>
+                        </MissingPrivilegesTooltip>
                       )}
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -141,7 +143,7 @@ export const CreateIntegrationLanding = React.memo(() => {
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </AuthWrapper>
+          </AuthorizationWrapper>
         </SectionWrapper>
       </KibanaPageTemplate.Section>
       <ButtonsFooter />

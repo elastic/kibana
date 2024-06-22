@@ -24,18 +24,3 @@ export const CREATE_CONNECTOR = i18n.translate(
     defaultMessage: 'Create new connector',
   }
 );
-
-export const PRIVILEGES_MISSING_TITLE = i18n.translate(
-  'xpack.integrationAssistant.steps.connector.privilegesMissingTitle',
-  {
-    defaultMessage: 'Missing privileges',
-  }
-);
-
-export const CREATE_CONNECTOR_MISSING_PRIVILEGES = i18n.translate(
-  'xpack.integrationAssistant.steps.connector.createConnectorMissingPrivileges',
-  {
-    defaultMessage:
-      'Missing privileges to create a new connector. Contact your administrator for assistance.',
-  }
-);

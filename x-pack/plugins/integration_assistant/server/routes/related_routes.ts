@@ -11,7 +11,6 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
-import { IntegrationAssistantAPIAction } from '../../common/feature';
 import { RELATED_GRAPH_PATH, RelatedRequestBody, RelatedResponse } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getRelatedGraph } from '../graphs/related';
@@ -24,7 +23,6 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
       path: RELATED_GRAPH_PATH,
       access: 'internal',
       options: {
-        tags: [`access:${IntegrationAssistantAPIAction}`],
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },

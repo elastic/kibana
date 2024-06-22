@@ -4,4 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { MissingPrivileges } from './missing_privileges';
+export { AuthorizationWrapper } from './authorization_wrapper';
+export { MissingPrivilegesTooltip } from './missing_privileges_tooltip';

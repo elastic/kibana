@@ -16,7 +16,6 @@ import type {
 import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
 import { registerRoutes } from './routes';
 import type { IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart } from './types';
-import { kibanaSubFeature } from '../common/feature';
 
 export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
   integrationAssistant: {
@@ -52,9 +51,7 @@ export class IntegrationAssistantPlugin
 
     registerRoutes(router);
 
-    return {
-      getKibanaSubFeature: () => kibanaSubFeature,
-    };
+    return {};
   }
 
   public start(core: CoreStart) {

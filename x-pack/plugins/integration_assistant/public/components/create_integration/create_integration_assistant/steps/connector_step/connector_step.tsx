@@ -7,15 +7,11 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPopover, EuiLink } from '@elastic/eui';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPopover,
-  EuiLink,
-  EuiCallOut,
-  EuiToolTip,
-} from '@elastic/eui';
+  AuthorizationWrapper,
+  MissingPrivilegesTooltip,
+} from '../../../../../common/components/authorization';
 import { useAuthorization } from '../../../../../common/hooks/use_authorization';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import { StepContentWrapper } from '../step_content_wrapper';
@@ -27,7 +23,6 @@ import * as i18n from './translations';
 
 /**
  * List of allowed action type IDs for the integrations assistant.
- * Replace by ['.bedrock', '.gen-ai'] to allow OpenAI connectors.
  */
 const AllowedActionTypeIds = ['.bedrock'];
 
@@ -36,7 +31,6 @@ interface ConnectorStepProps {
 }
 export const ConnectorStep = React.memo<ConnectorStepProps>(({ connectorId }) => {
   const { http, notifications } = useKibana().services;
-  const { canCreateConnectors } = useAuthorization();
   const { setConnectorId } = useActions();
   const [connectors, setConnectors] = useState<AIConnector[]>();
   const {
@@ -79,15 +73,13 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connectorId }) =>
                 <EuiFlexGroup alignItems="stretch" direction="column" gutterSize="s">
                   <ConnectorSelector connectors={connectors} selectedConnectorId={connectorId} />
                 </EuiFlexGroup>
-              ) : canCreateConnectors ? (
-                <ConnectorSetup
-                  actionTypeIds={AllowedActionTypeIds}
-                  onConnectorSaved={onConnectorSaved}
-                />
               ) : (
-                <EuiCallOut iconType="iInCircle" title={i18n.PRIVILEGES_MISSING_TITLE}>
-                  {i18n.CREATE_CONNECTOR_MISSING_PRIVILEGES}
-                </EuiCallOut>
+                <AuthorizationWrapper canCreateConnectors>
+                  <ConnectorSetup
+                    actionTypeIds={AllowedActionTypeIds}
+                    onConnectorSaved={onConnectorSaved}
+                  />
+                </AuthorizationWrapper>
               )}
             </>
           )}
@@ -114,9 +106,9 @@ const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(({ onConn
 
   if (!canCreateConnectors) {
     return (
-      <EuiToolTip content={i18n.CREATE_CONNECTOR_MISSING_PRIVILEGES}>
+      <MissingPrivilegesTooltip canCreateConnectors>
         <EuiLink disabled>{i18n.CREATE_CONNECTOR}</EuiLink>
-      </EuiToolTip>
+      </MissingPrivilegesTooltip>
     );
   }
   return (

@@ -16,8 +16,8 @@ import type { CreateIntegrationCardButtonComponent } from './components/create_i
 export interface IntegrationAssistantPluginSetup {}
 
 export interface IntegrationAssistantPluginStart {
-  CreateIntegration?: CreateIntegrationComponent;
-  CreateIntegrationCardButton?: CreateIntegrationCardButtonComponent;
+  CreateIntegration: CreateIntegrationComponent;
+  CreateIntegrationCardButton: CreateIntegrationCardButtonComponent;
 }
 
 export interface IntegrationAssistantPluginSetupDependencies {

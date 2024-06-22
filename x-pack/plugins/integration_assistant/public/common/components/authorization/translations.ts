@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LANDING_TITLE = i18n.translate('xpack.integrationAssistant.missingPrivileges.title', {
-  defaultMessage: 'Create new integration',
-});
-
 export const PRIVILEGES_MISSING_TITLE = i18n.translate(
   'xpack.integrationAssistant.missingPrivileges.title',
   {
@@ -21,7 +17,7 @@ export const PRIVILEGES_MISSING_TITLE = i18n.translate(
 export const PRIVILEGES_REQUIRED_TITLE = i18n.translate(
   'xpack.integrationAssistant.missingPrivileges.privilegesNeededTitle',
   {
-    defaultMessage: 'The required Kibana privileges are:',
+    defaultMessage: 'The minimum Kibana privileges required to use this feature are:',
   }
 );
 
@@ -41,13 +37,13 @@ export const REQUIRED_PRIVILEGES = {
   CONNECTORS_READ: i18n.translate(
     'xpack.integrationAssistant.missingPrivileges.requiredPrivileges.connectors',
     {
-      defaultMessage: 'Management > Actions & Connectors: Read',
+      defaultMessage: 'Management > Connectors: Read',
     }
   ),
   CONNECTORS_ALL: i18n.translate(
     'xpack.integrationAssistant.missingPrivileges.requiredPrivileges.connectors',
     {
-      defaultMessage: 'Management > Actions & Connectors: All',
+      defaultMessage: 'Management > Connectors: All',
     }
   ),
 };

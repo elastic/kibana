@@ -12,7 +12,6 @@ export interface Authorization {
   canExecuteConnectors: boolean;
   canCreateConnectors: boolean;
 }
-
 export const useAuthorization = (): Authorization => {
   const { capabilities } = useKibana().services.application;
   const { fleet: integrations, fleetv2: fleet, actions } = capabilities;
@@ -23,14 +22,14 @@ export const useAuthorization = (): Authorization => {
   };
 };
 
-export interface PageAuthorization {
+export interface RoutesAuthorization {
   canUseIntegrationAssistant: boolean;
   canUseIntegrationUpload: boolean;
 }
-export const usePageAuthorization = (): PageAuthorization => {
+export const useRoutesAuthorization = (): RoutesAuthorization => {
   const { canCreateIntegrations, canExecuteConnectors } = useAuthorization();
   return {
-    canUseIntegrationAssistant: canExecuteConnectors && canCreateIntegrations,
+    canUseIntegrationAssistant: canCreateIntegrations && canExecuteConnectors,
     canUseIntegrationUpload: canCreateIntegrations,
   };
 };

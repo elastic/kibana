@@ -6,7 +6,6 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { IntegrationAssistantAPIAction } from '../../common/feature';
 import { BuildIntegrationRequestBody, INTEGRATION_BUILDER_PATH } from '../../common';
 import { buildPackage } from '../integration_builder';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
@@ -20,7 +19,7 @@ export function registerIntegrationBuilderRoutes(
       path: INTEGRATION_BUILDER_PATH,
       access: 'internal',
       options: {
-        tags: [`access:${IntegrationAssistantAPIAction}`],
+        tags: [`access:integrations-all`],
       },
     })
     .addVersion(
