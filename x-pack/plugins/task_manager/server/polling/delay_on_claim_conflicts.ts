@@ -20,12 +20,13 @@ import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { isTaskPollingCycleEvent } from '../task_events';
 import { ClaimAndFillPoolResult } from '../lib/fill_pool';
 import { createRunningAveragedStat } from '../monitoring/task_run_calcultors';
+import { TaskCost } from '../task';
 
 /**
  * Emits a delay amount in ms to apply to polling whenever the task store exceeds a threshold of claim claimClashes
  */
 export function delayOnClaimConflicts(
-  maxWorkersConfiguration$: ManagedConfiguration['maxWorkersConfiguration$'],
+  capacityConfiguration$: ManagedConfiguration['capacityConfiguration$'],
   pollIntervalConfiguration$: ManagedConfiguration['pollIntervalConfiguration$'],
   taskLifecycleEvents$: Observable<TaskLifecycleEvent>,
   claimClashesPercentageThreshold: number,
@@ -37,7 +38,7 @@ export function delayOnClaimConflicts(
   merge(
     of(0),
     combineLatest([
-      maxWorkersConfiguration$,
+      capacityConfiguration$,
       pollIntervalConfiguration$,
       taskLifecycleEvents$.pipe(
         map<TaskLifecycleEvent, Option<number>>((taskEvent: TaskLifecycleEvent) =>
@@ -51,11 +52,13 @@ export function delayOnClaimConflicts(
         map((claimClashes: Option<number>) => (claimClashes as Some<number>).value)
       ),
     ]).pipe(
-      map(([maxWorkers, pollInterval, latestClaimConflicts]) => {
+      map(([capacity, pollInterval, latestClaimConflicts]) => {
         // add latest claimConflict count to queue
         claimConflictQueue(latestClaimConflicts);
 
-        const emitWhenExceeds = (claimClashesPercentageThreshold * maxWorkers) / 100;
+        // TODO: Is this the formula we want to use?
+        const emitWhenExceeds =
+          (claimClashesPercentageThreshold * (capacity / TaskCost.Normal)) / 100;
         if (
           // avoid calculating average if the new value isn't above the Threshold
           latestClaimConflicts >= emitWhenExceeds &&

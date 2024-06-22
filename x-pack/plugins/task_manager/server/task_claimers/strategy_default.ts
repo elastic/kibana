@@ -17,7 +17,7 @@ import { groupBy, pick } from 'lodash';
 import { asOk } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskClaimerOpts, ClaimOwnershipResult, getEmptyClaimOwnershipResult } from '.';
-import { ConcreteTaskInstance } from '../task';
+import { ConcreteTaskInstance, TaskCost } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { isLimited, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
@@ -56,25 +56,30 @@ interface OwnershipClaimingOpts {
 export function claimAvailableTasksDefault(
   opts: TaskClaimerOpts
 ): Observable<ClaimOwnershipResult> {
-  const { getCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
+  const { getAvailableCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
   const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
-  const initialCapacity = getCapacity();
+  const availableCapacity = getAvailableCapacity();
+  // For this claim strategy, all tasks are claimed with Normal cost
+  const normalTaskCapacity = Math.floor(availableCapacity / TaskCost.Normal);
+
   return from(batches).pipe(
     mergeScan(
       (accumulatedResult, batch) => {
         const stopTaskTimer = startTaskTimer();
-        const capacity = Math.min(
-          initialCapacity - accumulatedResult.stats.tasksClaimed,
-          isLimited(batch) ? getCapacity(batch.tasksTypes) : getCapacity()
+        const taskCountCapacity = Math.min(
+          normalTaskCapacity - accumulatedResult.stats.tasksClaimed,
+          isLimited(batch)
+            ? Math.floor(getAvailableCapacity(batch.tasksTypes) / TaskCost.Normal)
+            : Math.floor(getAvailableCapacity() / TaskCost.Normal)
         );
         // if we have no more capacity, short circuit here
-        if (capacity <= 0) {
+        if (taskCountCapacity <= 0) {
           return of(accumulatedResult);
         }
         return from(
           executeClaimAvailableTasks({
             claimOwnershipUntil,
-            size: capacity,
+            size: taskCountCapacity,
             events$,
             taskTypes: isLimited(batch) ? new Set([batch.tasksTypes]) : batch.tasksTypes,
             taskStore,
@@ -87,7 +92,7 @@ export function claimAvailableTasksDefault(
             stats.tasksConflicted = correctVersionConflictsForContinuation(
               stats.tasksClaimed,
               stats.tasksConflicted,
-              initialCapacity
+              normalTaskCapacity
             );
             return { stats, docs, timing: stopTaskTimer() };
           })

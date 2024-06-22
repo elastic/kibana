@@ -42,7 +42,7 @@ describe('TaskPollingLifecycle', () => {
   const taskManagerOpts = {
     config: {
       enabled: true,
-      max_workers: 10,
+      capacity: 20,
       index: 'foo',
       max_attempts: 9,
       poll_interval: 6000000,
@@ -88,7 +88,9 @@ describe('TaskPollingLifecycle', () => {
     unusedTypes: [],
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
-    maxWorkersConfiguration$: of(100),
+    startingCapacity: 20,
+    startingPollInterval: 100,
+    capacityConfiguration$: of(20),
     pollIntervalConfiguration$: of(100),
     executionContext,
   };
@@ -120,7 +122,7 @@ describe('TaskPollingLifecycle', () => {
 
     test('provides TaskClaiming with the capacity available', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      const maxWorkers$ = new Subject<number>();
+      const capacity$ = new Subject<number>();
       taskManagerOpts.definitions.registerTaskDefinitions({
         report: {
           title: 'report',
@@ -137,26 +139,21 @@ describe('TaskPollingLifecycle', () => {
       new TaskPollingLifecycle({
         ...taskManagerOpts,
         elasticsearchAndSOAvailability$,
-        maxWorkersConfiguration$: maxWorkers$,
+        capacityConfiguration$: capacity$,
       });
 
       const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
-        .calls[0][0].getCapacity;
+        .calls[0][0].getAvailableCapacity;
 
-      maxWorkers$.next(20);
+      capacity$.next(20);
       expect(taskClaimingGetCapacity()).toEqual(20);
-      expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
+      expect(taskClaimingGetCapacity('report')).toEqual(2);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
 
-      maxWorkers$.next(30);
+      capacity$.next(30);
       expect(taskClaimingGetCapacity()).toEqual(30);
-      expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
-
-      maxWorkers$.next(2);
-      expect(taskClaimingGetCapacity()).toEqual(2);
-      expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(2);
+      expect(taskClaimingGetCapacity('report')).toEqual(2);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
     });
   });
 
@@ -206,7 +203,7 @@ describe('TaskPollingLifecycle', () => {
   });
 
   describe('claimAvailableTasks', () => {
-    test('should claim Available Tasks when there are available workers', async () => {
+    test('should claim Available Tasks when there is available capacity', async () => {
       const logger = mockLogger();
       const taskClaiming = taskClaimingMock.create({});
       taskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>

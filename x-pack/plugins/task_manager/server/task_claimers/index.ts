@@ -18,7 +18,7 @@ import { claimAvailableTasksMget } from './strategy_mget';
 import { CLAIM_STRATEGY_DEFAULT, CLAIM_STRATEGY_MGET } from '../config';
 
 export interface TaskClaimerOpts {
-  getCapacity: (taskType?: string | undefined) => number;
+  getAvailableCapacity: (taskType?: string | undefined) => number;
   claimOwnershipUntil: Date;
   batches: TaskClaimingBatches;
   events$: Subject<TaskClaim>;

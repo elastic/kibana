@@ -31,7 +31,7 @@ describe('TaskPoller', () => {
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
       pollIntervalDelay$: of(0),
-      getCapacity: () => 1,
+      getAvailableCapacity: () => 2,
       work,
     }).start();
 
@@ -62,7 +62,7 @@ describe('TaskPoller', () => {
       logger: loggingSystemMock.create().get(),
       pollInterval$,
       pollIntervalDelay$: of(0),
-      getCapacity: () => 1,
+      getAvailableCapacity: () => 2,
       work,
     }).start();
 
@@ -101,7 +101,7 @@ describe('TaskPoller', () => {
       logger,
       pollInterval$,
       pollIntervalDelay$: of(0),
-      getCapacity: () => 1,
+      getAvailableCapacity: () => 2,
       work,
     }).start();
 
@@ -153,7 +153,7 @@ describe('TaskPoller', () => {
       pollInterval$: of(pollInterval),
       pollIntervalDelay$: of(0),
       work,
-      getCapacity: () => (hasCapacity ? 1 : 0),
+      getAvailableCapacity: () => (hasCapacity ? 2 : 0),
     }).start();
 
     expect(work).toHaveBeenCalledTimes(1);
@@ -209,7 +209,7 @@ describe('TaskPoller', () => {
         await worker;
         return args;
       },
-      getCapacity: () => 5,
+      getAvailableCapacity: () => 10,
     });
     poller.events$.subscribe(handler);
     poller.start();
@@ -247,7 +247,7 @@ describe('TaskPoller', () => {
       work: async (...args) => {
         throw new Error('failed to work');
       },
-      getCapacity: () => 5,
+      getAvailableCapacity: () => 10,
     });
     poller.events$.subscribe(handler);
     poller.start();
@@ -282,7 +282,7 @@ describe('TaskPoller', () => {
       pollInterval$: of(pollInterval),
       pollIntervalDelay$: of(0),
       work,
-      getCapacity: () => 5,
+      getAvailableCapacity: () => 10,
     });
     poller.events$.subscribe(handler);
     poller.start();
@@ -319,7 +319,7 @@ describe('TaskPoller', () => {
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
       pollIntervalDelay$: of(0),
-      getCapacity: () => 1,
+      getAvailableCapacity: () => 2,
       work,
     });
 
@@ -352,7 +352,7 @@ describe('TaskPoller', () => {
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
       pollIntervalDelay$: of(0),
-      getCapacity: () => 1,
+      getAvailableCapacity: () => 2,
       work,
     });
 

@@ -137,7 +137,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes,
         unusedTypes: unusedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
-        getCapacity: taskClaimingOpts.getCapacity ?? (() => 10),
+        getAvailableCapacity: taskClaimingOpts.getAvailableCapacity ?? (() => 20),
         ...taskClaimingOpts,
       });
 
@@ -337,9 +337,9 @@ describe('TaskClaiming', () => {
     function instantiateStoreWithMockedApiResponses({
       taskManagerId = uuidv4(),
       definitions = taskDefinitions,
-      getCapacity = () => 10,
+      getAvailableCapacity = () => 20,
       tasksClaimed,
-    }: Partial<Pick<TaskClaimingOpts, 'definitions' | 'getCapacity'>> & {
+    }: Partial<Pick<TaskClaimingOpts, 'definitions' | 'getAvailableCapacity'>> & {
       taskManagerId?: string;
       tasksClaimed?: ConcreteTaskInstance[][];
     } = {}) {
@@ -372,7 +372,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         taskStore,
         maxAttempts: 2,
-        getCapacity,
+        getAvailableCapacity,
       });
 
       return { taskManagerId, runAt, taskClaiming };

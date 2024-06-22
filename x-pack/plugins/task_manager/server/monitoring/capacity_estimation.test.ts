@@ -21,7 +21,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -77,7 +77,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -135,7 +135,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -172,7 +172,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -228,7 +228,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             // 0 active tasks at this moment in time, so no owners identifiable
             owner_ids: 0,
@@ -285,7 +285,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             owner_ids: 3,
             overdue_non_recurring: 0,
@@ -347,7 +347,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             owner_ids: provisionedKibanaInstances,
             overdue_non_recurring: 0,
@@ -428,7 +428,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             owner_ids: provisionedKibanaInstances,
             overdue_non_recurring: 0,
@@ -510,7 +510,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -578,7 +578,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -643,7 +643,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -708,7 +708,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -784,7 +784,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -862,7 +862,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: 20, poll_interval: 3000 },
           {
             overdue: undefined,
             owner_ids: 1,
@@ -949,7 +949,7 @@ function mockStats(
       status: HealthStatus.OK,
       timestamp: new Date().toISOString(),
       value: {
-        max_workers: 0,
+        capacity: 0,
         poll_interval: 0,
         request_capacity: 1000,
         monitored_aggregated_stats_refresh_rate: 5000,

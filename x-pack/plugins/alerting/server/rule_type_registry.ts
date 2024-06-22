@@ -12,7 +12,7 @@ import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { RunContext, TaskManagerSetupContract, TaskCost } from '@kbn/task-manager-plugin/server';
 import { stateSchemaByVersion } from '@kbn/alerting-state-types';
 import { TaskRunnerFactory } from './task_runner';
 import {
@@ -294,6 +294,7 @@ export class RuleTypeRegistry {
         title: ruleType.name,
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion,
+        cost: ruleType.id === 'siem.indicatorRule' ? TaskCost.ExtraLarge : TaskCost.Normal,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,

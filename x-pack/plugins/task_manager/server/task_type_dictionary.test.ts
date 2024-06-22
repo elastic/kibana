@@ -62,30 +62,33 @@ describe('taskTypeDictionary', () => {
       const result = sanitizeTaskDefinitions(taskDefinitions);
 
       expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_0",
-        },
-        Object {
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_1",
-        },
-        Object {
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_2",
-        },
-      ]
-    `);
+        Array [
+          Object {
+            "cost": 2,
+            "createTaskRunner": [Function],
+            "description": "one super cool task",
+            "timeout": "5m",
+            "title": "Test",
+            "type": "test_task_type_0",
+          },
+          Object {
+            "cost": 2,
+            "createTaskRunner": [Function],
+            "description": "one super cool task",
+            "timeout": "5m",
+            "title": "Test",
+            "type": "test_task_type_1",
+          },
+          Object {
+            "cost": 2,
+            "createTaskRunner": [Function],
+            "description": "one super cool task",
+            "timeout": "5m",
+            "title": "Test",
+            "type": "test_task_type_2",
+          },
+        ]
+      `);
     });
 
     it('throws a validation exception for invalid task definition', () => {
@@ -227,6 +230,7 @@ describe('taskTypeDictionary', () => {
         timeout: '5m',
         title: 'foo',
         type: 'foo',
+        cost: 2,
       });
     });
 

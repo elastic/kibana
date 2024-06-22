@@ -13,6 +13,7 @@ import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistic
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { isTaskRunEvent, isTaskManagerStatEvent } from '../task_events';
+import { TaskCost } from '../task';
 import {
   AveragedStat,
   calculateRunningAverage,
@@ -35,7 +36,7 @@ export interface SummarizedEphemeralTaskStat extends JsonObject {
 export function createEphemeralTaskAggregator(
   ephemeralTaskLifecycle: EphemeralTaskLifecycle,
   runningAverageWindowSize: number,
-  maxWorkers: number
+  capacity: number
 ): AggregatedStatProvider<EphemeralTaskStat> {
   const ephemeralTaskRunEvents$ = ephemeralTaskLifecycle.events.pipe(
     filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent))
@@ -70,7 +71,7 @@ export function createEphemeralTaskAggregator(
     map(([tasksRanSincePreviousQueueSize, ephemeralQueueSize]) => ({
       queuedTasks: ephemeralQueuedTasksQueue(ephemeralQueueSize),
       executionsPerCycle: ephemeralQueueExecutionsPerCycleQueue(tasksRanSincePreviousQueueSize),
-      load: ephemeralTaskLoadQueue(calculateWorkerLoad(maxWorkers, tasksRanSincePreviousQueueSize)),
+      load: ephemeralTaskLoadQueue(calculateCapacityLoad(capacity, tasksRanSincePreviousQueueSize)),
     })),
     startWith({
       queuedTasks: [],
@@ -103,8 +104,9 @@ export function createEphemeralTaskAggregator(
   );
 }
 
-function calculateWorkerLoad(maxWorkers: number, tasksExecuted: number) {
-  return Math.round((tasksExecuted * 100) / maxWorkers);
+function calculateCapacityLoad(capacity: number, tasksExecuted: number) {
+  // TODO: Find the right formula
+  return Math.round((tasksExecuted * 100) / (capacity / TaskCost.Normal));
 }
 
 export function summarizeEphemeralStat({

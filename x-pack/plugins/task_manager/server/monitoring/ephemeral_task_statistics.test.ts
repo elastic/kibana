@@ -176,11 +176,11 @@ describe('Ephemeral Task Statistics', () => {
     });
 
     const runningAverageWindowSize = 5;
-    const maxWorkers = 10;
+    const capacity = 20;
     const ephemeralTaskAggregator = createEphemeralTaskAggregator(
       ephemeralTaskLifecycle,
       runningAverageWindowSize,
-      maxWorkers
+      capacity
     );
 
     function expectWindowEqualsUpdate(
@@ -241,11 +241,11 @@ test('returns the average load added per polling cycle cycle by ephemeral tasks 
   });
 
   const runningAverageWindowSize = 5;
-  const maxWorkers = 10;
+  const capacity = 20;
   const ephemeralTaskAggregator = createEphemeralTaskAggregator(
     ephemeralTaskLifecycle,
     runningAverageWindowSize,
-    maxWorkers
+    capacity
   );
 
   function expectWindowEqualsUpdate(

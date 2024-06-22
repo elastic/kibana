@@ -81,22 +81,28 @@ export class EphemeralTaskLifecycle {
               (hasPollingCycleCompleted || isTaskRunEvent(e)) &&
               // we want to know when the queue has ephemeral task run requests
               this.queuedTasks > 0 &&
-              this.getCapacity() > 0
+              this.getAvailableCapacity() > 0
             );
           })
         )
         .subscribe((e) => {
-          let overallCapacity = this.getCapacity();
+          let overallAvailableCapacity = this.getAvailableCapacity();
           const capacityByType = new Map<string, number>();
           const tasksWithinCapacity = [...this.ephemeralTaskQueue]
             .filter(({ task }) => {
-              if (overallCapacity > 0) {
+              if (overallAvailableCapacity > 0) {
                 if (!capacityByType.has(task.taskType)) {
-                  capacityByType.set(task.taskType, this.getCapacity(task.taskType));
+                  capacityByType.set(task.taskType, this.getAvailableCapacity(task.taskType));
                 }
-                if (capacityByType.get(task.taskType)! > 0) {
-                  overallCapacity--;
-                  capacityByType.set(task.taskType, capacityByType.get(task.taskType)! - 1);
+                if (
+                  capacityByType.get(task.taskType)! - this.definitions.get(task.taskType).cost >=
+                  0
+                ) {
+                  overallAvailableCapacity -= this.definitions.get(task.taskType).cost;
+                  capacityByType.set(
+                    task.taskType,
+                    capacityByType.get(task.taskType)! - this.definitions.get(task.taskType).cost
+                  );
                   return true;
                 }
               }
@@ -139,17 +145,21 @@ export class EphemeralTaskLifecycle {
     return this.events$;
   }
 
-  private getCapacity = (taskType?: string) =>
-    taskType && this.definitions.get(taskType)?.maxConcurrency
-      ? Math.max(
-          Math.min(
-            this.pool.availableWorkers,
-            this.definitions.get(taskType)!.maxConcurrency! -
-              this.pool.getOccupiedWorkersByType(taskType)
-          ),
-          0
-        )
-      : this.pool.availableWorkers;
+  private getAvailableCapacity = (taskType?: string) => {
+    const taskTypeDef = taskType ? this.definitions.get(taskType) : null;
+    if (taskTypeDef?.maxConcurrency) {
+      return Math.max(
+        Math.min(
+          this.pool.availableCapacity,
+          taskTypeDef.maxConcurrency * taskTypeDef.cost -
+            this.pool.getOccupiedCapacityByType(taskType!)
+        ),
+        0
+      );
+    } else {
+      return this.pool.availableCapacity;
+    }
+  };
 
   private emitEvent = (event: TaskLifecycleEvent) => {
     this.events$.next(event);
