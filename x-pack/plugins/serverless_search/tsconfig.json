@@ -50,5 +50,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/search-playground",
     "@kbn/search-inference-endpoints",
+    "@kbn/search-homepage",
   ]
 }

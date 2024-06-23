@@ -25,6 +25,7 @@ import {
   useGetSentinelOneAgentStatus,
 } from '../../../../management/hooks/agents/use_get_agent_status';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../../../management/hooks');
 jest.mock('../../../../management/hooks/agents/use_get_agent_status');
@@ -116,7 +117,7 @@ describe('<HighlightedFieldsCell />', () => {
 
   // TODO: 8.15 simplify when `agentStatusClientEnabled` FF is enabled and removed
   it.each(Object.keys(hooksToMock))(
-    'should render SentinelOne agent status cell if field is agent.status and `originalField` is `observer.serial_number` with %s hook',
+    `should render SentinelOne agent status cell if field is agent.status and 'originalField' is ${RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one} with %s hook`,
     (hookName) => {
       const hook = hooksToMock[hookName];
       useAgentStatusHookMock.mockImplementation(() => hook);
@@ -131,7 +132,7 @@ describe('<HighlightedFieldsCell />', () => {
           <HighlightedFieldsCell
             values={['value']}
             field={'agent.status'}
-            originalField="observer.serial_number"
+            originalField={RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one}
           />
         </TestProviders>
       );
@@ -140,7 +141,7 @@ describe('<HighlightedFieldsCell />', () => {
     }
   );
   it.each(Object.keys(hooksToMock))(
-    'should render Crowdstrike agent status cell if field is agent.status and `originalField` is `crowdstrike.event.DeviceId` with %s hook',
+    `should render Crowdstrike agent status cell if field is agent.status and 'originalField' is ${RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike} with %s hook`,
     (hookName) => {
       const hook = hooksToMock[hookName];
       useAgentStatusHookMock.mockImplementation(() => hook);
@@ -155,7 +156,7 @@ describe('<HighlightedFieldsCell />', () => {
           <HighlightedFieldsCell
             values={['value']}
             field={'agent.status'}
-            originalField="crowdstrike.event.DeviceId"
+            originalField={RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike}
           />
         </TestProviders>
       );

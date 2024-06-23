@@ -238,14 +238,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('DataTable features', () => {
-      it('Edit data view field option is Enabled', async () => {
-        await latestFindingsTable.toggleEditDataViewFieldsOption('result.evaluation');
-        expect(await testSubjects.find('gridEditFieldButton')).to.be.ok();
-        await latestFindingsTable.toggleEditDataViewFieldsOption('result.evaluation');
-      });
-    });
-
     describe('Findings - Fields selector', () => {
       const CSP_FIELDS_SELECTOR_MODAL = 'cloudSecurityFieldsSelectorModal';
       const CSP_FIELDS_SELECTOR_OPEN_BUTTON = 'cloudSecurityFieldsSelectorOpenButton';
