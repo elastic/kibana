@@ -8,7 +8,7 @@
 import { EntityDefinition } from '@kbn/entities-schema';
 import { generateLatestIndexName } from '../helpers/generate_index_name';
 
-function mapDesitnationToPainless(destination: string, source: string) {
+function mapDestinationToPainless(destination: string, source: string) {
   const fieldParts = destination.split('.');
   return fieldParts.reduce((acc, _part, currentIndex, parts) => {
     if (currentIndex + 1 === parts.length) {
@@ -33,7 +33,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
     return `${script}if (ctx.entity?.metadata?.${source.replaceAll(
       '.',
       '?.'
-    )}.data != null) {${mapDesitnationToPainless(destination, source)}\n}\n`;
+    )}.data != null) {${mapDestinationToPainless(destination, source)}\n}\n`;
   }, '');
 }
 
