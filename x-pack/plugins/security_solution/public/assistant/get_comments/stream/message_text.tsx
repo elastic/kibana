@@ -100,6 +100,14 @@ const loadingCursorPlugin = () => {
   };
 };
 
+const getEsql = (timestamp?: string) => (props) =>
+  (
+    <>
+      <EsqlCodeBlock {...props} timestamp={timestamp} />
+      <EuiSpacer size="m" />
+    </>
+  );
+
 const getPluginDependencies = (timestamp?: string) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
@@ -110,14 +118,7 @@ const getPluginDependencies = (timestamp?: string) => {
   processingPlugins[1][1].components = {
     ...components,
     cursor: Cursor,
-    esql: (props) => {
-      return (
-        <>
-          <EsqlCodeBlock {...props} timestamp={timestamp} />
-          <EuiSpacer size="m" />
-        </>
-      );
-    },
+    esql: getEsql(timestamp),
     customCodeBlock: (props) => {
       return (
         <>
@@ -153,7 +154,7 @@ const getPluginDependencies = (timestamp?: string) => {
   };
 };
 
-export function MessageText({ loading, content, timestamp, index }: Props) {
+export const MessageText = React.memo(({ loading, content, timestamp, index }: Props) => {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
@@ -174,4 +175,5 @@ export function MessageText({ loading, content, timestamp, index }: Props) {
       </EuiMarkdownFormat>
     </EuiText>
   );
-}
+});
+MessageText.displayName = 'MessageText';

@@ -22,5 +22,3 @@ export const defaultAssistantFeatures = Object.freeze({
   assistantKnowledgeBaseByDefault: true,
   assistantModelEvaluation: true,
 });
-
-// console.log('a')

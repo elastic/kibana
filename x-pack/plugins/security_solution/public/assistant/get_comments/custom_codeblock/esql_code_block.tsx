@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -39,7 +39,7 @@ const saveVisualizationLabel = i18n.translate('xpack.securityAiAssistant.lensESQ
   defaultMessage: 'Save visualization',
 });
 
-export function EsqlCodeBlock({
+const EsqlCodeBlockComponent = ({
   value,
   actionsDisabled,
   timestamp,
@@ -47,16 +47,16 @@ export function EsqlCodeBlock({
   value: string;
   timestamp: string;
   actionsDisabled: boolean;
-}) {
-  const { lens, dataViews: dataViewService, data } = useKibana().services;
+}) => {
   const theme = useEuiTheme();
+  const { lens, dataViews: dataViewService, data } = useKibana().services;
 
-  const lensHelpersAsync = useAsync(() => {
+  const { value: lensHelpersAsync } = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
 
   const { data: queryResults } = useQuery({
-    queryKey: ['test'],
+    queryKey: ['getESQLResults', value, timestamp],
     enabled: true,
     queryFn: async () => {
       return getESQLResults({
@@ -83,8 +83,8 @@ export function EsqlCodeBlock({
     keepPreviousData: true,
   });
 
-  const indexPattern = getIndexPatternFromESQLQuery(value);
-  const formattedColumns = useAsync(
+  const indexPattern = useMemo(() => getIndexPatternFromESQLQuery(value), [value]);
+  const { value: formattedColumns } = useAsync(
     () =>
       getESQLQueryColumns({
         esqlQuery: value,
@@ -93,7 +93,7 @@ export function EsqlCodeBlock({
     [value]
   );
 
-  const dataViewAsync = useAsync(() => {
+  const { value: dataViewAsync } = useAsync(() => {
     return getESQLAdHocDataview(indexPattern, dataViewService).then((dataView) => {
       if (dataView.fields.getByName('@timestamp')?.type === 'date') {
         dataView.timeFieldName = '@timestamp';
@@ -111,19 +111,19 @@ export function EsqlCodeBlock({
 
   // initialization
   useEffect(() => {
-    if (lensHelpersAsync.value && dataViewAsync.value && !lensInput && formattedColumns.value) {
+    if (lensHelpersAsync && dataViewAsync && !lensInput && formattedColumns) {
       const context = {
-        dataViewSpec: dataViewAsync.value?.toSpec(),
+        dataViewSpec: dataViewAsync?.toSpec(),
         fieldName: '',
-        textBasedColumns: formattedColumns.value,
+        textBasedColumns: formattedColumns,
         query: {
           esql: value,
         },
       };
 
-      const chartSuggestions = lensHelpersAsync.value.suggestions(
+      const chartSuggestions = lensHelpersAsync.suggestions(
         context,
-        dataViewAsync.value,
+        dataViewAsync,
         [],
         preferredChartType
       );
@@ -137,7 +137,7 @@ export function EsqlCodeBlock({
             esql: value,
           },
           suggestion,
-          dataView: dataViewAsync.value,
+          dataView: dataViewAsync,
         }) as TypedLensByValueInput['attributes'];
 
         const lensEmbeddableInput = {
@@ -147,17 +147,12 @@ export function EsqlCodeBlock({
         setLensInput(lensEmbeddableInput);
       }
     }
-  }, [
-    dataViewAsync.value,
-    formattedColumns.value,
-    lensHelpersAsync.value,
-    lensInput,
-    preferredChartType,
-    value,
-  ]);
+  }, [dataViewAsync, formattedColumns, lensHelpersAsync, lensInput, preferredChartType, value]);
 
   // if the Lens suggestions api suggests a table then we want to render a Discover table instead
   const isLensInputTable = lensInput?.attributes?.visualizationType === 'lnsDatatable';
+
+  const handleShowVisualization = useCallback(() => setShowVisualization(true), []);
 
   return (
     <>
@@ -193,7 +188,7 @@ export function EsqlCodeBlock({
                     data-test-subj="securityAiAssistantEsqlCodeBlockVisualizeThisQueryButton"
                     size="xs"
                     iconType="lensApp"
-                    onClick={() => setShowVisualization(true)}
+                    onClick={handleShowVisualization}
                     disabled={actionsDisabled}
                   >
                     {i18n.translate('xpack.securityAiAssistant.visualizeThisQuery', {
@@ -206,105 +201,108 @@ export function EsqlCodeBlock({
           )}
         </EuiFlexGroup>
       </EuiPanel>
-
-      {showVisualization && queryResults && formattedColumns.value && (
-        <>
-          {!isLensInputTable && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={
-                        isTableVisible
-                          ? i18n.translate(
-                              'xpack.observabilityAiAssistant.lensESQLFunction.visualization',
-                              {
-                                defaultMessage: 'Visualization',
-                              }
-                            )
-                          : i18n.translate(
-                              'xpack.observabilityAiAssistant.lensESQLFunction.table',
-                              {
-                                defaultMessage: 'Table of results',
-                              }
-                            )
-                      }
-                    >
-                      <EuiButtonIcon
-                        size="xs"
-                        iconType={isTableVisible ? 'visBarVerticalStacked' : 'tableDensityExpanded'}
-                        onClick={() => setIsTableVisible(!isTableVisible)}
-                        data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
-                        aria-label={
+      {showVisualization && queryResults && formattedColumns && (
+        <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            {!isLensInputTable && (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup direction="row" gutterSize="xs" justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={
                           isTableVisible
                             ? i18n.translate(
-                                'xpack.observabilityAiAssistant.lensESQLFunction.displayChart',
+                                'xpack.observabilityAiAssistant.lensESQLFunction.visualization',
                                 {
-                                  defaultMessage: 'Display chart',
+                                  defaultMessage: 'Visualization',
                                 }
                               )
                             : i18n.translate(
-                                'xpack.observabilityAiAssistant.lensESQLFunction.displayTable',
+                                'xpack.observabilityAiAssistant.lensESQLFunction.table',
                                 {
-                                  defaultMessage: 'Display table',
+                                  defaultMessage: 'Table of results',
                                 }
                               )
                         }
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip content={saveVisualizationLabel}>
-                      <EuiButtonIcon
-                        size="xs"
-                        iconType="save"
-                        onClick={() => setIsSaveModalOpen(true)}
-                        data-test-subj="observabilityAiAssistantLensESQLSaveButton"
-                        aria-label={saveVisualizationLabel}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
+                      >
+                        <EuiButtonIcon
+                          size="xs"
+                          iconType={
+                            isTableVisible ? 'visBarVerticalStacked' : 'tableDensityExpanded'
+                          }
+                          onClick={() => setIsTableVisible(!isTableVisible)}
+                          data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
+                          aria-label={
+                            isTableVisible
+                              ? i18n.translate(
+                                  'xpack.observabilityAiAssistant.lensESQLFunction.displayChart',
+                                  {
+                                    defaultMessage: 'Display chart',
+                                  }
+                                )
+                              : i18n.translate(
+                                  'xpack.observabilityAiAssistant.lensESQLFunction.displayTable',
+                                  {
+                                    defaultMessage: 'Display table',
+                                  }
+                                )
+                          }
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip content={saveVisualizationLabel}>
+                        <EuiButtonIcon
+                          size="xs"
+                          iconType="save"
+                          onClick={() => setIsSaveModalOpen(true)}
+                          data-test-subj="observabilityAiAssistantLensESQLSaveButton"
+                          aria-label={saveVisualizationLabel}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {isTableVisible ? (
+                    <ESQLDataGrid
+                      rows={queryResults?.rows}
+                      columns={formattedColumns ?? []}
+                      dataView={dataViewAsync}
+                      query={{
+                        esql: value,
+                      }}
+                      flyoutType="overlay"
+                      isTableView
+                    />
+                  ) : lensInput ? (
+                    <lens.EmbeddableComponent
+                      {...lensInput}
+                      style={{
+                        height: 240,
+                      }}
+                    />
+                  ) : null}
+                </EuiFlexItem>
+              </>
+            )}
+            {/* hide the grid in case of errors (as the user can't fix them) */}
+            {isLensInputTable && (
               <EuiFlexItem>
-                {isTableVisible ? (
-                  <ESQLDataGrid
-                    rows={queryResults?.rows}
-                    columns={formattedColumns.value ?? []}
-                    dataView={dataViewAsync.value}
-                    query={{
-                      esql: value,
-                    }}
-                    flyoutType="overlay"
-                    isTableView
-                  />
-                ) : lensInput ? (
-                  <lens.EmbeddableComponent
-                    {...lensInput}
-                    style={{
-                      height: 240,
-                    }}
-                  />
-                ) : null}
+                <ESQLDataGrid
+                  rows={queryResults?.rows}
+                  columns={formattedColumns}
+                  dataView={dataViewAsync}
+                  query={{
+                    esql: value,
+                  }}
+                  flyoutType="overlay"
+                />
               </EuiFlexItem>
-            </>
-          )}
-          {/* hide the grid in case of errors (as the user can't fix them) */}
-          {isLensInputTable && (
-            <EuiFlexItem>
-              <ESQLDataGrid
-                rows={queryResults?.rows}
-                columns={formattedColumns.value}
-                dataView={dataViewAsync.value}
-                query={{
-                  esql: value,
-                }}
-                flyoutType="overlay"
-              />
-            </EuiFlexItem>
-          )}
-        </>
+            )}
+          </EuiFlexGroup>
+        </EuiPanel>
       )}
 
       {isSaveModalOpen ? (
@@ -319,4 +317,6 @@ export function EsqlCodeBlock({
       ) : null}
     </>
   );
-}
+};
+
+export const EsqlCodeBlock = React.memo(EsqlCodeBlockComponent);

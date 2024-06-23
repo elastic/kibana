@@ -5,16 +5,28 @@
  * 2.0.
  */
 
+import Fs from 'fs';
+import { keyBy, mapValues, once, pick, forOwn, get, isEmpty, map } from 'lodash';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
+import pLimit from 'p-limit';
+import Path from 'path';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { forOwn, get } from 'lodash';
 import { JsonOutputParser, StringOutputParser } from '@langchain/core/output_parsers';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
 import type { StateGraphArgs } from '@langchain/langgraph';
-import { StateGraph } from '@langchain/langgraph';
+import { END, START, StateGraph } from '@langchain/langgraph';
+import type { BaseMessage } from '@langchain/core/messages';
+import type { RunnableConfig } from '@langchain/core/runnables';
+import type { ValidationResult } from '@kbn/esql-validation-autocomplete/src/validation/types';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
+import { promisify } from 'util';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { APP_UI_ID } from '../../../../common';
+import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
+
+export const INLINE_ESQL_QUERY_REGEX = /```esql\s*(.*?)\s*```/gms;
 
 export const ECS_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
   [
@@ -33,12 +45,11 @@ Here is some context for you to reference for your task, read it carefully as yo
   [
     'human',
     `{input}.
-
 Example response format:
 <example_response>
 A: Please find the ESQL query below:
 \`\`\`esql
-FROM logs
+FROM logs-*
 | SORT @timestamp DESC
 | LIMIT 5
 \`\`\`
@@ -49,150 +60,349 @@ FROM logs
 
 export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
+const TOOL_NAME = 'ESQLKnowledgeBaseTool';
+
 const toolDetails = {
-  description:
-    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text. Only output valid ES|QL queries as described above. Do not add any additional text to describe your output.',
   id: 'esql-knowledge-base-tool',
-  name: 'ESQLKnowledgeBaseTool',
+  name: TOOL_NAME,
+  description: `You MUST use the "${TOOL_NAME}" function when the user wants to:
+  - visualize data
+  - run any arbitrary query
+  - breakdown or filter ES|QL queries that are displayed on the current page
+  - convert queries from another language to ES|QL
+  - asks general questions about ES|QL
+
+  DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
+  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "${TOOL_NAME}" function for this.
+
+  If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.
+
+  Even if the "${TOOL_NAME}" function was used before that, follow it up with the "${TOOL_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${TOOL_NAME}" function,
+  even if it has been called before.`,
 };
 
-export interface CategorizationState {
-  rawSamples: string[];
-  samples: string[];
-  formattedSamples: string;
-  ecsTypes: string;
-  ecsCategories: string;
-  exAnswer: string;
-  lastExecutedChain: string;
-  packageName: string;
-  dataStreamName: string;
-  errors: object;
-  pipelineResults: object[];
-  finalized: boolean;
-  reviewed: boolean;
-  currentPipeline: object;
-  currentProcessors: object[];
-  invalidCategorization: object;
-  initialPipeline: object;
-  result: object;
+interface IState {
+  messages: BaseMessage[];
+  esqlQuery: string;
+  documentation: {
+    functions: string[];
+    commands: string[];
+    intention: string;
+  };
+  errors: ValidationResult['errors'];
+  availableIndices: Record<string, unknown>;
+  invalidQueries: string[];
 }
 
-const graphState: StateGraphArgs<CategorizationState>['channels'] = {
-  lastExecutedChain: {
-    value: (x: string, y?: string) => y ?? x,
-    default: () => '',
-  },
-  rawSamples: {
-    value: (x: string[], y?: string[]) => y ?? x,
+// This defines the agent state
+const graphState: StateGraphArgs<IState>['channels'] = {
+  messages: {
+    value: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
     default: () => [],
   },
-  samples: {
-    value: (x: string[], y?: string[]) => y ?? x,
-    default: () => [],
-  },
-  formattedSamples: {
+  esqlQuery: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },
-  ecsTypes: {
-    value: (x: string, y?: string) => y ?? x,
-    default: () => '',
-  },
-  ecsCategories: {
-    value: (x: string, y?: string) => y ?? x,
-    default: () => '',
-  },
-  exAnswer: {
-    value: (x: string, y?: string) => y ?? x,
-    default: () => '',
-  },
-  packageName: {
-    value: (x: string, y?: string) => y ?? x,
-    default: () => '',
-  },
-  dataStreamName: {
-    value: (x: string, y?: string) => y ?? x,
-    default: () => '',
-  },
-  finalized: {
-    value: (x: boolean, y?: boolean) => y ?? x,
-    default: () => false,
-  },
-  reviewed: {
-    value: (x: boolean, y?: boolean) => y ?? x,
-    default: () => false,
+  documentation: {
+    value: (
+      x: {
+        functions: string[];
+        commands: string[];
+        intention: string;
+      },
+      y?: {
+        functions: string[];
+        commands: string[];
+        intention: string;
+      }
+    ) => y ?? x,
+    default: () => ({
+      functions: [],
+      commands: [],
+      intention: '',
+    }),
   },
   errors: {
-    value: (x: object, y?: object) => y ?? x,
-    default: () => ({}),
-  },
-  pipelineResults: {
-    value: (x: object[], y?: object[]) => y ?? x,
-    default: () => [{}],
-  },
-  currentPipeline: {
-    value: (x: object, y?: object) => y ?? x,
-    default: () => ({}),
-  },
-  currentProcessors: {
-    value: (x: object[], y?: object[]) => y ?? x,
+    value: (x, y) => (y && !y.length ? y : x.concat(y)),
     default: () => [],
   },
-  invalidCategorization: {
-    value: (x: object, y?: object) => y ?? x,
-    default: () => ({}),
+  invalidQueries: {
+    value: (x, y) => x.concat(y),
+    default: () => [],
   },
-  initialPipeline: {
-    value: (x: object, y?: object) => y ?? x,
-    default: () => ({}),
-  },
-  result: {
-    value: (x: object, y?: object) => y ?? x,
+  availableIndices: {
+    value: (x, y) => y ?? x,
     default: () => ({}),
   },
 };
 
-function modelInput(state: CategorizationState): Partial<CategorizationState> {
-  // const samples = modifySamples(state);
-  // const formattedSamples = formatSamples(samples);
-  // const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
-  return {
-    // exAnswer: JSON.stringify(CATEGORIZATION_EXAMPLE_ANSWER, null, 2),
-    // ecsCategories: JSON.stringify(ECS_CATEGORIES, null, 2),
-    // ecsTypes: JSON.stringify(ECS_TYPES, null, 2),
-    // samples,
-    // formattedSamples,
-    // initialPipeline,
-    finalized: false,
-    reviewed: false,
-    lastExecutedChain: 'modelInput',
-  };
-}
+const readFile = promisify(Fs.readFile);
+const readdir = promisify(Fs.readdir);
 
-function modelOutput(state: CategorizationState): Partial<CategorizationState> {
-  return {
-    finalized: true,
-    lastExecutedChain: 'modelOutput',
-    result: {
-      query: state.query,
-      rows: state.pipelineResults,
-      columns: state.currentPipeline,
-    },
-  };
-}
-
-const handleGenerateQuery = (state: CategorizationState, model) => {};
-
-const getEsqlGraph = (client, model) => {
-  const workflow = new StateGraph({
-    channels: graphState,
-  })
-    .addNode('modelInput', modelInput)
-    .addNode('modelOutput', modelOutput)
-    .addNode('handleGenerateQuery', (state: CategorizationState) =>
-      handleGenerateQuery(state, model)
+const loadSystemMessage = once(async () => {
+  const data = await readFile(
+    Path.join(
+      __dirname,
+      '../../../../../observability_solution/observability_ai_assistant_app/server/functions/query/system_message.txt'
     )
-    .addNode('handleClassifyEsql', (state: CategorizationState) => {});
+  );
+  return data.toString('utf-8');
+});
+
+const loadEsqlDocs = once(async () => {
+  const dir = Path.join(
+    __dirname,
+    '../../../../../observability_solution/observability_ai_assistant_app/server/functions/query/esql_docs'
+  );
+  const files = (await readdir(dir)).filter((file) => Path.extname(file) === '.txt');
+
+  if (!files.length) {
+    return {};
+  }
+
+  const limiter = pLimit(10);
+  return keyBy(
+    await Promise.all(
+      files.map((file) =>
+        limiter(async () => {
+          const data = (await readFile(Path.join(dir, file))).toString('utf-8');
+          const filename = Path.basename(file, '.txt');
+
+          const keyword = filename
+            .replace('esql-', '')
+            .replace('agg-', '')
+            .replaceAll('-', '_')
+            .toUpperCase();
+
+          return {
+            keyword: keyword === 'STATS_BY' ? 'STATS' : keyword,
+            data,
+          };
+        })
+      )
+    ),
+    'keyword'
+  );
+});
+
+// function transformInputToOutput(input2: Record<string, any>) {
+//   const output: Record<string, any> = {};
+
+//   forOwn(input2, (value, _key) => {
+//     const key = Object.keys(value.aliases)[0] || _key;
+//     const properties = get(value, 'mappings.properties', {});
+//     output[key] = transformProperties(properties);
+//   });
+
+//   return output;
+// }
+
+// function transformProperties(properties) {
+//   const result: Record<string, any> = {};
+
+//   forOwn(properties, (value, _key) => {
+//     const key = value.data_stream || _key;
+//     if (value.type) {
+//       result[key] = value.type;
+//     } else if (value.properties) {
+//       result[key] = transformProperties(value.properties);
+//     } else if (value.fields) {
+//       result[key] = { fields: {} };
+//       forOwn(value.fields, (fieldValue, fieldKey) => {
+//         result[key].fields[fieldKey] = { type: fieldValue.type };
+//         if (fieldValue.ignore_above !== undefined) {
+//           result[key].fields[fieldKey].ignore_above = fieldValue.ignore_above;
+//         }
+//       });
+//     } else {
+//       result[key] = value;
+//     }
+//   });
+
+//   return result;
+// }
+
+const getClassifyEsql =
+  ({
+    userQuery,
+    llm,
+    esClient,
+  }: {
+    userQuery: string;
+    llm: NonNullable<AssistantToolParams['llm']>;
+    esClient: AssistantToolParams['esClient'];
+  }) =>
+  async (state: IState, config?: RunnableConfig) => {
+    const [systemMessage, esqlDocs] = await Promise.all([loadSystemMessage(), loadEsqlDocs()]);
+
+    const formatInstructions = `Respond only in valid JSON. The JSON object you return should match the following schema:
+  {{ commands: [], functions: [], intention: string }}
+
+  Where commands is a list of processing or source commands that are referenced in the list of commands in this conversation.
+  Where functions is a list of functions that are referenced in the list of functions in this conversation.
+  Where intention is the user\'s intention.
+  `;
+
+    const prompt = await ChatPromptTemplate.fromMessages([
+      [
+        'system',
+        `${systemMessage} Answer the user query. Wrap the output in \`json\` tags\n{format_instructions}`,
+      ],
+      [
+        'user',
+        `Use this function to determine:
+      - what ES|QL functions and commands are candidates for answering the user's question
+      - whether the user has requested a query, and if so, it they want it to be executed, or just shown.
+
+      All parameters are required. Make sure the functions and commands you request are available in the
+      system message.
+
+      {query}
+      `,
+      ],
+    ]).partial({
+      format_instructions: formatInstructions,
+    });
+
+    // Set up a parser
+    const parser = new JsonOutputParser();
+
+    const chainss = prompt.pipe(llm).pipe(parser);
+
+    const result = await chainss.invoke({
+      query: userQuery,
+      date: 'date',
+      msg: 'msg',
+      ip: 'ip',
+    });
+
+    const keywords = [
+      ...(result.commands ?? []),
+      ...(result.functions ?? []),
+      'SYNTAX',
+      'OVERVIEW',
+      'OPERATORS',
+    ].map((keyword) => keyword.toUpperCase());
+
+    const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
+
+    const allDataStreams = await esClient.indices.getDataStream();
+
+    return {
+      documentation: messagesToInclude,
+      availableIndices: map(allDataStreams.data_streams, 'name'),
+    };
+  };
+
+const getGenerateQuery =
+  ({ userQuery, llm }: { userQuery: string; llm: NonNullable<AssistantToolParams['llm']> }) =>
+  async (state: IState) => {
+    const [systemMessage] = await Promise.all([loadSystemMessage()]);
+
+    const answerPrompt = await ChatPromptTemplate.fromMessages([
+      [
+        'system',
+        `${systemMessage}\nDocumentation: {documentation}\nAvailable indices: {availableIndices}`,
+      ],
+      [
+        'user',
+        `Answer the user's question that was previously asked ("{query}...") using the attached documentation. Take into account any previous errors {errors} and invalid ES|QL queries {invalidQueries}.
+
+          Format any ES|QL query as follows:
+          \`\`\`esql
+          <query>
+          \`\`\`
+
+          Respond in plain text. Do not attempt to use a function.
+
+          You must use commands and functions for which you have requested documentation.
+
+          DO NOT UNDER ANY CIRCUMSTANCES generate more than a single query.
+          If multiple queries are needed, do it as a follow-up step. Make this clear to the user. For example:
+
+          Human: plot both yesterday's and today's data.
+
+          Assistant: Here's how you can plot yesterday's data:
+          \`\`\`esql
+          <query>
+          \`\`\`
+
+          Let's see that first. We'll look at today's data next.
+
+          Human: <response from yesterday's data>
+
+          Assistant: Let's look at today's data:
+
+          \`\`\`esql
+          <query>
+          \`\`\`
+
+          DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
+          as mentioned in the system message and documentation. When converting queries from one language
+          to ES|QL, make sure that the functions are available and documented in ES|QL.
+          E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
+        `,
+      ],
+    ]).partial({
+      documentation: JSON.stringify(state.documentation),
+      availableIndices: JSON.stringify(state.availableIndices),
+      errors: state.errors.join('\n'),
+      invalidQueries: state.invalidQueries.join('\n'),
+    });
+
+    const finalChain = answerPrompt.pipe(llm).pipe(new StringOutputParser());
+
+    const finalResult = await finalChain.invoke({
+      query: userQuery,
+      date: 'date',
+      msg: 'msg',
+      ip: 'ip',
+    });
+
+    const correctedResult = finalResult.replaceAll(INLINE_ESQL_QUERY_REGEX, (_match, query) => {
+      const correction = correctCommonEsqlMistakes(query);
+      // if (correction.isCorrection) {
+      //   logger.error(`Corrected query, from: \n${correction.input}\nto:\n${correction.output}`);
+      // }
+      return `\`\`\`esql\n${correction.output}\n\`\`\``;
+    });
+
+    const esqlQuery = correctedResult.match(new RegExp(INLINE_ESQL_QUERY_REGEX, 'ms'))?.[1];
+
+    return { answer: correctedResult, esqlQuery };
+  };
+
+const getValidateQuery =
+  ({ search }: { search: AssistantToolParams['search'] }) =>
+  async (state: IState, config?: RunnableConfig) => {
+    const { errors } = await validateQuery(state.esqlQuery, getAstAndSyntaxErrors, {
+      // setting this to true, we don't want to validate the index / fields existence
+      ignoreOnMissingCallbacks: true,
+    });
+
+    if (!isEmpty(errors)) {
+      return { errors, invalidQueries: [state.esqlQuery] };
+    }
+
+    let esqlQueryColumns;
+    try {
+      esqlQueryColumns = await getESQLQueryColumns({
+        esqlQuery: state.esqlQuery,
+        search: search.search,
+      });
+      return { errors: [] };
+    } catch (e) {
+      return { errors: [e?.message], invalidQueries: [state.esqlQuery] };
+    }
+  };
+
+const shouldRegenerate = (state: IState) => {
+  if (state.errors?.length) {
+    return 'generateQuery';
+  }
+
+  return END;
 };
 
 export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
@@ -208,96 +418,31 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
     const { chain, esClient, search, llm } = params as EsqlKnowledgeBaseToolParams;
     if (chain == null) return null;
 
-    console.error('params', Object.keys(params));
-
-    console.error('search', search);
-
     return new DynamicStructuredTool({
       name: toolDetails.name,
       description: toolDetails.description,
       schema: z.object({
-        question: z.string().describe(`The user's exact question about ESQL`),
+        query: z.string().describe(`The user's exact question about ESQL`),
       }),
       func: async (input, _, cbManager) => {
-        let response;
-        try {
-          response = await esClient.indices.getDataStream();
-        } catch (e) {
-          console.error('e', e);
-        }
+        const workflow = new StateGraph<IState>({
+          channels: graphState,
+        })
+          .addNode('classifyEsql', getClassifyEsql({ userQuery: input.query, llm, esClient }))
+          .addNode('generateQuery', getGenerateQuery({ userQuery: input.query, llm }))
+          .addNode('validateQuery', getValidateQuery({ search }))
+          .addEdge(START, 'classifyEsql')
+          .addEdge('classifyEsql', 'generateQuery')
+          .addEdge('generateQuery', 'validateQuery')
+          .addConditionalEdges('validateQuery', shouldRegenerate);
 
-        console.error('response', JSON.stringify(response, null, 2));
+        const app = workflow.compile();
 
-        function transformInputToOutput(input2: Record<string, any>) {
-          const output: Record<string, any> = {};
+        const query = await app.invoke({}, { recursionLimit: 20 });
 
-          forOwn(input2, (value, _key) => {
-            const key = Object.keys(value.aliases)[0] || _key;
-            const properties = get(value, 'mappings.properties', {});
-            output[key] = transformProperties(properties);
-          });
+        console.error('graph result', query);
 
-          return output;
-        }
-
-        function transformProperties(properties) {
-          const result: Record<string, any> = {};
-
-          forOwn(properties, (value, key) => {
-            if (value.type) {
-              result[key] = value.type;
-            } else if (value.properties) {
-              result[key] = transformProperties(value.properties);
-            } else if (value.fields) {
-              result[key] = { fields: {} };
-              forOwn(value.fields, (fieldValue, fieldKey) => {
-                result[key].fields[fieldKey] = { type: fieldValue.type };
-                if (fieldValue.ignore_above !== undefined) {
-                  result[key].fields[fieldKey].ignore_above = fieldValue.ignore_above;
-                }
-              });
-            } else {
-              result[key] = value;
-            }
-          });
-
-          return result;
-        }
-
-        // const indices = transformInputToOutput(response);
-
-        const graph = ECS_MAIN_PROMPT.pipe(llm).pipe(new StringOutputParser());
-
-        const result = await graph.invoke({
-          input: input.question,
-          availableIndices: JSON.stringify(
-            response?.data_streams.map((item) => item.name),
-            null,
-            2
-          ),
-        });
-
-        console.error('result', JSON.stringify(result, null, 2));
-
-        const esqlQuery = result
-          ?.match(/(?<=```esql)[\s\S]*?(?=```)/g)
-          .join('')
-          .replace('\n', '')
-          .replaceAll('"', '')
-          .trim();
-
-        console.error('esqlQuery', esqlQuery);
-
-        try {
-          const esqlQueryColumns = await getESQLQueryColumns({ esqlQuery, search: search.search });
-          console.error('esqlQueryColumns', esqlQueryColumns);
-        } catch (e) {
-          console.error('e', e);
-        }
-
-        console.error('trimee', result.replaceAll('"', '').trim());
-
-        return result.replaceAll('"', '').trim();
+        return query.esqlQuery;
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
     });
