@@ -177,8 +177,9 @@ export const EditIndexPattern = withRouter(
       dataViews.getRollupsEnabled();
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
-        onSave={() => {
-          setFields(indexPattern.getNonScriptedFields());
+        onSave={async (saveResponse) => {
+          const fieldMap = (await saveResponse.getFields({ fieldName: ['*'] })).getFieldMapSorted();
+          setFields(Object.values(fieldMap));
           setShowEditDialog(false);
         }}
         onCancel={() => setShowEditDialog(false)}
@@ -338,7 +339,8 @@ export const EditIndexPattern = withRouter(
           history={history}
           location={location}
           compositeRuntimeFields={compositeRuntimeFields}
-          refreshFields={() => {
+          refreshFields={async () => {
+            await dataViews.refreshFields(indexPattern, false, true);
             setFields(indexPattern.getNonScriptedFields());
             setCompositeRuntimeFields(getCompositeRuntimeFields(indexPattern));
           }}
