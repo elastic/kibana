@@ -271,7 +271,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               setConversationSettings={setConversationSettings}
               setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
-              setUpdatedSystemPromptSettings={handleChange(setUpdatedSystemPromptSettings)}
+              setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
               onCancelClick={onCancelClick}
             />
           )}
