@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export interface ReadIndexResponse {
-  name: string;
-  index_mapping_outdated: boolean | null;
-}
+export { ROLLUP_DEPRECATION_BADGE_LABEL } from './constants';
+export { RollupDeprecationTooltip } from './rollup_deprecation_tooltip';

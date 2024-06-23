@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export interface DeleteIndexResponse {
-  acknowledged: boolean;
-}
+import { i18n } from '@kbn/i18n';
+
+export const ROLLUP_DEPRECATION_BADGE_LABEL = i18n.translate(
+  'xpack.rollupJobs.rollupDeprecationLabel',
+  {
+    defaultMessage: 'Rollup (deprecated)',
+  }
+);

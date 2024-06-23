@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { EndpointAppliedPolicyStatus } from './endpoint_applied_policy_status';
-export type { EndpointAppliedPolicyStatusProps } from './endpoint_applied_policy_status';
+export const DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID = 'security-solution-default';

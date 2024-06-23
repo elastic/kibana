@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { JsonSchemaService } from './json_schema_service';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/packages/rollup'],
+};

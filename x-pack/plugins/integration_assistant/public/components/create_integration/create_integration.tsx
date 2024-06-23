@@ -8,13 +8,13 @@ import React from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { CreateIntegrationServices } from './types';
+import type { Services } from '../../services';
 import { CreateIntegrationLanding } from './create_integration_landing';
 import { CreateIntegrationUpload } from './create_integration_upload';
 import { CreateIntegrationAssistant } from './create_integration_assistant';
 
 interface CreateIntegrationProps {
-  services: CreateIntegrationServices;
+  services: Services;
 }
 export const CreateIntegration = React.memo<CreateIntegrationProps>(({ services }) => (
   <KibanaContextProvider services={services}>
