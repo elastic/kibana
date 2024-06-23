@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import { getInstalledPackages } from '../../../../../common/lib/api';
+import * as i18n from './translations';
 
 export const useLoadPackageNames = () => {
   const { http, notifications } = useKibana().services;
@@ -29,7 +30,7 @@ export const useLoadPackageNames = () => {
       } catch (e) {
         if (!abortController.signal.aborted) {
           notifications?.toasts.addError(e, {
-            title: 'Error loading package names',
+            title: i18n.PACKAGE_NAMES_FETCH_ERROR,
           });
         }
       } finally {

@@ -44,6 +44,13 @@ export const PREVIEW = i18n.translate('xpack.integrationAssistant.step.integrati
   defaultMessage: 'Preview',
 });
 
+export const PREVIEW_TOOLTIP = i18n.translate(
+  'xpack.integrationAssistant.step.integration.previewTooltip',
+  {
+    defaultMessage: 'This is a preview of the integration card for the integrations catalog',
+  }
+);
+
 export const LOGO_ERROR = i18n.translate('xpack.integrationAssistant.step.integration.logo.error', {
   defaultMessage: 'Error processing logo file',
 });

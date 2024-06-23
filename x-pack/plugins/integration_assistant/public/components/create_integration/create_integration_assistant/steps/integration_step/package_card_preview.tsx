@@ -55,7 +55,7 @@ export const PackageCardPreview = React.memo<PackageCardPreviewProps>(({ integra
       }
       betaBadgeProps={{
         label: i18n.PREVIEW,
-        tooltipContent: 'This is a preview of the package card',
+        tooltipContent: i18n.PREVIEW_TOOLTIP,
       }}
     />
   );

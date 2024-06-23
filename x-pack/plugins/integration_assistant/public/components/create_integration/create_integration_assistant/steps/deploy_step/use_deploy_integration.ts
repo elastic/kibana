@@ -66,10 +66,6 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
 
         const zippedIntegration = await runBuildIntegration(parameters, deps);
         if (abortController.signal.aborted) return;
-        if (!zippedIntegration) {
-          setError('Not able to build integration.');
-          return;
-        }
         setIntegrationFile(zippedIntegration);
 
         const installResult = await runInstallPackage(zippedIntegration, deps);
