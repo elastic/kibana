@@ -112,7 +112,7 @@ describe('Endpoint Upload Action Result component', () => {
 
     expect(getByTestId('test')).toHaveTextContent(
       'Host: Host-agent-aFile saved to: /path/to/uploaded/fileFree disk space on drive: 1.18MB' +
-        'Host: agent-bThe following error was encountered:some error here'
+        'Host: agent-bThe following error was encountered:Host: agent-bErrors: some error here'
     );
   });
 });

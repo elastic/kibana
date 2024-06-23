@@ -8,8 +8,22 @@
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { getEmptyValue } from '../../../common/components/empty_value';
 import { endpointActionResponseCodes } from '../endpoint_responder/lib/endpoint_action_response_codes';
 import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
+import { KeyValueDisplay } from '../key_value_display';
+
+const emptyValue = getEmptyValue();
+
+const ERROR_INFO_LABELS = Object.freeze<Record<string, string>>({
+  errors: i18n.translate('xpack.securitySolution.endpointActionFailureMessage.errors', {
+    defaultMessage: 'Errors',
+  }),
+  host: i18n.translate('xpack.securitySolution.endpointActionFailureMessage.host', {
+    defaultMessage: 'Host',
+  }),
+});
 
 interface EndpointActionFailureMessageProps {
   action: MaybeImmutable<ActionDetails>;
@@ -23,7 +37,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
         return null;
       }
 
-      const errors: string[] = [];
+      const allAgentErrors: Array<{ name: string; errors: string[] }> = [];
 
       // Determine if each endpoint returned a response code and if so,
       // see if we have a localized message for it
@@ -37,39 +51,36 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
             !!endpointAgentOutput &&
             endpointAgentOutput.type === 'json' &&
             !!endpointAgentOutput.content &&
-            !!endpointAgentOutput.content.code &&
-            !!endpointActionResponseCodes[endpointAgentOutput.content.code];
+            !!endpointAgentOutput.content.code;
 
-          if (action.agents.length > 1) {
-            let errorInfo = `${action.hosts[agent].name}:`;
+          const agentErrorInfo: { name: string; errors: string[] } = { name: '', errors: [] };
 
-            if (hasOutputCode && endpointAgentOutput) {
-              errorInfo = errorInfo.concat(
-                `${endpointActionResponseCodes[endpointAgentOutput.content.code]}`
-              );
-            }
+          if (
+            hasOutputCode &&
+            !!endpointAgentOutput &&
+            !!endpointActionResponseCodes[endpointAgentOutput.content.code]
+          ) {
+            agentErrorInfo.errors.push(
+              endpointActionResponseCodes[endpointAgentOutput.content.code]
+            );
+          }
 
-            if (hasErrors) {
-              const errorMessages = [...new Set(agentState.errors)];
-              errorInfo = hasOutputCode
-                ? errorInfo.concat(` | ${errorMessages}`)
-                : errorInfo.concat(`${errorMessages}`);
-            }
+          if (hasErrors) {
+            const errorMessages: string[] = [...new Set(agentState.errors)];
+            agentErrorInfo.errors.push(...errorMessages);
+          }
 
-            errors.push(errorInfo);
-          } else {
-            if (endpointAgentOutput) {
-              errors.push(
-                `${endpointActionResponseCodes[endpointAgentOutput.content.code]} | ${[
-                  ...new Set(action.errors),
-                ]}`
-              );
-            }
+          if (agentErrorInfo.errors.length && action.hosts[agent].name) {
+            agentErrorInfo.name = action.hosts[agent].name;
+          }
+
+          if (agentErrorInfo.errors.length) {
+            allAgentErrors.push(agentErrorInfo);
           }
         }
       }
 
-      if (!errors.length) {
+      if (!allAgentErrors.length) {
         return null;
       }
 
@@ -78,10 +89,24 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
           <FormattedMessage
             id="xpack.securitySolution.endpointResponseActions.actionError.errorMessage"
             defaultMessage="The following { errorCount, plural, =1 {error was} other {errors were}} encountered:"
-            values={{ errorCount: errors.length }}
+            values={{ errorCount: allAgentErrors.length }}
           />
           <EuiSpacer size="s" />
-          <div>{errors.join('\n\n')}</div>
+          <>
+            {allAgentErrors.map((agentErrorInfo) => (
+              <div key={agentErrorInfo.name}>
+                <KeyValueDisplay
+                  name={ERROR_INFO_LABELS.host}
+                  value={agentErrorInfo.name.length ? agentErrorInfo.name : emptyValue}
+                />
+                <KeyValueDisplay
+                  name={ERROR_INFO_LABELS.errors}
+                  value={agentErrorInfo.errors.join(' | ')}
+                />
+                <EuiSpacer size="s" />
+              </div>
+            ))}
+          </>
         </div>
       );
     }, [

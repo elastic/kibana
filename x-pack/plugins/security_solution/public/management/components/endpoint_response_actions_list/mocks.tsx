@@ -17,6 +17,8 @@ import { EndpointActionGenerator } from '../../../../common/endpoint/data_genera
 export const getActionListMock = async ({
   agentTypes = ['endpoint'] as ResponseActionAgentType[],
   agentIds: _agentIds,
+  hosts,
+  agentState,
   commands,
   actionCount = 0,
   endDate,
@@ -32,7 +34,9 @@ export const getActionListMock = async ({
   outputs = {},
 }: {
   agentTypes?: ResponseActionAgentType[];
+  agentState?: Pick<ActionDetails, 'agentState'>;
   agentIds?: string[];
+  hosts?: Record<string, { name: string }>;
   commands?: string[];
   actionCount?: number;
   endDate?: string;
@@ -51,62 +55,28 @@ export const getActionListMock = async ({
 
   const agentIds = _agentIds ?? [uuidv4()];
 
-  const data: ActionListApiResponse['data'] = agentIds.map((id) => {
-    const actionIds = Array(actionCount)
-      .fill(1)
-      .map(() => uuidv4());
+  const actionIds = Array(actionCount)
+    .fill(1)
+    .map(() => uuidv4());
 
-    const actionDetails: ActionListApiResponse['data'] = actionIds.map((actionId) => {
-      const command = (commands?.[0] ?? 'isolate') as ResponseActionsApiCommandNames;
-      const actionDetailsOverrides = {
-        agents: [id],
-        command,
-        id: actionId,
-        isCompleted,
-        isExpired,
-        wasSuccessful,
-        status,
-        completedAt: isExpired ? undefined : new Date().toISOString(),
-        hosts: {
-          ...(command === 'upload'
-            ? {
-                [id]: { name: 'host name' },
-              }
-            : {}),
-        },
-        agentState: {
-          ...(command === 'upload'
-            ? {
-                [id]: {
-                  errors: undefined,
-                  wasSuccessful: true,
-                  isCompleted: true,
-                  completedAt: '2023-05-10T20:09:25.824Z',
-                },
-              }
-            : {}),
-        },
-        errors,
-        outputs: {
-          ...(command === 'upload'
-            ? {
-                [id]: {
-                  type: 'json',
-                  content: {
-                    code: 'ra_upload_file-success',
-                    path: 'some/path/to/file',
-                    disk_free_space: 123445,
-                  },
-                },
-              }
-            : outputs),
-        },
-      };
-      return endpointActionGenerator.generateActionDetails(actionDetailsOverrides);
-    });
-
-    return actionDetails;
-  })[0];
+  const actionDetails: ActionListApiResponse['data'] = actionIds.map((actionId) => {
+    const command = (commands?.[0] ?? 'isolate') as ResponseActionsApiCommandNames;
+    const actionDetailsOverrides = {
+      agents: agentIds,
+      hosts,
+      command,
+      id: actionId,
+      isCompleted,
+      isExpired,
+      wasSuccessful,
+      status,
+      completedAt: isExpired ? undefined : new Date().toISOString(),
+      agentState,
+      errors,
+      outputs,
+    };
+    return endpointActionGenerator.generateActionDetails(actionDetailsOverrides);
+  });
 
   return {
     page,
@@ -116,9 +86,9 @@ export const getActionListMock = async ({
     agentTypes,
     elasticAgentIds: agentIds,
     commands,
-    data,
+    data: actionDetails,
     userIds,
     statuses: undefined,
-    total: data.length ?? 0,
+    total: actionDetails.length ?? 0,
   };
 };
