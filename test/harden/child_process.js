@@ -307,6 +307,20 @@ for (const name of functions) {
     assertProcess(t, cp.spawn(command, [], { env: { custom: 'custom' } }), { stdout: 'custom' });
   });
 
+  test('spawn(command, options) - prevent object prototype pollution', (t) => {
+    const pathName = path.join(__dirname, '_node_script.js');
+    const options = {};
+
+    // eslint-disable-next-line no-proto
+    options.__proto__['2'] = {
+      env: {
+        NODE_OPTIONS: `--require ${pathName}`,
+      },
+      shell: process.argv[0],
+    };
+    assertProcess(t, cp.spawn(command, []));
+  });
+
   for (const unset of notSet) {
     test(`spawn(command, ${unset})`, (t) => {
       assertProcess(t, cp.spawn(command, unset));
