@@ -20,6 +20,7 @@ import { Conversation, ConversationsBulkActions } from '../../../../..';
 import { AIConnector } from '../../../../connectorland/connector_selector';
 import { Flyout } from '../../../common/components/assistant_settings_management/flyout';
 import { useFlyoutModalVisibility } from '../../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
+import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE } from '../../../settings/const';
 import { CANCEL, DELETE } from '../../../settings/translations';
 import { Prompt } from '../../../types';
 import { SystemPromptEditor } from '../system_prompt_modal/system_prompt_editor';
@@ -149,8 +150,8 @@ const SystemPromptSettingsManagementComponent = ({
 
   const pagination = useMemo(
     () => ({
-      pageIndex: 0,
-      pageSize: 25,
+      pageIndex: DEFAULT_PAGE_INDEX,
+      pageSize: DEFAULT_PAGE_SIZE,
       totalItemCount: systemPromptSettings.length,
     }),
     [systemPromptSettings.length]

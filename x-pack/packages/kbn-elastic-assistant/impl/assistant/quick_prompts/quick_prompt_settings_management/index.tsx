@@ -22,6 +22,7 @@ import { Flyout } from '../../common/components/assistant_settings_management/fl
 import { CANCEL, DELETE } from '../../settings/translations';
 import { useQuickPromptEditor } from '../quick_prompt_settings/use_quick_prompt_editor';
 import { useQuickPromptTable } from './use_quick_prompt_table';
+import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE } from '../../settings/const';
 
 interface Props {
   onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
@@ -114,8 +115,8 @@ const QuickPromptSettingsManagementComponent = ({
 
   const pagination = useMemo(
     () => ({
-      pageIndex: 0,
-      pageSize: 25,
+      pageIndex: DEFAULT_PAGE_INDEX,
+      pageSize: DEFAULT_PAGE_SIZE,
       totalItemCount: quickPromptSettings.length,
     }),
     [quickPromptSettings.length]

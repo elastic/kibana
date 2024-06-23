@@ -24,6 +24,7 @@ import { Flyout } from '../../common/components/assistant_settings_management/fl
 import { CANCEL, DELETE } from '../../settings/translations';
 import { ConversationSettingsEditor } from '../conversation_settings/conversation_settings_editor';
 import { useConversationChanged } from '../conversation_settings/use_conversation_changed';
+import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE } from '../../settings/const';
 
 interface Props {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -179,6 +180,15 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     [deletedConversation?.title]
   );
 
+  const pagination = useMemo(
+    () => ({
+      pageIndex: DEFAULT_PAGE_INDEX,
+      pageSize: DEFAULT_PAGE_SIZE,
+      totalItemCount: conversationOptions.length,
+    }),
+    [conversationOptions.length]
+  );
+
   if (!conversationsLoaded) {
     return null;
   }
@@ -195,7 +205,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         <EuiInMemoryTable
           items={conversationOptions}
           columns={columns}
-          pagination
+          pagination={pagination}
           sorting={sorting}
         />
       </EuiPanel>
