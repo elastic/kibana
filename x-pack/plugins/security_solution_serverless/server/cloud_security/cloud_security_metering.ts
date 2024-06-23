@@ -21,6 +21,15 @@ export const cloudSecurityMetringCallback = async ({
   lastSuccessfulReport,
   config,
 }: MeteringCallbackInput): Promise<MeteringCallBackResponse> => {
+  const projectHasCloudProductLine = config.productTypes.some(
+    (product) => product.product_line === ProductLine.cloud
+  );
+
+  if (!projectHasCloudProductLine) {
+    logger.info('No cloud product line found in the project');
+    return { records: [] };
+  }
+
   const projectId = cloudSetup?.serverless?.projectId || 'missing_project_id';
 
   const tier: Tier = getCloudProductTier(config, logger);

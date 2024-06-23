@@ -15,7 +15,6 @@ import {
   CSPM,
   KSPM,
   METERING_CONFIGS,
-  THRESHOLD_MINUTES,
   BILLABLE_ASSETS_CONFIG,
 } from './constants';
 import type { Tier, UsageRecord } from '../types';
@@ -23,69 +22,105 @@ import type {
   CloudSecurityMeteringCallbackInput,
   CloudSecuritySolutions,
   AssetCountAggregation,
+  ResourceSubtypeAggregationBucket,
 } from './types';
 
+export interface ResourceSubtypeCounter {
+  [key: string]: {
+    doc_count: number;
+    unique_assets: number;
+  };
+}
+
 export const getUsageRecords = (
-  assetCountAggregations: AssetCountAggregation[],
+  assetCountAggregation: AssetCountAggregation,
   cloudSecuritySolution: CloudSecuritySolutions,
   taskId: string,
   tier: Tier,
   projectId: string,
   periodSeconds: number,
   logger: Logger
-): UsageRecord[] => {
-  const usageRecords = assetCountAggregations.map((assetCountAggregation) => {
-    const assetCount = assetCountAggregation.unique_assets.value;
+): UsageRecord => {
+  const resourceSubtypeCounter = assetCountAggregation.resource_sub_type.buckets.reduce(
+    (resourceMap, item) => {
+      resourceMap[item.key] = {
+        doc_count: item.doc_count,
+        unique_assets: item.unique_assets.value,
+      };
+      return resourceMap;
+    },
+    {} as ResourceSubtypeCounter
+  );
 
-    if (assetCount > AGGREGATION_PRECISION_THRESHOLD) {
-      logger.warn(
-        `The number of unique resources for {${cloudSecuritySolution}} is ${assetCount}, which is higher than the AGGREGATION_PRECISION_THRESHOLD of ${AGGREGATION_PRECISION_THRESHOLD}.`
-      );
-    }
+  const resourceSubtypeBuckets: ResourceSubtypeAggregationBucket[] =
+    assetCountAggregation.resource_sub_type.buckets;
 
-    const minTimestamp = new Date(
-      assetCountAggregation.min_timestamp.value_as_string
-    ).toISOString();
+  let assetCount;
 
-    const creationTimestamp = new Date();
-    const minutes = creationTimestamp.getMinutes();
-    if (minutes >= 30) {
-      creationTimestamp.setMinutes(30, 0, 0);
-    } else {
-      creationTimestamp.setMinutes(0, 0, 0);
-    }
-    const roundedCreationTimestamp = creationTimestamp.toISOString();
+  if (cloudSecuritySolution === CSPM || cloudSecuritySolution === KSPM) {
+    const billableAssets = BILLABLE_ASSETS_CONFIG[cloudSecuritySolution].values;
+    assetCount = resourceSubtypeBuckets
+      .filter((bucket) => billableAssets.includes(bucket.key))
+      .reduce((acc, bucket) => acc + bucket.unique_assets.value, 0);
+  } else {
+    assetCount = resourceSubtypeBuckets.reduce(
+      (acc, bucket) => acc + bucket.unique_assets.value,
+      0
+    );
+  }
 
-    const usageRecord: UsageRecord = {
-      id: `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}_${roundedCreationTimestamp}`,
-      usage_timestamp: minTimestamp,
-      creation_timestamp: creationTimestamp.toISOString(),
-      usage: {
-        type: CLOUD_SECURITY_TASK_TYPE,
-        sub_type: cloudSecuritySolution,
-        quantity: assetCount,
-        period_seconds: periodSeconds,
-      },
-      source: {
-        id: taskId,
-        instance_group_id: projectId,
-        metadata: { tier },
-      },
-    };
+  if (assetCount > AGGREGATION_PRECISION_THRESHOLD) {
+    logger.warn(
+      `The number of unique resources for {${cloudSecuritySolution}} is ${assetCount}, which is higher than the AGGREGATION_PRECISION_THRESHOLD of ${AGGREGATION_PRECISION_THRESHOLD}.`
+    );
+  }
 
-    return usageRecord;
-  });
-  return usageRecords;
+  const minTimestamp = new Date(assetCountAggregation.min_timestamp.value_as_string).toISOString();
+
+  const creationTimestamp = new Date();
+  const minutes = creationTimestamp.getMinutes();
+  if (minutes >= 30) {
+    creationTimestamp.setMinutes(30, 0, 0);
+  } else {
+    creationTimestamp.setMinutes(0, 0, 0);
+  }
+  const roundedCreationTimestamp = creationTimestamp.toISOString();
+
+  const usageRecord: UsageRecord = {
+    id: `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}_${roundedCreationTimestamp}`,
+    usage_timestamp: minTimestamp,
+    creation_timestamp: creationTimestamp.toISOString(),
+    usage: {
+      type: CLOUD_SECURITY_TASK_TYPE,
+      sub_type: cloudSecuritySolution,
+      quantity: assetCount,
+      period_seconds: periodSeconds,
+    },
+    source: {
+      id: taskId,
+      instance_group_id: projectId,
+      metadata: { tier, resourceSubtypeCounter },
+    },
+  };
+
+  return usageRecord;
 };
 
 export const getAggregationByCloudSecuritySolution = (
   cloudSecuritySolution: CloudSecuritySolutions
 ) => {
   return {
-    unique_assets: {
-      cardinality: {
-        field: METERING_CONFIGS[cloudSecuritySolution].assets_identifier,
-        precision_threshold: AGGREGATION_PRECISION_THRESHOLD,
+    resource_sub_type: {
+      terms: {
+        field: `resource.sub_type`,
+      },
+      aggs: {
+        unique_assets: {
+          cardinality: {
+            field: METERING_CONFIGS[cloudSecuritySolution].assets_identifier,
+            precision_threshold: AGGREGATION_PRECISION_THRESHOLD,
+          },
+        },
       },
     },
     min_timestamp: {
@@ -97,8 +132,7 @@ export const getAggregationByCloudSecuritySolution = (
 };
 
 export const getSearchQueryByCloudSecuritySolution = (
-  cloudSecuritySolution: CloudSecuritySolutions,
-  searchFrom: Date
+  cloudSecuritySolution: CloudSecuritySolutions
 ) => {
   const mustFilters = [];
 
@@ -117,18 +151,9 @@ export const getSearchQueryByCloudSecuritySolution = (
   }
 
   if (cloudSecuritySolution === CSPM || cloudSecuritySolution === KSPM) {
-    const billableAssetsConfig = BILLABLE_ASSETS_CONFIG[cloudSecuritySolution];
-
     mustFilters.push({
       term: {
         'rule.benchmark.posture_type': cloudSecuritySolution,
-      },
-    });
-
-    // filter in only billable assets
-    mustFilters.push({
-      terms: {
-        [billableAssetsConfig.filter_attribute]: billableAssetsConfig.values,
       },
     });
   }
@@ -141,10 +166,9 @@ export const getSearchQueryByCloudSecuritySolution = (
 };
 
 export const getAssetAggQueryByCloudSecuritySolution = (
-  cloudSecuritySolution: CloudSecuritySolutions,
-  searchFrom: Date
+  cloudSecuritySolution: CloudSecuritySolutions
 ) => {
-  const query = getSearchQueryByCloudSecuritySolution(cloudSecuritySolution, searchFrom);
+  const query = getSearchQueryByCloudSecuritySolution(cloudSecuritySolution);
   const aggs = getAggregationByCloudSecuritySolution(cloudSecuritySolution);
 
   return {
@@ -157,49 +181,32 @@ export const getAssetAggQueryByCloudSecuritySolution = (
 
 export const getAssetAggByCloudSecuritySolution = async (
   esClient: ElasticsearchClient,
-  cloudSecuritySolution: CloudSecuritySolutions,
-  searchFrom: Date
-): Promise<AssetCountAggregation[]> => {
-  const assetsAggQuery = getAssetAggQueryByCloudSecuritySolution(cloudSecuritySolution, searchFrom);
+  cloudSecuritySolution: CloudSecuritySolutions
+): Promise<AssetCountAggregation | undefined> => {
+  const assetsAggQuery = getAssetAggQueryByCloudSecuritySolution(cloudSecuritySolution);
 
   const response = await esClient.search<unknown, AssetCountAggregation>(assetsAggQuery);
-  if (!response.aggregations) return [];
 
-  return [response.aggregations];
+  if (!response.aggregations) return;
+
+  return response.aggregations;
 };
 
 const indexHasDataInDateRange = async (
   esClient: ElasticsearchClient,
-  cloudSecuritySolution: CloudSecuritySolutions,
-  searchFrom: Date
+  cloudSecuritySolution: CloudSecuritySolutions
 ) => {
   const response = await esClient.search(
     {
       index: METERING_CONFIGS[cloudSecuritySolution].index,
       size: 1,
       _source: false,
-      query: getSearchQueryByCloudSecuritySolution(cloudSecuritySolution, searchFrom),
+      query: getSearchQueryByCloudSecuritySolution(cloudSecuritySolution),
     },
     { ignore: [404] }
   );
 
   return response.hits?.hits.length > 0;
-};
-
-const getSearchStartDate = (lastSuccessfulReport: Date): Date => {
-  const initialDate = new Date();
-  const thresholdDate = new Date(initialDate.getTime() - THRESHOLD_MINUTES * 60 * 1000);
-
-  if (lastSuccessfulReport) {
-    const lastSuccessfulReportDate = new Date(lastSuccessfulReport);
-
-    const searchFrom =
-      lastSuccessfulReport && lastSuccessfulReportDate > thresholdDate
-        ? lastSuccessfulReportDate
-        : thresholdDate;
-    return searchFrom;
-  }
-  return thresholdDate;
 };
 
 export const getCloudSecurityUsageRecord = async ({
@@ -212,21 +219,20 @@ export const getCloudSecurityUsageRecord = async ({
   logger,
 }: CloudSecurityMeteringCallbackInput): Promise<UsageRecord[] | undefined> => {
   try {
-    const searchFrom = getSearchStartDate(lastSuccessfulReport);
-
-    if (!(await indexHasDataInDateRange(esClient, cloudSecuritySolution, searchFrom))) return;
+    if (!(await indexHasDataInDateRange(esClient, cloudSecuritySolution))) return;
 
     // const periodSeconds = Math.floor((new Date().getTime() - searchFrom.getTime()) / 1000);
     const periodSeconds = 1800; // Workaround to prevent overbilling by charging for a constant time window. The issue should be resolved in https://github.com/elastic/security-team/issues/9424.
 
-    const assetCountAggregations = await getAssetAggByCloudSecuritySolution(
+    const assetCountAggregation = await getAssetAggByCloudSecuritySolution(
       esClient,
-      cloudSecuritySolution,
-      searchFrom
+      cloudSecuritySolution
     );
 
+    if (!assetCountAggregation) return [];
+
     const usageRecords = await getUsageRecords(
-      assetCountAggregations,
+      assetCountAggregation,
       cloudSecuritySolution,
       taskId,
       tier,
@@ -235,7 +241,7 @@ export const getCloudSecurityUsageRecord = async ({
       logger
     );
 
-    return usageRecords;
+    return [usageRecords];
   } catch (err) {
     logger.error(`Failed to fetch ${cloudSecuritySolution} metering data ${err}`);
   }
