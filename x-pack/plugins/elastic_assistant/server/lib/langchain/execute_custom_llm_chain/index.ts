@@ -19,6 +19,7 @@ import {
 } from '@kbn/langchain/server';
 import { EsAnonymizationFieldsSchema } from '../../../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../../../ai_assistant_data_clients/anonymization_fields/helpers';
+import { MessagesPlaceholder } from '@langchain/core/prompts';
 import { AgentExecutor } from '../executors/types';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
@@ -137,7 +138,10 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         returnIntermediateSteps: false,
         agentArgs: {
           // this is important to help LangChain correctly format tool input
-          humanMessageTemplate: `Question: {input}\n\n{agent_scratchpad}`,
+          humanMessageTemplate: `Remember, when you have enough information, always prefix your final JSON output with "Final Answer:"\n\nQuestion: {input}\n\n{agent_scratchpad}.`,
+          memoryPrompts: [new MessagesPlaceholder('chat_history')],
+          suffix:
+            'Begin! Reminder to ALWAYS use the above format, and to use tools if appropriate.',
         },
       });
 

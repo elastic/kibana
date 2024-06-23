@@ -43,7 +43,15 @@ describe('Router', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       const validation = schema.object({ foo: schema.string() });
       router.post(
-        { path: '/', validate: { body: validation, query: validation, params: validation } },
+        {
+          path: '/',
+          validate: { body: validation, query: validation, params: validation },
+          options: {
+            deprecated: true,
+            summary: 'post test summary',
+            description: 'post test description',
+          },
+        },
         (context, req, res) => res.ok()
       );
       const routes = router.getRoutes();
@@ -55,6 +63,11 @@ describe('Router', () => {
         path: '/',
         validationSchemas: { body: validation, query: validation, params: validation },
         isVersioned: false,
+        options: {
+          deprecated: true,
+          summary: 'post test summary',
+          description: 'post test description',
+        },
       });
     });
 
