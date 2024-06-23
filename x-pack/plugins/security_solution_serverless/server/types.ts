@@ -24,7 +24,7 @@ import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
-import { ResourceSubtypeCounter } from './cloud_security/cloud_security_metering_task';
+import type { ResourceSubtypeCounter } from './cloud_security/cloud_security_metering_task';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
