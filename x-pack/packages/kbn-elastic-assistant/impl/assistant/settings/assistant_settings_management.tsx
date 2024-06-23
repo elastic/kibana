@@ -19,7 +19,7 @@ import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
-import { KnowledgeBaseSettings, EvaluationSettings } from '.';
+import { EvaluationSettings } from '.';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
@@ -28,6 +28,7 @@ import { ConversationSettingsManagement } from '../conversations/conversation_se
 import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management';
 import { SystemPromptSettingsManagement } from '../prompt_editor/system_prompt/system_prompt_settings_management';
 import { AnonymizationSettingsManagement } from '../../data_anonymization/settings/anonymization_settings_management';
+import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management.tsx';
 
 import {
   ANONYMIZATION_TAB,
@@ -295,7 +296,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
             />
           )}
           {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (
-            <KnowledgeBaseSettings
+            <KnowledgeBaseSettingsManagement
               knowledgeBase={knowledgeBase}
               setUpdatedKnowledgeBaseSettings={handleChange(setUpdatedKnowledgeBaseSettings)}
             />
