@@ -10,12 +10,13 @@ import { EuiButton } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
+import { of } from 'rxjs';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { EnabledFeatures } from './enabled_features';
@@ -103,6 +104,93 @@ describe('ManageSpacePage', () => {
       imageUrl: '',
       disabledFeatures: [],
     });
+  });
+
+  it('shows solution view select when enabled', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    const wrapper = mountWithIntl(
+      <ManageSpacePage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowFeatureVisibility
+        isSolutionNavEnabled$={of(true)}
+      />
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+    });
+
+    expect(findTestSubject(wrapper, 'navigationPanel')).toHaveLength(1);
+  });
+
+  it('hides solution view select when not enabled or undefined', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    {
+      const wrapper = mountWithIntl(
+        <ManageSpacePage
+          spacesManager={spacesManager as unknown as SpacesManager}
+          getFeatures={featuresStart.getFeatures}
+          notifications={notificationServiceMock.createStartContract()}
+          history={history}
+          capabilities={{
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: { manage: true },
+          }}
+          allowFeatureVisibility
+        />
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+      });
+
+      expect(findTestSubject(wrapper, 'navigationPanel')).toHaveLength(0);
+    }
+
+    {
+      const wrapper = mountWithIntl(
+        <ManageSpacePage
+          spacesManager={spacesManager as unknown as SpacesManager}
+          getFeatures={featuresStart.getFeatures}
+          notifications={notificationServiceMock.createStartContract()}
+          history={history}
+          capabilities={{
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: { manage: true },
+          }}
+          allowFeatureVisibility
+          isSolutionNavEnabled$={of(false)}
+        />
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+      });
+
+      expect(findTestSubject(wrapper, 'navigationPanel')).toHaveLength(0);
+    }
   });
 
   it('shows feature visibility controls when allowed', async () => {
