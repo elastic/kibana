@@ -16,12 +16,13 @@ import {
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { PANEL_BADGE_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
 import { InputControlPublicConfig } from '../config';
 import { InputControlDeprecationBadge } from './deprecation_badge';
+import { convertToControlsAction } from './convert_to_controls_action';
 
 type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
 
@@ -87,6 +88,8 @@ export class InputControlVisPlugin implements Plugin<void, void> {
     const deprecationBadge = new InputControlDeprecationBadge();
 
     uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, deprecationBadge);
+
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, convertToControlsAction);
 
     return {};
   }
