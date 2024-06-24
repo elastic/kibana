@@ -85,6 +85,7 @@ export const getVersionedRouterDefaults = () => ({
   options: {
     summary: 'versioned route',
     access: 'public',
+    deprecated: true,
     options: {
       tags: ['ignore-me', 'oas-tag:versioned'],
     },

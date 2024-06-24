@@ -19,6 +19,7 @@ export interface Props {
 export function SloDetailsAlerts({ slo }: Props) {
   const {
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
+    observability: { observabilityRuleTypeRegistry },
   } = useKibana().services;
 
   return (
@@ -42,6 +43,7 @@ export function SloDetailsAlerts({ slo }: Props) {
             }}
             showAlertStatusWithFlapping
             pageSize={100}
+            cellContext={{ observabilityRuleTypeRegistry }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -764,6 +764,27 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.integrationAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "integrationAssistant",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "integrationAssistant",
+                "scope": "public",
+                "docId": "kibIntegrationAssistantPluginApi",
+                "section": "def-public.IntegrationAssistantPluginStart",
+                "text": "IntegrationAssistantPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.FleetStartServices.cloud",
             "type": "CompoundType",
             "tags": [],
@@ -3384,10 +3405,10 @@
             "id": "def-public.UIExtensionsStorage.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string]: Partial<Record<\"agent-enrollment-flyout\" | \"package-detail-assets\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-policy-create-multi-step\" | \"package-policy-edit\" | ... 4 more ... | \"endpoint-agent-tamper-protection\", UIExtensionPoint>>",
+            "label": "[key: string]: Partial<Record<\"agent-enrollment-flyout\" | \"package-detail-assets\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-policy-create-multi-step\" | \"package-policy-edit\" | ... 5 more ... | \"pli-auth-block\", UIExtensionPoint>>",
             "description": [],
             "signature": [
-              "[key: string]:  Partial<Record<\"agent-enrollment-flyout\" | \"package-detail-assets\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-policy-create-multi-step\" | \"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-policy-response\" | \"package-policy-replace-define-step\" | \"package-generic-errors-list\" | \"endpoint-agent-tamper-protection\", ",
+              "[key: string]:  Partial<Record<\"agent-enrollment-flyout\" | \"package-detail-assets\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-policy-create-multi-step\" | \"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-policy-response\" | \"package-policy-replace-define-step\" | \"package-generic-errors-list\" | \"endpoint-agent-tamper-protection\" | \"pli-auth-block\", ",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -3840,7 +3861,9 @@
             "text": "PackagePolicyCreateMultiStepExtension"
           },
           " | ",
-          "EndpointAgentTamperProtectionExtension"
+          "EndpointAgentTamperProtectionExtension",
+          " | ",
+          "PliAuthBlockExtension"
         ],
         "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
         "deprecated": false,
@@ -3948,7 +3971,9 @@
                 "text": "PackagePolicyCreateMultiStepExtension"
               },
               " | ",
-              "EndpointAgentTamperProtectionExtension"
+              "EndpointAgentTamperProtectionExtension",
+              " | ",
+              "PliAuthBlockExtension"
             ],
             "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
             "deprecated": false,
@@ -4204,6 +4229,22 @@
                 ]
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.integration_create",
+            "type": "Function",
+            "tags": [],
+            "label": "integration_create",
+            "description": [],
+            "signature": [
+              "() => [string, string]"
+            ],
+            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -5550,7 +5591,9 @@
                   "text": "PackagePolicyCreateMultiStepExtension"
                 },
                 " | ",
-                "EndpointAgentTamperProtectionExtension"
+                "EndpointAgentTamperProtectionExtension",
+                " | ",
+                "PliAuthBlockExtension"
               ],
               "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
               "deprecated": false,
@@ -6011,7 +6054,7 @@
                 "section": "def-common.Agent",
                 "text": "Agent"
               },
-              "[]; total: number; page: number; perPage: number; aggregations?: Record<string, ",
+              "[]; total: number; page: number; perPage: number; statusSummary?: Record<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\", number> | undefined; aggregations?: Record<string, ",
               "AggregationsAggregate",
               "> | undefined; }>"
             ],
@@ -6343,7 +6386,7 @@
                 "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
-              ", ids: string[], options?: { fields?: string[] | undefined; withPackagePolicies?: boolean | undefined; ignoreMissing?: boolean | undefined; }) => Promise<",
+              ", ids: (string | { id: string; spaceId?: string | undefined; })[], options?: { fields?: string[] | undefined; withPackagePolicies?: boolean | undefined; ignoreMissing?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6386,7 +6429,7 @@
                 "label": "ids",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  "(string | { id: string; spaceId?: string | undefined; })[]"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
@@ -9909,7 +9952,7 @@
                 "section": "def-common.ListWithKuery",
                 "text": "ListWithKuery"
               },
-              ") => Promise<",
+              " & { spaceId?: string | undefined; }) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -9955,7 +9998,7 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-server.PackagePolicyClient.list.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
@@ -9966,7 +10009,8 @@
                     "docId": "kibFleetPluginApi",
                     "section": "def-common.ListWithKuery",
                     "text": "ListWithKuery"
-                  }
+                  },
+                  " & { spaceId?: string | undefined; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -21293,6 +21337,22 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetServerAgent.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [
+              "\nNamespaces"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -23960,6 +24020,20 @@
             "tags": [],
             "label": "id",
             "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PackagePolicy.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
