@@ -215,6 +215,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     return new TaskManagerRunner({
       logger: this.logger,
       instance,
+      taskStore: this.store,
       store: this.bufferedStore,
       definitions: this.definitions,
       beforeRun: this.middleware.beforeRun,

@@ -52,6 +52,7 @@ import {
   TaskDefinition,
   TaskStatus,
 } from '../task';
+import { TaskStore } from '../task_store';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isRetryableError, isUnrecoverableError } from './errors';
 import type { EventLoopDelayConfig } from '../config';
@@ -101,6 +102,7 @@ type Opts = {
   logger: Logger;
   definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
+  taskStore: TaskStore;
   store: Updatable;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   defaultMaxAttempts: number;
@@ -147,6 +149,7 @@ export class TaskManagerRunner implements TaskRunner {
   private instance: TaskRunningInstance;
   private definitions: TaskTypeDictionary;
   private logger: Logger;
+  private taskStore: TaskStore;
   private bufferedTaskStore: Updatable;
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
@@ -181,6 +184,7 @@ export class TaskManagerRunner implements TaskRunner {
     usageCounter,
     eventLoopDelayConfig,
     allowReadingInvalidState,
+    taskStore,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -194,6 +198,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.usageCounter = usageCounter;
     this.uuid = uuidv4();
     this.eventLoopDelayConfig = eventLoopDelayConfig;
+    this.taskStore = taskStore;
     this.taskValidator = new TaskValidator({
       logger: this.logger,
       definitions: this.definitions,
@@ -650,9 +655,20 @@ export class TaskManagerRunner implements TaskRunner {
       this.instance = asRan(this.instance.task);
       await this.removeTask();
     } else {
-      const { shouldValidate = true } = unwrap(result);
-      this.instance = asRan(
-        await this.bufferedTaskStore.update(
+      // const { shouldValidate = true } = unwrap(result);
+      const partialUpdateResult = await this.taskStore.bulkPartialUpdate([
+        {
+          id: this.instance.task.id,
+          ...fieldUpdates,
+          // reset fields that track the lifecycle of the concluded `task run`
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+          version: this.instance.task.version,
+        },
+      ]);
+      if (isOk(partialUpdateResult[0]!)) {
+        this.instance = asRan(
           defaults(
             {
               ...fieldUpdates,
@@ -662,10 +678,13 @@ export class TaskManagerRunner implements TaskRunner {
               ownerId: null,
             },
             taskWithoutEnabled(this.instance.task)
-          ),
-          { validate: shouldValidate }
-        )
-      );
+          )
+        );
+      } else {
+        throw new Error(
+          partialUpdateResult[0]!.error.error.reason || 'Failed to update task after running'
+        );
+      }
     }
 
     return fieldUpdates.status === TaskStatus.Failed
