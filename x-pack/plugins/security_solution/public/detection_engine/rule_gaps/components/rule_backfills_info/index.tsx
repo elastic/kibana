@@ -23,12 +23,14 @@ import { useUserData } from '../../../../detections/components/user_info';
 import { getBackfillRowsFromResponse } from './utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 
 const AUTO_REFRESH_INTERVAL = 3000;
 const DEFAULT_PAGE_SIZE = 10;
 
 const getBackfillsTableColumns = (hasCRUDPermissions: boolean) => {
   const stopAction = {
+    name: i18n.BACKFILLS_TABLE_COLUMN_ACTION,
     render: (item: BackfillRow) => <StopBackfill id={item.id} />,
     width: '10%',
   };
@@ -36,18 +38,33 @@ const getBackfillsTableColumns = (hasCRUDPermissions: boolean) => {
   const columns: Array<EuiBasicTableColumn<BackfillRow>> = [
     {
       field: 'status',
-      name: i18n.BACKFILLS_TABLE_COLUMN_STATUS,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.BACKFILLS_TABLE_COLUMN_STATUS}
+          tooltipContent={i18n.BACKFILLS_TABLE_COLUMN_STATUS_TOOLTIP}
+        />
+      ),
       render: (value: BackfillStatus) => <BackfillStatusInfo status={value} />,
       width: '10%',
     },
     {
       field: 'created_at',
-      name: i18n.BACKFILLS_TABLE_COLUMN_CREATED_AT,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.BACKFILLS_TABLE_COLUMN_CREATED_AT}
+          tooltipContent={i18n.BACKFILLS_TABLE_COLUMN_CREATED_AT_TOOLTIP}
+        />
+      ),
       render: (value: 'string') => <FormattedDate value={value} fieldName={'created_at'} />,
       width: '20%',
     },
     {
-      name: i18n.BACKFILLS_TABLE_COLUMN_SOURCE_TIME_RANCE,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.BACKFILLS_TABLE_COLUMN_SOURCE_TIME_RANGE}
+          tooltipContent={i18n.BACKFILLS_TABLE_COLUMN_SOURCE_TIME_RANGE_TOOLTIP}
+        />
+      ),
       render: (value: BackfillRow) => (
         <>
           <FormattedDate value={value.start} fieldName={'start'} />
@@ -60,31 +77,56 @@ const getBackfillsTableColumns = (hasCRUDPermissions: boolean) => {
     {
       field: 'error',
       align: 'right',
-      name: i18n.BACKFILLS_TABLE_COLUMN_ERROR,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.BACKFILLS_TABLE_COLUMN_ERROR}
+          tooltipContent={i18n.BACKFILLS_TABLE_COLUMN_ERROR_TOOLTIP}
+        />
+      ),
       'data-test-subj': 'rule-backfills-column-error',
     },
     {
       field: 'pending',
       align: 'right',
-      name: i18n.BACKFILLS_TABLE_COLUMN_PENDING,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.BACKFILLS_TABLE_COLUMN_PENDING}
+          tooltipContent={i18n.BACKFILLS_TABLE_COLUMN_PENDING_TOOLTIP}
+        />
+      ),
       'data-test-subj': 'rule-backfills-column-pending',
     },
     {
       field: 'running',
       align: 'right',
-      name: i18n.BACKFILLS_TABLE_COLUMN_RUNNING,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.BACKFILLS_TABLE_COLUMN_RUNNING}
+          tooltipContent={i18n.BACKFILLS_TABLE_COLUMN_RUNNING_TOOLTIP}
+        />
+      ),
       'data-test-subj': 'rule-backfills-column-running',
     },
     {
       field: 'complete',
       align: 'right',
-      name: i18n.BACKFILLS_TABLE_COLUMN_COMPLETED,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.BACKFILLS_TABLE_COLUMN_COMPLETED}
+          tooltipContent={i18n.BACKFILLS_TABLE_COLUMN_COMPLETED_TOOLTIP}
+        />
+      ),
       'data-test-subj': 'rule-backfills-column-completed',
     },
     {
       field: 'total',
       align: 'right',
-      name: i18n.BACKFILLS_TABLE_COLUMN_TOTAL,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.BACKFILLS_TABLE_COLUMN_TOTAL}
+          tooltipContent={i18n.BACKFILLS_TABLE_COLUMN_TOTAL_TOOLTIP}
+        />
+      ),
       'data-test-subj': 'rule-backfills-column-total',
     },
   ];
