@@ -7,41 +7,49 @@
 
 import { handleCategorizationValidation } from './validate';
 import type { CategorizationState } from '../../types';
-import {
-  categorizationTestState,
-} from '../../../__jest__/fixtures/categorization';
+import { categorizationTestState } from '../../../__jest__/fixtures/categorization';
 
-let testState: CategorizationState = categorizationTestState;
+const testState: CategorizationState = categorizationTestState;
 
 describe('Testing categorization invalid category', () => {
   it('handleCategorizationValidation()', async () => {
-    testState.pipelineResults = [{ test: 'testresult', event: {category: ["foo"] }}]
+    testState.pipelineResults = [{ test: 'testresult', event: { category: ['foo'] } }];
     const response = handleCategorizationValidation(testState);
-    expect(response.invalidCategorization).toEqual([{
-             "error": "field event.category's values (foo) is not one of the allowed values (api, authentication, configuration, database, driver, email, file, host, iam, intrusion_detection, library, malware, network, package, process, registry, session, threat, vulnerability, web)",
-           }]);
+    expect(response.invalidCategorization).toEqual([
+      {
+        error:
+          "field event.category's values (foo) is not one of the allowed values (api, authentication, configuration, database, driver, email, file, host, iam, intrusion_detection, library, malware, network, package, process, registry, session, threat, vulnerability, web)",
+      },
+    ]);
     expect(response.lastExecutedChain).toBe('handleCategorizationValidation');
   });
 });
 
 describe('Testing categorization invalid type', () => {
-    it('handleCategorizationValidation()', async () => {
-      testState.pipelineResults = [{ test: 'testresult', event: {type: ["foo"] }}]
-      const response = handleCategorizationValidation(testState);
-      expect(response.invalidCategorization).toEqual([{
-               "error": "field event.type's values (foo) is not one of the allowed values (access, admin, allowed, change, connection, creation, deletion, denied, end, error, group, indicator, info, installation, protocol, start, user)",
-             }]);
-      expect(response.lastExecutedChain).toBe('handleCategorizationValidation');
-    });
+  it('handleCategorizationValidation()', async () => {
+    testState.pipelineResults = [{ test: 'testresult', event: { type: ['foo'] } }];
+    const response = handleCategorizationValidation(testState);
+    expect(response.invalidCategorization).toEqual([
+      {
+        error:
+          "field event.type's values (foo) is not one of the allowed values (access, admin, allowed, change, connection, creation, deletion, denied, end, error, group, indicator, info, installation, protocol, start, user)",
+      },
+    ]);
+    expect(response.lastExecutedChain).toBe('handleCategorizationValidation');
   });
+});
 
-  describe('Testing categorization invalid compatibility', () => {
-    it('handleCategorizationValidation()', async () => {
-      testState.pipelineResults = [{ test: 'testresult', event: {category : ["authentication"], type: ["access"] }}]
-      const response = handleCategorizationValidation(testState);
-      expect(response.invalidCategorization).toEqual([{
-               "error": "event.type (access) not compatible with any of the event.category (authentication)"
-             }]);
-      expect(response.lastExecutedChain).toBe('handleCategorizationValidation');
-    });
+describe('Testing categorization invalid compatibility', () => {
+  it('handleCategorizationValidation()', async () => {
+    testState.pipelineResults = [
+      { test: 'testresult', event: { category: ['authentication'], type: ['access'] } },
+    ];
+    const response = handleCategorizationValidation(testState);
+    expect(response.invalidCategorization).toEqual([
+      {
+        error: 'event.type (access) not compatible with any of the event.category (authentication)',
+      },
+    ]);
+    expect(response.lastExecutedChain).toBe('handleCategorizationValidation');
   });
+});

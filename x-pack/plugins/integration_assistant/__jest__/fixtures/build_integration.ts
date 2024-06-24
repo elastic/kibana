@@ -16,7 +16,7 @@ export const testIntegration: Integration = {
       name: 'datastream',
       title: 'Datastream',
       description: 'Datastream description',
-      inputTypes: ["filestream", "tcp", "udp"],
+      inputTypes: ['filestream', 'tcp', 'udp'],
       docs: [
         {
           key: 'value',

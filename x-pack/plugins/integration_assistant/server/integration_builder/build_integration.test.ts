@@ -11,7 +11,7 @@ import type { Integration } from '../../common';
 
 import { testIntegration } from '../../__jest__/fixtures/build_integration';
 
-let testLocalIntegraiton: Integration = testIntegration;
+const testLocalIntegraiton: Integration = testIntegration;
 
 describe('Testing categorization invalid category', () => {
   it('buildPackage()', async () => {
