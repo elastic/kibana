@@ -4,8 +4,6 @@
     "rootDir": ".",
     "paths": {
       // START AUTOMATED PACKAGE LISTING
-      "@kbn/aad-fixtures-plugin": ["x-pack/test/alerting_api_integration/common/plugins/aad"],
-      "@kbn/aad-fixtures-plugin/*": ["x-pack/test/alerting_api_integration/common/plugins/aad/*"],
       "@kbn/ace": ["packages/kbn-ace"],
       "@kbn/ace/*": ["packages/kbn-ace/*"],
       "@kbn/actions-plugin": ["x-pack/plugins/actions"],
@@ -1866,6 +1864,8 @@
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
       "@kbn/zod-helpers": ["packages/kbn-zod-helpers"],
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
+      "@kbn/aad-fixtures-plugin": ["x-pack/test/alerting_api_integration/common/plugins/aad"],
+      "@kbn/aad-fixtures-plugin/*": ["x-pack/test/alerting_api_integration/common/plugins/aad/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
       "@emotion/core": ["typings/@emotion"]

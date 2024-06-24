@@ -12,14 +12,13 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { mapValues, once } from 'lodash';
+import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '@kbn/actions-plugin/server/constants/saved_objects';
-import { firstValueFrom } from 'rxjs';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
@@ -110,47 +109,10 @@ export class ObservabilityAIAssistantPlugin
       };
     }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
 
-    // Using once to make sure the same model ID is used during service init and Knowledge base setup
-    const getModelId = once(async () => {
-      const defaultModelId = '.elser_model_2';
-      const [_, pluginsStart] = await core.getStartServices();
-      const license = await firstValueFrom(pluginsStart.licensing.license$);
-
-      if (!license.hasAtLeast('enterprise')) {
-        return defaultModelId;
-      }
-
-      try {
-        // Wait for the ML plugin's dependency on the internal saved objects client to be ready
-        const { ml } = await core.plugins.onSetup('ml');
-
-        if (!ml.found) {
-          throw new Error('Could not find ML plugin');
-        }
-
-        const elserModelDefinition = await (
-          ml.contract as {
-            trainedModelsProvider: (
-              request: {},
-              soClient: {}
-            ) => { getELSER: () => Promise<{ model_id: string }> };
-          }
-        )
-          .trainedModelsProvider({} as any, {} as any) // request, savedObjectsClient (but we fake it to use the internal user)
-          .getELSER();
-
-        return elserModelDefinition.model_id;
-      } catch (error) {
-        this.logger.error(`Failed to resolve ELSER model definition: ${error}`);
-        return defaultModelId;
-      }
-    });
-
     const service = (this.service = new ObservabilityAIAssistantService({
       logger: this.logger.get('service'),
       core,
       taskManager: plugins.taskManager,
-      getModelId,
     }));
 
     service.register(registerFunctions);
