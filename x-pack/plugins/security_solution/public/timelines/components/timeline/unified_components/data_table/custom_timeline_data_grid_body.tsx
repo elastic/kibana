@@ -36,7 +36,9 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
 };
 
 const emptyNotes: string[] = [];
-const DEFAULT_UDT_ROW_HEIGHT = 34;
+
+// THE DataGrid Row default is 34px, but we make ours 40 to account for our row actions
+const DEFAULT_UDT_ROW_HEIGHT = 40;
 
 /**
  *
@@ -168,6 +170,7 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
   height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
+    align-items: flex-start;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -194,6 +197,16 @@ type CustomTimelineDataGridSingleRowProps = {
   'visibleColumns' | 'Cell' | 'enabledRowRenderers' | 'refetch' | 'rowHeight'
 >;
 
+const calculateRowHeightInPixels = (lineHeightMultiple: number): string => {
+  // The line height multiple can be negative to indicate "auto" in the unified data table
+  if (lineHeightMultiple < 0) return 'auto';
+  // The base line-height in pixels is 16px. This would be calculated default by the datagird and we could use
+  // the `configRowHeight` prop, but since we own control of our rows via `customGridBody` we have to calculate it ourselves.
+  const baseRowLineHeightInPx = 16;
+  const rowHeightInPixels = DEFAULT_UDT_ROW_HEIGHT + baseRowLineHeightInPx * lineHeightMultiple;
+  return `${rowHeightInPixels}px`;
+};
+
 /**
  *
  * RenderCustomBody component above uses this component to display a single row.
@@ -213,7 +226,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     eventId = '',
     onToggleShowNotes,
     refetch,
-    rowHeight = 0,
+    rowHeight: rowHeightMultiple = 0,
   } = props;
   const dispatch = useDispatch();
   const { canShowRowRenderer } = useStatefulRowRenderer({
@@ -221,8 +234,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     rowRenderers: enabledRowRenderers,
   });
 
-  let cssRowHeight: string = 'auto';
-  if (rowHeight >= 0) cssRowHeight = `${DEFAULT_UDT_ROW_HEIGHT + 16 * rowHeight}px`;
+  const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple);
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
    * which renders the row-renderer, notes and notes editor
