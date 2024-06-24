@@ -10,11 +10,12 @@ import { EuiComment, EuiCommentList, EuiLoadingElastic, EuiMarkdownFormat } from
 import { useSelector } from 'react-redux';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { NOTES_COMMENT_TEST_ID, NOTES_LOADING_TEST_ID } from './test_ids';
+import { ADD_NOTE_LOADING_TEST_ID, NOTES_COMMENT_TEST_ID, NOTES_LOADING_TEST_ID } from './test_ids';
 import type { State } from '../../../../common/store';
 import type { Note } from '../../../../../common/api/timeline';
 import {
   ReqStatus,
+  selectCreateNoteByDocumentIdStatus,
   selectFetchNotesByDocumentIdError,
   selectFetchNotesByDocumentIdStatus,
   selectNotesByDocumentId,
@@ -25,7 +26,7 @@ export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.notes.addedAN
   defaultMessage: 'added a note',
 });
 export const FETCH_NOTES_ERROR = i18n.translate(
-  'xpack.securitySolution.notes.fetchNoteErrorLabel',
+  'xpack.securitySolution.notes.fetchNotesErrorLabel',
   {
     defaultMessage: 'Error fetching notes',
   }
@@ -44,6 +45,7 @@ export interface NotesListProps {
 /**
  * Renders a list of notes for the document.
  * If a note belongs to a timeline, a timeline icon will be shown the top right corner.
+ * When a note is being created, the component renders a loading spinner when the new note is about to be added.
  */
 export const NotesList = ({ eventId }: NotesListProps) => {
   const { addError: addErrorToast } = useAppToasts();
@@ -51,6 +53,8 @@ export const NotesList = ({ eventId }: NotesListProps) => {
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdError(state));
   const notes: Note[] = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
+
+  const createStatus = useSelector((state: State) => selectCreateNoteByDocumentIdStatus(state));
 
   useEffect(() => {
     if (fetchStatus === ReqStatus.Failed && fetchError) {
@@ -81,6 +85,9 @@ export const NotesList = ({ eventId }: NotesListProps) => {
           <EuiMarkdownFormat textSize="s">{note.note || ''}</EuiMarkdownFormat>
         </EuiComment>
       ))}
+      {createStatus === ReqStatus.Loading && (
+        <EuiLoadingElastic size="xxl" data-test-subj={ADD_NOTE_LOADING_TEST_ID} />
+      )}
     </EuiCommentList>
   );
 };
