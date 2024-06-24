@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import { EuiComment, EuiCommentList, EuiLoadingElastic, EuiMarkdownFormat } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedRelative } from '@kbn/i18n-react';
@@ -47,7 +47,7 @@ export interface NotesListProps {
  * If a note belongs to a timeline, a timeline icon will be shown the top right corner.
  * When a note is being created, the component renders a loading spinner when the new note is about to be added.
  */
-export const NotesList = ({ eventId }: NotesListProps) => {
+export const NotesList = memo(({ eventId }: NotesListProps) => {
   const { addError: addErrorToast } = useAppToasts();
 
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdStatus(state));
@@ -90,6 +90,6 @@ export const NotesList = ({ eventId }: NotesListProps) => {
       )}
     </EuiCommentList>
   );
-};
+});
 
 NotesList.displayName = 'NotesList';

@@ -27,7 +27,13 @@ import {
 } from '../../../../notes/store/notes.slice';
 import { MarkdownEditor } from '../../../../common/components/markdown_editor';
 
-export const ADD_NOTE_BUTTON = i18n.translate('xpack.securitySolution.notes.addNoteButtonLabel', {
+export const MARKDOWN_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.notes.markdownAriaLabel',
+  {
+    defaultMessage: 'Note',
+  }
+);
+export const ADD_NOTE_BUTTON = i18n.translate('xpack.securitySolution.notes.addNoteBtnLabel', {
   defaultMessage: 'Add note',
 });
 export const CREATE_NOTE_ERROR = i18n.translate(
@@ -84,7 +90,7 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
             dataTestSubj={ADD_NOTE_MARKDOWN_TEST_ID}
             value={editorValue}
             onChange={setEditorValue}
-            ariaLabel={'add new note'}
+            ariaLabel={MARKDOWN_ARIA_LABEL}
             setIsMarkdownInvalid={() => {}}
           />
         </EuiComment>

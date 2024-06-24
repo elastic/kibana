@@ -10,21 +10,16 @@ import type { BareNote, Note } from '../../../common/api/timeline';
 import { KibanaServices } from '../../common/lib/kibana';
 import { NOTE_URL } from '../../../common/constants';
 
-export const createNote = async ({
-  note,
-  noteId,
-  version,
-  overrideOwner,
-}: {
-  note: BareNote;
-  noteId?: string | null;
-  version?: string | null;
-  overrideOwner?: boolean;
-}) => {
+/**
+ * Adds a new note.
+ * This code is very close to the persistNote found in x-pack/plugins/security_solution/public/timelines/containers/notes/api.ts.
+ * // TODO remove the old method when the transition to the new notes system is complete
+ */
+export const createNote = async ({ note }: { note: BareNote }) => {
   let requestBody;
 
   try {
-    requestBody = JSON.stringify({ noteId, version, note, overrideOwner });
+    requestBody = JSON.stringify({ note });
   } catch (err) {
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
