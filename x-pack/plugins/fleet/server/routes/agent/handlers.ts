@@ -8,6 +8,7 @@
 import { uniq } from 'lodash';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type {
   GetAgentsResponse,
@@ -20,6 +21,7 @@ import type {
   GetAgentUploadsResponse,
   PostAgentReassignResponse,
   PostRetrieveAgentsByActionsResponse,
+  Agent,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -37,22 +39,36 @@ import type {
   GetAgentUploadFileRequestSchema,
   DeleteAgentUploadFileRequestSchema,
   PostRetrieveAgentsByActionsRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
-import { defaultFleetErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler, FleetNotFoundError } from '../../errors';
 import * as AgentService from '../../services/agents';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
+import { getAgentStatusForAgentPolicy } from '../../services/agents';
 
-export const getAgentHandler: RequestHandler<
+export function verifyNamespace(agent: Agent, currentNamespace?: string) {
+  const isInNamespace =
+    (currentNamespace && agent.namespaces?.includes(currentNamespace)) ||
+    (!currentNamespace &&
+      (!agent.namespaces ||
+        agent.namespaces.length === 0 ||
+        agent.namespaces?.includes(DEFAULT_NAMESPACE_STRING)));
+  if (!isInNamespace) {
+    throw new FleetNotFoundError(`${agent.id} not found in namespace`);
+  }
+}
+
+export const getAgentHandler: FleetRequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>,
   TypeOf<typeof GetOneAgentRequestSchema.query>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
-  const soClient = coreContext.savedObjects.client;
-
   try {
-    let agent = await AgentService.getAgentById(esClient, soClient, request.params.agentId);
+    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
+
+    let agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
+
+    verifyNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace());
 
     if (request.query.withMetrics) {
       agent = (await fetchAndAssignAgentMetrics(esClientCurrentUser, [agent]))[0];
@@ -77,10 +93,10 @@ export const getAgentHandler: RequestHandler<
 export const deleteAgentHandler: RequestHandler<
   TypeOf<typeof DeleteAgentRequestSchema.params>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-
   try {
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+
     await AgentService.deleteAgent(esClient, request.params.agentId);
 
     const body = {
@@ -162,17 +178,16 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
   }
 };
 
-export const getAgentsHandler: RequestHandler<
+export const getAgentsHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentsRequestSchema.query>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+  const { agentClient } = fleetContext;
   const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
-  const soClient = coreContext.savedObjects.client;
 
   try {
-    const agentRes = await AgentService.getAgentsByKuery(esClient, soClient, {
+    const agentRes = await agentClient.asCurrentUser.listAgents({
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
@@ -300,19 +315,20 @@ export const postBulkAgentReassignHandler: RequestHandler<
   }
 };
 
-export const getAgentStatusForAgentPolicyHandler: RequestHandler<
+export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const soClient = coreContext.savedObjects.client;
   try {
-    const results = await AgentService.getAgentStatusForAgentPolicy(
+    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const soClient = fleetContext.internalSoClient;
+    const results = await getAgentStatusForAgentPolicy(
       esClient,
       soClient,
       request.query.policyId,
-      request.query.kuery
+      request.query.kuery,
+      coreContext.savedObjects.client.getCurrentNamespace()
     );
 
     const body: GetAgentStatusResponse = { results };
