@@ -61,10 +61,6 @@ export const usePollApi = ({
   useEffect(() => {
     connectorIdRef.current = connectorId;
     return () => {
-      console.log('DISMOUNT connectorId??????', {
-        currentTimeout: timeoutIdRef.current,
-        connectorId,
-      });
       connectorIdRef.current = undefined;
       // when a connectorId changes, clear timeout
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
@@ -81,7 +77,6 @@ export const usePollApi = ({
         setData(null);
         return;
       }
-      console.log('handleResponse', responseData);
       setStatus(responseData.status);
       setApproximateFutureTime(
         moment(responseData.updatedAt).add(responseData.averageIntervalMs, 'milliseconds').toDate()
@@ -154,15 +149,9 @@ export const usePollApi = ({
       handleResponse(parsedResponse.data.data ?? null);
       setStats(parsedResponse.data.stats);
       // poll every 5 seconds, regardless if current connector is running. Need stats object for connector dropdown stats
-      console.log('connectorIds', {
-        connectorId,
-        connectorIdRef: connectorIdRef.current,
-      });
-      console.log('timeoutIdRef.current before', timeoutIdRef.current);
       timeoutIdRef.current = setTimeout(() => {
         pollApi();
       }, 5000);
-      console.log('timeoutIdRef.current after', timeoutIdRef.current);
     } catch (error) {
       setStatus(null);
       setData(null);
@@ -173,10 +162,6 @@ export const usePollApi = ({
       });
     }
   }, [connectorId, handleResponse, http, toasts]);
-  // const returnValue = useMemo(() => {
-  //   console.log('returnValue', { cancelAttackDiscovery, status, data, pollApi, stats });
-  //   return { cancelAttackDiscovery, status, data, pollApi, stats };
-  // }, [cancelAttackDiscovery, status, data, pollApi, stats]);
 
   return { cancelAttackDiscovery, status, data, pollApi, stats };
 };

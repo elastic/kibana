@@ -122,7 +122,6 @@ export const useAttackDiscovery = ({
   }, [pollApi, connectorId, setLoadingConnectorId]);
 
   useEffect(() => {
-    console.log('pollStatus useEffect', pollStatus);
     if (pollStatus === 'running') {
       setIsLoading(true);
       setLoadingConnectorId?.(connectorId ?? null);

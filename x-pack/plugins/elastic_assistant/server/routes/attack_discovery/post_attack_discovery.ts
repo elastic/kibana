@@ -156,7 +156,6 @@ export const postAttackDiscoveryRoute = (
             telemetry,
             toolInstance,
           });
-          console.log('JSON.stringify(currentAd)', JSON.stringify(currentAd, null, 2));
           return response.ok({
             body: currentAd,
           });
