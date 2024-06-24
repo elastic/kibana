@@ -217,13 +217,13 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   agentPolicies: AgentPolicy[];
   updateAgentPolicies: (agentPolicies: AgentPolicy[]) => void;
   setHasAgentPolicyError: (hasError: boolean) => void;
-  selectedAgentPolicyId?: string;
+  selectedAgentPolicyIds: string[];
 }> = ({
   packageInfo,
   agentPolicies,
   updateAgentPolicies: updateSelectedAgentPolicies,
   setHasAgentPolicyError,
-  selectedAgentPolicyId,
+  selectedAgentPolicyIds,
 }) => {
   const { isReady: isFleetReady } = useFleetStatus();
 
@@ -240,8 +240,10 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   } = useAgentPoliciesOptions(packageInfo);
 
   const [selectedPolicyIds, setSelectedPolicyIds] = useState<string[]>([]);
+  const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
 
-  const [isLoadingSelectedAgentPolicy, setIsLoadingSelectedAgentPolicy] = useState<boolean>(false);
+  const [isLoadingSelectedAgentPolicies, setIsLoadingSelectedAgentPolicies] =
+    useState<boolean>(false);
   const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<AgentPolicy[]>(agentPolicies);
 
   const updateAgentPolicies = useCallback(
@@ -255,7 +257,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   useEffect(() => {
     const fetchAgentPolicyInfo = async () => {
       if (selectedPolicyIds.length > 0) {
-        setIsLoadingSelectedAgentPolicy(true);
+        setIsLoadingSelectedAgentPolicies(true);
         const { data, error } = await sendBulkGetAgentPolicies(selectedPolicyIds, { full: true });
         if (error) {
           setSelectedAgentPolicyError(error);
@@ -264,7 +266,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
           setSelectedAgentPolicyError(undefined);
           updateAgentPolicies(data.items);
         }
-        setIsLoadingSelectedAgentPolicy(false);
+        setIsLoadingSelectedAgentPolicies(false);
       } else {
         setSelectedAgentPolicyError(undefined);
         updateAgentPolicies([]);
@@ -284,25 +286,27 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   // Try to select default agent policy
   useEffect(() => {
     if (
+      isFirstLoad &&
       selectedPolicyIds.length === 0 &&
       existingAgentPolicies.length &&
       (enableReusableIntegrationPolicies
         ? agentPolicyMultiOptions.length
         : agentPolicyOptions.length)
     ) {
+      setIsFirstLoad(false);
       if (enableReusableIntegrationPolicies) {
         const enabledOptions = agentPolicyMultiOptions.filter((option) => !option.disabled);
         if (enabledOptions.length === 1) {
           setSelectedPolicyIds([enabledOptions[0].key!]);
-        } else if (selectedAgentPolicyId) {
-          setSelectedPolicyIds([selectedAgentPolicyId]);
+        } else if (selectedAgentPolicyIds.length > 0) {
+          setSelectedPolicyIds(selectedAgentPolicyIds);
         }
       } else {
         const enabledOptions = agentPolicyOptions.filter((option) => !option.disabled);
         if (enabledOptions.length === 1) {
           setSelectedPolicyIds([enabledOptions[0].value]);
-        } else if (selectedAgentPolicyId) {
-          setSelectedPolicyIds([selectedAgentPolicyId]);
+        } else if (selectedAgentPolicyIds.length > 0) {
+          setSelectedPolicyIds(selectedAgentPolicyIds);
         }
       }
     }
@@ -310,9 +314,10 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     agentPolicyOptions,
     agentPolicyMultiOptions,
     enableReusableIntegrationPolicies,
-    selectedAgentPolicyId,
+    selectedAgentPolicyIds,
     selectedPolicyIds,
     existingAgentPolicies,
+    isFirstLoad,
   ]);
 
   // Bubble up any issues with agent policy selection
@@ -342,6 +347,14 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     );
   }
 
+  const someNewAgentPoliciesHaveLimitedPackage =
+    !packageInfo ||
+    selectedAgentPolicies
+      .filter((policy) => !selectedAgentPolicyIds.find((id) => policy.id === id))
+      .some((selectedAgentPolicy) =>
+        doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo)
+      );
+
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -369,7 +382,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
             }
           >
             <AgentPolicyFormRow
-              fullWidth={true}
+              fullWidth
               label={
                 <EuiFlexGroup justifyContent="spaceBetween">
                   <EuiFlexItem>
@@ -381,7 +394,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 </EuiFlexGroup>
               }
               helpText={
-                isFleetReady && selectedPolicyIds.length > 0 && !isLoadingSelectedAgentPolicy ? (
+                isFleetReady && selectedPolicyIds.length > 0 && !isLoadingSelectedAgentPolicies ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
                     defaultMessage="{count, plural, one {# agent is} other {# agents are}} enrolled with the selected agent policies."
@@ -395,11 +408,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 ) : null
               }
               isInvalid={Boolean(
-                selectedPolicyIds.length === 0 ||
-                  !packageInfo ||
-                  selectedAgentPolicies.every((selectedAgentPolicy) =>
-                    doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo)
-                  )
+                selectedPolicyIds.length === 0 || someNewAgentPoliciesHaveLimitedPackage
               )}
               error={
                 selectedPolicyIds.length === 0 ? (
@@ -407,17 +416,17 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.noPolicySelectedError"
                     defaultMessage="An agent policy is required."
                   />
-                ) : (
+                ) : someNewAgentPoliciesHaveLimitedPackage ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddLimitedIntegrationError"
                     defaultMessage="This integration can only be added once per agent policy."
                   />
-                )
+                ) : null
               }
             >
               {enableReusableIntegrationPolicies ? (
                 <AgentPolicyMultiSelect
-                  isLoading={isLoading || !packageInfo || isLoadingSelectedAgentPolicy}
+                  isLoading={isLoading || !packageInfo || isLoadingSelectedAgentPolicies}
                   selectedPolicyIds={selectedPolicyIds}
                   setSelectedPolicyIds={setSelectedPolicyIds}
                   agentPolicyMultiOptions={agentPolicyMultiOptions}
@@ -431,7 +440,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                     }
                   )}
                   fullWidth
-                  isLoading={isLoading || !packageInfo || isLoadingSelectedAgentPolicy}
+                  isLoading={isLoading || !packageInfo || isLoadingSelectedAgentPolicies}
                   options={agentPolicyOptions}
                   valueOfSelected={selectedPolicyIds[0]}
                   onChange={onChange}

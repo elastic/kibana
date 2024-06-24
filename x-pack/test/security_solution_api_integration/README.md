@@ -47,6 +47,13 @@ ex:
 3. In these new configuration files, include references to the base configurations located under the config directory to inherit CI configurations, environment variables, and other settings.
 4. Append a new entry in the `ftr_configs.yml` file to enable the execution of the newly added tests within the CI pipeline.
 
+## Adding tests for MKI which rely onto NON default project configuration
+
+The default project type configuration in Serverless is complete. If for the needs of a test suite a different configuration is required, e.g. [PLI - Essentials](https://github.com/elastic/kibana/blob/36578e82fa0a0440c1657a0ca688106c895d5e4e/x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/serverless.config.ts#L13), the already mentioned configuration in the permalink **does not work** for MKI. The override is needed to be added in the `./scripts/api_configs.json` file under the key with exact same name as the one of the script in `package.json` file which is running. 
+
+There are already configurations in the `./scripts/api_configs.json` which you can follow in order to add yours when it is needed. The currently supported configuration, allows **ONLY** the PLIs to be configured. Thus, experimental feature flags **are not yet supported** and the test should be skipped until further notice. 
+
+**NOTE**: If a target script living in `package.json` file, does not require any further configuration, then the entry in `./scripts/api_configs.json` file, **can be omitted!**
 
 # Testing locally 
 

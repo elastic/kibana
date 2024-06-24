@@ -67,12 +67,14 @@ const euiItemTypeToNodeDefinition = ({
 
 export const getNavigationTreeDefinition = ({
   dynamicItems$,
+  isSearchHomepageEnabled,
 }: {
   dynamicItems$: Observable<DynamicSideNavItems>;
+  isSearchHomepageEnabled: boolean;
 }): AddSolutionNavigationArg => {
   return {
     dataTestSubj: 'searchSideNav',
-    homePage: 'enterpriseSearch',
+    homePage: isSearchHomepageEnabled ? 'searchHomepage' : 'enterpriseSearch',
     icon,
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
@@ -84,7 +86,7 @@ export const getNavigationTreeDefinition = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
-                  link: 'enterpriseSearch',
+                  link: isSearchHomepageEnabled ? 'searchHomepage' : 'enterpriseSearch',
                 },
                 {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
@@ -204,6 +206,13 @@ export const getNavigationTreeDefinition = ({
                   id: 'build',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.build', {
                     defaultMessage: 'Build',
+                  }),
+                },
+                {
+                  children: [{ link: 'searchInferenceEndpoints' }],
+                  id: 'relevance',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
+                    defaultMessage: 'Relevance',
                   }),
                 },
                 {

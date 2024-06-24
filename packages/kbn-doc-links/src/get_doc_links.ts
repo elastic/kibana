@@ -28,6 +28,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
   const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
+  const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/${DOC_LINK_VERSION}/`;
   const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
   const OBSERVABILITY_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/`;
   const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
@@ -421,6 +422,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingSourceFields: `${ELASTICSEARCH_DOCS}mapping-source-field.html`,
       mappingSourceFieldsDisable: `${ELASTICSEARCH_DOCS}mapping-source-field.html#disable-source-field`,
       mappingStore: `${ELASTICSEARCH_DOCS}mapping-store.html`,
+      mappingSubobjects: `${ELASTICSEARCH_DOCS}subobjects.html`,
       mappingTermVector: `${ELASTICSEARCH_DOCS}term-vector.html`,
       mappingTypesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
       migrateIndexAllocationFilters: `${ELASTICSEARCH_DOCS}migrate-index-allocation-filters.html`,
@@ -434,6 +436,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       remoteClustersOnPremSetupTrustWithCert: `${ELASTICSEARCH_DOCS}remote-clusters-cert.html`,
       remoteClustersOnPremSetupTrustWithApiKey: `${ELASTICSEARCH_DOCS}remote-clusters-api-key.html`,
       remoteClustersCloudSetupTrust: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-enable-ccs.html`,
+      rollupMigratingToDownsampling: `${ELASTICSEARCH_DOCS}rollup-migrating-to-downsampling.html`,
       rrf: `${ELASTICSEARCH_DOCS}rrf.html`,
       scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
       secureCluster: `${ELASTICSEARCH_DOCS}secure-cluster.html`,
@@ -515,6 +518,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${ELASTICSEARCH_DOCS}index-mgmt.html`,
       kibanaSearchSettings: `${KIBANA_DOCS}advanced-options.html#kibana-search-settings`,
       discoverSettings: `${KIBANA_DOCS}advanced-options.html#kibana-discover-settings`,
+      rollupSettings: `${KIBANA_DOCS}advanced-options.html#kibana-rollups-settings`,
       visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
       timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
       savedObjectsApiList: `${KIBANA_DOCS}saved-objects-api.html#saved-objects-api`,
@@ -841,6 +845,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       datastreamsManualRollover: `${ELASTICSEARCH_DOCS}use-a-data-stream.html#manually-roll-over-a-data-stream`,
       datastreamsTSDS: `${ELASTICSEARCH_DOCS}tsds.html`,
       datastreamsTSDSMetrics: `${ELASTICSEARCH_DOCS}tsds.html#time-series-metric`,
+      datastreamsDownsampling: `${ELASTICSEARCH_DOCS}downsampling.html`,
       installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
       installElasticAgentStandalone: `${FLEET_DOCS}install-standalone-elastic-agent.html`,
       upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
@@ -860,6 +865,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       scalingKubernetesResourcesAndLimits: `${FLEET_DOCS}scaling-on-kubernetes.html#_specifying_resources_and_limits_in_agent_manifests`,
       roleAndPrivileges: `${FLEET_DOCS}fleet-roles-and-privileges.html`,
       proxiesSettings: `${FLEET_DOCS}fleet-agent-proxy-support.html`,
+    },
+    integrationDeveloper: {
+      upload: `${INTEGRATIONS_DEV_DOCS}upload-a-new-integration.html`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/index.html`,
