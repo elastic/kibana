@@ -40,8 +40,8 @@ export function AnnotationTooltip({
       description: <TagsList tags={annotation.tags} />,
     },
     {
-      title: i18n.translate('xpack.observability.annotationTooltip.description', {
-        defaultMessage: 'Description',
+      title: i18n.translate('xpack.observability.annotationTooltip.message', {
+        defaultMessage: 'Message',
       }),
       description: annotation.message ?? '--',
     },
