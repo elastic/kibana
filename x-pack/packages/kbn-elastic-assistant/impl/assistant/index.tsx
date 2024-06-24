@@ -640,8 +640,8 @@ const AssistantComponent: React.FC<Props> = ({
       </>
     ),
     [
-      refetchCurrentConversation,
       abortStream,
+      refetchCurrentConversation,
       currentConversation,
       editingSystemPromptId,
       getComments,

@@ -61,9 +61,7 @@ export async function get({
     connector = {
       id,
       actionTypeId: foundInMemoryConnector.actionTypeId,
-      isMissingSecrets: foundInMemoryConnector.isMissingSecrets,
       name: foundInMemoryConnector.name,
-      config: foundInMemoryConnector.config,
       isPreconfigured: foundInMemoryConnector.isPreconfigured,
       isSystemAction: foundInMemoryConnector.isSystemAction,
       isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
