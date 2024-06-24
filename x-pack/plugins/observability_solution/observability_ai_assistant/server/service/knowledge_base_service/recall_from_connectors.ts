@@ -13,20 +13,20 @@ import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
 
 export async function recallFromConnectors({
   queries,
-  asCurrentUser,
+  esClient,
   uiSettingsClient,
   modelId,
 }: {
   queries: Array<{ text: string; boost?: number }>;
-  asCurrentUser: ElasticsearchClient;
+  esClient: { asCurrentUser: ElasticsearchClient };
   uiSettingsClient: IUiSettingsClient;
   modelId: string;
 }): Promise<RecalledEntry[]> {
   const ML_INFERENCE_PREFIX = 'ml.inference.';
 
-  const connectorIndices = await getConnectorIndices(asCurrentUser, uiSettingsClient);
+  const connectorIndices = await getConnectorIndices(esClient, uiSettingsClient);
 
-  const fieldCaps = await asCurrentUser.fieldCaps({
+  const fieldCaps = await esClient.asCurrentUser.fieldCaps({
     index: connectorIndices,
     fields: `${ML_INFERENCE_PREFIX}*`,
     allow_no_indices: true,
@@ -72,7 +72,7 @@ export async function recallFromConnectors({
     });
   });
 
-  const response = await asCurrentUser.search<unknown>({
+  const response = await esClient.asCurrentUser.search<unknown>({
     index: connectorIndices,
     query: {
       bool: {
@@ -96,11 +96,11 @@ export async function recallFromConnectors({
 }
 
 async function getConnectorIndices(
-  client: ElasticsearchClient,
+  esClient: { asCurrentUser: ElasticsearchClient },
   uiSettingsClient: IUiSettingsClient
 ) {
   // improve performance by running this in parallel with the `uiSettingsClient` request
-  const responsePromise = client.transport.request({
+  const responsePromise = esClient.asCurrentUser.transport.request({
     method: 'GET',
     path: '_connector',
     querystring: {
