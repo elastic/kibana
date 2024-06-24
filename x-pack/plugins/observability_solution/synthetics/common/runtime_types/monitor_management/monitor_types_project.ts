@@ -6,8 +6,22 @@
  */
 
 import * as t from 'io-ts';
+import { Either } from 'fp-ts/Either';
 import { AlertConfigsCodec } from './alert_config';
 import { ScreenshotOptionCodec } from './monitor_configs';
+
+const ProjectMonitorSchedule = new t.Type<string | number, string | number, unknown>(
+  'ProjectMonitorSchedule',
+  t.string.is,
+  (input, context): Either<t.Errors, string | number> => {
+    if (typeof input === 'number' || input === '10s' || input === '30s') {
+      return t.success(input);
+    } else {
+      return t.failure(input, context);
+    }
+  },
+  t.identity
+);
 
 export const ProjectMonitorThrottlingConfigCodec = t.union([
   t.interface({
@@ -23,7 +37,7 @@ export const ProjectMonitorCodec = t.intersection([
     type: t.string,
     id: t.string,
     name: t.string,
-    schedule: t.number,
+    schedule: ProjectMonitorSchedule,
   }),
   t.partial({
     content: t.string,
