@@ -8940,7 +8940,7 @@
           "\nRenders a component from the React Embeddable registry into a Presentation Panel.\n\nTODO: Rename this to simply `Embeddable` when the legacy Embeddable system is removed."
         ],
         "signature": [
-          "<SerializedState extends object = object, Api extends ",
+          "<SerializedState extends object = object, RuntimeState extends object = SerializedState, Api extends ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -8948,7 +8948,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<SerializedState, SerializedState> = ",
+          "<SerializedState, RuntimeState> = ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -8956,7 +8956,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<SerializedState, SerializedState>, RuntimeState extends object = SerializedState, ParentApi extends ",
+          "<SerializedState, RuntimeState>, ParentApi extends ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
@@ -12813,7 +12813,7 @@
             "section": "def-public.ReactEmbeddableFactory",
             "text": "ReactEmbeddableFactory"
           },
-          "<SerializedState, Api, RuntimeState>"
+          "<SerializedState, RuntimeState, Api>"
         ],
         "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
         "deprecated": false,
@@ -12901,7 +12901,7 @@
             "signature": [
               "(initialState: RuntimeState, buildApi: (apiRegistration: ",
               "BuildReactEmbeddableApiRegistration",
-              "<SerializedState, Api>, comparators: ",
+              "<SerializedState, RuntimeState, Api>, comparators: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -12909,9 +12909,17 @@
                 "section": "def-common.StateComparators",
                 "text": "StateComparators"
               },
-              "<RuntimeState>) => Api, uuid: string, parentApi: unknown, setApi: (api: ",
+              "<RuntimeState>) => Api & ",
+              {
+                "pluginId": "@kbn/presentation-containers",
+                "scope": "common",
+                "docId": "kibKbnPresentationContainersPluginApi",
+                "section": "def-common.HasSnapshottableState",
+                "text": "HasSnapshottableState"
+              },
+              "<RuntimeState>, uuid: string, parentApi: unknown, setApi: (api: ",
               "SetReactEmbeddableApiRegistration",
-              "<SerializedState, Api>) => Api) => Promise<{ Component: React.FC<{}>; api: Api; }>"
+              "<SerializedState, RuntimeState, Api>) => Api) => Promise<{ Component: React.FC<{}>; api: Api; }>"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
@@ -12942,7 +12950,7 @@
                 "signature": [
                   "(apiRegistration: ",
                   "BuildReactEmbeddableApiRegistration",
-                  "<SerializedState, Api>, comparators: ",
+                  "<SerializedState, RuntimeState, Api>, comparators: ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "common",
@@ -12950,7 +12958,15 @@
                     "section": "def-common.StateComparators",
                     "text": "StateComparators"
                   },
-                  "<RuntimeState>) => Api"
+                  "<RuntimeState>) => Api & ",
+                  {
+                    "pluginId": "@kbn/presentation-containers",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "section": "def-common.HasSnapshottableState",
+                    "text": "HasSnapshottableState"
+                  },
+                  "<RuntimeState>"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
@@ -12997,7 +13013,7 @@
                 "signature": [
                   "(api: ",
                   "SetReactEmbeddableApiRegistration",
-                  "<SerializedState, Api>) => Api"
+                  "<SerializedState, RuntimeState, Api>) => Api"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
@@ -14041,10 +14057,6 @@
             {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/plugin.ts"
-            },
-            {
-              "plugin": "maps",
-              "path": "x-pack/plugins/maps/public/plugin.ts"
             }
           ],
           "returnComment": [],
@@ -14118,7 +14130,7 @@
             "\nRegisters an async {@link ReactEmbeddableFactory} getter."
           ],
           "signature": [
-            "<SerializedState extends object = object, Api extends ",
+            "<SerializedState extends object = object, RuntimeState extends object = SerializedState, Api extends ",
             {
               "pluginId": "embeddable",
               "scope": "public",
@@ -14126,7 +14138,7 @@
               "section": "def-public.DefaultEmbeddableApi",
               "text": "DefaultEmbeddableApi"
             },
-            "<SerializedState, SerializedState> = ",
+            "<SerializedState, RuntimeState> = ",
             {
               "pluginId": "embeddable",
               "scope": "public",
@@ -14134,7 +14146,7 @@
               "section": "def-public.DefaultEmbeddableApi",
               "text": "DefaultEmbeddableApi"
             },
-            "<SerializedState, SerializedState>, RuntimeState extends object = SerializedState>(type: string, getFactory: () => Promise<",
+            "<SerializedState, RuntimeState>>(type: string, getFactory: () => Promise<",
             {
               "pluginId": "embeddable",
               "scope": "public",
@@ -14142,7 +14154,7 @@
               "section": "def-public.ReactEmbeddableFactory",
               "text": "ReactEmbeddableFactory"
             },
-            "<SerializedState, Api, RuntimeState>>) => void"
+            "<SerializedState, RuntimeState, Api>>) => void"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": false,
@@ -14176,7 +14188,7 @@
                   "section": "def-public.ReactEmbeddableFactory",
                   "text": "ReactEmbeddableFactory"
                 },
-                "<SerializedState, Api, RuntimeState>>"
+                "<SerializedState, RuntimeState, Api>>"
               ],
               "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
               "deprecated": false,
@@ -14295,28 +14307,8 @@
               "path": "src/plugins/dashboard/public/plugin.tsx"
             },
             {
-              "plugin": "maps",
-              "path": "x-pack/plugins/maps/public/plugin.ts"
-            },
-            {
               "plugin": "discover",
               "path": "src/plugins/discover/public/plugin.tsx"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
             },
             {
               "plugin": "links",
@@ -14713,24 +14705,12 @@
               "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_renderer.tsx"
             },
             {
-              "plugin": "observabilityShared",
-              "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/profiling_embeddable.tsx"
-            },
-            {
-              "plugin": "observabilityShared",
-              "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx"
-            },
-            {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
             },
             {
               "plugin": "controls",
               "path": "src/plugins/controls/public/services/embeddable/embeddable.story.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/duplicate_dashboard_panel.test.ts"
             },
             {
               "plugin": "dashboard",

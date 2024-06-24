@@ -155,7 +155,7 @@
         "label": "AlertSummary",
         "description": [],
         "signature": [
-          "({ alertSummaryFields }: AlertSummaryProps) => JSX.Element"
+          "({ alert, alertSummaryFields }: AlertSummaryProps) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability/public/pages/alert_details/components/alert_summary.tsx",
         "deprecated": false,
@@ -166,7 +166,7 @@
             "id": "def-public.AlertSummary.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ alertSummaryFields }",
+            "label": "{ alert, alertSummaryFields }",
             "description": [],
             "signature": [
               "AlertSummaryProps"
@@ -836,6 +836,65 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.getGroupFilters",
+        "type": "Function",
+        "tags": [],
+        "label": "getGroupFilters",
+        "description": [],
+        "signature": [
+          "(groups?: ",
+          "Group",
+          "[] | undefined, groupFieldName?: string | undefined) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/common/custom_threshold_rule/helpers/get_group.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.getGroupFilters.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "groups",
+            "description": [],
+            "signature": [
+              "Group",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/common/custom_threshold_rule/helpers/get_group.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.getGroupFilters.$2",
+            "type": "string",
+            "tags": [],
+            "label": "groupFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/common/custom_threshold_rule/helpers/get_group.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.LazyAlertsFlyout",
         "type": "Function",
         "tags": [],
@@ -1004,6 +1063,39 @@
               ">"
             ],
             "path": "x-pack/plugins/observability_solution/observability/public/utils/test_helper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.RuleConditionChart",
+        "type": "Function",
+        "tags": [],
+        "label": "RuleConditionChart",
+        "description": [],
+        "signature": [
+          "({\n  metricExpression,\n  searchConfiguration,\n  dataView,\n  groupBy,\n  error,\n  annotations,\n  timeRange,\n  chartOptions: { seriesType, interval } = {},\n  additionalFilters = [],\n}: RuleConditionChartProps) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/public/components/rule_condition_chart/rule_condition_chart.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.RuleConditionChart.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  metricExpression,\n  searchConfiguration,\n  dataView,\n  groupBy,\n  error,\n  annotations,\n  timeRange,\n  chartOptions: { seriesType, interval } = {},\n  additionalFilters = [],\n}",
+            "description": [],
+            "signature": [
+              "RuleConditionChartProps"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/components/rule_condition_chart/rule_condition_chart.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2599,7 +2691,7 @@
             "label": "observabilityShared",
             "description": [],
             "signature": [
-              "{ locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
+              "{ registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -4618,6 +4710,22 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.GenericAggType",
+        "type": "Type",
+        "tags": [],
+        "label": "GenericAggType",
+        "description": [],
+        "signature": [
+          "\"custom\" | ",
+          "Aggregators"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/public/components/rule_condition_chart/rule_condition_chart.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -10192,7 +10300,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "false"
+                  "true"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -13852,6 +13960,21 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableContinuousRollups\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmEnableMultiSignal",
+        "type": "string",
+        "tags": [],
+        "label": "apmEnableMultiSignal",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableMultiSignal\""
         ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,

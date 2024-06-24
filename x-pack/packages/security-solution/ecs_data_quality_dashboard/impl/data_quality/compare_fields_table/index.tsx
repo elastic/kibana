@@ -20,17 +20,17 @@ const search: Search = {
   },
 };
 
-interface Props {
-  enrichedFieldMetadata: EnrichedFieldMetadata[];
-  getTableColumns: () => Array<EuiTableFieldDataColumnType<EnrichedFieldMetadata>>;
+interface Props<T extends EnrichedFieldMetadata> {
+  enrichedFieldMetadata: T[];
+  getTableColumns: () => Array<EuiTableFieldDataColumnType<T>>;
   title: string;
 }
 
-const CompareFieldsTableComponent: React.FC<Props> = ({
+const CompareFieldsTableComponent = <T extends EnrichedFieldMetadata>({
   enrichedFieldMetadata,
   getTableColumns,
   title,
-}) => {
+}: Props<T>): React.ReactElement => {
   const columns = useMemo(() => getTableColumns(), [getTableColumns]);
 
   return (
@@ -53,4 +53,8 @@ const CompareFieldsTableComponent: React.FC<Props> = ({
 
 CompareFieldsTableComponent.displayName = 'CompareFieldsTableComponent';
 
-export const CompareFieldsTable = React.memo(CompareFieldsTableComponent);
+export const CompareFieldsTable = React.memo(
+  CompareFieldsTableComponent
+  // React.memo doesn't pass generics through so
+  // this is a cheap fix without sacrificing type safety
+) as typeof CompareFieldsTableComponent;
