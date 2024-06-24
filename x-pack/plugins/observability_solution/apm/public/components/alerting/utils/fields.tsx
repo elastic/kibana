@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-import { EuiExpression, EuiFieldNumber, EuiPopover } from '@elastic/eui';
+import { EuiExpression, EuiFieldNumber, EuiFormRow, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import {
@@ -192,6 +192,10 @@ export function ErrorGroupingKeyField({
   );
 }
 
+function isNumeric(value: string): boolean {
+  return !isNaN(Number(value)) && value.trim() !== '';
+}
+
 export function IsAboveField({
   value,
   unit,
@@ -205,7 +209,6 @@ export function IsAboveField({
 }) {
   const [thresholdPopoverOpen, serThresholdPopoverOpen] = useState(false);
   const [isAboveValue, setIsAboveValue] = useState(String(value));
-  const isInvalid = isNaN(Number(isAboveValue));
 
   return (
     <EuiPopover
@@ -221,7 +224,7 @@ export function IsAboveField({
           description={i18n.translate('xpack.apm.transactionErrorRateRuleType.isAbove', {
             defaultMessage: 'is above',
           })}
-          isInvalid={isInvalid}
+          isInvalid={!isNumeric(isAboveValue)}
           isActive={thresholdPopoverOpen}
           onClick={() => {
             serThresholdPopoverOpen(true);
@@ -229,24 +232,31 @@ export function IsAboveField({
         />
       }
     >
-      <EuiFieldNumber
-        data-test-subj="apmIsAboveFieldFieldNumber"
-        min={0}
-        value={isAboveValue}
-        onChange={(e) => {
-          const thresholdVal = e.target.value;
-          // Update the value to continue typing (if user stopped at . or ,)
-          setIsAboveValue(thresholdVal);
-          // Only send the value back to the rule if it's a valid number
-          if (!isNaN(Number(thresholdVal))) {
-            onChange(Number(thresholdVal));
-          }
-        }}
-        append={unit}
-        isInvalid={isInvalid}
-        compressed
-        step={step}
-      />
+      <EuiFormRow
+        isInvalid={!isNumeric(isAboveValue)}
+        error={i18n.translate('xpack.apm.transactionErrorRateRuleType.error.validThreshold', {
+          defaultMessage: 'Thresholds must contain a valid number.',
+        })}
+      >
+        <EuiFieldNumber
+          data-test-subj="apmIsAboveFieldFieldNumber"
+          min={0}
+          value={isAboveValue}
+          onChange={(e) => {
+            const thresholdVal = e.target.value;
+            // Update the value to continue typing (if user stopped at . or ,)
+            setIsAboveValue(thresholdVal);
+            // Only send the value back to the rule if it's a valid number
+            if (!isNaN(Number(thresholdVal))) {
+              onChange(Number(thresholdVal));
+            }
+          }}
+          append={unit}
+          isInvalid={!isNumeric(isAboveValue)}
+          compressed
+          step={step}
+        />
+      </EuiFormRow>
     </EuiPopover>
   );
 }
