@@ -7,7 +7,7 @@
  */
 
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { Embeddable } from '@kbn/embeddable-plugin/public';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { ISearchStart } from '@kbn/data-plugin/public';
@@ -26,8 +26,9 @@ import {
   type LensTreeMapConfig,
   LensDataset,
 } from '@kbn/lens-embeddable-utils/config_builder';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { DataViewsPublicPluginStart, DataViewListItem } from '@kbn/data-views-plugin/public';
+import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { AwaitingDashboardAPI } from '../../dashboard_container';
 
 const chartTypes = [
@@ -55,19 +56,82 @@ export function useObservabilityAIAssistantContext({
   search: ISearchStart;
   dataViews: DataViewsPublicPluginStart;
 }) {
+  const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   useEffect(() => {
     if (!observabilityAIAssistant) {
       return;
     }
+
+    const fetchDataViews = async () => {
+      if (!dataViewsList.length) {
+        const list = await dataViews.getIdsWithTitle();
+        setDataViewsList(list);
+      }
+    };
 
     const {
       service: { setScreenContext },
       createScreenContextAction,
     } = observabilityAIAssistant;
 
+    const dashboardState = dashboardAPI?.getState();
+    fetchDataViews();
+    const lensPanels = Object.values(dashboardState?.explicitInput.panels ?? {}).filter(
+      (panel) => panel.type === 'lens' && 'attributes' in panel.explicitInput
+    );
+    const reducedPanels = lensPanels.map((panel) => {
+      const lensInput = panel.explicitInput as TypedLensByValueInput;
+      const isESQL = isOfAggregateQueryType(lensInput.attributes.state.query);
+      let indexPattern: string | undefined;
+      if (isESQL) {
+        indexPattern = Object.values(lensInput.attributes.state.adHocDataViews ?? {})[0].id;
+      } else {
+        indexPattern = dataViewsList.find((dataView) =>
+          lensInput.attributes.references.some((reference) => reference.id === dataView.id)
+        )?.title;
+      }
+      return {
+        type: panel.type,
+        id: lensInput.id,
+        title: lensInput.attributes?.title ?? lensInput.title,
+        description: lensInput.description ?? lensInput.attributes.description,
+        isESQL,
+        esqlQuery: isESQL ? lensInput.attributes.state.query : undefined,
+        visualizationType: lensInput.attributes.visualizationType,
+        datasourceType: isESQL ? 'ES|QL' : 'DSL',
+        datasourceState: isESQL
+          ? lensInput.attributes.state.datasourceStates.textBased
+          : lensInput.attributes.state.datasourceStates.formBased,
+        indexPattern,
+      };
+    });
+
     return setScreenContext({
-      screenDescription:
-        'The user is looking at the dashboard app. Here they can add visualizations to a dashboard and save them',
+      starterPrompts: [
+        {
+          title: 'Explain',
+          prompt: 'Can you explain this page?',
+          icon: 'inspect',
+        },
+        {
+          title: 'ES|QL',
+          prompt: 'Can you find the ES|QL queries used in this  dashboard?',
+          icon: 'esqlVis',
+        },
+        {
+          title: 'Analyze',
+          prompt: 'Can you analyze my panels?',
+          icon: 'bullseye',
+        },
+        {
+          title: 'Suggest',
+          prompt: 'Can you suggest some visualizations for this dashboard?',
+          icon: 'sparkles',
+        },
+      ],
+      screenDescription: `The user is looking at the dashboard app. Here they can add visualizations to a dashboard and save them. The current dashboard content is these panels:[ ${JSON.stringify(
+        reducedPanels
+      )}]`,
       actions: dashboardAPI
         ? [
             createScreenContextAction(
@@ -379,8 +443,41 @@ export function useObservabilityAIAssistantContext({
                   });
               }
             ),
+            createScreenContextAction(
+              {
+                name: 'update_panel_title_description',
+                description:
+                  'Update the panel title and description. Pick the correct panel type and fill in the title and description fields.',
+                parameters: {
+                  type: 'object',
+                  properties: {
+                    panelId: {
+                      type: 'string',
+                      description: 'The id of the panel to update',
+                    },
+                    title: {
+                      type: 'string',
+                      description: 'The suggested title for the visualization.',
+                    },
+                    description: {
+                      type: 'string',
+                      description: 'The suggested description for the visualization.',
+                    },
+                  },
+                  required: ['panelId'],
+                } as const,
+              },
+              async ({ args, signal }) => {
+                const { title = '', description = '', panelId } = args;
+                dashboardAPI.updateInputForChild(panelId, { title, description });
+
+                return {
+                  content: 'Title and description successfully updated',
+                };
+              }
+            ),
           ]
         : [],
     });
-  }, [observabilityAIAssistant, dashboardAPI, search, dataViews]);
+  }, [observabilityAIAssistant, dashboardAPI, search, dataViews, dataViewsList]);
 }
