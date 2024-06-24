@@ -136,6 +136,14 @@ describe('When using processes action from response actions console', () => {
     });
     pendingDetailResponse.data.command = 'running-processes';
     pendingDetailResponse.data.wasSuccessful = false;
+    pendingDetailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: true,
+        wasSuccessful: false,
+        errors: ['error one', 'error two'],
+        completedAt: new Date().toISOString(),
+      },
+    };
     pendingDetailResponse.data.errors = ['error one', 'error two'];
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
