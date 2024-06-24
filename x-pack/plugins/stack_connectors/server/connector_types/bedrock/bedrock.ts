@@ -11,6 +11,7 @@ import { AxiosError, Method } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
@@ -184,16 +185,18 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
   }
 
   private async runApiDeprecated(
-    params: SubActionRequestParams<RunActionResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
+    params: SubActionRequestParams<RunActionResponse>, // : SubActionRequestParams<RunApiLatestResponseSchema>
+    connectorMetricsService: ConnectorMetricsService
   ): Promise<RunActionResponse> {
-    const response = await this.request(params);
+    const response = await this.request(params, connectorMetricsService);
     return response.data;
   }
 
   private async runApiLatest(
-    params: SubActionRequestParams<RunApiLatestResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
+    params: SubActionRequestParams<RunApiLatestResponse>, // : SubActionRequestParams<RunApiLatestResponseSchema>
+    connectorMetricsService: ConnectorMetricsService
   ): Promise<RunActionResponse> {
-    const response = await this.request(params);
+    const response = await this.request(params, connectorMetricsService);
     // keeping the response the same as claude 2 for our APIs
     // adding the usage object for better token tracking
     return {
@@ -208,12 +211,10 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async runApi({
-    body,
-    model: reqModel,
-    signal,
-    timeout,
-  }: RunActionParams): Promise<RunActionResponse> {
+  public async runApi(
+    { body, model: reqModel, signal, timeout }: RunActionParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<RunActionResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
     const path = `/model/${currentModel}/invoke`;
@@ -229,9 +230,15 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     };
     // possible api received deprecated arguments, which will still work with the deprecated Claude 2 models
     if (usesDeprecatedArguments(body)) {
-      return this.runApiDeprecated({ ...requestArgs, responseSchema: RunActionResponseSchema });
+      return this.runApiDeprecated(
+        { ...requestArgs, responseSchema: RunActionResponseSchema },
+        connectorMetricsService
+      );
     }
-    return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
+    return this.runApiLatest(
+      { ...requestArgs, responseSchema: RunApiLatestResponseSchema },
+      connectorMetricsService
+    );
   }
 
   /**
@@ -242,26 +249,27 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  private async streamApi({
-    body,
-    model: reqModel,
-    signal,
-    timeout,
-  }: RunActionParams): Promise<StreamingResponse> {
+  private async streamApi(
+    { body, model: reqModel, signal, timeout }: RunActionParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<StreamingResponse> {
     // set model on per request basis
     const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
     const signed = this.signRequest(body, path, true);
 
-    const response = await this.request({
-      ...signed,
-      url: `${this.url}${path}`,
-      method: 'post',
-      responseSchema: StreamingResponseSchema,
-      data: body,
-      responseType: 'stream',
-      signal,
-      timeout,
-    });
+    const response = await this.request(
+      {
+        ...signed,
+        url: `${this.url}${path}`,
+        method: 'post',
+        responseSchema: StreamingResponseSchema,
+        data: body,
+        responseType: 'stream',
+        signal,
+        timeout,
+      },
+      connectorMetricsService
+    );
 
     return response.data.pipe(new PassThrough());
   }
@@ -274,21 +282,19 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param messages An array of messages to be sent to the API
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async invokeStream({
-    messages,
-    model,
-    stopSequences,
-    system,
-    temperature,
-    signal,
-    timeout,
-  }: InvokeAIActionParams): Promise<IncomingMessage> {
-    const res = (await this.streamApi({
-      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
-      model,
-      signal,
-      timeout,
-    })) as unknown as IncomingMessage;
+  public async invokeStream(
+    { messages, model, stopSequences, system, temperature, signal, timeout }: InvokeAIActionParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<IncomingMessage> {
+    const res = (await this.streamApi(
+      {
+        body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
+        model,
+        signal,
+        timeout,
+      },
+      connectorMetricsService
+    )) as unknown as IncomingMessage;
     return res;
   }
 
@@ -300,24 +306,30 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    * @returns an object with the response string as a property called message
    */
-  public async invokeAI({
-    messages,
-    model,
-    stopSequences,
-    system,
-    temperature,
-    maxTokens,
-    signal,
-    timeout,
-  }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    const res = await this.runApi({
-      body: JSON.stringify(
-        formatBedrockBody({ messages, stopSequences, system, temperature, maxTokens })
-      ),
+  public async invokeAI(
+    {
+      messages,
       model,
+      stopSequences,
+      system,
+      temperature,
+      maxTokens,
       signal,
       timeout,
-    });
+    }: InvokeAIActionParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<InvokeAIActionResponse> {
+    const res = await this.runApi(
+      {
+        body: JSON.stringify(
+          formatBedrockBody({ messages, stopSequences, system, temperature, maxTokens })
+        ),
+        model,
+        signal,
+        timeout,
+      },
+      connectorMetricsService
+    );
     return { message: res.completion.trim() };
   }
 }

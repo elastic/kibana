@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
 import {
   ExternalServiceApi,
   Incident,
@@ -12,10 +13,10 @@ import {
   PushToServiceResponse,
 } from './types';
 
-const pushToServiceHandler = async ({
-  externalService,
-  params,
-}: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
+const pushToServiceHandler = async (
+  { externalService, params }: PushToServiceApiHandlerArgs,
+  connectorMetricsService: ConnectorMetricsService
+): Promise<PushToServiceResponse> => {
   const {
     incident: { externalId, ...rest },
     comments,
@@ -24,14 +25,20 @@ const pushToServiceHandler = async ({
   let res: PushToServiceResponse;
 
   if (externalId != null) {
-    res = await externalService.updateIncident({
-      incidentId: externalId,
-      incident,
-    });
+    res = await externalService.updateIncident(
+      {
+        incidentId: externalId,
+        incident,
+      },
+      connectorMetricsService
+    );
   } else {
-    res = await externalService.createIncident({
-      incident,
-    });
+    res = await externalService.createIncident(
+      {
+        incident,
+      },
+      connectorMetricsService
+    );
   }
 
   if (comments && Array.isArray(comments) && comments.length > 0) {
@@ -40,10 +47,13 @@ const pushToServiceHandler = async ({
       if (!currentComment.comment) {
         continue;
       }
-      await externalService.createComment({
-        incidentId: res.id,
-        comment: currentComment,
-      });
+      await externalService.createComment(
+        {
+          incidentId: res.id,
+          comment: currentComment,
+        },
+        connectorMetricsService
+      );
       res.comments = [
         ...(res.comments ?? []),
         {

@@ -17,7 +17,7 @@ import {
 import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { SSLSettings } from '../types';
+import { ConnectorMetricsService, SSLSettings } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
 
 export const request = async <T = unknown>({
@@ -30,6 +30,7 @@ export const request = async <T = unknown>({
   headers,
   sslOverrides,
   timeout,
+  connectorMetricsService,
   ...config
 }: {
   axios: AxiosInstance;
@@ -41,6 +42,7 @@ export const request = async <T = unknown>({
   headers?: Record<string, AxiosHeaderValue>;
   timeout?: number;
   sslOverrides?: SSLSettings;
+  connectorMetricsService?: ConnectorMetricsService;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
     throw new Error(
@@ -64,18 +66,31 @@ export const request = async <T = unknown>({
     headers,
   });
 
-  return await axios(url, {
-    ...restConfig,
-    method,
-    headers: headersWithBasicAuth,
-    ...(data ? { data } : {}),
-    // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
-    httpAgent,
-    httpsAgent,
-    proxy: false,
-    maxContentLength,
-    timeout: Math.max(settingsTimeout, timeout ?? 0),
-  });
+  try {
+    const result = await axios(url, {
+      ...restConfig,
+      method,
+      headers: headersWithBasicAuth,
+      ...(data ? { data } : {}),
+      // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
+      httpAgent,
+      httpsAgent,
+      proxy: false,
+      maxContentLength,
+      timeout: Math.max(settingsTimeout, timeout ?? 0),
+    });
+
+    if (connectorMetricsService) {
+      connectorMetricsService.addRequestBodyBytes(result, data);
+    }
+
+    return result;
+  } catch (error) {
+    if (connectorMetricsService) {
+      connectorMetricsService.addRequestBodyBytes(error, data);
+    }
+    throw error;
+  }
 };
 
 export const patch = async <T = unknown>({
@@ -84,12 +99,14 @@ export const patch = async <T = unknown>({
   data,
   logger,
   configurationUtilities,
+  connectorMetricsService,
 }: {
   axios: AxiosInstance;
   url: string;
   data: T;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
+  connectorMetricsService: ConnectorMetricsService;
 }): Promise<AxiosResponse> => {
   return request({
     axios,
@@ -98,6 +115,7 @@ export const patch = async <T = unknown>({
     method: 'patch',
     data,
     configurationUtilities,
+    connectorMetricsService,
   });
 };
 

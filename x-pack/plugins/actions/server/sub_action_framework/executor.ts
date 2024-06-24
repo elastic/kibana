@@ -30,7 +30,15 @@ export const buildExecutor = <
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }): ExecutorType<Config, Secrets, ExecutorParams, unknown> => {
-  return async ({ actionId, params, config, secrets, services, request }) => {
+  return async ({
+    actionId,
+    params,
+    config,
+    secrets,
+    services,
+    request,
+    connectorMetricsService,
+  }) => {
     const subAction = params.subAction;
     const subActionParams = params.subActionParams;
 
@@ -88,7 +96,7 @@ export const buildExecutor = <
       }
     }
 
-    const data = await func.call(service, subActionParams);
+    const data = await func.call(service, subActionParams, connectorMetricsService);
     return { status: 'ok', data: data ?? {}, actionId };
   };
 };
