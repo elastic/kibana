@@ -1251,15 +1251,15 @@ describe('Response actions history', () => {
             const outputs = expandRows();
             if (command === 'get-file') {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following error was encountered:Host: Host-agent-aErrors: The file specified was not found | Error here!`,
+                `${outputCommand} failedThe following errors were encountered:The file specified was not found | Error here!`,
               ]);
             } else if (command === 'scan') {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following error was encountered:Host: Host-agent-aErrors: Invalid absolute file path provided | Error here!`,
+                `${outputCommand} failedThe following errors were encountered:Invalid absolute file path provided | Error here!`,
               ]);
             } else {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following error was encountered:Host: Host-agent-aErrors: Error here!`,
+                `${outputCommand} failedThe following error was encountered:Error here!`,
               ]);
             }
           }
@@ -1295,7 +1295,7 @@ describe('Response actions history', () => {
             const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
             const outputs = expandRows();
             expect(outputs.map((n) => n.textContent)).toEqual([
-              `${outputCommand} failedThe following error was encountered:Host: Host-agent-aErrors: Error message w/o output`,
+              `${outputCommand} failedThe following error was encountered:Error message w/o output`,
             ]);
           }
         );

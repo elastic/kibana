@@ -84,28 +84,42 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
         return null;
       }
 
+      const groupCounts = allAgentErrors.reduce<{ agents: number; errors: number }>(
+        (acc, allErrors) => {
+          acc.agents += allErrors.name.length ? 1 : 0;
+          acc.errors += allErrors.errors.length;
+
+          return acc;
+        },
+        { agents: 0, errors: 0 }
+      );
+
       return (
         <div data-test-subj={dataTestSubj}>
           <FormattedMessage
             id="xpack.securitySolution.endpointResponseActions.actionError.errorMessage"
             defaultMessage="The following { errorCount, plural, =1 {error was} other {errors were}} encountered:"
-            values={{ errorCount: allAgentErrors.length }}
+            values={{ errorCount: groupCounts.errors }}
           />
           <EuiSpacer size="s" />
           <>
-            {allAgentErrors.map((agentErrorInfo) => (
-              <div key={agentErrorInfo.name}>
-                <KeyValueDisplay
-                  name={ERROR_INFO_LABELS.host}
-                  value={agentErrorInfo.name.length ? agentErrorInfo.name : emptyValue}
-                />
-                <KeyValueDisplay
-                  name={ERROR_INFO_LABELS.errors}
-                  value={agentErrorInfo.errors.join(' | ')}
-                />
-                <EuiSpacer size="s" />
-              </div>
-            ))}
+            {groupCounts.agents > 1 ? (
+              allAgentErrors.map((agentErrorInfo) => (
+                <div key={agentErrorInfo.name}>
+                  <KeyValueDisplay
+                    name={ERROR_INFO_LABELS.host}
+                    value={agentErrorInfo.name.length ? agentErrorInfo.name : emptyValue}
+                  />
+                  <KeyValueDisplay
+                    name={ERROR_INFO_LABELS.errors}
+                    value={agentErrorInfo.errors.join(' | ')}
+                  />
+                  <EuiSpacer size="s" />
+                </div>
+              ))
+            ) : (
+              <>{allAgentErrors[0].errors.join(' | ')}</>
+            )}
           </>
         </div>
       );
