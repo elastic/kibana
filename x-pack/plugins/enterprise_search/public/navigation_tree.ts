@@ -25,6 +25,7 @@ export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
   indices?: Array<EuiSideNavItemType<unknown>>;
   searchApps?: Array<EuiSideNavItemType<unknown>>;
+  workplaceSearch?: Array<EuiSideNavItemType<unknown>>;
 }
 
 const title = i18n.translate(
@@ -80,7 +81,7 @@ export const getNavigationTreeDefinition = ({
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
       debounceTime(10),
-      map(({ appSearch, indices, searchApps, collections }) => {
+      map(({ appSearch, indices, searchApps, collections, workplaceSearch }) => {
         const navTree: NavigationTreeDefinition = {
           body: [
             {
@@ -236,7 +237,15 @@ export const getNavigationTreeDefinition = ({
                         : {}),
                     },
                     {
+                      getIsActive: () => false,
                       link: 'workplaceSearch',
+                      ...(workplaceSearch
+                        ? {
+                            children: workplaceSearch.map(euiItemTypeToNodeDefinition),
+                            isCollapsible: false,
+                            renderAs: 'accordion',
+                          }
+                        : {}),
                     },
                   ],
                   id: 'entsearch',

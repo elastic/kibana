@@ -10,9 +10,6 @@ import React from 'react';
 import { useValues } from 'kea';
 import useObservable from 'react-use/lib/useObservable';
 
-import type { EuiSideNavItemType } from '@elastic/eui';
-import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
-
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetAppSearchChrome } from '../../../shared/kibana_chrome';
@@ -27,19 +24,12 @@ export const AppSearchPageTemplate: React.FC<
   const navItems = useAppSearchNav();
   const { getChromeStyle$, updateSideNavDefinition } = useValues(KibanaLogic);
   const chromeStyle = useObservable(getChromeStyle$(), 'classic');
-  const getProjectItems = React.useCallback(
-    (
-      items?: Array<EuiSideNavItemType<unknown>>
-    ): Array<EuiSideNavItemTypeEnhanced<unknown>> | undefined => {
-      return items;
-    },
-    []
-  );
 
   React.useEffect(() => {
+    if (chromeStyle === 'classic') return;
     // We update the new side nav definition with the selected app items
-    updateSideNavDefinition({ appSearch: getProjectItems(navItems?.[0]?.items) });
-  }, [navItems, updateSideNavDefinition]);
+    updateSideNavDefinition({ appSearch: navItems?.[0]?.items });
+  }, [chromeStyle, navItems, updateSideNavDefinition]);
   React.useEffect(() => {
     return () => {
       updateSideNavDefinition({ appSearch: undefined });
