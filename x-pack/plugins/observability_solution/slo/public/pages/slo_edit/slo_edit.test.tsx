@@ -45,6 +45,7 @@ jest.mock('../../hooks/use_create_slo');
 jest.mock('../../hooks/use_update_slo');
 jest.mock('../../hooks/use_fetch_apm_suggestions');
 jest.mock('../../hooks/use_permissions');
+jest.mock('../../hooks/use_create_rule');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
