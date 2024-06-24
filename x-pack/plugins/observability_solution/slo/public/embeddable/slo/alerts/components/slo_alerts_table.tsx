@@ -98,6 +98,7 @@ export function SloAlertsTable({
 }: Props) {
   const {
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
+    observability: { observabilityRuleTypeRegistry },
   } = deps;
   return (
     <AlertsStateTable
@@ -115,6 +116,7 @@ export function SloAlertsTable({
         }
       }}
       lastReloadRequestTime={lastReloadRequestTime}
+      cellContext={{ observabilityRuleTypeRegistry }}
     />
   );
 }
