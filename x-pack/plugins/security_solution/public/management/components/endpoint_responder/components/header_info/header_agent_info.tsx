@@ -8,18 +8,28 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { AgentTypeVendorLogo } from './agent_type_vendor_logo';
+import { getAgentTypeName } from '../../../../../common/translations';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { Platform } from './platforms';
 import { PlatformIcon } from './platforms';
+
+const INTEGRATION_SECTION_LABEL = i18n.translate(
+  'xpack.securitySolution.headerAgentInfo.integrationSectionLabel',
+  { defaultMessage: 'Integration' }
+);
 
 interface HeaderAgentInfoProps {
   platform: Platform;
   hostName: string;
   lastCheckin: string;
   children: React.ReactNode;
+  agentType?: ResponseActionAgentType;
 }
 
 export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
-  ({ platform, hostName, lastCheckin, children }) => {
+  ({ platform, hostName, lastCheckin, agentType, children }) => {
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -55,6 +65,30 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+
+        {agentType && (
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s" data-test-subj="responderHeaderIntegrationLabel">
+                  {INTEGRATION_SECTION_LABEL}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup responsive={false} wrap={false} gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <AgentTypeVendorLogo agentType={agentType} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" data-test-subj="responderHeaderIntegrationName">
+                      {getAgentTypeName(agentType)}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }

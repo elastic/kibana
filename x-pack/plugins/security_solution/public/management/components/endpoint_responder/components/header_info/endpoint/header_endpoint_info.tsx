@@ -34,6 +34,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
       platform={endpointDetails.metadata.host.os.name.toLowerCase() as Platform}
       hostName={endpointDetails.metadata.host.name}
       lastCheckin={endpointDetails.last_checkin}
+      agentType="endpoint"
     >
       <EndpointAgentStatus
         endpointHostInfo={endpointDetails}
