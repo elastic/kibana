@@ -72,7 +72,6 @@ export const postActionsConnectorExecuteRoute = (
           },
         },
       },
-      // eslint-disable-next-line complexity
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 

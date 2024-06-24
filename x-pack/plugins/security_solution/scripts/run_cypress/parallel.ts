@@ -337,7 +337,10 @@ ${JSON.stringify(
                   procs,
                   config,
                   installDir: options?.installDir,
-                  extraKbnOpts: options?.installDir || options?.ci || !isOpen ? [] : ['--dev'],
+                  extraKbnOpts:
+                    options?.installDir || options?.ci || !isOpen
+                      ? []
+                      : ['--dev', '--no-dev-config', '--no-dev-credentials'],
                   onEarlyExit,
                   inspect: argv.inspect,
                 });
