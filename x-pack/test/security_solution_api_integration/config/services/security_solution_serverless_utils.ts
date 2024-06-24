@@ -51,6 +51,7 @@ export function SecuritySolutionServerlessUtils({
   return {
     getUsername: async (role = 'admin') => {
       const { username } = await svlUserManager.getUserData(role);
+
       return username;
     },
     /**
