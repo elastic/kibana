@@ -12,10 +12,12 @@ const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-export default function ({ getPageObjects }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'cisAddIntegration', 'header']);
+  const agentlessPreReleaseVersion = '1.10.0-preview01';
+  const previousPackageVersion = '1.9.0';
 
-  describe('CIS Integration Page', function () {
+  describe('Agentless CIS Integration Page', function () {
     // TODO: we need to check if the tests are running on MKI. There is a suspicion that installing csp package via Kibana server args is not working on MKI.
     this.tags(['skipMKI', 'cloud_security_posture_cis_integration']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
@@ -25,15 +27,18 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
-      await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
     after(async () => {
       await pageObjects.svlCommonPage.forceLogout();
     });
 
-    describe('CIS_GCP Single Account Launch Cloud shell', () => {
-      it('should show CIS_GCP Launch Cloud shell button when setup technology selector is Agentless', async () => {
+    describe('Agentless CIS_GCP Single Account Launch Cloud shell', () => {
+      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}`, async () => {
+        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
+          agentlessPreReleaseVersion
+        );
+
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
@@ -45,13 +50,14 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
       });
 
-      it.skip('should hide CIS_GCP Launch Cloud Shell button when setup technology selector is Agent based', async () => {
+      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${agentlessPreReleaseVersion}`, async () => {
+        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
+
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
         await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        pageObjects.header.waitUntilLoadingHasFinished();
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agent-based');
+        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -59,8 +65,12 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('CIS_GCP ORG Account Launch Cloud Shell', () => {
-      it('should show CIS_GCP Launch Cloud Shell button when setup technology selector is Agentless', async () => {
+    describe('Agentless CIS_GCP ORG Account Launch Cloud Shell', () => {
+      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}`, async () => {
+        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
+          agentlessPreReleaseVersion
+        );
+
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
         await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
@@ -71,11 +81,13 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
       });
 
-      it.skip('should hide CIS_GCP Launch Cloud shell button when setup technology selector is Agent-based', async () => {
+      it(`should hide CIS_GCP Launch Cloud shell button when package version is ${previousPackageVersion}`, async () => {
+        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
+
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
         await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agent-based');
+        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 

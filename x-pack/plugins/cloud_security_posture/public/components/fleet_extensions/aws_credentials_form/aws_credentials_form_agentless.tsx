@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import semverCompare from 'semver/functions/compare';
+import semverValid from 'semver/functions/valid';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -15,7 +17,11 @@ import {
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '../../../common/utils/get_template_url_package_info';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import { SINGLE_ACCOUNT, TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR } from '../../../../common/constants';
+import {
+  CLOUD_CREDENTIALS_PACKAGE_VERSION,
+  SINGLE_ACCOUNT,
+  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
+} from '../../../../common/constants';
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormAgentlessOptions,
@@ -143,6 +149,11 @@ export const AwsCredentialsFormAgentless = ({
   const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
+  const isValidSemantic = semverValid(packageInfo.version);
+  const showCloudCredentialsButton = isValidSemantic
+    ? semverCompare(packageInfo.version, CLOUD_CREDENTIALS_PACKAGE_VERSION) >= 0
+    : false;
+
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,
     input.policy_template,
@@ -185,25 +196,35 @@ export const AwsCredentialsFormAgentless = ({
         }}
       />
       <EuiSpacer size="m" />
-      {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE &&
-        automationCredentialTemplate && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiButton
-              data-test-subj="launchCloudFormationAgentlessButton"
-              target="_blank"
-              iconSide="left"
-              iconType="launch"
-              href={automationCredentialTemplate}
-            >
-              <FormattedMessage
-                id="xpack.csp.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
-                defaultMessage="Launch CloudFormation"
-              />
-            </EuiButton>
-            <EuiSpacer size="m" />
-          </>
-        )}
+      {!showCloudCredentialsButton && (
+        <>
+          <EuiCallOut color="warning">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.cloudCredentials.cloudFormationSupportedMessage"
+              defaultMessage="Launch Cloud Formation for Automated Credentials not supported in current integration version. Please upgrade to the latest version to enable Launch CloudFormation for Automated Credentials."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE && showCloudCredentialsButton && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiButton
+            data-test-subj="launchCloudFormationAgentlessButton"
+            target="_blank"
+            iconSide="left"
+            iconType="launch"
+            href={automationCredentialTemplate}
+          >
+            <FormattedMessage
+              id="xpack.csp.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
+              defaultMessage="Launch CloudFormation"
+            />
+          </EuiButton>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <AwsInputVarFields
         fields={fields}
         packageInfo={packageInfo}

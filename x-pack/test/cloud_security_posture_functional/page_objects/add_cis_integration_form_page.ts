@@ -119,6 +119,15 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
+  const navigateToAddIntegrationCspmWithVersionPage = async (packageVersion: string) => {
+    await PageObjects.common.navigateToUrl(
+      'fleet',
+      `integrations/cloud_security_posture-${packageVersion}/add-integration/cspm`,
+      { shouldUseHashForSubUrl: false }
+    );
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
   const navigateToAddIntegrationCnvmPage = async () => {
     await PageObjects.common.navigateToUrl(
       'fleet', // Defined in Security Solution plugin
@@ -270,6 +279,7 @@ export function AddCisIntegrationFormPageProvider({
     cisAws,
     cisGcp,
     navigateToAddIntegrationCspmPage,
+    navigateToAddIntegrationCspmWithVersionPage,
     navigateToAddIntegrationCnvmPage,
     navigateToAddIntegrationKspmPage,
     navigateToIntegrationCspList,
