@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+
+import { useStartServices } from '../../../../hooks';
 
 interface Props {
   dataStreams: Array<{ name: string; title: string }>;
 }
 
 export const RootPrivilegesCallout: React.FC<Props> = ({ dataStreams }) => {
+  const { docLinks } = useStartServices();
+
   return (
     <EuiCallOut
       size="m"
@@ -35,7 +39,17 @@ export const RootPrivilegesCallout: React.FC<Props> = ({ dataStreams }) => {
         <>
           <FormattedMessage
             id="xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsDataStreamsMessage"
-            defaultMessage="This integration has the following data streams that require Elastic Agents to have root privileges. To ensure that all data required by the integration can be collected, enroll agents using an account with root privileges."
+            defaultMessage="This integration has the following data streams that require Elastic Agents to have root privileges. To ensure that all data required by the integration can be collected, enroll agents using an account with root privileges.  For more information, see the {guideLink}"
+            values={{
+              guideLink: (
+                <EuiLink href={docLinks.links.fleet.unprivilegedMode} target="_blank" external>
+                  <FormattedMessage
+                    id="xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsDataStreamsMessage.guideLink"
+                    defaultMessage="Fleet and Elastic Agent Guide"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
           <ul>
             {dataStreams.map((item) => (
