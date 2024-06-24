@@ -32,6 +32,7 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
+import { useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
 import { TransformFailedCallout } from './components/transform_failed_callout';
 import type { EndpointIndexUIQueryParams } from '../types';
 import { EndpointListNavLink } from './components/endpoint_list_nav_link';
@@ -43,6 +44,7 @@ import { isPolicyOutOfDate } from '../utils';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import type { CreateStructuredSelector } from '../../../../common/store';
 import type {
+  AgentStatusRecords,
   HostInfo,
   HostInfoInterface,
   Immutable,
@@ -82,6 +84,7 @@ interface GetEndpointListColumnsProps {
   queryParams: Immutable<EndpointIndexUIQueryParams>;
   search: string;
   getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
+  agentStatusRecords: AgentStatusRecords;
 }
 
 const columnWidths: Record<
@@ -105,6 +108,7 @@ const getEndpointListColumns = ({
   queryParams,
   search,
   getAppUrl,
+  agentStatusRecords,
 }: GetEndpointListColumnsProps): Array<EuiBasicTableColumn<Immutable<HostInfo>>> => {
   const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
     defaultMessage: 'Last active',
@@ -151,7 +155,7 @@ const getEndpointListColumns = ({
       render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
         return (
           <AgentStatus
-            agentId={endpointInfo.metadata.agent.id}
+            statusInfo={agentStatusRecords[endpointInfo.metadata.agent.id]}
             agentType="endpoint"
             data-test-subj="rowHostStatus"
           />
@@ -395,6 +399,8 @@ export const EndpointList = () => {
     return endpointsExist && !patternsError;
   }, [endpointsExist, patternsError]);
 
+  // FIXME:PT need to retrieve all host's agent status at once then use it in agentStatus column
+
   const paginationSetup = useMemo(() => {
     return {
       pageIndex,
@@ -522,6 +528,12 @@ export const EndpointList = () => {
     };
   }, []);
 
+  const { data: agentStatusRecords } = useGetAgentStatus(
+    listData.map((rowItem) => rowItem.metadata.agent.id),
+    'endpoint',
+    { enabled: hasListData }
+  );
+
   const columns = useMemo(
     () =>
       getEndpointListColumns({
@@ -530,8 +542,16 @@ export const EndpointList = () => {
         getAppUrl,
         queryParams,
         search,
+        agentStatusRecords: agentStatusRecords ?? {},
       }),
-    [backToEndpointList, canReadPolicyManagement, getAppUrl, queryParams, search]
+    [
+      agentStatusRecords,
+      backToEndpointList,
+      canReadPolicyManagement,
+      getAppUrl,
+      queryParams,
+      search,
+    ]
   );
 
   const sorting = useMemo(
