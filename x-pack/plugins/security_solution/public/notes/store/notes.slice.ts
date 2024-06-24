@@ -7,6 +7,7 @@
 
 import type { EntityState, SerializedError } from '@reduxjs/toolkit';
 import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
+import { createSelector } from 'reselect';
 import type { State } from '../../common/store';
 import { fetchNotesByDocumentId as fetchNotesByDocumentIdApi } from '../api/api';
 import type { NormalizedEntities } from './normalize';
@@ -63,7 +64,7 @@ const notesSlice = createSlice({
   reducers: {},
   extraReducers(builder) {
     builder
-      .addCase(fetchNotesByDocumentId.pending, (state, action) => {
+      .addCase(fetchNotesByDocumentId.pending, (state) => {
         state.status.fetchNotesByDocumentId = ReqStatus.Loading;
       })
       .addCase(fetchNotesByDocumentId.fulfilled, (state, action) => {
@@ -84,3 +85,14 @@ export const {
   selectById: selectNoteById,
   selectIds: selectNoteIds,
 } = notesAdapter.getSelectors((state: State) => state.notes);
+
+export const selectFetchNotesByDocumentIdStatus = (state: State) =>
+  state.notes.status.fetchNotesByDocumentId;
+
+export const selectFetchNotesByDocumentIdError = (state: State) =>
+  state.notes.error.fetchNotesByDocumentId;
+
+export const selectNotesByDocumentId = createSelector(
+  [selectAllNotes, (state, documentId) => documentId],
+  (notes, documentId) => notes.filter((note) => note.eventId === documentId)
+);
