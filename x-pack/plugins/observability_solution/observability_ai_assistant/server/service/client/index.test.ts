@@ -14,7 +14,6 @@ import { Subject } from 'rxjs';
 import { EventEmitter, PassThrough, type Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { ObservabilityAIAssistantClient } from '.';
-import { createResourceNamesMap } from '..';
 import { MessageRole, type Message } from '../../../common';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
@@ -186,7 +185,6 @@ describe('Observability AI Assistant client', () => {
       knowledgeBaseService: knowledgeBaseServiceMock,
       logger: loggerMock,
       namespace: 'default',
-      resources: createResourceNamesMap(),
       user: {
         name: 'johndoe',
       },
