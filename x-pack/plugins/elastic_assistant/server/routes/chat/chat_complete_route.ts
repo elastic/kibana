@@ -117,7 +117,7 @@ export const chatCompleteRoute = (
           // anonymize messages before sending to LLM
           messages = request.body.messages.map((m) => {
             let content = m.content ?? '';
-            if (m.data && m.data.length > 0) {
+            if (m.data) {
               // includes/anonymize fields from the messages data
               if (m.fields_to_anonymize && m.fields_to_anonymize.length > 0) {
                 anonymizationFields = anonymizationFields?.map((a) => {
@@ -136,7 +136,10 @@ export const chatCompleteRoute = (
                 currentReplacements: latestReplacements,
                 getAnonymizedValue,
                 onNewReplacements,
-                rawData: m.data as unknown as Record<string, unknown[]>,
+                rawData: Object.keys(m.data).reduce(
+                  (obj, key) => ({ ...obj, key: [m.data ? m.data[key] : ''] }),
+                  {}
+                ),
               });
               const wr = `${SYSTEM_PROMPT_CONTEXT_NON_I18N(anonymizedData)}\n`;
 

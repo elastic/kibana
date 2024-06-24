@@ -71,10 +71,8 @@ components:
           $ref: '#/components/schemas/ChatMessageRole'
           description: Message role.
         data:
-          description: ECS objects array to attach to the context of the message.
-          type: array
-          items:
-              $ref: '#/components/schemas/MessageData'
+          description: ECS object to attach to the context of the message.
+          $ref: '#/components/schemas/MessageData'
         fields_to_anonymize:
           type: array
           items:

@@ -44,9 +44,9 @@ export const ChatMessage = z.object({
    */
   role: ChatMessageRole,
   /**
-   * ECS objects array to attach to the context of the message.
+   * ECS object to attach to the context of the message.
    */
-  data: z.array(MessageData).optional(),
+  data: MessageData.optional(),
   fields_to_anonymize: z.array(z.string()).optional(),
 });
 
