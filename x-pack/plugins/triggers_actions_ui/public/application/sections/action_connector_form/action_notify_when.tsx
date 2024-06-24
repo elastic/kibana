@@ -245,7 +245,6 @@ export const ActionNotifyWhen = ({
   const summaryOptions = useMemo(
     () => [
       <SummaryContextMenuOption
-        className="euiSuperSelect__item"
         key="summary"
         onClick={() => selectSummaryOption(true)}
         icon={frequency.summary ? 'check' : 'empty'}
@@ -255,7 +254,6 @@ export const ActionNotifyWhen = ({
         {SUMMARY_OF_ALERTS}
       </SummaryContextMenuOption>,
       <SummaryContextMenuOption
-        className="euiSuperSelect__item"
         key="for_each"
         onClick={() => selectSummaryOption(false)}
         icon={!frequency.summary ? 'check' : 'empty'}
@@ -392,4 +390,5 @@ const SUMMARY_OF_ALERTS = i18n.translate(
 
 const SummaryContextMenuOption = euiStyled(EuiContextMenuItem)`
   min-width: 300px;
+  padding: ${({ theme }) => theme.eui.euiSizeS};
 `;
