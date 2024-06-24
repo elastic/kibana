@@ -99,6 +99,7 @@ export const parseTestFileConfig = (filePath: string): SecuritySolutionDescribeB
 
     try {
       // TODO:PT need to assess implication of using this approach to get the JSON back out
+      // eslint-disable-next-line no-new-func
       const ftrConfigJson = new Function(`return ${ftrConfigCode}`)();
       return TestFileFtrConfigSchema.validate(ftrConfigJson);
     } catch (err) {

@@ -108,7 +108,7 @@ export function TriggerContextExample({ uiActionsApi }: Props) {
 
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-      return rows.hasOwnProperty(rowIndex) ? rows[rowIndex][columnId] : null;
+      return Object.hasOwn(rows, rowIndex) ? rows[rowIndex][columnId] : null;
     };
   }, [rows]);
 

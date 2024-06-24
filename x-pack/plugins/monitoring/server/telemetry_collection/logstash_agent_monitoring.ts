@@ -121,14 +121,14 @@ export class LogstashAgentMonitoring implements LogstashMonitoring {
         }
 
         const thisCollectionType = hit._source?.agent?.type || 'agent';
-        if (!clusterStats.hasOwnProperty('collection_types')) {
+        if (!Object.hasOwn(clusterStats, 'collection_types')) {
           clusterStats.collection_types = {};
         }
         clusterStats.collection_types![thisCollectionType] =
           (clusterStats.collection_types![thisCollectionType] || 0) + 1;
         const pipelines = logstashStats?.logstash?.pipelines || [];
 
-        if (!clusterStats.hasOwnProperty('pipelines')) {
+        if (!Object.hasOwn(clusterStats, 'pipelines')) {
           clusterStats.pipelines = {};
         }
         clusterStats.pipelines!.count = pipelines.length;

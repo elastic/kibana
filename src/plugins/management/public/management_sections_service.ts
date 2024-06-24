@@ -71,12 +71,12 @@ export class ManagementSectionsService {
 
   start({ capabilities }: SectionsServiceStartDeps) {
     this.getAllSections().forEach((section) => {
-      if (capabilities.management.hasOwnProperty(section.id)) {
+      if (Object.hasOwn(capabilities.management, section.id)) {
         const sectionCapabilities = capabilities.management[section.id];
         section.apps.forEach((app) => {
           const capabilitiesId = app.capabilitiesId || app.id;
           if (
-            sectionCapabilities.hasOwnProperty(capabilitiesId) &&
+            Object.hasOwn(sectionCapabilities, capabilitiesId) &&
             sectionCapabilities[capabilitiesId] !== true
           ) {
             app.disable();

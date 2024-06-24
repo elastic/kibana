@@ -16,7 +16,7 @@ export function convertMapboxVectorTileToJson(response: VectorTile) {
   const output: MapboxVectorTileJson = {};
 
   for (const property in data) {
-    if (data.hasOwnProperty(property)) {
+    if (Object.hasOwn(data, property)) {
       const propertyObject: VectorTileLayer = data[property];
       const featuresArray = [];
 

@@ -47,7 +47,7 @@ interface PropDefinition {
 }
 
 function isPropDefinition(a: PropDefinition | object): a is PropDefinition {
-  return a.hasOwnProperty('optional');
+  return Object.hasOwn(a, 'optional');
 }
 
 interface AnalyticsJobMetaData {
@@ -345,7 +345,7 @@ export function isAdvancedConfig(
   meta: AnalyticsJobMetaData = getAnalyticsJobMeta(config)
 ): boolean {
   for (const configKey in config) {
-    if (config.hasOwnProperty(configKey)) {
+    if (Object.hasOwn(config, configKey)) {
       const fieldConfig = config[configKey as keyof typeof config];
       const fieldMeta = meta[configKey as keyof typeof meta];
 

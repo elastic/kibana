@@ -429,7 +429,7 @@ export class AlertsClient<
       // See if there's an existing active alert document
       if (!!activeAlerts[id]) {
         if (
-          this.fetchedAlerts.data.hasOwnProperty(id) &&
+          Object.hasOwn(this.fetchedAlerts.data, id) &&
           get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
         ) {
           const isImproving = isAlertImproving<
@@ -491,7 +491,7 @@ export class AlertsClient<
     for (const id of keys(recoveredAlertsToReturn)) {
       // See if there's an existing alert document
       // If there is not, log an error because there should be
-      if (this.fetchedAlerts.data.hasOwnProperty(id)) {
+      if (Object.hasOwn(this.fetchedAlerts.data, id)) {
         recoveredAlertsToIndex.push(
           currentRecoveredAlerts[id]
             ? buildRecoveredAlert<

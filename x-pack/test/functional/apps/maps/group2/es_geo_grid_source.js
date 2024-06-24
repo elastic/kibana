@@ -124,8 +124,8 @@ export default function ({ getPageObjects, getService }) {
         expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(12);
 
         mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
-          expect(properties.hasOwnProperty(MAX_OF_BYTES_PROP_NAME)).to.be(true);
-          expect(properties.hasOwnProperty(DOC_COUNT_PROP_NAME)).to.be(true);
+          expect(Object.hasOwn(properties, MAX_OF_BYTES_PROP_NAME)).to.be(true);
+          expect(Object.hasOwn(properties, DOC_COUNT_PROP_NAME)).to.be(true);
         });
       });
 

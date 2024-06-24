@@ -51,7 +51,7 @@ export const useReauthorizeTransforms = () => {
     onSuccess: (results) => {
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
-        if (results.hasOwnProperty(transformId)) {
+        if (Object.hasOwn(results, transformId)) {
           const result = results[transformId];
           if (!result.success) {
             toastNotifications.addError(

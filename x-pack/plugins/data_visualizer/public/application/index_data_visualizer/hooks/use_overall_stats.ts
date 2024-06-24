@@ -354,7 +354,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           if (sampledNonAggregatableFieldsExamples) {
             sampledNonAggregatableFieldsExamples.forEach((doc) => {
               nonAggregatableFields.forEach((field, fieldIdx) => {
-                if (doc.hasOwnProperty(field)) {
+                if (Object.hasOwn(doc, field)) {
                   nonAggregatableFieldsCount[fieldIdx] += 1;
                   nonAggregatableFieldsUniqueCount[fieldIdx].add(doc[field]!);
                 }

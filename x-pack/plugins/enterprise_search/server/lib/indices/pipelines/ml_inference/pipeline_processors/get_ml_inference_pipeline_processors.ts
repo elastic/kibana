@@ -91,7 +91,7 @@ export const fetchPipelineProcessorInferenceData = async (
 
       // Get the inference processors; there is one per configured field, but they share the same model ID
       const inferenceProcessors = subProcessors.filter((processor) =>
-        processor.hasOwnProperty('inference')
+        Object.hasOwn(processor, 'inference')
       );
 
       const trainedModelName = inferenceProcessors[0]?.inference?.model_id;
@@ -153,7 +153,7 @@ export const getMlModelConfigsForModelIds = async (
 
   trainedModelsStats.trained_model_stats.forEach((trainedModelStats) => {
     const trainedModelName = trainedModelStats.model_id;
-    if (modelConfigs.hasOwnProperty(trainedModelName)) {
+    if (Object.hasOwn(modelConfigs, trainedModelName)) {
       modelConfigs[trainedModelName].modelState = parseModelStateFromStats(
         trainedModelStats,
         modelConfigs[trainedModelName].types

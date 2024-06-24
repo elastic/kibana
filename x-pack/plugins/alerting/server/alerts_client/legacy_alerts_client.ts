@@ -229,7 +229,7 @@ export class LegacyAlertsClient<
   public getProcessedAlerts(
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
   ) {
-    if (this.processedAlerts.hasOwnProperty(type)) {
+    if (Object.hasOwn(this.processedAlerts, type)) {
       return this.processedAlerts[type];
     }
 

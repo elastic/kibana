@@ -98,13 +98,13 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
           aggregatableFieldNames = uniqueFieldNames.filter((field) => {
             if (
               typeof datafeedConfig?.script_fields === 'object' &&
-              datafeedConfig?.script_fields.hasOwnProperty(field)
+              Object.hasOwn(datafeedConfig?.script_fields ?? {}, field)
             ) {
               return true;
             }
             if (
               typeof datafeedConfig?.runtime_mappings === 'object' &&
-              datafeedConfig?.runtime_mappings.hasOwnProperty(field)
+              Object.hasOwn(datafeedConfig?.runtime_mappings ?? {}, field)
             ) {
               return true;
             }

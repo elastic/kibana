@@ -45,7 +45,7 @@ export class CustomIntegrationRegistry {
 
     const allowedCategories: IntegrationCategory[] = (customIntegration.categories ?? []).filter(
       (category) => {
-        return INTEGRATION_CATEGORY_DISPLAY.hasOwnProperty(category);
+        return Object.hasOwn(INTEGRATION_CATEGORY_DISPLAY, category);
       }
     ) as IntegrationCategory[];
 

@@ -42,7 +42,7 @@ export const SelectInput = ({
   const options = useMemo(
     () =>
       optionsProp?.map((option) => ({
-        text: optionLabels.hasOwnProperty(option) ? optionLabels[option] : option,
+        text: Object.hasOwn(optionLabels, option) ? optionLabels[option] : option,
         value: option,
       })),
     [optionsProp, optionLabels]

@@ -25,7 +25,7 @@ const MSG_PREFIXES = {
   error: `${red('ERROR')} `,
 };
 
-const has = <T extends object>(obj: T, key: any): key is keyof T => obj.hasOwnProperty(key);
+const has = <T extends object>(obj: T, key: any): key is keyof T => Object.hasOwn(obj, key);
 
 export interface ToolingLogTextWriterConfig {
   /**

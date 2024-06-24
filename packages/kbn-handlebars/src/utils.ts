@@ -63,6 +63,7 @@ export function allowUnsafeEval() {
   try {
     // Do not remove the `kbnUnsafeEvalTest` parameter.
     // It is used for filtering out expected CSP failures, and must be the first piece of content in this function.
+    // eslint-disable-next-line no-new-func
     new Function('kbnUnsafeEvalTest', 'return true;');
     return true;
   } catch (e) {

@@ -121,7 +121,7 @@ export const createStubClient = (
         return { body: { ok: true } };
       }),
       create: sinon.spy(async ({ index }) => {
-        if (existingIndices.includes(index) || aliases.hasOwnProperty(index)) {
+        if (existingIndices.includes(index) || Object.hasOwn(aliases, index)) {
           throw createEsClientError('resource_already_exists_exception');
         } else {
           existingIndices.push(index);

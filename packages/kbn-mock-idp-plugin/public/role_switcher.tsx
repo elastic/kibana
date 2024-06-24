@@ -145,7 +145,7 @@ const createForm = (url: string, fields: Record<string, string>) => {
   form.setAttribute('action', url);
 
   for (const key in fields) {
-    if (!fields.hasOwnProperty(key)) {
+    if (!Object.hasOwn(fields, key)) {
       continue;
     }
     const input = document.createElement('input');

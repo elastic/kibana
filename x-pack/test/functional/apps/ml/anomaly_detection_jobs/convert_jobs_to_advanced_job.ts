@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         'advanced job creation retains or inputs the summary count field'
       );
       await ml.jobWizardAdvanced.assertSummaryCountFieldInputExists();
-      if (testData.pickFieldsConfig.hasOwnProperty('summaryCountField')) {
+      if (Object.hasOwn(testData.pickFieldsConfig, 'summaryCountField')) {
         await ml.jobWizardAdvanced.selectSummaryCountField(
           testData.pickFieldsConfig.summaryCountField!
         );
@@ -92,22 +92,22 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.jobWizardAdvanced.assertDetectorDescriptionValue('');
 
         await ml.jobWizardAdvanced.selectDetectorFunction(detector.function);
-        if (detector.hasOwnProperty('field')) {
+        if (Object.hasOwn(detector, 'field')) {
           await ml.jobWizardAdvanced.selectDetectorField(detector.field!);
         }
-        if (detector.hasOwnProperty('byField')) {
+        if (Object.hasOwn(detector, 'byField')) {
           await ml.jobWizardAdvanced.selectDetectorByField(detector.byField!);
         }
-        if (detector.hasOwnProperty('overField')) {
+        if (Object.hasOwn(detector, 'overField')) {
           await ml.jobWizardAdvanced.selectDetectorOverField(detector.overField!);
         }
-        if (detector.hasOwnProperty('partitionField')) {
+        if (Object.hasOwn(detector, 'partitionField')) {
           await ml.jobWizardAdvanced.selectDetectorPartitionField(detector.partitionField!);
         }
-        if (detector.hasOwnProperty('excludeFrequent')) {
+        if (Object.hasOwn(detector, 'excludeFrequent')) {
           await ml.jobWizardAdvanced.selectDetectorExcludeFrequent(detector.excludeFrequent!);
         }
-        if (detector.hasOwnProperty('description')) {
+        if (Object.hasOwn(detector, 'description')) {
           await ml.jobWizardAdvanced.setDetectorDescription(detector.description!);
         }
 
@@ -119,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.jobWizardAdvanced.assertDetectorEntryExists(
           index + previousDetectors.length,
           detector.identifier,
-          detector.hasOwnProperty('description') ? detector.description! : undefined
+          Object.hasOwn(detector, 'description') ? detector.description! : undefined
         );
       }
 

@@ -233,7 +233,7 @@ export function processResults(
 
       const heartbeatState = hit._source?.beats_state?.state?.heartbeat;
       if (heartbeatState !== undefined) {
-        if (!clusters[clusterUuid].hasOwnProperty('heartbeat')) {
+        if (!Object.hasOwn(clusters[clusterUuid], 'heartbeat')) {
           clusters[clusterUuid].heartbeat = {
             monitors: 0,
             endpoints: 0,
@@ -244,7 +244,7 @@ export function processResults(
         clusterHb.monitors += heartbeatState.monitors;
         clusterHb.endpoints += heartbeatState.endpoints;
         for (const proto in heartbeatState) {
-          if (!heartbeatState.hasOwnProperty(proto)) {
+          if (!Object.hasOwn(heartbeatState, proto)) {
             continue;
           }
           const val = heartbeatState[proto];
@@ -252,7 +252,7 @@ export function processResults(
             continue;
           }
 
-          if (!clusterHb.hasOwnProperty(proto)) {
+          if (!Object.hasOwn(clusterHb, proto)) {
             clusterHb[proto] = {
               monitors: 0,
               endpoints: 0,
@@ -265,7 +265,7 @@ export function processResults(
 
       const functionbeatState = hit._source?.beats_state?.state?.functionbeat;
       if (functionbeatState !== undefined) {
-        if (!clusters[clusterUuid].hasOwnProperty('functionbeat')) {
+        if (!Object.hasOwn(clusters[clusterUuid], 'functionbeat')) {
           clusters[clusterUuid].functionbeat = {
             functions: {
               count: 0,

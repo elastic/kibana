@@ -233,7 +233,7 @@ export const testUsers: {
 
 export const setupTestUsers = async (security: SecurityService) => {
   for (const roleName in testUsers) {
-    if (testUsers.hasOwnProperty(roleName)) {
+    if (Object.hasOwn(testUsers, roleName)) {
       const user = testUsers[roleName];
 
       if (user.permissions) {

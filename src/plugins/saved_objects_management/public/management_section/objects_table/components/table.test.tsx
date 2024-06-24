@@ -147,7 +147,7 @@ describe('Table', () => {
 
     const table = component.find('EuiBasicTable');
     const columns = table.prop('columns') as any[];
-    const actionColumn = columns.find((x) => x.hasOwnProperty('actions')) as { actions: any[] };
+    const actionColumn = columns.find((x) => Object.hasOwn(x, 'actions')) as { actions: any[] };
     const someAction = actionColumn.actions.find(
       (x) => x['data-test-subj'] === 'savedObjectsTableAction-someAction'
     );

@@ -76,7 +76,7 @@ export const getConnectorType = (): ConnectorTypeModel<
       if (actionParams.subAction === 'postBlockkit' && actionParams.subActionParams.text) {
         try {
           const blockkitJson = JSON.parse(actionParams.subActionParams.text);
-          if (!blockkitJson.hasOwnProperty('blocks')) {
+          if (!Object.hasOwn(blockkitJson, 'blocks')) {
             errors.text.push(BLOCKS_REQUIRED);
           }
         } catch {

@@ -115,7 +115,7 @@ setAndSetWithFunctions.forEach(([set, testName]) => {
       const arr = [];
       set(arr, path, 'foo');
       Object.keys(expected).forEach((key) => {
-        t.ok(Object.prototype.hasOwnProperty.call(arr, key));
+        t.ok(Object.hasOwn(arr, key));
         t.deepEqual(arr[key], expected[key]);
       });
       t.end();

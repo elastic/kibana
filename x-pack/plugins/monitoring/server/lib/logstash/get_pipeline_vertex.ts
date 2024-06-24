@@ -126,7 +126,7 @@ export function _enrichVertexStateWithStatsAggregation(
       );
       Object.keys(vertexStats).forEach((stat) => {
         if (vertex?.stats) {
-          if (!vertex.stats.hasOwnProperty(stat)) {
+          if (!Object.hasOwn(vertex.stats, stat)) {
             vertex.stats[stat] = { data: [] };
           }
           vertex.stats[stat].data?.push([timestamp, vertexStats[stat]]);

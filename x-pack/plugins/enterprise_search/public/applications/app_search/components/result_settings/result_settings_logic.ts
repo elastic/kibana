@@ -147,7 +147,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         clearAllFields: (resultFields) => clearAllFields(resultFields),
         resetAllFields: (resultFields) => resetAllFields(resultFields),
         updateField: (resultFields, { fieldName, settings }) =>
-          resultFields.hasOwnProperty(fieldName)
+          Object.hasOwn(resultFields, fieldName)
             ? { ...resultFields, [fieldName]: settings }
             : resultFields,
       },

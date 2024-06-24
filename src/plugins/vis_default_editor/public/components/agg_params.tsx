@@ -141,8 +141,8 @@ function DefaultEditorAggParams({
     Object.entries(editorConfig).forEach(([param, paramConfig]) => {
       const paramOptions = agg.type.params.find((paramOption) => paramOption.name === param);
 
-      const hasFixedValue = paramConfig.hasOwnProperty(FIXED_VALUE_PROP);
-      const hasDefault = paramConfig.hasOwnProperty(DEFAULT_PROP);
+      const hasFixedValue = Object.hasOwn(paramConfig, FIXED_VALUE_PROP);
+      const hasDefault = Object.hasOwn(paramConfig, DEFAULT_PROP);
       // If the parameter has a fixed value in the config, set this value.
       // Also for all supported configs we should freeze the editor for this param.
       if (hasFixedValue || hasDefault) {

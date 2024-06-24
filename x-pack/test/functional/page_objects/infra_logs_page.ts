@@ -38,7 +38,7 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
         const parsedParams: Record<string, string> = {};
 
         for (const key in params) {
-          if (params.hasOwnProperty(key)) {
+          if (Object.hasOwn(params, key)) {
             const value = params[key];
             parsedParams[key] = encode(value);
           }

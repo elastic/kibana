@@ -97,7 +97,7 @@ export function groupValues(
         return;
       }
 
-      if (groups.hasOwnProperty(value)) {
+      if (Object.hasOwn(groups, value)) {
         groups[value].count++;
       } else {
         groups[value] = {

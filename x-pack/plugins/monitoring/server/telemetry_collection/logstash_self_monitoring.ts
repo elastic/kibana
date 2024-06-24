@@ -104,7 +104,7 @@ export class LogstashSelfMonitoring implements LogstashMonitoring {
 
         // Internal Collection has no agent field, so default to 'internal_collection'
         const thisCollectionType = hit._source?.agent?.type || 'internal_collection';
-        if (!clusterStats.hasOwnProperty('collection_types')) {
+        if (!Object.hasOwn(clusterStats, 'collection_types')) {
           clusterStats.collection_types = {};
         }
         clusterStats.collection_types![thisCollectionType] =
@@ -114,7 +114,7 @@ export class LogstashSelfMonitoring implements LogstashMonitoring {
         pipelines.forEach((pipeline) => {
           const thisQueueType = pipeline.queue?.type;
           if (thisQueueType !== undefined) {
-            if (!clusterStats.hasOwnProperty('queues')) {
+            if (!Object.hasOwn(clusterStats, 'queues')) {
               clusterStats.queues = {};
             }
             clusterStats.queues![thisQueueType] = (clusterStats.queues![thisQueueType] || 0) + 1;
@@ -206,7 +206,7 @@ export class LogstashSelfMonitoring implements LogstashMonitoring {
               } else {
                 pipelineConfig = 'file';
               }
-              if (!pipelineStats.hasOwnProperty('sources')) {
+              if (!Object.hasOwn(pipelineStats, 'sources')) {
                 pipelineStats.sources = {};
               }
               pipelineStats.sources![pipelineConfig] = true;

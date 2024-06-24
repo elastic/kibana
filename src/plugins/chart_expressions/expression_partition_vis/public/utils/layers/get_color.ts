@@ -79,13 +79,13 @@ const getDistinctColor = (
   formattedCategoricalKey: string
 ) => {
   // TODO move away from Record to a Map to avoid issues with reserved JS keywords
-  if (overwriteColors.hasOwnProperty(categoricalKey)) {
+  if (Object.hasOwn(overwriteColors, categoricalKey)) {
     return overwriteColors[categoricalKey];
   }
   // this is for supporting old visualizations (created by vislib plugin)
   // it seems that there for some aggs, the uiState saved from vislib is
   // different from how es-charts handles it
-  if (overwriteColors.hasOwnProperty(formattedCategoricalKey)) {
+  if (Object.hasOwn(overwriteColors, formattedCategoricalKey)) {
     return overwriteColors[formattedCategoricalKey];
   }
 
@@ -181,7 +181,7 @@ const overrideColors = (
 ) => {
   let overwriteColor;
 
-  if (overwriteColors.hasOwnProperty(name)) {
+  if (Object.hasOwn(overwriteColors, name)) {
     overwriteColor = overwriteColors[name];
   }
 

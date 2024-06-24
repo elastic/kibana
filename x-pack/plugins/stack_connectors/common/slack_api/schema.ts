@@ -42,7 +42,7 @@ export function validateBlockkit(text: string) {
   try {
     const parsedText = JSON.parse(text);
 
-    if (!parsedText.hasOwnProperty('blocks')) {
+    if (!Object.hasOwn(parsedText, 'blocks')) {
       return 'block kit body must contain field "blocks"';
     }
   } catch (err) {

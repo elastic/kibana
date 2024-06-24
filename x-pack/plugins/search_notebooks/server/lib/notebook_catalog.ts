@@ -180,7 +180,7 @@ export const getNotebookMetadata = (id: string, cache: NotebooksCache) => {
     const nbInfo = cache.catalog.notebooks.find((nb) => nb.id === id);
     return nbInfo ? cleanNotebookMetadata(nbInfo) : undefined;
   }
-  if (!NOTEBOOKS_MAP.hasOwnProperty(id)) {
+  if (!Object.hasOwn(NOTEBOOKS_MAP, id)) {
     return undefined;
   }
 

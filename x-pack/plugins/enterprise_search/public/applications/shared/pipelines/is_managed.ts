@@ -17,7 +17,7 @@ interface IngestPipelineWithMetadata extends IngestPipeline {
 const isIngestPipelineWithMetadata = (
   pipeline: IngestPipeline
 ): pipeline is IngestPipelineWithMetadata => {
-  return pipeline.hasOwnProperty('_meta');
+  return Object.hasOwn(pipeline, '_meta');
 };
 
 export const isManagedPipeline = (pipeline: IngestPipeline): boolean => {

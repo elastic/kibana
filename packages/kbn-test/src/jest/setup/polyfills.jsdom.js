@@ -11,12 +11,12 @@ Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 
 require('whatwg-fetch');
 
-if (!global.URL.hasOwnProperty('createObjectURL')) {
+if (!Object.hasOwn(global.URL, 'createObjectURL')) {
   Object.defineProperty(global.URL, 'createObjectURL', { value: () => '' });
 }
 
 // https://github.com/jsdom/jsdom/issues/2524
-if (!global.hasOwnProperty('TextEncoder')) {
+if (!Object.hasOwn(global, 'TextEncoder')) {
   const customTextEncoding = require('@kayahr/text-encoding');
   global.TextEncoder = customTextEncoding.TextEncoder;
   global.TextDecoder = customTextEncoding.TextDecoder;
@@ -29,11 +29,11 @@ if (!global.hasOwnProperty('TextEncoder')) {
 // https://github.com/jsdom/jsdom/issues/2555
 global.Blob = require('blob-polyfill').Blob;
 
-if (!global.hasOwnProperty('ResizeObserver')) {
+if (!Object.hasOwn(global, 'ResizeObserver')) {
   global.ResizeObserver = require('resize-observer-polyfill');
 }
 
-if (!global.hasOwnProperty('Worker')) {
+if (!Object.hasOwn(global, 'Worker')) {
   class Worker {
     constructor(stringUrl) {
       this.url = stringUrl;
@@ -49,7 +49,7 @@ if (!global.hasOwnProperty('Worker')) {
 
   // Mocking matchMedia to resolve TypeError: window.matchMedia is not a function
   // For more info, see https://jestjs.io/docs/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
-  if (!global.hasOwnProperty('matchMedia')) {
+  if (!Object.hasOwn(global, 'matchMedia')) {
     Object.defineProperty(global, 'matchMedia', {
       writable: true,
       // eslint-disable-next-line no-undef
