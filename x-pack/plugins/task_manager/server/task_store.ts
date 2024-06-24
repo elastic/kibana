@@ -63,6 +63,10 @@ export interface SearchOpts {
   routing?: string[];
 }
 
+export interface PartialSearchOpts extends SearchOpts {
+  fields: string[];
+}
+
 export interface AggregationOpts {
   aggs: Record<string, estypes.AggregationsAggregationContainer>;
   query?: estypes.QueryDslQueryContainer;
@@ -80,6 +84,11 @@ export interface UpdateByQueryOpts extends SearchOpts {
 
 export interface FetchResult {
   docs: ConcreteTaskInstance[];
+  versionMap: Map<string, ConcreteTaskInstanceVersion>;
+}
+
+export interface PartialFetchResult {
+  docs: PartialConcreteTaskInstance[];
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
@@ -548,6 +557,54 @@ export class TaskStore {
     }
   }
 
+  public async partialSearch(opts: PartialSearchOpts): Promise<PartialFetchResult> {
+    const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
+
+    try {
+      const result = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
+        index: this.index,
+        ignore_unavailable: true,
+        // ...(opts.routing ? { routing: opts.routing.join(',') } : {}),
+        body: {
+          ...omit(opts, 'routing'),
+          query,
+          fields: opts.fields.map((field) => `tas.${field}`),
+        },
+      });
+
+      const {
+        hits: { hits: tasks },
+      } = result;
+
+      const versionMap = new Map<string, ConcreteTaskInstanceVersion>();
+      for (const task of tasks) {
+        if (task._seq_no == null || task._primary_term == null) continue;
+
+        const esId = task._id.startsWith('task:') ? task._id.slice(5) : task._id;
+        versionMap.set(esId, {
+          esId: task._id,
+          seqNo: task._seq_no,
+          primaryTerm: task._primary_term,
+        });
+      }
+
+      return {
+        versionMap,
+        docs: tasks
+          // @ts-expect-error @elastic/elasticsearch _source is optional
+          .filter((doc) => this.serializer.isRawSavedObject(doc))
+          // @ts-expect-error @elastic/elasticsearch _source is optional
+          .map((doc) => this.serializer.rawToSavedObject(doc))
+          .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
+          .map((doc) => partialSavedObjectToConcreteTaskInstance(doc))
+          .filter((doc): doc is ConcreteTaskInstance => !!doc),
+      };
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+  }
+
   public async search(opts: SearchOpts = {}): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
@@ -736,6 +793,22 @@ export function savedObjectToConcreteTaskInstance(
     state: parseJSONField(savedObject.attributes.state, 'state', savedObject.id),
     params: parseJSONField(savedObject.attributes.params, 'params', savedObject.id),
   };
+}
+
+export function partialSavedObjectToConcreteTaskInstance(
+  savedObject: Omit<SavedObject<Partial<SerializedConcreteTaskInstance>>, 'references'>
+): PartialConcreteTaskInstance {
+  return {
+    ...omit(savedObject.attributes, 'scheduledAt', 'runAt', 'startedAt', 'retryAt', 'state', 'params'),
+    id: savedObject.id,
+    version: savedObject.version,
+    ...(savedObject.attributes.scheduledAt ? { scheduledAt: new Date(savedObject.attributes.scheduledAt) } : {}),
+    ...(savedObject.attributes.runAt ? { runAt: new Date(savedObject.attributes.runAt) } : {}),
+    ...(savedObject.attributes.startedAt ? { startedAt: new Date(savedObject.attributes.startedAt) } : {}),
+    ...(savedObject.attributes.retryAt ? { retryAt: new Date(savedObject.attributes.retryAt) } : {}),
+    ...(savedObject.attributes.state ? { state: parseJSONField(savedObject.attributes.state, 'state', savedObject.id) } : {}),
+    ...(savedObject.attributes.params ? { params: parseJSONField(savedObject.attributes.params, 'params', savedObject.id) } : {}),
+  }
 }
 
 function parseJSONField(json: string, fieldName: string, id: string) {

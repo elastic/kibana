@@ -66,6 +66,11 @@ interface OwnershipClaimingOpts {
 
 const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 
+type PartialSearchConcreteTaskInstance = PartialConcreteTaskInstance & {
+  taskType: ConcreteTaskInstance['taskType'];
+  attempts: ConcreteTaskInstance['attempts'];
+};
+
 export function claimAvailableTasksMget(opts: TaskClaimerOpts): Observable<ClaimOwnershipResult> {
   const taskClaimOwnership$ = new Subject<ClaimOwnershipResult>();
 
@@ -113,9 +118,9 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       return emptyClaimOwnershipResult();
     }
 
-    const currentTasks = new Set<ConcreteTaskInstance>();
-    const staleTasks = new Set<ConcreteTaskInstance>();
-    const missingTasks = new Set<ConcreteTaskInstance>();
+    const currentTasks = new Set<PartialSearchConcreteTaskInstance>();
+    const staleTasks = new Set<PartialSearchConcreteTaskInstance>();
+    const missingTasks = new Set<PartialSearchConcreteTaskInstance>();
 
     const docLatestVersions = await taskStore.getDocVersions(docs.map((doc) => `task:${doc.id}`));
 
@@ -176,19 +181,14 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
         };
       });
 
-    const finalResults: ConcreteTaskInstance[] = [];
+    // const finalResults: ConcreteTaskInstance[] = [];
+    const idsToMget: string[] = [];
     let conflicts = staleTasks.size;
     try {
       const updateResults = await taskStore.bulkPartialUpdate(taskUpdates);
       for (const updateResult of updateResults) {
         if (isOk(updateResult)) {
-          const originalTask = Array.from(candidateTasks).find(
-            (task) => task.id === updateResult.value.id
-          );
-          finalResults.push({
-            ...originalTask,
-            ...updateResult.value,
-          } as ConcreteTaskInstance);
+          idsToMget.push(updateResult.value.id);
         } else {
           conflicts++;
           const { id, type, error } = updateResult.error;
@@ -200,6 +200,17 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       // eslint-disable-next-line no-console
       console.log(`Error updating tasks during claim: ${err}`);
     }
+
+    const finalResults = (await taskStore.bulkGet(idsToMget))
+      .map((item) => {
+        if (isOk(item)) {
+          return item.value;
+        } else {
+          // eslint-disable-next-line no-console
+          console.log('Failed to mget task', item.error.id, item.error.error.message);
+        }
+      })
+      .filter((item): item is ConcreteTaskInstance => !!item);
 
     apmTrans.end('success');
 
@@ -220,7 +231,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 }
 
 interface SearchAvailableTasksResponse {
-  docs: ConcreteTaskInstance[];
+  docs: PartialSearchConcreteTaskInstance[];
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
@@ -259,12 +270,13 @@ async function searchAvailableTasks({
     filterDownBy(InactiveTasks, tasksWithPartition(partitions))
   );
 
-  return await taskStore.fetch({
+  return (await taskStore.partialSearch({
     query,
     sort,
     size,
     seq_no_primary_term: true,
-  });
+    fields: ['taskType', 'attempts'],
+  })) as SearchAvailableTasksResponse;
 }
 
 function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombinations[] {
@@ -320,9 +332,9 @@ function emptyClaimOwnershipResult() {
 }
 
 function applyLimitedConcurrency(
-  tasks: Set<ConcreteTaskInstance>,
+  tasks: Set<PartialSearchConcreteTaskInstance>,
   batches: TaskClaimingBatches
-): Set<ConcreteTaskInstance> {
+): Set<PartialSearchConcreteTaskInstance> {
   // create a map of task type - concurrency
   const limitedBatches = batches.filter(isLimited);
   const limitedMap = new Map<string, number>();
@@ -332,7 +344,7 @@ function applyLimitedConcurrency(
   }
 
   // apply the limited concurrency
-  const result = new Set<ConcreteTaskInstance>();
+  const result = new Set<PartialSearchConcreteTaskInstance>();
   for (const task of tasks) {
     const concurrency = limitedMap.get(task.taskType);
     if (concurrency == null) {
