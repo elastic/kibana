@@ -4398,7 +4398,7 @@ The following boolean operators are supported:
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.castOperator.markdown',
             {
-              defaultMessage: `### CAST
+              defaultMessage: `### CAST (\`::\`)
 The \`::\` operator provides a convenient alternative syntax to the \`TO_<type>\` type conversion functions.
 
 Example:
