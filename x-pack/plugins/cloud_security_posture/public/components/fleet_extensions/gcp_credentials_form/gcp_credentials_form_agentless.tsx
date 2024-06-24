@@ -72,7 +72,7 @@ export const GcpCredentialsFormAgentless = ({
           <EuiCallOut color="warning">
             <FormattedMessage
               id="xpack.csp.fleetIntegration.cloudCredentials.cloudFormationSupportedMessage"
-              defaultMessage="Launch Cloud Shell for Automated Credentials not supported in current integration version. Please upgrade to the latest version to enable Launch Cloud Shell for Automated Credentials."
+              defaultMessage="Launch Cloud Shell for automated credentials not supported in current integration version. Please upgrade to the latest version to enable Launch Cloud Shell for automated credentials."
             />
           </EuiCallOut>
           <EuiSpacer size="m" />
