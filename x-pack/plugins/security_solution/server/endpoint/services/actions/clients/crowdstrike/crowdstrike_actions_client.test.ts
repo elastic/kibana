@@ -134,10 +134,12 @@ describe('CrowdstrikeActionsClient class', () => {
         },
         error: {
           code: '500',
-          message: 'Crowdstrike action failed',
+          message: 'Crowdstrike action failed: error message',
         },
+        meta: undefined,
       },
       index: ENDPOINT_ACTION_RESPONSES_INDEX,
+      refresh: 'wait_for',
     });
   });
 
@@ -209,12 +211,16 @@ describe('CrowdstrikeActionsClient class', () => {
                 '1-2-3': {
                   name: 'Crowdstrike-1460',
                 },
+                parameters: undefined,
               },
             },
             input_type: 'crowdstrike',
+            error: undefined,
+            meta: undefined,
           },
         },
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        refresh: 'wait_for',
       });
     });
 
@@ -302,11 +308,15 @@ describe('CrowdstrikeActionsClient class', () => {
                   name: 'Crowdstrike-1460',
                 },
               },
+              parameters: undefined,
             },
             input_type: 'crowdstrike',
           },
+          error: undefined,
+          meta: undefined,
         },
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        refresh: 'wait_for',
       });
     });
 
