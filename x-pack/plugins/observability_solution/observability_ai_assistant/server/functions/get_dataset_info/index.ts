@@ -87,11 +87,11 @@ export function registerGetDatasetInfoFunction({
         signal,
         chat,
       });
-
       return {
         content: {
           indices: [index],
           fields: relevantFieldNames.fields,
+          stats: relevantFieldNames.stats,
         },
       };
     }
