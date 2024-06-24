@@ -173,7 +173,9 @@ export function createWorkloadAggregator(
                   field: 'task.runAt',
                   ranges: [
                     {
+                      // @ts-expect-error type regression introduced by https://github.com/elastic/elasticsearch-specification/pull/2552
                       from: `now`,
+                      // @ts-expect-error type regression introduced by https://github.com/elastic/elasticsearch-specification/pull/2552
                       to: `now+${asInterval(scheduleDensityBuckets * pollInterval)}`,
                     },
                   ],

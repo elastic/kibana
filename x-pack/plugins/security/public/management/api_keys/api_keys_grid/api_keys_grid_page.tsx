@@ -88,7 +88,9 @@ export const APIKeysGridPage: FunctionComponent = () => {
       size: page?.size!,
       sort: sort ?? tableState.sort,
     };
+    // @ts-expect-error type mismatch on field sort.field
     setTableState(newState);
+    // @ts-expect-error type mismatch on field sort.field
     queryApiKeysAndAggregations(newState);
   };
 

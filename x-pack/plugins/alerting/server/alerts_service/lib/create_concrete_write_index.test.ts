@@ -647,7 +647,7 @@ describe('createConcreteWriteIndex', () => {
         clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
         clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(async () => ({
           ...SimulateTemplateResponse,
-          template: { ...SimulateTemplateResponse.template, mappings: null },
+          template: { ...SimulateTemplateResponse.template, mappings: {} },
         }));
 
         await createConcreteWriteIndex({
