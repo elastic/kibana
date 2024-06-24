@@ -70,7 +70,7 @@ export const useSimpleRunOnceMonitors = ({
 
     // Whenever a new found document is fetched, update lastUpdated
     const docsChecksum = docs
-      .map(({ _id }: { _id: string }) => _id)
+      .map(({ _id }: { _id?: string }) => _id!)
       .reduce((acc, cur) => acc + cur, '');
     if (docsChecksum !== lastUpdated.current.checksum) {
       // Mutating lastUpdated
