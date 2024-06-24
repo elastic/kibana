@@ -22,7 +22,7 @@ const allOsValues = [
   PolicyOperatingSystem.windows,
 ];
 
-const getPolicyProtectionsReference = (): PolicyProtectionReference[] => [
+export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => [
   {
     keyPath: 'malware.mode',
     osList: [...allOsValues],
@@ -204,3 +204,9 @@ export const isPolicySetToEventCollectionOnly = (
     message,
   };
 };
+
+export function isBillablePolicy(policy: PolicyConfig) {
+  if (!policy.meta.serverless) return false;
+
+  return !isPolicySetToEventCollectionOnly(policy).isOnlyCollectingEvents;
+}
