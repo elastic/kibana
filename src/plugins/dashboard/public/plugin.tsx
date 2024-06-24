@@ -55,7 +55,6 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { MaybePromise } from '@kbn/utility-types';
 import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
 import { registerDashboardPanelPlacementSetting } from './dashboard_container/panel_placement';
 import {
@@ -122,9 +121,9 @@ export interface DashboardStart {
   locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
-  registerDashboardPanelPlacementSetting: (
+  registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
     embeddableType: string,
-    getPanelPlacementSettings: MaybePromise<GetPanelPlacementSettings>
+    getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
   ) => void;
 }
 

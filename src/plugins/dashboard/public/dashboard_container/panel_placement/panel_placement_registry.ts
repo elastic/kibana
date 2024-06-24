@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { MaybePromise } from '@kbn/utility-types';
 import { GetPanelPlacementSettings } from './types';
 import { panelPlacementStrings } from '../_dashboard_container_strings';
 
-const registry = new Map<string, MaybePromise<GetPanelPlacementSettings<object>>>();
+const registry = new Map<string, GetPanelPlacementSettings<object>>();
 
-export const registerDashboardPanelPlacementSetting = (
+export const registerDashboardPanelPlacementSetting = <SerializedState extends object = object>(
   embeddableType: string,
-  getPanelPlacementSettings: MaybePromise<GetPanelPlacementSettings>
+  getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
 ) => {
   if (registry.has(embeddableType)) {
     throw new Error(panelPlacementStrings.getPanelPlacementSettingsExistsError(embeddableType));
   }
-  registry.set(embeddableType, getPanelPlacementSettings);
+  registry.set(embeddableType, getPanelPlacementSettings as GetPanelPlacementSettings<object>);
 };
 
 export const getDashboardPanelPlacementSetting = (embeddableType: string) => {
