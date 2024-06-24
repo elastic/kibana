@@ -316,11 +316,11 @@ EsqlCodeBlockComponent.displayName = 'EsqlCodeBlock';
 
 export const EsqlCodeBlock = React.memo(EsqlCodeBlockComponent);
 
-export const getEsqlRenderer = (timestamp) => (props) => {
-  return (
+// eslint-disable-next-line react/display-name
+export const getEsqlRenderer = (timestamp: string | undefined) => (props) =>
+  (
     <>
       <EsqlCodeBlock {...props} timestamp={timestamp} />
       <EuiSpacer size="m" />
     </>
   );
-};
