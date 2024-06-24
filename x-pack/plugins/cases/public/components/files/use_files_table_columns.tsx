@@ -27,8 +27,9 @@ export const useFilesTableColumns = ({
   return [
     {
       name: i18n.NAME,
+      field: 'name',
       'data-test-subj': 'cases-files-table-filename',
-      render: (file: FileJSON) => (
+      render: (name: string, file: FileJSON) => (
         <FileNameLink file={file} showPreview={() => showPreview(file)} />
       ),
       width: '60%',

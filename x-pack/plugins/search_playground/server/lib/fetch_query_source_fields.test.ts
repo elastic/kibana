@@ -26,6 +26,8 @@ import {
   DENSE_SEMANTIC_FIELD_MAPPINGS,
   DENSE_SEMANTIC_FIELD_FIELD_CAPS,
   DENSE_SEMANTIC_FIELD_MAPPINGS_MISSING_TASK_TYPE,
+  DENSE_PIPELINE_FIELD_CAPS,
+  DENSE_OLD_PIPELINE_DOCS,
 } from '../../__mocks__/fetch_query_source_fields.mock';
 import {
   fetchFields,
@@ -502,6 +504,54 @@ describe('fetch_query_source_fields', () => {
               },
             },
           },
+        },
+      });
+    });
+
+    it('should perform a search request with the correct modelid for old style inference', async () => {
+      const client = {
+        asCurrentUser: {
+          fieldCaps: jest.fn().mockResolvedValue(DENSE_PIPELINE_FIELD_CAPS),
+          search: jest.fn().mockResolvedValue(DENSE_OLD_PIPELINE_DOCS[0]),
+          indices: {
+            getMapping: jest.fn().mockResolvedValue({
+              'search-test-e5': {
+                mappings: {},
+              },
+            }),
+          },
+        },
+      } as any;
+      const indices = ['search-test-e5'];
+      const response = await fetchFields(client, indices);
+      expect(client.asCurrentUser.search).toHaveBeenCalledWith({
+        index: 'search-test-e5',
+        body: {
+          size: 0,
+          aggs: {
+            'ml.inference.body_content.model_id': {
+              terms: {
+                field: 'ml.inference.body_content.model_id.enum',
+                size: 1,
+              },
+            },
+          },
+        },
+      });
+      expect(response).toEqual({
+        'search-test-e5': {
+          bm25_query_fields: expect.any(Array),
+          dense_vector_query_fields: [
+            {
+              field: 'ml.inference.body_content.predicted_value',
+              indices: ['search-test-e5'],
+              model_id: '.multilingual-e5-small_linux-x86_64',
+            },
+          ],
+          elser_query_fields: [],
+          semantic_fields: [],
+          source_fields: expect.any(Array),
+          skipped_fields: 30,
         },
       });
     });
