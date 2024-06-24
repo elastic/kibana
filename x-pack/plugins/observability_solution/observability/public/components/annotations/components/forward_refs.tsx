@@ -15,12 +15,18 @@ import {
   EuiTextAreaProps,
   EuiFieldTextProps,
   EuiFieldText,
+  EuiFieldNumber,
   EuiSelectProps,
   EuiSelect,
+  EuiFieldNumberProps,
 } from '@elastic/eui';
 
 export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>((props, ref) => (
   <EuiFieldText data-test-subj={props['data-test-subj']} {...props} inputRef={ref} />
+));
+
+export const NumberField = React.forwardRef<HTMLInputElement, EuiFieldNumberProps>((props, ref) => (
+  <EuiFieldNumber data-test-subj={props['data-test-subj']} {...props} inputRef={ref} />
 ));
 
 export const TextArea = React.forwardRef<HTMLTextAreaElement, EuiTextAreaProps>((props, ref) => (

@@ -7,21 +7,10 @@
 
 import { RectAnnotation } from '@elastic/charts';
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  formatDate,
-  useEuiTheme,
-} from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import moment from 'moment';
 import { useFormContext } from 'react-hook-form';
-import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { AnnotationTooltip } from './annotation_tooltip';
 import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 
 export function NewRectAnnotation({
@@ -62,8 +51,9 @@ export function ObsRectAnnotation({
   const timestamp = annotation['@timestamp'];
   const timestampEnd = annotation['@timestampEnd'];
   const { euiTheme } = useEuiTheme();
+  const annotationStyle = annotation.annotation?.style;
 
-  const color = annotation.annotation?.style?.color ?? euiTheme.colors.warning;
+  const color = annotationStyle?.color ?? euiTheme.colors.warning;
 
   return (
     <RectAnnotation
@@ -78,57 +68,13 @@ export function ObsRectAnnotation({
       ]}
       id={'id' in annotation ? annotation.id : `${timestamp}${message}`}
       style={{ fill: color, opacity: 1 }}
-      outside={annotation.annotation.style?.rect?.fill === 'outside'}
+      outside={annotationStyle?.rect?.fill === 'outside'}
       outsideDimension={14}
-      {...(annotation.annotation.style?.rect?.position === 'top' && {
+      groupId="primary"
+      {...(annotationStyle?.rect?.position === 'top' && {
         groupId: 'secondary',
       })}
-      customTooltip={() => (
-        <EuiPanel
-          color="plain"
-          hasShadow={false}
-          hasBorder={false}
-          paddingSize="xs"
-          borderRadius="none"
-        >
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="stopFilled" color={color} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={true}>
-                  <EuiTitle size="xxxs">
-                    <h2>{annotation.name}</h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {(annotation.tags ?? []).length > 0 && (
-                    <EuiFlexItem>
-                      <TagsList tags={annotation.tags} color="default" />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-
-              <EuiFlexItem>
-                <EuiText size="s">
-                  {`${formatDate(timestamp, 'longDateTime')} — ${formatDate(
-                    timestampEnd,
-                    'longDateTime'
-                  )}`}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiHorizontalRule margin="xs" />
-              <EuiFlexItem>
-                <EuiText size="s">{message}</EuiText>
-              </EuiFlexItem>
-
-              <EuiSpacer size="s" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      )}
+      customTooltip={() => <AnnotationTooltip annotation={annotation} />}
     />
   );
 }

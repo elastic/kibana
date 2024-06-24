@@ -51,28 +51,23 @@ export function useUpdateAnnotation() {
     },
     {
       onSuccess: (data, { annotation }) => {
-        toasts.addSuccess(
-          {
-            title: toMountPoint(
-              <RedirectAppLinks coreStart={services} data-test-subj="observabilityMainContainer">
-                <FormattedMessage
-                  id="xpack.observability.annotation.updated.successNotification"
-                  defaultMessage="Successfully updated annotation {name}"
-                  values={{
-                    name: annotation.message,
-                  }}
-                />
-              </RedirectAppLinks>,
-              {
-                i18n: i18nStart,
-                theme,
-              }
-            ),
-          },
-          {
-            toastLifeTimeMs: 30000,
-          }
-        );
+        toasts.addSuccess({
+          title: toMountPoint(
+            <RedirectAppLinks coreStart={services} data-test-subj="observabilityMainContainer">
+              <FormattedMessage
+                id="xpack.observability.annotation.updated.successNotification"
+                defaultMessage="Successfully updated annotation {name}"
+                values={{
+                  name: annotation.message,
+                }}
+              />
+            </RedirectAppLinks>,
+            {
+              i18n: i18nStart,
+              theme,
+            }
+          ),
+        });
       },
       onError: (error, { annotation }, context) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {

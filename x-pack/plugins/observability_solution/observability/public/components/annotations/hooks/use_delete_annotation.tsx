@@ -36,28 +36,23 @@ export function useDeleteAnnotation() {
     },
     {
       onSuccess: (data, { annotations }) => {
-        toasts.addSuccess(
-          {
-            title: toMountPoint(
-              <RedirectAppLinks coreStart={services} data-test-subj="observabilityMainContainer">
-                <FormattedMessage
-                  id="xpack.observability.annotation.delete.successNotification"
-                  defaultMessage="Successfully deleted annotations {name}."
-                  values={{
-                    name: annotations.map((annotation) => annotation.message).join(', '),
-                  }}
-                />
-              </RedirectAppLinks>,
-              {
-                i18n: i18nStart,
-                theme,
-              }
-            ),
-          },
-          {
-            toastLifeTimeMs: 30000,
-          }
-        );
+        toasts.addSuccess({
+          title: toMountPoint(
+            <RedirectAppLinks coreStart={services} data-test-subj="observabilityMainContainer">
+              <FormattedMessage
+                id="xpack.observability.annotation.delete.successNotification"
+                defaultMessage="Successfully deleted annotations {name}."
+                values={{
+                  name: annotations.map((annotation) => annotation.message).join(', '),
+                }}
+              />
+            </RedirectAppLinks>,
+            {
+              i18n: i18nStart,
+              theme,
+            }
+          ),
+        });
       },
       onError: (error, { annotations }, context) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {

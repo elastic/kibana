@@ -13,12 +13,11 @@ import {
   EuiTableSelectionType,
   EuiSearchBarProps,
   EuiButton,
-  formatDate,
   EuiSpacer,
   EuiText,
-  EuiIcon,
 } from '@elastic/eui';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { TimestampRangeLabel } from '../../components/annotations/components/timestamp_range_label';
 import { DatePicker } from './date_picker';
 import { useDeleteAnnotation } from '../../components/annotations/hooks/use_delete_annotation';
 import { AnnotationsListChart } from './annotations_list_chart';
@@ -107,21 +106,7 @@ export function AnnotationsList() {
       dataType: 'date',
       sortable: true,
       render: (timestamp: string, annotation: Annotation) => {
-        if (annotation['@timestampEnd']) {
-          return (
-            <>
-              {formatDate(timestamp, 'longDateTime')}
-              <EuiIcon
-                type="sortRight"
-                css={{
-                  margin: '0 5px',
-                }}
-              />
-              {formatDate(annotation['@timestampEnd'], 'longDateTime')}
-            </>
-          );
-        }
-        return formatDate(timestamp, 'longDateTime');
+        return <TimestampRangeLabel annotation={annotation} />;
       },
     },
     {
@@ -140,8 +125,8 @@ export function AnnotationsList() {
       render: (annotation: Annotation) => {
         return (
           <EuiText size="s">
-            {i18n.translate('xpack.observability.columns.sloIDTextLabel', {
-              defaultMessage: 'SLO ID:',
+            {i18n.translate('xpack.observability.columns.sloTextLabel', {
+              defaultMessage: 'SLO:',
             })}
             {annotation.slo?.id}
           </EuiText>
@@ -168,13 +153,7 @@ export function AnnotationsList() {
       <EuiSpacer size="m" />
       <EuiInMemoryTable
         childrenBetween={
-          <AnnotationsListChart
-            data={data ?? []}
-            start={start}
-            end={end}
-            isEditing={isEditing}
-            setIsEditing={setIsEditing}
-          />
+          <AnnotationsListChart data={data ?? []} start={start} end={end} isEditing={isEditing} />
         }
         tableCaption={i18n.translate('xpack.observability.annotationsTableCaption', {
           defaultMessage: 'List of annotations for the selected time range.',

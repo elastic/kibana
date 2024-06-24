@@ -9,10 +9,11 @@ import React from 'react';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
+import { CreateAnnotationParams } from '../../../../common/annotations';
 
 export function FillOptions() {
-  const { control, watch } = useFormContext();
-  const isOutside = watch('annotation.rect.fill') === 'outside';
+  const { control, watch } = useFormContext<CreateAnnotationParams>();
+  const isOutside = watch('annotation.style.rect.fill') === 'outside';
 
   return (
     <>
@@ -24,15 +25,15 @@ export function FillOptions() {
         fullWidth
       >
         <Controller
-          defaultValue=""
+          defaultValue="inside"
           name="annotation.style.rect.fill"
           control={control}
-          render={({ field, fieldState }) => (
+          render={({ field }) => (
             <EuiButtonGroup
               buttonSize="compressed"
               isFullWidth={true}
               id="fillOptions"
-              idSelected={field.value}
+              idSelected={field.value as string}
               onChange={(id) => {
                 field.onChange(id);
               }}
@@ -45,34 +46,39 @@ export function FillOptions() {
         />
       </EuiFormRow>
       {isOutside && (
-        <EuiFormRow
-          label={i18n.translate('xpack.observability.fillOptions.euiFormRow.positionLabel', {
-            defaultMessage: 'Position',
-          })}
-          display="columnCompressed"
-          fullWidth
-        >
-          <Controller
-            defaultValue=""
-            name="annotation.style.rect.position"
-            control={control}
-            render={({ field, fieldState }) => (
-              <EuiButtonGroup
-                buttonSize="compressed"
-                isFullWidth={true}
-                id="positionOptions"
-                idSelected={field.value}
-                onChange={(id) => {
-                  field.onChange(id);
-                }}
-                options={positionOptions}
-                legend={i18n.translate('xpack.observability.annotationForm.positionLabel.legend', {
-                  defaultMessage: 'Position',
-                })}
-              />
-            )}
-          />
-        </EuiFormRow>
+        <>
+          <EuiFormRow
+            label={i18n.translate('xpack.observability.fillOptions.euiFormRow.positionLabel', {
+              defaultMessage: 'Position',
+            })}
+            display="columnCompressed"
+            fullWidth
+          >
+            <Controller
+              defaultValue="top"
+              name="annotation.style.rect.position"
+              control={control}
+              render={({ field }) => (
+                <EuiButtonGroup
+                  buttonSize="compressed"
+                  isFullWidth={true}
+                  id="positionOptions"
+                  idSelected={field.value as string}
+                  onChange={(id) => {
+                    field.onChange(id);
+                  }}
+                  options={positionOptions}
+                  legend={i18n.translate(
+                    'xpack.observability.annotationForm.positionLabel.legend',
+                    {
+                      defaultMessage: 'Position',
+                    }
+                  )}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </>
       )}
     </>
   );
@@ -92,6 +98,7 @@ const options = [
     }),
   },
 ];
+
 const positionOptions = [
   {
     id: 'top',

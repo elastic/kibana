@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-import moment from 'moment';
-import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
+import moment from 'moment';
+import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
+import { AnnotationIcon } from './annotation_icon';
+import { AnnotationTooltip } from './annotation_tooltip';
 import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 
 export function NewLineAnnotation({
@@ -28,11 +30,13 @@ export function NewLineAnnotation({
     return null;
   }
   const values = getValues();
+  const annotation = watch('annotation');
 
   return (
     <ObsLineAnnotation
       annotation={{
         ...values,
+        annotation,
         ...(sloId ? { slo: { id: sloId, instanceId: sloInstanceId } } : {}),
       }}
     />
@@ -76,11 +80,12 @@ export function ObsLineAnnotation({
       }}
       marker={
         <span>
-          <EuiIcon type={annotation.annotation?.style?.icon ?? 'iInCircle'} />
+          <AnnotationIcon annotation={annotation} />
         </span>
       }
       markerBody={<EuiText>{annotation.name}</EuiText>}
       markerPosition={annotation.annotation.style?.line?.iconPosition ?? 'top'}
+      customTooltip={() => <AnnotationTooltip annotation={annotation} />}
     />
   );
 }

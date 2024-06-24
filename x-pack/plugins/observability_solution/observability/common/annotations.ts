@@ -27,6 +27,9 @@ const dateAsStringRt = new t.Type<string, string, unknown>(
   t.identity
 );
 
+export const rectFill = t.union([t.literal('inside'), t.literal('outside')]);
+export const rectPosition = t.union([t.literal('top'), t.literal('bottom')]);
+
 export const createAnnotationRt = t.intersection([
   t.type({
     annotation: t.partial({
@@ -41,8 +44,8 @@ export const createAnnotationRt = t.intersection([
           textDecoration: t.union([t.literal('none'), t.literal('name')]),
         }),
         rect: t.partial({
-          fill: t.union([t.literal('inside'), t.literal('outside')]),
-          position: t.union([t.literal('top'), t.literal('bottom')]),
+          fill: rectFill,
+          position: rectPosition,
         }),
       }),
     }),
@@ -91,5 +94,7 @@ export type CreateAnnotationParams = t.TypeOf<typeof createAnnotationRt>;
 export type DeleteAnnotationParams = t.TypeOf<typeof deleteAnnotationRt>;
 export type GetByIdAnnotationParams = t.TypeOf<typeof getAnnotationByIdRt>;
 export type FindAnnotationParams = t.TypeOf<typeof findAnnotationRt>;
+export type AnnotationRectFill = t.TypeOf<typeof rectFill>;
+export type AnnotationRectPosition = t.TypeOf<typeof rectPosition>;
 
 export type Annotation = t.TypeOf<typeof updateAnnotationRt>;

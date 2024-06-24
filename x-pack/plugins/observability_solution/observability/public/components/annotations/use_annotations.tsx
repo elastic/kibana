@@ -10,6 +10,13 @@ import { FormProvider, useForm } from 'react-hook-form';
 import moment, { Moment } from 'moment';
 import useKey from 'react-use/lib/useKey';
 import { clone } from 'lodash';
+import {
+  AvailableAnnotationIcons,
+  defaultAnnotationColor,
+  defaultAnnotationLabel,
+  defaultAnnotationRangeColor,
+  defaultRangeAnnotationLabel,
+} from '@kbn/event-annotation-common';
 import { useEditAnnotationHelper } from './hooks/use_edit_annotation_helper';
 import type { CreateAnnotationForm } from './components/create_annotation';
 import { ObservabilityAnnotations, CreateAnnotation } from './components';
@@ -151,7 +158,7 @@ export const useAnnotations = ({
         }
       };
     },
-    createAnnotation: (start: string | number, end?: string | null, name?: string) => {
+    createAnnotation: (start: string | number, end?: string | null) => {
       if (isCreateOpen) return;
       reset(getDefaultAnnotation({ sloId, sloInstanceId }));
 
@@ -163,8 +170,9 @@ export const useAnnotations = ({
       if (end) {
         setValue('@timestampEnd', moment(new Date(Number(end))));
       }
-      if (name) {
-        setValue('name', name);
+      if (end) {
+        setValue('name', defaultRangeAnnotationLabel);
+        setValue('annotation.style.color', defaultAnnotationRangeColor);
       }
       setIsCreateOpen(true);
     },
@@ -211,13 +219,14 @@ const getDefaultAnnotation = ({
   sloInstanceId?: string;
 }): Partial<CreateAnnotationForm> => {
   return {
+    name: defaultAnnotationLabel,
     message: '',
     '@timestamp': timestamp ?? moment(),
     '@timestampEnd': timestampEnd,
     annotation: {
       style: {
-        icon: 'iInCircle',
-        color: '#D6BF57',
+        icon: AvailableAnnotationIcons.TRIANGLE,
+        color: defaultAnnotationColor,
         line: {
           width: 2,
           style: 'solid',
@@ -225,7 +234,7 @@ const getDefaultAnnotation = ({
         },
         rect: {
           fill: 'inside',
-          position: 'bottom',
+          position: 'top',
         },
       },
     },

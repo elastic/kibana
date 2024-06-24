@@ -77,13 +77,7 @@ export function AnnotationsListChart({
           data-test-subj="o11yRenderToolsRightCreateAnnotationButton"
           key="createAnnotation"
           onClick={() => {
-            createAnnotation(
-              moment().subtract(1, 'day').toISOString(),
-              null,
-              i18n.translate('xpack.observability.renderToolsRight.newAnnotation', {
-                defaultMessage: 'New annotation',
-              })
-            );
+            createAnnotation(moment().subtract(1, 'day').toISOString());
           }}
           fill={true}
         >
@@ -126,6 +120,7 @@ export function AnnotationsListChart({
             defaultMessage: '@timestamp',
           })}
           tickFormat={(d) => formatDate(d, 'longDateTime')}
+          groupId="primary"
         />
         <Axis
           id="vertical"
