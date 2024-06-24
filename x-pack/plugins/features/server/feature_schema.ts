@@ -116,6 +116,11 @@ const kibanaPrivilegeSchema = schema.object({
     read: schema.arrayOf(schema.string()),
   }),
   ui: listOfCapabilitiesSchema,
+  replacedBy: schema.maybe(
+    schema.arrayOf(
+      schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+    )
+  ),
 });
 
 const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
@@ -155,6 +160,11 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
     read: schema.arrayOf(schema.string()),
   }),
   ui: listOfCapabilitiesSchema,
+  replacedBy: schema.maybe(
+    schema.arrayOf(
+      schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+    )
+  ),
 });
 
 const kibanaMutuallyExclusiveSubFeaturePrivilegeSchema =
@@ -245,6 +255,7 @@ const kibanaFeatureSchema = schema.object({
       ),
     })
   ),
+  deprecated: schema.maybe(schema.boolean()),
 });
 
 const elasticsearchPrivilegeSchema = schema.object({

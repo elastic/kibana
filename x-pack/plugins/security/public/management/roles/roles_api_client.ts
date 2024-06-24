@@ -18,7 +18,9 @@ export class RolesAPIClient {
   };
 
   public getRole = async (roleName: string) => {
-    return await this.http.get<Role>(`/api/security/role/${encodeURIComponent(roleName)}`);
+    return await this.http.get<Role>(`/api/security/role/${encodeURIComponent(roleName)}`, {
+      query: { replaceDeprecated: true },
+    });
   };
 
   public deleteRole = async (roleName: string) => {

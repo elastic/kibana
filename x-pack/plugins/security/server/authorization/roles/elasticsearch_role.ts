@@ -6,7 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { KibanaFeature } from '@kbn/features-plugin/common';
+import type { FeatureKibanaPrivilegesReference, KibanaFeature } from '@kbn/features-plugin/common';
+import type { SubFeaturePrivilegeIterator } from '@kbn/features-plugin/server/feature_privilege_iterator';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
 import type { Role, RoleKibanaPrivilege } from '../../../common';
@@ -35,20 +36,116 @@ export type ElasticsearchRole = Pick<
 };
 
 const isReservedPrivilege = (app: string) => app === RESERVED_PRIVILEGES_APPLICATION_WILDCARD;
-const isWildcardPrivilage = (app: string) => app === PRIVILEGES_ALL_WILDCARD;
+const isWildcardPrivilege = (app: string) => app === PRIVILEGES_ALL_WILDCARD;
+
+export interface RoleTransformOptions {
+  replaceDeprecatedKibanaPrivileges?: boolean;
+}
+
+function getReplacedByForTopLevelFeaturePrivilege(
+  feature: KibanaFeature,
+  privilege: 'all' | 'read',
+  isMinimalPrivilege: boolean
+): readonly FeatureKibanaPrivilegesReference[] | undefined {
+  const replacedBy = feature.privileges?.[privilege].replacedBy;
+  if (!replacedBy) {
+    return;
+  }
+
+  // If a privilege of the deprecated feature explicitly defines a replacement for minimal privileges, use it.
+  // Otherwise, use the default replacement for all cases.
+  if ('minimal' in replacedBy) {
+    return isMinimalPrivilege ? replacedBy.minimal : replacedBy.default;
+  }
+
+  return replacedBy;
+}
+
+function getReplacedByForFeaturePrivilege(
+  feature: KibanaFeature,
+  subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator,
+  privilege: string
+): readonly FeatureKibanaPrivilegesReference[] | undefined {
+  const isMinimalPrivilege = privilege.startsWith('minimal_');
+  if (privilege === 'all' || privilege === 'minimal_all') {
+    return getReplacedByForTopLevelFeaturePrivilege(feature, 'all', isMinimalPrivilege);
+  }
+
+  if (privilege === 'read' || privilege === 'minimal_read') {
+    return getReplacedByForTopLevelFeaturePrivilege(feature, 'read', isMinimalPrivilege);
+  }
+
+  for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature, () => true)) {
+    if (subFeaturePrivilege.id === privilege) {
+      return subFeaturePrivilege.replacedBy;
+    }
+  }
+}
+
+function deserializeKibanaFeaturePrivileges(
+  features: KibanaFeature[],
+  subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator,
+  serializedPrivileges: string[],
+  { replaceDeprecatedKibanaPrivileges }: RoleTransformOptions
+) {
+  // Filter out deprecated features upfront to avoid going through ALL features within a loop.
+  const deprecatedFeatures = replaceDeprecatedKibanaPrivileges
+    ? features.filter((feature) => feature.deprecated)
+    : undefined;
+  const result = {} as RoleKibanaPrivilege['feature'];
+  for (const serializedPrivilege of serializedPrivileges) {
+    if (!PrivilegeSerializer.isSerializedFeaturePrivilege(serializedPrivilege)) {
+      continue;
+    }
+
+    const { featureId, privilege } =
+      PrivilegeSerializer.deserializeFeaturePrivilege(serializedPrivilege);
+
+    // If feature privileges are deprecated, replace them with non-deprecated feature privileges according to the
+    // deprecation "manifest".
+    const deprecatedFeature = deprecatedFeatures?.find((feature) => feature.id === featureId);
+    if (deprecatedFeature) {
+      const replacedBy = getReplacedByForFeaturePrivilege(
+        deprecatedFeature,
+        subFeaturePrivilegeIterator,
+        privilege
+      );
+      if (!replacedBy) {
+        throw new Error(
+          `A deprecated feature "${featureId}" is missing a replacement for the "${privilege}" privilege.`
+        );
+      }
+
+      for (const replacingFeature of replacedBy) {
+        result[replacingFeature.feature] = getUniqueList([
+          ...(result[replacingFeature.feature] || []),
+          ...replacingFeature.privileges,
+        ]);
+      }
+    } else {
+      result[featureId] = getUniqueList([...(result[featureId] || []), privilege]);
+    }
+  }
+
+  return result;
+}
 
 export function transformElasticsearchRoleToRole(
   features: KibanaFeature[],
+  subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator,
   elasticsearchRole: Omit<ElasticsearchRole, 'name'>,
   name: string,
   application: string,
-  logger: Logger
+  logger: Logger,
+  options: RoleTransformOptions = {}
 ): Role {
   const kibanaTransformResult = transformRoleApplicationsToKibanaPrivileges(
     features,
+    subFeaturePrivilegeIterator,
     elasticsearchRole.applications,
     application,
-    logger
+    logger,
+    options
   );
   return {
     name,
@@ -73,15 +170,17 @@ export function transformElasticsearchRoleToRole(
 
 function transformRoleApplicationsToKibanaPrivileges(
   features: KibanaFeature[],
+  subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator,
   roleApplications: ElasticsearchRole['applications'],
   application: string,
-  logger: Logger
+  logger: Logger,
+  options: RoleTransformOptions
 ) {
   const roleKibanaApplications = roleApplications.filter(
     (roleApplication) =>
       roleApplication.application === application ||
       isReservedPrivilege(roleApplication.application) ||
-      isWildcardPrivilage(roleApplication.application)
+      isWildcardPrivilege(roleApplication.application)
   );
 
   // if any application entry contains an empty resource, we throw an error
@@ -94,11 +193,11 @@ function transformRoleApplicationsToKibanaPrivileges(
   if (
     roleKibanaApplications.some(
       (entry) =>
-        (isReservedPrivilege(entry.application) || isWildcardPrivilage(entry.application)) &&
+        (isReservedPrivilege(entry.application) || isWildcardPrivilege(entry.application)) &&
         !entry.privileges.every(
           (privilege) =>
             PrivilegeSerializer.isSerializedReservedPrivilege(privilege) ||
-            isWildcardPrivilage(privilege)
+            isWildcardPrivilege(privilege)
         )
     )
   ) {
@@ -112,7 +211,7 @@ function transformRoleApplicationsToKibanaPrivileges(
     roleKibanaApplications.some(
       (entry) =>
         !isReservedPrivilege(entry.application) &&
-        !isWildcardPrivilage(entry.application) &&
+        !isWildcardPrivilege(entry.application) &&
         entry.privileges.some((privilege) =>
           PrivilegeSerializer.isSerializedReservedPrivilege(privilege)
         )
@@ -188,7 +287,7 @@ function transformRoleApplicationsToKibanaPrivileges(
 
   const allResources = roleKibanaApplications
     .filter(
-      (entry) => !isReservedPrivilege(entry.application) && !isWildcardPrivilage(entry.application)
+      (entry) => !isReservedPrivilege(entry.application) && !isWildcardPrivilege(entry.application)
     )
     .flatMap((entry) => entry.resources);
 
@@ -252,6 +351,13 @@ function transformRoleApplicationsToKibanaPrivileges(
   // try/catch block ensures graceful return on deserialize exceptions
   try {
     const transformResult = roleKibanaApplications.map(({ resources, privileges }) => {
+      const featurePrivileges = deserializeKibanaFeaturePrivileges(
+        features,
+        subFeaturePrivilegeIterator,
+        privileges,
+        options
+      );
+
       // if we're dealing with a global entry, which we've ensured above is only possible if it's the only item in the array
       if (resources.length === 1 && resources[0] === GLOBAL_RESOURCE) {
         const reservedPrivileges = privileges.filter((privilege) =>
@@ -260,10 +366,6 @@ function transformRoleApplicationsToKibanaPrivileges(
         const basePrivileges = privileges.filter((privilege) =>
           PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege)
         );
-        const featurePrivileges = privileges.filter((privilege) =>
-          PrivilegeSerializer.isSerializedFeaturePrivilege(privilege)
-        );
-
         return {
           ...(reservedPrivileges.length
             ? {
@@ -275,14 +377,7 @@ function transformRoleApplicationsToKibanaPrivileges(
           base: basePrivileges.map((privilege) =>
             PrivilegeSerializer.serializeGlobalBasePrivilege(privilege)
           ),
-          feature: featurePrivileges.reduce((acc, privilege) => {
-            const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
-            acc[featurePrivilege.featureId] = getUniqueList([
-              ...(acc[featurePrivilege.featureId] || []),
-              featurePrivilege.privilege,
-            ]);
-            return acc;
-          }, {} as RoleKibanaPrivilege['feature']),
+          feature: featurePrivileges,
           spaces: ['*'],
         };
       }
@@ -290,21 +385,11 @@ function transformRoleApplicationsToKibanaPrivileges(
       const basePrivileges = privileges.filter((privilege) =>
         PrivilegeSerializer.isSerializedSpaceBasePrivilege(privilege)
       );
-      const featurePrivileges = privileges.filter((privilege) =>
-        PrivilegeSerializer.isSerializedFeaturePrivilege(privilege)
-      );
       return {
         base: basePrivileges.map((privilege) =>
           PrivilegeSerializer.deserializeSpaceBasePrivilege(privilege)
         ),
-        feature: featurePrivileges.reduce((acc, privilege) => {
-          const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
-          acc[featurePrivilege.featureId] = getUniqueList([
-            ...(acc[featurePrivilege.featureId] || []),
-            featurePrivilege.privilege,
-          ]);
-          return acc;
-        }, {} as RoleKibanaPrivilege['feature']),
+        feature: featurePrivileges,
         spaces: resources.map((resource) => ResourceSerializer.deserializeSpaceResource(resource)),
       };
     });
@@ -331,7 +416,7 @@ const extractUnrecognizedApplicationNames = (
         (roleApplication) =>
           roleApplication.application !== application &&
           !isReservedPrivilege(roleApplication.application) &&
-          !isWildcardPrivilage(roleApplication.application)
+          !isWildcardPrivilege(roleApplication.application)
       )
       .map((roleApplication) => roleApplication.application)
   );

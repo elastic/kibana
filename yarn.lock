@@ -4956,6 +4956,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/features-provider-plugin@link:x-pack/test/security_api_integration/plugins/features_provider":
+  version "0.0.0"
+  uid ""
+
 "@kbn/fec-alerts-test-plugin@link:x-pack/test/functional_execution_context/plugins/alerts":
   version "0.0.0"
   uid ""
