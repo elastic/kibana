@@ -3324,7 +3324,7 @@ components:
           description: >
             The generative artificial intelligence model for Amazon Bedrock to
             use. Current support is for the Anthropic Claude models.
-          default: anthropic.claude-3-5-sonnet-20240620-v1:0
+          default: anthropic.claude-3-sonnet-20240229-v1:0
     Connectors_secrets_properties_bedrock:
       title: Connector secrets properties for an Amazon Bedrock connector
       description: Defines secrets for connectors when type is `.bedrock`.
@@ -3356,7 +3356,7 @@ components:
           description: >-
             The generative artificial intelligence model for Google Gemini to
             use.
-          default: gemini-1.5-pro-001
+          default: gemini-1.5-pro-preview-0409
         gcpRegion:
           type: string
           description: The GCP region where the Vertex AI endpoint enabled.
@@ -3594,7 +3594,7 @@ components:
             The host name of the service provider. If the `service` is
             `elastic_cloud` (for Elastic Cloud notifications) or one of
             Nodemailer's well-known email service providers, this property is
-            ignored. If `service` is `other`, this property must be defined.
+            ignored. If `service` is `other`, this property must be defined. 
           type: string
         oauthTokenUrl:
           type: string
@@ -3604,7 +3604,7 @@ components:
             The port to connect to on the service provider. If the `service` is
             `elastic_cloud` (for Elastic Cloud notifications) or one of
             Nodemailer's well-known email service providers, this property is
-            ignored. If `service` is `other`, this property must be defined.
+            ignored. If `service` is `other`, this property must be defined. 
           type: integer
         secure:
           description: >
@@ -5272,7 +5272,7 @@ components:
       type: boolean
       description: >
         Indicates whether it is a preconfigured connector. If true, the `config`
-        and `is_missing_secrets` properties are omitted from the response.
+        and `is_missing_secrets` properties are omitted from the response. 
       example: false
     Connectors_is_system_action:
       type: boolean
