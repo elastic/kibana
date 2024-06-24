@@ -216,7 +216,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should remove custom feilds from templates', async () => {
+    it('should remove custom fields from templates', async () => {
       const customFieldsConfiguration = [
         {
           key: 'text_field_1',
