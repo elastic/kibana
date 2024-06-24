@@ -1170,6 +1170,40 @@ describe('Response actions history', () => {
     };
 
     describe('Single agents', () => {
+      it('should show hostname as - when no hostname is available', async () => {
+        const data = await getActionListMock({
+          agentIds: ['agent-a'],
+          hosts: { 'agent-a': { name: '' } },
+          actionCount: 1,
+          commands: ['isolate'],
+          wasSuccessful: true,
+          status: 'failed',
+          errors: [],
+          agentState: {
+            'agent-a': {
+              errors: [],
+              wasSuccessful: true,
+              isCompleted: true,
+              completedAt: '2023-05-10T20:09:25.824Z',
+            },
+          } as unknown as Pick<ActionDetails, 'agentState'>,
+          outputs: {},
+        });
+
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data,
+        });
+        render();
+
+        const { getAllByTestId, getByTestId } = renderResult;
+        const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+        expandButtons.map((button) => userEvent.click(button));
+
+        const hostnameInfo = getByTestId(`${testPrefix}-action-details-info-Hostname`);
+        expect(hostnameInfo.textContent).toEqual('—');
+      });
+
       describe('with `outputs` and `errors`', () => {
         it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
           'shows failed outputs and errors for %s action',
@@ -1269,6 +1303,57 @@ describe('Response actions history', () => {
     });
 
     describe('Multiple agents', () => {
+      it('should show `—` concatenated hostnames when no hostname is available for an agent', async () => {
+        const data = await getActionListMock({
+          agentIds: ['agent-a', 'agent-b'],
+          hosts: {
+            'agent-a': { name: '' },
+            'agent-b': { name: 'Agent-B' },
+            'agent-c': { name: '' },
+          },
+          actionCount: 1,
+          commands: ['isolate'],
+          wasSuccessful: true,
+          status: 'failed',
+          errors: [''],
+          agentState: {
+            'agent-a': {
+              errors: [''],
+              wasSuccessful: true,
+              isCompleted: true,
+              completedAt: '2023-05-10T20:09:25.824Z',
+            },
+            'agent-b': {
+              errors: [''],
+              wasSuccessful: false,
+              isCompleted: true,
+              completedAt: '2023-05-10T20:09:25.824Z',
+            },
+            'agent-c': {
+              errors: [''],
+              isExpired: true,
+              wasSuccessful: false,
+              isCompleted: true,
+              completedAt: '2023-05-10T20:09:25.824Z',
+            },
+          } as unknown as Pick<ActionDetails, 'agentState'>,
+          outputs: {},
+        });
+
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data,
+        });
+        render();
+
+        const { getAllByTestId } = renderResult;
+        const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+        expandButtons.map((button) => userEvent.click(button));
+
+        const hostnameInfo = getAllByTestId(`${testPrefix}-action-details-info-Hostname`);
+        expect(hostnameInfo.map((element) => element.textContent)).toEqual(['—, Agent-B, —']);
+      });
+
       describe('with `outputs` and `errors`', () => {
         it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
           'shows failed outputs and errors for %s action on multiple agents',

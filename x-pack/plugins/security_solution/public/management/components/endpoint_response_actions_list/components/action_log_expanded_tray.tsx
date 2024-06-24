@@ -261,7 +261,11 @@ export const ActionsLogExpandedTray = memo<{
     return list.map(({ title, description }) => {
       return {
         title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
-        description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
+        description: (
+          <StyledEuiCodeBlock data-test-subj={getTestId(`action-details-info-${title}`)}>
+            {description}
+          </StyledEuiCodeBlock>
+        ),
       };
     });
   }, [
@@ -269,6 +273,7 @@ export const ActionsLogExpandedTray = memo<{
     command,
     comment,
     completedAt,
+    getTestId,
     hosts,
     isSentinelOneV1Enabled,
     parametersList,
