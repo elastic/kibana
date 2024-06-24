@@ -162,9 +162,7 @@ describe('getCloudSecurityUsageRecord', () => {
 
 describe('getSearchQueryByCloudSecuritySolution', () => {
   it('should return the correct search query for CSPM', () => {
-    const searchFrom = new Date('2023-07-30T15:11:41.738Z');
-
-    const result = getSearchQueryByCloudSecuritySolution('cspm', searchFrom);
+    const result = getSearchQueryByCloudSecuritySolution('cspm');
 
     expect(result).toEqual({
       bool: {
@@ -211,9 +209,7 @@ describe('getSearchQueryByCloudSecuritySolution', () => {
   });
 
   it('should return the correct search query for KSPM', () => {
-    const searchFrom = new Date('2023-07-30T15:11:41.738Z');
-
-    const result = getSearchQueryByCloudSecuritySolution('kspm', searchFrom);
+    const result = getSearchQueryByCloudSecuritySolution('kspm');
 
     expect(result).toEqual({
       bool: {
@@ -241,9 +237,7 @@ describe('getSearchQueryByCloudSecuritySolution', () => {
   });
 
   it('should return the correct search query for CNVM', () => {
-    const searchFrom = new Date('2023-07-30T15:11:41.738Z');
-
-    const result = getSearchQueryByCloudSecuritySolution(CNVM, searchFrom);
+    const result = getSearchQueryByCloudSecuritySolution(CNVM);
 
     expect(result).toEqual({
       bool: {
