@@ -15,8 +15,10 @@ import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
   InvokeAIActionParamsSchema,
+  InvokeAIRawActionParamsSchema,
   StreamingResponseSchema,
   RunActionResponseSchema,
+  RunActionRawResponseSchema,
   RunApiLatestResponseSchema,
 } from '../../../common/bedrock/schema';
 import {
@@ -26,6 +28,7 @@ import {
   RunActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
+  InvokeAIRawActionParams,
   RunApiLatestResponse,
 } from '../../../common/bedrock/types';
 import {
@@ -83,6 +86,12 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.INVOKE_AI,
       method: 'invokeAI',
       schema: InvokeAIActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_AI_RAW,
+      method: 'invokeAIRaw',
+      schema: InvokeAIRawActionParamsSchema,
     });
 
     this.registerSubAction({
@@ -319,6 +328,47 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       timeout,
     });
     return { message: res.completion.trim() };
+  }
+
+  /**
+   * Non-streamed security solution AI Assistant requests
+   * Responsible for invoking the runApi method with the provided body.
+   * It then formats the response into a string
+   * @param messages An array of messages to be sent to the API
+   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   * @returns an object with the response string as a property called message
+   */
+  public async invokeAIRaw({
+    bedrockMethod = 'invoke',
+    messages,
+    model,
+    stopSequences,
+    system,
+    temperature,
+    maxTokens,
+    signal,
+    timeout,
+  }: InvokeAIRawActionParams) {
+    // set model on per request basis
+    const currentModel = model ?? this.model;
+    const path = `/model/${currentModel}/${bedrockMethod}`;
+    const body = JSON.stringify(
+      formatBedrockBody({ messages, stopSequences, system, temperature, maxTokens })
+    );
+    const signed = this.signRequest(body, path, false);
+    const params = {
+      ...signed,
+      url: `${this.url}${path}`,
+      method: 'post' as Method,
+      data: body,
+      signal,
+      // give up to 2 minutes for response
+      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+    };
+
+    const response = await this.request({ ...params, responseSchema: RunActionRawResponseSchema });
+
+    return response.data;
   }
 }
 

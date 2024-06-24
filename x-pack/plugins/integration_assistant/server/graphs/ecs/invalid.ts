@@ -4,18 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+
+import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { EcsMappingState } from '../../types';
 import { ECS_INVALID_PROMPT } from './prompts';
 
-export async function handleInvalidEcs(
-  state: EcsMappingState,
-  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
-) {
+export async function handleInvalidEcs(state: EcsMappingState, model: AssistantToolLlm) {
   const ecsInvalidEcsPrompt = ECS_INVALID_PROMPT;
   const outputParser = new JsonOutputParser();
   const ecsInvalidEcsGraph = ecsInvalidEcsPrompt.pipe(model).pipe(outputParser);

@@ -12,12 +12,9 @@ import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
-import {
-  getDefaultArguments,
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server';
+import { getDefaultArguments } from '@kbn/langchain/server';
 import { MessagesPlaceholder } from '@langchain/core/prompts';
+import { getLlmClass, isToolCallingSupported } from '../../../routes/utils';
 import { AgentExecutor } from '../executors/types';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
@@ -45,13 +42,14 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   isStream = false,
   onLlmResponse,
   onNewReplacements,
+  model,
+  region,
   replacements,
   request,
   size,
   traceOptions,
 }) => {
-  const isOpenAI = llmType === 'openai';
-  const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+  const llmClass = getLlmClass(llmType, isStream);
 
   const llm = new llmClass({
     actions,
@@ -59,9 +57,10 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     llmType,
     logger,
+    region,
     // possible client model override,
     // let this be undefined otherwise so the connector handles the model
-    model: request.body.model,
+    model,
     // ensure this is defined because we default to it in the language_models
     // This is where the LangSmith logs (Metadata > Invocation Params) are set
     temperature: getDefaultArguments(llmType).temperature,
@@ -116,7 +115,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     handleParsingErrors: 'Try again, paying close attention to the allowed tool input',
   };
   // isOpenAI check is not on agentType alone because typescript doesn't like
-  const executor = isOpenAI
+  const executor = isToolCallingSupported(llmType)
     ? await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'openai-functions',
         ...executorArgs,

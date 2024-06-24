@@ -356,6 +356,24 @@ export const postActionsConnectorExecuteRoute = (
             kbDataClient,
           };
 
+          const llmType = getLlmType(actionTypeId);
+
+          const actionsClient = await actions.getActionsClientWithRequest(request);
+
+          let region;
+          let model = request.body.model;
+          if (llmType === 'bedrock') {
+            try {
+              const connector = await actionsClient.get({ id: connectorId });
+              region = connector.config?.apiUrl.split('.').reverse()[2];
+              if (!model) {
+                model = connector.config?.defaultModel;
+              }
+            } catch (e) {
+              logger.error(`Failed to get region: ${e.message}`);
+            }
+          }
+
           // Shared executor params
           const executorParams: AgentExecutorParams<boolean> = {
             abortSignal,
@@ -372,11 +390,13 @@ export const postActionsConnectorExecuteRoute = (
             esClient,
             esStore,
             isStream: request.body.subAction !== 'invokeAI',
-            llmType: getLlmType(actionTypeId),
+            llmType,
             langChainMessages,
             logger,
+            model,
             onNewReplacements,
             onLlmResponse,
+            region,
             request,
             response,
             replacements: request.body.replacements,

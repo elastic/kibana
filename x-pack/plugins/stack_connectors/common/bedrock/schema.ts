@@ -27,6 +27,8 @@ export const RunActionParamsSchema = schema.object({
   timeout: schema.maybe(schema.number()),
 });
 
+export const InvokeAIRawActionParamsSchema = schema.any();
+
 export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.arrayOf(
     schema.object({
@@ -64,6 +66,8 @@ export const RunApiLatestResponseSchema = schema.object(
   },
   { unknowns: 'allow' }
 );
+
+export const RunActionRawResponseSchema = schema.any();
 
 export const RunActionResponseSchema = schema.object(
   {

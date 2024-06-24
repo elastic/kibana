@@ -4,20 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+
+import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { ESProcessorItem, Pipeline } from '../../../common';
 import type { RelatedState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { RELATED_ERROR_PROMPT } from './prompts';
 
-export async function handleErrors(
-  state: RelatedState,
-  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
-) {
+export async function handleErrors(state: RelatedState, model: AssistantToolLlm) {
   const relatedErrorPrompt = RELATED_ERROR_PROMPT;
   const outputParser = new JsonOutputParser();
   const relatedErrorGraph = relatedErrorPrompt.pipe(model).pipe(outputParser);

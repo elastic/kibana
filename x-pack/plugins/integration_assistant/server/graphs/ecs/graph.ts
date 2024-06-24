@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { EcsMappingState } from '../../types';
@@ -140,7 +137,7 @@ function chainRouter(state: EcsMappingState): string {
   return END;
 }
 
-export async function getEcsGraph(model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
+export async function getEcsGraph(model: AssistantToolLlm) {
   const workflow = new StateGraph({
     channels: graphState,
   })

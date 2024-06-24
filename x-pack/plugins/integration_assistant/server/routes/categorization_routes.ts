@@ -7,10 +7,7 @@
 
 import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+import { getLlmType, getLlmClass } from '@kbn/elastic-assistant-plugin/server/routes/utils';
 import {
   CATEGORIZATION_GRAPH_PATH,
   CategorizationRequestBody,
@@ -59,15 +56,15 @@ export function registerCategorizationRoutes(
               )[0];
 
           const abortSignal = getRequestAbortedSignal(req.events.aborted$);
-          const isOpenAI = connector.actionTypeId === '.gen-ai';
-          const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+          const llmType = getLlmType(connector.actionTypeId);
+          const llmClass = getLlmClass(llmType);
 
           const model = new llmClass({
             actions: actionsPlugin,
             connectorId: connector.id,
             request: req,
             logger,
-            llmType: isOpenAI ? 'openai' : 'bedrock',
+            llmType,
             model: connector.config?.defaultModel,
             temperature: 0.05,
             maxTokens: 4096,

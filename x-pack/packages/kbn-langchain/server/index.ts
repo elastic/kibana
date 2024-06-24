@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ActionsClientBedrockChatModel } from './language_models/bedrock_chat';
 import { ActionsClientChatOpenAI } from './language_models/chat_openai';
 import { ActionsClientLlm } from './language_models/llm';
 import { ActionsClientSimpleChatModel } from './language_models/simple_chat_model';
@@ -16,6 +17,7 @@ export {
   parseBedrockStream,
   parseGeminiResponse,
   getDefaultArguments,
+  ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
   ActionsClientLlm,
   ActionsClientSimpleChatModel,

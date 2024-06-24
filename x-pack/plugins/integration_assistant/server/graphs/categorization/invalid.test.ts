@@ -13,14 +13,11 @@ import {
   categorizationMockProcessors,
   categorizationExpectedHandlerResponse,
 } from '../../../__jest__/fixtures/categorization';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
 
 const mockLlm = new FakeLLM({
   response: JSON.stringify(categorizationMockProcessors, null, 2),
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as AssistantToolLlm;
 
 const testState: CategorizationState = categorizationTestState;
 

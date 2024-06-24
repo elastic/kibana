@@ -9,14 +9,11 @@ import { FakeLLM } from '@langchain/core/utils/testing';
 import { handleEcsMapping } from './mapping';
 import type { EcsMappingState } from '../../types';
 import { ecsTestState } from '../../../__jest__/fixtures/ecs_mapping';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
 
 const mockLlm = new FakeLLM({
   response: '{ "message": "ll callback later."}',
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as AssistantToolLlm;
 
 const testState: EcsMappingState = ecsTestState;
 

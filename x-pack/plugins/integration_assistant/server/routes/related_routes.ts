@@ -7,10 +7,7 @@
 
 import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+import { getLlmClass, getLlmType } from '@kbn/elastic-assistant-plugin/server/routes/utils';
 import { RELATED_GRAPH_PATH, RelatedRequestBody, RelatedResponse } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getRelatedGraph } from '../graphs/related';
@@ -51,8 +48,8 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
                 (connectorItem) => connectorItem.actionTypeId === '.bedrock'
               )[0];
 
-          const isOpenAI = connector.actionTypeId === '.gen-ai';
-          const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+          const llmType = getLlmType(connector.actionTypeId);
+          const llmClass = getLlmClass(llmType);
           const abortSignal = getRequestAbortedSignal(req.events.aborted$);
 
           const model = new llmClass({
@@ -60,7 +57,7 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
             connectorId: connector.id,
             request: req,
             logger,
-            llmType: isOpenAI ? 'openai' : 'bedrock',
+            llmType,
             model: connector.config?.defaultModel,
             temperature: 0.05,
             maxTokens: 4096,
