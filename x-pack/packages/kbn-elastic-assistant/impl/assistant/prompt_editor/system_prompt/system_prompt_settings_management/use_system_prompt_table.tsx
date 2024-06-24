@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLink } from '@elastic/eui';
+import { EuiIcon, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { Conversation } from '../../../../assistant_context/types';
 import { AIConnector } from '../../../../connectorland/connector_selector';
@@ -15,6 +15,7 @@ import {
   getConversationApiConfig,
   getDefaultSystemPrompt,
 } from '../../../use_conversation/helpers';
+import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../system_prompt_modal/translations';
 import * as i18n from './translations';
 import { getSelectedConversations } from './utils';
 
@@ -38,7 +39,16 @@ export const useSystemPromptTable = () => {
       truncateText: { lines: 3 },
       render: (prompt: SystemPromptTableItem) =>
         prompt?.name ? (
-          <EuiLink onClick={() => onEditActionClicked(prompt)}>{prompt?.name}</EuiLink>
+          <EuiLink onClick={() => onEditActionClicked(prompt)}>
+            {prompt?.name}
+            {prompt.isNewConversationDefault && (
+              <EuiIcon
+                type="starFilled"
+                aria-label={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}
+                className="eui-alignTop"
+              />
+            )}
+          </EuiLink>
         ) : null,
     },
     {

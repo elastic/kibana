@@ -195,14 +195,13 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
               ? {
                   create: {
                     ...(updatedConversationsSettingsBulkActions.create ?? {}),
-                    [convo.id]: {
+                    [convo.title]: {
                       ...convo,
                       ...(convo.apiConfig ? getApiConfigWithSelectedPrompt() : {}),
                     },
                   },
                 }
               : {};
-
           const updateOperation =
             convo.id !== ''
               ? {
@@ -217,7 +216,6 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
                   },
                 }
               : {};
-
           updatedConversationsSettingsBulkActions = {
             ...updatedConversationsSettingsBulkActions,
             ...createOperation,
