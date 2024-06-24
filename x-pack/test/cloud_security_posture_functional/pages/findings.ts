@@ -17,6 +17,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -99,6 +100,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     },
   ];
 
+  const ruleName1 = data[0].rule.name;
+  const ruleName2 = data[1].rule.name;
+
   const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
     const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
       type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
@@ -147,8 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/152913
-    describe.skip('Table Sort', () => {
+    describe('Table Sort', () => {
       type SortingMethod = (a: string, b: string) => number;
       type SortDirection = 'asc' | 'desc';
       // Sort by lexical order will sort by the first character of the string (case-sensitive)
