@@ -6,13 +6,22 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { PatchRuleArgs } from '../detection_rules_client_interface';
-import type { RuleAlertType } from '../../../../rule_schema';
 import { getIdError } from '../../../utils/utils';
-import { convertPatchAPIToInternalSchema } from '../../../normalization/rule_converters';
+import {
+  convertPatchAPIToInternalSchema,
+  internalRuleToAPIResponse,
+} from '../../../normalization/rule_converters';
+import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 
-import { validateMlAuth, ClientError, toggleRuleEnabledOnUpdate } from '../utils';
+import {
+  validateMlAuth,
+  ClientError,
+  toggleRuleEnabledOnUpdate,
+  RuleResponseValidationError,
+} from '../utils';
 
 import { readRules } from '../read_rules';
 
@@ -20,7 +29,7 @@ export const patchRule = async (
   rulesClient: RulesClient,
   args: PatchRuleArgs,
   mlAuthz: MlAuthz
-): Promise<RuleAlertType> => {
+): Promise<RuleResponse> => {
   const { nextParams } = args;
   const { rule_id: ruleId, id } = nextParams;
 
@@ -39,16 +48,28 @@ export const patchRule = async (
 
   const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule);
 
-  const update = await rulesClient.update({
+  const patchedInternalRule = await rulesClient.update({
     id: existingRule.id,
     data: patchedRule,
   });
 
-  await toggleRuleEnabledOnUpdate(rulesClient, existingRule, nextParams.enabled);
+  const { enabled } = await toggleRuleEnabledOnUpdate(
+    rulesClient,
+    existingRule,
+    nextParams.enabled
+  );
 
-  if (nextParams.enabled != null) {
-    return { ...update, enabled: nextParams.enabled };
-  } else {
-    return update;
+  /* Trying to convert the internal rule to a RuleResponse object */
+  const parseResult = RuleResponse.safeParse(
+    internalRuleToAPIResponse({ ...patchedInternalRule, enabled })
+  );
+
+  if (!parseResult.success) {
+    throw new RuleResponseValidationError({
+      message: stringifyZodError(parseResult.error),
+      ruleId: patchedInternalRule.params.ruleId,
+    });
   }
+
+  return parseResult.data;
 };
