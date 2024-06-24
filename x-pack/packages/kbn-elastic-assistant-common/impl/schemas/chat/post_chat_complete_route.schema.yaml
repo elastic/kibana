@@ -62,7 +62,6 @@ components:
       type: object
       description: AI assistant message.
       required:
-        - '@timestamp'
         - 'role'
       properties:
         content:
@@ -71,9 +70,6 @@ components:
         role:
           $ref: '#/components/schemas/ChatMessageRole'
           description: Message role.
-        '@timestamp':
-          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
-          description: The timestamp message was sent or received.
         data:
           description: ECS objects array to attach to the context of the message.
           type: array

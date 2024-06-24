@@ -128,24 +128,24 @@ export const postActionsConnectorExecuteRoute = (
               role: c.role,
               content: c.content,
             }));
-
-            onLlmResponse = async (
-              content: string,
-              traceData: Message['traceData'] = {},
-              isError = false
-            ): Promise<void> => {
-              if (updatedConversation && conversationsDataClient) {
-                await appendAssistantMessageToConversation({
-                  conversation: updatedConversation,
-                  conversationsDataClient,
-                  messageContent: content,
-                  replacements: latestReplacements,
-                  isError,
-                  traceData,
-                });
-              }
-            };
           }
+
+          onLlmResponse = async (
+            content: string,
+            traceData: Message['traceData'] = {},
+            isError = false
+          ): Promise<void> => {
+            if (conversationsDataClient && conversationId) {
+              await appendAssistantMessageToConversation({
+                conversationId,
+                conversationsDataClient,
+                messageContent: content,
+                replacements: latestReplacements,
+                isError,
+                traceData,
+              });
+            }
+          };
 
           if (!request.body.isEnabledKnowledgeBase && !request.body.isEnabledRAGAlerts) {
             // if not langchain, call execute action directly and return the response:

@@ -39,7 +39,7 @@ export const registerRoutes = (
 ) => {
   /** PUBLIC */
   // Chat
-  chatCompleteRoute(router);
+  chatCompleteRoute(router, getElserId);
 
   /** INTERNAL */
   // Capabilities

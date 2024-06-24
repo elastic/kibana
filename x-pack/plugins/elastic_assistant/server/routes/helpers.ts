@@ -217,7 +217,7 @@ export interface AppendAssistantMessageToConversationParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
   messageContent: string;
   replacements: Replacements;
-  conversation: ConversationResponse;
+  conversationId: string;
   isError?: boolean;
   traceData?: Message['traceData'];
 }
@@ -225,11 +225,16 @@ export const appendAssistantMessageToConversation = async ({
   conversationsDataClient,
   messageContent,
   replacements,
-  conversation,
+  conversationId,
   isError = false,
   traceData = {},
 }: AppendAssistantMessageToConversationParams) => {
-  await conversationsDataClient?.appendConversationMessages({
+  const conversation = await conversationsDataClient.getConversation({ id: conversationId });
+  if (!conversation) {
+    return;
+  }
+
+  await conversationsDataClient.appendConversationMessages({
     existingConversation: conversation,
     messages: [
       getMessageFromRawResponse({
@@ -449,8 +454,8 @@ export const langChainExecute = async ({
 
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
-    isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
-    isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+    isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? true,
+    isEnabledRAGAlerts: request.body.isEnabledRAGAlerts ?? true,
     model: request.body.model,
     // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
     // tracked here: https://github.com/elastic/security-team/issues/7363
@@ -468,7 +473,7 @@ export interface CreateOrUpdateConversationWithParams {
   actionTypeId: string;
   connectorId: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
-  newMessages?: Array<Pick<Message, 'content' | 'role' | 'timestamp'>>;
+  newMessages?: Array<Pick<Message, 'content' | 'role'>>;
   model?: string;
   responseLanguage?: string;
 }
@@ -500,7 +505,11 @@ export const createOrUpdateConversationWithUserInput = async ({
         return conversationsDataClient.createConversation({
           conversation: {
             title,
-            messages: newMessages,
+            messages: newMessages.map((m) => ({
+              content: m.content,
+              role: m.role,
+              timestamp: new Date().toISOString(),
+            })),
             replacements,
             apiConfig: {
               connectorId,

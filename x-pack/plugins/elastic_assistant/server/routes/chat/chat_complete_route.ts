@@ -65,7 +65,6 @@ export const chatCompleteRoute = (
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           const logger: Logger = ctx.elasticAssistant.logger;
           const telemetry = ctx.elasticAssistant.telemetry;
-          let onLlmResponse;
 
           const license = ctx.licensing.license;
           if (!hasAIAssistantLicense(license)) {
@@ -135,7 +134,6 @@ export const chatCompleteRoute = (
               const transformedMessage = {
                 role: m.role,
                 content,
-                timestamp: m['@timestamp'],
               };
               return transformedMessage;
             });
@@ -174,24 +172,24 @@ export const chatCompleteRoute = (
               role: c.role,
               content: c.content,
             }));
-
-            onLlmResponse = async (
-              content: string,
-              traceData: Message['traceData'] = {},
-              isError = false
-            ): Promise<void> => {
-              if (updatedConversation && conversationsDataClient) {
-                await appendAssistantMessageToConversation({
-                  conversation: updatedConversation,
-                  conversationsDataClient,
-                  messageContent: content,
-                  replacements: latestReplacements,
-                  isError,
-                  traceData,
-                });
-              }
-            };
           }
+
+          const onLlmResponse = async (
+            content: string,
+            traceData: Message['traceData'] = {},
+            isError = false
+          ): Promise<void> => {
+            if (conversationId && conversationsDataClient) {
+              await appendAssistantMessageToConversation({
+                conversationId,
+                conversationsDataClient,
+                messageContent: content,
+                replacements: latestReplacements,
+                isError,
+                traceData,
+              });
+            }
+          };
 
           return await langChainExecute({
             abortSignal,
