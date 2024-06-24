@@ -56,7 +56,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('removeIndexButton');
       },
 
-      async expectToSelectIndicesAndStartButtonEnabled(indexName) {
+      async expectToSelectIndicesAndStartButtonEnabled(indexName: string) {
         await comboBox.setCustom('selectIndicesComboBox', indexName);
         expect(await testSubjects.isEnabled('startChatButton')).to.be(true);
         expect(await testSubjects.isEnabled('editContextActionButton')).to.be(true);
