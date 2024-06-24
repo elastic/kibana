@@ -279,6 +279,7 @@ describe('policy details: ', () => {
                     cluster_name: '',
                     cluster_uuid: '',
                     serverless: false,
+                    billable: false,
                   },
                   windows: {
                     events: {
