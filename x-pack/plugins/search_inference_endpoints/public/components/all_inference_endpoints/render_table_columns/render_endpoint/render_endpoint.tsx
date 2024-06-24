@@ -15,6 +15,7 @@ import { RenderOpenAI } from './render_open_ai';
 import { RenderAzureAIStudio } from './render_azure_ai_studio';
 import { RenderMistral } from './render_mistral';
 import { RenderAzureOpenAI } from './render_azure_open_ai';
+import { RenderGoogleAIStudio } from './render_google_ai_studio';
 
 export interface RenderEndpointProps {
   endpoint: InferenceAPIConfigResponse;
@@ -34,6 +35,7 @@ export const RenderEndpoint: React.FC<RenderEndpointProps> = ({ endpoint }) => {
     [ServiceProviderKeys.azureaistudio]: <RenderAzureAIStudio endpoint={endpoint} />,
     [ServiceProviderKeys.azureopenai]: <RenderAzureOpenAI endpoint={endpoint} />,
     [ServiceProviderKeys.mistral]: <RenderMistral endpoint={endpoint} />,
+    [ServiceProviderKeys.googleaistudio]: <RenderGoogleAIStudio endpoint={endpoint} />,
   };
 
   return renderMap[endpoint.service] || <strong>{endpoint.model_id}</strong>;
