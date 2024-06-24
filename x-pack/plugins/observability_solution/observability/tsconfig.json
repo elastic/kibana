@@ -106,6 +106,7 @@
     "@kbn/visualization-ui-components",
     "@kbn/expression-metric-vis-plugin",
     "@kbn/securitysolution-io-ts-utils",
+    "@kbn/event-annotation-components",
   ],
   "exclude": [
     "target/**/*"
