@@ -9,6 +9,7 @@ import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-help
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useCopyIDAction } from './use_copy_id_action';
+import { useKibana } from '../../../../../../hooks/use_kibana';
 
 const mockInferenceEndpoint = {
   deployment: 'not_applicable',
@@ -28,12 +29,6 @@ const mockInferenceEndpoint = {
   type: 'text_embedding',
 } as any;
 
-jest.mock('../../../../../../hooks/use_inference_toast', () => ({
-  useInferenceToast: () => ({
-    showSuccessToast: jest.fn(),
-  }),
-}));
-
 Object.defineProperty(navigator, 'clipboard', {
   value: {
     writeText: jest.fn().mockResolvedValue(undefined),
@@ -42,6 +37,22 @@ Object.defineProperty(navigator, 'clipboard', {
 });
 
 const mockOnActionSuccess = jest.fn();
+
+jest.mock('../../../../../../hooks/use_kibana', () => ({
+  useKibana: jest.fn(),
+}));
+
+const addSuccess = jest.fn();
+
+(useKibana as jest.Mock).mockImplementation(() => ({
+  services: {
+    notifications: {
+      toasts: {
+        addSuccess,
+      },
+    },
+  },
+}));
 
 describe('useCopyIDAction hook', () => {
   beforeEach(() => {

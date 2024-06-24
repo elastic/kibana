@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiIcon, EuiTextColor } from '@elastic/eui';
-import { InferenceEndpointUI } from '../../../../types';
+import React from 'react';
 import * as i18n from '../../../../../../../common/translations';
-import { useInferenceToast } from '../../../../../../hooks/use_inference_toast';
+import { useKibana } from '../../../../../../hooks/use_kibana';
+import { InferenceEndpointUI } from '../../../../types';
 import { UseCopyIDActionProps } from '../types';
 
 export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {
-  const { showSuccessToast } = useInferenceToast();
+  const {
+    services: { notifications },
+  } = useKibana();
+  const toasts = notifications?.toasts;
 
   const getAction = (inferenceEndpoint: InferenceEndpointUI) => {
     return {
@@ -25,7 +28,7 @@ export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {
       onClick: () => {
         navigator.clipboard.writeText(inferenceEndpoint.endpoint.model_id).then(() => {
           onActionSuccess();
-          showSuccessToast(i18n.COPY_ID_ACTION_SUCCESS);
+          toasts?.addSuccess({ title: i18n.COPY_ID_ACTION_SUCCESS });
         });
       },
       icon: <EuiIcon type="copyClipboard" size="m" />,
