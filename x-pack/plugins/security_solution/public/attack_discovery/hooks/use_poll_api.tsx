@@ -77,10 +77,6 @@ export const usePollApi = ({
         setData(null);
         return;
       }
-      setStatus(responseData.status);
-      setApproximateFutureTime(
-        moment(responseData.updatedAt).add(responseData.averageIntervalMs, 'milliseconds').toDate()
-      );
       setData((prevData) => {
         if (
           responseData.updatedAt === prevData?.updatedAt &&
@@ -91,7 +87,12 @@ export const usePollApi = ({
           // prevents unnecessary re-renders
           return prevData;
         }
-
+        setStatus(responseData.status);
+        setApproximateFutureTime(
+          moment(responseData.updatedAt)
+            .add(responseData.averageIntervalMs, 'milliseconds')
+            .toDate()
+        );
         return {
           ...responseData,
           connectorId,

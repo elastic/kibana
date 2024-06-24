@@ -12,6 +12,7 @@ export const getMockUseAttackDiscoveriesWithCachedAttackDiscoveries = (
 ): UseAttackDiscovery => ({
   alertsContextCount: 20,
   approximateFutureTime: null,
+  isLoadingPost: false,
   failureReason: null,
   generationIntervals: [
     {
@@ -186,6 +187,7 @@ export const getMockUseAttackDiscoveriesWithNoAttackDiscoveriesLoading = (
   onCancel: jest.fn(),
   generationIntervals: undefined,
   attackDiscoveries: [],
+  isLoadingPost: false,
   failureReason: null,
   lastUpdated: null,
   replacements: {},

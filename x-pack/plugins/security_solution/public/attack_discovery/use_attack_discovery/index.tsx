@@ -34,6 +34,7 @@ export interface UseAttackDiscovery {
   fetchAttackDiscoveries: () => Promise<void>;
   generationIntervals: GenerationInterval[] | undefined;
   isLoading: boolean;
+  isLoadingPost: boolean;
   lastUpdated: Date | null;
   onCancel: () => Promise<void>;
   replacements: Replacements;
@@ -58,18 +59,15 @@ export const useAttackDiscovery = ({
 
   // generation can take a long time, so we calculate an approximate future time:
   const [approximateFutureTime, setApproximateFutureTime] = useState<Date | null>(null);
-  const [pollStatus, setPollStatus] = useState<AttackDiscoveryStatus | null>(null);
+  // whether post request is loading (dont show actions)
+  const [isLoadingPost, setIsLoadingPost] = useState<boolean>(false);
   const {
     cancelAttackDiscovery,
     data: pollData,
     pollApi,
-    status,
+    status: pollStatus,
     stats,
   } = usePollApi({ http, setApproximateFutureTime, toasts, connectorId });
-
-  useEffect(() => {
-    setPollStatus(status);
-  }, [status]);
 
   // loading boilerplate:
   const [isLoading, setIsLoading] = useState(false);
@@ -156,7 +154,8 @@ export const useAttackDiscovery = ({
         throw new Error(CONNECTOR_ERROR);
       }
       setLoadingConnectorId?.(connectorId ?? null);
-      setPollStatus('running');
+      setIsLoading(true);
+      setIsLoadingPost(true);
       setApproximateFutureTime(null);
       // call the internal API to generate attack discoveries:
       const rawResponse = await http.fetch('/internal/elastic_assistant/attack_discovery', {
@@ -164,7 +163,7 @@ export const useAttackDiscovery = ({
         method: 'POST',
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
       });
-
+      setIsLoadingPost(false);
       const parsedResponse = AttackDiscoveryPostResponse.safeParse(rawResponse);
 
       if (!parsedResponse.success) {
@@ -175,6 +174,7 @@ export const useAttackDiscovery = ({
         pollApi();
       }
     } catch (error) {
+      setIsLoadingPost(false);
       setIsLoading(false);
       toasts?.addDanger(error, {
         title: ERROR_GENERATING_ATTACK_DISCOVERIES,
@@ -191,6 +191,7 @@ export const useAttackDiscovery = ({
     fetchAttackDiscoveries,
     generationIntervals,
     isLoading,
+    isLoadingPost,
     lastUpdated,
     onCancel: cancelAttackDiscovery,
     replacements,
