@@ -41,6 +41,7 @@ import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
+import { HeaderHelpCenterTrigger } from './header_help_center';
 import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_menu';
@@ -159,6 +160,12 @@ export function Header({
                     docLinks={docLinks}
                     kibanaVersion={kibanaVersion}
                     navigateToUrl={application.navigateToUrl}
+                  />,
+                  <HeaderHelpCenterTrigger
+                    docLinks={docLinks}
+                    breadCrumbs$={observables.breadcrumbs$}
+                    helpExtension$={observables.helpExtension$}
+                    helpSupportUrl$={observables.helpSupportUrl$}
                   />,
                   <HeaderNavControls navControls$={observables.navControlsRight$} />,
                 ],
