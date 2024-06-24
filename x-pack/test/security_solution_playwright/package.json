@@ -1,0 +1,10 @@
+{
+  "author": "Elastic",
+  "name": "@kbn/security-solution-playwright",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "playwright": "node ../../plugins/security_solution/scripts/start_playwright run --config-file ../../test/security_solution_playwright/playwright.config.ts --ftr-config-file ../security_solution_cypress/cli_config"
+  }
+}

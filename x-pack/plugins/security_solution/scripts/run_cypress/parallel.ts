@@ -113,7 +113,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       // If we don't return early, these specs will start executing, and Cypress will be skipping
       // tests at runtime: those that should be excluded according to the tags passed in the config.
       // This can take so much time that the job can fail by timeout in CI.
-      if (grepFilterSpecs && isGrepReturnedSpecPattern) {
+      if (!isOpen && grepFilterSpecs && isGrepReturnedSpecPattern) {
         log.info('No tests found - all tests could have been skipped via Cypress tags');
         // eslint-disable-next-line no-process-exit
         return process.exit(0);
@@ -248,8 +248,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 fleetServerPort,
                 ftrConfigFilePath,
                 specFilePath: filePath,
-                specFileFTRConfig,
-                isOpen,
+                specFileFTRConfig: specFileFTRConfig.ftrConfig,
               });
 
               const createUrlFromFtrConfig = (

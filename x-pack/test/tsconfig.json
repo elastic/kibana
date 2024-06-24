@@ -173,6 +173,7 @@
     "@kbn/alerting-comparators",
     "@kbn/alerting-state-types",
     "@kbn/reporting-server",
+    "@kbn/security-solution-plugin/public/management/cypress",
     "@kbn/data-quality-plugin"
   ]
 }

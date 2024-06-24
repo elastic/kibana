@@ -637,6 +637,11 @@ module.exports = {
       },
     },
 
+    {
+      files: 'x-pack/test/security_solution_playwright/tests/**',
+      extends: 'plugin:playwright/recommended',
+    },
+
     /**
      * Single package.json rules, it tells eslint to ignore the child package.json files
      * and look for dependencies declarations in the single and root level package.json
