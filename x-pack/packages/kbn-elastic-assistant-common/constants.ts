@@ -7,7 +7,7 @@
 
 export const ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION = '1';
 
-export const ELASTIC_AI_ASSISTANT_URL = '/api/elastic_assistant';
+export const ELASTIC_AI_ASSISTANT_URL = '/api/security_ai_assistant';
 export const ELASTIC_AI_ASSISTANT_INTERNAL_URL = '/internal/elastic_assistant';
 
 export const ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/current_user/conversations`;

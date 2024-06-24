@@ -8,7 +8,6 @@
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
-import { createConversationRoute } from './create_route';
 import { getBasicEmptySearchResponse, getEmptyFindResult } from '../../__mocks__/response';
 import { getCreateConversationRequest, requestMock } from '../../__mocks__/request';
 import {
@@ -16,10 +15,11 @@ import {
   getConversationMock,
   getQueryConversationParams,
 } from '../../__mocks__/conversations_schema.mock';
-import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL } from '@kbn/elastic-assistant-common';
+import { chatCompleteRoute } from './chat_complete_route';
 
-describe('Create conversation route', () => {
+describe('Chat complete route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   const mockUser1 = {
@@ -45,7 +45,8 @@ describe('Create conversation route', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
     context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
-    createConversationRoute(server.router);
+    const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
+    chatCompleteRoute(server.router, mockGetElser);
   });
 
   describe('status codes', () => {
@@ -90,7 +91,7 @@ describe('Create conversation route', () => {
     test('disallows unknown title', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+        path: ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
         body: {
           ...getCreateConversationSchemaMock(),
           title: true,
@@ -112,7 +113,7 @@ describe('Create conversation route', () => {
     test('is successful', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+        path: ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
         body: {
           ...getCreateConversationSchemaMock(),
           messages: [defaultMessage],
@@ -128,7 +129,7 @@ describe('Create conversation route', () => {
 
       const request = requestMock.create({
         method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+        path: ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
         body: {
           ...getCreateConversationSchemaMock(),
           messages: [wrongMessage],
