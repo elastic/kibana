@@ -121,7 +121,10 @@ export const sampleDocWithSortId = (
 export const sampleDocNoSortId = (
   someUuid: string = sampleIdGuid,
   ip?: string
-): SignalSourceHit & { _source: Required<SignalSourceHit>['_source'] } => ({
+): SignalSourceHit & {
+  _source: Required<SignalSourceHit>['_source'];
+  _id: Required<SignalSourceHit>['_id'];
+} => ({
   _index: 'myFakeSignalIndex',
   _score: 100,
   _version: 1,
@@ -337,6 +340,7 @@ export const sampleDocNoSortIdWithTimestamp = (
   someUuid: string = sampleIdGuid,
   ip?: string
 ): SignalSourceHit & {
+  _id: Required<SignalSourceHit>['_id'];
   _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
 } => {
   const doc = sampleDocNoSortId(someUuid, ip);
