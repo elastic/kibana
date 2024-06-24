@@ -34,22 +34,15 @@ steps:
 
   - wait
 
-  # - command: TEST_PACKAGE=fips .buildkite/scripts/steps/package_testing/test.sh
-  #   label: 'Smoke testing for FIPS'
-  #   agents:
-  #     machineType: n2-standard-4
-  #   timeout_in_minutes: 600
-
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-    label: 'Pick Test Group Run Order (FTR + Integration)'
+    label: 'Pick Test Group Run Order'
     depends_on: build
     timeout_in_minutes: 10
     env:
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIG_PATTERNS: 'x-pack/test/reporting_functional/reporting_and_security.config.ts,x-pack/test/saved_object_api_integration/security_and_spaces/config_trial.ts,x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts,x-pack/test/alerting_api_integration/security_and_spaces/group2/config.ts,x-pack/test/alerting_api_integration/security_and_spaces/group3/config.ts,x-pack/test/alerting_api_integration/security_and_spaces/group4/config.ts,x-pack/test/functional/apps/saved_objects_management/config.ts,x-pack/test/functional/apps/user_profiles/config.ts,x-pack/test/functional/apps/security/config.ts'
       FTR_EXTRA_ARGS: '$FTR_EXTRA_ARGS'
-      LIMIT_CONFIG_TYPE: 'functional,integration'
+      LIMIT_CONFIG_TYPE: 'functional'
     retry:
       automatic:
         - exit_status: '*'
