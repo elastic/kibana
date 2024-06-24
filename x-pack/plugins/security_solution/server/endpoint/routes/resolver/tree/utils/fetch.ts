@@ -313,7 +313,8 @@ export function getLeafNodes(
  * @param obj the doc value fields retrieved from a document returned by Elasticsearch
  * @param schema the schema used for identifying connections between documents
  */
-export function getIDField(obj: FieldsObject, schema: ResolverSchema): NodeID | undefined {
+export function getIDField(obj: FieldsObject, schema: Resol
+verSchema): NodeID | undefined {
   const id: ECSField<NodeID> = obj[schema.id];
   return firstNonNullValue(id);
 }
