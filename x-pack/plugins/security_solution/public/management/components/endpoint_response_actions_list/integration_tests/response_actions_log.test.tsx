@@ -1102,8 +1102,8 @@ describe('Response actions history', () => {
         const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${outputCommand} failed`,
-          `${outputCommand} failed`,
+          `${outputCommand} failedUnknown error`,
+          `${outputCommand} failedUnknown error`,
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)

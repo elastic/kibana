@@ -81,7 +81,12 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
       }
 
       if (!allAgentErrors.length) {
-        return null;
+        return (
+          <FormattedMessage
+            id="xpack.securitySolution.endpointActionFailureMessage.unknownFailure"
+            defaultMessage="Unknown error"
+          />
+        );
       }
 
       const groupCounts = allAgentErrors.reduce<{ agents: number; errors: number }>(
