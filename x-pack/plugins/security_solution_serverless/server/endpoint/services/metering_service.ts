@@ -10,14 +10,13 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/endpoint/types';
 
+import { METERING_SERVICE_BATCH_SIZE } from '../../constants';
 import { ProductLine, ProductTier } from '../../../common/product';
 
 import type { UsageRecord, MeteringCallbackInput, MeteringCallBackResponse } from '../../types';
 import type { ServerlessSecurityConfig } from '../../config';
 
 import { METERING_TASK } from '../constants/metering';
-
-const BATCH_SIZE = 1000;
 
 export class EndpointMeteringService {
   private type: ProductLine.endpoint | `${ProductLine.cloud}_${ProductLine.endpoint}` | undefined;
@@ -73,7 +72,7 @@ export class EndpointMeteringService {
     }, [] as UsageRecord[]);
 
     const latestTimestamp = new Date(records[records.length - 1].usage_timestamp);
-    const shouldRunAgain = heartbeatsResponse.hits.hits.length === BATCH_SIZE;
+    const shouldRunAgain = heartbeatsResponse.hits.hits.length === METERING_SERVICE_BATCH_SIZE;
     return { latestTimestamp, records, shouldRunAgain };
   };
 
@@ -86,7 +85,7 @@ export class EndpointMeteringService {
       {
         index: ENDPOINT_HEARTBEAT_INDEX,
         sort: 'event.ingested',
-        size: BATCH_SIZE,
+        size: METERING_SERVICE_BATCH_SIZE,
         query: {
           range: {
             'event.ingested': {

@@ -224,19 +224,26 @@ export const useColumns = (
                 />
               )}
               {type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN && (
-                <EuiIconTip
-                  type="aggregate"
-                  data-test-subj={'aiopsLogPatternIcon'}
-                  css={{ marginLeft: euiTheme.euiSizeS, marginRight: euiTheme.euiSizeXS }}
-                  size="m"
-                  content={i18n.translate(
-                    'xpack.aiops.fieldContextPopover.descriptionTooltipLogPattern',
-                    {
-                      defaultMessage:
-                        'The field value for this field shows an example of the identified significant text field pattern.',
-                    }
-                  )}
-                />
+                <span
+                  // match the margins of the FieldStatsPopover button
+                  css={{
+                    marginLeft: euiTheme.euiSizeS,
+                    marginRight: euiTheme.euiSizeXS,
+                  }}
+                >
+                  <EuiIconTip
+                    type="aggregate"
+                    data-test-subj={'aiopsLogPatternIcon'}
+                    size="m"
+                    content={i18n.translate(
+                      'xpack.aiops.fieldContextPopover.descriptionTooltipLogPattern',
+                      {
+                        defaultMessage:
+                          'The field value for this field shows an example of the identified significant text field pattern.',
+                      }
+                    )}
+                  />
+                </span>
               )}
 
               <span title={fieldName} className="eui-textTruncate">

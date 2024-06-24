@@ -98,20 +98,13 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     if (!messages.length) {
       throw new Error('No messages provided.');
     }
-    const formattedMessages = [];
-    if (messages.length >= 2) {
-      messages.forEach((message, i) => {
-        if (typeof message.content !== 'string') {
-          throw new Error('Multimodal messages are not supported.');
-        }
-        formattedMessages.push(getMessageContentAndRole(message.content, message._getType()));
-      });
-    } else {
-      if (typeof messages[0].content !== 'string') {
+    const formattedMessages: Array<{ content: string; role: string }> = [];
+    messages.forEach((message, i) => {
+      if (typeof message.content !== 'string') {
         throw new Error('Multimodal messages are not supported.');
       }
-      formattedMessages.push(getMessageContentAndRole(messages[0].content));
-    }
+      formattedMessages.push(getMessageContentAndRole(message.content, message._getType()));
+    });
     this.#logger.debug(
       `ActionsClientSimpleChatModel#_call\ntraceId: ${
         this.#traceId
@@ -125,12 +118,10 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         subActionParams: {
           model: this.model,
           messages: formattedMessages,
-          maxTokens: this.#maxTokens,
-          ...getDefaultArguments(this.llmType, this.temperature, options.stop),
+          ...getDefaultArguments(this.llmType, this.temperature, options.stop, this.#maxTokens),
         },
       },
     };
-
     // create an actions client from the authenticated request context:
     const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
 
