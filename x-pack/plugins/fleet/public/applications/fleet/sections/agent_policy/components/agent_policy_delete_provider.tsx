@@ -183,7 +183,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
               title={
                 <FormattedMessage
                   id="xpack.fleet.deleteAgentPolicy.confirmModal.warningSharedIntegrationPolicies"
-                  defaultMessage="Fleet has detected that this policy contains integrations that are shared by other agent policies. These integrations won't be deleted."
+                  defaultMessage="Fleet has detected that this policy contains integration policies shared by multiple agent policies. These integration policies won't be deleted."
                 />
               }
             />
