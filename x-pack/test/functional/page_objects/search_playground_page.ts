@@ -52,6 +52,10 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('selectIndicesComboBox');
       },
 
+      async removeIndexFromComboBox() {
+        await testSubjects.click('removeIndexButton');
+      },
+
       async expectToSelectIndicesAndStartButtonEnabled(indexName) {
         await comboBox.setCustom('selectIndicesComboBox', indexName);
         expect(await testSubjects.isEnabled('startChatButton')).to.be(true);
@@ -123,6 +127,10 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const assistantMessageElement = await testSubjects.find('assistant-message');
         const assistantMessage = await assistantMessageElement.getVisibleText();
         expect(assistantMessage).to.contain('My response');
+      },
+
+      async expectTokenTooltipExists() {
+        await testSubjects.existOrFail('token-tooltip-button');
       },
 
       async expectOpenViewCode() {

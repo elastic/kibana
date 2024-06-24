@@ -110,6 +110,10 @@ export default function (ftrContext: FtrProviderContext) {
           await createIndex();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSelectIndex(indexName);
         });
+
+        after(async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.removeIndexFromComboBox();
+        });
       });
 
       describe('with existing indices', () => {
@@ -142,15 +146,14 @@ export default function (ftrContext: FtrProviderContext) {
 
           await pageObjects.searchPlayground.PlaygroundChatPage.sendQuestion();
 
-          const [conversationSimulator] = await Promise.all([
-            conversationInterceptor.waitForIntercept(),
-          ]);
+          const conversationSimulator = await conversationInterceptor.waitForIntercept();
 
           await conversationSimulator.next('My response');
 
           await conversationSimulator.complete();
 
           await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWorks();
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectTokenTooltipExists();
         });
 
         it('open view code', async () => {
