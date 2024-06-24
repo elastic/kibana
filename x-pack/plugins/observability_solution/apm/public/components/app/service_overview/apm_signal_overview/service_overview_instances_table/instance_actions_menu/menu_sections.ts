@@ -12,13 +12,13 @@ import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators'
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { NodeLogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { getInfraHref } from '../../../../shared/links/infra_link';
+import { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
+import { getInfraHref } from '../../../../../shared/links/infra_link';
 import {
   Action,
   getNonEmptySections,
   SectionRecord,
-} from '../../../../shared/transaction_action_menu/sections_helper';
+} from '../../../../../shared/transaction_action_menu/sections_helper';
 
 type InstaceDetails =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;

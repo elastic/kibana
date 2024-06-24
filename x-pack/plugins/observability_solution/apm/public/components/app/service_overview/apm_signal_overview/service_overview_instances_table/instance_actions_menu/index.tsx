@@ -20,13 +20,13 @@ import {
   ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
-import { isJavaAgentName } from '../../../../../../common/agent_name';
-import { SERVICE_NODE_NAME } from '../../../../../../common/es_fields/apm';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { isPending } from '../../../../../hooks/use_fetcher';
-import { pushNewItemToKueryBar } from '../../../../shared/kuery_bar/utils';
-import { useMetricOverviewHref } from '../../../../shared/links/apm/metric_overview_link';
-import { useServiceNodeMetricOverviewHref } from '../../../../shared/links/apm/service_node_metric_overview_link';
+import { isJavaAgentName } from '../../../../../../../common/agent_name';
+import { SERVICE_NODE_NAME } from '../../../../../../../common/es_fields/apm';
+import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
+import { isPending } from '../../../../../../hooks/use_fetcher';
+import { pushNewItemToKueryBar } from '../../../../../shared/kuery_bar/utils';
+import { useMetricOverviewHref } from '../../../../../shared/links/apm/metric_overview_link';
+import { useServiceNodeMetricOverviewHref } from '../../../../../shared/links/apm/service_node_metric_overview_link';
 import { useInstanceDetailsFetcher } from '../use_instance_details_fetcher';
 import { getMenuSections } from './menu_sections';
 

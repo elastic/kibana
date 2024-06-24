@@ -10,7 +10,7 @@ import React from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
+import { ServiceOverviewThroughputChart } from '../../../app/service_overview/apm_signal_overview/service_overview_throughput_chart';
 import { LatencyChart } from '../latency_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TransactionColdstartRateChart } from '../transaction_coldstart_rate_chart';

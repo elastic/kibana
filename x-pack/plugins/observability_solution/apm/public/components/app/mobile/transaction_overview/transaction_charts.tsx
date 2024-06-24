@@ -9,7 +9,7 @@ import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import { ServiceOverviewThroughputChart } from '../../service_overview/service_overview_throughput_chart';
+import { ServiceOverviewThroughputChart } from '../../service_overview/apm_signal_overview/service_overview_throughput_chart';
 import { SessionsChart } from '../charts/sessions_chart';
 import { HttpRequestsChart } from '../charts/http_requests_chart';
 import { LatencyChart } from '../../../shared/charts/latency_chart';

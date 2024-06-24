@@ -10,7 +10,7 @@ import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
-import { ServiceOverviewDependenciesTable } from '../service_overview/service_overview_dependencies_table';
+import { ServiceOverviewDependenciesTable } from '../service_overview/apm_signal_overview/service_overview_dependencies_table';
 import { ServiceDependenciesBreakdownChart } from './service_dependencies_breakdown_chart';
 
 export function ServiceDependencies() {

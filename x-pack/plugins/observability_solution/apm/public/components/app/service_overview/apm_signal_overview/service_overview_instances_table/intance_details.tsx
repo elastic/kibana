@@ -25,21 +25,21 @@ import {
   SERVICE_RUNTIME_VERSION,
   KUBERNETES_POD_NAME,
   KUBERNETES_POD_UID,
-} from '../../../../../common/es_fields/apm';
+} from '../../../../../../common/es_fields/apm';
 
 import {
   KUBERNETES_CONTAINER_NAME,
   KUBERNETES_NAMESPACE,
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
-} from '../../../../../common/es_fields/infra_metrics';
+} from '../../../../../../common/es_fields/infra_metrics';
 
-import { isPending } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
-import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
-import { getContainerIcon } from '../../../shared/service_icons';
+import { isPending } from '../../../../../hooks/use_fetcher';
+import { useTheme } from '../../../../../hooks/use_theme';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import { KeyValueFilterList } from '../../../../shared/key_value_filter_list';
+import { pushNewItemToKueryBar } from '../../../../shared/kuery_bar/utils';
+import { getContainerIcon } from '../../../../shared/service_icons';
 import { useInstanceDetailsFetcher } from './use_instance_details_fetcher';
 
 type ServiceInstanceDetails =

@@ -8,10 +8,10 @@
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { ServiceOverview } from '.';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { APMServiceContextValue } from '../../../context/apm_service/apm_service_context';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { mockApmApiCallResponse } from '../../../services/rest/call_apm_api_spy';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { APMServiceContextValue } from '../../../../context/apm_service/apm_service_context';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
 
 const stories: Meta<{}> = {
   title: 'app/ServiceOverview',

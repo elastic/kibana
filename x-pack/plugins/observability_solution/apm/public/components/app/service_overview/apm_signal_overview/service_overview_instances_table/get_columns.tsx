@@ -9,21 +9,27 @@ import { EuiBasicTableColumn, EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { ActionMenu } from '@kbn/observability-shared-plugin/public';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
+import { isTimeComparison } from '../../../../shared/time_comparison/get_comparison_options';
+import { LatencyAggregationType } from '../../../../../../common/latency_aggregation_types';
+import {
+  getServiceNodeName,
+  SERVICE_NODE_NAME_MISSING,
+} from '../../../../../../common/service_nodes';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
-} from '../../../../../common/utils/formatters';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { MetricOverviewLink } from '../../../shared/links/apm/metric_overview_link';
-import { ListMetric } from '../../../shared/list_metric';
-import { getLatencyColumnLabel } from '../../../shared/transactions_table/get_latency_column_label';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+} from '../../../../../../common/utils/formatters';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import { MetricOverviewLink } from '../../../../shared/links/apm/metric_overview_link';
+import { ListMetric } from '../../../../shared/list_metric';
+import { getLatencyColumnLabel } from '../../../../shared/transactions_table/get_latency_column_label';
+import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { InstanceActionsMenu } from './instance_actions_menu';
-import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../../shared/charts/helper/get_timeseries_color';
 
 type ServiceInstanceMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;

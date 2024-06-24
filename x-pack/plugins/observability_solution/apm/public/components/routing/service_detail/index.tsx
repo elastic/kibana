@@ -31,7 +31,7 @@ import { MetricsDetails } from '../../app/metrics_details';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
 import { ServiceMapServiceDetail } from '../../app/service_map';
-import { ServiceOverview } from '../../app/service_overview';
+import { ServiceOverview } from '../../app/service_overview/apm_signal_overview';
 import { TransactionDetails } from '../../app/transaction_details';
 import { TransactionOverview } from '../../app/transaction_overview';
 import { ApmServiceTemplate } from '../templates/apm_service_template';
