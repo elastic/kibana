@@ -8,6 +8,7 @@ import {
   SerializedTitles,
   PublishesWritablePanelTitle,
   PublishesPanelTitle,
+  HasEditCapabilities,
 } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
@@ -53,7 +54,8 @@ export type SloOverviewEmbeddableState = SerializedTitles &
 export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   PublishesWritablePanelTitle &
   PublishesPanelTitle &
-  HasSloGroupOverviewConfig;
+  HasSloGroupOverviewConfig &
+  HasEditCapabilities;
 
 export interface HasSloGroupOverviewConfig {
   getSloGroupOverviewConfig: () => GroupSloCustomInput;
