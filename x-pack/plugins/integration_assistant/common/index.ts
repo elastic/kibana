@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 export { BuildIntegrationRequestBody } from './api/build_integration/build_integration';
 export {
   CategorizationRequestBody,
@@ -17,7 +16,13 @@ export {
 export { EcsMappingRequestBody, EcsMappingResponse } from './api/ecs/ecs_route';
 export { RelatedRequestBody, RelatedResponse } from './api/related/related_route';
 
-export type { Datastream, InputType, Integration, Pipeline } from './api/model/common_attributes';
+export type {
+  DataStream,
+  InputType,
+  Integration,
+  Pipeline,
+  Docs,
+} from './api/model/common_attributes';
 export type { ESProcessorItem } from './api/model/processor_attributes';
 
 export {
@@ -28,5 +33,5 @@ export {
   INTEGRATION_BUILDER_PATH,
   PLUGIN_ID,
   RELATED_GRAPH_PATH,
-  TEST_PIPELINE_PATH,
+  CHECK_PIPELINE_PATH,
 } from './constants';
