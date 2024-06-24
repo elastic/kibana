@@ -25,8 +25,8 @@ import { isControlGroupApi, type ControlGroupApi } from '@kbn/controls-plugin/pu
 import { apiHasVisualizeConfig, HasVisualizeConfig, Vis } from '@kbn/visualizations-plugin/public';
 import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { InputControlVisParams } from '../types';
 import { PresentationContainer } from '@kbn/presentation-containers';
+import type { InputControlVisParams } from '../types';
 
 export const ACTION_CONVERT_TO_CONTROLS = 'ACTION_CONVERT_TO_CONTROLS';
 
@@ -52,7 +52,9 @@ const MenuItem: React.FC = () => {
 type ActionApi = HasUniqueId &
   HasVisualizeConfig &
   CanAccessViewMode &
-  HasParentApi<Partial<Pick<PresentationContainer, 'removePanel'>> & { controlGroup: ControlGroupApi }>;
+  HasParentApi<
+    Partial<Pick<PresentationContainer, 'removePanel'>> & { controlGroup: ControlGroupApi }
+  >;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is ActionApi =>
   apiHasUniqueId(api) &&
@@ -81,14 +83,14 @@ export function getConvertToControlsAction(
     execute: async ({ embeddable }: EmbeddableApiContext) => {
       if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
       const { addToControls } = await import('./add_to_controls');
+      if (typeof embeddable.parentApi.removePanel === 'function') {
+        embeddable.parentApi.removePanel(embeddable.uuid);
+      }
       addToControls(
         embeddable.parentApi.controlGroup,
         embeddable.getVis() as unknown as Vis<InputControlVisParams>,
         dataService
       );
-      if (typeof embeddable.parentApi.removePanel === 'function') {
-        embeddable.parentApi.removePanel(embeddable.uuid);
-      }
     },
     showNotification: true,
   };

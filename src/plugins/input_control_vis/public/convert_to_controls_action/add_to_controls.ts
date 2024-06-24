@@ -6,11 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { AddRangeSliderControlProps, ControlGroupApi } from '@kbn/controls-plugin/public';
+import type {
+  AddOptionsListControlProps,
+  AddRangeSliderControlProps,
+  ControlGroupApi,
+} from '@kbn/controls-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Filter } from '@kbn/es-query';
 import type { Vis } from '@kbn/visualizations-plugin/public';
-import { getRangeValueFromFilter } from '../control/filter_manager/range_filter_manager';
+import { getSelectedOptionsFromFilter } from '../control/filter_manager/phrase_filter_manager';
+import { getSelectedRangeFromFilter } from '../control/filter_manager/range_filter_manager';
 import { ControlParams, CONTROL_TYPES } from '../editor_utils';
 import type { InputControlVisParams } from '../types';
 
@@ -19,20 +24,48 @@ export function addToControls(
   vis: Vis<InputControlVisParams>,
   dataService: DataPublicPluginStart
 ) {
-  console.log('controlGroup', controlGroup);
-  console.log('vis', vis);
-  vis.params.controls.forEach((controlParams) => {
+  (vis.params?.controls ?? []).forEach((controlParams) => {
+    const filter = dataService.query.filterManager
+      .getFilters()
+      .find(({ meta }) => meta.controlledBy === controlParams.id);
+    if (filter) {
+      dataService.query.filterManager.removeFilter(filter);
+    }
+
     if (controlParams.type === CONTROL_TYPES.LIST) {
+      controlGroup.addOptionsListControl(getOptionListProps(controlParams, filter));
     } else if (controlParams.type === CONTROL_TYPES.RANGE) {
-      const filter = dataService.query.filterManager
-        .getFilters()
-        .find(({ meta }) => meta.controlledBy === controlParams.id);
       controlGroup.addRangeSliderControl(getRangeSliderProps(controlParams, filter));
-      if (filter) {
-        dataService.query.filterManager.removeFilter(filter);
-      }
     }
   });
+}
+
+// Maps input control option list props to control option list props
+function getOptionListProps(legacyControlParams: ControlParams, filter?: Filter) {
+  const controlProps: AddOptionsListControlProps = {
+    controlId: legacyControlParams.id,
+    dataViewId: legacyControlParams.indexPattern,
+    fieldName: legacyControlParams.fieldName,
+  };
+
+  if (legacyControlParams.label) {
+    controlProps.title = legacyControlParams.label;
+  }
+
+  if (typeof legacyControlParams.options.multiselect === 'boolean') {
+    controlProps.singleSelect = !legacyControlParams.options.multiselect;
+  }
+
+  if (filter) {
+    const selectedOptions = getSelectedOptionsFromFilter(filter, legacyControlParams.fieldName);
+    if (selectedOptions) {
+      controlProps.selectedOptions = (
+        Array.isArray(selectedOptions) ? selectedOptions : [selectedOptions]
+      ).map((value) => String(value));
+    }
+  }
+
+  return controlProps;
 }
 
 // Maps input control range slider props to control range slider props
@@ -52,7 +85,7 @@ function getRangeSliderProps(legacyControlParams: ControlParams, filter?: Filter
   }
 
   if (filter) {
-    const selectedRange = getRangeValueFromFilter(filter, legacyControlParams.fieldName);
+    const selectedRange = getSelectedRangeFromFilter(filter, legacyControlParams.fieldName);
     if (selectedRange && selectedRange.min !== undefined && selectedRange.max !== undefined) {
       controlProps.value = [String(selectedRange.min), String(selectedRange.max)];
     }

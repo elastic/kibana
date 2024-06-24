@@ -67,11 +67,11 @@ export class RangeFilterManager extends FilterManager {
       return;
     }
 
-    return getRangeValueFromFilter(kbnFilters[0], this.fieldName);
+    return getSelectedRangeFromFilter(kbnFilters[0], this.fieldName);
   }
 }
 
-export function getRangeValueFromFilter(filter: Filter, fieldName: string) {
+export function getSelectedRangeFromFilter(filter: Filter, fieldName: string) {
   let range: RangeFilterParams;
   if (_.has(filter, 'query.script')) {
     range = _.get(filter, 'query.script.script.params');
