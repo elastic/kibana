@@ -5,16 +5,23 @@
  * 2.0.
  */
 
+import { createTestPackageInfo } from '@kbn/config-mocks';
 import type { Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
-import type { CSPViolationEvent, PermissionsPolicyViolationEvent } from './analytics_service';
+import type {
+  AnalyticsServiceSetupParams,
+  CSPViolationEvent,
+  PermissionsPolicyViolationEvent,
+} from './analytics_service';
 import {
   AnalyticsService,
   AUTHENTICATION_TYPE_EVENT_TYPE,
   CSP_VIOLATION_EVENT_TYPE,
   PERMISSIONS_POLICY_VIOLATION_EVENT_TYPE,
 } from './analytics_service';
+
+const packageInfo = createTestPackageInfo();
 
 describe('AnalyticsService', () => {
   let service: AnalyticsService;
@@ -25,10 +32,13 @@ describe('AnalyticsService', () => {
   });
 
   describe('#setup()', () => {
-    const getSetupParams = () => {
+    const getSetupParams = (params?: Partial<AnalyticsServiceSetupParams>) => {
       const mockCoreStart = coreMock.createSetup();
       return {
         analytics: mockCoreStart.analytics,
+        version: packageInfo.version,
+        deploymentId: 'a-deployment-id',
+        ...(params ?? {}),
       };
     };
 
@@ -94,10 +104,27 @@ describe('AnalyticsService', () => {
         analyticsSetup.reportCSPViolation(event);
 
         expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
-        expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
-          'security_csp_violation',
-          event
-        );
+        expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith('security_csp_violation', {
+          ...event,
+          version: packageInfo.version,
+          deploymentId: 'a-deployment-id',
+        });
+      });
+
+      it('properly reports CSP violation event with serverless default event props', async () => {
+        const setupParams = getSetupParams({ serverlessProjectId: 'serverless-project-id' });
+        const analyticsSetup = service.setup(setupParams);
+
+        const event = {} as CSPViolationEvent;
+        analyticsSetup.reportCSPViolation(event);
+
+        expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+        expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith('security_csp_violation', {
+          ...event,
+          version: packageInfo.version,
+          deploymentId: 'a-deployment-id',
+          serverlessProjectId: 'serverless-project-id',
+        });
       });
     });
 
@@ -112,7 +139,7 @@ describe('AnalyticsService', () => {
         expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
         expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
           'security_permissions_policy_violation',
-          event
+          { ...event, version: packageInfo.version, deploymentId: 'a-deployment-id' }
         );
       });
     });

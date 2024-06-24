@@ -22,6 +22,9 @@ export const PERMISSIONS_POLICY_VIOLATION_EVENT_TYPE = 'security_permissions_pol
 
 export interface AnalyticsServiceSetupParams {
   analytics: CoreAnalyticsServiceSetup;
+  deploymentId?: string;
+  version: string;
+  serverlessProjectId?: string;
 }
 
 export interface AnalyticsServiceSetup {
@@ -276,8 +279,19 @@ const permissionsPolicyViolation: EventTypeOpts<PermissionsPolicyViolationEvent>
 export class AnalyticsService {
   constructor(private readonly logger: Logger) {}
 
-  public setup({ analytics }: AnalyticsServiceSetupParams): AnalyticsServiceSetup {
+  public setup({
+    analytics,
+    deploymentId,
+    version,
+    serverlessProjectId,
+  }: AnalyticsServiceSetupParams): AnalyticsServiceSetup {
     this.logger.debug(`Registering ${AUTHENTICATION_TYPE_EVENT_TYPE} event type.`);
+
+    const commonParams = {
+      deploymentId,
+      version,
+      serverlessProjectId,
+    };
 
     analytics.registerEventType({
       eventType: AUTHENTICATION_TYPE_EVENT_TYPE,
@@ -323,10 +337,13 @@ export class AnalyticsService {
         });
       },
       reportCSPViolation(event: CSPViolationEvent) {
-        analytics.reportEvent(CSP_VIOLATION_EVENT_TYPE, event);
+        analytics.reportEvent(CSP_VIOLATION_EVENT_TYPE, { ...event, ...commonParams });
       },
       reportPermissionsPolicyViolation(event: PermissionsPolicyViolationEvent) {
-        analytics.reportEvent(PERMISSIONS_POLICY_VIOLATION_EVENT_TYPE, event);
+        analytics.reportEvent(PERMISSIONS_POLICY_VIOLATION_EVENT_TYPE, {
+          ...event,
+          ...commonParams,
+        });
       },
     };
   }

@@ -203,7 +203,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies, SecurityPluginStart>,
-    { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, spaces, cloud }: PluginSetupDependencies
   ) {
     this.kibanaIndexName = core.savedObjects.getDefaultIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -324,7 +324,12 @@ export class SecurityPlugin
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
-      analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
+      analyticsService: this.analyticsService.setup({
+        analytics: core.analytics,
+        deploymentId: cloud?.deploymentId,
+        version: this.initializerContext.env.packageInfo.version,
+        serverlessProjectId: cloud?.serverless.projectId,
+      }),
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
     });
 
