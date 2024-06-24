@@ -6,37 +6,48 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
+import type { Agent as SuperTestAgent } from 'supertest';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   data as telemetryMockData,
   MockTelemetryFindings,
 } from '../../../../../test/cloud_security_posture_api/telemetry/data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+import { RoleCredentials } from '../../../../shared/services';
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 
 export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
-  const supertest = getService('supertest');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+
+  let roleAuthc: RoleCredentials;
+  let internalRequestHeader: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string };
 
   /**
    * required before indexing findings
    */
-  const waitForPluginInitialized = (): Promise<void> =>
+  const waitForPluginInitialized = (
+    supertestWithoutAuthParam: SuperTestAgent,
+    internalRequestHeaderParam: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string },
+    roleAuthcParam: RoleCredentials
+  ): Promise<void> =>
     retry.try(async () => {
       log.debug('Check CSP plugin is initialized');
-      const response = await supertest
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
+      const response = await supertestWithoutAuthParam
         .get('/internal/cloud_security_posture/status?check=init')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'xxx')
+        .set(internalRequestHeaderParam)
+        .set(roleAuthcParam.apiKeyHeader)
         .expect(200);
       expect(response.body).to.eql({ isPluginInitialized: true });
       log.debug('CSP plugin is initialized');
@@ -68,12 +79,15 @@ export default function ({ getService }: FtrProviderContext) {
     let agentPolicyId: string;
 
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
-      const { body: agentPolicyResponse } = await supertest
+      const { body: agentPolicyResponse } = await supertestWithoutAuth
         .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xxxx')
+        .set(internalRequestHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'Test policy',
           namespace: 'default',
@@ -82,18 +96,21 @@ export default function ({ getService }: FtrProviderContext) {
       agentPolicyId = agentPolicyResponse.item.id;
 
       await createPackagePolicy(
-        supertest,
+        supertestWithoutAuth,
         agentPolicyId,
         'cspm',
         'cloudbeat/cis_aws',
         'aws',
         'cspm',
-        'CSPM-1'
+        'CSPM-1',
+        roleAuthc,
+        internalRequestHeader
       );
-      await waitForPluginInitialized();
+      await waitForPluginInitialized(supertestWithoutAuth, internalRequestHeader, roleAuthc);
     });
 
     after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
@@ -107,11 +124,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertest
+      } = await supertestWithoutAuth
         .post(`/internal/telemetry/clusters/_stats`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .set('kbn-xsrf', 'xxxx')
+        .set(internalRequestHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -161,11 +178,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertest
+      } = await supertestWithoutAuth
         .post(`/internal/telemetry/clusters/_stats`)
-        .set('kbn-xsrf', 'xxxx')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set(internalRequestHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -208,11 +225,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertest
+      } = await supertestWithoutAuth
         .post(`/internal/telemetry/clusters/_stats`)
-        .set('kbn-xsrf', 'xxxx')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set(internalRequestHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -286,11 +303,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertest
+      } = await supertestWithoutAuth
         .post(`/internal/telemetry/clusters/_stats`)
-        .set('kbn-xsrf', 'xxxx')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set(internalRequestHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -342,11 +359,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertest
+      } = await supertestWithoutAuth
         .post(`/internal/telemetry/clusters/_stats`)
-        .set('kbn-xsrf', 'xxxx')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set(internalRequestHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,

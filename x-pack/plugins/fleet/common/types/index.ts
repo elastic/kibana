@@ -30,6 +30,11 @@ export interface FleetConfigType {
       hosts?: string[];
     };
   };
+  agentless?: {
+    api: {
+      url: string;
+    };
+  };
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
