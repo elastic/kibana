@@ -9,7 +9,7 @@ import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiText, useEuiTheme } from '@el
 import { css } from '@emotion/css';
 import React, { useCallback } from 'react';
 import { KnowledgeBaseConfig } from '../assistant/types';
-import { ALERTS_LABEL, SEND_ALERTS_LABEL } from './translations';
+import { SEND_ALERTS_LABEL } from './translations';
 
 interface Props {
   compressed?: boolean;

@@ -7,7 +7,6 @@
 
 import { ReadKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
 import { KnowledgeBaseConfig } from '../assistant/types';
-
 interface Props {
   enableKnowledgeBaseByDefault: boolean;
   kbStatus: ReadKnowledgeBaseResponse | undefined;

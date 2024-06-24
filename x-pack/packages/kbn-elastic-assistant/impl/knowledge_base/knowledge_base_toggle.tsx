@@ -73,33 +73,34 @@ export const KnowledgeBaseToggle: React.FC<Props> = React.memo(
       <EuiLoadingSpinner size="s" />
     ) : (
       <EuiFormRow fullWidth display={compressed ? 'rowCompressed' : 'row'}>
-        <EuiSwitch
-          showLabel={showLabel}
-          data-test-subj="isEnabledKnowledgeBaseSwitch"
-          disabled={isSwitchDisabled}
-          checked={isEnabledKnowledgeBase}
-          onChange={onEnableAssistantLangChainChange}
-          label={
-            <EuiToolTip
-              content={isSwitchDisabled && i18n.KNOWLEDGE_BASE_TOOLTIP}
-              position={'right'}
-            >
-              <EuiTitle size="xs">
-                <h3>{i18n.KNOWLEDGE_BASE_LABEL}</h3>
-              </EuiTitle>
-            </EuiToolTip>
-          }
-          compressed={compressed}
-          labelProps={
-            compressed
-              ? {}
-              : {
-                  style: {
-                    paddingLeft: euiTheme.size.base,
-                  },
-                }
-          }
-        />
+        <EuiToolTip content={isSwitchDisabled && i18n.KNOWLEDGE_BASE_TOOLTIP} position={'right'}>
+          <EuiSwitch
+            showLabel={showLabel}
+            data-test-subj="isEnabledKnowledgeBaseSwitch"
+            disabled={isSwitchDisabled}
+            checked={isEnabledKnowledgeBase}
+            onChange={onEnableAssistantLangChainChange}
+            label={
+              compressed ? (
+                <></>
+              ) : (
+                <EuiTitle size="xs">
+                  <h3>{i18n.KNOWLEDGE_BASE_LABEL}</h3>
+                </EuiTitle>
+              )
+            }
+            compressed={compressed}
+            labelProps={
+              compressed
+                ? {}
+                : {
+                    style: {
+                      paddingLeft: euiTheme.size.base,
+                    },
+                  }
+            }
+          />
+        </EuiToolTip>
       </EuiFormRow>
     );
   }
