@@ -9,6 +9,7 @@ import React from 'react';
 import { Prompt } from '../types';
 import { Conversation } from '../../assistant_context/types';
 import { AIConnector } from '../../connectorland/connector_selector';
+import { getGenAiConfig } from '../../connectorland/helpers';
 
 export interface CodeBlockDetails {
   type: QueryType;
@@ -119,6 +120,8 @@ export const getConversationApiConfig = ({
 }) => {
   const connector: AIConnector | undefined =
     connectors?.find((c) => c.id === conversation.apiConfig?.connectorId) ?? defaultConnector;
+  const connectorModel = getGenAiConfig(connector)?.defaultModel;
+
   const defaultSystemPrompt = getDefaultSystemPrompt({
     allSystemPrompts,
     conversation,
@@ -130,6 +133,7 @@ export const getConversationApiConfig = ({
           actionTypeId: connector.actionTypeId,
           provider: connector.apiProvider,
           defaultSystemPromptId: defaultSystemPrompt?.id,
+          model: conversation?.apiConfig?.model ?? connectorModel,
         },
       }
     : {};

@@ -65,6 +65,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
         if (selectedConversation != null && selectedConversation.apiConfig) {
           const updatedConversation = {
             ...selectedConversation,
+            // updatedAt: new Date(),
             apiConfig: {
               ...selectedConversation.apiConfig,
               defaultSystemPromptId: systemPromptId,
@@ -116,7 +117,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     );
 
     const selectedConnector = useMemo(() => {
-      const selectedConnectorId = selectedConversation?.apiConfig?.connectorId;
+      const selectedConnectorId: string | undefined = selectedConversation?.apiConfig?.connectorId;
       if (areConnectorsFetched) {
         return connectors?.find((c) => c.id === selectedConnectorId);
       }
@@ -141,6 +142,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           const config = getGenAiConfig(connector);
           const updatedConversation = {
             ...selectedConversation,
+            // updatedAt: new Date(),
             apiConfig: {
               ...selectedConversation.apiConfig,
               connectorId: connector.id,
@@ -182,7 +184,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.id]: updatedConversation,
+                [updatedConversation.title || updatedConversation.id]: updatedConversation,
               },
             });
           }
@@ -209,6 +211,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
         if (selectedConversation != null && selectedConversation.apiConfig) {
           const updatedConversation = {
             ...selectedConversation,
+            // updatedAt: new Date(),
             apiConfig: {
               ...selectedConversation.apiConfig,
               model,
@@ -244,7 +247,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.id]: updatedConversation,
+                [updatedConversation.id || updatedConversation.title]: updatedConversation,
               },
             });
           }
