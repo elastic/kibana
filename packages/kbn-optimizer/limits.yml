@@ -82,6 +82,7 @@ pageLoadAssetSize:
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
+  integrationAssistant: 19524
   interactiveSetup: 80000
   investigate: 17970
   kibanaOverview: 56279
@@ -132,6 +133,7 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchConnectors: 30000
+  searchHomepage: 19831
   searchInferenceEndpoints: 20470
   searchNotebooks: 18942
   searchPlayground: 19325
