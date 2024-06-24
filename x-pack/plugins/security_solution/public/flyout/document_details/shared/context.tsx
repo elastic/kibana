@@ -60,9 +60,13 @@ export interface DocumentDetailsContext {
    */
   getFieldsData: GetFieldsData;
   /**
-   * Boolean to indicate whether it is a preview flyout
+   * Boolean to indicate whether flyout is opened in rule preview
    */
   isPreview: boolean;
+  /**
+   * Boolean to indicate whether it is a preview panel
+   */
+  isPreviewMode: boolean;
 }
 
 export const DocumentDetailsContext = createContext<DocumentDetailsContext | undefined>(undefined);
@@ -75,7 +79,7 @@ export type DocumentDetailsProviderProps = {
 } & Partial<DocumentDetailsProps['params']>;
 
 export const DocumentDetailsProvider = memo(
-  ({ id, indexName, scopeId, children }: DocumentDetailsProviderProps) => {
+  ({ id, indexName, scopeId, isPreviewMode, children }: DocumentDetailsProviderProps) => {
     const {
       browserFields,
       dataAsNestedObject,
@@ -109,6 +113,7 @@ export const DocumentDetailsProvider = memo(
               refetchFlyoutData,
               getFieldsData,
               isPreview: scopeId === TableId.rulePreview,
+              isPreviewMode: Boolean(isPreviewMode),
             }
           : undefined,
       [
@@ -122,6 +127,7 @@ export const DocumentDetailsProvider = memo(
         searchHit,
         refetchFlyoutData,
         getFieldsData,
+        isPreviewMode,
       ]
     );
 

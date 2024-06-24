@@ -28,8 +28,14 @@ const DEFAULT_TO = 'now';
  * The component fetches the necessary data at once. The loading and error states are handled by the ExpandablePanel component.
  */
 export const PrevalenceOverview: FC = () => {
-  const { eventId, indexName, dataFormattedForFieldBrowser, scopeId, investigationFields } =
-    useDocumentDetailsContext();
+  const {
+    eventId,
+    indexName,
+    dataFormattedForFieldBrowser,
+    scopeId,
+    investigationFields,
+    isPreviewMode,
+  } = useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goPrevalenceTab = useCallback(() => {
@@ -67,6 +73,21 @@ export const PrevalenceOverview: FC = () => {
       ),
     [data]
   );
+  const link = useMemo(
+    () =>
+      !isPreviewMode
+        ? {
+            callback: goPrevalenceTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.prevalence.prevalenceTooltip"
+                defaultMessage="Show all prevalence"
+              />
+            ),
+          }
+        : undefined,
+    [goPrevalenceTab, isPreviewMode]
+  );
 
   return (
     <ExpandablePanel
@@ -77,16 +98,8 @@ export const PrevalenceOverview: FC = () => {
             defaultMessage="Prevalence"
           />
         ),
-        link: {
-          callback: goPrevalenceTab,
-          tooltip: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.prevalence.prevalenceTooltip"
-              defaultMessage="Show all prevalence"
-            />
-          ),
-        },
-        iconType: 'arrowStart',
+        link,
+        iconType: !isPreviewMode ? 'arrowStart' : undefined,
       }}
       content={{ loading, error }}
       data-test-subj={PREVALENCE_TEST_ID}

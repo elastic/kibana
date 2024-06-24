@@ -45,7 +45,7 @@ const renderHighlightedFieldsCell = (values: string[], field: string) =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={panelContextValue}>
-        <HighlightedFieldsCell values={values} field={field} />
+        <HighlightedFieldsCell values={values} field={field} isPreviewMode={false} />
       </DocumentDetailsContext.Provider>
     </TestProviders>
   );
@@ -58,7 +58,7 @@ describe('<HighlightedFieldsCell />', () => {
   it('should render a basic cell', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <HighlightedFieldsCell values={['value']} field={'field'} />
+        <HighlightedFieldsCell values={['value']} field={'field'} isPreviewMode={false} />
       </TestProviders>
     );
 
@@ -99,7 +99,7 @@ describe('<HighlightedFieldsCell />', () => {
     });
     const { getByTestId } = render(
       <TestProviders>
-        <HighlightedFieldsCell values={['value']} field={'agent.status'} />
+        <HighlightedFieldsCell values={['value']} field={'agent.status'} isPreviewMode={false} />
       </TestProviders>
     );
 
@@ -118,6 +118,7 @@ describe('<HighlightedFieldsCell />', () => {
           values={['value']}
           field={'agent.status'}
           originalField="observer.serial_number"
+          isPreviewMode={false}
         />
       </TestProviders>
     );
@@ -137,6 +138,7 @@ describe('<HighlightedFieldsCell />', () => {
           values={['value']}
           field={'agent.status'}
           originalField="crowdstrike.event.DeviceId"
+          isPreviewMode={false}
         />
       </TestProviders>
     );
@@ -146,7 +148,7 @@ describe('<HighlightedFieldsCell />', () => {
   it('should not render if values is null', () => {
     const { container } = render(
       <TestProviders>
-        <HighlightedFieldsCell values={null} field={'field'} />
+        <HighlightedFieldsCell values={null} field={'field'} isPreviewMode={false} />
       </TestProviders>
     );
 

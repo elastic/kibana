@@ -17,7 +17,8 @@ import type { HighlightedFieldsTableRow } from '../../right/components/highlight
 export const convertHighlightedFieldsToTableRow = (
   highlightedFields: UseHighlightedFieldsResult,
   scopeId: string,
-  isPreview: boolean
+  isPreview: boolean,
+  isPreviewMode: boolean
 ): HighlightedFieldsTableRow[] => {
   const fieldNames = Object.keys(highlightedFields);
   return fieldNames.map((fieldName) => {
@@ -36,6 +37,7 @@ export const convertHighlightedFieldsToTableRow = (
         values,
         scopeId,
         isPreview,
+        isPreviewMode,
       },
     };
   });

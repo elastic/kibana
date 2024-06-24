@@ -67,7 +67,7 @@ export interface HostEntityOverviewProps {
  * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
-  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
+  const { eventId, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
@@ -193,16 +193,20 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
             <EuiIcon type={HOST_ICON} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
-              css={css`
-                font-size: ${xsFontSize};
-                font-weight: ${euiTheme.font.weight.bold};
-              `}
-              onClick={goToEntitiesTab}
-            >
-              {hostName}
-            </EuiLink>
+            {!isPreviewMode ? (
+              <EuiLink
+                data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
+                css={css`
+                  font-size: ${xsFontSize};
+                  font-weight: ${euiTheme.font.weight.bold};
+                `}
+                onClick={goToEntitiesTab}
+              >
+                {hostName}
+              </EuiLink>
+            ) : (
+              <>{hostName}</>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

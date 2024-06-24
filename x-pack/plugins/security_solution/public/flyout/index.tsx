@@ -12,6 +12,7 @@ import {
   DocumentDetailsIsolateHostPanelKey,
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
+  DocumentDetailsPreviewPanelKey,
   DocumentDetailsAlertReasonPanelKey,
   DocumentDetailsRuleOverviewPanelKey,
 } from './document_details/shared/constants/panel_keys';
@@ -22,6 +23,7 @@ import type { DocumentDetailsProps } from './document_details/shared/types';
 import { DocumentDetailsProvider } from './document_details/shared/context';
 import { RightPanel } from './document_details/right';
 import { LeftPanel } from './document_details/left';
+import { PreviewPanel } from './document_details/preview';
 import type { AlertReasonPanelProps } from './document_details/alert_reason';
 import { AlertReasonPanel } from './document_details/alert_reason';
 import { AlertReasonPanelProvider } from './document_details/alert_reason/context';
@@ -55,6 +57,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => (
       <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
         <LeftPanel path={props.path as DocumentDetailsProps['path']} />
+      </DocumentDetailsProvider>
+    ),
+  },
+  {
+    key: DocumentDetailsPreviewPanelKey,
+    component: (props) => (
+      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+        <PreviewPanel path={props.path as DocumentDetailsProps['path']} />
       </DocumentDetailsProvider>
     ),
   },
