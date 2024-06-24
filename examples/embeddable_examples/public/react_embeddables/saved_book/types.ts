@@ -47,4 +47,4 @@ export interface BookRuntimeState
 
 export type BookApi = DefaultEmbeddableApi<BookSerializedState, BookRuntimeState> &
   HasEditCapabilities &
-  HasInPlaceLibraryTransforms;
+  HasInPlaceLibraryTransforms<BookRuntimeState>;

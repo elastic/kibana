@@ -7,12 +7,17 @@
 
 import { expect } from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingApi');
-  const supertest = getService('supertest');
+  const svlCommonApi = getService('svlCommonApi');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   const archives: Record<string, { data: string; savedObjects: string }> = {
     ecommerce: {
@@ -21,37 +26,49 @@ export default function ({ getService }: FtrProviderContext) {
     },
   };
 
-  describe('Data Stream', () => {
+  describe('Data Stream', function () {
+    // see details: https://github.com/elastic/kibana/issues/186648
+    this.tags(['failsOnMKI']);
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
 
       // for this test, we don't need to wait for the job to finish or verify the result
-      await reportingAPI.createReportJobInternal('csv_searchsource', {
-        browserTimezone: 'UTC',
-        objectType: 'search',
-        searchSource: {
-          index: '5193f870-d861-11e9-a311-0fa548c5f953',
-          query: { language: 'kuery', query: '' },
-          version: true,
+      await reportingAPI.createReportJobInternal(
+        'csv_searchsource',
+        {
+          browserTimezone: 'UTC',
+          objectType: 'search',
+          searchSource: {
+            index: '5193f870-d861-11e9-a311-0fa548c5f953',
+            query: { language: 'kuery', query: '' },
+            version: true,
+          },
+          title: 'Ecommerce Data',
+          version: '8.15.0',
         },
-        title: 'Ecommerce Data',
-        version: '8.15.0',
-      });
+        roleAuthc,
+        internalReqHeader
+      );
     });
 
     after(async () => {
-      await reportingAPI.deleteAllReports();
+      await reportingAPI.deleteAllReports(roleAuthc, internalReqHeader);
       await esArchiver.unload(archives.ecommerce.data);
       await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('uses the datastream configuration with set ILM policy', async () => {
-      const { body } = await supertest
+      const { status, body } = await supertestWithoutAuth
         .get(`/api/index_management/data_streams/.kibana-reporting`)
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'xxx')
-        .expect(200);
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader);
+
+      svlCommonApi.assertResponseStatusCode(200, status, body);
 
       expect(body).toEqual({
         _meta: {
@@ -72,12 +89,9 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ],
         lifecycle: { enabled: true },
-        maxTimeStamp: 0,
         nextGenerationManagedBy: 'Data stream lifecycle',
         privileges: { delete_index: true, manage_data_stream_lifecycle: true },
         timeStampField: { name: '@timestamp' },
-        storageSize: expect.any(String),
-        storageSizeBytes: expect.any(Number),
       });
     });
   });
