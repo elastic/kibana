@@ -7,6 +7,7 @@
 
 import React, { memo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { NotesList } from './notes_list';
 import { fetchNotesByDocumentId } from '../../../../notes/store/notes.slice';
 import { useDocumentDetailsContext } from '../../shared/context';
 
@@ -22,7 +23,7 @@ export const NotesDetails = memo(() => {
     dispatch(fetchNotesByDocumentId({ documentId: eventId }));
   }, [dispatch, eventId]);
 
-  return <></>;
+  return <NotesList eventId={eventId} />;
 });
 
 NotesDetails.displayName = 'NotesDetails';

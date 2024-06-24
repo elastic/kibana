@@ -20,7 +20,7 @@ export const fetchNotesByDocumentId = async (documentId: string) => {
 };
 
 // TODO remove when the API is available
-const generateNoteMock = (documentId: string) => ({
+export const generateNoteMock = (documentId: string) => ({
   noteId: uuid.v4(),
   version: 'WzU1MDEsMV0=',
   timelineId: '',
