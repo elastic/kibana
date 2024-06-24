@@ -6,7 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AgentTypeVendorLogo } from './agent_type_vendor_logo';
@@ -30,6 +37,8 @@ interface HeaderAgentInfoProps {
 
 export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
   ({ platform, hostName, lastCheckin, agentType, children }) => {
+    const { euiTheme } = useEuiTheme();
+
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -67,7 +76,7 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
         </EuiFlexItem>
 
         {agentType && (
-          <EuiFlexItem>
+          <EuiFlexItem css={{ paddingLeft: euiTheme.size.l }}>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem>
                 <EuiText color="subdued" size="s" data-test-subj="responderHeaderIntegrationLabel">
@@ -75,7 +84,7 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFlexGroup responsive={false} wrap={false} gutterSize="xs">
+                <EuiFlexGroup responsive={false} wrap={false} gutterSize="xs" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <AgentTypeVendorLogo agentType={agentType} />
                   </EuiFlexItem>
