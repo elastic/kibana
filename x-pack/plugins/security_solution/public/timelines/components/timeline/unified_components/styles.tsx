@@ -56,6 +56,12 @@ export const StyledMainEuiPanel = styled(EuiPanel).attrs(({ className = '' }) =>
   height: 100%;
 `;
 
+export const leadingActionsColumnStyles = `
+  .udtTimeline .euiDataGridRowCell--controlColumn:nth-child(3) .euiDataGridRowCell__content {
+    padding: 0;
+  }
+`;
+
 export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = '' }) => ({
   className: `unifiedDataTable ${className}`,
   role: 'rowgroup',
@@ -167,6 +173,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     display: flex;
     align-items: baseline;
   }
+
+  ${leadingActionsColumnStyles}
 `;
 
 export const UnifiedTimelineGlobalStyles = createGlobalStyle`
