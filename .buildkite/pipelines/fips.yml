@@ -1,6 +1,6 @@
 env:
   DISABLE_CI_STATS_SHIPPING: 'true'
-  FTR_ENABLE_FIPS_AGENT: 'true'
+  KBN_ENABLE_FIPS: 'true'
   TEST_BROWSER_HEADLESS: 1
   # TODO: remove
   KIBANA_BUILD_ID: '01904a8a-fb5d-4e75-9e51-6e1caf21fb1c'
