@@ -241,6 +241,15 @@ export type InferenceServiceSettings =
       };
     }
   | {
+      service: 'googleaistudio';
+      service_settings: {
+        model_id: string;
+        rate_limit: {
+          requests_per_minute: number;
+        };
+      };
+    }
+  | {
       service: 'hugging_face';
       service_settings: {
         api_key: string;
