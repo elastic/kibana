@@ -241,10 +241,6 @@ export const policyFactoryWithoutPaidFeatures = (
         reputation_service: false,
         supported: false,
       },
-      antivirus_registration: {
-        mode: AntivirusRegistrationModes.disabled,
-        enabled: false,
-      },
       attack_surface_reduction: {
         credential_hardening: {
           enabled: false,
