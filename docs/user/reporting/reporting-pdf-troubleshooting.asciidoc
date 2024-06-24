@@ -13,7 +13,7 @@ For more advice about common problems, refer to <<reporting-troubleshooting>>.
 === Reporting diagnostics
 Reporting comes with a built-in utility to try to automatically find common issues.
 When {kib} is running, navigate to the *Report Listing* page, and click *Run reporting diagnostics*.
-This will open up a diagnostic tool that checks various parts of the {kib} deployment and come up with any relevant recommendations.
+This will open up a diagnostic tool that checks various parts of the {kib} deployment and comes up with any relevant recommendations.
 
 If the diagnostic information doesn't reveal the problem, you can troubleshoot further by starting the Kibana server with an environment variable for revealing additional debugging logs.
 Refer to <<reporting-troubleshooting-puppeteer-debug-logs>>.
@@ -33,7 +33,7 @@ Refer to <<install-reporting-packages>>.
 
 Chromium uses sandboxing techniques that are built on top of operating system primitives.
 The Linux sandbox depends on user namespaces, which were introduced with the 3.8 Linux kernel.
-However, many distributions don't have user namespaces enabled by default, or they require the CAP_SYS_ADMIN capability.
+However, many distributions don't have user namespaces enabled by default or they require the CAP_SYS_ADMIN capability.
 If the sandbox is not explicitly disabled in Kibana, either based on operating system detection or with the `xpack.screenshotting.browser.chromium.disableSandbox` setting, Chrome will try to enable the sandbox.
 If it fails due to operating system or permissions restrictions, Chrome will crash during initialization.
 

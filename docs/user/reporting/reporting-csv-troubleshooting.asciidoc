@@ -42,7 +42,7 @@ Internally, the feature uses the {ref}/point-in-time-api.html[Point in time API 
 `search_after` parameters in the queries] to do so.
 There are some limitations related to the point in time API:
 
-1. Permissions to read data aliases alone will not work: the permissions are needed on the underlying indices or datastreams.
+1. Permissions to read data aliases alone will not work: the permissions are needed on the underlying indices or data streams.
 2. In cases where data shards are unavailable or time out, the export will be empty rather than returning partial data.
 
 Some users may benefit from using the {ref}/paginate-search-results.html#scroll-search-results[scroll API], an
