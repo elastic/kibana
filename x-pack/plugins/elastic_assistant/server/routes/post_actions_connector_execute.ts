@@ -165,6 +165,8 @@ export const postActionsConnectorExecuteRoute = (
 
           return await langChainExecute({
             abortSignal,
+            isStream: request.body.subAction !== 'invokeAI',
+            isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
             actionsClient,
             actionTypeId,
             connectorId,

@@ -320,6 +320,8 @@ export const nonLangChainExecute = async ({
 export interface LangChainExecuteParams {
   messages: Array<Pick<Message, 'content' | 'role'>>;
   replacements: Replacements;
+  isEnabledKnowledgeBase: boolean;
+  isStream?: boolean;
   onNewReplacements: (newReplacements: Replacements) => void;
   abortSignal: AbortSignal;
   telemetry: AnalyticsServiceSetup;
@@ -344,6 +346,7 @@ export const langChainExecute = async ({
   messages,
   replacements,
   onNewReplacements,
+  isEnabledKnowledgeBase,
   abortSignal,
   telemetry,
   actionTypeId,
@@ -357,10 +360,11 @@ export const langChainExecute = async ({
   getElser,
   response,
   responseLanguage,
+  isStream = true,
 }: LangChainExecuteParams) => {
   // TODO: Add `traceId` to actions request when calling via langchain
   logger.debug(
-    `Executing via langchain, isEnabledKnowledgeBase: ${request.body.isEnabledKnowledgeBase}, isEnabledRAGAlerts: ${request.body.isEnabledRAGAlerts}`
+    `Executing via langchain, isEnabledKnowledgeBase: ${isEnabledKnowledgeBase}, isEnabledRAGAlerts: ${request.body.isEnabledRAGAlerts}`
   );
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
@@ -418,13 +422,13 @@ export const langChainExecute = async ({
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
     actionsClient,
-    isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
+    isEnabledKnowledgeBase,
     assistantTools,
     conversationId,
     connectorId,
     esClient,
     esStore,
-    isStream: request.body.subAction !== 'invokeAI',
+    isStream,
     llmType: getLlmType(actionTypeId),
     langChainMessages,
     logger,
@@ -454,12 +458,12 @@ export const langChainExecute = async ({
 
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
-    isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? true,
+    isEnabledKnowledgeBase,
     isEnabledRAGAlerts: request.body.isEnabledRAGAlerts ?? true,
     model: request.body.model,
     // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
     // tracked here: https://github.com/elastic/security-team/issues/7363
-    assistantStreamingEnabled: request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
+    assistantStreamingEnabled: isStream && actionTypeId === '.gen-ai',
   });
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };

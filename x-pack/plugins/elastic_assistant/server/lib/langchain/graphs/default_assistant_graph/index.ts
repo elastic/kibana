@@ -80,7 +80,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
     : undefined;
 
-  const messages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
 
   const modelExists = await esStore.isModelInstalled();

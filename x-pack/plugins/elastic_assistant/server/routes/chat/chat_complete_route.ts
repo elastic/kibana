@@ -100,44 +100,54 @@ export const chatCompleteRoute = (
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
-          const actionTypeId =
-            (await actionsClient.getAllSystemConnectors()).find((c) => c.id === connectorId)
-              ?.actionTypeId ?? '.gen-ai';
+          const connectors = await actionsClient.getBulk({ ids: [connectorId] });
+          const actionTypeId = connectors.length > 0 ? connectors[0].actionTypeId : '.gen-ai';
 
-          if (request.body.messages) {
-            // replacements
-            const anonymizationFieldsRes =
-              await anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
-                perPage: 1000,
-                page: 1,
-              });
-
-            const anonymizationFields = anonymizationFieldsRes
-              ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
-              : undefined;
-
-            // anonymize messages before sending to LLM
-            messages = request.body.messages.map((m) => {
-              let content = m.content ?? '';
-              if (m.data && m.data.length > 0) {
-                const anonymizedData = transformRawData({
-                  anonymizationFields,
-                  currentReplacements: latestReplacements,
-                  getAnonymizedValue,
-                  onNewReplacements,
-                  rawData: m.data as unknown as Record<string, unknown[]>,
-                });
-                const wr = `${SYSTEM_PROMPT_CONTEXT_NON_I18N(anonymizedData)}\n`;
-
-                content = `${wr}\n${m.content}`;
-              }
-              const transformedMessage = {
-                role: m.role,
-                content,
-              };
-              return transformedMessage;
+          // replacements
+          const anonymizationFieldsRes =
+            await anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
+              perPage: 1000,
+              page: 1,
             });
-          }
+
+          let anonymizationFields = anonymizationFieldsRes
+            ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
+            : undefined;
+
+          // anonymize messages before sending to LLM
+          messages = request.body.messages.map((m) => {
+            let content = m.content ?? '';
+            if (m.data && m.data.length > 0) {
+              // includes/anonymize fields from the messages data
+              if (m.fields_to_anonymize && m.fields_to_anonymize.length > 0) {
+                anonymizationFields = anonymizationFields?.map((a) => {
+                  if (m.fields_to_anonymize?.includes(a.field)) {
+                    return {
+                      ...a,
+                      allowed: true,
+                      anonymized: true,
+                    };
+                  }
+                  return a;
+                });
+              }
+              const anonymizedData = transformRawData({
+                anonymizationFields,
+                currentReplacements: latestReplacements,
+                getAnonymizedValue,
+                onNewReplacements,
+                rawData: m.data as unknown as Record<string, unknown[]>,
+              });
+              const wr = `${SYSTEM_PROMPT_CONTEXT_NON_I18N(anonymizedData)}\n`;
+
+              content = `${wr}\n${m.content}`;
+            }
+            const transformedMessage = {
+              role: m.role,
+              content,
+            };
+            return transformedMessage;
+          });
 
           // Fetch any tools registered by the request's originating plugin
           const pluginName = getPluginNameFromRequest({
@@ -193,9 +203,12 @@ export const chatCompleteRoute = (
 
           return await langChainExecute({
             abortSignal,
+            isEnabledKnowledgeBase: true,
+            isStream: false,
             actionsClient,
             actionTypeId,
             connectorId,
+            conversationId,
             context,
             getElser,
             logger,
