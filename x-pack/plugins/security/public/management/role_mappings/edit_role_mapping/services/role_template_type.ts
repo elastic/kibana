@@ -17,6 +17,7 @@ export function isStoredRoleTemplate(
 ): roleMappingTemplate is StoredRoleTemplate {
   return (
     roleMappingTemplate.template != null &&
+    typeof roleMappingTemplate.template === 'object' &&
     Object.hasOwn(roleMappingTemplate.template, 'id') &&
     typeof (roleMappingTemplate as unknown as StoredRoleTemplate).template.id === 'string'
   );
@@ -27,6 +28,7 @@ export function isInlineRoleTemplate(
 ): roleMappingTemplate is InlineRoleTemplate {
   return (
     roleMappingTemplate.template != null &&
+    typeof roleMappingTemplate.template === 'object' &&
     Object.hasOwn(roleMappingTemplate.template, 'source') &&
     typeof (roleMappingTemplate as unknown as InlineRoleTemplate).template.source === 'string'
   );
