@@ -46,14 +46,14 @@ export const getPrivilegeDeprecationsService = ({
         context.esClient.asCurrentUser.security.getRole(),
       ]);
       kibanaRoles = Object.entries(elasticsearchRoles).map(([roleName, elasticsearchRole]) =>
-        transformElasticsearchRoleToRole(
+        transformElasticsearchRoleToRole({
           features,
           // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
           elasticsearchRole,
-          roleName,
-          authz.applicationName,
-          logger
-        )
+          name: roleName,
+          application: authz.applicationName,
+          logger,
+        })
       );
     } catch (e) {
       const statusCode = getErrorStatusCode(e);

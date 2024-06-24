@@ -1013,6 +1013,17 @@ Array [
     },
     "privilegeId": "all",
   },
+  Object {
+    "privilege": Object {
+      "disabled": true,
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
 ]
 `;
 
@@ -1634,6 +1645,17 @@ Array [
       ],
     },
     "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "disabled": true,
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
   },
 ]
 `;

@@ -15,11 +15,15 @@ export class RolesAPIClient {
   constructor(private readonly http: HttpStart) {}
 
   public getRoles = async () => {
-    return await this.http.get<Role[]>('/api/security/role');
+    return await this.http.get<Role[]>('/api/security/role', {
+      query: { replaceDeprecatedPrivileges: true },
+    });
   };
 
   public getRole = async (roleName: string) => {
-    return await this.http.get<Role>(`/api/security/role/${encodeURIComponent(roleName)}`);
+    return await this.http.get<Role>(`/api/security/role/${encodeURIComponent(roleName)}`, {
+      query: { replaceDeprecatedPrivileges: true },
+    });
   };
 
   public deleteRole = async (roleName: string) => {
