@@ -88,6 +88,11 @@ export type BulkUpdateResult = Result<
   { type: string; id: string; error: SavedObjectError }
 >;
 
+export type PartialBulkUpdateResult = Result<
+  PartialConcreteTaskInstance,
+  { type: string; id: string; error: estypes.ErrorCause }
+>;
+
 export type BulkGetResult = Array<
   Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
 >;
@@ -101,6 +106,13 @@ export interface UpdateByQueryResult {
 interface SerializedConcreteTaskInstanceWithPartition extends SerializedConcreteTaskInstance {
   partition: number;
 }
+
+export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
+  id: ConcreteTaskInstance['id'];
+};
+type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
+  id: SerializedConcreteTaskInstance['id'];
+};
 
 /**
  * Wraps an elasticsearch connection and provides a task manager-specific
@@ -295,6 +307,54 @@ export class TaskStore {
     );
     return this.taskValidator.getValidatedTaskInstanceFromReading(result, {
       validate: options.validate,
+    });
+  }
+
+  public async bulkPartialUpdate(
+    docs: PartialConcreteTaskInstance[]
+  ): Promise<PartialBulkUpdateResult[]> {
+    const bulkAttributes = [];
+    if (docs.length === 0) return [];
+    for (const doc of docs) {
+      const [seqNo, primaryTerm] = JSON.parse(atob(doc.version!));
+      bulkAttributes.push({
+        update: {
+          _id: `task:${doc.id}`,
+          if_seq_no: seqNo,
+          if_primary_term: primaryTerm,
+        },
+      });
+      bulkAttributes.push({
+        doc: {
+          task: partialTaskInstanceToAttributes(omit(doc, 'version')),
+        },
+      });
+    }
+
+    let result: estypes.BulkResponse;
+    try {
+      result = await this.esClient.bulk({
+        index: this.index,
+        refresh: false,
+        body: bulkAttributes,
+      });
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
+    return result.items.map((item) => {
+      if (item.update?.error) {
+        return asErr({
+          type: 'task',
+          id: item.update._id?.substring(5)!,
+          error: item.update.error,
+        });
+      }
+      return asOk({
+        ...docs.find((doc) => doc.id === item.update?._id?.substring(5))!,
+        version: btoa(`[${item.update?._seq_no},${item.update?._primary_term}]`),
+      });
     });
   }
 
@@ -646,6 +706,20 @@ function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInst
     runAt: (doc.runAt || new Date()).toISOString(),
     status: (doc as ConcreteTaskInstance).status || 'idle',
   } as SerializedConcreteTaskInstance;
+}
+
+function partialTaskInstanceToAttributes(
+  doc: PartialConcreteTaskInstance
+): PartialSerializedConcreteTaskInstance {
+  return {
+    ...omit(doc, 'id', 'version'),
+    ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
+    ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
+    ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),
+    ...(doc.startedAt ? { startedAt: doc.startedAt.toISOString() } : {}),
+    ...(doc.retryAt ? { retryAt: doc.retryAt.toISOString() } : {}),
+    ...(doc.runAt ? { runAt: doc.runAt.toISOString() } : {}),
+  } as PartialSerializedConcreteTaskInstance;
 }
 
 export function savedObjectToConcreteTaskInstance(

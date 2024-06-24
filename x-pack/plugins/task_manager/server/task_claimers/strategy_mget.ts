@@ -15,7 +15,6 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
-import { omit } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import apm from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
@@ -37,6 +36,7 @@ import {
 import { TaskClaim } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../queries/query_clauses';
 import { TaskPartitioner } from '../lib/task_partitioner';
+import type { PartialConcreteTaskInstance } from '../task_store';
 
 import {
   IdleTaskWithExpiredRunAt,
@@ -151,11 +151,12 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
     const candidateTasks = applyLimitedConcurrency(currentTasks, batches);
     const now = new Date();
-    const taskUpdates: ConcreteTaskInstance[] = Array.from(candidateTasks)
+    const taskUpdates: PartialConcreteTaskInstance[] = Array.from(candidateTasks)
       .slice(0, initialCapacity)
       .map((task) => {
         return {
-          ...omit(task, 'enabled'),
+          id: task.id,
+          version: task.version,
           status: TaskStatus.Running,
           startedAt: now,
           attempts: task.attempts + 1,
@@ -178,10 +179,16 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     const finalResults: ConcreteTaskInstance[] = [];
     let conflicts = staleTasks.size;
     try {
-      const updateResults = await taskStore.bulkUpdate(taskUpdates, { validate: false });
+      const updateResults = await taskStore.bulkPartialUpdate(taskUpdates);
       for (const updateResult of updateResults) {
         if (isOk(updateResult)) {
-          finalResults.push(updateResult.value);
+          const originalTask = Array.from(candidateTasks).find(
+            (task) => task.id === updateResult.value.id
+          );
+          finalResults.push({
+            ...originalTask,
+            ...updateResult.value,
+          } as ConcreteTaskInstance);
         } else {
           conflicts++;
           const { id, type, error } = updateResult.error;
