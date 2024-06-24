@@ -81,16 +81,28 @@ export const usePollApi = ({
       setApproximateFutureTime(
         moment(responseData.updatedAt).add(responseData.averageIntervalMs, 'milliseconds').toDate()
       );
-      setData({
-        ...responseData,
-        connectorId,
-        attackDiscoveries: responseData.attackDiscoveries.map((attackDiscovery) => ({
-          ...attackDiscovery,
-          id: attackDiscovery.id ?? uuid.v4(),
-          detailsMarkdown: replaceNewlineLiterals(attackDiscovery.detailsMarkdown),
-          entitySummaryMarkdown: replaceNewlineLiterals(attackDiscovery.entitySummaryMarkdown),
-          summaryMarkdown: replaceNewlineLiterals(attackDiscovery.summaryMarkdown),
-        })),
+      setData((prevData) => {
+        if (
+          responseData.updatedAt === prevData?.updatedAt &&
+          responseData.status === prevData?.status &&
+          responseData.id === prevData?.id
+        ) {
+          // do not update if the data is the same
+          // prevents unnecessary re-renders
+          return prevData;
+        }
+
+        return {
+          ...responseData,
+          connectorId,
+          attackDiscoveries: responseData.attackDiscoveries.map((attackDiscovery) => ({
+            ...attackDiscovery,
+            id: attackDiscovery.id ?? uuid.v4(),
+            detailsMarkdown: replaceNewlineLiterals(attackDiscovery.detailsMarkdown),
+            entitySummaryMarkdown: replaceNewlineLiterals(attackDiscovery.entitySummaryMarkdown),
+            summaryMarkdown: replaceNewlineLiterals(attackDiscovery.summaryMarkdown),
+          })),
+        };
       });
     },
     [connectorId, setApproximateFutureTime]
