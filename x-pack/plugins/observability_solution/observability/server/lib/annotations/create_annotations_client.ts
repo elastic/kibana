@@ -50,6 +50,7 @@ export function createAnnotationsClient(params: {
   }
 
   return {
+    index,
     create: ensureGoldLicense(
       async (
         createParams: CreateAnnotationParams
