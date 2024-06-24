@@ -134,6 +134,7 @@ describe('When using processes action from response actions console', () => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/1.2.3',
     });
+    pendingDetailResponse.data.command = 'running-processes';
     pendingDetailResponse.data.wasSuccessful = false;
     pendingDetailResponse.data.errors = ['error one', 'error two'];
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
@@ -194,6 +195,7 @@ describe('When using processes action from response actions console', () => {
       const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
         path: '/api/endpoint/action/1.2.3',
       });
+      pendingDetailResponse.data.command = 'running-processes';
       pendingDetailResponse.data.isCompleted = false;
       apiMocks.responseProvider.actionDetails.mockClear();
       apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
