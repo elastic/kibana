@@ -26,8 +26,6 @@ import {
   FLEET_SETUP_LOCK_TYPE,
 } from '../constants';
 
-import { migratePackagePolicyToV8150 } from './migrations/security_solution/to_v8_15_0';
-
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
 import {
@@ -88,7 +86,10 @@ import {
   migratePackagePolicyEvictionsFromV81102,
 } from './migrations/security_solution/to_v8_11_0_2';
 import { settingsV1 } from './model_versions/v1';
-import { packagePolicyV10OnWriteScanFix } from './model_versions/security_solution';
+import {
+  packagePolicyV13AdvancedFields,
+  packagePolicyV10OnWriteScanFix,
+} from './model_versions/security_solution';
 import {
   migratePackagePolicyIdsToV8150,
   migratePackagePolicySetRequiresRootToV8150,
@@ -617,7 +618,7 @@ export const getSavedObjectTypes = (
           changes: [
             {
               type: 'data_backfill',
-              backfillFn: migratePackagePolicyToV8150,
+              backfillFn: packagePolicyV13AdvancedFields,
             },
           ],
         },

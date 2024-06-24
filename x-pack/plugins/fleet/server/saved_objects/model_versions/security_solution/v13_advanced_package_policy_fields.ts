@@ -12,7 +12,7 @@ import type {
 
 import type { PackagePolicy } from '../../../../common';
 
-export const migratePackagePolicyToV8150: SavedObjectModelDataBackfillFn<
+export const packagePolicyV13AdvancedFields: SavedObjectModelDataBackfillFn<
   PackagePolicy,
   PackagePolicy
 > = (packagePolicyDoc) => {
