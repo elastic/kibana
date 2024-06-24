@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { LlmProxy } from '../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext) {
@@ -73,17 +72,11 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('create-connector-flyout');
       },
 
-      async createOpenAIConnector(proxy: LlmProxy) {
-        await testSubjects.click('.gen-ai-card');
-        await testSubjects.setValue('nameInput', 'myConnector');
-        await testSubjects.setValue('config.apiUrl-input', `http://localhost:${proxy.getPort()}`);
-        await testSubjects.setValue('secrets.apiKey-input', 'myApiKey');
-
-        await testSubjects.click('create-connector-flyout-save-btn');
-      },
-
-      async expectAddedConnectorCallout() {
-        await testSubjects.existOrFail('addedConnectorCallout');
+      async expectHideGenAIPanelConnectorAfterCreatingConnector(
+        createConnector: () => Promise<void>
+      ) {
+        await createConnector();
+        await browser.refresh();
         await testSubjects.missingOrFail('connectToLLMChatPanel');
       },
 

@@ -42,8 +42,17 @@ export default function (ftrContext: FtrProviderContext) {
     }
   }
 
+  let proxy: LlmProxy;
+  let removeOpenAIConnector: () => Promise<void>;
+  const createConnector = async () => {
+    removeOpenAIConnector = await createOpenAIConnector({
+      supertest,
+      requestHeader: commonAPI.getCommonRequestHeader(),
+      proxy,
+    });
+  };
+
   describe('Playground', () => {
-    let proxy: LlmProxy;
     before(async () => {
       await deleteConnectors();
       proxy = await createLlmProxy(log);
@@ -64,14 +73,6 @@ export default function (ftrContext: FtrProviderContext) {
       });
 
       describe('with gen ai connectors', () => {
-        let removeOpenAIConnector: () => Promise<void>;
-        const createConnector = async () => {
-          removeOpenAIConnector = await createOpenAIConnector({
-            supertest,
-            requestHeader: commonAPI.getCommonRequestHeader(),
-          });
-        };
-
         before(async () => {
           await createConnector();
           await browser.refresh();
@@ -93,8 +94,9 @@ export default function (ftrContext: FtrProviderContext) {
 
         it('creates a connector successfully', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenConnectorPagePlayground();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.createOpenAIConnector(proxy);
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectAddedConnectorCallout();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectHideGenAIPanelConnectorAfterCreatingConnector(
+            createConnector
+          );
         });
       });
 
