@@ -17,7 +17,7 @@ export const entityDefinition = entityDefinitionSchema.parse({
   },
   identityFields: ['log.logger', { field: 'event.category', optional: true }],
   displayNameTemplate: '{{log.logger}}{{#event.category}}:{{.}}{{/event.category}}',
-  metadata: ['tags', 'host.name'],
+  metadata: ['tags', 'host.name', 'host.os.name'],
   metrics: [
     {
       name: 'logRate',
