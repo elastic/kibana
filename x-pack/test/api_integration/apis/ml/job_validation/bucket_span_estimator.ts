@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       requestBody: {
         aggTypes: ['avg'],
-        duration: { start: 1689205536000, end: 1689205536000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         fields: ['taxless_total_price'],
         index: 'ft_ecommerce',
         query: { bool: { must: [{ match_all: {} }] } },
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       requestBody: {
         aggTypes: ['avg'],
-        duration: { start: 1689205536000, end: 1689205536000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         fields: ['taxless_total_price'],
         filters: [],
         index: 'ft_ecommerce',
