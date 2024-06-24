@@ -5,20 +5,38 @@
  * 2.0.
  */
 
-import { INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH } from '@kbn/alerting-plugin/common';
 import { act, renderHook } from '@testing-library/react-hooks';
 import moment from 'moment';
 import { useKibana } from '../../../common/lib/kibana';
+import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../../common/mock';
 import { useScheduleRuleRun } from './use_schedule_rule_run';
 
-jest.mock('../../../common/lib/kibana');
+const mockUseScheduleRuleRunMutation = jest.fn();
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+jest.mock('../../../common/lib/kibana');
+jest.mock('../api/hooks/use_schedule_rule_run_mutation', () => ({
+  useScheduleRuleRunMutation: () => {
+    return {
+      mutateAsync: mockUseScheduleRuleRunMutation,
+    };
+  },
+}));
+
+const mockedUseKibana = {
+  ...mockUseKibana(),
+  services: {
+    ...mockUseKibana().services,
+    telemetry: {
+      reportManualRuleRunExecute: jest.fn(),
+    },
+  },
+};
 
 describe('When using the `useScheduleRuleRun()` hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
   });
 
   it('should send schedule rule run request', async () => {
@@ -31,12 +49,14 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
       result.current.scheduleRuleRun({ ruleIds: ['rule-1'], timeRange });
     });
 
-    await waitFor(() => (useKibanaMock().services.http.fetch as jest.Mock).mock.calls.length > 0);
+    await waitFor(() => {
+      return mockUseScheduleRuleRunMutation.mock.calls.length > 0;
+    });
 
-    expect(useKibanaMock().services.http.fetch).toHaveBeenCalledWith(
-      INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH,
+    expect(mockUseScheduleRuleRunMutation).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: `[{"rule_id":"rule-1","start":"${timeRange.startDate.toISOString()}","end":"${timeRange.endDate.toISOString()}"}]`,
+        ruleIds: ['rule-1'],
+        timeRange,
       })
     );
   });
