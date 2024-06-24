@@ -10,7 +10,7 @@ import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import type { Space } from '../../../common';
 
 export const migrateTo660 = (doc: SavedObjectUnsanitizedDoc<Space>) => {
-  if (!doc.attributes.hasOwnProperty('disabledFeatures')) {
+  if (!Object.hasOwn(doc.attributes, 'disabledFeatures')) {
     doc.attributes.disabledFeatures = [];
   }
   return doc;

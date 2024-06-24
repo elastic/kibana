@@ -110,7 +110,7 @@ export const useDeleteTransforms = () => {
     onSuccess: (results) => {
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
-        if (results.hasOwnProperty(transformId)) {
+        if (Object.hasOwn(results, transformId)) {
           const status = results[transformId];
           const destinationIndex = status.destinationIndex;
 

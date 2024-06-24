@@ -651,10 +651,10 @@ function _generateMappings(
 
 function generateDynamicAndEnabled(field: Field) {
   const props: Properties = {};
-  if (field.hasOwnProperty('enabled')) {
+  if (Object.hasOwn(field, 'enabled')) {
     props.enabled = field.enabled;
   }
-  if (field.hasOwnProperty('dynamic')) {
+  if (Object.hasOwn(field, 'dynamic')) {
     props.dynamic = field.dynamic;
   }
   return props;
@@ -663,10 +663,10 @@ function generateDynamicAndEnabled(field: Field) {
 function generateNestedProps(field: Field) {
   const props = generateDynamicAndEnabled(field);
 
-  if (field.hasOwnProperty('include_in_parent')) {
+  if (Object.hasOwn(field, 'include_in_parent')) {
     props.include_in_parent = field.include_in_parent;
   }
-  if (field.hasOwnProperty('include_in_root')) {
+  if (Object.hasOwn(field, 'include_in_root')) {
     props.include_in_root = field.include_in_root;
   }
   return props;

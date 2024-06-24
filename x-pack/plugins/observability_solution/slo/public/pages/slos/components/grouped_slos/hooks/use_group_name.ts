@@ -54,7 +54,7 @@ export function useGroupName(groupBy: GroupByField, group: string, summary?: Gro
 
 function flattenObject(obj: Record<string, any>, parentKey = '', result: Record<string, any> = {}) {
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.hasOwn(obj, key)) {
       const newKey = parentKey ? `${parentKey}.${key}` : key;
       if (typeof obj[key] === 'object' && obj[key] !== null) {
         flattenObject(obj[key], newKey, result);

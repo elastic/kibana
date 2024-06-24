@@ -16,6 +16,6 @@ export const apiHasExecutionContext = (
   unknownApi: null | unknown
 ): unknownApi is HasExecutionContext => {
   return Boolean(
-    unknownApi && typeof unknownApi === 'object' && unknownApi.hasOwnProperty('executionContext')
+    unknownApi && typeof unknownApi === 'object' && Object.hasOwn(unknownApi, 'executionContext')
   );
 };

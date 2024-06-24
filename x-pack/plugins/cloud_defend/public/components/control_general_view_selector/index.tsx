@@ -141,7 +141,7 @@ const StringArrayCondition = ({
       label={label}
       fullWidth={true}
       key={prop}
-      isInvalid={!!errorMap.hasOwnProperty(prop)}
+      isInvalid={!!Object.hasOwn(errorMap, prop)}
     >
       <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem>
@@ -216,7 +216,7 @@ export const ControlGeneralViewSelector = ({
   const availableConditions = useMemo(() => getSelectorConditions(selector.type), [selector]);
 
   const remainingConditions = useMemo(() => {
-    return availableConditions.filter((condition) => !selector.hasOwnProperty(condition));
+    return availableConditions.filter((condition) => !Object.hasOwn(selector, condition));
   }, [availableConditions, selector]);
 
   const conditionsAdded = useMemo(() => {
@@ -462,14 +462,14 @@ export const ControlGeneralViewSelector = ({
         <EuiFormRow
           label={i18n.name}
           fullWidth={true}
-          isInvalid={!!errorMap.hasOwnProperty('name')}
+          isInvalid={!!Object.hasOwn(errorMap, 'name')}
         >
           <EuiFieldText
             fullWidth={true}
             name="name"
             value={selector.name}
             onChange={onNameChange}
-            isInvalid={errorMap.hasOwnProperty('name')}
+            isInvalid={Object.hasOwn(errorMap, 'name')}
             data-test-subj="cloud-defend-selectorcondition-name"
             maxLength={MAX_SELECTOR_NAME_LENGTH}
           />

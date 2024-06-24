@@ -407,9 +407,9 @@ export class DataVisualizer {
       };
 
       let cardinalityField: AggCardinality;
-      if (datafeedConfig?.script_fields?.hasOwnProperty(field)) {
+      if (Object.hasOwn(datafeedConfig?.script_fields ?? {}, field)) {
         cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
-          cardinality: { script: datafeedConfig?.script_fields[field].script },
+          cardinality: { script: datafeedConfig?.script_fields![field].script },
         };
       } else {
         cardinalityField = {
@@ -473,8 +473,8 @@ export class DataVisualizer {
         });
       } else {
         if (
-          datafeedConfig?.script_fields?.hasOwnProperty(field) ||
-          datafeedConfig?.runtime_mappings?.hasOwnProperty(field)
+          Object.hasOwn(datafeedConfig?.script_fields ?? {}, field) ||
+          Object.hasOwn(datafeedConfig?.runtime_mappings ?? {}, field)
         ) {
           const cardinality = get(
             aggregations,
