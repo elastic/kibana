@@ -7,12 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import {
-  Connector,
-  FeatureName,
-  IngestPipelineParams,
-  IngestionMethod,
-} from '@kbn/search-connectors';
+import { Connector, IngestPipelineParams, IngestionMethod } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -30,6 +25,8 @@ import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_ind
 import { ElasticsearchViewIndex } from '../../types';
 
 import {
+  hasAdvancedFilteringFeature,
+  hasBasicFilteringFeature,
   hasDocumentLevelSecurityFeature,
   hasIncrementalSyncFeature,
 } from '../../utils/connector_helpers';
@@ -176,19 +173,11 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     ],
     hasAdvancedFilteringFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features
-          ? connector.features[FeatureName.SYNC_RULES]?.advanced?.enabled ??
-            connector.features[FeatureName.FILTERING_ADVANCED_CONFIG]
-          : false,
+      (connector?: Connector) => hasAdvancedFilteringFeature(connector),
     ],
     hasBasicFilteringFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features
-          ? connector.features[FeatureName.SYNC_RULES]?.basic?.enabled ??
-            connector.features[FeatureName.FILTERING_RULES]
-          : false,
+      (connector?: Connector) => hasBasicFilteringFeature(connector),
     ],
     hasDocumentLevelSecurityFeature: [
       () => [selectors.connector],

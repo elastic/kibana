@@ -37,13 +37,12 @@ import {
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
+import { generateConfig } from '../../lib/connectors/generate_config';
 import { startSync } from '../../lib/connectors/start_sync';
-import { createIndex } from '../../lib/indices/create_index';
 import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
 import { fetchUnattachedIndices } from '../../lib/indices/fetch_unattached_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
-import { generatedIndexName } from '../../lib/indices/generate_index_name';
 import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
@@ -786,7 +785,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       const { connectorId } = request.params;
 
-      let generatedName;
+      let associatedIndex;
       let apiKeyResponse;
       try {
         const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
@@ -806,25 +805,10 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           });
         }
 
-        generatedName = await generatedIndexName(
-          client,
-          connector.name || connector.service_type || 'my-connector'
-        );
-
-        await createIndex(client, generatedName, connector.language, true);
-
-        await client.asCurrentUser.transport.request({
-          body: {
-            index_name: generatedName,
-          },
-          method: 'PUT',
-          path: `/_connector/${connectorId}/_index_name`,
-        });
-
-        await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
-        apiKeyResponse = await generateApiKey(client, generatedName, connector.is_native);
+        const configResponse = await generateConfig(client, connector);
+        associatedIndex = configResponse.associatedIndex;
+        apiKeyResponse = configResponse.apiKeyResponse;
       } catch (error) {
-        // replace with generate error code
         if (error.message === ErrorCode.GENERATE_INDEX_NAME_ERROR) {
           createError({
             errorCode: ErrorCode.GENERATE_INDEX_NAME_ERROR,
@@ -845,7 +829,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         body: {
           apiKey: apiKeyResponse,
           connectorId,
-          indexName: generatedName,
+          indexName: associatedIndex,
         },
         headers: { 'content-type': 'application/json' },
       });

@@ -253,9 +253,7 @@ export const ConnectorDeployment: React.FC = () => {
                               fill
                               iconType="sparkles"
                               onClick={() => {
-                                if (!index) {
-                                  generateConfiguration({ connectorId: connector.id });
-                                }
+                                generateConfiguration({ connectorId: connector.id });
                               }}
                             >
                               {i18n.translate(
