@@ -28,6 +28,7 @@ export const EndpointStatusActionResult = memo<
       apiCalled?: boolean;
       endpointDetails?: HostInfo;
       detailsFetchError?: IHttpFetchError;
+      // FIXME:PT remove this and use new API/TYpe (team issue: 9783)
       endpointPendingActions?: PendingActionsResponse;
     },
     EndpointCommandDefinitionMeta
