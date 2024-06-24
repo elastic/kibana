@@ -43,7 +43,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Machine Learning Detection Rules - Creation',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
