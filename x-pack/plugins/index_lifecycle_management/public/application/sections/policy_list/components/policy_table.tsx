@@ -12,7 +12,6 @@ import {
   EuiInMemoryTable,
   EuiToolTip,
   EuiButtonIcon,
-  EuiBadge,
   EuiFlexItem,
   EuiSwitch,
   EuiSearchBarProps,
@@ -30,12 +29,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useStateWithLocalStorage } from '../../../lib/settings_local_storage';
 import { PolicyFromES } from '../../../../../common/types';
 import { useKibana } from '../../../../shared_imports';
-import { getIndicesListPath, getPolicyEditPath } from '../../../services/navigation';
+import {
+  getIndicesListPath,
+  getPolicyEditPath,
+  getPolicyViewPath,
+} from '../../../services/navigation';
 import { trackUiMetric } from '../../../services/ui_metric';
+import { UIM_EDIT_CLICK, UIM_VIEW_CLICK } from '../../../constants';
 
-import { UIM_EDIT_CLICK } from '../../../constants';
 import { hasLinkedIndices } from '../../../lib/policies';
 import { usePolicyListContext } from '../policy_list_context';
+import { ManagedPolicyBadge, DeprecatedPolicyBadge } from '.';
 
 const actionTooltips = {
   deleteEnabled: i18n.translate('xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonText', {
@@ -58,39 +62,14 @@ const actionTooltips = {
   ),
 };
 
-const managedPolicyTooltips = {
-  badge: i18n.translate('xpack.indexLifecycleMgmt.policyTable.templateBadgeType.managedLabel', {
-    defaultMessage: 'Managed',
-  }),
-  badgeTooltip: i18n.translate(
-    'xpack.indexLifecycleMgmt.policyTable.templateBadgeType.managedDescription',
-    {
-      defaultMessage:
-        'This policy is preconfigured and managed by Elastic; editing or deleting this policy might break Kibana.',
-    }
-  ),
-};
-
-const deprecatedPolicyTooltips = {
-  badge: i18n.translate('xpack.indexLifecycleMgmt.policyTable.templateBadgeType.deprecatedLabel', {
-    defaultMessage: 'Deprecated',
-  }),
-  badgeTooltip: i18n.translate(
-    'xpack.indexLifecycleMgmt.policyTable.templateBadgeType.deprecatedDescription',
-    {
-      defaultMessage:
-        'This policy is no longer supported and might be removed in a future release. Instead, use one of the other policies available or create a new one.',
-    }
-  ),
-};
-
 interface Props {
   policies: PolicyFromES[];
+  isReadOnly: boolean;
 }
 
 const SHOW_MANAGED_POLICIES_BY_DEFAULT = 'ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT';
 
-export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
+export const PolicyTable: React.FunctionComponent<Props> = ({ policies, isReadOnly }) => {
   const [query, setQuery] = useState('');
 
   const history = useHistory();
@@ -176,8 +155,10 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
             <EuiLink
               className="eui-textBreakAll"
               data-test-subj="policyTablePolicyNameLink"
-              {...reactRouterNavigate(history, getPolicyEditPath(value), () =>
-                trackUiMetric(METRIC_TYPE.CLICK, UIM_EDIT_CLICK)
+              {...reactRouterNavigate(
+                history,
+                isReadOnly ? getPolicyViewPath(value) : getPolicyEditPath(value),
+                () => trackUiMetric(METRIC_TYPE.CLICK, isReadOnly ? UIM_VIEW_CLICK : UIM_EDIT_CLICK)
               )}
             >
               {value}
@@ -186,22 +167,14 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
             {isDeprecated && (
               <>
                 &nbsp;
-                <EuiToolTip content={deprecatedPolicyTooltips.badgeTooltip}>
-                  <EuiBadge color="warning" data-test-subj="deprecatedPolicyBadge">
-                    {deprecatedPolicyTooltips.badge}
-                  </EuiBadge>
-                </EuiToolTip>
+                <DeprecatedPolicyBadge />
               </>
             )}
 
             {isManaged && (
               <>
                 &nbsp;
-                <EuiToolTip content={managedPolicyTooltips.badgeTooltip}>
-                  <EuiBadge color="hollow" data-test-subj="managedPolicyBadge">
-                    {managedPolicyTooltips.badge}
-                  </EuiBadge>
-                </EuiToolTip>
+                <ManagedPolicyBadge />
               </>
             )}
           </>
@@ -261,7 +234,9 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
         return value ? moment(value).format('MMM D, YYYY') : value;
       },
     },
-    {
+  ];
+  if (!isReadOnly) {
+    columns.push({
       actions: [
         {
           render: (policy: PolicyFromES) => {
@@ -303,8 +278,8 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
       name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.actionsHeader', {
         defaultMessage: 'Actions',
       }),
-    },
-  ];
+    });
+  }
 
   return (
     <EuiInMemoryTable

@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { usePolicyListContext } from '../policy_list_context';
-import { IndexTemplatesFlyout } from '../../../components/index_templates_flyout';
-import { ConfirmDelete } from './confirm_delete';
-import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confirm_modal';
+import { IndexTemplatesFlyout } from '../../../components';
+import { ConfirmDelete, AddPolicyToTemplateConfirmModal, ViewPolicyFlyout } from '.';
 
 interface Props {
   updatePolicies: () => void;
@@ -58,5 +57,10 @@ export const ListActionHandler: React.FunctionComponent<Props> = ({ updatePolici
       />
     );
   }
+
+  if (listAction?.actionType === 'viewPolicy') {
+    return <ViewPolicyFlyout policy={listAction.selectedPolicy} />;
+  }
+
   return null;
 };
