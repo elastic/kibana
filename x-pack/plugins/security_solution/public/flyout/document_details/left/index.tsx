@@ -43,18 +43,20 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
-  const notesEnabled = useIsExperimentalFeatureEnabled('notesEnabled');
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
 
   const tabsDisplayed = useMemo(() => {
     const tabList =
       eventKind === EventKind.signal
         ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
         : [tabs.insightsTab];
-    if (notesEnabled) {
+    if (securitySolutionNotesEnabled) {
       tabList.push(tabs.notesTab);
     }
     return tabList;
-  }, [eventKind, notesEnabled]);
+  }, [eventKind, securitySolutionNotesEnabled]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;
