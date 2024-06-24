@@ -71,7 +71,7 @@ export const BACKFILLS_TABLE_COLUMN_COMPLETED = i18n.translate(
 );
 
 export const BACKFILLS_TABLE_COLUMN_COMPLETED_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.rule_gaps.backfillsTable.column.completed',
+  'xpack.securitySolution.rule_gaps.backfillsTable.column.completedTooltip',
   {
     defaultMessage: 'The number of completed manual run rule executions',
   }
