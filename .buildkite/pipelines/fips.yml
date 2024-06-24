@@ -1,32 +1,56 @@
 env:
-  DISABLE_CI_STATS_SHIPPING: "true"
+  DISABLE_CI_STATS_SHIPPING: 'true'
+  FTR_ENABLE_FIPS_AGENT: 'true'
+  TEST_BROWSER_HEADLESS: 1
+  # TODO: remove
+  KIBANA_BUILD_ID: '01904a8a-fb5d-4e75-9e51-6e1caf21fb1c'
+agents:
+  provider: 'gcp'
+  image: 'family/kibana-fips-ubuntu-2004'
+  imageProject: 'elastic-images-qa'
 steps:
+  - command: .buildkite/scripts/lifecycle/pre_build.sh
+    label: Pre-Build
+    key: pre-build
+    timeout_in_minutes: 10
+    agents:
+      machineType: n2-standard-2
+
+  - wait
+
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-16
       preemptible: true
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    depends_on: pre-build
     timeout_in_minutes: 60
     retry:
       automatic:
-        - exit_status: "-1"
+        - exit_status: '-1'
           limit: 3
 
   - wait
 
-  - command: TEST_PACKAGE=fips .buildkite/scripts/steps/package_testing/test.sh
-    label: "Smoke testing for FIPS"
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
-      machineType: n2-standard-4
-    timeout_in_minutes: 600
+  # - command: TEST_PACKAGE=fips .buildkite/scripts/steps/package_testing/test.sh
+  #   label: 'Smoke testing for FIPS'
+  #   agents:
+  #     machineType: n2-standard-4
+  #   timeout_in_minutes: 600
+
+  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    label: 'Pick Test Group Run Order (FTR + Integration)'
+    depends_on: build
+    timeout_in_minutes: 10
+    env:
+      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+      FTR_CONFIG_PATTERNS: 'x-pack/test/reporting_functional/reporting_and_security.config.ts,x-pack/test/saved_object_api_integration/security_and_spaces/config_trial.ts,x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts,x-pack/test/alerting_api_integration/security_and_spaces/group2/config.ts,x-pack/test/alerting_api_integration/security_and_spaces/group3/config.ts,x-pack/test/alerting_api_integration/security_and_spaces/group4/config.ts,x-pack/test/functional/apps/saved_objects_management/config.ts,x-pack/test/functional/apps/user_profiles/config.ts,x-pack/test/functional/apps/security/config.ts'
+      FTR_EXTRA_ARGS: '$FTR_EXTRA_ARGS'
+      LIMIT_CONFIG_TYPE: 'functional,integration'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
