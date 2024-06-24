@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TABLE_TAB_CONTENT_TEST_ID } from './test_ids';
 import { TableTab } from './table_tab';
 import { TestProviders } from '../../../../common/mock';
@@ -28,13 +28,13 @@ describe('<TableTab />', () => {
       eventId: 'some_Id',
       browserFields: {},
       dataFormattedForFieldBrowser: [],
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { getByTestId } = render(
       <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
+        <DocumentDetailsContext.Provider value={contextValue}>
           <TableTab />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
