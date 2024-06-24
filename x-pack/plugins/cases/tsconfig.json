@@ -75,6 +75,10 @@
     "@kbn/core-logging-browser-mocks",
     "@kbn/data-views-plugin",
     "@kbn/core-http-router-server-internal",
+    "@kbn/elastic-assistant",
+    "@kbn/esql-utils",
+    "@kbn/esql-datagrid",
+    "@kbn/visualization-utils",
   ],
   "exclude": [
     "target/**/*",

@@ -209,5 +209,9 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
+    "@kbn/esql-datagrid",
+    "@kbn/visualization-utils",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-ast",
   ]
 }
