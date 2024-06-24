@@ -13,17 +13,16 @@ import type {
   RuleToImport,
   RuleResponse,
 } from '../../../../../../common/api/detection_engine';
-import type { RuleAlertType } from '../../../rule_schema';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 
 export interface IDetectionRulesClient {
   createCustomRule: (args: CreateCustomRuleArgs) => Promise<RuleResponse>;
   createPrebuiltRule: (args: CreatePrebuiltRuleArgs) => Promise<RuleResponse>;
-  updateRule: (args: UpdateRuleArgs) => Promise<RuleAlertType>;
-  patchRule: (args: PatchRuleArgs) => Promise<RuleAlertType>;
+  updateRule: (args: UpdateRuleArgs) => Promise<RuleResponse>;
+  patchRule: (args: PatchRuleArgs) => Promise<RuleResponse>;
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
-  upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleAlertType>;
-  importRule: (args: ImportRuleArgs) => Promise<RuleAlertType>;
+  upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
+  importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
 }
 
 export interface CreateCustomRuleArgs {
