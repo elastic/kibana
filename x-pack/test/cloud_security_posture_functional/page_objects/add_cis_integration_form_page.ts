@@ -256,13 +256,6 @@ export function AddCisIntegrationFormPageProvider({
     return await (await checkBox.findByCssSelector(`input[id='${id}']`)).getAttribute('checked');
   };
 
-  const doesStringExist = async (str: string) => {
-    const textBlock = await testSubjects.find('editPackagePolicy_page');
-    const stringToFind = await textBlock.findByXpath(`//span[text()="${str}"]`);
-
-    return stringToFind;
-  };
-
   const getReplaceSecretButton = async (secretField: string) => {
     return await testSubjects.find(`button-replace${secretField}`);
   };
@@ -298,7 +291,6 @@ export function AddCisIntegrationFormPageProvider({
     getValueInEditPage,
     isOptionChecked,
     checkIntegrationPliAuthBlockExists,
-    doesStringExist,
     getReplaceSecretButton,
   };
 }
