@@ -36,9 +36,7 @@ const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
-    const panelsToBuild: EuiContextMenuPanelDescriptor[] = [
-      { id: 0, items: mainPanelItems, title: 'Actions' },
-    ];
+    const panelsToBuild: EuiContextMenuPanelDescriptor[] = [{ id: 0, items: mainPanelItems }];
 
     mainPanelItems.push(copyIDAction.getAction(interfaceEndpoint));
     mainPanelItems.push(deleteAction.getAction(interfaceEndpoint));
@@ -93,7 +91,7 @@ interface UseBulkActionsReturnValue {
 export const useActions = (): UseBulkActionsReturnValue => {
   return {
     actions: {
-      name: 'Actions',
+      name: '',
       align: 'right',
       render: (interfaceEndpoint: InferenceEndpointUI) => {
         return (
