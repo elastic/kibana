@@ -11,6 +11,7 @@ import type {
   Replacements,
   GenerationInterval,
   AttackDiscoveryStats,
+  AttackDiscoveryStatus,
 } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostResponse,
@@ -57,13 +58,18 @@ export const useAttackDiscovery = ({
 
   // generation can take a long time, so we calculate an approximate future time:
   const [approximateFutureTime, setApproximateFutureTime] = useState<Date | null>(null);
+  const [pollStatus, setPollStatus] = useState<AttackDiscoveryStatus | null>(null);
   const {
     cancelAttackDiscovery,
     data: pollData,
     pollApi,
-    status: pollStatus,
+    status,
     stats,
   } = usePollApi({ http, setApproximateFutureTime, toasts, connectorId });
+
+  useEffect(() => {
+    setPollStatus(status);
+  }, [status]);
 
   // loading boilerplate:
   const [isLoading, setIsLoading] = useState(false);
@@ -116,6 +122,7 @@ export const useAttackDiscovery = ({
   }, [pollApi, connectorId, setLoadingConnectorId]);
 
   useEffect(() => {
+    console.log('pollStatus useEffect', pollStatus);
     if (pollStatus === 'running') {
       setIsLoading(true);
       setLoadingConnectorId?.(connectorId ?? null);
@@ -150,7 +157,7 @@ export const useAttackDiscovery = ({
         throw new Error(CONNECTOR_ERROR);
       }
       setLoadingConnectorId?.(connectorId ?? null);
-      setIsLoading(true);
+      setPollStatus('running');
       setApproximateFutureTime(null);
       // call the internal API to generate attack discoveries:
       const rawResponse = await http.fetch('/internal/elastic_assistant/attack_discovery', {

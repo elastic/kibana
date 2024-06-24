@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiNotificationBadge,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -129,6 +136,22 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
       [selectedConversation, setApiConfig, onConnectorIdSelected, onConnectorSelected]
     );
 
+    const statusBadge = useMemo(() => {
+      if (stats && stats.newConnectorResultsCount > 0) {
+        return (
+          <EuiToolTip
+            position="bottom"
+            content={`There are ${stats.newConnectorResultsCount} connectors with new attack discovery results.`}
+          >
+            <EuiNotificationBadge style={{ marginLeft: 5 }}>
+              {stats.newConnectorResultsCount}
+            </EuiNotificationBadge>
+          </EuiToolTip>
+        );
+      }
+      return null;
+    }, [stats]);
+
     if (isFlyoutMode) {
       return (
         <EuiFlexGroup
@@ -200,6 +223,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
                 size={'xs'}
               >
                 {selectedConnectorName}
+                {statusBadge}
               </EuiButtonEmpty>
             </span>
           )}

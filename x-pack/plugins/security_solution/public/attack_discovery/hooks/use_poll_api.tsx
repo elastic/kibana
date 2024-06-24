@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as uuid from 'uuid';
 import type {
   AttackDiscoveryStats,
@@ -81,6 +81,7 @@ export const usePollApi = ({
         setData(null);
         return;
       }
+      console.log('handleResponse', responseData);
       setStatus(responseData.status);
       setApproximateFutureTime(
         moment(responseData.updatedAt).add(responseData.averageIntervalMs, 'milliseconds').toDate()
@@ -172,12 +173,12 @@ export const usePollApi = ({
       });
     }
   }, [connectorId, handleResponse, http, toasts]);
-  const returnValue = useMemo(() => {
-    console.log('returnValue', { cancelAttackDiscovery, status, data, pollApi, stats });
-    return { cancelAttackDiscovery, status, data, pollApi, stats };
-  }, [cancelAttackDiscovery, status, data, pollApi, stats]);
+  // const returnValue = useMemo(() => {
+  //   console.log('returnValue', { cancelAttackDiscovery, status, data, pollApi, stats });
+  //   return { cancelAttackDiscovery, status, data, pollApi, stats };
+  // }, [cancelAttackDiscovery, status, data, pollApi, stats]);
 
-  return returnValue;
+  return { cancelAttackDiscovery, status, data, pollApi, stats };
 };
 
 export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {
