@@ -11,7 +11,6 @@ import {
   CROWDSTRIKE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import moment from 'moment';
 import type { CrowdstrikeBaseApiResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
@@ -26,7 +25,6 @@ import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
-  LogsEndpointActionResponse,
 } from '../../../../../../common/endpoint/types';
 import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type {
@@ -40,8 +38,6 @@ import type {
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
 import { ELASTIC_RESPONSE_ACTION_MESSAGE } from '../../utils';
-import { ENDPOINT_ACTION_RESPONSES_DS } from '../../../../../../common/endpoint/constants';
-import { wrapErrorIfNeeded } from '../../../../../../common/endpoint/data_loaders/utils';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -310,35 +306,21 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined,
     doc: LogsEndpointAction
   ): Promise<void> {
-    const createBaseDocument = (): LogsEndpointActionResponse => ({
-      '@timestamp': moment().toISOString(),
-      agent: doc.agent,
-      EndpointActions: {
-        action_id: doc.EndpointActions.action_id,
-        completed_at: moment().toISOString(),
-        started_at: moment().toISOString(),
-        data: doc.EndpointActions.data,
-        input_type: 'crowdstrike',
-      },
-    });
+    const options = {
+      actionId: doc.EndpointActions.action_id,
+      agentId: doc.agent.id,
+      data: doc.EndpointActions.data,
+      ...(actionResponse?.data?.errors?.length
+        ? {
+            error: {
+              code: '500',
+              message: `Crowdstrike action failed: ${actionResponse.data.errors[0].message}`,
+            },
+          }
+        : {}),
+    };
 
-    const document = createBaseDocument();
-
-    if (actionResponse?.data?.errors?.length) {
-      document.error = {
-        code: '500',
-        message: 'Crowdstrike action failed',
-      };
-    }
-
-    try {
-      await this.options.esClient.index<LogsEndpointActionResponse>({
-        index: `${ENDPOINT_ACTION_RESPONSES_DS}-default`,
-        document,
-      });
-    } catch (error) {
-      this.log.error(wrapErrorIfNeeded(error));
-    }
+    await this.writeActionResponseToEndpointIndex(options);
   }
 
   async processPendingActions({
