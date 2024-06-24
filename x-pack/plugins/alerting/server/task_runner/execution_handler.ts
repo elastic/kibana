@@ -57,6 +57,7 @@ import {
 } from './rule_action_helper';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { ConnectorAdapter } from '../connector_adapters/types';
+import { withAlertingSpan } from './lib';
 
 enum Reasons {
   MUTED = 'muted',
@@ -353,7 +354,9 @@ export class ExecutionHandler<
       for (const c of chunk(bulkActions, CHUNK_SIZE)) {
         let enqueueResponse;
         try {
-          enqueueResponse = await this.actionsClient!.bulkEnqueueExecution(c);
+          enqueueResponse = await withAlertingSpan('alerting:bulk-enqueue-actions', () =>
+            this.actionsClient!.bulkEnqueueExecution(c)
+          );
         } catch (e) {
           if (e.statusCode === 404) {
             throw createTaskRunError(e, TaskErrorSource.USER);
@@ -904,7 +907,9 @@ export class ExecutionHandler<
 
     let alerts;
     try {
-      alerts = await this.alertsClient.getSummarizedAlerts!(options);
+      alerts = await withAlertingSpan(`alerting:get-summarized-alerts-${action.uuid}`, () =>
+        this.alertsClient.getSummarizedAlerts!(options)
+      );
     } catch (e) {
       throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
     }
