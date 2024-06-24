@@ -213,17 +213,14 @@ const EsqlCodeBlockComponent = ({
                         content={
                           isTableVisible
                             ? i18n.translate(
-                                'xpack.observabilityAiAssistant.lensESQLFunction.visualization',
+                                'xpack.securitySolution.lensESQLFunction.visualization',
                                 {
                                   defaultMessage: 'Visualization',
                                 }
                               )
-                            : i18n.translate(
-                                'xpack.observabilityAiAssistant.lensESQLFunction.table',
-                                {
-                                  defaultMessage: 'Table of results',
-                                }
-                              )
+                            : i18n.translate('xpack.securitySolution.lensESQLFunction.table', {
+                                defaultMessage: 'Table of results',
+                              })
                         }
                       >
                         <EuiButtonIcon
@@ -236,13 +233,13 @@ const EsqlCodeBlockComponent = ({
                           aria-label={
                             isTableVisible
                               ? i18n.translate(
-                                  'xpack.observabilityAiAssistant.lensESQLFunction.displayChart',
+                                  'xpack.securitySolution.lensESQLFunction.displayChart',
                                   {
                                     defaultMessage: 'Display chart',
                                   }
                                 )
                               : i18n.translate(
-                                  'xpack.observabilityAiAssistant.lensESQLFunction.displayTable',
+                                  'xpack.securitySolution.lensESQLFunction.displayTable',
                                   {
                                     defaultMessage: 'Display table',
                                   }

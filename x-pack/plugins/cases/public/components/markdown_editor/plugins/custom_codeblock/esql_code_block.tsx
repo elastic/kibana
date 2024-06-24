@@ -36,7 +36,7 @@ function generateId() {
   return uuidv4();
 }
 
-const saveVisualizationLabel = i18n.translate('xpack.securityAiAssistant.lensESQLFunction.save', {
+const saveVisualizationLabel = i18n.translate('xpack.cases.lensESQLFunction.save', {
   defaultMessage: 'Save visualization',
 });
 
@@ -220,18 +220,12 @@ const EsqlCodeBlockComponent: React.FC<EsqlCodeBlockProps> = ({
                     <EuiToolTip
                       content={
                         isTableVisible
-                          ? i18n.translate(
-                              'xpack.observabilityAiAssistant.lensESQLFunction.visualization',
-                              {
-                                defaultMessage: 'Visualization',
-                              }
-                            )
-                          : i18n.translate(
-                              'xpack.observabilityAiAssistant.lensESQLFunction.table',
-                              {
-                                defaultMessage: 'Table of results',
-                              }
-                            )
+                          ? i18n.translate('xpack.cases.lensESQLFunction.visualization', {
+                              defaultMessage: 'Visualization',
+                            })
+                          : i18n.translate('xpack.cases.lensESQLFunction.table', {
+                              defaultMessage: 'Table of results',
+                            })
                       }
                     >
                       <EuiButtonIcon
@@ -241,18 +235,12 @@ const EsqlCodeBlockComponent: React.FC<EsqlCodeBlockProps> = ({
                         data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
                         aria-label={
                           isTableVisible
-                            ? i18n.translate(
-                                'xpack.observabilityAiAssistant.lensESQLFunction.displayChart',
-                                {
-                                  defaultMessage: 'Display chart',
-                                }
-                              )
-                            : i18n.translate(
-                                'xpack.observabilityAiAssistant.lensESQLFunction.displayTable',
-                                {
-                                  defaultMessage: 'Display table',
-                                }
-                              )
+                            ? i18n.translate('xpack.cases.lensESQLFunction.displayChart', {
+                                defaultMessage: 'Display chart',
+                              })
+                            : i18n.translate('xpack.cases.lensESQLFunction.displayTable', {
+                                defaultMessage: 'Display table',
+                              })
                         }
                       />
                     </EuiToolTip>
