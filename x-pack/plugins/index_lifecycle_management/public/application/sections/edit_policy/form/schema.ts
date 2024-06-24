@@ -80,9 +80,7 @@ export const searchableSnapshotFields = {
 };
 
 const numberOfReplicasField = {
-  label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberOfReplicasLabel', {
-    defaultMessage: 'Number of replicas',
-  }),
+  label: i18nTexts.editPolicy.numberOfReplicasLabel,
   validations: [
     {
       validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
@@ -95,9 +93,7 @@ const numberOfReplicasField = {
 };
 
 const numberOfShardsField = {
-  label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
-    defaultMessage: 'Number of primary shards',
-  }),
+  label: i18nTexts.editPolicy.shrinkNumberOfShardsLabel,
   defaultValue: 1,
   validations: [
     {
@@ -380,9 +376,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       actions: {
         rollover: {
           max_age: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel', {
-              defaultMessage: 'Maximum age',
-            }),
+            label: i18nTexts.editPolicy.maxAgeLabel,
             validations: [
               {
                 validator: rolloverThresholdsValidator,
@@ -397,9 +391,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
             fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_docs: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel', {
-              defaultMessage: 'Maximum documents',
-            }),
+            label: i18nTexts.editPolicy.maxDocsLabel,
             validations: [
               {
                 validator: rolloverThresholdsValidator,
@@ -443,9 +435,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
             fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_size: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
-              defaultMessage: 'Maximum index size',
-            }),
+            label: i18nTexts.editPolicy.maxSizeLabel,
             validations: [
               {
                 validator: rolloverThresholdsValidator,

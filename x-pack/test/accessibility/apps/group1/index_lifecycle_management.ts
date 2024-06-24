@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     throw new Error(`Could not find ${policyName} in policy table`);
   };
 
-  describe('Index Lifecycle Management Accessibility', () => {
+  describe('Index Lifecycle Management Accessibility', async () => {
     before(async () => {
       await esClient.snapshot.createRepository({
         name: REPO_NAME,
@@ -132,8 +132,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Edit policy', async () => {
-        const link = await findPolicyLinkInListView(POLICY_NAME);
-        await link.click();
+        const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
+
+        const editPolicyButton = await policyRow.findByTestSubject('editPolicy');
+        await editPolicyButton.click();
+
         await retry.waitFor('ILM edit form', async () => {
           return (
             (await testSubjects.getVisibleText('policyTitle')) === `Edit policy ${POLICY_NAME}`
@@ -143,8 +146,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Request flyout', async () => {
-        const link = await findPolicyLinkInListView(POLICY_NAME);
-        await link.click();
+        const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
+
+        const editPolicyButton = await policyRow.findByTestSubject('editPolicy');
+        await editPolicyButton.click();
+
         await retry.waitFor('ILM request button', async () => {
           return testSubjects.exists('requestButton');
         });
@@ -163,8 +169,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Add policy to index template modal', async () => {
       await filterByPolicyName(POLICY_NAME);
       const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
-      const addPolicyButton = await policyRow.findByTestSubject('addPolicyToTemplate');
 
+      const actionsButton = await policyRow.findByTestSubject('euiCollapsedItemActionsButton');
+      await actionsButton.click();
+
+      const addPolicyButton = await testSubjects.find('addPolicyToTemplate');
       await addPolicyButton.click();
 
       await retry.waitFor('ILM add policy to index template modal to be present', async () => {
@@ -177,8 +186,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Delete policy modal', async () => {
       await filterByPolicyName(POLICY_NAME);
       const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
-      const deleteButton = await policyRow.findByTestSubject('deletePolicy');
 
+      const deleteButton = await policyRow.findByTestSubject('deletePolicy');
       await deleteButton.click();
 
       await retry.waitFor('ILM delete policy modal to be present', async () => {
@@ -191,9 +200,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Index templates flyout', async () => {
       await filterByPolicyName(POLICY_NAME);
       const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
-      const actionsButton = await policyRow.findByTestSubject('viewIndexTemplates');
 
+      const actionsButton = await policyRow.findByTestSubject('euiCollapsedItemActionsButton');
       await actionsButton.click();
+
+      const templatesButton = await testSubjects.find('viewIndexTemplates');
+      await templatesButton.click();
 
       const flyoutTitleSelector = 'indexTemplatesFlyoutHeader';
       await retry.waitFor('Index templates flyout', async () => {

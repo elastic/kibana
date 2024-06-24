@@ -9,13 +9,22 @@ import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
   editPolicy: {
-    shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.enableShrinkLabel', {
+    shrinkActionLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.actionLabel', {
+      defaultMessage: 'Shrink',
+    }),
+    shrinkToggleLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.enableShrinkLabel', {
       defaultMessage: 'Shrink index',
     }),
     shrinkCountLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardCountLabel',
       {
         defaultMessage: 'Configure shard count',
+      }
+    ),
+    shrinkNumberOfShardsLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel',
+      {
+        defaultMessage: 'Number of primary shards',
       }
     ),
     shrinkSizeLabel: i18n.translate(
@@ -59,6 +68,9 @@ export const i18nTexts = {
     }),
     readonlyEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.readonlyFieldLabel', {
       defaultMessage: 'Make index read only',
+    }),
+    readonlyLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.readonlyTitle', {
+      defaultMessage: 'Read only',
     }),
     downsampleEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.downsampleFieldLabel', {
       defaultMessage: 'Enable downsampling',
@@ -116,12 +128,6 @@ export const i18nTexts = {
         defaultMessage: 'Snapshot repository',
       }
     ),
-    searchableSnapshotsStorageFieldLabel: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotStorageFieldLabel',
-      {
-        defaultMessage: 'Searchable snapshot storage',
-      }
-    ),
     maxPrimaryShardSizeLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardSizeLabel',
       {
@@ -139,6 +145,55 @@ export const i18nTexts = {
       {
         defaultMessage: 'Maximum shard size units',
       }
+    ),
+    maxAgeLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel', {
+      defaultMessage: 'Maximum age',
+    }),
+    maxDocsLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel', {
+      defaultMessage: 'Maximum documents',
+    }),
+    maxSizeLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
+      defaultMessage: 'Maximum index size',
+    }),
+    downsampleLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.downsampleTitle', {
+      defaultMessage: 'Downsample',
+    }),
+    minAgeLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.minimumAge.minimumAgeFieldLabel',
+      { defaultMessage: 'Move data into phase when:' }
+    ),
+    rolloverToolTipDescription: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.minimumAge.rolloverToolTipDescription',
+      {
+        defaultMessage:
+          'Data age is calculated from rollover. Rollover is configured in the hot phase.',
+      }
+    ),
+    minAgeUnitFieldSuffix: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.minimumAge.minimumAgeFieldSuffixLabel',
+      { defaultMessage: 'old' }
+    ),
+    replicasLabel: i18n.translate('xpack.indexLifecycleMgmt.numberOfReplicas.formRowTitle', {
+      defaultMessage: 'Replicas',
+    }),
+    numberOfReplicasLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.numberOfReplicasLabel',
+      {
+        defaultMessage: 'Number of replicas',
+      }
+    ),
+    dataAllocationLabel: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.title', {
+      defaultMessage: 'Data allocation',
+    }),
+    searchableSnapshotLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.title',
+      {
+        defaultMessage: 'Searchable snapshot',
+      }
+    ),
+    waitForSnapshotLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotTitle',
+      { defaultMessage: 'Wait for snapshot policy' }
     ),
     errors: {
       numberRequired: i18n.translate(
