@@ -7,16 +7,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { BrushEvent, TooltipSpec, LineAnnotationEvent, RectAnnotationEvent } from '@elastic/charts';
 import { FormProvider, useForm } from 'react-hook-form';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import useKey from 'react-use/lib/useKey';
 import { clone } from 'lodash';
 import {
-  AvailableAnnotationIcons,
-  defaultAnnotationColor,
-  defaultAnnotationLabel,
-  defaultAnnotationRangeColor,
   defaultRangeAnnotationLabel,
+  defaultAnnotationRangeColor,
 } from '@kbn/event-annotation-common';
+import { getDefaultAnnotation } from './default_annotation';
 import { useEditAnnotationHelper } from './hooks/use_edit_annotation_helper';
 import type { CreateAnnotationForm } from './components/create_annotation';
 import { ObservabilityAnnotations, CreateAnnotation } from './components';
@@ -204,47 +202,6 @@ export const useAnnotations = ({
         </FormProvider>
       );
     },
-  };
-};
-
-const getDefaultAnnotation = ({
-  timestamp,
-  sloId,
-  sloInstanceId,
-  timestampEnd,
-}: {
-  timestamp?: Moment;
-  timestampEnd?: Moment;
-  sloId?: string;
-  sloInstanceId?: string;
-}): Partial<CreateAnnotationForm> => {
-  return {
-    name: defaultAnnotationLabel,
-    message: '',
-    '@timestamp': timestamp ?? moment(),
-    '@timestampEnd': timestampEnd,
-    annotation: {
-      style: {
-        icon: AvailableAnnotationIcons.TRIANGLE,
-        color: defaultAnnotationColor,
-        line: {
-          width: 2,
-          style: 'solid',
-          textDecoration: 'name',
-        },
-        rect: {
-          fill: 'inside',
-          position: 'top',
-        },
-      },
-    },
-    ...(sloId &&
-      sloInstanceId && {
-        slo: {
-          id: sloId,
-          instanceId: sloInstanceId,
-        },
-      }),
   };
 };
 

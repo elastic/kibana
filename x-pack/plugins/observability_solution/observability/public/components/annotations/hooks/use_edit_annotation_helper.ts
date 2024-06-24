@@ -8,8 +8,8 @@
 import moment from 'moment';
 import { useEffect } from 'react';
 import { UseFormReset } from 'react-hook-form';
-import { Annotation } from '../../../../common/annotations';
-import { CreateAnnotationForm } from '../components/create_annotation';
+import type { Annotation } from '../../../../common/annotations';
+import type { CreateAnnotationForm } from '../components/create_annotation';
 
 export const useEditAnnotationHelper = ({
   reset,
