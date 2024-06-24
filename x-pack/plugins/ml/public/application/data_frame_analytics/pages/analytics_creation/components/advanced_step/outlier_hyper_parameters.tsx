@@ -156,10 +156,10 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
                 ),
               },
             ]}
-            value={standardizationEnabled}
+            value={standardizationEnabled ? 'true' : 'false'}
             hasNoInitialSelection={true}
             onChange={(e) => {
-              setFormState({ standardizationEnabled: e.target.value });
+              setFormState({ standardizationEnabled: e.target.value === 'true' ? true : false });
             }}
           />
         </EuiFormRow>
