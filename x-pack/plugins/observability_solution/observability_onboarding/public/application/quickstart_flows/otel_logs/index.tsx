@@ -99,12 +99,18 @@ export const OtelLogsPanel: React.FC = () => {
                 'xpack.observability_onboarding.otelLogsPanel.kubernetesApplyCommandPromptLabel',
                 {
                   defaultMessage:
-                    'From the directory where the manifest is downloaded, run the apply command:',
+                    'From the directory where the manifest is downloaded, run the following command to install the collector on every node of your cluster:',
                 }
               )}
             </p>
           </EuiText>
-          <CopyableCodeBlock content={'kubectl apply -f otel-collector-k8s.yml'} />
+          <CopyableCodeBlock
+            content={`kubectl create secret generic elastic-secret \
+--from-literal=es_endpoint='${setup?.elasticsearchUrl}' \                 
+--from-literal=es_api_key='${apiKeyData?.apiKeyEncoded}'
+
+kubectl apply -f otel-collector-k8s.yml`}
+          />
         </>
       ),
       firstStepTitle: i18n.translate(
@@ -133,8 +139,8 @@ data:
         verbosity: detailed
       elasticsearch:
         endpoints: 
-        - ${setup?.elasticsearchUrl}
-        api_key: ${apiKeyData?.apiKeyEncoded}
+        - \${env:ES_ENDPOINT}
+        api_key: \${env:ES_API_KEY}
         logs_index: logs-otel.generic-default
         # Metrics are not supported yet
         #metrics_index: metrics-otel.generic-default
@@ -464,7 +470,6 @@ subjects:
     namespace: default
 ---`,
       type: 'download',
-      check: 'kubectl get pods -l app=nginx',
       fileName: 'otel-collector-k8s.yml',
     },
     {
@@ -476,7 +481,7 @@ subjects:
 curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch 
         
 rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
-      check: './otelcol --config otel.yml',
+      start: './otelcol --config otel.yml',
       type: 'copy',
     },
     {
@@ -488,7 +493,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && se
 curl --output elastic-distro-${agentVersion}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir "elastic-distro-${agentVersion}-darwin-$arch" && tar -xvf elastic-distro-${agentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${agentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-darwin-$arch 
       
 rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i '' 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
-      check: './otelcol --config otel.yml',
+      start: './otelcol --config otel.yml',
       type: 'copy',
     },
   ];
@@ -649,25 +654,21 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && se
                 children: (
                   <EuiFlexGroup direction="column">
                     {selectedContent.prompt}
-                    <EuiText>
-                      <p>
-                        {selectedTab === 'kubernetes'
-                          ? i18n.translate(
-                              'xpack.observability_onboarding.otelLogsPanel.p.checkTheCollectorLabel',
-                              {
-                                defaultMessage:
-                                  'Run the following command to check whether the collector is running correctly:',
-                              }
-                            )
-                          : i18n.translate(
+                    {selectedContent.start && (
+                      <>
+                        <EuiText>
+                          <p>
+                            {i18n.translate(
                               'xpack.observability_onboarding.otelLogsPanel.p.startTheCollectorLabel',
                               {
                                 defaultMessage: 'Run the following command to start the collector',
                               }
                             )}
-                      </p>
-                    </EuiText>
-                    <CopyableCodeBlock content={selectedContent.check} />
+                          </p>
+                        </EuiText>
+                        <CopyableCodeBlock content={selectedContent.start} />
+                      </>
+                    )}
                   </EuiFlexGroup>
                 ),
               },
@@ -760,7 +761,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && se
                           link: (
                             <EuiLink
                               data-test-subj="observabilityOnboardingOtelLogsPanelDocumentationLink"
-                              href="https://www.elastic.co/guide/en/observability/current/otel-getting-started.html"
+                              href="https://www.elastic.co/guide/en/observability/current/get-started-opentelemetry.html"
                               target="_blank"
                               external
                             >
