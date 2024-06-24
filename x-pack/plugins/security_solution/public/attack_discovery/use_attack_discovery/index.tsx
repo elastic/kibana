@@ -28,6 +28,7 @@ export interface UseAttackDiscovery {
   alertsContextCount: number | null;
   approximateFutureTime: Date | null;
   attackDiscoveries: AttackDiscoveries;
+  didInitialFetch: boolean;
   failureReason: string | null;
   fetchAttackDiscoveries: () => Promise<void>;
   generationIntervals: GenerationInterval[] | undefined;
@@ -63,6 +64,7 @@ export const useAttackDiscovery = ({
     data: pollData,
     pollApi,
     status: pollStatus,
+    didInitialFetch,
   } = usePollApi({ http, setApproximateFutureTime, toasts, connectorId });
 
   // loading boilerplate:
@@ -183,6 +185,7 @@ export const useAttackDiscovery = ({
     alertsContextCount,
     approximateFutureTime,
     attackDiscoveries,
+    didInitialFetch,
     failureReason,
     fetchAttackDiscoveries,
     generationIntervals,
