@@ -5,10 +5,10 @@
  * 2.0.
  */
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { SearchRequest, TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { get, getOr } from 'lodash/fp';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { AggregationsMinAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsMinAggregate, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SecuritySolutionFactory } from '../../types';
 import type {

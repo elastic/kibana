@@ -36,12 +36,14 @@ const indexPattern = {
   fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }, { name: '_id' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
+  getAllowHidden: jest.fn(),
 } as unknown as DataView;
 
 const indexPattern2 = {
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource2,
+  getAllowHidden: jest.fn(),
 } as unknown as DataView;
 
 const fields3 = [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }];
@@ -1474,10 +1476,15 @@ describe('SearchSource', () => {
       return buildExpression(ast).toString();
     }
 
+    beforeEach(() => {
+      searchSource = new SearchSource({}, searchSourceDependencies);
+      searchSource.setField('index', indexPattern);
+    });
+
     test('should generate an expression AST', () => {
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context
-        | esdsl dsl=\\"{}\\""
+        | esdsl dsl=\\"{}\\" index=\\"1234\\""
       `);
     });
 
@@ -1486,7 +1493,7 @@ describe('SearchSource', () => {
 
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context q={kql q=\\"something\\"}
-        | esdsl dsl=\\"{}\\""
+        | esdsl dsl=\\"{}\\" index=\\"1234\\""
       `);
     });
 
@@ -1504,7 +1511,7 @@ describe('SearchSource', () => {
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query1\\\\\\"}}\\"}
           filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query2\\\\\\"}}\\"}
-        | esdsl dsl=\\"{}\\""
+        | esdsl dsl=\\"{}\\" index=\\"1234\\""
       `);
     });
 
@@ -1517,7 +1524,7 @@ describe('SearchSource', () => {
 
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query\\\\\\"}}\\"}
-        | esdsl dsl=\\"{}\\""
+        | esdsl dsl=\\"{}\\" index=\\"1234\\""
       `);
     });
 
@@ -1540,7 +1547,7 @@ describe('SearchSource', () => {
       expect(toString(childSearchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context q={kql q=\\"something2\\"} q={kql q=\\"something1\\"} filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query2\\\\\\"}}\\"}
           filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query1\\\\\\"}}\\"}
-        | esdsl dsl=\\"{}\\""
+        | esdsl dsl=\\"{}\\" index=\\"1234\\""
       `);
     });
 
@@ -1558,7 +1565,7 @@ describe('SearchSource', () => {
 
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context
-        | esdsl size=1000 dsl=\\"{}\\""
+        | esdsl size=1000 dsl=\\"{}\\" index=\\"1234\\""
       `);
     });
 
