@@ -27,6 +27,7 @@ import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';
 import * as i18n from './translations';
 import { AIConnector } from '../../connectorland/connector_selector';
+import { FlyoutPositionMode } from '../assistant_overlay';
 
 interface OwnProps {
   selectedConversation: Conversation | undefined;
@@ -46,6 +47,8 @@ interface OwnProps {
   refetchConversationsState: () => Promise<void>;
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
+  flyoutPositionMode?: FlyoutPositionMode;
+  toggleFlyoutPositionMode?: () => void;
 }
 
 type Props = OwnProps;
@@ -72,6 +75,8 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   refetchConversationsState,
   onConversationCreate,
   isAssistantEnabled,
+  flyoutPositionMode,
+  toggleFlyoutPositionMode,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -145,6 +150,30 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
         isAssistantEnabled={isAssistantEnabled}
       >
         <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              anchorPosition="downLeft"
+              button={
+                <EuiToolTip
+                  content={
+                    flyoutPositionMode === FlyoutPositionMode.OVERLAY
+                      ? i18n.DOCK_CHAT
+                      : i18n.UNDOCK_CHAT
+                  }
+                  display="block"
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.TOGGLE_FLYOUT_MODE}
+                    data-test-subj="assistantDockToggleButton"
+                    iconType={
+                      flyoutPositionMode === FlyoutPositionMode.OVERLAY ? 'menuRight' : 'menuLeft'
+                    }
+                    onClick={toggleFlyoutPositionMode}
+                  />
+                </EuiToolTip>
+              }
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AssistantSettingsButton
               defaultConnector={defaultConnector}

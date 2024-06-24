@@ -104,6 +104,8 @@ export interface Props {
   chatHistoryVisible?: boolean;
   setChatHistoryVisible?: Dispatch<SetStateAction<boolean>>;
   currentUserAvatar?: UserAvatar;
+  flyoutPositionMode?: string;
+  toggleFlyoutPositionMode: () => void;
 }
 
 /**
@@ -122,6 +124,8 @@ const AssistantComponent: React.FC<Props> = ({
   chatHistoryVisible,
   setChatHistoryVisible,
   currentUserAvatar,
+  flyoutPositionMode,
+  toggleFlyoutPositionMode,
 }) => {
   const {
     assistantTelemetry,
@@ -950,6 +954,8 @@ const AssistantComponent: React.FC<Props> = ({
                     refetchConversationsState={refetchConversationsState}
                     onConversationCreate={handleCreateConversation}
                     isAssistantEnabled={isAssistantEnabled}
+                    flyoutPositionMode={flyoutPositionMode}
+                    toggleFlyoutPositionMode={toggleFlyoutPositionMode}
                   />
 
                   {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}

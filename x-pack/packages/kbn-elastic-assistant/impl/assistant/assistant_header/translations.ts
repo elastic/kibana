@@ -70,3 +70,18 @@ export const CLEAR_CHAT_CONFIRMATION = i18n.translate(
       'Are you sure you want to clear the current chat? All conversation data will be lost.',
   }
 );
+
+export const DOCK_CHAT = i18n.translate(
+  'xpack.elasticAssistant.assistant.chatHeader.euiToolTip.flyoutModeLabel.dock',
+  { defaultMessage: 'Dock chat' }
+);
+
+export const UNDOCK_CHAT = i18n.translate(
+  'xpack.elasticAssistant.assistant.chatHeader.euiToolTip.flyoutModeLabel.undock',
+  { defaultMessage: 'Undock chat' }
+);
+
+export const TOGGLE_FLYOUT_MODE = i18n.translate(
+  'xpack.elasticAssistant.assistant.chatHeader.euiButtonIcon.toggleFlyoutModeLabel',
+  { defaultMessage: 'Toggle flyout mode' }
+);
