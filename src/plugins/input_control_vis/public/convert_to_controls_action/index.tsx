@@ -20,9 +20,11 @@ import {
   HasParentApi,
   HasUniqueId,
 } from '@kbn/presentation-publishing';
-import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { isControlGroupApi, type ControlGroupApi } from '@kbn/controls-plugin/public';
 import { apiHasVisualizeConfig, HasVisualizeConfig, Vis } from '@kbn/visualizations-plugin/public';
+import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { InputControlVisParams } from '../types';
 
 export const ACTION_CONVERT_TO_CONTROLS = 'ACTION_CONVERT_TO_CONTROLS';
@@ -58,27 +60,32 @@ const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is Act
   apiHasParentApi(api) &&
   isControlGroupApi((api.parentApi as { controlGroup?: unknown }).controlGroup);
 
-export const convertToControlsAction = createAction<EmbeddableApiContext>({
-  id: ACTION_CONVERT_TO_CONTROLS,
-  type: ACTION_CONVERT_TO_CONTROLS,
-  order: 100,
-  getDisplayName: () => displayName,
-  MenuItem,
-  getIconType: () => 'merge',
-  isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
-    return (
-      compatibilityCheck(embeddable) &&
-      embeddable.getVis().type?.name === 'input_control_vis' &&
-      getInheritedViewMode(embeddable) === ViewMode.EDIT
-    );
-  },
-  execute: async ({ embeddable }: EmbeddableApiContext) => {
-    if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
-    const { addToControls } = await import('./add_to_controls');
-    addToControls(
-      embeddable.parentApi.controlGroup,
-      embeddable.getVis() as unknown as Vis<InputControlVisParams>
-    );
-  },
-  showNotification: true,
-});
+export function getConvertToControlsAction(
+  dataService: DataPublicPluginStart
+): ActionDefinition<EmbeddableApiContext> {
+  return {
+    id: ACTION_CONVERT_TO_CONTROLS,
+    type: ACTION_CONVERT_TO_CONTROLS,
+    order: 100,
+    getDisplayName: () => displayName,
+    MenuItem,
+    getIconType: () => 'merge',
+    isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
+      return (
+        compatibilityCheck(embeddable) &&
+        embeddable.getVis().type?.name === 'input_control_vis' &&
+        getInheritedViewMode(embeddable) === ViewMode.EDIT
+      );
+    },
+    execute: async ({ embeddable }: EmbeddableApiContext) => {
+      if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
+      const { addToControls } = await import('./add_to_controls');
+      addToControls(
+        embeddable.parentApi.controlGroup,
+        embeddable.getVis() as unknown as Vis<InputControlVisParams>,
+        dataService
+      );
+    },
+    showNotification: true,
+  };
+}

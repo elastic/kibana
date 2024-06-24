@@ -22,7 +22,7 @@ import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
 import { InputControlPublicConfig } from '../config';
 import { InputControlDeprecationBadge } from './deprecation_badge';
-import { convertToControlsAction } from './convert_to_controls_action';
+import { getConvertToControlsAction } from './convert_to_controls_action';
 
 type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
 
@@ -89,7 +89,7 @@ export class InputControlVisPlugin implements Plugin<void, void> {
 
     uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, deprecationBadge);
 
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, convertToControlsAction);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, getConvertToControlsAction(deps.data));
 
     return {};
   }

@@ -8,12 +8,12 @@
 
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { Vis } from '@kbn/visualizations-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { CONTROL_TYPES } from '../editor_utils';
 import { InputControlVisParams } from '../types';
 import { addToControls } from './add_to_controls';
 
 describe('addToControls', () => {
-
   const mockControlGroupApi = {
     addOptionsListControl: jest.fn(),
     addRangeSliderControl: jest.fn(),
@@ -23,31 +23,63 @@ describe('addToControls', () => {
     jest.clearAllMocks();
   });
 
-  test('should add range slider control', () => {
+  describe('range slider', () => {
+    const LEGACY_RANGE_CONTROL_ID = '1234';
     const vis = {
       params: {
         controls: [
           {
-            id: '1234',
+            id: LEGACY_RANGE_CONTROL_ID,
             fieldName: 'bytes',
             indexPattern: '90943e30-9a47-11e8-b64d-95841ca0b247',
             label: 'My bytes',
             options: {
-              step: 1024
+              step: 1024,
             },
             type: CONTROL_TYPES.RANGE,
-          }
-        ]
-      }
+          },
+        ],
+      },
     } as unknown as Vis<InputControlVisParams>;
-    addToControls(mockControlGroupApi, vis);
-    expect(mockControlGroupApi.addRangeSliderControl.mock.calls).toHaveLength(1);
-    expect(mockControlGroupApi.addRangeSliderControl.mock.calls[0][0]).toEqual({
-      controlId: '1234',
-      dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-      fieldName: 'bytes',
-      step: 1024,
-      title: 'My bytes'
+
+    test('should add range slider control', () => {
+      const mockDataService = dataPluginMock.createStartContract();
+      mockDataService.query.filterManager.getFilters = () => [];
+      addToControls(mockControlGroupApi, vis, mockDataService);
+      expect(mockControlGroupApi.addRangeSliderControl.mock.calls).toHaveLength(1);
+      expect(mockControlGroupApi.addRangeSliderControl.mock.calls[0][0]).toEqual({
+        controlId: LEGACY_RANGE_CONTROL_ID,
+        dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        fieldName: 'bytes',
+        step: 1024,
+        title: 'My bytes',
+      });
+    });
+
+    test('should remove legacy control filter and set value of range slider control', () => {
+      const mockDataService = dataPluginMock.createStartContract();
+      mockDataService.query.filterManager.getFilters = () => [
+        {
+          meta: {
+            controlledBy: LEGACY_RANGE_CONTROL_ID,
+          },
+          query: {
+            range: {
+              bytes: {
+                gte: 7014,
+                lte: 13103,
+              },
+            },
+          },
+        },
+      ];
+      addToControls(mockControlGroupApi, vis, mockDataService);
+      expect(mockControlGroupApi.addRangeSliderControl.mock.calls).toHaveLength(1);
+      expect(mockControlGroupApi.addRangeSliderControl.mock.calls[0][0].value).toEqual([
+        '7014',
+        '13103',
+      ]);
+      expect(mockDataService.query.filterManager.removeFilter.mock.calls).toHaveLength(1);
     });
   });
 });

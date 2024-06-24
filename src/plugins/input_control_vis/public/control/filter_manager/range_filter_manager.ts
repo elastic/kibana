@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 
-import { RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
+import { RangeFilterParams, buildRangeFilter, Filter } from '@kbn/es-query';
 import { FilterManager } from './filter_manager';
 
 interface SliderValue {
@@ -67,17 +67,21 @@ export class RangeFilterManager extends FilterManager {
       return;
     }
 
-    let range: RangeFilterParams;
-    if (_.has(kbnFilters[0], 'query.script')) {
-      range = _.get(kbnFilters[0], 'query.script.script.params');
-    } else {
-      range = _.get(kbnFilters[0], ['query', 'range', this.fieldName]);
-    }
-
-    if (!range) {
-      return;
-    }
-
-    return fromRange(range);
+    return getRangeValueFromFilter(kbnFilters[0], this.fieldName);
   }
+}
+
+export function getRangeValueFromFilter(filter: Filter, fieldName: string) {
+  let range: RangeFilterParams;
+  if (_.has(filter, 'query.script')) {
+    range = _.get(filter, 'query.script.script.params');
+  } else {
+    range = _.get(filter, ['query', 'range', fieldName]);
+  }
+
+  if (!range) {
+    return;
+  }
+
+  return fromRange(range);
 }
