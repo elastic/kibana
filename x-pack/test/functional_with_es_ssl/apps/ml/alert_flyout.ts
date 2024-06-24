@@ -67,10 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   let testJobId = '';
 
-  // Failing: See https://github.com/elastic/kibana/issues/102012
-  describe.skip('anomaly detection alert', function () {
-    this.tags('ciGroup13');
-
+  describe('anomaly detection alert', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
