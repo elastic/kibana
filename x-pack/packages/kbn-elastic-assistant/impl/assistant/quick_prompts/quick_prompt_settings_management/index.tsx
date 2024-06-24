@@ -29,7 +29,7 @@ interface Props {
   quickPromptSettings: QuickPrompt[];
   selectedQuickPrompt: QuickPrompt | undefined;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
-  handleSave: () => void;
+  handleSave: (shouldRefetchConversation?: boolean) => void;
   onCancelClick: () => void;
 }
 

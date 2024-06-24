@@ -35,7 +35,7 @@ interface Props {
   conversationsSettingsBulkActions: ConversationsBulkActions;
   conversationsLoaded: boolean;
   defaultConnector?: AIConnector;
-  handleSave: () => void;
+  handleSave: (shouldRefetchConversation?: boolean) => void;
   isDisabled?: boolean;
   isFlyoutMode: boolean;
   onCancelClick: () => void;
@@ -122,8 +122,14 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       return;
     }
     closeConfirmModal();
-    handleSave();
-  }, [closeConfirmModal, conversationsSettingsBulkActions, handleSave]);
+    handleSave(true);
+    setConversationsSettingsBulkActions({});
+  }, [
+    closeConfirmModal,
+    conversationsSettingsBulkActions,
+    handleSave,
+    setConversationsSettingsBulkActions,
+  ]);
 
   const onDeleteCancelled = useCallback(() => {
     setDeletedConversation(null);
@@ -148,8 +154,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const onSaveConfirmed = useCallback(() => {
     closeEditFlyout();
-    handleSave();
-  }, [closeEditFlyout, handleSave]);
+    handleSave(true);
+    setConversationsSettingsBulkActions({});
+  }, [closeEditFlyout, handleSave, setConversationsSettingsBulkActions]);
 
   const columns = useMemo(
     () =>

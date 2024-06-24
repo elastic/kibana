@@ -80,7 +80,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.id]: {
+                [updatedConversation.id || updatedConversation.title]: {
                   ...updatedConversation,
                   ...(conversationsSettingsBulkActions.update
                     ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
@@ -101,7 +101,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.id]: updatedConversation,
+                [updatedConversation.id || updatedConversation.title]: updatedConversation,
               },
             });
           }
@@ -160,7 +160,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.id]: {
+                [updatedConversation.id || updatedConversation.title]: {
                   ...updatedConversation,
                   ...(conversationsSettingsBulkActions.update
                     ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
@@ -211,7 +211,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
         if (selectedConversation != null && selectedConversation.apiConfig) {
           const updatedConversation = {
             ...selectedConversation,
-            // updatedAt: new Date(),
+            updatedAt: new Date(),
             apiConfig: {
               ...selectedConversation.apiConfig,
               model,
@@ -219,7 +219,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           };
           setConversationSettings({
             ...conversationSettings,
-            [updatedConversation.id]: updatedConversation,
+            [updatedConversation.id || updatedConversation.title]: updatedConversation,
           });
           if (selectedConversation.id !== '') {
             setConversationsSettingsBulkActions({

@@ -34,7 +34,11 @@ export const ManagementSettings = React.memo(() => {
       mergeBaseWithPersistedConversations(baseConversations, conversationsData),
     [baseConversations]
   );
-  const { data: conversations, isFetched: conversationsLoaded } = useFetchCurrentUserConversations({
+  const {
+    data: conversations,
+    isFetched: conversationsLoaded,
+    refetch: refetchConversations,
+  } = useFetchCurrentUserConversations({
     http,
     onFetch: onFetchedConversations,
     isAssistantEnabled,
@@ -52,10 +56,11 @@ export const ManagementSettings = React.memo(() => {
   if (conversations) {
     return (
       <AssistantSettingsManagement
-        selectedConversation={currentConversation}
         conversations={conversations}
         conversationsLoaded={conversationsLoaded}
         isFlyoutMode={isFlyoutMode}
+        refetchConversations={refetchConversations}
+        selectedConversation={currentConversation}
       />
     );
   }

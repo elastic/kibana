@@ -43,7 +43,7 @@ interface Props {
     React.SetStateAction<ConversationsBulkActions>
   >;
   defaultConnector?: AIConnector;
-  handleSave: () => void;
+  handleSave: (shouldRefetchConversation?: boolean) => void;
   onCancelClick: () => void;
 }
 
@@ -110,8 +110,9 @@ const SystemPromptSettingsManagementComponent = ({
 
   const onDeleteConfirmed = useCallback(() => {
     closeConfirmModal();
-    handleSave();
-  }, [closeConfirmModal, handleSave]);
+    handleSave(true);
+    setConversationsSettingsBulkActions({});
+  }, [closeConfirmModal, handleSave, setConversationsSettingsBulkActions]);
 
   const onSaveCancelled = useCallback(() => {
     closeFlyout();
@@ -120,8 +121,9 @@ const SystemPromptSettingsManagementComponent = ({
 
   const onSaveConfirmed = useCallback(() => {
     closeFlyout();
-    handleSave();
-  }, [closeFlyout, handleSave]);
+    handleSave(true);
+    setConversationsSettingsBulkActions({});
+  }, [closeFlyout, handleSave, setConversationsSettingsBulkActions]);
 
   const confirmationTitle = useMemo(
     () =>

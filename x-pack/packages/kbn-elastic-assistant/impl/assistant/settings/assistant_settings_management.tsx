@@ -44,6 +44,7 @@ interface Props {
   conversationsLoaded: boolean;
   selectedConversation: Conversation;
   isFlyoutMode: boolean;
+  refetchConversations: () => void;
 }
 
 /**
@@ -52,10 +53,11 @@ interface Props {
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
   ({
-    selectedConversation: defaultSelectedConversation,
     conversations,
     conversationsLoaded,
     isFlyoutMode,
+    refetchConversations,
+    selectedConversation: defaultSelectedConversation,
   }) => {
     const {
       actionTypeRegistry,
@@ -153,14 +155,24 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       }
     }, [selectedSystemPrompt, systemPromptSettings]);
 
-    const handleSave = useCallback(() => {
-      saveSettings();
-      toasts?.addSuccess({
-        iconType: 'check',
-        title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
-      });
-      setHasPendingChanges(false);
-    }, [saveSettings, toasts]);
+    const handleSave = useCallback(
+      async (shouldRefetchConversation?: boolean) => {
+        await saveSettings();
+        toasts?.addSuccess({
+          iconType: 'check',
+          title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
+        });
+        setHasPendingChanges(false);
+        if (shouldRefetchConversation) {
+          refetchConversations();
+        }
+      },
+      [refetchConversations, saveSettings, toasts]
+    );
+
+    const onSaveButtonClicked = useCallback(() => {
+      handleSave(true);
+    }, [handleSave]);
 
     const tabsConfig = useMemo(
       () => [
@@ -245,17 +257,17 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               assistantStreamingEnabled={assistantStreamingEnabled}
               connectors={connectors}
               conversationSettings={conversationSettings}
-              conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               conversationsLoaded={conversationsLoaded}
+              conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               defaultConnector={defaultConnector}
               handleSave={handleSave}
               isFlyoutMode={isFlyoutMode}
               onCancelClick={onCancelClick}
+              onSelectedConversationChange={onHandleSelectedConversationChange}
               selectedConversation={selectedConversation}
               setAssistantStreamingEnabled={handleChange(setUpdatedAssistantStreamingEnabled)}
               setConversationSettings={setConversationSettings}
               setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
-              onSelectedConversationChange={onHandleSelectedConversationChange}
             />
           )}
           {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
@@ -321,7 +333,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
                   size="s"
                   type="submit"
                   data-test-subj="save-button"
-                  onClick={handleSave}
+                  onClick={onSaveButtonClicked}
                   iconType="check"
                   fill
                 >
