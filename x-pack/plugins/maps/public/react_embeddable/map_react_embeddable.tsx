@@ -22,7 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { inject } from '../../common/embeddable';
-import type { MapApi, MapSerializedState } from './types';
+import type { MapApi, MapRuntimeState, MapSerializedState } from './types';
 import { SavedMap } from '../routes/map_page';
 import { initializeReduxSync } from './initialize_redux_sync';
 import {
@@ -44,7 +44,11 @@ export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
 }
 
-export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, MapApi> = {
+export const mapEmbeddableFactory: ReactEmbeddableFactory<
+  MapSerializedState,
+  MapRuntimeState,
+  MapApi
+> = {
   type: MAP_SAVED_OBJECT_TYPE,
   deserializeState: (state) => {
     return state.rawState

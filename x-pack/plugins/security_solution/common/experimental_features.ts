@@ -115,6 +115,11 @@ export const allowedExperimentalValues = Object.freeze({
   expandableFlyoutDisabled: false,
 
   /**
+   * Enables new notes
+   */
+  notesEnabled: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -262,6 +267,14 @@ export const allowedExperimentalValues = Object.freeze({
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: false,
+
+  /**
+   * Enables an ability to customize Elastic prebuilt rules.
+   *
+   * Ticket: https://github.com/elastic/security-team/issues/1974
+   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
+   */
+  prebuiltRulesCustomizationEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

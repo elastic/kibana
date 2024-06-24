@@ -14,7 +14,6 @@ import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { Space } from '@kbn/spaces-plugin/public';
 import type { BuildFlavor } from '@kbn/config';
-import type { UserSettingsData } from '@kbn/user-profile-components';
 import { SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
 import { NavigationPublicPlugin } from './plugin';
 
@@ -32,10 +31,8 @@ const setup = (
   },
   {
     buildFlavor = 'traditional',
-    userSettings = {},
   }: {
     buildFlavor?: BuildFlavor;
-    userSettings?: UserSettingsData;
   } = {}
 ) => {
   const initializerContext = coreMock.createPluginInitializerContext({}, { buildFlavor });
@@ -104,7 +101,7 @@ describe('Navigation Plugin', () => {
 
       spaces.getActiveSpace$ = jest
         .fn()
-        .mockReturnValue(of({ solution: 'search' } as Pick<Space, 'solution'>));
+        .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
 
       plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments, spaces });
       await new Promise((resolve) => setTimeout(resolve));
@@ -201,7 +198,7 @@ describe('Navigation Plugin', () => {
           featureOn: true,
         });
 
-        for (const solution of ['search', 'observability', 'security']) {
+        for (const solution of ['es', 'oblt', 'security']) {
           spaces.getActiveSpace$ = jest
             .fn()
             .mockReturnValue(of({ solution } as Pick<Space, 'solution'>));
@@ -219,6 +216,85 @@ describe('Navigation Plugin', () => {
     });
 
     describe('isSolutionNavEnabled$', () => {
+      // This test will need to be changed when we remove the feature flag
+      it('should be off by default', async () => {
+        const { plugin, coreStart, unifiedSearch, cloud } = setup({ featureOn });
+
+        const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
+          unifiedSearch,
+          cloud,
+        });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        const isEnabled = await firstValueFrom(isSolutionNavEnabled$);
+        expect(isEnabled).toBe(false);
+      });
+
+      it('should be off if feature flag if "ON" but space solution is "classic" or "undefined"', async () => {
+        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments, spaces } = setup({
+          featureOn,
+        });
+
+        cloudExperiments.getVariation.mockResolvedValue(true); // Feature flag ON
+
+        {
+          spaces.getActiveSpace$ = jest
+            .fn()
+            .mockReturnValue(of({ solution: undefined } as Pick<Space, 'solution'>));
+
+          const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
+            unifiedSearch,
+            cloud,
+            cloudExperiments,
+            spaces,
+          });
+          await new Promise((resolve) => setTimeout(resolve));
+
+          const isEnabled = await firstValueFrom(isSolutionNavEnabled$);
+          expect(isEnabled).toBe(false);
+        }
+
+        {
+          spaces.getActiveSpace$ = jest
+            .fn()
+            .mockReturnValue(of({ solution: 'classic' } as Pick<Space, 'solution'>));
+
+          const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
+            unifiedSearch,
+            cloud,
+            cloudExperiments,
+            spaces,
+          });
+          await new Promise((resolve) => setTimeout(resolve));
+
+          const isEnabled = await firstValueFrom(isSolutionNavEnabled$);
+          expect(isEnabled).toBe(false);
+        }
+      });
+
+      it('should be on if feature flag if "ON" and space solution is set', async () => {
+        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments, spaces } = setup({
+          featureOn,
+        });
+
+        cloudExperiments.getVariation.mockResolvedValue(true); // Feature flag ON
+
+        spaces.getActiveSpace$ = jest
+          .fn()
+          .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
+
+        const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
+          unifiedSearch,
+          cloud,
+          cloudExperiments,
+          spaces,
+        });
+        await new Promise((resolve) => setTimeout(resolve));
+
+        const isEnabled = await firstValueFrom(isSolutionNavEnabled$);
+        expect(isEnabled).toBe(true);
+      });
+
       it('on serverless should flag must be disabled', async () => {
         const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
           { featureOn },

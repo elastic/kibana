@@ -1609,6 +1609,18 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND",
+        "description": [],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL",
         "type": "string",
         "tags": [],
@@ -1876,6 +1888,81 @@
           "{ page: number; perPage: number; total: number; data: { id: string; namespace: string; title: string; createdAt: string; category: \"assistant\" | \"insights\"; users: { id?: string | undefined; name?: string | undefined; }[]; summary?: { content?: string | undefined; timestamp?: string | undefined; public?: boolean | undefined; confidence?: \"medium\" | \"low\" | \"high\" | undefined; } | undefined; timestamp?: string | undefined; updatedAt?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; isError?: boolean | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }[] | undefined; apiConfig?: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; } | undefined; isDefault?: boolean | undefined; excludeFromLastConversationStorage?: boolean | undefined; }[]; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindKnowledgeBaseEntriesRequestQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "FindKnowledgeBaseEntriesRequestQuery",
+        "description": [],
+        "signature": [
+          "{ per_page: number; page: number; fields?: string[] | undefined; filter?: string | undefined; sort_field?: \"title\" | \"updated_at\" | \"created_at\" | \"is_default\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/find_knowledge_base_entries_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindKnowledgeBaseEntriesRequestQueryInput",
+        "type": "Type",
+        "tags": [],
+        "label": "FindKnowledgeBaseEntriesRequestQueryInput",
+        "description": [],
+        "signature": [
+          "{ fields?: unknown; filter?: string | undefined; sort_field?: \"title\" | \"updated_at\" | \"created_at\" | \"is_default\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; page?: number | undefined; per_page?: number | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/find_knowledge_base_entries_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindKnowledgeBaseEntriesResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "FindKnowledgeBaseEntriesResponse",
+        "description": [],
+        "signature": [
+          "{ page: number; perPage: number; total: number; data: { id: string; namespace: string; text: string; createdAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; createdBy?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; metadata?: { source: string; required: boolean; kbResource: string; } | undefined; vector?: { modelId: string; tokens: {} & { [k: string]: number; }; } | undefined; }[]; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/find_knowledge_base_entries_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindKnowledgeBaseEntriesSortField",
+        "type": "Type",
+        "tags": [],
+        "label": "FindKnowledgeBaseEntriesSortField",
+        "description": [],
+        "signature": [
+          "\"title\" | \"updated_at\" | \"created_at\" | \"is_default\""
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/find_knowledge_base_entries_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindKnowledgeBaseEntriesSortFieldEnum",
+        "type": "Type",
+        "tags": [],
+        "label": "FindKnowledgeBaseEntriesSortFieldEnum",
+        "description": [],
+        "signature": [
+          "{ title: \"title\"; updated_at: \"updated_at\"; created_at: \"created_at\"; is_default: \"is_default\"; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/find_knowledge_base_entries_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2639,7 +2726,7 @@
         "signature": [
           "\"asc\" | \"desc\""
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2654,7 +2741,7 @@
         "signature": [
           "{ asc: \"asc\"; desc: \"desc\"; }"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3665,6 +3752,66 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindKnowledgeBaseEntriesRequestQuery",
+        "type": "Object",
+        "tags": [],
+        "label": "FindKnowledgeBaseEntriesRequestQuery",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ fields: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodArray<Zod.ZodString, \"many\">, string[], unknown>>; filter: Zod.ZodOptional<Zod.ZodString>; sort_field: Zod.ZodOptional<Zod.ZodEnum<[\"created_at\", \"is_default\", \"title\", \"updated_at\"]>>; sort_order: Zod.ZodOptional<Zod.ZodEnum<[\"asc\", \"desc\"]>>; page: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; per_page: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { per_page: number; page: number; fields?: string[] | undefined; filter?: string | undefined; sort_field?: \"title\" | \"updated_at\" | \"created_at\" | \"is_default\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; }, { fields?: unknown; filter?: string | undefined; sort_field?: \"title\" | \"updated_at\" | \"created_at\" | \"is_default\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; page?: number | undefined; per_page?: number | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/find_knowledge_base_entries_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindKnowledgeBaseEntriesResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "FindKnowledgeBaseEntriesResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ page: Zod.ZodNumber; perPage: Zod.ZodNumber; total: Zod.ZodNumber; data: Zod.ZodArray<Zod.ZodObject<{ timestamp: Zod.ZodOptional<Zod.ZodString>; id: Zod.ZodString; createdAt: Zod.ZodString; createdBy: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodOptional<Zod.ZodString>; updatedBy: Zod.ZodOptional<Zod.ZodString>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; metadata: Zod.ZodOptional<Zod.ZodObject<{ kbResource: Zod.ZodString; source: Zod.ZodString; required: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { source: string; required: boolean; kbResource: string; }, { source: string; required: boolean; kbResource: string; }>>; namespace: Zod.ZodString; text: Zod.ZodString; vector: Zod.ZodOptional<Zod.ZodObject<{ modelId: Zod.ZodString; tokens: Zod.ZodObject<{}, \"strip\", Zod.ZodNumber, Zod.objectOutputType<{}, Zod.ZodNumber, \"strip\">, Zod.objectInputType<{}, Zod.ZodNumber, \"strip\">>; }, \"strip\", Zod.ZodTypeAny, { modelId: string; tokens: {} & { [k: string]: number; }; }, { modelId: string; tokens: {} & { [k: string]: number; }; }>>; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; text: string; createdAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; createdBy?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; metadata?: { source: string; required: boolean; kbResource: string; } | undefined; vector?: { modelId: string; tokens: {} & { [k: string]: number; }; } | undefined; }, { id: string; namespace: string; text: string; createdAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; createdBy?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; metadata?: { source: string; required: boolean; kbResource: string; } | undefined; vector?: { modelId: string; tokens: {} & { [k: string]: number; }; } | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { page: number; perPage: number; total: number; data: { id: string; namespace: string; text: string; createdAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; createdBy?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; metadata?: { source: string; required: boolean; kbResource: string; } | undefined; vector?: { modelId: string; tokens: {} & { [k: string]: number; }; } | undefined; }[]; }, { page: number; perPage: number; total: number; data: { id: string; namespace: string; text: string; createdAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; timestamp?: string | undefined; createdBy?: string | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; metadata?: { source: string; required: boolean; kbResource: string; } | undefined; vector?: { modelId: string; tokens: {} & { [k: string]: number; }; } | undefined; }[]; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/find_knowledge_base_entries_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindKnowledgeBaseEntriesSortField",
+        "type": "Object",
+        "tags": [],
+        "label": "FindKnowledgeBaseEntriesSortField",
+        "description": [],
+        "signature": [
+          "Zod.ZodEnum<[\"created_at\", \"is_default\", \"title\", \"updated_at\"]>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/find_knowledge_base_entries_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.FindKnowledgeBaseEntriesSortFieldEnum",
+        "type": "Object",
+        "tags": [],
+        "label": "FindKnowledgeBaseEntriesSortFieldEnum",
+        "description": [],
+        "signature": [
+          "{ title: \"title\"; updated_at: \"updated_at\"; created_at: \"created_at\"; is_default: \"is_default\"; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/find_knowledge_base_entries_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.GetCapabilitiesResponse",
         "type": "Object",
         "tags": [],
@@ -4273,7 +4420,7 @@
         "signature": [
           "Zod.ZodEnum<[\"asc\", \"desc\"]>"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4288,7 +4435,7 @@
         "signature": [
           "{ asc: \"asc\"; desc: \"desc\"; }"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
