@@ -80,7 +80,6 @@ const StyledDatePicker = styled.div`
 
 interface GetEndpointListColumnsProps {
   missingPolicies: ReturnType<typeof nonExistingPolicies>;
-  canReadPolicyManagement: boolean;
   backToEndpointList: PolicyDetailsRouteState['backLink'];
   queryParams: Immutable<EndpointIndexUIQueryParams>;
   search: string;
@@ -105,7 +104,6 @@ const columnWidths: Record<
 
 const getEndpointListColumns = ({
   missingPolicies,
-  canReadPolicyManagement,
   backToEndpointList,
   queryParams,
   search,
@@ -512,7 +510,6 @@ export const EndpointList = () => {
   const columns = useMemo(
     () =>
       getEndpointListColumns({
-        canReadPolicyManagement,
         backToEndpointList,
         getAppUrl,
         missingPolicies,
