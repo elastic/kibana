@@ -75,20 +75,19 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
  * particular field? Consider using the EcsFlat module from `@kbn/ecs`
  */
 export interface BrowserField {
-  aggregatable: boolean;
-  category: string;
-  description: string | null;
-  example: string | number | null;
-  fields: Record<string, Partial<BrowserField>>;
-  format: string;
-  indexes: string[];
-  name: string;
-  searchable: boolean;
-  type: string;
-  esTypes?: string[];
-  subType?: IFieldSubType;
-  readFromDocValues: boolean;
-  runtimeField?: RuntimeField;
+  aggregatable: boolean; // NOTE present in fieldspec
+  description: string | null; // customDescription
+  example: string | number | null; // not there, could be pulled from the ecs
+  fields: Record<string, Partial<BrowserField>>; // missing
+  format: string; // is there
+  indexes: string[]; // missing
+  name: string; // is there
+  searchable: boolean; // is there
+  type: string; // is there
+  esTypes?: string[]; // is there
+  subType?: IFieldSubType; // not sure
+  readFromDocValues: boolean; // not sure
+  runtimeField?: RuntimeField; // is there
 }
 
 /**
