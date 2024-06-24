@@ -14,8 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getField } from '../../shared/utils';
-import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
-import { AlertReasonPreviewPanel } from '../../preview';
+import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
 import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,
@@ -23,6 +22,17 @@ import {
 } from './test_ids';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { useRightPanelContext } from '../context';
+
+export const ALERT_REASON_BANNER = {
+  title: i18n.translate(
+    'xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle',
+    {
+      defaultMessage: 'Preview alert reason',
+    }
+  ),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+};
 
 /**
  * Displays the information provided by the rowRenderer. Supports multiple types of documents.
@@ -37,22 +47,12 @@ export const Reason: FC = () => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const openRulePreview = useCallback(() => {
     openPreviewPanel({
-      id: DocumentDetailsPreviewPanelKey,
-      path: { tab: AlertReasonPreviewPanel },
+      id: DocumentDetailsAlertReasonPanelKey,
       params: {
         id: eventId,
         indexName,
         scopeId,
-        banner: {
-          title: i18n.translate(
-            'xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle',
-            {
-              defaultMessage: 'Preview alert reason',
-            }
-          ),
-          backgroundColor: 'warning',
-          textColor: 'warning',
-        },
+        banner: ALERT_REASON_BANNER,
       },
     });
     telemetry.reportDetailsFlyoutOpened({
