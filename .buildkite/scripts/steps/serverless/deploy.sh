@@ -49,7 +49,7 @@ deploy() {
   PROJECT_EXISTS_LOGS=$(mktemp --suffix ".json")
   PROJECT_INFO_LOGS=$(mktemp --suffix ".json")
 
-  curl -s \
+  curl -s --fail \
     -H "Authorization: ApiKey $PROJECT_API_KEY" \
     "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}" \
     -XGET &> $PROJECT_EXISTS_LOGS
@@ -60,7 +60,7 @@ deploy() {
       echo "No project to remove"
     else
       echo "Shutting down previous project..."
-      curl -s \
+      curl -s --fail \
         -H "Authorization: ApiKey $PROJECT_API_KEY" \
         -H "Content-Type: application/json" \
         "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
@@ -71,7 +71,7 @@ deploy() {
 
   if [ -z "${PROJECT_ID}" ] || [ "$PROJECT_ID" = 'null' ]; then
     echo "Creating project..."
-    curl -s \
+    curl -s --fail \
       -H "Authorization: ApiKey $PROJECT_API_KEY" \
       -H "Content-Type: application/json" \
       "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}" \
@@ -95,15 +95,15 @@ deploy() {
 
   else
     echo "Updating project..."
-    curl -s \
+    curl -s --fail \
       -H "Authorization: ApiKey $PROJECT_API_KEY" \
       -H "Content-Type: application/json" \
       "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
-      -XPUT -d "$PROJECT_UPDATE_CONFIGURATION" &> $PROJECT_DEPLOY_LOGS
+      -XPATCH -d "$PROJECT_UPDATE_CONFIGURATION" &> $PROJECT_DEPLOY_LOGS
   fi
 
   echo "Getting project info..."
-  curl -s \
+  curl -s --fail \
     -H "Authorization: ApiKey $PROJECT_API_KEY" \
     "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
     -XGET &> $PROJECT_INFO_LOGS
