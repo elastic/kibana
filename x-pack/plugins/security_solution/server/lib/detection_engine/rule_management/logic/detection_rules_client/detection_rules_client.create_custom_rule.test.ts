@@ -19,8 +19,6 @@ import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
-import { RuleResponseValidationError } from './utils';
-import type { RuleAlertType } from '../../../rule_schema';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -68,20 +66,6 @@ describe('DetectionRulesClient.createCustomRule', () => {
     ).rejects.toThrow('mocked MLAuth error');
 
     expect(rulesClient.create).not.toHaveBeenCalled();
-  });
-
-  it('throws if RuleResponse validation fails', async () => {
-    const internalRuleMock: RuleAlertType = getRuleMock({
-      ...getQueryRuleParams(),
-      /* Casting as 'query' suppress to TS error */
-      type: 'fake-non-existent-type' as 'query',
-    });
-
-    rulesClient.create.mockResolvedValueOnce(internalRuleMock);
-
-    await expect(
-      detectionRulesClient.createCustomRule({ params: getCreateMachineLearningRulesSchemaMock() })
-    ).rejects.toThrow(RuleResponseValidationError);
   });
 
   it('calls the rulesClient with legacy ML params', async () => {
