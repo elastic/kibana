@@ -11,11 +11,11 @@ import styled from 'styled-components';
 import { getAgentStatusText } from './translations';
 import { getEmptyTagValue } from '../../../empty_value';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import type { EndpointPendingActions } from '../../../../../../common/endpoint/types';
 import { useGetAgentStatus } from '../../../../../management/hooks/agents/use_get_agent_status';
 import { useTestIdGenerator } from '../../../../../management/hooks/use_test_id_generator';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../../management/pages/endpoint_hosts/view/host_constants';
 import { AgentResponseActionsStatus } from './agent_response_action_status';
+import type { AgentStatusInfo } from '../../../../../../common/endpoint/types';
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   .isolation-status {
@@ -23,37 +23,61 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   }
 `;
 
-// FIXME:PT component needs to be enhanced so that it also accepts agentStatusInfo (for use on lists UIs)
+export interface AgentStatusProps {
+  agentType: ResponseActionAgentType;
+  /**
+   * The agent id for which the status will be displayed. An API call will be made to retrieve the
+   * status. If using this component on a List view, use `statusInfo` prop instead and make API
+   * call to retrieve all statuses of displayed agents at the view level in order to keep API calls
+   * to a minimum
+   *
+   * NOTE: will be ignored if `statusInfo` prop is defined!
+   */
+  agentId?: string;
+  /**
+   * The status info for the agent. When both `agentId` and `agentInfo` are defined, `agentInfo` will
+   * be used and `agentId` ignored.
+   */
+  statusInfo?: AgentStatusInfo;
+  'data-test-subj'?: string;
+}
 
 /**
- * Display the agent status of a host that supports response actions
+ * Display the agent status of a host that supports response actions.
+ *
+ * IMPORTANT: If using this component on a list view, ensure that `statusInfo` prop is used instead
+ *            of `agentId` in order to ensure API calls are kept to a minimum and the list view
+ *            remains more performant.
  */
 export const AgentStatus = React.memo(
-  ({
-    agentId,
-    agentType,
-    'data-test-subj': dataTestSubj,
-  }: {
-    agentId: string;
-    agentType: ResponseActionAgentType;
-    'data-test-subj'?: string;
-  }) => {
+  ({ agentId, agentType, statusInfo, 'data-test-subj': dataTestSubj }: AgentStatusProps) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { data, isLoading, isFetched } = useGetAgentStatus(agentId, agentType);
+    const enableApiCall = useMemo(() => {
+      return !statusInfo || !agentId;
+    }, [agentId, statusInfo]);
+    const { data, isLoading, isFetched } = useGetAgentStatus(agentId ?? '', agentType, {
+      enabled: enableApiCall,
+    });
+    const agentStatus: AgentStatusInfo | undefined = useMemo(() => {
+      if (statusInfo) {
+        return statusInfo;
+      }
+      return data?.[agentId ?? ''];
+    }, [agentId, data, statusInfo]);
 
-    const agentStatus = data?.[agentId];
     const isCurrentlyIsolated = Boolean(agentStatus?.isolated);
-    const pendingActions = agentStatus?.pendingActions;
 
     const [hasPendingActions, hostPendingActions] = useMemo<
-      [boolean, EndpointPendingActions['pending_actions']]
+      [boolean, AgentStatusInfo['pendingActions']]
     >(() => {
+      const pendingActions = agentStatus?.pendingActions;
+
       if (!pendingActions) {
         return [false, {}];
       }
 
       return [Object.keys(pendingActions).length > 0, pendingActions];
-    }, [pendingActions]);
+    }, [agentStatus?.pendingActions]);
 
     return (
       <EuiFlexGroupStyled

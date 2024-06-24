@@ -10,6 +10,7 @@ import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { DEFAULT_POLL_INTERVAL } from '../../common/constants';
 import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type { AgentStatusRecords, AgentStatusApiResponse } from '../../../../common/endpoint/types';
@@ -29,7 +30,7 @@ interface ErrorType {
  */
 export const useGetAgentStatus = (
   agentIds: string[] | string,
-  agentType: string,
+  agentType: ResponseActionAgentType,
   options: UseQueryOptions<AgentStatusRecords, IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<AgentStatusRecords, IHttpFetchError<ErrorType>> => {
   // FIXME:PT where are the tests for this hook?
@@ -43,8 +44,12 @@ export const useGetAgentStatus = (
     queryKey: ['get-agent-status', agentIds],
     refetchInterval: DEFAULT_POLL_INTERVAL,
     ...options,
-    queryFn: () =>
-      http
+    queryFn: () => {
+      if (agentIds.length === 0) {
+        return {};
+      }
+
+      return http
         .get<AgentStatusApiResponse>(AGENT_STATUS_ROUTE, {
           version: '1',
           query: {
@@ -52,6 +57,7 @@ export const useGetAgentStatus = (
             agentType,
           },
         })
-        .then((response) => response.data),
+        .then((response) => response.data);
+    },
   });
 };
