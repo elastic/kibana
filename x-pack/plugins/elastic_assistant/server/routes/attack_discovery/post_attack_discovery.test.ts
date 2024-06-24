@@ -19,7 +19,6 @@ import { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
 import {
   getAssistantTool,
   getAssistantToolParams,
-  invokeAttackDiscoveryTool,
   updateAttackDiscoveryStatusToRunning,
 } from './helpers';
 jest.mock('./helpers');
@@ -73,7 +72,6 @@ describe('postAttackDiscoveryRoute', () => {
     findAttackDiscoveryByConnectorId.mockResolvedValue(mockCurrentAd);
     (getAssistantTool as jest.Mock).mockReturnValue({ getTool: jest.fn() });
     (getAssistantToolParams as jest.Mock).mockReturnValue({ tool: 'tool' });
-    (invokeAttackDiscoveryTool as jest.Mock).mockResolvedValue({ tool: 'tool' });
     (updateAttackDiscoveryStatusToRunning as jest.Mock).mockResolvedValue({
       currentAd: runningAd,
       attackDiscoveryId: mockCurrentAd.id,

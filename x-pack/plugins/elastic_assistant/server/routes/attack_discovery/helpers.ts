@@ -24,7 +24,6 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import { Moment } from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import moment from 'moment/moment';
 import { uniq } from 'lodash/fp';
 import { getLangSmithTracer } from '../evaluate/utils';
@@ -266,59 +265,6 @@ export const updateAttackDiscoveryStatusToCanceled = async (
 const getDataFromJSON = (adStringified: string) => {
   const { alertsContextCount, attackDiscoveries } = JSON.parse(adStringified);
   return { alertsContextCount, attackDiscoveries };
-};
-
-export const invokeAttackDiscoveryTool = ({
-  apiConfig,
-  attackDiscoveryId,
-  authenticatedUser,
-  dataClient,
-  latestReplacements,
-  logger,
-  size,
-  startTime,
-  telemetry,
-  toolInstance,
-}: {
-  apiConfig: ApiConfig;
-  attackDiscoveryId: string;
-  authenticatedUser: AuthenticatedUser;
-  dataClient: AttackDiscoveryDataClient;
-  latestReplacements: Replacements;
-  logger: Logger;
-  size: number;
-  startTime: Moment;
-  toolInstance: Tool | DynamicStructuredTool | null;
-  telemetry: AnalyticsServiceSetup;
-}) => {
-  toolInstance
-    ?.invoke('')
-    .then((rawAttackDiscoveries: string) =>
-      updateAttackDiscoveries({
-        apiConfig,
-        attackDiscoveryId,
-        authenticatedUser,
-        dataClient,
-        latestReplacements,
-        logger,
-        rawAttackDiscoveries,
-        size,
-        startTime,
-        telemetry,
-      })
-    )
-    .catch((err) =>
-      handleToolError({
-        apiConfig,
-        attackDiscoveryId,
-        authenticatedUser,
-        dataClient,
-        err,
-        latestReplacements,
-        logger,
-        telemetry,
-      })
-    );
 };
 
 export const updateAttackDiscoveries = async ({
