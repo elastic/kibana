@@ -200,7 +200,7 @@ export const AwsCredentialsFormAgentless = ({
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.cloudCredentials.cloudFormationSupportedMessage"
+              id="xpack.csp.fleetIntegration.awsCloudCredentials.cloudFormationSupportedMessage"
               defaultMessage="Launch Cloud Formation for Automated Credentials not supported in current integration version. Please upgrade to the latest version to enable Launch CloudFormation for automated credentials."
             />
           </EuiCallOut>
