@@ -208,6 +208,7 @@ describe('buildDatasourceStates', () => {
               "query": Object {
                 "esql": "from test | limit 10",
               },
+              "timeField": undefined,
             },
           },
         },
