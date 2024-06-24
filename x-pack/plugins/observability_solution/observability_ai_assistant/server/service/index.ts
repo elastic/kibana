@@ -22,44 +22,32 @@ import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
 import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
-import type {
-  RegistrationCallback,
-  ObservabilityAIAssistantResourceNames,
-  RespondFunctionResources,
-} from './types';
+import { registerIndexQueuedDocumentsTask } from './task_manager_definitions/register_index_queued_documents_task';
+import type { RegistrationCallback, RespondFunctionResources } from './types';
 import { splitKbText } from './util/split_kb_text';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
 }
 
-export function createResourceNamesMap() {
-  return {
-    componentTemplate: {
-      conversations: getResourceName('component-template-conversations'),
-      kb: getResourceName('component-template-kb'),
-    },
-    aliases: {
-      conversations: getResourceName('conversations'),
-      kb: getResourceName('kb'),
-    },
-    indexPatterns: {
-      conversations: getResourceName('conversations*'),
-      kb: getResourceName('kb*'),
-    },
-    indexTemplate: {
-      conversations: getResourceName('index-template-conversations'),
-      kb: getResourceName('index-template-kb'),
-    },
-    pipelines: {
-      kb: getResourceName('kb-ingest-pipeline'),
-    },
-  };
-}
-
-export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQueuedDocumentsTask';
-
-export const INDEX_QUEUED_DOCUMENTS_TASK_TYPE = INDEX_QUEUED_DOCUMENTS_TASK_ID + 'Type';
+export const resourceNames = {
+  componentTemplate: {
+    conversations: getResourceName('component-template-conversations'),
+    kb: getResourceName('component-template-kb'),
+  },
+  aliases: {
+    conversations: getResourceName('conversations'),
+    kb: getResourceName('kb'),
+  },
+  indexPatterns: {
+    conversations: getResourceName('conversations*'),
+    kb: getResourceName('kb*'),
+  },
+  indexTemplate: {
+    conversations: getResourceName('index-template-conversations'),
+    kb: getResourceName('index-template-kb'),
+  },
+};
 
 type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> } & (
   | {
@@ -73,10 +61,7 @@ type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> }
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
-  private readonly getModelId: () => Promise<string>;
   private kbService?: KnowledgeBaseService;
-
-  private readonly resourceNames: ObservabilityAIAssistantResourceNames = createResourceNamesMap();
 
   private readonly registrations: RegistrationCallback[] = [];
 
@@ -84,51 +69,45 @@ export class ObservabilityAIAssistantService {
     logger,
     core,
     taskManager,
-    getModelId,
   }: {
     logger: Logger;
     core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
     taskManager: TaskManagerSetupContract;
-    getModelId: () => Promise<string>;
   }) {
     this.core = core;
     this.logger = logger;
-    this.getModelId = getModelId;
 
-    this.allowInit();
+    this.registerInit();
 
-    taskManager.registerTaskDefinitions({
-      [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
-        title: 'Index queued KB articles',
-        description:
-          'Indexes previously registered entries into the knowledge base when it is ready',
-        timeout: '30m',
-        maxAttempts: 2,
-        createTaskRunner: (context) => {
-          return {
-            run: async () => {
-              if (this.kbService) {
-                await this.kbService.processQueue();
-              }
-            },
-          };
-        },
-      },
+    const getTaskManagerStart = async () => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.taskManager;
+    };
+
+    registerIndexQueuedDocumentsTask({
+      taskManager,
+      logger,
+      getKbService: () => this.kbService,
+      getTaskManagerStart,
     });
-  }
 
-  getKnowledgeBaseStatus() {
-    return this.init().then(() => {
-      return this.kbService!.status();
-    });
+    // registerMigrateKnowledgeBaseEntriesTask({
+    //   taskManager,
+    //   logger,
+    //   getEsClient: async () => {
+    //     const [coreStart] = await core.getStartServices();
+    //     return coreStart.elasticsearch.client.asInternalUser;
+    //   },
+    //   getTaskManagerStart,
+    // });
   }
 
   init = async () => {};
 
-  private allowInit = () => {
+  private registerInit = () => {
     this.init = once(async () => {
       return this.doInit().catch((error) => {
-        this.allowInit();
+        this.registerInit(); // reset the once flag if an error occurs
         throw error;
       });
     });
@@ -138,39 +117,34 @@ export class ObservabilityAIAssistantService {
     try {
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
-      const elserModelId = await this.getModelId();
+      const esClient = {
+        asInternalUser: coreStart.elasticsearch.client.asInternalUser,
+      };
 
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-      await esClient.cluster.putComponentTemplate({
+      await esClient.asInternalUser.cluster.putComponentTemplate({
         create: false,
-        name: this.resourceNames.componentTemplate.conversations,
+        name: resourceNames.componentTemplate.conversations,
         template: conversationComponentTemplate,
       });
 
-      await esClient.indices.putIndexTemplate({
-        name: this.resourceNames.indexTemplate.conversations,
-        composed_of: [this.resourceNames.componentTemplate.conversations],
+      await esClient.asInternalUser.indices.putIndexTemplate({
+        name: resourceNames.indexTemplate.conversations,
+        composed_of: [resourceNames.componentTemplate.conversations],
         create: false,
-        index_patterns: [this.resourceNames.indexPatterns.conversations],
+        index_patterns: [resourceNames.indexPatterns.conversations],
         template: {
           settings: {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
             hidden: true,
           },
-          mappings: {
-            _meta: {
-              model: elserModelId,
-            },
-          },
         },
       });
 
-      const conversationAliasName = this.resourceNames.aliases.conversations;
+      const conversationAliasName = resourceNames.aliases.conversations;
 
       await createConcreteWriteIndex({
-        esClient,
+        esClient: esClient.asInternalUser,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {
@@ -178,43 +152,22 @@ export class ObservabilityAIAssistantService {
           pattern: `${conversationAliasName}*`,
           basePattern: `${conversationAliasName}*`,
           name: `${conversationAliasName}-000001`,
-          template: this.resourceNames.indexTemplate.conversations,
+          template: resourceNames.indexTemplate.conversations,
         },
         dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
-      await esClient.cluster.putComponentTemplate({
+      await esClient.asInternalUser.cluster.putComponentTemplate({
         create: false,
-        name: this.resourceNames.componentTemplate.kb,
+        name: resourceNames.componentTemplate.kb,
         template: kbComponentTemplate,
       });
 
-      await esClient.ingest.putPipeline({
-        id: this.resourceNames.pipelines.kb,
-        processors: [
-          {
-            inference: {
-              model_id: elserModelId,
-              target_field: 'ml',
-              field_map: {
-                text: 'text_field',
-              },
-              inference_config: {
-                // @ts-expect-error
-                text_expansion: {
-                  results_field: 'tokens',
-                },
-              },
-            },
-          },
-        ],
-      });
-
-      await esClient.indices.putIndexTemplate({
-        name: this.resourceNames.indexTemplate.kb,
-        composed_of: [this.resourceNames.componentTemplate.kb],
+      await esClient.asInternalUser.indices.putIndexTemplate({
+        name: resourceNames.indexTemplate.kb,
+        composed_of: [resourceNames.componentTemplate.kb],
         create: false,
-        index_patterns: [this.resourceNames.indexPatterns.kb],
+        index_patterns: [resourceNames.indexPatterns.kb],
         template: {
           settings: {
             number_of_shards: 1,
@@ -224,10 +177,10 @@ export class ObservabilityAIAssistantService {
         },
       });
 
-      const kbAliasName = this.resourceNames.aliases.kb;
+      const kbAliasName = resourceNames.aliases.kb;
 
       await createConcreteWriteIndex({
-        esClient,
+        esClient: esClient.asInternalUser,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {
@@ -235,7 +188,7 @@ export class ObservabilityAIAssistantService {
           pattern: `${kbAliasName}*`,
           basePattern: `${kbAliasName}*`,
           name: `${kbAliasName}-000001`,
-          template: this.resourceNames.indexTemplate.kb,
+          template: resourceNames.indexTemplate.kb,
         },
         dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
@@ -243,9 +196,7 @@ export class ObservabilityAIAssistantService {
       this.kbService = new KnowledgeBaseService({
         logger: this.logger.get('kb'),
         esClient,
-        resources: this.resourceNames,
         taskManagerStart: pluginsStart.taskManager,
-        getModelId: this.getModelId,
       });
 
       this.logger.info('Successfully set up index assets');
@@ -290,7 +241,6 @@ export class ObservabilityAIAssistantService {
         asInternalUser: coreStart.elasticsearch.client.asInternalUser,
         asCurrentUser: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
       },
-      resources: this.resourceNames,
       logger: this.logger,
       user: user
         ? {

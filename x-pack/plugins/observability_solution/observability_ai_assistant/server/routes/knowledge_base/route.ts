@@ -5,37 +5,33 @@
  * 2.0.
  */
 
-import type {
-  MlDeploymentAllocationState,
-  MlDeploymentState,
-} from '@elastic/elasticsearch/lib/api/types';
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
+import { InferenceEndpointResponse } from '../../service/create_inference_endpoint';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
   options: {
     tags: ['access:ai_assistant'],
   },
-  handler: async (
-    resources
-  ): Promise<{
-    ready: boolean;
-    error?: any;
-    deployment_state?: MlDeploymentState;
-    allocation_state?: MlDeploymentAllocationState;
-    model_name?: string;
-  }> => {
-    const client = await resources.service.getClient({ request: resources.request });
+  handler: async ({
+    service,
+    request,
+  }): Promise<
+    Partial<InferenceEndpointResponse['endpoints'][0]> & {
+      ready: boolean;
+    }
+  > => {
+    const client = await service.getClient({ request });
 
     if (!client) {
       throw notImplemented();
     }
 
-    return await client.getKnowledgeBaseStatus();
+    return client.getKnowledgeBaseStatus();
   },
 });
 
@@ -47,16 +43,33 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
       idleSocket: 20 * 60 * 1000, // 20 minutes
     },
   },
-  handler: async (resources): Promise<{}> => {
+  handler: async (resources): Promise<unknown> => {
     const client = await resources.service.getClient({ request: resources.request });
 
     if (!client) {
       throw notImplemented();
     }
 
-    await client.setupKnowledgeBase();
+    return await client.setupKnowledgeBase();
+  },
+});
 
-    return {};
+const resetKnowledgeBase = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/kb/reset',
+  options: {
+    tags: ['access:ai_assistant'],
+    timeout: {
+      idleSocket: 20 * 60 * 1000, // 20 minutes
+    },
+  },
+  handler: async (resources): Promise<unknown> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return await client.resetKnowledgeBase();
   },
 });
 
@@ -204,6 +217,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
 
 export const knowledgeBaseRoutes = {
   ...setupKnowledgeBase,
+  ...resetKnowledgeBase,
   ...getKnowledgeBaseStatus,
   ...getKnowledgeBaseEntries,
   ...importKnowledgeBaseEntries,
