@@ -18,10 +18,12 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
   ActionTypeExecutorResult,
+  RequestMetrics,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { getRequestMetrics } from '@kbn/actions-plugin/server/lib';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { promiseResult, isOk, Result } from '../lib/result_type';
 
@@ -154,7 +156,7 @@ export async function executor(
   try {
     body = JSON.parse(data || 'null');
   } catch (err) {
-    return errorInvalidBody(actionId, execOptions.logger, err);
+    return errorInvalidBody(actionId, execOptions.logger, err, getRequestMetrics(undefined, ''));
   }
 
   const axiosInstance = axios.create();
@@ -181,17 +183,20 @@ export async function executor(
     execOptions.logger.debug(
       `response from Torq action "${actionId}": [HTTP ${status}] ${statusText}`
     );
-    return successResult(actionId, data);
+    return successResult(actionId, data, result.value);
   }
   const { error } = result;
-  return handleExecutionError(error, execOptions.logger, actionId);
+  return handleExecutionError(error, execOptions.logger, actionId, body);
 }
 
 async function handleExecutionError(
   error: AxiosError<{ message: string }>,
   logger: Logger,
-  actionId: string
+  actionId: string,
+  body: object
 ): Promise<ActionTypeExecutorResult<unknown>> {
+  const metrics = getRequestMetrics(error, body);
+
   if (error.response) {
     const {
       status,
@@ -206,52 +211,57 @@ async function handleExecutionError(
     // that falls out of the range of 2xx
     // special handling for 5xx
     if (status >= 500) {
-      return retryResult(actionId, message);
+      return retryResult(actionId, message, metrics);
     }
 
     // special handling for rate limiting
     if (status === 429) {
       return pipe(
         getRetryAfterIntervalFromHeaders(responseHeaders),
-        map((retry) => retryResultSeconds(actionId, message, retry)),
-        getOrElse(() => retryResult(actionId, message))
+        map((retry) => retryResultSeconds(actionId, message, retry, metrics)),
+        getOrElse(() => retryResult(actionId, message, metrics))
       );
     }
 
     if (status === 405) {
-      return errorResultInvalidMethod(actionId, message);
+      return errorResultInvalidMethod(actionId, message, metrics);
     }
 
     if (status === 401) {
-      return errorResultUnauthorised(actionId, message);
+      return errorResultUnauthorised(actionId, message, metrics);
     }
 
     if (status === 404) {
-      return errorNotFound(actionId, message);
+      return errorNotFound(actionId, message, metrics);
     }
 
-    return errorResultInvalid(actionId, message);
+    return errorResultInvalid(actionId, message, metrics);
   } else if (error.code) {
     const message = `[${error.code}] ${error.message}`;
     logger.error(`error on ${actionId} Torq event: ${message}`);
-    return errorResultRequestFailed(actionId, message);
+    return errorResultRequestFailed(actionId, message, metrics);
   } else if (error.isAxiosError) {
     const message = `${error.message}`;
     logger.error(`error on ${actionId} Torq event: ${message}`);
-    return errorResultRequestFailed(actionId, message);
+    return errorResultRequestFailed(actionId, message, metrics);
   }
   logger.error(`error on ${actionId} Torq action: unexpected error`);
-  return errorResultUnexpectedError(actionId);
+  return errorResultUnexpectedError(actionId, metrics);
 }
 
-function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
-  return { status: 'ok', data, actionId };
+function successResult(
+  actionId: string,
+  data: unknown,
+  result: AxiosResponse
+): ActionTypeExecutorResult<unknown> {
+  return { status: 'ok', data, actionId, metrics: getRequestMetrics(result, data) };
 }
 
 function errorInvalidBody(
   actionId: string,
   logger: Logger,
-  err: Error
+  err: Error,
+  metrics: RequestMetrics
 ): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.torq.invalidBodyErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, invalid body',
@@ -262,12 +272,14 @@ function errorInvalidBody(
     message: errMessage,
     actionId,
     serviceMessage: err.message,
+    metrics,
   };
 }
 
 function errorResultInvalid(
   actionId: string,
-  serviceMessage: string
+  serviceMessage: string,
+  metrics: RequestMetrics
 ): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.torq.invalidResponseErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, invalid response',
@@ -277,10 +289,15 @@ function errorResultInvalid(
     message: errMessage,
     actionId,
     serviceMessage,
+    metrics,
   };
 }
 
-function errorNotFound(actionId: string, serviceMessage: string): ActionTypeExecutorResult<void> {
+function errorNotFound(
+  actionId: string,
+  serviceMessage: string,
+  metrics: RequestMetrics
+): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.torq.notFoundErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, make sure the webhook URL is valid',
   });
@@ -289,12 +306,14 @@ function errorNotFound(actionId: string, serviceMessage: string): ActionTypeExec
     message: errMessage,
     actionId,
     serviceMessage,
+    metrics,
   };
 }
 
 function errorResultRequestFailed(
   actionId: string,
-  serviceMessage: string
+  serviceMessage: string,
+  metrics: RequestMetrics
 ): ActionTypeExecutorResult<unknown> {
   const errMessage = i18n.translate('xpack.stackConnectors.torq.requestFailedErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, request failed',
@@ -304,12 +323,14 @@ function errorResultRequestFailed(
     message: errMessage,
     actionId,
     serviceMessage,
+    metrics,
   };
 }
 
 function errorResultInvalidMethod(
   actionId: string,
-  serviceMessage: string
+  serviceMessage: string,
+  metrics: RequestMetrics
 ): ActionTypeExecutorResult<unknown> {
   const errMessage = i18n.translate('xpack.stackConnectors.torq.invalidMethodErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, method is not supported',
@@ -319,12 +340,14 @@ function errorResultInvalidMethod(
     message: errMessage,
     actionId,
     serviceMessage,
+    metrics,
   };
 }
 
 function errorResultUnauthorised(
   actionId: string,
-  serviceMessage: string
+  serviceMessage: string,
+  metrics: RequestMetrics
 ): ActionTypeExecutorResult<unknown> {
   const errMessage = i18n.translate('xpack.stackConnectors.torq.unauthorisedErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, unauthorised',
@@ -334,10 +357,14 @@ function errorResultUnauthorised(
     message: errMessage,
     actionId,
     serviceMessage,
+    metrics,
   };
 }
 
-function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult<void> {
+function errorResultUnexpectedError(
+  actionId: string,
+  metrics: RequestMetrics
+): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.torq.unreachableErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, unexpected error',
   });
@@ -345,10 +372,15 @@ function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult<
     status: 'error',
     message: errMessage,
     actionId,
+    metrics,
   };
 }
 
-function retryResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult<void> {
+function retryResult(
+  actionId: string,
+  serviceMessage: string,
+  metrics: RequestMetrics
+): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate(
     'xpack.stackConnectors.torq.invalidResponseRetryLaterErrorMessage',
     {
@@ -361,13 +393,15 @@ function retryResult(actionId: string, serviceMessage: string): ActionTypeExecut
     retry: true,
     actionId,
     serviceMessage,
+    metrics,
   };
 }
 
 function retryResultSeconds(
   actionId: string,
   serviceMessage: string,
-  retryAfter: number
+  retryAfter: number,
+  metrics: RequestMetrics
 ): ActionTypeExecutorResult<void> {
   const retryEpoch = Date.now() + retryAfter * 1000;
   const retry = new Date(retryEpoch);
@@ -387,5 +421,6 @@ function retryResultSeconds(
     retry,
     actionId,
     serviceMessage,
+    metrics,
   };
 }

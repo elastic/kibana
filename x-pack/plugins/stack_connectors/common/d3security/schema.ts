@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RequestMetricsSchema } from '@kbn/actions-plugin/common';
 import { D3SecuritySeverity } from './constants';
 
 // Connector schema
@@ -22,9 +23,14 @@ export const D3SecurityRunActionParamsSchema = schema.object({
   eventType: schema.maybe(schema.string({ defaultValue: '' })),
 });
 
-export const D3SecurityRunActionResponseSchema = schema.object(
+export const D3SecurityRunActionResponseDataSchema = schema.object(
   {
     refid: schema.string(),
   },
   { unknowns: 'ignore' }
 );
+
+export const D3SecurityRunActionResponseSchema = schema.object({
+  data: D3SecurityRunActionResponseDataSchema,
+  metrics: RequestMetricsSchema,
+});

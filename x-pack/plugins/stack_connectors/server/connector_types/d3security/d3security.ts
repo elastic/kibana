@@ -7,10 +7,11 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
+import { getRequestMetrics } from '@kbn/actions-plugin/server/lib';
 import { addSeverityAndEventTypeInBody } from './helpers';
 import {
   D3SecurityRunActionParamsSchema,
-  D3SecurityRunActionResponseSchema,
+  D3SecurityRunActionResponseDataSchema,
 } from '../../../common/d3security/schema';
 import type {
   D3SecurityConfig,
@@ -65,7 +66,7 @@ export class D3SecurityConnector extends SubActionConnector<D3SecurityConfig, D3
     const response = await this.request({
       url: this.url,
       method: 'post',
-      responseSchema: D3SecurityRunActionResponseSchema,
+      responseSchema: D3SecurityRunActionResponseDataSchema,
       data: addSeverityAndEventTypeInBody(
         body ?? '',
         severity ?? D3SecuritySeverity.EMPTY,
@@ -73,6 +74,6 @@ export class D3SecurityConnector extends SubActionConnector<D3SecurityConfig, D3
       ),
       headers: { d3key: this.token || '' },
     });
-    return response.data;
+    return { data: response.data, metrics: getRequestMetrics(response, body) };
   }
 }

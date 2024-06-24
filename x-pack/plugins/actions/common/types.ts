@@ -7,6 +7,7 @@
 
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 export {
   AlertingConnectorFeatureId,
@@ -41,6 +42,14 @@ export interface ValidatedEmail {
 const ActionTypeExecutorResultStatusValues = ['ok', 'error'] as const;
 type ActionTypeExecutorResultStatus = typeof ActionTypeExecutorResultStatusValues[number];
 
+type ConnectorTypeMetrics = RequestMetrics;
+
+export const RequestMetricsSchema = schema.object({
+  requestBodyBytes: schema.number(),
+});
+
+export type RequestMetrics = TypeOf<typeof RequestMetricsSchema>;
+
 export interface ActionTypeExecutorResult<Data> {
   actionId: string;
   status: ActionTypeExecutorResultStatus;
@@ -49,6 +58,7 @@ export interface ActionTypeExecutorResult<Data> {
   data?: Data;
   retry?: null | boolean | Date;
   errorSource?: TaskErrorSource;
+  metrics: ConnectorTypeMetrics;
 }
 
 export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {

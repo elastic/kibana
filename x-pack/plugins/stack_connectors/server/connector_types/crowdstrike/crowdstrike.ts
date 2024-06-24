@@ -9,6 +9,8 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { getRequestMetrics } from '@kbn/actions-plugin/server/lib';
+import { RequestMetrics } from '@kbn/actions-plugin/common';
 import { isAggregateError, NodeSystemError } from './types';
 import type {
   CrowdstrikeConfig,
@@ -174,7 +176,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
   private async crowdstrikeApiRequest<R extends RelaxedCrowdstrikeBaseApiResponse>(
     req: SubActionRequestParams<R>,
     retried?: boolean
-  ): Promise<R> {
+  ): Promise<{ data: R; metrics: RequestMetrics }> {
     try {
       if (!CrowdstrikeConnector.token) {
         CrowdstrikeConnector.token = (await this.getTokenRequest()) as string;
@@ -188,7 +190,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
         },
       });
 
-      return response.data;
+      return { data: response.data, metrics: getRequestMetrics(response, req.data) };
     } catch (error) {
       if (error.code === 401 && !retried) {
         CrowdstrikeConnector.token = null;

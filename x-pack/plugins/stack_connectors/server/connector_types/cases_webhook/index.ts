@@ -11,6 +11,8 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
+import { RequestMetrics } from '@kbn/actions-plugin/common';
+import { getRequestMetrics } from '@kbn/actions-plugin/server/lib';
 import {
   CasesWebhookActionParamsType,
   CasesWebhookExecutorResultData,
@@ -73,6 +75,7 @@ export async function executor(
   const { actionId, configurationUtilities, params, logger } = execOptions;
   const { subAction, subActionParams } = params;
   let data: CasesWebhookExecutorResultData | undefined;
+  let metrics: RequestMetrics = getRequestMetrics(undefined, '');
 
   const externalService = createExternalService(
     actionId,
@@ -98,14 +101,17 @@ export async function executor(
 
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
-    data = await api.pushToService({
+    const { data: pushServiceData, metrics: pushServiceMetrics } = await api.pushToService({
       externalService,
       params: pushToServiceParams,
       logger,
     });
 
-    logger.debug(`response push to service for case id: ${data.id}`);
+    data = pushServiceData;
+    metrics = pushServiceMetrics;
+
+    logger.debug(`response push to service for case id: ${data.data.id}`);
   }
 
-  return { status: 'ok', data, actionId };
+  return { status: 'ok', data, actionId, metrics };
 }

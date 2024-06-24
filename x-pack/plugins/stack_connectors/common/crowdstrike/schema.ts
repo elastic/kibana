@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RequestMetricsSchema } from '@kbn/actions-plugin/common';
 import { SUB_ACTION } from './constants';
 
 // Connector schema
@@ -34,7 +35,7 @@ export const CrowdstrikeBaseApiResponseSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export const CrowdstrikeGetAgentOnlineStatusResponseSchema = schema.object(
+export const CrowdstrikeGetAgentOnlineStatusDataSchema = schema.object(
   {
     resources: schema.arrayOf(
       schema.object(
@@ -57,8 +58,12 @@ export const CrowdstrikeGetAgentOnlineStatusResponseSchema = schema.object(
   },
   { unknowns: 'allow' }
 );
+export const CrowdstrikeGetAgentOnlineStatusResponseSchema = schema.object({
+  data: CrowdstrikeGetAgentOnlineStatusDataSchema,
+  metrics: RequestMetricsSchema,
+});
 
-export const CrowdstrikeGetAgentsResponseSchema = schema.object(
+export const CrowdstrikeGetAgentsDataSchema = schema.object(
   {
     resources: schema.arrayOf(
       schema.object(
@@ -206,7 +211,12 @@ export const CrowdstrikeGetAgentsResponseSchema = schema.object(
   },
   { unknowns: 'allow' }
 );
-export const CrowdstrikeHostActionsResponseSchema = schema.object(
+export const CrowdstrikeGetAgentsResponseSchema = schema.object({
+  data: CrowdstrikeGetAgentsDataSchema,
+  metrics: RequestMetricsSchema,
+});
+
+export const CrowdstrikeHostActionsDataSchema = schema.object(
   {
     resources: schema.arrayOf(
       schema.object(
@@ -229,6 +239,11 @@ export const CrowdstrikeHostActionsResponseSchema = schema.object(
   },
   { unknowns: 'allow' }
 );
+
+export const CrowdstrikeHostActionsResponseSchema = schema.object({
+  data: CrowdstrikeHostActionsDataSchema,
+  metrics: RequestMetricsSchema,
+});
 
 export const CrowdstrikeHostActionsParamsSchema = schema.object({
   command: schema.oneOf([schema.literal('contain'), schema.literal('lift_containment')]),

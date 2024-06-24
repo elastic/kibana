@@ -7,6 +7,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
+import { RequestMetrics } from '@kbn/actions-plugin/common';
 import {
   ExecutorParamsSchema,
   ExecutorSubActionPushParamsSchema,
@@ -31,11 +32,19 @@ export interface ExternalServiceCredentials {
 }
 
 export interface ExternalServiceIncidentResponse {
-  id: string;
-  title: string;
-  url: string;
-  pushedDate: string;
+  data: {
+    id: string;
+    title: string;
+    url: string;
+    pushedDate: string;
+  };
+  metrics: RequestMetrics;
 }
+
+export interface ExternalServiceCreateIncidentResponse {
+  metrics: RequestMetrics;
+}
+
 export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
@@ -44,7 +53,7 @@ export type PushToServiceApiParams = ExecutorSubActionPushParams;
 
 // incident service
 export interface ExternalService {
-  createComment: (params: CreateCommentParams) => Promise<unknown>;
+  createComment: (params: CreateCommentParams) => Promise<ExternalServiceCreateIncidentResponse>;
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   getIncident: (id: string) => Promise<GetIncidentResponse>;
   updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
@@ -75,8 +84,14 @@ export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerAr
   params: PushToServiceApiParams;
   logger: Logger;
 }
-export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
+
+export interface PushToServiceResponseData extends ExternalServiceIncidentResponse {
   comments?: ExternalServiceCommentResponse[];
+}
+
+export interface PushToServiceResponse {
+  data: PushToServiceResponseData;
+  metrics: RequestMetrics;
 }
 
 export interface ExternalServiceCommentResponse {

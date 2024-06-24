@@ -195,7 +195,14 @@ export abstract class SubActionConnector<Config, Secrets> {
         const errorMessage = `Status code: ${
           error.status ?? error.response?.status
         }. Message: ${this.getResponseErrorMessage(error)}`;
-        throw new Error(errorMessage);
+
+        const axiosError = new AxiosError(errorMessage);
+
+        if (error.request) {
+          axiosError.request = error.request;
+        }
+
+        throw axiosError;
       }
 
       throw error;

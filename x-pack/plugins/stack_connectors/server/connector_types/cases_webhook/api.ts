@@ -35,22 +35,25 @@ const pushToServiceHandler = async ({
   }
 
   if (comments && Array.isArray(comments) && comments.length > 0) {
-    res.comments = [];
+    res.data.comments = [];
     for (const currentComment of comments) {
       if (!currentComment.comment) {
         continue;
       }
-      await externalService.createComment({
-        incidentId: res.id,
+      const commentResponse = await externalService.createComment({
+        incidentId: res.data.id,
         comment: currentComment,
       });
-      res.comments = [
-        ...(res.comments ?? []),
+      res.data.comments = [
+        ...(res.data.comments ?? []),
         {
           commentId: currentComment.commentId,
-          pushedDate: res.pushedDate,
+          pushedDate: res.data.pushedDate,
         },
       ];
+
+      res.metrics.requestBodyBytes =
+        res.metrics.requestBodyBytes + commentResponse.metrics.requestBodyBytes;
     }
   }
 
