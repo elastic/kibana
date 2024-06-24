@@ -15,7 +15,6 @@ paths:
     post:
       summary: Create an APM agent key
       description: Create a new agent key for APM.
-      operationId: createAgentKey
       tags:
         - APM agent keys
       requestBody:
@@ -57,7 +56,6 @@ paths:
     get:
       summary: Search for annotations
       description: Search for annotations related to a specific service.
-      operationId: getAnnotation
       tags:
         - APM annotations
       parameters:
@@ -112,7 +110,6 @@ paths:
     post:
       summary: Create a service annotation
       description: Create a new annotation for a specific service.
-      operationId: createAnnotation
       tags:
         - APM annotations
       parameters:
