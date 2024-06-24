@@ -1593,9 +1593,9 @@
             "signature": [
               "{ optIn: (optInConfig: ",
               {
-                "pluginId": "@kbn/analytics-client",
+                "pluginId": "@kbn/ebt",
                 "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
+                "docId": "kibKbnEbtPluginApi",
                 "section": "def-common.OptInConfig",
                 "text": "OptInConfig"
               },
@@ -1603,9 +1603,9 @@
               "Observable",
               "<",
               {
-                "pluginId": "@kbn/analytics-client",
+                "pluginId": "@kbn/ebt",
                 "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
+                "docId": "kibKbnEbtPluginApi",
                 "section": "def-common.TelemetryCounter",
                 "text": "TelemetryCounter"
               },

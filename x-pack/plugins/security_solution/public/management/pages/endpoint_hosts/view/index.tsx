@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type CSSProperties, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import {
@@ -32,6 +32,7 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
+import { isPolicyOutOfDate } from '../utils';
 import { useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
 import { TransformFailedCallout } from './components/transform_failed_callout';
 import type { EndpointIndexUIQueryParams } from '../types';
@@ -39,8 +40,8 @@ import { EndpointListNavLink } from './components/endpoint_list_nav_link';
 import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
+import { nonExistingPolicies } from '../store/selectors';
 import { useEndpointSelector } from './hooks';
-import { isPolicyOutOfDate } from '../utils';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import type { CreateStructuredSelector } from '../../../../common/store';
 import type {
@@ -61,7 +62,6 @@ import { getEndpointDetailsPath, getEndpointListPath } from '../../../common/rou
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 import type { EndpointAction } from '../store/action';
-import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { TableRowActions } from './components/table_row_actions';
@@ -79,6 +79,7 @@ const StyledDatePicker = styled.div`
 `;
 
 interface GetEndpointListColumnsProps {
+  missingPolicies: ReturnType<typeof nonExistingPolicies>;
   canReadPolicyManagement: boolean;
   backToEndpointList: PolicyDetailsRouteState['backLink'];
   queryParams: Immutable<EndpointIndexUIQueryParams>;
@@ -103,6 +104,7 @@ const columnWidths: Record<
 };
 
 const getEndpointListColumns = ({
+  missingPolicies,
   canReadPolicyManagement,
   backToEndpointList,
   queryParams,
@@ -113,7 +115,6 @@ const getEndpointListColumns = ({
   const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
     defaultMessage: 'Last active',
   });
-  const padLeft: CSSProperties = { paddingLeft: '6px' };
 
   return [
     {
@@ -175,42 +176,17 @@ const getEndpointListColumns = ({
         item: HostInfo
       ) => {
         const policy = item.metadata.Endpoint.policy.applied;
-
         return (
-          <>
-            <EuiToolTip content={policyName} anchorClassName="eui-textTruncate">
-              {canReadPolicyManagement ? (
-                <EndpointPolicyLink
-                  policyId={policy.id}
-                  className="eui-textTruncate"
-                  data-test-subj="policyNameCellLink"
-                  backLink={backToEndpointList}
-                >
-                  {policyName}
-                </EndpointPolicyLink>
-              ) : (
-                <>{policyName}</>
-              )}
-            </EuiToolTip>
-            {policy.endpoint_policy_version && (
-              <EuiText
-                color="subdued"
-                size="xs"
-                style={{ whiteSpace: 'nowrap', ...padLeft }}
-                className="eui-textTruncate"
-                data-test-subj="policyListRevNo"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.list.policy.revisionNumber"
-                  defaultMessage="rev. {revNumber}"
-                  values={{ revNumber: policy.endpoint_policy_version }}
-                />
-              </EuiText>
-            )}
-            {isPolicyOutOfDate(policy, item.policy_info) && (
-              <OutOfDate style={padLeft} data-test-subj="rowPolicyOutOfDate" />
-            )}
-          </>
+          <EndpointPolicyLink
+            policyId={policy.id}
+            revision={policy.endpoint_policy_version}
+            isOutdated={isPolicyOutOfDate(policy, item.policy_info)}
+            policyExists={!missingPolicies[policy.id]}
+            data-test-subj="policyNameCellLink"
+            backLink={backToEndpointList}
+          >
+            {policyName}
+          </EndpointPolicyLink>
         );
       },
     },
@@ -365,11 +341,10 @@ export const EndpointList = () => {
     metadataTransformStats,
     isInitialized,
   } = useEndpointSelector(selector);
-
+  const missingPolicies = useEndpointSelector(nonExistingPolicies);
   const {
     canReadEndpointList,
     canAccessFleet,
-    canReadPolicyManagement,
     loading: endpointPrivilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
   const { search } = useFormatUrl(SecurityPageName.administration);
@@ -540,18 +515,12 @@ export const EndpointList = () => {
         canReadPolicyManagement,
         backToEndpointList,
         getAppUrl,
+        missingPolicies,
         queryParams,
         search,
         agentStatusRecords: agentStatusRecords ?? {},
       }),
-    [
-      agentStatusRecords,
-      backToEndpointList,
-      canReadPolicyManagement,
-      getAppUrl,
-      queryParams,
-      search,
-    ]
+    [agentStatusRecords, backToEndpointList, getAppUrl, missingPolicies, queryParams, search]
   );
 
   const sorting = useMemo(

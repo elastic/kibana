@@ -108,6 +108,11 @@ export const allowedExperimentalValues = Object.freeze({
   expandableFlyoutDisabled: false,
 
   /**
+   * Enables new notes
+   */
+  notesEnabled: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
