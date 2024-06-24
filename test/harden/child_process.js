@@ -310,15 +310,38 @@ for (const name of functions) {
   test('spawn(command, options) - prevent object prototype pollution', (t) => {
     const pathName = path.join(__dirname, '_node_script.js');
     const options = {};
-
-    // eslint-disable-next-line no-proto
-    options.__proto__['2'] = {
+    const pollutedObject = {
       env: {
         NODE_OPTIONS: `--require ${pathName}`,
       },
       shell: process.argv[0],
     };
-    assertProcess(t, cp.spawn(command, []));
+    // eslint-disable-next-line no-proto
+    options.__proto__['2'] = pollutedObject;
+
+    const argsArray = [];
+
+    t.deepEqual(
+      argsArray[2],
+      pollutedObject,
+      'Prototype should be polluted with the object at index 2'
+    );
+
+    const stdout = '';
+    t.plan(3);
+    const cmd = cp.spawn(command, argsArray);
+    cmd.stdout.on('data', (data) => {
+      t.equal(data.toString().trim(), stdout);
+    });
+
+    cmd.stderr.on('data', (data) => {
+      t.fail(`Unexpected data on STDERR: "${data}"`);
+    });
+
+    cmd.on('close', (code) => {
+      t.equal(code, 0);
+      t.end();
+    });
   });
 
   for (const unset of notSet) {
