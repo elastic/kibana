@@ -14,6 +14,7 @@ import {
   useEuiTheme,
   useEuiFontSize,
   EuiSkeletonText,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
@@ -54,6 +55,7 @@ import {
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
+import { UserPanelKey } from '../../../entity_details/user_right';
 
 const USER_ICON = 'user';
 
@@ -69,7 +71,7 @@ export interface UserEntityOverviewProps {
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
   const { eventId, indexName, scopeId } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openFlyout, openLeftPanel } = useExpandableFlyoutApi();
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
       id: DocumentDetailsLeftPanelKey,
@@ -81,6 +83,19 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       },
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
+
+  const goToUserFlyout = useCallback(() => {
+    openFlyout({
+      right: {
+        id: UserPanelKey,
+        title: userName,
+        params: {
+          userName,
+          scopeId,
+        },
+      },
+    });
+  }, [userName, openFlyout, scopeId]);
 
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
@@ -188,7 +203,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       data-test-subj={ENTITIES_USER_OVERVIEW_TEST_ID}
     >
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="m" responsive={false}>
+        <EuiFlexGroup gutterSize="m" responsive={false} alignItems={"center"}>
           <EuiFlexItem grow={false}>
             <EuiIcon type={USER_ICON} />
           </EuiFlexItem>
@@ -203,6 +218,9 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
             >
               {userName}
             </EuiLink>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon iconType={'expand'} onClick={goToUserFlyout} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

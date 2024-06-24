@@ -10,8 +10,9 @@ export { ExpandableFlyout } from './src';
 
 export { useExpandableFlyoutApi } from './src/hooks/use_expandable_flyout_api';
 export { useExpandableFlyoutState } from './src/hooks/use_expandable_flyout_state';
+export { useExpandableFlyoutHistory } from './src/hooks/use_expandable_flyout_history';
 
-export { type FlyoutState as ExpandableFlyoutState } from './src/state';
+export { type FlyoutState as ExpandableFlyoutState, type FlyoutHistoryProps } from './src/state';
 
 export { ExpandableFlyoutProvider } from './src/provider';
 

@@ -102,6 +102,9 @@ const RowActionComponent = ({
   const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const showExpandableFlyout =
     pageName === SecurityPageName.attackDiscovery ? true : !expandableFlyoutDisabled;
+    
+  const ruleName= ecsData?.kibana?.alert?.rule?.name;
+  const title = ruleName ? ruleName[0] : "Details Flyout";
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
     const updatedExpandedDetail: ExpandedDetailType = {
@@ -116,6 +119,7 @@ const RowActionComponent = ({
       openFlyout({
         right: {
           id: DocumentDetailsRightPanelKey,
+          title,
           path: shouldFocusOnOverviewTab ? { tab: 'overview' } : undefined,
           params: {
             id: eventId,

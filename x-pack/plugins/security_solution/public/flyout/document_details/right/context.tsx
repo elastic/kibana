@@ -33,6 +33,10 @@ export interface RightPanelContext {
    */
   scopeId: string;
   /**
+   * Title of the flyout to be displayed as header
+   */
+  title: string;
+  /**
    * An object containing fields by type
    */
   browserFields: BrowserFields;
@@ -87,7 +91,7 @@ export const RightPanelProvider = memo(
       searchHit,
     } = useEventDetails({ eventId: id, indexName });
 
-    const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+    const { ruleId, ruleName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
     const contextValue = useMemo(
@@ -102,6 +106,7 @@ export const RightPanelProvider = memo(
               eventId: id,
               indexName,
               scopeId,
+              title: ruleName,
               browserFields,
               dataAsNestedObject,
               dataFormattedForFieldBrowser,
