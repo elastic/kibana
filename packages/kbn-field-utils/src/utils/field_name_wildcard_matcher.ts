@@ -7,6 +7,7 @@
  */
 
 import { escapeRegExp, memoize } from 'lodash';
+import levenshtein from 'js-levenshtein';
 
 const makeRegEx = memoize(function makeRegEx(glob: string) {
   const trimmedGlob = glob.trim();
@@ -39,8 +40,52 @@ export const fieldNameWildcardMatcher = (
   }
 
   const regExp = makeRegEx(fieldSearchHighlight);
-  return (!!field.displayName && regExp.test(field.displayName)) || regExp.test(field.name);
+  const doesWildcardMatch =
+    (!!field.displayName && regExp.test(field.displayName)) || regExp.test(field.name);
+  if (doesWildcardMatch) {
+    return true;
+  }
+
+  return testFuzzySearch(field, fieldSearchHighlight);
 };
+
+const STRING_MIN_LENGTH = 3;
+const FUZZY_SEARCH_DISTANCE = 1;
+
+const testFuzzySearch = (field: { name: string; displayName?: string }, searchValue: string) => {
+  if (searchValue.length < STRING_MIN_LENGTH) {
+    return false;
+  }
+  return (
+    testFuzzySearchForString(field.displayName?.toLowerCase(), searchValue.toLowerCase()) ||
+    testFuzzySearchForString(field.name.toLowerCase(), searchValue.toLowerCase())
+  );
+};
+
+const testFuzzySearchForString = (label: string | undefined, searchValue: string) => {
+  if (!label) {
+    return false;
+  }
+
+  const substrLength = Math.max(Math.min(searchValue.length, label.length), STRING_MIN_LENGTH);
+  // performance optimization: instead of building the whole matrix,
+  // only iterate through the strings of the substring length +- 1 character,
+  // for example for searchValue = 'test' and label = 'test_value',
+  // we iterate through 'test', 'est_', 'st_v' (and +- character cases too).
+
+  const iterationsCount = label.length - substrLength + 1;
+  for (let i = 0; i <= iterationsCount; i++) {
+    for (let j = substrLength - 1; j <= substrLength + 1; j++) {
+      if (compareLevenshtein(searchValue, label.substring(i, j + i))) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+const compareLevenshtein = (str1: string, str2: string) =>
+  levenshtein(str1, str2) <= FUZZY_SEARCH_DISTANCE;
 
 /**
  * Adapts fieldNameWildcardMatcher to combobox props.
@@ -53,7 +98,10 @@ export const comboBoxFieldOptionMatcher = ({
 }: {
   option: { name?: string; label: string };
   searchValue: string;
-}) => fieldNameWildcardMatcher({ name: name || label, displayName: label }, searchValue);
+}) => {
+  const field = { name: name || label, displayName: label };
+  return fieldNameWildcardMatcher(field, searchValue);
+};
 
 /**
  * Get `highlight` string to be used together with `EuiHighlight`
