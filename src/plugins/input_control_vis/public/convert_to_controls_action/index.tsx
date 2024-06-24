@@ -26,6 +26,7 @@ import { apiHasVisualizeConfig, HasVisualizeConfig, Vis } from '@kbn/visualizati
 import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { InputControlVisParams } from '../types';
+import { PresentationContainer } from '@kbn/presentation-containers';
 
 export const ACTION_CONVERT_TO_CONTROLS = 'ACTION_CONVERT_TO_CONTROLS';
 
@@ -51,7 +52,7 @@ const MenuItem: React.FC = () => {
 type ActionApi = HasUniqueId &
   HasVisualizeConfig &
   CanAccessViewMode &
-  HasParentApi<{ controlGroup: ControlGroupApi }>;
+  HasParentApi<Partial<Pick<PresentationContainer, 'removePanel'>> & { controlGroup: ControlGroupApi }>;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is ActionApi =>
   apiHasUniqueId(api) &&
@@ -85,6 +86,9 @@ export function getConvertToControlsAction(
         embeddable.getVis() as unknown as Vis<InputControlVisParams>,
         dataService
       );
+      if (typeof embeddable.parentApi.removePanel === 'function') {
+        embeddable.parentApi.removePanel(embeddable.uuid);
+      }
     },
     showNotification: true,
   };
