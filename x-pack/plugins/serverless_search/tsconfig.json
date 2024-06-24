@@ -51,5 +51,6 @@
     "@kbn/security-api-key-management",
     "@kbn/search-inference-endpoints",
     "@kbn/search-homepage",
+    "@kbn/security-plugin-types-common",
   ]
 }
