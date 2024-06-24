@@ -175,6 +175,13 @@ export const BACKFILL_TABLE_TITLE = i18n.translate(
   }
 );
 
+export const BACKFILL_TABLE_REFRESH = i18n.translate(
+  'xpack.securitySolution.rule_gaps.backfillTable.refresh',
+  {
+    defaultMessage: 'Refresh',
+  }
+);
+
 export const BACKFILL_TABLE_SUBTITLE = i18n.translate(
   'xpack.securitySolution.rule_gaps.backfillTable.subtitle',
   {

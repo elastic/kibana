@@ -6,12 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { EuiAutoRefresh, EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type {
-  EuiBasicTableColumn,
-  CriteriaWithPagination,
-  OnRefreshChangeProps,
-} from '@elastic/eui';
+import { EuiButton, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import { useFindBackfillsForRules } from '../../api/hooks/use_find_backfills_for_rules';
 import { StopBackfill } from './stop_backfill';
 import { BackfillStatusInfo } from './backfill_status';
@@ -25,7 +21,6 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 
-const AUTO_REFRESH_INTERVAL = 3000;
 const DEFAULT_PAGE_SIZE = 10;
 
 const getBackfillsTableColumns = (hasCRUDPermissions: boolean) => {
@@ -140,21 +135,18 @@ const getBackfillsTableColumns = (hasCRUDPermissions: boolean) => {
 
 export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => {
   const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
-  const [autoRefreshInterval, setAutoRefreshInterval] = useState(AUTO_REFRESH_INTERVAL);
-  const [isAutoRefresh, setIsAutoRefresh] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [{ canUserCRUD }] = useUserData();
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
 
-  const { data, isLoading, isError } = useFindBackfillsForRules(
+  const { data, isLoading, isError, refetch } = useFindBackfillsForRules(
     {
       ruleIds: [ruleId],
       page: pageIndex + 1,
       perPage: pageSize,
     },
     {
-      refetchInterval: isAutoRefresh ? autoRefreshInterval : false,
       enabled: isManualRuleRunEnabled,
     }
   );
@@ -173,13 +165,6 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
     totalItemCount: data?.total ?? 0,
   };
 
-  if (data?.total === 0) return null;
-
-  const handleRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps) => {
-    setIsAutoRefresh(!isPaused);
-    setAutoRefreshInterval(refreshInterval);
-  };
-
   const handleTableChange: (params: CriteriaWithPagination<BackfillRow>) => void = ({
     page,
     sort,
@@ -190,8 +175,12 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
     }
   };
 
+  const handleRefresh = () => {
+    refetch();
+  };
+
   return (
-    <div>
+    <EuiPanel hasBorder>
       <EuiFlexGroup gutterSize="s" data-test-subj="rule-backfills-info">
         <EuiFlexItem grow={true}>
           <HeaderSection
@@ -200,11 +189,9 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiAutoRefresh
-            isPaused={!isAutoRefresh}
-            refreshInterval={autoRefreshInterval}
-            onRefreshChange={handleRefreshChange}
-          />
+          <EuiButton iconType="refresh" fill onClick={handleRefresh}>
+            {i18n.BACKFILL_TABLE_REFRESH}
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiBasicTable
@@ -217,7 +204,7 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
         onChange={handleTableChange}
         noItemsMessage={'not found'}
       />
-    </div>
+    </EuiPanel>
   );
 });
 
