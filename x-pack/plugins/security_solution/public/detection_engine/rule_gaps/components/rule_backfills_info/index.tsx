@@ -6,7 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiBetaBadge,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import { useFindBackfillsForRules } from '../../api/hooks/use_find_backfills_for_rules';
 import { StopBackfill } from './stop_backfill';
@@ -20,6 +27,7 @@ import { getBackfillRowsFromResponse } from './utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
+import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -181,19 +189,24 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
 
   return (
     <EuiPanel hasBorder>
-      <EuiFlexGroup gutterSize="s" data-test-subj="rule-backfills-info">
+      <EuiFlexGroup alignItems="flexStart" gutterSize="s" data-test-subj="rule-backfills-info">
         <EuiFlexItem grow={true}>
-          <HeaderSection
-            title={i18n.BACKFILL_TABLE_TITLE}
-            subtitle={i18n.BACKFILL_TABLE_SUBTITLE}
-          />
+          <EuiFlexGroup gutterSize="s" alignItems="baseline">
+            <HeaderSection
+              title={i18n.BACKFILL_TABLE_TITLE}
+              subtitle={i18n.BACKFILL_TABLE_SUBTITLE}
+            />
+            <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_TOOLTIP} />
+          </EuiFlexGroup>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <EuiButton iconType="refresh" fill onClick={handleRefresh}>
             {i18n.BACKFILL_TABLE_REFRESH}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+
       <EuiBasicTable
         data-test-subj="rule-backfills-table"
         items={backfills}
@@ -202,7 +215,6 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
         error={isError ? 'error' : undefined}
         loading={isLoading}
         onChange={handleTableChange}
-        noItemsMessage={'not found'}
       />
     </EuiPanel>
   );
