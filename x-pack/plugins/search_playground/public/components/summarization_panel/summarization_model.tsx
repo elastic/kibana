@@ -14,13 +14,13 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiSuperSelect,
+  type EuiSuperSelectOption,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import type { LLMModel } from '../../types';
