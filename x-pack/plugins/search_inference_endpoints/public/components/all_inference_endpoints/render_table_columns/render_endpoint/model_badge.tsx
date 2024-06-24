@@ -6,14 +6,16 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
 
 interface ModelBadgeProps {
   model?: string;
 }
 
 export const ModelBadge: React.FC<ModelBadgeProps> = ({ model }) => {
+  const { euiTheme } = useEuiTheme();
+
   if (!model) return null;
 
-  return <EuiBadge color="default">{model}</EuiBadge>;
+  return <EuiBadge color={euiTheme.colors.body}>{model}</EuiBadge>;
 };

@@ -29,7 +29,7 @@ export const useTableColumns = () => {
 
         return null;
       },
-      width: '2%',
+      width: '16px',
     },
     {
       field: 'endpoint',
@@ -42,7 +42,7 @@ export const useTableColumns = () => {
         return null;
       },
       sortable: true,
-      width: '50%',
+      width: '971px',
     },
     {
       field: 'provider',
@@ -55,7 +55,7 @@ export const useTableColumns = () => {
         return null;
       },
       sortable: false,
-      width: '110px',
+      width: '165px',
     },
     {
       field: 'type',
@@ -68,7 +68,7 @@ export const useTableColumns = () => {
         return null;
       },
       sortable: false,
-      width: '90px',
+      width: '110px',
     },
     actions,
   ];
