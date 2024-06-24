@@ -21,6 +21,7 @@ import {
   HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { isControlGroupApi, type ControlGroupApi } from '@kbn/controls-plugin/public';
 import { apiHasVisualizeConfig, HasVisualizeConfig, Vis } from '@kbn/visualizations-plugin/public';
 import type { InputControlVisParams } from '../types';
 
@@ -45,13 +46,17 @@ const MenuItem: React.FC = () => {
   );
 };
 
-type ActionApi = HasUniqueId & HasVisualizeConfig & CanAccessViewMode & HasParentApi;
+type ActionApi = HasUniqueId &
+  HasVisualizeConfig &
+  CanAccessViewMode &
+  HasParentApi<{ controlGroup: ControlGroupApi }>;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is ActionApi =>
   apiHasUniqueId(api) &&
   apiCanAccessViewMode(api) &&
   apiHasVisualizeConfig(api) &&
-  apiHasParentApi(api);
+  apiHasParentApi(api) &&
+  isControlGroupApi((api.parentApi as { controlGroup?: unknown }).controlGroup);
 
 export const convertToControlsAction = createAction<EmbeddableApiContext>({
   id: ACTION_CONVERT_TO_CONTROLS,
@@ -70,7 +75,10 @@ export const convertToControlsAction = createAction<EmbeddableApiContext>({
   execute: async ({ embeddable }: EmbeddableApiContext) => {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
     const { addToControls } = await import('./add_to_controls');
-    addToControls(embeddable.parentApi.controlGroup, embeddable.getVis() as unknown as Vis<InputControlVisParams>);
+    addToControls(
+      embeddable.parentApi.controlGroup,
+      embeddable.getVis() as unknown as Vis<InputControlVisParams>
+    );
   },
   showNotification: true,
 });

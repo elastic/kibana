@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { InputControlVisParams } from '../types';
 
-export function addToControls(controlGroup: unknown, vis: Vis<InputControlVisParams>) {
+export function addToControls(controlGroup: ControlGroupApi, vis: Vis<InputControlVisParams>) {
   console.log('controlGroup', controlGroup);
   console.log('vis', vis);
 }
