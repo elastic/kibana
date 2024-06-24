@@ -22,6 +22,7 @@ import { useExpandSection } from '../hooks/use_expand_section';
 jest.mock('../hooks/use_expand_section');
 
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
+const OPEN_FLYOUT_MESSAGE = 'Open alert details flyout to access response actions.';
 
 const renderResponseSection = () =>
   render(
@@ -97,6 +98,21 @@ describe('<ResponseSection />', () => {
       </IntlProvider>
     );
     expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
+  });
+
+  it('should render open details flyout message if flyout is in preview', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(true);
+
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <TestProvider>
+          <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreviewMode: true }}>
+            <ResponseSection />
+          </DocumentDetailsContext.Provider>
+        </TestProvider>
+      </IntlProvider>
+    );
+    expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toHaveTextContent(OPEN_FLYOUT_MESSAGE);
   });
 
   it('should render empty component if document is not signal', () => {

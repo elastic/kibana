@@ -21,7 +21,7 @@ const KEY = 'response';
  * Most bottom section of the overview tab. It contains a summary of the response tab.
  */
 export const ResponseSection = memo(() => {
-  const { isPreview, getFieldsData } = useDocumentDetailsContext();
+  const { isPreview, getFieldsData, isPreviewMode } = useDocumentDetailsContext();
 
   const expanded = useExpandSection({ title: KEY, defaultValue: false });
 
@@ -46,6 +46,11 @@ export const ResponseSection = memo(() => {
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.response.previewMessage"
           defaultMessage="Response is not available in alert preview."
+        />
+      ) : isPreviewMode ? (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.response.openFlyoutMessage"
+          defaultMessage="Open alert details flyout to access response actions."
         />
       ) : (
         <ResponseButton />

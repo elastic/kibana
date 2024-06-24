@@ -76,12 +76,14 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       values: string[] | null | undefined;
       scopeId: string;
       isPreview: boolean;
+      isPreviewMode: boolean;
     }) => (
       <CellActions field={description.field} value={description.values}>
         <HighlightedFieldsCell
           values={description.values}
           field={description.field}
           originalField={description.originalField}
+          isPreviewMode={description.isPreviewMode}
         />
       </CellActions>
     ),
@@ -92,7 +94,8 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
  * Component that displays the highlighted fields in the right panel under the Investigation section.
  */
 export const HighlightedFields: FC = () => {
-  const { dataFormattedForFieldBrowser, scopeId, isPreview } = useDocumentDetailsContext();
+  const { dataFormattedForFieldBrowser, scopeId, isPreview, isPreviewMode } =
+    useDocumentDetailsContext();
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const { loading, rule: maybeRule } = useRuleWithFallback(ruleId);
 
@@ -101,8 +104,8 @@ export const HighlightedFields: FC = () => {
     investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
   });
   const items = useMemo(
-    () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview),
-    [highlightedFields, scopeId, isPreview]
+    () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview, isPreviewMode),
+    [highlightedFields, scopeId, isPreview, isPreviewMode]
   );
 
   return (

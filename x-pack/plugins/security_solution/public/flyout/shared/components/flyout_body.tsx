@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface FlyoutBodyProps extends React.ComponentProps<typeof EuiFlyoutBody> {
   children: React.ReactNode;
@@ -18,7 +19,16 @@ interface FlyoutBodyProps extends React.ComponentProps<typeof EuiFlyoutBody> {
  */
 export const FlyoutBody: FC<FlyoutBodyProps> = memo(({ children, ...flyoutBodyProps }) => {
   return (
-    <EuiFlyoutBody {...flyoutBodyProps}>
+    <EuiFlyoutBody
+      {...flyoutBodyProps}
+      css={css`
+        .euiFlyoutBody__overflow {
+          // fix a bug with red overlay when position was not set
+          // remove when position: relative is added in EUI
+          mask-image: none;
+        }
+      `}
+    >
       <EuiPanel hasShadow={false} color="transparent">
         {children}
       </EuiPanel>
