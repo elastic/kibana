@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { ApiKey } from '@kbn/security-plugin/common';
+import { ApiKey } from '@kbn/security-plugin-types-common';
 import { useQuery } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { ApiKeySelectableTokenField } from '@kbn/security-api-key-management';
