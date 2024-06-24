@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
 import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+import { ILicense } from '@kbn/licensing-plugin/public';
 
 import {
   ANALYTICS_PLUGIN,
@@ -49,9 +50,19 @@ import { generateNavLink } from './nav_link_helpers';
  * @returns The Enterprise Search navigation items
  */
 export const useEnterpriseSearchNav = (alwaysReturn = false) => {
-  const { isSearchHomepageEnabled, searchHomepage, isSidebarEnabled, productAccess } =
+  const { isSearchHomepageEnabled, searchHomepage, isSidebarEnabled, productAccess, licensing } =
     useValues(KibanaLogic);
   const indicesNavItems = useIndicesNav();
+
+  const [isEnterpriseLicense, setIsEnterpriseLicense] = useState<boolean>(false);
+  useEffect(() => {
+    const subscription = licensing?.license$.subscribe((license: ILicense) => {
+      setIsEnterpriseLicense(license.isActive && license.hasAtLeast('enterprise'));
+    });
+
+    return () => subscription?.unsubscribe();
+  }, [licensing]);
+
   if (!isSidebarEnabled && !alwaysReturn) return undefined;
 
   const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = [
@@ -154,25 +165,29 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
         defaultMessage: 'Build',
       }),
     },
-    {
-      id: 'relevance',
-      items: [
-        {
-          id: 'inference_endpoints',
-          name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
-            defaultMessage: 'Inference Endpoints',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            shouldShowActiveForSubroutes: true,
-            to: INFERENCE_ENDPOINTS_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
-          }),
-        },
-      ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
-        defaultMessage: 'Relevance',
-      }),
-    },
+    ...(isEnterpriseLicense
+      ? [
+          {
+            id: 'relevance',
+            items: [
+              {
+                id: 'inference_endpoints',
+                name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
+                  defaultMessage: 'Inference Endpoints',
+                }),
+                ...generateNavLink({
+                  shouldNotCreateHref: true,
+                  shouldShowActiveForSubroutes: true,
+                  to: INFERENCE_ENDPOINTS_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
+                }),
+              },
+            ],
+            name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
+              defaultMessage: 'Relevance',
+            }),
+          },
+        ]
+      : []),
     {
       id: 'es_getting_started',
       items: [

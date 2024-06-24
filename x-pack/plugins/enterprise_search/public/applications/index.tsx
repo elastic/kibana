@@ -80,6 +80,7 @@ export const renderApp = (
     security,
     share,
     ml,
+    licensing,
   } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
@@ -121,6 +122,7 @@ export const renderApp = (
     isSidebarEnabled,
     lens,
     ml,
+    licensing,
     navigateToUrl,
     productAccess,
     productFeatures,
