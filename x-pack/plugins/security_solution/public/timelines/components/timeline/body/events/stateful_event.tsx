@@ -11,8 +11,12 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import type {
   ColumnHeaderOptions,
@@ -111,6 +115,9 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openFlyout } = useExpandableFlyoutApi();
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
 
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({
@@ -178,26 +185,57 @@ const StatefulEventComponent: React.FC<Props> = ({
     [event.ecs, rowRenderers]
   );
 
-  const onToggleShowNotes = useCallback(() => {
-    setShowNotes((prevShowNotes) => {
-      if (prevShowNotes[eventId]) {
-        // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
-        setTimeout(() => {
-          const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
-            `.${NOTES_BUTTON_CLASS_NAME}`
-          );
-          notesButtonElement?.focus();
-        }, 0);
-      }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const indexName = event._index!;
 
-      return { ...prevShowNotes, [eventId]: !prevShowNotes[eventId] };
-    });
-  }, [eventId]);
+  const onToggleShowNotes = useCallback(() => {
+    if (!expandableFlyoutDisabled && securitySolutionNotesEnabled) {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
+        },
+        left: {
+          id: DocumentDetailsLeftPanelKey,
+          path: {
+            tab: LeftPanelNotesTab,
+          },
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
+        },
+      });
+    } else {
+      setShowNotes((prevShowNotes) => {
+        if (prevShowNotes[eventId]) {
+          // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
+          setTimeout(() => {
+            const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
+              `.${NOTES_BUTTON_CLASS_NAME}`
+            );
+            notesButtonElement?.focus();
+          }, 0);
+        }
+
+        return { ...prevShowNotes, [eventId]: !prevShowNotes[eventId] };
+      });
+    }
+  }, [
+    eventId,
+    expandableFlyoutDisabled,
+    indexName,
+    securitySolutionNotesEnabled,
+    openFlyout,
+    timelineId,
+  ]);
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const indexName = event._index!;
-
     const updatedExpandedDetail: ExpandedDetailType = {
       panelView: 'eventDetail',
       params: {
@@ -229,14 +267,14 @@ const StatefulEventComponent: React.FC<Props> = ({
       );
     }
   }, [
-    dispatch,
     eventId,
-    event._index,
+    indexName,
+    refetch,
     expandableFlyoutDisabled,
     openFlyout,
-    refetch,
-    tabType,
     timelineId,
+    dispatch,
+    tabType,
   ]);
 
   const associateNote = useCallback(

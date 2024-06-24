@@ -13,10 +13,14 @@ import {
   NOTE_AVATAR_TEST_ID,
   NOTES_COMMENT_TEST_ID,
   NOTES_LOADING_TEST_ID,
+  OPEN_TIMELINE_BUTTON_TEST_ID,
 } from './test_ids';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
-import { FETCH_NOTES_ERROR, NO_NOTES, NotesList } from './notes_list';
+import { DELETE_NOTE_ERROR, FETCH_NOTES_ERROR, NO_NOTES, NotesList } from './notes_list';
 import { ReqStatus } from '../../../../notes/store/notes.slice';
+import { useQueryTimelineById } from '../../../../timelines/components/open_timeline/helpers';
+
+jest.mock('../../../../timelines/components/open_timeline/helpers');
 
 const mockAddError = jest.fn();
 jest.mock('../../../../common/hooks/use_app_toasts', () => ({
@@ -47,6 +51,7 @@ describe('NotesList', () => {
     expect(getByTestId(`${NOTES_COMMENT_TEST_ID}-0`)).toBeInTheDocument();
     expect(getByText('note-1')).toBeInTheDocument();
     expect(getByTestId(`${DELETE_NOTE_BUTTON_TEST_ID}-0`)).toBeInTheDocument();
+    expect(getByTestId(`${OPEN_TIMELINE_BUTTON_TEST_ID}-0`)).toBeInTheDocument();
     expect(getByTestId(`${NOTE_AVATAR_TEST_ID}-0`)).toBeInTheDocument();
   });
 
@@ -124,26 +129,30 @@ describe('NotesList', () => {
       ...mockGlobalState,
       notes: {
         ...mockGlobalState.notes,
-        status: {
-          ...mockGlobalState.notes.status,
-          fetchNotesByDocumentId: ReqStatus.Failed,
-        },
-        error: {
-          ...mockGlobalState.notes.error,
-          fetchNotesByDocumentId: { type: 'http', status: 500 },
+        entities: {
+          '1': {
+            eventId: 'event-id',
+            noteId: '1',
+            note: 'note-1',
+            timelineId: '',
+            created: 1663882629000,
+            createdBy: 'elastic',
+            updated: 1663882629000,
+            updatedBy: null,
+            version: 'version',
+          },
         },
       },
     });
 
-    render(
+    const { getByTestId } = render(
       <TestProviders store={store}>
         <NotesList eventId={'event-id'} />
       </TestProviders>
     );
+    const { getByText } = within(getByTestId(`${NOTE_AVATAR_TEST_ID}-0`));
 
-    expect(mockAddError).toHaveBeenCalledWith(null, {
-      title: FETCH_NOTES_ERROR,
-    });
+    expect(getByText('?')).toBeInTheDocument();
   });
 
   it('should render create loading when user creates a new note', () => {
@@ -206,6 +215,50 @@ describe('NotesList', () => {
       ...mockGlobalState,
       notes: {
         ...mockGlobalState.notes,
+        status: {
+          ...mockGlobalState.notes.status,
+          deleteNote: ReqStatus.Failed,
+        },
+        error: {
+          ...mockGlobalState.notes.error,
+          deleteNote: { type: 'http', status: 500 },
+        },
+      },
+    });
+
+    render(
+      <TestProviders store={store}>
+        <NotesList eventId={'event-id'} />
+      </TestProviders>
+    );
+
+    expect(mockAddError).toHaveBeenCalledWith(null, {
+      title: DELETE_NOTE_ERROR,
+    });
+  });
+
+  it('should open timeline if user clicks on the icon', () => {
+    const queryTimelineById = jest.fn();
+    (useQueryTimelineById as jest.Mock).mockReturnValue(queryTimelineById);
+
+    const { getByTestId } = renderNotesList();
+
+    getByTestId(`${OPEN_TIMELINE_BUTTON_TEST_ID}-0`).click();
+
+    expect(queryTimelineById).toHaveBeenCalledWith({
+      duplicate: false,
+      onOpenTimeline: undefined,
+      timelineId: 'timeline-1',
+      timelineType: undefined,
+      unifiedComponentsInTimelineEnabled: false,
+    });
+  });
+
+  it('should not render timeline icon if no timeline is related to the note', () => {
+    const store = createMockStore({
+      ...mockGlobalState,
+      notes: {
+        ...mockGlobalState.notes,
         entities: {
           '1': {
             eventId: 'event-id',
@@ -215,20 +268,19 @@ describe('NotesList', () => {
             created: 1663882629000,
             createdBy: 'elastic',
             updated: 1663882629000,
-            updatedBy: null,
+            updatedBy: 'elastic',
             version: 'version',
           },
         },
       },
     });
 
-    const { getByTestId } = render(
+    const { queryByTestId } = render(
       <TestProviders store={store}>
         <NotesList eventId={'event-id'} />
       </TestProviders>
     );
-    const { getByText } = within(getByTestId(`${NOTE_AVATAR_TEST_ID}-0`));
 
-    expect(getByText('?')).toBeInTheDocument();
+    expect(queryByTestId(`${OPEN_TIMELINE_BUTTON_TEST_ID}-0`)).not.toBeInTheDocument();
   });
 });
