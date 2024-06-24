@@ -6,10 +6,10 @@
  */
 
 import apm from 'elastic-apm-node';
-import { omit } from 'lodash';
+import { omit, mapKeys } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
-import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { IClusterClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   createTaskRunError,
@@ -42,7 +42,7 @@ import {
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -112,6 +112,7 @@ export class TaskRunner<
 > {
   private context: TaskRunnerContext;
   private logger: Logger;
+  private esClient: IClusterClient;
   private taskInstance: RuleTaskInstance;
   private ruleConsumer: string | null;
   private ruleType: NormalizedRuleType<
@@ -168,6 +169,7 @@ export class TaskRunner<
     AlertData
   >) {
     this.context = context;
+    this.esClient = context.elasticsearch.client;
     const loggerId = ruleType.id.startsWith('.') ? ruleType.id.substring(1) : ruleType.id;
     this.logger = context.logger.get(loggerId);
     this.usageCounter = context.usageCounter;
@@ -217,7 +219,6 @@ export class TaskRunner<
       lastRun?: RawRuleLastRun | null;
     }
   ) {
-    const client = this.internalSavedObjectsRepository;
     try {
       // Future engineer -> Here we are just checking if we need to wait for
       // the update of the attribute `running` in the rule's saved object
@@ -228,16 +229,15 @@ export class TaskRunner<
       // eslint-disable-next-line no-empty
     } catch {}
     try {
-      await partiallyUpdateRule(
-        client,
-        ruleId,
-        { ...attributes, running: false },
-        {
-          ignore404: true,
-          namespace,
-          refresh: false,
-        }
-      );
+      await this.esClient.asInternalUser.update({
+        index: '.kibana_alerting_cases',
+        id: `alert:${ruleId}`,
+        refresh: false,
+        doc: {
+          ...mapKeys(attributes, (key) => `alert.${key}`),
+          'alert.running': false,
+        },
+      });
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
     }
