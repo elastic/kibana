@@ -372,8 +372,6 @@ export const EndpointList = () => {
     return endpointsExist && !patternsError;
   }, [endpointsExist, patternsError]);
 
-  // FIXME:PT need to retrieve all host's agent status at once then use it in agentStatus column
-
   const paginationSetup = useMemo(() => {
     return {
       pageIndex,
