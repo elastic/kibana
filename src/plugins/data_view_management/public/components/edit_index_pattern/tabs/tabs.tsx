@@ -308,8 +308,8 @@ export const Tabs: React.FC<TabsProps> = ({
   }, []);
 
   const openFieldEditor = useCallback(
-    (fieldName?: string) => {
-      closeEditorHandler.current = dataViewFieldEditor.openEditor({
+    async (fieldName?: string) => {
+      closeEditorHandler.current = await dataViewFieldEditor.openEditor({
         ctx: {
           dataView: indexPattern,
         },
