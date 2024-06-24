@@ -11,9 +11,6 @@ fi
 
 echo --- Verify FIPS enabled
 
-echo "KIBANA_BUILD_LOCATION: $KIBANA_BUILD_LOCATION"
-echo "OPENSSL_MODULES: $OPENSSL_MODULES"
-
 NODE_BINARY="$KIBANA_BUILD_LOCATION/node/glibc-217/bin/node"
 
 if [[ -x "$NODE_BINARY" ]]; then
