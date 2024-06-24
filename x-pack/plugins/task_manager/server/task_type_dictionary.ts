@@ -113,6 +113,10 @@ export class TaskTypeDictionary {
     return this.definitions.has(type);
   }
 
+  public size() {
+    return this.definitions.size;
+  }
+
   public get(type: string): TaskDefinition {
     this.ensureHas(type);
     return this.definitions.get(type)!;

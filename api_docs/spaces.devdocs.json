@@ -1793,7 +1793,14 @@
               "\nSolution selected for this space."
             ],
             "signature": [
-              "\"search\" | \"security\" | \"observability\" | \"classic\" | undefined"
+              {
+                "pluginId": "cloud",
+                "scope": "common",
+                "docId": "kibCloudPluginApi",
+                "section": "def-common.OnBoardingDefaultSolution",
+                "text": "OnBoardingDefaultSolution"
+              },
+              " | \"classic\" | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
@@ -1825,7 +1832,15 @@
               "The space to represent with an avatar."
             ],
             "signature": [
-              "{ id?: string | undefined; name?: string | undefined; description?: string | undefined; color?: string | undefined; initials?: string | undefined; imageUrl?: string | undefined; disabledFeatures?: string[] | undefined; _reserved?: boolean | undefined; solution?: \"search\" | \"security\" | \"observability\" | \"classic\" | undefined; }"
+              "{ id?: string | undefined; name?: string | undefined; description?: string | undefined; color?: string | undefined; initials?: string | undefined; imageUrl?: string | undefined; disabledFeatures?: string[] | undefined; _reserved?: boolean | undefined; solution?: ",
+              {
+                "pluginId": "cloud",
+                "scope": "common",
+                "docId": "kibCloudPluginApi",
+                "section": "def-common.OnBoardingDefaultSolution",
+                "text": "OnBoardingDefaultSolution"
+              },
+              " | \"classic\" | undefined; }"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false,
@@ -3701,7 +3716,14 @@
               "\nSolution selected for this space."
             ],
             "signature": [
-              "\"search\" | \"security\" | \"observability\" | \"classic\" | undefined"
+              {
+                "pluginId": "cloud",
+                "scope": "common",
+                "docId": "kibCloudPluginApi",
+                "section": "def-common.OnBoardingDefaultSolution",
+                "text": "OnBoardingDefaultSolution"
+              },
+              " | \"classic\" | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
@@ -4951,7 +4973,14 @@
               "\nSolution selected for this space."
             ],
             "signature": [
-              "\"search\" | \"security\" | \"observability\" | \"classic\" | undefined"
+              {
+                "pluginId": "cloud",
+                "scope": "common",
+                "docId": "kibCloudPluginApi",
+                "section": "def-common.OnBoardingDefaultSolution",
+                "text": "OnBoardingDefaultSolution"
+              },
+              " | \"classic\" | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,

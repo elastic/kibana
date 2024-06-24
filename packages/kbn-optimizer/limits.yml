@@ -31,7 +31,7 @@ pageLoadAssetSize:
   dataQuality: 19384
   datasetQuality: 50624
   dataViewEditor: 28082
-  dataViewFieldEditor: 27000
+  dataViewFieldEditor: 42021
   dataViewManagement: 5300
   dataViews: 65000
   dataVisualizer: 27530
@@ -41,8 +41,8 @@ pageLoadAssetSize:
   discoverShared: 17111
   embeddable: 87309
   embeddableEnhanced: 22107
-  enterpriseSearch: 50858
-  esqlDataGrid: 24598
+  enterpriseSearch: 66810
+  esqlDataGrid: 24582
   esUiShared: 326654
   eventAnnotation: 30000
   eventAnnotationListing: 25841
@@ -82,6 +82,7 @@ pageLoadAssetSize:
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
+  integrationAssistant: 19524
   interactiveSetup: 80000
   investigate: 17970
   kibanaOverview: 56279
@@ -132,6 +133,8 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchConnectors: 30000
+  searchHomepage: 19831
+  searchInferenceEndpoints: 20470
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080

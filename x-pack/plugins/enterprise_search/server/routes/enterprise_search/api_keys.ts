@@ -51,8 +51,9 @@ export function registerApiKeysRoutes(
       validate: {},
     },
     async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
-      const user = security.authc.getCurrentUser(request);
+      const core = await context.core;
+      const { client } = core.elasticsearch;
+      const user = core.security.authc.getCurrentUser();
       if (user) {
         try {
           const apiKeys = await client.asCurrentUser.security.getApiKey({
