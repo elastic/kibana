@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../hooks/use_kibana';
 
 const LICENSE_MANAGEMENT_LOCATOR = 'LICENSE_MANAGEMENT_LOCATOR';
 
-const getLicenseManagementLocatorKey = 'license_management_url_key';
-
+/**
+ * Hook to get the license management locator
+ * @returns a callback to navigate to the license management page
+ */
 export const useLicenseManagementLocatorApi = () => {
   const { share } = useKibana().services;
 
-  return useQuery([getLicenseManagementLocatorKey], () => {
-    const locator = share.url.locators.get(LICENSE_MANAGEMENT_LOCATOR);
-    // license management does not exist on serverless
-    if (!locator) return;
+  const locator = share.url.locators.get(LICENSE_MANAGEMENT_LOCATOR);
 
-    return locator.getUrl({
-      page: 'dashboard',
-    });
-  });
+  // license management does not exist on serverless
+  if (!locator) return;
+
+  return () => locator.navigate({ page: 'dashboard' });
 };

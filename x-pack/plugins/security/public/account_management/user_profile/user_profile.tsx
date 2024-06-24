@@ -29,6 +29,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { Form, FormikProvider, useFormik, useFormikContext } from 'formik';
 import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
@@ -64,6 +65,12 @@ import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
 import { isUserReserved } from '../../management/users/user_utils';
+
+const formRowCSS = css`
+  .euiFormRow__label {
+    flex: 1;
+  }
+`;
 
 export interface UserProfileProps {
   user: AuthenticatedUser;
@@ -129,30 +136,36 @@ const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) 
       }
     >
       <FormRow
+        css={formRowCSS}
         label={
           <FormLabel for="user.full_name">
-            <FormattedMessage
-              id="xpack.security.accountManagement.userProfile.fullNameLabel"
-              defaultMessage="Full name"
-            />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.fullNameLabel"
+                defaultMessage="Full name"
+              />
+              <OptionalText />
+            </EuiFlexGroup>
           </FormLabel>
         }
-        labelAppend={<OptionalText />}
         fullWidth
       >
         <FormField name="user.full_name" data-test-subj={'userProfileFullName'} fullWidth />
       </FormRow>
 
       <FormRow
+        css={formRowCSS}
         label={
           <FormLabel for="user.email">
-            <FormattedMessage
-              id="xpack.security.accountManagement.userProfile.emailLabel"
-              defaultMessage="Email address"
-            />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.emailLabel"
+                defaultMessage="Email address"
+              />
+              <OptionalText />
+            </EuiFlexGroup>
           </FormLabel>
         }
-        labelAppend={<OptionalText />}
         fullWidth
       >
         <FormField type="email" name="user.email" data-test-subj={'userProfileEmail'} fullWidth />

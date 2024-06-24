@@ -12,6 +12,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiCopy,
+  EuiFieldText,
   EuiFormControlLayout,
   EuiHorizontalRule,
   EuiPopover,
@@ -50,13 +51,12 @@ export const TokenField: FunctionComponent<TokenFieldProps> = (props) => {
       style={{ backgroundColor: 'transparent' }}
       readOnly
     >
-      <input
+      <EuiFieldText
         data-test-subj="apiKeyTokenField"
-        type="text"
+        controlOnly
         aria-label={i18n.translate('xpack.security.copyTokenField.tokenLabel', {
           defaultMessage: 'Token',
         })}
-        className="euiFieldText euiFieldText--inGroup"
         value={props.value}
         style={{
           fontFamily: euiThemeVars.euiCodeFontFamily,

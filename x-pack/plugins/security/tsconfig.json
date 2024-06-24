@@ -65,7 +65,6 @@
     "@kbn/core-http-server",
     "@kbn/core-http-server-mocks",
     "@kbn/remote-clusters-plugin",
-    "@kbn/analytics-client",
     "@kbn/security-plugin-types-common",
     "@kbn/security-plugin-types-public",
     "@kbn/security-plugin-types-server",

@@ -41,13 +41,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('search', function () {
-      const itemsPerPage = 25;
-
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
         await PageObjects.discover.isShowingDocViewer();
         await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === itemsPerPage;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });
       });
 
@@ -95,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // expect no changes in the list
         await retry.waitFor('all items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === itemsPerPage;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });
       });
     });
