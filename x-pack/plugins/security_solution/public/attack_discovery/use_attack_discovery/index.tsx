@@ -32,6 +32,7 @@ export interface UseAttackDiscovery {
   fetchAttackDiscoveries: () => Promise<void>;
   generationIntervals: GenerationInterval[] | undefined;
   isLoading: boolean;
+  isLoadingPost: boolean;
   lastUpdated: Date | null;
   onCancel: () => Promise<void>;
   replacements: Replacements;
@@ -55,6 +56,8 @@ export const useAttackDiscovery = ({
 
   // generation can take a long time, so we calculate an approximate future time:
   const [approximateFutureTime, setApproximateFutureTime] = useState<Date | null>(null);
+  // whether post request is loading (dont show actions)
+  const [isLoadingPost, setIsLoadingPost] = useState<boolean>(false);
   const {
     cancelAttackDiscovery,
     data: pollData,
@@ -148,6 +151,7 @@ export const useAttackDiscovery = ({
       }
       setLoadingConnectorId?.(connectorId ?? null);
       setIsLoading(true);
+      setIsLoadingPost(true);
       setApproximateFutureTime(null);
       // call the internal API to generate attack discoveries:
       const rawResponse = await http.fetch('/internal/elastic_assistant/attack_discovery', {
@@ -155,7 +159,7 @@ export const useAttackDiscovery = ({
         method: 'POST',
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
       });
-
+      setIsLoadingPost(false);
       const parsedResponse = AttackDiscoveryPostResponse.safeParse(rawResponse);
 
       if (!parsedResponse.success) {
@@ -166,6 +170,7 @@ export const useAttackDiscovery = ({
         pollApi();
       }
     } catch (error) {
+      setIsLoadingPost(false);
       setIsLoading(false);
       toasts?.addDanger(error, {
         title: ERROR_GENERATING_ATTACK_DISCOVERIES,
@@ -182,6 +187,7 @@ export const useAttackDiscovery = ({
     fetchAttackDiscoveries,
     generationIntervals,
     isLoading,
+    isLoadingPost,
     lastUpdated,
     onCancel: cancelAttackDiscovery,
     replacements,

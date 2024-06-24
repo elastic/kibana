@@ -10,7 +10,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@
 import { css } from '@emotion/react';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { noop } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import * as i18n from './translations';
@@ -19,6 +19,7 @@ interface Props {
   connectorId: string | undefined;
   connectorsAreConfigured: boolean;
   isLoading: boolean;
+  isDisabledActions: boolean;
   onGenerate: () => void;
   onCancel: () => void;
   onConnectorIdSelected: (connectorId: string) => void;
@@ -28,6 +29,7 @@ const HeaderComponent: React.FC<Props> = ({
   connectorId,
   connectorsAreConfigured,
   isLoading,
+  isDisabledActions,
   onGenerate,
   onConnectorIdSelected,
   onCancel,
@@ -37,13 +39,24 @@ const HeaderComponent: React.FC<Props> = ({
   const { euiTheme } = useEuiTheme();
   const disabled = !hasAssistantPrivilege || connectorId == null;
 
+  const [didCancel, setDidCancel] = useState(false);
+
+  const handleCancel = useCallback(() => {
+    setDidCancel(true);
+    onCancel();
+  }, [onCancel]);
+
+  useEffect(() => {
+    if (isLoading === false) setDidCancel(false);
+  }, [isLoading]);
+
   const buttonProps = useMemo(
     () =>
       isLoading
         ? {
             dataTestSubj: 'cancel',
             color: 'danger' as EuiButtonProps['color'],
-            onClick: onCancel,
+            onClick: handleCancel,
             text: i18n.CANCEL,
           }
         : {
@@ -52,7 +65,7 @@ const HeaderComponent: React.FC<Props> = ({
             onClick: onGenerate,
             text: i18n.GENERATE,
           },
-    [isLoading, onCancel, onGenerate]
+    [isLoading, handleCancel, onGenerate]
   );
 
   return (
@@ -84,7 +97,7 @@ const HeaderComponent: React.FC<Props> = ({
           <EuiButton
             data-test-subj={buttonProps.dataTestSubj}
             size="s"
-            disabled={disabled}
+            disabled={disabled || didCancel || isDisabledActions}
             color={buttonProps.color}
             onClick={buttonProps.onClick}
           >

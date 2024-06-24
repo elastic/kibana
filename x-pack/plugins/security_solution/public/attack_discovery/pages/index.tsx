@@ -76,6 +76,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     generationIntervals,
     onCancel,
     isLoading,
+    isLoadingPost,
     lastUpdated,
     replacements,
   } = useAttackDiscovery({
@@ -165,6 +166,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
             connectorId={connectorId}
             connectorsAreConfigured={aiConnectors != null && aiConnectors.length > 0}
             isLoading={isLoading}
+            // disable header actions before post request has completed
+            isDisabledActions={isLoadingPost}
             onConnectorIdSelected={onConnectorIdSelected}
             onGenerate={onGenerate}
             onCancel={onCancel}
@@ -190,7 +193,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           {showLoading({
             attackDiscoveriesCount,
             connectorId,
-            isLoading,
+            isLoading: isLoading || isLoadingPost,
             loadingConnectorId,
           }) ? (
             <LoadingCallout
@@ -229,7 +232,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
               attackDiscoveriesCount={attackDiscoveriesCount}
               failureReason={failureReason}
               connectorId={connectorId}
-              isLoading={isLoading}
+              isLoading={isLoading || isLoadingPost}
               onGenerate={onGenerate}
             />
           </EuiFlexItem>
