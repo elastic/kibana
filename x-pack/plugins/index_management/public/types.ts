@@ -52,8 +52,8 @@ export interface ClientConfigType {
   enableIndexActions?: boolean;
   enableLegacyTemplates?: boolean;
   enableIndexStats?: boolean;
+  enableDataStreamStats?: boolean;
   editableIndexSettings?: 'all' | 'limited';
-  enableDataStreamsStorageColumn?: boolean;
   enableMappingsSourceFieldSection?: boolean;
   enableTogglingDataRetention?: boolean;
   dev: {
