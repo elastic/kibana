@@ -58,6 +58,7 @@ const RowActionsComponent = <T,>({
         {onEdit != null && (
           <EuiFlexItem>
             <EuiButtonEmpty
+              aria-label={i18n.EDIT_BUTTON}
               iconType="pencil"
               onClick={handleEditConnector}
               disabled={!isEditable}

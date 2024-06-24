@@ -29,7 +29,7 @@ import * as i18n from './translations';
 import { useDeleteKnowledgeBase } from '../assistant/api/knowledge_base/use_delete_knowledge_base';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
-import { KnowledgeBaseSwitch } from './knowledgeBaseSwitch';
+import { KnowledgeBaseSwitch } from './knowledge_base_switch';
 import {
   ESQL_RESOURCE,
   KNOWLEDGE_BASE_INDEX_PATTERN,

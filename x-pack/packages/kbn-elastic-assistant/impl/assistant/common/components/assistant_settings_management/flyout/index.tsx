@@ -21,7 +21,7 @@ import * as i18n from './translations';
 
 interface Props {
   children: React.ReactNode;
-  title: string;
+  title?: string;
   flyoutVisible: boolean;
   onClose: () => void;
   onSaveCancelled: () => void;
@@ -38,11 +38,13 @@ const FlyoutComponent: React.FC<Props> = ({
 }) => {
   return flyoutVisible ? (
     <EuiFlyout ownFocus onClose={onClose}>
-      <EuiFlyoutHeader>
-        <EuiTitle size={'s'}>
-          <h2>{title}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
+      {title && (
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size={'s'}>
+            <h2>{title}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+      )}
       <EuiFlyoutBody>{children}</EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">

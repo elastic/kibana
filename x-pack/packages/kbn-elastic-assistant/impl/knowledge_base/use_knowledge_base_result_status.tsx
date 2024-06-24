@@ -6,12 +6,11 @@
  */
 
 import { ReadKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
-import { KnowledgeBaseSettings } from '../assistant/settings';
-
+import { KnowledgeBaseConfig } from '../assistant/types';
 interface Props {
   enableKnowledgeBaseByDefault: boolean;
   kbStatus: ReadKnowledgeBaseResponse | undefined;
-  knowledgeBase: KnowledgeBaseSettings;
+  knowledgeBase: KnowledgeBaseConfig;
   isLoading: boolean;
   isFetching: boolean;
   isSettingUpKB: boolean;
