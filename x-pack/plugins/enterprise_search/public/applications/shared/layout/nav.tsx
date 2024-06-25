@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
 import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { ILicense } from '@kbn/licensing-plugin/public';
 
 import {
   ANALYTICS_PLUGIN,
@@ -41,6 +40,8 @@ import {
 import { INFERENCE_ENDPOINTS_PATH } from '../../enterprise_search_relevance/routes';
 import { KibanaLogic } from '../kibana';
 
+import { LicensingLogic } from '../licensing';
+
 import { generateNavLink } from './nav_link_helpers';
 
 /**
@@ -50,18 +51,12 @@ import { generateNavLink } from './nav_link_helpers';
  * @returns The Enterprise Search navigation items
  */
 export const useEnterpriseSearchNav = (alwaysReturn = false) => {
-  const { isSearchHomepageEnabled, searchHomepage, isSidebarEnabled, productAccess, licensing } =
+  const { isSearchHomepageEnabled, searchHomepage, isSidebarEnabled, productAccess } =
     useValues(KibanaLogic);
+
+  const { hasEnterpriseLicense } = useValues(LicensingLogic);
+
   const indicesNavItems = useIndicesNav();
-
-  const [isEnterpriseLicense, setIsEnterpriseLicense] = useState<boolean>(false);
-  useEffect(() => {
-    const subscription = licensing?.license$.subscribe((license: ILicense) => {
-      setIsEnterpriseLicense(license.isActive && license.hasAtLeast('enterprise'));
-    });
-
-    return () => subscription?.unsubscribe();
-  }, [licensing]);
 
   if (!isSidebarEnabled && !alwaysReturn) return undefined;
 
@@ -165,7 +160,7 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
         defaultMessage: 'Build',
       }),
     },
-    ...(isEnterpriseLicense
+    ...(hasEnterpriseLicense
       ? [
           {
             id: 'relevance',

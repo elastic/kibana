@@ -64,7 +64,7 @@ export interface KibanaLogicProps {
   isSidebarEnabled: boolean;
   lens?: LensPublicStart;
   ml?: MlPluginStart;
-  licensing: LicensingPluginStart;
+  licensing?: LicensingPluginStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
@@ -100,7 +100,7 @@ export interface KibanaValues {
   isSidebarEnabled: boolean;
   lens: LensPublicStart | null;
   ml: MlPluginStart | null;
-  licensing: LicensingPluginStart;
+  licensing?: LicensingPluginStart | null;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
@@ -141,7 +141,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     isSidebarEnabled: [props.isSidebarEnabled, {}],
     lens: [props.lens || null, {}],
     ml: [props.ml || null, {}],
-    licensing: [props.licensing, {}],
+    licensing: [props.licensing || null, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
         const deps = { history: props.history, http: HttpLogic.values.http };

@@ -10,6 +10,7 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 export const mockLicensingValues = {
   license: licensingMock.createLicense(),
   hasPlatinumLicense: false,
+  hasEnterpriseLicense: true,
   hasGoldLicense: false,
   isTrial: false,
   canManageLicense: true,
