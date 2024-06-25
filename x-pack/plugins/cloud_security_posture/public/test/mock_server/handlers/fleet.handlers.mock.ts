@@ -7,7 +7,7 @@
 
 import { http, HttpResponse } from 'msw';
 
-export const fleetCspPackageHandler = http.get(
+export const defaultFleetCspPackageHandler = http.get(
   `/api/fleet/epm/packages/cloud_security_posture`,
   () => {
     return HttpResponse.json({

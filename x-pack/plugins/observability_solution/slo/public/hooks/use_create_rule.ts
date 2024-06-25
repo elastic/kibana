@@ -9,7 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { BASE_ALERTING_API_PATH, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { v4 } from 'uuid';
-import {
+import type {
   CreateRuleRequestBody,
   CreateRuleResponse,
 } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
@@ -41,7 +41,7 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
     {
       onError: (_err) => {
         toasts.addDanger(
-          i18n.translate('xpack.observability.rules.createRule.errorNotification.descriptionText', {
+          i18n.translate('xpack.slo.rules.createRule.errorNotification.descriptionText', {
             defaultMessage: 'Failed to create rule',
           })
         );
@@ -49,12 +49,9 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
 
       onSuccess: () => {
         toasts.addSuccess(
-          i18n.translate(
-            'xpack.observability.rules.createRule.successNotification.descriptionText',
-            {
-              defaultMessage: 'Rule created',
-            }
-          )
+          i18n.translate('xpack.slo.rules.createRule.successNotification.descriptionText', {
+            defaultMessage: 'Rule created',
+          })
         );
       },
     }
