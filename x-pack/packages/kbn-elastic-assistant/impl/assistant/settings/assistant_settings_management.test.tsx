@@ -64,6 +64,7 @@ const testProps = {
   conversations: {},
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   refetchAnonymizationFieldsResults: jest.fn(),
+  refetchConversations: jest.fn(),
 };
 jest.mock('../../assistant_context');
 
