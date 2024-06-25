@@ -14,16 +14,23 @@ import {
 } from './cloud_security_metering_task';
 
 import type { ServerlessSecurityConfig } from '../config';
-import type { CloudSecuritySolutions } from './types';
+
 import type { ProductTier } from '../../common/product';
-import { CLOUD_SECURITY_TASK_TYPE, CSPM, KSPM, CNVM, CLOUD_DEFEND } from './constants';
+import {
+  CLOUD_SECURITY_TASK_TYPE,
+  CSPM,
+  KSPM,
+  CNVM,
+  CLOUD_DEFEND,
+  BILLABLE_ASSETS_CONFIG,
+} from './constants';
 import { getCloudDefendUsageRecords } from './defend_for_containers_metering';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const chance = new Chance();
 
-const cloudSecuritySolutions: CloudSecuritySolutions[] = [CSPM, KSPM, CNVM];
+const cloudSecuritySolutions: Array<typeof CSPM | typeof KSPM> = [CSPM, KSPM];
 
 describe('getCloudSecurityUsageRecord', () => {
   beforeEach(() => {
@@ -54,18 +61,33 @@ describe('getCloudSecurityUsageRecord', () => {
   });
 
   test.each(cloudSecuritySolutions)(
-    'should return usageRecords with correct values for cspm, kspm, and cnvm when Elasticsearch response has aggregations',
+    'should return usageRecords with correct values for cspm and kspm when Elasticsearch response has aggregations',
     async (cloudSecuritySolution) => {
       // @ts-ignore
       mockEsClient.search.mockResolvedValueOnce({
         hits: { hits: [{ _id: 'someRecord', _index: 'mockIndex' }] }, // mocking for indexHasDataInDateRange
       });
+      const randomIndex = Math.floor(
+        Math.random() * BILLABLE_ASSETS_CONFIG[cloudSecuritySolution].values.length
+      );
+      const randomBillableAsset = BILLABLE_ASSETS_CONFIG[cloudSecuritySolution].values[randomIndex];
 
       // @ts-ignore
       mockEsClient.search.mockResolvedValueOnce({
         aggregations: {
-          unique_assets: {
-            value: 10,
+          resource_sub_type: {
+            buckets: [
+              {
+                key: randomBillableAsset,
+                doc_count: 100,
+                unique_assets: { value: 10 },
+              },
+              {
+                key: 'not_billable_asset',
+                doc_count: 50,
+                unique_assets: { value: 11 },
+              },
+            ],
           },
           min_timestamp: {
             value_as_string: '2023-07-30T15:11:41.738Z',
@@ -106,12 +128,78 @@ describe('getCloudSecurityUsageRecord', () => {
             instance_group_id: projectId,
             metadata: {
               tier: 'essentials',
+              resource_sub_type_count: {
+                [randomBillableAsset]: {
+                  doc_count: 100,
+                  unique_assets: 10,
+                },
+                not_billable_asset: {
+                  doc_count: 50,
+                  unique_assets: 11,
+                },
+              },
             },
           },
         },
       ]);
     }
   );
+
+  it('should return usageRecords with correct values for cnvm when Elasticsearch response has aggregations', async () => {
+    const cloudSecuritySolution = CNVM;
+
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({
+      hits: { hits: [{ _id: 'someRecord', _index: 'mockIndex' }] }, // mocking for indexHasDataInDateRange
+    });
+
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({
+      aggregations: {
+        unique_assets: {
+          value: 10,
+        },
+        min_timestamp: {
+          value_as_string: '2023-07-30T15:11:41.738Z',
+        },
+      },
+    });
+
+    const projectId = chance.guid();
+    const taskId = chance.guid();
+
+    const tier = 'essentials' as ProductTier;
+    const result = await getCloudSecurityUsageRecord({
+      esClient: mockEsClient,
+      projectId,
+      logger,
+      taskId,
+      lastSuccessfulReport: new Date(),
+      cloudSecuritySolution,
+      tier,
+    });
+
+    expect(result).toEqual([
+      {
+        id: expect.stringContaining(`${CLOUD_SECURITY_TASK_TYPE}_cnvm_${projectId}`),
+        usage_timestamp: '2023-07-30T15:11:41.738Z',
+        creation_timestamp: expect.any(String), // Expect a valid ISO string
+        usage: {
+          type: CLOUD_SECURITY_TASK_TYPE,
+          sub_type: CNVM,
+          quantity: 10,
+          period_seconds: expect.any(Number),
+        },
+        source: {
+          id: taskId,
+          instance_group_id: projectId,
+          metadata: {
+            tier: 'essentials',
+          },
+        },
+      },
+    ]);
+  });
 
   it('should return undefined when Elasticsearch response does not have aggregations', async () => {
     // @ts-ignore
@@ -179,30 +267,6 @@ describe('getSearchQueryByCloudSecuritySolution', () => {
               'rule.benchmark.posture_type': 'cspm',
             },
           },
-          {
-            terms: {
-              'resource.sub_type': [
-                // 'aws-ebs', we can't include EBS volumes until https://github.com/elastic/security-team/issues/9283 is resolved
-                // 'aws-ec2', we can't include EC2 instances until https://github.com/elastic/security-team/issues/9254 is resolved
-                'aws-s3',
-                'aws-rds',
-                'azure-disk',
-                'azure-document-db-database-account',
-                'azure-flexible-mysql-server-db',
-                'azure-flexible-postgresql-server-db',
-                'azure-mysql-server-db',
-                'azure-postgresql-server-db',
-                'azure-sql-server',
-                'azure-storage-account',
-                'azure-vm',
-                'gcp-bigquery-dataset',
-                'gcp-compute-disk',
-                'gcp-compute-instance',
-                'gcp-sqladmin-instance',
-                'gcp-storage-bucket',
-              ],
-            },
-          },
         ],
       },
     });
@@ -224,11 +288,6 @@ describe('getSearchQueryByCloudSecuritySolution', () => {
           {
             term: {
               'rule.benchmark.posture_type': 'kspm',
-            },
-          },
-          {
-            terms: {
-              'resource.sub_type': ['Node', 'node'],
             },
           },
         ],

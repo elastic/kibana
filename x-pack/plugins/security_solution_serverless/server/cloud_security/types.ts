@@ -26,6 +26,9 @@ export interface ResourceSubtypeAggregationBucket {
 export interface AssetCountAggregation {
   key_as_string: string;
   min_timestamp: MinTimestamp;
+  unique_assets: {
+    value: number;
+  };
   resource_sub_type: {
     buckets: ResourceSubtypeAggregationBucket[];
   };
@@ -34,6 +37,13 @@ export interface AssetCountAggregation {
 export interface MinTimestamp {
   value: number;
   value_as_string: string;
+}
+
+export interface ResourceSubtypeCounter {
+  [key: string]: {
+    doc_count: number;
+    unique_assets: number;
+  };
 }
 
 export type CloudSecuritySolutions = typeof CSPM | typeof KSPM | typeof CNVM | typeof CLOUD_DEFEND;

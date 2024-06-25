@@ -23,14 +23,8 @@ import type {
   CloudSecuritySolutions,
   AssetCountAggregation,
   ResourceSubtypeAggregationBucket,
+  ResourceSubtypeCounter,
 } from './types';
-
-export interface ResourceSubtypeCounter {
-  [key: string]: {
-    doc_count: number;
-    unique_assets: number;
-  };
-}
 
 export const getUsageRecords = (
   assetCountAggregation: AssetCountAggregation,
@@ -41,32 +35,30 @@ export const getUsageRecords = (
   periodSeconds: number,
   logger: Logger
 ): UsageRecord => {
-  const resourceSubtypeCounter = assetCountAggregation.resource_sub_type.buckets.reduce(
-    (resourceMap, item) => {
-      resourceMap[item.key] = {
-        doc_count: item.doc_count,
-        unique_assets: item.unique_assets.value,
-      };
-      return resourceMap;
-    },
-    {} as ResourceSubtypeCounter
-  );
-
-  const resourceSubtypeBuckets: ResourceSubtypeAggregationBucket[] =
-    assetCountAggregation.resource_sub_type.buckets;
-
   let assetCount;
+  let resourceSubtypeCounter;
 
   if (cloudSecuritySolution === CSPM || cloudSecuritySolution === KSPM) {
+    const resourceSubtypeBuckets: ResourceSubtypeAggregationBucket[] =
+      assetCountAggregation.resource_sub_type.buckets;
+
     const billableAssets = BILLABLE_ASSETS_CONFIG[cloudSecuritySolution].values;
     assetCount = resourceSubtypeBuckets
       .filter((bucket) => billableAssets.includes(bucket.key))
       .reduce((acc, bucket) => acc + bucket.unique_assets.value, 0);
-  } else {
-    assetCount = resourceSubtypeBuckets.reduce(
-      (acc, bucket) => acc + bucket.unique_assets.value,
-      0
+
+    resourceSubtypeCounter = assetCountAggregation.resource_sub_type.buckets.reduce(
+      (resourceMap, item) => {
+        resourceMap[item.key] = {
+          doc_count: item.doc_count,
+          unique_assets: item.unique_assets.value,
+        };
+        return resourceMap;
+      },
+      {} as ResourceSubtypeCounter
     );
+  } else {
+    assetCount = assetCountAggregation.unique_assets.value;
   }
 
   if (assetCount > AGGREGATION_PRECISION_THRESHOLD) {
@@ -86,6 +78,10 @@ export const getUsageRecords = (
   }
   const roundedCreationTimestamp = creationTimestamp.toISOString();
 
+  const metadata = resourceSubtypeCounter
+    ? { tier, resource_sub_type_count: resourceSubtypeCounter }
+    : { tier };
+
   const usageRecord: UsageRecord = {
     id: `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}_${roundedCreationTimestamp}`,
     usage_timestamp: minTimestamp,
@@ -99,7 +95,7 @@ export const getUsageRecords = (
     source: {
       id: taskId,
       instance_group_id: projectId,
-      metadata: { tier, resourceSubtypeCounter },
+      metadata,
     },
   };
 
@@ -109,18 +105,33 @@ export const getUsageRecords = (
 export const getAggregationByCloudSecuritySolution = (
   cloudSecuritySolution: CloudSecuritySolutions
 ) => {
-  return {
-    resource_sub_type: {
-      terms: {
-        field: `resource.sub_type`,
-      },
-      aggs: {
-        unique_assets: {
-          cardinality: {
-            field: METERING_CONFIGS[cloudSecuritySolution].assets_identifier,
-            precision_threshold: AGGREGATION_PRECISION_THRESHOLD,
+  if (cloudSecuritySolution === CSPM || cloudSecuritySolution === KSPM)
+    return {
+      resource_sub_type: {
+        terms: {
+          field: BILLABLE_ASSETS_CONFIG[cloudSecuritySolution].filter_attribute,
+        },
+        aggs: {
+          unique_assets: {
+            cardinality: {
+              field: METERING_CONFIGS[cloudSecuritySolution].assets_identifier,
+              precision_threshold: AGGREGATION_PRECISION_THRESHOLD,
+            },
           },
         },
+      },
+      min_timestamp: {
+        min: {
+          field: '@timestamp',
+        },
+      },
+    };
+
+  return {
+    unique_assets: {
+      cardinality: {
+        field: METERING_CONFIGS[cloudSecuritySolution].assets_identifier,
+        precision_threshold: AGGREGATION_PRECISION_THRESHOLD,
       },
     },
     min_timestamp: {
