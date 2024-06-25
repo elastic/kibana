@@ -24,6 +24,7 @@ import {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
   type Either,
@@ -166,8 +167,10 @@ export const performBulkUpdate = async <T>(
   }));
 
   const bulkGetResponse = bulkGetDocs.length
-    ? await client.mget<SavedObjectsRawDocSource>(
-        { body: { docs: bulkGetDocs } },
+    ? // Applying this workaround because the types mismatch
+      // (hopefully https://github.com/elastic/kibana/pull/186848 will get them closer)
+      await (client as ElasticsearchTraditionalClient).mget<SavedObjectsRawDocSource>(
+        { docs: bulkGetDocs },
         { ignore: [404], meta: true }
       )
     : undefined;

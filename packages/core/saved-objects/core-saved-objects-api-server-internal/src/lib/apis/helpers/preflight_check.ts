@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import type { RepositoryEsClient } from '../../repository_es_client';
 import type { PreflightCheckForBulkDeleteParams } from '../internals/repository_bulk_delete_internal_types';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
@@ -32,10 +33,12 @@ import {
 export type IPreflightCheckHelper = PublicMethodsOf<PreflightCheckHelper>;
 
 export class PreflightCheckHelper {
-  private registry: ISavedObjectTypeRegistry;
-  private serializer: ISavedObjectsSerializer;
-  private client: RepositoryEsClient;
-  private getIndexForType: (type: string) => string;
+  private readonly registry: ISavedObjectTypeRegistry;
+  private readonly serializer: ISavedObjectsSerializer;
+  // Applying this workaround because the types mismatch
+  // (hopefully https://github.com/elastic/kibana/pull/186848 will get them closer)
+  private readonly client: ElasticsearchTraditionalClient; // RepositoryEsClient;
+  private readonly getIndexForType: (type: string) => string;
   private createPointInTimeFinder: CreatePointInTimeFinderFn;
 
   constructor({
@@ -53,7 +56,7 @@ export class PreflightCheckHelper {
   }) {
     this.registry = registry;
     this.serializer = serializer;
-    this.client = client;
+    this.client = client as ElasticsearchTraditionalClient;
     this.getIndexForType = getIndexForType;
     this.createPointInTimeFinder = createPointInTimeFinder;
   }
@@ -87,10 +90,7 @@ export class PreflightCheckHelper {
       }));
 
     const bulkGetMultiNamespaceDocsResponse = bulkGetMultiNamespaceDocs.length
-      ? await this.client.mget(
-          { body: { docs: bulkGetMultiNamespaceDocs } },
-          { ignore: [404], meta: true }
-        )
+      ? await this.client.mget({ docs: bulkGetMultiNamespaceDocs }, { ignore: [404], meta: true })
       : undefined;
     // fail fast if we can't verify a 404 response is from Elasticsearch
     if (

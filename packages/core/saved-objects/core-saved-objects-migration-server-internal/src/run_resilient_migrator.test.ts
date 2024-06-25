@@ -115,7 +115,7 @@ describe('runResilientMigrator', () => {
 
 const mockOptions = (): RunResilientMigratorParams => {
   const logger = loggingSystemMock.create().get();
-  const mockedClient = elasticsearchClientMock.createElasticsearchClient();
+  const mockedClient = elasticsearchClientMock.createInternalClient();
   (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
 
   return {

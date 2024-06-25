@@ -13,6 +13,7 @@ import {
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import { isFoundGetResponse, getSavedObjectFromSource, rawDocExistsInNamespace } from './utils';
 import { ApiExecutionContext } from './types';
 
@@ -35,7 +36,11 @@ export const performGet = async <T>(
   if (!allowedTypes.includes(type)) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   }
-  const { body, statusCode, headers } = await client.get<SavedObjectsRawDocSource>(
+  // Applying this workaround because the types mismatch
+  // (hopefully https://github.com/elastic/kibana/pull/186848 will get them closer)
+  const { body, statusCode, headers } = await (
+    client as ElasticsearchTraditionalClient
+  ).get<SavedObjectsRawDocSource>(
     {
       id: serializer.generateRawId(namespace, type, id),
       index: commonHelper.getIndexForType(type),

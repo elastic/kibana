@@ -10,8 +10,8 @@ import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type {
-  ElasticsearchClient,
   ElasticsearchCapabilities,
+  ElasticsearchTraditionalClient,
 } from '@kbn/core-elasticsearch-server';
 import type {
   ISavedObjectTypeRegistry,
@@ -43,7 +43,7 @@ export interface RunZeroDowntimeMigrationOpts {
   /** SO serializer to use for migration */
   serializer: ISavedObjectsSerializer;
   /** The client to use for communications with ES */
-  elasticsearchClient: ElasticsearchClient;
+  elasticsearchClient: ElasticsearchTraditionalClient;
   /** The node roles of the Kibana instance */
   nodeRoles: NodeRoles;
   /** Capabilities of the ES cluster we're using */

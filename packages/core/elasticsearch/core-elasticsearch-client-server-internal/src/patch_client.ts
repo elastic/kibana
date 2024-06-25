@@ -8,11 +8,13 @@
 
 import { inspect } from 'util';
 import { errors } from '@elastic/elasticsearch';
+import { errors as serverlessErrors } from '@elastic/elasticsearch-serverless';
 
 export const patchElasticsearchClient = () => {
   const baseErrorPrototype = errors.ElasticsearchClientError.prototype;
+  const baseServerlessErrorPrototype = serverlessErrors.ElasticsearchClientError.prototype;
   // @ts-expect-error
-  baseErrorPrototype.toJSON = function () {
+  baseErrorPrototype.toJSON = baseServerlessErrorPrototype.toJSON = function () {
     return {
       name: this.name,
       message: this.message,
@@ -20,7 +22,7 @@ export const patchElasticsearchClient = () => {
   };
 
   // @ts-expect-error
-  baseErrorPrototype[inspect.custom] = function () {
+  baseErrorPrototype[inspect.custom] = baseServerlessErrorPrototype[inspect.custom] = function () {
     // @ts-expect-error
     return this.toJSON();
   };

@@ -10,7 +10,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors as esErrors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -22,7 +22,7 @@ import type { BulkOperation } from '../model/create_batches';
 
 /** @internal */
 export interface BulkOverwriteTransformedDocumentsParams {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   index: string;
   operations: BulkOperation[];
   refresh?: estypes.Refresh;

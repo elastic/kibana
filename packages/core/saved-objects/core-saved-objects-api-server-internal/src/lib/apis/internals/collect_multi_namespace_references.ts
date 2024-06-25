@@ -22,6 +22,7 @@ import {
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { getObjectKey, parseObjectKey } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import { getRootFields } from '../../utils';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
@@ -183,8 +184,10 @@ async function getObjectsAndReferences({
         `Exceeded maximum reference graph depth of ${MAX_REFERENCE_GRAPH_DEPTH} objects!`
       );
     }
-    const bulkGetResponse = await client.mget(
-      { body: { docs: makeBulkGetDocs(bulkGetObjects) } },
+    // Applying this workaround because the types mismatch
+    // (hopefully https://github.com/elastic/kibana/pull/186848 will get them closer)
+    const bulkGetResponse = await (client as ElasticsearchTraditionalClient).mget(
+      { docs: makeBulkGetDocs(bulkGetObjects) },
       { ignore: [404], meta: true }
     );
     // exit early if we can't verify a 404 response is from Elasticsearch

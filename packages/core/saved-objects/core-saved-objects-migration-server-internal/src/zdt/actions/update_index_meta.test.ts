@@ -13,7 +13,7 @@ import { updateIndexMeta } from './update_index_meta';
 
 describe('updateIndexMeta', () => {
   it('calls updateMappings with the correct parameters', () => {
-    const client = elasticsearchClientMock.createElasticsearchClient();
+    const client = elasticsearchClientMock.createInternalClient();
     const index = '.kibana_1';
     const meta: IndexMappingMeta = {
       mappingVersions: {
@@ -36,7 +36,7 @@ describe('updateIndexMeta', () => {
   });
 
   it('returns the response from updateMappings', () => {
-    const client = elasticsearchClientMock.createElasticsearchClient();
+    const client = elasticsearchClientMock.createInternalClient();
     const index = '.kibana_1';
     const meta: IndexMappingMeta = {};
 

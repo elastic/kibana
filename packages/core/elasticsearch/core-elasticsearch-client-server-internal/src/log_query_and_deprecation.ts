@@ -14,6 +14,7 @@ import numeral from '@elastic/numeral';
 import type { Logger } from '@kbn/logging';
 import { isMaximumResponseSizeExceededError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
 import type { ElasticsearchApiToRedactInLogs } from '@kbn/core-elasticsearch-server';
+import { Client as ServerlessClient } from '@elastic/elasticsearch-serverless';
 import { getEcsResponseLog } from './get_ecs_response_log';
 
 /**
@@ -188,7 +189,7 @@ export const instrumentEsQueryAndDeprecationLogger = ({
   apisToRedactInLogs,
 }: {
   logger: Logger;
-  client: Client;
+  client: Client | ServerlessClient;
   type: string;
   apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
 }) => {

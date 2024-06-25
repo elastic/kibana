@@ -8,8 +8,8 @@
 
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Either from 'fp-ts/lib/Either';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -22,7 +22,7 @@ export type FetchIndexResponse = Record<
 
 /** @internal */
 export interface FetchIndicesParams {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   indices: string[];
 }
 

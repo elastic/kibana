@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from './client';
+import type { ElasticsearchClient, ElasticsearchTraditionalClient } from './client';
 import type { ScopeableRequest } from './scopeable_request';
 import type { IScopedClusterClient } from './scoped_cluster_client';
 
@@ -22,6 +22,14 @@ export interface IClusterClient {
    * A {@link ElasticsearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user
    */
   readonly asInternalUser: ElasticsearchClient;
+
+  /**
+   * A {@link ElasticsearchTraditionalClient | client} to be used to query the ES cluster on behalf of the Kibana internal user.
+   * @remark The intention of this client is to cover the special scenario where a Serveless-internal API is still needed.
+   * You shouldn't use it unless you know what you're doing.
+   */
+  readonly asInternalUserTraditionalClient: ElasticsearchTraditionalClient;
+
   /**
    * Creates a {@link IScopedClusterClient | scoped cluster client} bound to given {@link ScopeableRequest | request}
    */

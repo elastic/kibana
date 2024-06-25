@@ -30,7 +30,7 @@ import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-
 import { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import { registerServiceConfig } from '@kbn/core-root-server-internal';
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
@@ -206,6 +206,7 @@ const getElasticsearchClient = async (
       { dnsCacheTtlInSeconds: esClientConfig.dnsCacheTtl?.asSeconds() ?? 0 }
     ),
     kibanaVersion,
+    flavor: 'traditional',
   });
 };
 
@@ -223,7 +224,7 @@ const getMigrator = async ({
   nodeRoles,
 }: {
   configService: ConfigService;
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   kibanaIndex: string;
   typeRegistry: ISavedObjectTypeRegistry;
   defaultIndexTypesMap: IndexTypesMap;

@@ -10,7 +10,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   catchRetryableEsClientErrors,
@@ -28,7 +28,7 @@ export interface ReadWithPit {
 
 /** @internal */
 export interface ReadWithPitParams {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   pitId: string;
   query: estypes.QueryDslQueryContainer;
   batchSize: number;

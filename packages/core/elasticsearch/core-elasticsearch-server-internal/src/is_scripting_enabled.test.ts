@@ -12,10 +12,10 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { isInlineScriptingEnabled } from './is_scripting_enabled';
 
 describe('isInlineScriptingEnabled', () => {
-  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
 
   beforeEach(() => {
-    client = elasticsearchClientMock.createElasticsearchClient();
+    client = elasticsearchClientMock.createInternalClient();
   });
 
   const mockSettingsValue = (settings: estypes.ClusterGetSettingsResponse) => {

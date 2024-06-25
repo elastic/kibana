@@ -29,6 +29,7 @@ import type {
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import {
   getBulkOperationError,
   getExpectedVersionProperties,
@@ -153,8 +154,10 @@ export async function updateObjectsSpaces({
     _source: ['type', 'namespaces'],
   }));
   const bulkGetResponse = bulkGetDocs.length
-    ? await client.mget<SavedObjectsRawDocSource>(
-        { body: { docs: bulkGetDocs } },
+    ? // Applying this workaround because the types mismatch
+      // (hopefully https://github.com/elastic/kibana/pull/186848 will get them closer)
+      await (client as ElasticsearchTraditionalClient).mget<SavedObjectsRawDocSource>(
+        { docs: bulkGetDocs },
         { ignore: [404], meta: true }
       )
     : undefined;

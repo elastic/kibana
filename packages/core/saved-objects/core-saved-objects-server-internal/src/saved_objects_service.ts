@@ -18,6 +18,7 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
   ElasticsearchClient,
   ElasticsearchCapabilities,
+  ElasticsearchTraditionalClient,
 } from '@kbn/core-elasticsearch-server';
 import type {
   InternalElasticsearchServiceSetup,
@@ -241,7 +242,7 @@ export class SavedObjectsService
     const migrator = this.createMigrator(
       this.config.migration,
       // override the default Client settings
-      client.asInternalUser.child(MIGRATION_CLIENT_OPTIONS),
+      client.asInternalUserTraditionalClient.child(MIGRATION_CLIENT_OPTIONS),
       docLinks,
       waitForMigrationCompletion,
       node,
@@ -402,7 +403,7 @@ export class SavedObjectsService
 
   private createMigrator(
     soMigrationsConfig: SavedObjectsMigrationConfigType,
-    client: ElasticsearchClient,
+    client: ElasticsearchTraditionalClient,
     docLinks: DocLinksServiceStart,
     waitForMigrationCompletion: boolean,
     nodeInfo: NodeInfo,

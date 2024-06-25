@@ -21,6 +21,7 @@ import {
   getObjectKey,
   type LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import type { RepositoryEsClient } from '../../repository_es_client';
@@ -276,8 +277,10 @@ async function bulkGetObjectsAndAliases(
   }
 
   const bulkGetResponse = docsToBulkGet.length
-    ? await client.mget<SavedObjectsRawDocSource>(
-        { body: { docs: docsToBulkGet } },
+    ? // Applying this workaround because the types mismatch
+      // (hopefully https://github.com/elastic/kibana/pull/186848 will get them closer)
+      await (client as ElasticsearchTraditionalClient).mget<SavedObjectsRawDocSource>(
+        { docs: docsToBulkGet },
         { ignore: [404], meta: true }
       )
     : undefined;

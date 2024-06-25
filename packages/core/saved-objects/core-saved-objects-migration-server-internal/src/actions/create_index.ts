@@ -11,7 +11,7 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/function';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
-  ElasticsearchClient,
+  ElasticsearchTraditionalClient,
   ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
@@ -43,7 +43,7 @@ export interface ClusterShardLimitExceeded {
 
 /** @internal */
 export interface CreateIndexParams {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   indexName: string;
   mappings: IndexMapping;
   esCapabilities: ElasticsearchCapabilities;

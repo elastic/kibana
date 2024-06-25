@@ -70,6 +70,7 @@ describe('configureClient', () => {
       scoped: false,
       agentFactoryProvider,
       kibanaVersion,
+      flavor: 'traditional',
     });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
@@ -83,6 +84,7 @@ describe('configureClient', () => {
       scoped: true,
       agentFactoryProvider,
       kibanaVersion,
+      flavor: 'traditional',
     });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
@@ -101,6 +103,7 @@ describe('configureClient', () => {
       scoped: false,
       agentFactoryProvider,
       kibanaVersion,
+      flavor: 'traditional',
     });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
@@ -120,6 +123,7 @@ describe('configureClient', () => {
       scoped: false,
       agentFactoryProvider: customAgentFactoryProvider,
       kibanaVersion,
+      flavor: 'traditional',
     });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
@@ -136,6 +140,7 @@ describe('configureClient', () => {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
+      flavor: 'traditional',
     });
 
     expect(createTransportMock).toHaveBeenCalledTimes(1);
@@ -150,6 +155,7 @@ describe('configureClient', () => {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
+      flavor: 'traditional',
     });
 
     expect(createTransportMock).toHaveBeenCalledTimes(1);
@@ -166,6 +172,7 @@ describe('configureClient', () => {
       scoped: false,
       agentFactoryProvider,
       kibanaVersion,
+      flavor: 'traditional',
     });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
@@ -187,6 +194,7 @@ describe('configureClient', () => {
       scoped: false,
       agentFactoryProvider,
       kibanaVersion,
+      flavor: 'traditional',
     });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
@@ -205,6 +213,7 @@ describe('configureClient', () => {
       scoped: false,
       agentFactoryProvider,
       kibanaVersion,
+      flavor: 'traditional',
     });
 
     expect(instrumentEsQueryAndDeprecationLogger).toHaveBeenCalledTimes(1);

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import { updateMappings } from '../../actions';
 
 export interface UpdateIndexMetaParams {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   index: string;
   meta: IndexMappingMeta;
 }

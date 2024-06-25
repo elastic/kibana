@@ -20,7 +20,10 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { HttpConfigType, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchServiceStart,
+  ElasticsearchTraditionalClient,
+} from '@kbn/core-elasticsearch-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
 import type { MetricsServiceSetup, OpsMetrics } from '@kbn/core-metrics-server';
 import {
@@ -172,11 +175,13 @@ export class CoreUsageDataService
 
   private async getSavedObjectAliasUsageData(elasticsearch: ElasticsearchServiceStart) {
     // Note: this agg can be changed to use `savedObjectsRepository.find` in the future after `filters` is supported.
-    // See src/core/server/saved_objects/service/lib/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
-    const resp = await elasticsearch.client.asInternalUser.search<
-      unknown,
-      { aliases: UsageDataAggs }
-    >({
+    // See packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/search/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
+
+    // Applying this workaround because the types mismatch
+    // (hopefully https://github.com/elastic/kibana/pull/186848 will get them closer)
+    const resp = await (
+      elasticsearch.client.asInternalUser as ElasticsearchTraditionalClient
+    ).search<unknown, { aliases: UsageDataAggs }>({
       index: MAIN_SAVED_OBJECT_INDEX, // depends on the .kibana split (assuming 'legacy-url-alias' is stored in '.kibana')
       body: {
         track_total_hits: true,

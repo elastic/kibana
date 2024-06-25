@@ -7,10 +7,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import {
-  ElasticsearchClientMock,
-  elasticsearchClientMock,
-} from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   SavedObjectTypeRegistry,
@@ -18,11 +15,12 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import type { ElasticsearchTraditionalClientMock } from '@kbn/core-elasticsearch-client-server-mocks/src/mocks';
 import type { MigratorContext } from '../context';
 import { createDocumentMigrator } from './document_migrator';
 
 export type MockedMigratorContext = Omit<MigratorContext, 'elasticsearchClient'> & {
-  elasticsearchClient: ElasticsearchClientMock;
+  elasticsearchClient: ElasticsearchTraditionalClientMock;
   typeRegistry: SavedObjectTypeRegistry;
 };
 
@@ -59,7 +57,7 @@ export const createContextMock = (
     },
     documentMigrator: createDocumentMigrator(),
     migrationConfig: createMigrationConfigMock(),
-    elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
+    elasticsearchClient: elasticsearchClientMock.createInternalClient(),
     maxRetryAttempts: 15,
     migrationDocLinks: docLinksServiceMock.createSetupContract().links.kibanaUpgradeSavedObjects,
     typeRegistry,

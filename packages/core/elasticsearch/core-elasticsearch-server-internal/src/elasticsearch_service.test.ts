@@ -218,7 +218,7 @@ describe('#setup', () => {
   });
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {
-    const mockedClient = mockClusterClientInstance.asInternalUser;
+    const mockedClient = mockClusterClientInstance.asInternalUserTraditionalClient;
     mockedClient.nodes.info.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
     );
@@ -233,7 +233,7 @@ describe('#setup', () => {
   });
 
   it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
-    const mockedClient = mockClusterClientInstance.asInternalUser;
+    const mockedClient = mockClusterClientInstance.asInternalUserTraditionalClient;
     mockedClient.nodes.info.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
     );
@@ -476,7 +476,7 @@ describe('#stop', () => {
   it('stops pollEsNodeVersions even if there are active subscriptions', async () => {
     expect.assertions(3);
 
-    const mockedClient = mockClusterClientInstance.asInternalUser;
+    const mockedClient = mockClusterClientInstance.asInternalUserTraditionalClient;
     mockedClient.nodes.info.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
     );

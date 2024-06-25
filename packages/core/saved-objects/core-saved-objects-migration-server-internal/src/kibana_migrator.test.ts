@@ -236,7 +236,7 @@ describe('KibanaMigrator', () => {
 });
 
 const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
-  const mockedClient = elasticsearchClientMock.createElasticsearchClient();
+  const mockedClient = elasticsearchClientMock.createInternalClient();
   (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
 
   return {

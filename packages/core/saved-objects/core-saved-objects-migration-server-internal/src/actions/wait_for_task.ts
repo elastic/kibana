@@ -10,7 +10,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -59,7 +59,7 @@ const catchWaitForTaskCompletionTimeout = (
 
 /** @internal */
 export interface WaitForTaskParams {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   taskId: string;
   timeout: string;
 }
