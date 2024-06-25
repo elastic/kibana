@@ -49,7 +49,7 @@ async function updatePanelFromFlyoutEdits({
   initialState,
 }: {
   api: FieldStatisticsTableEmbeddableApi;
-  isNewPanel?: boolean;
+  isNewPanel: boolean;
   deletePanel?: () => void;
   coreStart: CoreStart;
   pluginStart: DataVisualizerStartDependencies;
@@ -109,6 +109,7 @@ async function updatePanelFromFlyoutEdits({
           }}
           onCreate={update}
           onCancel={cancelChanges}
+          isNewPanel={isNewPanel}
         />
       </KibanaContextProvider>,
       coreStart
@@ -116,6 +117,7 @@ async function updatePanelFromFlyoutEdits({
     {
       ownFocus: true,
       size: 's',
+      paddingSize: 'm',
       type: 'push',
       'data-test-subj': 'fieldStatisticsInitializerFlyout',
       onClose: cancelChanges,

@@ -177,6 +177,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 pluginStart,
                 parentApi,
                 uuid,
+                false,
                 chartState,
                 fieldStatsControlsApi
               );
@@ -200,7 +201,6 @@ export const getFieldStatsChartEmbeddableFactory = (
               : [];
             return {
               rawState: {
-                timeRange: undefined,
                 ...serializeTitles(),
                 ...serializeTimeRange(),
                 ...serializeFieldStatsChartState(),

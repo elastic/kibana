@@ -14,10 +14,11 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiForm,
   EuiFormRow,
   EuiTitle,
   EuiSpacer,
+  EuiIconTip,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,6 +44,7 @@ export interface FieldStatsInitializerProps {
   onCreate: (props: FieldStatsInitialState) => Promise<void>;
   onCancel: () => void;
   onPreview: (update: Partial<FieldStatsInitialState>) => Promise<void>;
+  isNewPanel: boolean;
 }
 
 const defaultESQLQuery = { esql: '' };
@@ -56,6 +58,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
   onCreate,
   onCancel,
   onPreview,
+  isNewPanel,
 }) => {
   const {
     unifiedSearch: {
@@ -108,20 +111,44 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
   return (
     <>
       <EuiFlyoutHeader
-        hasBorder
+        hasBorder={true}
         css={css`
           pointer-events: auto;
           background-color: ${euiThemeVars.euiColorEmptyShade};
         `}
+        data-test-subj="editFlyoutHeader"
       >
-        <EuiTitle size="xs">
-          <h2 id={'fieldStatsConfig'}>
-            <FormattedMessage
-              id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.modalTitle"
-              defaultMessage="Edit field statistics"
-            />
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
+              <h2>
+                {isNewPanel
+                  ? i18n.translate(
+                      'xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.createLable',
+                      {
+                        defaultMessage: 'Create field statistics',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.editLabel',
+                      {
+                        defaultMessage: 'Edit field statistics',
+                      }
+                    )}{' '}
+                <EuiIconTip
+                  type="iInCircle"
+                  content={i18n.translate(
+                    'xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.samplingTooltip',
+                    {
+                      defaultMessage:
+                        'Field statistics are calculated from a smaller subset of documents to increase performance, so some accuracy might be lost.',
+                    }
+                  )}
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
@@ -147,9 +174,24 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
             padding: 0;
             block-size: 100%;
           }
+          border-bottom: 2px solid ${euiThemeVars.euiBorderColor};
         `}
       >
-        <EuiForm>
+        <EuiFlexGroup
+          css={css`
+            block-size: 100%;
+          `}
+          direction="column"
+          gutterSize="none"
+        >
+          {isNewPanel ? (
+            <EuiCallOut>
+              <FormattedMessage
+                id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.description"
+                defaultMessage="Field statistics provides an approximate summary and statistics for the data content along with how the field is populated."
+              />
+            </EuiCallOut>
+          ) : null}
           {initialInput?.viewType === FieldStatsInitializerViewType.ESQL && !isEsqlEnabled ? (
             <>
               <DataSourceTypeSelector value={viewType} onChange={setViewType} />
@@ -196,28 +238,45 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               onQuerySubmit={onESQLQuerySubmit}
             />
           ) : null}
-        </EuiForm>
+        </EuiFlexGroup>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel} data-test-subj="fieldStatsInitializerCancelButton">
+            <EuiButtonEmpty
+              onClick={onCancel}
+              data-test-subj="fieldStatsInitializerCancelButton"
+              flush="left"
+              aria-label={i18n.translate(
+                'xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.cancelButtonAriaLabel',
+                {
+                  defaultMessage: 'Cancel applied changes',
+                }
+              )}
+            >
               <FormattedMessage
-                id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.setupModal.cancelButtonLabel"
+                id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subj="fieldStatsInitializerConfirmButton"
-              isDisabled={!isEsqlFormValid || !isDataViewFormValid}
               onClick={onCreate.bind(null, updatedProps)}
               fill
+              aria-label={i18n.translate(
+                'xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.applyFlyoutAriaLabel',
+                {
+                  defaultMessage: 'Apply changes',
+                }
+              )}
+              disabled={!isEsqlFormValid || !isDataViewFormValid}
+              iconType="check"
+              data-test-subj="applyFlyoutButton"
             >
               <FormattedMessage
-                id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.setupModal.applyAndCloseLabel"
+                id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.applyAndCloseLabel"
                 defaultMessage="Apply and close"
               />
             </EuiButton>

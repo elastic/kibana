@@ -25,6 +25,7 @@ export async function resolveEmbeddableFieldStatsUserInput(
   pluginStart: DataVisualizerStartDependencies,
   parentApi: unknown,
   focusedPanelId: string,
+  isNewPanel: boolean,
   initialState?: FieldStatisticsTableEmbeddableState,
   fieldStatsControlsApi?: FieldStatsControlsApi
 ): Promise<FieldStatisticsTableEmbeddableState> {
@@ -81,6 +82,7 @@ export async function resolveEmbeddableFieldStatsUserInput(
               }}
               onCreate={update}
               onCancel={cancelChanges}
+              isNewPanel={isNewPanel}
             />
           </KibanaContextProvider>,
           coreStart
@@ -88,6 +90,7 @@ export async function resolveEmbeddableFieldStatsUserInput(
         {
           ownFocus: true,
           size: 's',
+          paddingSize: 'm',
           type: 'push',
           'data-test-subj': 'fieldStatisticsInitializerFlyout',
           onClose: cancelChanges,
