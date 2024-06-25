@@ -145,6 +145,9 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
 
     // Aggregate by detector - default to function_description if no description available.
     const detectorIndex = record.detector_index;
+    if (typeof detectorIndex !== 'number') {
+      return;
+    }
     const detectorsForJob = jobsAtTime[jobId];
     if (detectorsForJob[detectorIndex] === undefined) {
       detectorsForJob[detectorIndex] = Object.create(null);
@@ -153,7 +156,9 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
     // Now add an object for the anomaly with the highest anomaly score per entity.
     // For the choice of entity, look in order for byField, overField, partitionField.
     // If no by/over/partition, default to an empty String.
-    const entitiesForDetector = detectorsForJob[detectorIndex];
+    const entitiesForDetector = Object.hasOwn(detectorsForJob, detectorIndex)
+      ? detectorsForJob[detectorIndex]
+      : Object.create(null);
 
     // TODO - are we worried about different byFields having the same
     // value e.g. host=server1 and machine=server1?
@@ -163,7 +168,7 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
     }
     if (entitiesForDetector[entity] === undefined) {
       entitiesForDetector[entity] = record;
-    } else {
+    } else if (Object.hasOwn(entitiesForDetector, entity)) {
       if (record.record_score > entitiesForDetector[entity].record_score) {
         entitiesForDetector[entity] = record;
       }
