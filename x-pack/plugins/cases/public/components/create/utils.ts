@@ -41,7 +41,7 @@ export const getInitialCaseValue = ({
   owner,
 });
 
-const trimUserFormData = (
+export const trimUserFormData = (
   userFormData: Omit<CreateCaseFormSchema, 'connectorId' | 'fields' | 'syncAlerts' | 'customFields'>
 ) => {
   let formData = {
@@ -66,6 +66,7 @@ export const createFormDeserializer = (data: CasePostRequest): CreateCaseFormSch
     const { connector, settings, customFields, ...restData } = getInitialCaseValue({
       owner: data.owner,
     });
+
     return {
       ...restData,
       connectorId: connector.id,
