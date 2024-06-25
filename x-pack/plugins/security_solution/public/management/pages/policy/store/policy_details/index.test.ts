@@ -279,6 +279,7 @@ describe('policy details: ', () => {
                     cluster_name: '',
                     cluster_uuid: '',
                     serverless: false,
+                    billable: false,
                   },
                   windows: {
                     events: {
@@ -324,8 +325,8 @@ describe('policy details: ', () => {
                     },
                     logging: { file: 'info' },
                     antivirus_registration: {
-                      enabled: false,
-                      mode: 'disabled',
+                      enabled: true,
+                      mode: 'sync_with_malware_prevent',
                     },
                   },
                   mac: {

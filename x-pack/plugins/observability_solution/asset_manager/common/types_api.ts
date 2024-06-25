@@ -296,3 +296,20 @@ export const getAssetsResponseRT = rt.type({
   assets: rt.array(assetRT),
 });
 export type GetAssetsResponse = rt.TypeOf<typeof getAssetsResponseRT>;
+
+/**
+ * Managed entities enablement
+ */
+export const managedEntityEnabledResponseRT = rt.type({
+  enabled: rt.boolean,
+  reason: rt.string,
+});
+export type ManagedEntityEnabledResponse = rt.TypeOf<typeof managedEntityEnabledResponseRT>;
+
+export const managedEntityResponseBase = rt.type({
+  success: rt.boolean,
+  reason: rt.string,
+  message: rt.string,
+});
+export type EnableManagedEntityResponse = rt.TypeOf<typeof managedEntityResponseBase>;
+export type DisableManagedEntityResponse = rt.TypeOf<typeof managedEntityResponseBase>;
