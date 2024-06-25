@@ -89,7 +89,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
           setAgentLogLevel(selectedLogLevel);
           notifications.toasts.addSuccess(
             i18n.translate('xpack.fleet.agentLogs.selectLogLevel.successText', {
-              defaultMessage: `Changed agent logging level to '{logLevel}'`,
+              defaultMessage: `Changed agent logging level to ''{logLevel}''`,
               values: {
                 logLevel: selectedLogLevel,
               },
@@ -129,9 +129,9 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
               onChange={(event) => {
                 setSelectedLogLevel(event.target.value);
               }}
-              options={Object.entries(AGENT_LOG_LEVELS).map(([key, value]) => ({
-                value,
-                text: key,
+              options={AGENT_LOG_LEVELS.map((level) => ({
+                value: level,
+                text: level,
               }))}
             />
           </EuiFlexItem>

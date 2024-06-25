@@ -73,6 +73,7 @@ export const PresentationPanel = <
       </EuiFlexGroup>
     );
   }
+
   return shouldHavePanel && Panel ? (
     <Panel<ApiType, PropsType> Component={UnwrappedComponent} {...passThroughProps} />
   ) : (

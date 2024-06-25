@@ -8,6 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../../../common/constants';
 import {
   BulkCreateRulesRequestBody,
@@ -16,10 +17,8 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { readRules } from '../../../logic/rule_management/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getDuplicates } from './get_duplicates';
-import { transformValidateBulkError } from '../../../utils/validate';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
 import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
@@ -62,7 +61,7 @@ export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logge
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const ruleDefinitions = request.body;
           const dupes = getDuplicates(ruleDefinitions, 'rule_id');
@@ -109,11 +108,11 @@ export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logge
                     });
                   }
 
-                  const createdRule = await rulesManagementClient.createCustomRule({
+                  const createdRule = await detectionRulesClient.createCustomRule({
                     params: payloadRule,
                   });
 
-                  return transformValidateBulkError(createdRule.params.ruleId, createdRule);
+                  return createdRule;
                 } catch (err) {
                   return transformBulkError(
                     payloadRule.rule_id,
@@ -122,6 +121,7 @@ export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logge
                 }
               })
           );
+
           const rulesBulk = [
             ...rules,
             ...dupes.map((ruleId) =>

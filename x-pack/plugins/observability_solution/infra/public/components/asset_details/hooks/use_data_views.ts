@@ -34,7 +34,7 @@ const useDataViews = () => {
 
   const { value: logsDataView, loading: logsDataViewLoading } = useAsync(
     () => getLogsDataView(logViewReference),
-    [logViewReference]
+    [logViewReference, getLogsDataView]
   );
 
   return {

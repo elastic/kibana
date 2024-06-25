@@ -7,10 +7,11 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
+import { selectTimelineById } from '../../../timelines/store/selectors';
 import {
   eventHasNotes,
   getEventType,
@@ -18,7 +19,7 @@ import {
 } from '../../../timelines/components/timeline/body/helpers';
 import { getScopedActions, isTimelineScope } from '../../../helpers';
 import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { timelineActions, timelineSelectors } from '../../../timelines/store';
+import { timelineActions } from '../../../timelines/store';
 import type { ActionProps, OnPinEvent } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
 import { AddEventNoteAction } from './add_note_icon_item';
@@ -48,35 +49,28 @@ const ActionsContainer = styled.div`
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
-  checked,
   columnValues,
   ecsData,
   eventId,
   eventIdToNoteIds,
   isEventPinned = false,
   isEventViewer = false,
-  loadingEventIds,
   onEventDetailsPanelOpened,
-  onRowSelected,
   onRuleChange,
-  showCheckboxes,
   showNotes,
   timelineId,
   toggleShowNotes,
   refetch,
-  setEventsLoading,
 }) => {
   const dispatch = useDispatch();
-  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
   const emptyNotes: string[] = [];
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const timelineType = useShallowEqualSelector(
-    (state) =>
-      (isTimelineScope(timelineId) ? getTimeline(state, timelineId) : timelineDefaults).timelineType
+  const { timelineType } = useShallowEqualSelector((state) =>
+    isTimelineScope(timelineId) ? selectTimelineById(state, timelineId) : timelineDefaults
   );
+
   const { startTransaction } = useStartTransaction();
 
   const isEnterprisePlus = useLicense().isEnterprise();
@@ -89,15 +83,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const onUnPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId: evtId })),
     [dispatch, timelineId]
-  );
-
-  const handleSelectEvent = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      onRowSelected({
-        eventIds: [eventId],
-        isSelected: event.currentTarget.checked,
-      }),
-    [eventId, onRowSelected]
   );
 
   const handlePinClicked = useCallback(
@@ -228,29 +213,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
     onEventDetailsPanelOpened();
   }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
   const showExpandEvent = useMemo(
-    () => !unifiedComponentsInTimelineEnabled || isEventViewer || timelineId !== TimelineId.active,
-    [isEventViewer, timelineId, unifiedComponentsInTimelineEnabled]
+    () => !unifiedComponentsInTimelineEnabled || isEventViewer,
+    [isEventViewer, unifiedComponentsInTimelineEnabled]
   );
 
   return (
     <ActionsContainer>
-      {showCheckboxes && !tGridEnabled && (
-        <div key="select-event-container" data-test-subj="select-event-container">
-          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            {loadingEventIds.includes(eventId) ? (
-              <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
-            ) : (
-              <EuiCheckbox
-                aria-label={i18n.CHECKBOX_FOR_ROW({ ariaRowindex, columnValues, checked })}
-                data-test-subj="select-event"
-                id={eventId}
-                checked={checked}
-                onChange={handleSelectEvent}
-              />
-            )}
-          </EventsTdContent>
-        </div>
-      )}
       <>
         {showExpandEvent && (
           <GuidedOnboardingTourStep

@@ -13,10 +13,10 @@ import { TimelineId } from '../../../common/types';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { timelineActions } from '../store';
 import { inputsActions } from '../../common/store/inputs';
-import { sourcererActions } from '../../common/store/sourcerer';
+import { sourcererActions } from '../../sourcerer/store';
 import { appActions } from '../../common/store/app';
 import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../sourcerer/store/model';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { TestProviders, mockGlobalState } from '../../common/mock';
 

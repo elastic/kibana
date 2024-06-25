@@ -9,13 +9,15 @@ import { FunctionRegistrationParameters } from '..';
 import { FunctionVisibility } from '../../../common/functions/types';
 import { getRelevantFieldNames } from './get_relevant_field_names';
 
+export const GET_DATASET_INFO_FUNCTION_NAME = 'get_dataset_info';
+
 export function registerGetDatasetInfoFunction({
   resources,
   functions,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
-      name: 'get_dataset_info',
+      name: GET_DATASET_INFO_FUNCTION_NAME,
       visibility: FunctionVisibility.AssistantOnly,
       description: `Use this function to get information about indices/datasets available and the fields available on them.
 
@@ -39,13 +41,13 @@ export function registerGetDatasetInfoFunction({
     async ({ arguments: { index }, messages, chat }, signal) => {
       const coreContext = await resources.context.core;
 
-      const esClient = coreContext.elasticsearch.client.asCurrentUser;
+      const esClient = coreContext.elasticsearch.client;
       const savedObjectsClient = coreContext.savedObjects.client;
 
       let indices: string[] = [];
 
       try {
-        const body = await esClient.indices.resolveIndex({
+        const body = await esClient.asCurrentUser.indices.resolveIndex({
           name: index === '' ? '*' : index,
           expand_wildcards: 'open',
         });
@@ -79,7 +81,7 @@ export function registerGetDatasetInfoFunction({
       const relevantFieldNames = await getRelevantFieldNames({
         index,
         messages,
-        esClient,
+        esClient: esClient.asCurrentUser,
         dataViews: await resources.plugins.dataViews.start(),
         savedObjectsClient,
         signal,

@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { fireEvent, screen, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import '../../../../common/mock/formatted_relative';
@@ -56,7 +56,7 @@ describe('NotePreviews', () => {
   test('it renders a note preview for each note when isModal is false', () => {
     const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
-    const wrapper = mountWithIntl(<NotePreviews notes={hasNotes[0].notes} />, {
+    const wrapper = mountWithI18nProvider(<NotePreviews notes={hasNotes[0].notes} />, {
       wrappingComponent: createReactQueryWrapper(),
     });
 
@@ -68,7 +68,7 @@ describe('NotePreviews', () => {
   test('it renders a note preview for each note when isModal is true', () => {
     const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
-    const wrapper = mountWithIntl(<NotePreviews notes={hasNotes[0].notes} />, {
+    const wrapper = mountWithI18nProvider(<NotePreviews notes={hasNotes[0].notes} />, {
       wrappingComponent: createReactQueryWrapper(),
     });
 
@@ -99,7 +99,7 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />, {
+    const wrapper = mountWithI18nProvider(<NotePreviews notes={nonUniqueNotes} />, {
       wrappingComponent: createReactQueryWrapper(),
     });
 
@@ -128,7 +128,7 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />, {
+    const wrapper = mountWithI18nProvider(<NotePreviews notes={nonUniqueNotes} />, {
       wrappingComponent: createReactQueryWrapper(),
     });
 
@@ -156,7 +156,7 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />, {
+    const wrapper = mountWithI18nProvider(<NotePreviews notes={nonUniqueNotes} />, {
       wrappingComponent: createReactQueryWrapper(),
     });
 
@@ -167,7 +167,7 @@ describe('NotePreviews', () => {
     const timeline = mockTimelineResults[0];
     (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountWithI18nProvider(
       <NotePreviews notes={[]} showTimelineDescription timelineId="test-timeline-id" />,
       {
         wrappingComponent: createReactQueryWrapper(),
@@ -183,7 +183,7 @@ describe('NotePreviews', () => {
     const timeline = mockTimelineResults[0];
     (useDeepEqualSelector as jest.Mock).mockReturnValue({ ...timeline, description: undefined });
 
-    const wrapper = mountWithIntl(<NotePreviews notes={[]} />, {
+    const wrapper = mountWithI18nProvider(<NotePreviews notes={[]} />, {
       wrappingComponent: createReactQueryWrapper(),
     });
 
@@ -194,7 +194,7 @@ describe('NotePreviews', () => {
     const timeline = mockTimelineResults[0];
     (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountWithI18nProvider(
       <NotePreviews
         notes={[
           {
@@ -218,7 +218,7 @@ describe('NotePreviews', () => {
     const timeline = mockTimelineResults[0];
     (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountWithI18nProvider(
       <NotePreviews
         notes={[
           {

@@ -27,12 +27,12 @@ import React, { memo, useState } from 'react';
 import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
 import { useKibana } from '../../../../utils/kibana_react';
-import { SLI_OPTIONS } from '../../../slo_edit/constants';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
 import type { SortDirection, SortField } from '../../hooks/use_url_search_state';
 import { SlosView } from '../slos_view';
 import { GroupByField } from '../slo_list_group_by';
 import { SLOView } from '../toggle_slo_view';
+import { useGroupName } from './hooks/use_group_name';
 
 interface Props {
   group: string;
@@ -57,26 +57,7 @@ export function GroupListView({
 }: Props) {
   const groupQuery = `"${groupBy}": "${group}"`;
   const query = kqlQuery ? `${groupQuery} and ${kqlQuery}` : groupQuery;
-  let groupName = group.toLowerCase();
-  if (groupBy === 'slo.indicator.type') {
-    groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
-  }
-  if (groupBy === '_index') {
-    // get remote cluster name from index name
-    if (groupName.includes(':.')) {
-      const [remoteClusterName] = groupName.split(':.');
-      groupName = i18n.translate('xpack.slo.group.remoteCluster', {
-        defaultMessage: 'Remote Cluster: {remoteClusterName}',
-        values: {
-          remoteClusterName,
-        },
-      });
-    } else {
-      groupName = i18n.translate('xpack.slo.group.remoteCluster.localKibana', {
-        defaultMessage: 'Local Kibana',
-      });
-    }
-  }
+  const groupName = useGroupName(groupBy, group, summary);
 
   const [page, setPage] = useState(0);
   const [accordionState, setAccordionState] = useState<'open' | 'closed'>('closed');

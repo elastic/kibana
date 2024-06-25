@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
 import type { ConfigType } from './config';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
@@ -22,11 +25,14 @@ import { getUiApi } from './ui_api';
 export interface PluginsSetup {
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
+  cloud?: CloudStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 /**
@@ -54,7 +60,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
   public setup(core: CoreSetup<PluginsStart, SpacesPluginStart>, plugins: PluginsSetup) {
     const hasOnlyDefaultSpace = this.config.maxSpaces === 1;
-
     this.spacesManager = new SpacesManager(core.http);
     this.spacesApi = {
       ui: getUiApi({
@@ -67,6 +72,18 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     };
 
     if (!this.isServerless) {
+      const getRolesAPIClient = async () => {
+        const { security } = await core.plugins.onSetup<{ security: SecurityPluginStart }>(
+          'security'
+        );
+
+        if (!security.found) {
+          throw new Error('Security plugin is not available as runtime dependency.');
+        }
+
+        return security.contract.authz.roles;
+      };
+
       if (plugins.home) {
         plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());
       }
@@ -78,6 +95,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           getStartServices: core.getStartServices,
           spacesManager: this.spacesManager,
           config: this.config,
+          getRolesAPIClient,
         });
       }
 

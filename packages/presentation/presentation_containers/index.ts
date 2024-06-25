@@ -27,6 +27,7 @@ export {
   apiIsPresentationContainer,
   getContainerParentFromAPI,
   listenForCompatibleApi,
+  combineCompatibleChildrenApis,
   type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';
@@ -41,5 +42,5 @@ export { apiPublishesSettings, type PublishesSettings } from './interfaces/publi
 export {
   canTrackContentfulRender,
   type TrackContentfulRender,
-} from './interfaces/track_contentful_render';
-export { apiPublishesDataView, type PublishesDataView } from './interfaces/publishes_data_view';
+  type TracksQueryPerformance,
+} from './interfaces/performance_trackers';

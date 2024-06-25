@@ -25,9 +25,25 @@ export function warnAndSkipTest(mochaContext: Mocha.Context, log: ToolingLog) {
   mochaContext.skip();
 }
 
+export function isDockerRegistryEnabledOrSkipped(providerContext: FtrProviderContext) {
+  if (process.env.FLEET_SKIP_RUNNING_PACKAGE_REGISTRY === 'true') {
+    return true;
+  }
+
+  const { getService } = providerContext;
+  const dockerServers = getService('dockerServers');
+  const server = dockerServers.get('registry');
+
+  return server.enabled;
+}
+
 export function skipIfNoDockerRegistry(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const dockerServers = getService('dockerServers');
+
+  if (process.env.FLEET_SKIP_RUNNING_PACKAGE_REGISTRY === 'true') {
+    return;
+  }
 
   const server = dockerServers.get('registry');
   const log = getService('log');

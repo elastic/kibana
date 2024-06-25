@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { Anomalies } from '../../../../common/components/ml/types';
 import { TestProviders } from '../../../../common/mock';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { UserDetails } from './user_details';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
@@ -23,7 +23,7 @@ import {
 } from './test_ids';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -58,7 +58,7 @@ jest.mock('uuid', () => ({
 jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
 
-jest.mock('../../../../common/containers/sourcerer', () => ({
+jest.mock('../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ selectedPatterns: ['index'] }),
 }));
 
@@ -121,12 +121,12 @@ const mockRelatedHostsResponse = {
   loading: false,
 };
 
-const renderUserDetails = (contextValue: LeftPanelContext) =>
+const renderUserDetails = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <LeftPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <UserDetails {...defaultProps} />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 

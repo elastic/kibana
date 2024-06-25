@@ -24,10 +24,12 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
         headers: corsAllowedHeaders,
       }
     : false;
+
   const options: ServerOptions = {
     host: config.host,
     port: config.port,
     // manually configuring the listener
+    // @ts-expect-error HAPI types only define http1/https listener, not http2
     listener: getServerListener(config, { configureTLS }),
     // must set to true when manually passing a TLS listener, false otherwise
     tls: configureTLS && config.ssl.enabled,

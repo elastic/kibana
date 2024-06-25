@@ -9,7 +9,7 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
-import { areChangesSkippable, doAnyChangesMatch } from '#pipeline-utils';
+import { areChangesSkippable, doAnyChangesMatch, getAgentImageConfig } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 
@@ -43,6 +43,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     const pipeline = [];
 
+    pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
@@ -145,15 +146,14 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fips.yml'));
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_project.yml'));
-    }
     if (
       GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-security')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));
+    } else if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_project.yml'));
     }
 
     if (

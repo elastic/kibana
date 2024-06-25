@@ -41,6 +41,7 @@ import {
   EXECUTION_LOG_CONTAINER,
   EXECUTION_RUN_TYPE_FILTER,
   EXECUTION_RUN_TYPE_FILTER_ITEM,
+  RULE_BACKFILLS_TABLE,
 } from '../screens/rule_details';
 import { RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
 import {
@@ -210,3 +211,5 @@ export const filterByRunType = (ruleType: string) => {
   cy.get(EXECUTION_RUN_TYPE_FILTER).click();
   cy.get(EXECUTION_RUN_TYPE_FILTER_ITEM).contains(ruleType).click();
 };
+
+export const getBackfillsTableRows = () => cy.get(RULE_BACKFILLS_TABLE).find('tbody tr');
