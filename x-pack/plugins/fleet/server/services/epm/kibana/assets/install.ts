@@ -31,10 +31,10 @@ import {
 import { kibanaAssetsToAssetsRef, saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
 import { FleetError, KibanaSOReferenceError } from '../../../../errors';
-import { appContextService } from '../../../app_context';
 import { withPackageSpan } from '../../packages/utils';
 
 import { tagKibanaAssets } from './tag_assets';
+import { getSpaceAwareSaveobjectsClients } from './saved_objects';
 
 type SavedObjectsImporterContract = Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
@@ -217,30 +217,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
     assetTags,
     installAsAdditionalSpace,
   });
-}
-
-export function getSpaceAwareSaveobjectsClients(spaceId?: string) {
-  // Saved object client need to be scopped with the package space for saved object tagging
-  const savedObjectClientWithSpace = appContextService.getInternalUserSOClientForSpaceId(spaceId);
-
-  const savedObjectsImporter = appContextService
-    .getSavedObjects()
-    .createImporter(savedObjectClientWithSpace, { importSizeLimit: 15_000 });
-
-  const savedObjectTagAssignmentService = appContextService
-    .getSavedObjectsTagging()
-    .createInternalAssignmentService({ client: savedObjectClientWithSpace });
-
-  const savedObjectTagClient = appContextService
-    .getSavedObjectsTagging()
-    .createTagClient({ client: savedObjectClientWithSpace });
-
-  return {
-    savedObjectClientWithSpace,
-    savedObjectsImporter,
-    savedObjectTagAssignmentService,
-    savedObjectTagClient,
-  };
 }
 
 export async function installKibanaAssetsAndReferences({

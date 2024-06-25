@@ -10,20 +10,13 @@ import type {
   SavedObjectsImportSuccess,
   SavedObjectsImportResponse,
 } from '@kbn/core/server';
-import {
-  loggingSystemMock,
-  savedObjectsClientMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { appContextService } from '../../../app_context';
-
-import { type ArchiveAsset, getSpaceAwareSaveobjectsClients } from './install';
+import { type ArchiveAsset } from './install';
 
 jest.mock('timers/promises', () => ({
   async setTimeout() {},
 }));
-jest.mock('../../../app_context');
 
 import { createSavedObjectKibanaAsset, installKibanaSavedObjects } from './install';
 
@@ -150,32 +143,5 @@ describe('createSavedObjectKibanaAsset', () => {
 
     expect(result.typeMigrationVersion).toEqual('8.6.0');
     expect(result.coreMigrationVersion).toEqual('8.7.0');
-  });
-});
-
-describe('getSpaceAwareSaveobjectsClients', () => {
-  it('return space scopped clients', () => {
-    const soStartMock = savedObjectsServiceMock.createStartContract();
-    const mockedSavedObjectTagging = {
-      createInternalAssignmentService: jest.fn(),
-      createTagClient: jest.fn(),
-    };
-
-    const scoppedSoClient = savedObjectsClientMock.create();
-    jest
-      .mocked(appContextService.getInternalUserSOClientForSpaceId)
-      .mockReturnValue(scoppedSoClient);
-
-    jest.mocked(appContextService.getSavedObjects).mockReturnValue(soStartMock);
-    jest.mocked(appContextService.getSavedObjectsTagging).mockReturnValue(mockedSavedObjectTagging);
-
-    getSpaceAwareSaveobjectsClients('test1');
-
-    expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledWith('test1');
-    expect(soStartMock.createImporter).toBeCalledWith(scoppedSoClient, expect.anything());
-    expect(mockedSavedObjectTagging.createInternalAssignmentService).toBeCalledWith({
-      client: scoppedSoClient,
-    });
-    expect(mockedSavedObjectTagging.createTagClient).toBeCalledWith({ client: scoppedSoClient });
   });
 });
