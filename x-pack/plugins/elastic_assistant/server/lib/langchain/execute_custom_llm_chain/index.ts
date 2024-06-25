@@ -172,6 +172,9 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
     let message = '';
     let tokenParentRunId = '';
+    let finalOutputIndex = -1;
+    const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
+    const finalOutputStopRegex = /(?<!\\)\"/;
 
     executor
       .invoke(
@@ -191,7 +194,20 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
                   tokenParentRunId = parentRunId;
                 }
                 if (payload.length && !didEnd && tokenParentRunId === parentRunId) {
-                  push({ payload, type: 'content' });
+                  const finalOutputEndIndex = payload.search(finalOutputStopRegex);
+                  const currentOutput = message.replace(/\s/g, '');
+
+                  if (currentOutput.includes(finalOutputStartToken)) {
+                    finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
+                  }
+
+                  if (finalOutputIndex > -1) {
+                    push({ payload, type: 'content' });
+                  }
+
+                  if (finalOutputIndex > -1 && finalOutputEndIndex > -1) {
+                    didEnd = true;
+                  }
                   // store message in case of error
                   message += payload;
                 }

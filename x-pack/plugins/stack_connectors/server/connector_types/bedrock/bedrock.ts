@@ -349,6 +349,23 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     signal,
     timeout,
   }: InvokeAIRawActionParams) {
+    if (bedrockMethod === 'invoke-with-response-stream') {
+      const body = JSON.stringify(
+        formatBedrockBody({ messages, stopSequences, system, temperature })
+      );
+      // set model on per request basis
+      const path = `/model/${model ?? this.model}/invoke-with-response-stream`;
+      const signed = this.signRequest(body, path, true);
+
+      const res = await fetch(`${this.url}${path}`, {
+        headers: signed.headers,
+        body: signed.body,
+        method: 'POST',
+      });
+
+      return res.body;
+    }
+
     // set model on per request basis
     const currentModel = model ?? this.model;
     const path = `/model/${currentModel}/${bedrockMethod}`;

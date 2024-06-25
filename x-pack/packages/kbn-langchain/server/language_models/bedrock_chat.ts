@@ -112,6 +112,12 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
       },
     })) as unknown as Promise<Response>;
 
+    if (bedrockMethod === 'invoke-with-response-stream') {
+      return {
+        body: data.data,
+      };
+    }
+
     return {
       ok: data.status === 'ok',
       json: () => data.data,

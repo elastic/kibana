@@ -183,7 +183,7 @@ export const getLlmType = (actionTypeId: string): string | undefined => {
 export const getLlmClass = (llmType?: string, isStreaming?: boolean) =>
   llmType === 'openai'
     ? ActionsClientChatOpenAI
-    : llmType === 'bedrock' && !isStreaming
+    : llmType === 'bedrock'
     ? ActionsClientBedrockChatModel
     : ActionsClientSimpleChatModel;
 
