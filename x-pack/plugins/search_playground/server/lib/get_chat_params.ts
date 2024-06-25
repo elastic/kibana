@@ -15,8 +15,10 @@ import type { Connector } from '@kbn/actions-plugin/server/application/connector
 import {
   ActionsClientChatOpenAI,
   ActionsClientLlm,
+  ActionsClientSimpleChatModel,
   getDefaultArguments,
 } from '@kbn/langchain/server';
+import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
 import { Prompt } from '../../common/prompt';
 
 export const getChatParams = async (
@@ -42,6 +44,7 @@ export const getChatParams = async (
   const connector = await actionsClient.get({ id: connectorId });
   let chatModel;
   let chatPrompt;
+  let llmType;
 
   switch (connector.actionTypeId) {
     case OPENAI_CONNECTOR_ID:
@@ -65,7 +68,7 @@ export const getChatParams = async (
       });
       break;
     case BEDROCK_CONNECTOR_ID:
-      const llmType = 'bedrock';
+      llmType = 'bedrock';
       chatModel = new ActionsClientLlm({
         actions,
         logger,
@@ -80,6 +83,24 @@ export const getChatParams = async (
         citations,
         context: true,
         type: 'anthropic',
+      });
+      break;
+    case GEMINI_CONNECTOR_ID:
+      llmType = 'gemini';
+      chatModel = new ActionsClientSimpleChatModel({
+        actions,
+        logger,
+        request,
+        connectorId,
+        model,
+        llmType,
+        temperature: getDefaultArguments(llmType).temperature,
+        streaming: false,
+      });
+      chatPrompt = Prompt(prompt, {
+        citations,
+        context: true,
+        type: 'gemini',
       });
       break;
     default:

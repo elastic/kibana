@@ -45,10 +45,24 @@ const AnthropicPrompt = (systemInstructions: string) => {
   `;
 };
 
+// guessing
+const GeminiPrompt = (systemInstructions: string) => {
+  return `
+  Instructions:
+  ${systemInstructions}
+
+  Context:
+  {context}
+
+  Question: {question}
+  Answer:
+  `;
+};
+
 interface PromptTemplateOptions {
   citations?: boolean;
   context?: boolean;
-  type?: 'openai' | 'mistral' | 'anthropic';
+  type?: 'openai' | 'mistral' | 'anthropic' | 'gemini';
 }
 
 export const Prompt = (instructions: string, options: PromptTemplateOptions): string => {
@@ -73,5 +87,6 @@ export const Prompt = (instructions: string, options: PromptTemplateOptions): st
     openai: OpenAIPrompt,
     mistral: MistralPrompt,
     anthropic: AnthropicPrompt,
+    gemini: GeminiPrompt,
   }[options.type || 'openai'](systemInstructions);
 };

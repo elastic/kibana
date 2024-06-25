@@ -40,7 +40,7 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
   const { getValues } = useFormContext<ChatForm>();
   const formValues = getValues(ChatFormFields.summarizationModel);
 
-  const selectedModel = models.find((m) => m.value === formValues?.value);
+  const g = models.find((m) => m.value === formValues?.value);
 
   const toggleTooltip = () => {
     setShowTooltip(!showTooltip);
@@ -50,7 +50,7 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
     prefix: 'tokenEstimateTooltipId',
   });
 
-  const modelLimit = selectedModel?.promptTokenLimit;
+  const modelLimit = g?.promptTokenLimit;
 
   return (
     <EuiPopover
