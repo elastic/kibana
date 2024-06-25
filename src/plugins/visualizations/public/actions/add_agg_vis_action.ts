@@ -51,7 +51,7 @@ export class AddAggVisualizationPanelAction implements Action<EmbeddableApiConte
     }
 
     showNewVisModal({
-      originatingApp: embeddable.type,
+      originatingApp: 'dashboards',
       outsideVisualizeApp: true,
       showAggsSelection: true,
     });
