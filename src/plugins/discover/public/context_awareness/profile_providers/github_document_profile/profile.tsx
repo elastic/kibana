@@ -54,7 +54,7 @@ export const githubDocumentProfileProvider: DocumentProfileProvider = {
                       <h1>{props.hit.flattened.title}</h1>
                     </EuiTitle>
                     <EuiSpacer size="s" />
-                    <EuiMarkdownFormat textSize="s">
+                    <EuiMarkdownFormat textSize="s" className="githubMarkDown">
                       {props.hit.flattened.body as string}
                     </EuiMarkdownFormat>
                   </EuiFlexItem>
@@ -66,7 +66,7 @@ export const githubDocumentProfileProvider: DocumentProfileProvider = {
           registry.add({
             id: 'doc_view_github_2',
             title: i18n.translate('discover.docViews.github', {
-              defaultMessage: 'Space invaders',
+              defaultMessage: '👾',
             }),
             order: 4,
             component: (props) => {
@@ -106,6 +106,13 @@ export const githubDataSourceProfileProvider: DataSourceProfileProvider = {
   profile: {
     getCellRenderers: (prev) => () => ({
       ...prev(),
+      number: (props) => {
+        const number = getFieldValue(props.row, 'number');
+        if (!number) {
+          return <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
+        }
+        return <a href={`https://github.com/elastic/kibana/pull/${number}`}>#{number}</a>;
+      },
       user: (props) => {
         const user = getFieldValue(props.row, 'user');
 
@@ -120,7 +127,7 @@ export const githubDataSourceProfileProvider: DataSourceProfileProvider = {
               width={25}
               height={25}
               alt={user}
-              style={{ verticalAlign: 'middle' }}
+              style={{ verticalAlign: 'middle', borderRadius: '50%', border: '1px solid #CCC' }}
             />{' '}
             {user}
           </>
@@ -151,9 +158,15 @@ export const githubDataSourceProfileProvider: DataSourceProfileProvider = {
       const prevState = prev(params);
       const columns = prevState?.columns ?? [];
 
-      columns.push({ name: 'user', width: 60 }, { name: 'title' });
+      columns.push(
+        { name: 'user', width: 160 },
+        { name: 'number', width: 100 },
+        { name: 'updated_at.time', width: 260 },
+        { name: 'title' },
+        { name: 'labels' }
+      );
 
-      return { columns, rowHeight: 0 };
+      return { columns, rowHeight: -1 };
     },
   },
   resolve: (params) => {
