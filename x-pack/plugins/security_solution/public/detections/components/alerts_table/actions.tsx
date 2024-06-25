@@ -1032,6 +1032,7 @@ export const sendAlertToTimelineAction = async ({
             getExceptionFilter
           );
           // The Query field should remain unpopulated with the suppressed EQL/ES|QL alert.
+          // TODO do we need additional logic for ML alerts here?
         } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData) && !isEsqlAlert(ecsData)) {
           return createSuppressedTimeline(
             ecsData,

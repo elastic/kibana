@@ -37,18 +37,38 @@ describe('useAlertSuppression', () => {
     expect(result.current.isSuppressionEnabled).toBe(false);
   });
 
-  it('should return isSuppressionEnabled false if ES|QL Feature Flag is disabled', () => {
-    const { result } = renderHook(() => useAlertSuppression('esql'));
+  describe('ML rules', () => {
+    it('is true if the feature flag is enabled', () => {
+      jest
+        .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
+        .mockReset()
+        .mockReturnValue(true);
+      const { result } = renderHook(() => useAlertSuppression('machine_learning'));
 
-    expect(result.current.isSuppressionEnabled).toBe(false);
+      expect(result.current.isSuppressionEnabled).toBe(true);
+    });
+
+    it('is false if the feature flag is disabled', () => {
+      const { result } = renderHook(() => useAlertSuppression('machine_learning'));
+
+      expect(result.current.isSuppressionEnabled).toBe(false);
+    });
   });
 
-  it('should return isSuppressionEnabled true if ES|QL Feature Flag is enabled', () => {
-    jest
-      .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
-      .mockImplementation((flag) => flag === 'alertSuppressionForEsqlRuleEnabled');
-    const { result } = renderHook(() => useAlertSuppression('esql'));
+  describe('ES|QL rules', () => {
+    it('should return isSuppressionEnabled false if ES|QL Feature Flag is disabled', () => {
+      const { result } = renderHook(() => useAlertSuppression('esql'));
 
-    expect(result.current.isSuppressionEnabled).toBe(true);
+      expect(result.current.isSuppressionEnabled).toBe(false);
+    });
+
+    it('should return isSuppressionEnabled true if ES|QL Feature Flag is enabled', () => {
+      jest
+        .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
+        .mockImplementation((flag) => flag === 'alertSuppressionForEsqlRuleEnabled');
+      const { result } = renderHook(() => useAlertSuppression('esql'));
+
+      expect(result.current.isSuppressionEnabled).toBe(true);
+    });
   });
 });

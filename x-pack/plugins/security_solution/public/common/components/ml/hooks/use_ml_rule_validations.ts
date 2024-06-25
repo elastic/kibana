@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import { useInstalledSecurityJobs } from './use_installed_security_jobs';
+
+export interface UseMlRuleValidationsParams {
+  machineLearningJobId: string[] | undefined;
+}
+
+export interface UseMlRuleValidationsReturn {
+  loading: boolean;
+  noJobsStarted: boolean;
+  someJobsStarted: boolean;
+}
+
+/**
+ * Hook to encapsulate some of our validation checks for ML rules.
+ *
+ * @param machineLearningJobId the ML Job IDs of the rule
+ * @returns validation state about the rule, relative to its ML jobs.
+ */
+export const useMlRuleValidations = ({
+  machineLearningJobId,
+}: UseMlRuleValidationsParams): UseMlRuleValidationsReturn => {
+  const { jobs: installedJobs, loading } = useInstalledSecurityJobs();
+  console.log('installedJobs', installedJobs);
+  const ruleMlJobs = installedJobs.filter((installedJob) =>
+    (machineLearningJobId ?? []).includes(installedJob.id)
+  );
+  console.log('ruleMlJobs', ruleMlJobs);
+  const numberOfRuleMlJobsStarted = ruleMlJobs.filter((job) =>
+    isJobStarted(job.jobState, job.datafeedState)
+  ).length;
+  console.log('numberofRuleMlJobsStarted', numberOfRuleMlJobsStarted);
+  const noMlJobsStarted = numberOfRuleMlJobsStarted === 0;
+  const someMlJobsStarted = !noMlJobsStarted && numberOfRuleMlJobsStarted !== ruleMlJobs.length;
+
+  return { loading, noJobsStarted: noMlJobsStarted, someJobsStarted: someMlJobsStarted };
+};

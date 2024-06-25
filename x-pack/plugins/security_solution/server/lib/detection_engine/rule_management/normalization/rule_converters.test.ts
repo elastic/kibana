@@ -110,6 +110,51 @@ describe('rule_converters', () => {
       });
     });
 
+    describe('machine learning rules', () => {
+      test('should accept machine learning params when existing rule type is machine learning', () => {
+        const patchParams = {
+          anomaly_threshold: 5,
+        };
+        const rule = getMlRuleParams();
+        const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+        expect(patchedParams).toEqual(
+          expect.objectContaining({
+            anomalyThreshold: 5,
+          })
+        );
+      });
+
+      test('should reject invalid machine learning params when existing rule type is machine learning', () => {
+        const patchParams = {
+          anomaly_threshold: 'invalid',
+        } as PatchRuleRequestBody;
+        const rule = getMlRuleParams();
+        expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
+          'anomaly_threshold: Expected number, received string'
+        );
+      });
+
+      it('accepts suppression params', () => {
+        const patchParams = {
+          alert_suppression: {
+            group_by: ['agent.name'],
+            missing_fields_strategy: 'suppress' as const,
+          },
+        };
+        const rule = getMlRuleParams();
+        const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+
+        expect(patchedParams).toEqual(
+          expect.objectContaining({
+            alertSuppression: {
+              groupBy: ['agent.name'],
+              missingFieldsStrategy: 'suppress',
+            },
+          })
+        );
+      });
+    });
+
     test('should accept threat match params when existing rule type is threat match', () => {
       const patchParams = {
         threat_indicator_path: 'my.indicator',
@@ -298,29 +343,6 @@ describe('rule_converters', () => {
       );
     });
 
-    test('should accept machine learning params when existing rule type is machine learning', () => {
-      const patchParams = {
-        anomaly_threshold: 5,
-      };
-      const rule = getMlRuleParams();
-      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
-      expect(patchedParams).toEqual(
-        expect.objectContaining({
-          anomalyThreshold: 5,
-        })
-      );
-    });
-
-    test('should reject invalid machine learning params when existing rule type is machine learning', () => {
-      const patchParams = {
-        anomaly_threshold: 'invalid',
-      } as PatchRuleRequestBody;
-      const rule = getMlRuleParams();
-      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'anomaly_threshold: Expected number, received string'
-      );
-    });
-
     test('should accept new terms params when existing rule type is new terms', () => {
       const patchParams = {
         new_terms_fields: ['event.new_field'],
@@ -344,6 +366,7 @@ describe('rule_converters', () => {
       );
     });
   });
+
   describe('typeSpecificCamelToSnake', () => {
     describe('EQL', () => {
       test('should accept EQL params when existing rule type is EQL', () => {
@@ -390,6 +413,54 @@ describe('rule_converters', () => {
                 value: 10,
                 unit: 'm',
               } as AlertSuppressionDuration,
+              missing_fields_strategy: 'suppress',
+            },
+          })
+        );
+      });
+    });
+
+    describe('machine learning rules', () => {
+      it('accepts normal params', () => {
+        const params = {
+          anomalyThreshold: 74,
+          machineLearningJobId: ['job-1'],
+        };
+        const ruleParams = { ...getMlRuleParams(), ...params };
+        const transformedParams = typeSpecificCamelToSnake(ruleParams);
+        expect(transformedParams).toEqual(
+          expect.objectContaining({
+            anomaly_threshold: 74,
+            machine_learning_job_id: ['job-1'],
+          })
+        );
+      });
+
+      it('accepts suppression params', () => {
+        const params = {
+          anomalyThreshold: 74,
+          machineLearningJobId: ['job-1'],
+          alertSuppression: {
+            groupBy: ['event.type'],
+            duration: {
+              value: 10,
+              unit: 'm',
+            } as AlertSuppressionDuration,
+            missingFieldsStrategy: 'suppress' as AlertSuppressionMissingFieldsStrategy,
+          },
+        };
+        const ruleParams = { ...getMlRuleParams(), ...params };
+        const transformedParams = typeSpecificCamelToSnake(ruleParams);
+        expect(transformedParams).toEqual(
+          expect.objectContaining({
+            anomaly_threshold: 74,
+            machine_learning_job_id: ['job-1'],
+            alert_suppression: {
+              group_by: ['event.type'],
+              duration: {
+                value: 10,
+                unit: 'm',
+              },
               missing_fields_strategy: 'suppress',
             },
           })

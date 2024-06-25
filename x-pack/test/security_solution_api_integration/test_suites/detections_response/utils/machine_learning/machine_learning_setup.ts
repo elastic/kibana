@@ -6,6 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
+import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { getCommonRequestHeader } from '../../../../../functional/services/ml/common_api';
 
 export const executeSetupModuleRequest = async ({
@@ -22,7 +23,7 @@ export const executeSetupModuleRequest = async ({
     .set(getCommonRequestHeader('1'))
     .send({
       prefix: '',
-      groups: ['auditbeat'],
+      groups: [ML_GROUP_ID],
       indexPatternName: 'auditbeat-*',
       startDatafeed: false,
       useDedicatedIndex: true,
