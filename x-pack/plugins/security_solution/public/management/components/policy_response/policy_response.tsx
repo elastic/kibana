@@ -26,33 +26,46 @@ import { PolicyResponseActionItem } from './policy_response_action_item';
 
 // Most of them are needed in order to display large react nodes (PolicyResponseActionItem) in child levels.
 const StyledEuiTreeView = styled(EuiTreeView)`
-  .policy-response-action-item-expanded {
-    height: auto;
-    padding-top: ${({ theme }) => theme.eui.euiSizeS};
-    padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
-    .euiTreeView__nodeLabel {
+  & .policy-response-artifact-item {
+    & .euiTreeView__nodeLabel {
       width: 100%;
     }
   }
-  .policyResponseStatusHealth {
+
+  & .policy-response-action-item-expanded {
+    height: auto;
+    padding-top: ${({ theme }) => theme.eui.euiSizeS};
+    padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
+
+    & .euiTreeView__nodeLabel {
+      width: 100%;
+    }
+  }
+
+  & .policyResponseStatusHealth {
     padding-top: 5px;
   }
-  .euiTreeView__node--expanded {
+
+  & .euiTreeView__node--expanded {
     max-height: none !important;
-    .policy-response-action-expanded + div {
-      .euiTreeView__node {
+
+    & .policy-response-action-expanded + div {
+      & .euiTreeView__node {
         // When response action item displays a callout, this needs to be overwritten to remove the default max height of EuiTreeView
         max-height: none !important;
       }
     }
   }
-  .euiTreeView__node {
+
+  & .euiTreeView__node {
     max-height: none !important;
-    .euiNotificationBadge {
+
+    & .euiNotificationBadge {
       margin-right: 5px;
     }
-    .euiTreeView__nodeLabel {
-      .euiText {
+
+    & .euiTreeView__nodeLabel {
+      & .euiText {
         font-size: ${({ theme }) => theme.eui.euiFontSize};
       }
     }
@@ -170,6 +183,7 @@ export const PolicyResponse = memo(
           return {
             label: <PolicyResponseArtifactItem artifact={artifact} />,
             id: artifact.name,
+            className: 'policy-response-artifact-item',
           };
         });
       },
