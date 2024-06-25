@@ -23,8 +23,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
-import { useQueryIndices } from '../../hooks/use_query_indices';
+import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
+import { useQueryIndices } from '../hooks/use_query_indices';
 
 interface SelectIndicesFlyout {
   onClose: () => void;
@@ -119,7 +119,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={handleSaveQuery} fill>
+            <EuiButton onClick={handleSaveQuery} fill disabled={!selectedTempIndices.length}>
               <FormattedMessage
                 id="xpack.searchPlayground.setupPage.addDataSource.flyout.saveButton"
                 defaultMessage="Save and continue"

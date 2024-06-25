@@ -10,7 +10,7 @@ import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { ChatForm, ChatFormFields } from '../../types';
-import { SelectIndicesFlyout } from './select_indices_flyout';
+import { SelectIndicesFlyout } from '../select_indices_flyout';
 
 export const AddDataSources: React.FC = () => {
   const [showFlyout, setShowFlyout] = useState(false);
