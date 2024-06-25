@@ -84,8 +84,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/shared-ux-markdown",
     "@kbn/data-view-utils",
-    "@kbn/elastic-assistant-plugin",
-    "@kbn/elastic-assistant-common",
     "@kbn/presentation-publishing"
   ],
   "exclude": ["target/**/*"]

@@ -22,7 +22,6 @@ import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/publ
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
-import type { ElasticAssistantPublicPluginStart } from '@kbn/elastic-assistant-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
@@ -79,9 +78,6 @@ import {
 } from './components/discover_container';
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
-import { BASE_DISCOVER_QUICK_PROMPTS } from './assistant/quick_prompts';
-import { PROMPT_CONTEXTS } from './assistant/prompt_contexts';
-import { BASE_DISCOVER_SYSTEM_PROMPTS } from './assistant/prompts/system';
 
 /**
  * @public
@@ -178,7 +174,6 @@ export interface DiscoverSetupPlugins {
  * @internal
  */
 export interface DiscoverStartPlugins {
-  elasticAssistant?: ElasticAssistantPublicPluginStart;
   dataViews: DataViewsServicePublic;
   dataViewEditor: DataViewEditorStart;
   uiActions: UiActionsStart;
@@ -433,33 +428,6 @@ export class DiscoverPlugin
         })
       );
     }
-
-    plugins.elasticAssistant?.registerAIAssistantDefaults('discover', {
-      quickPrompts: BASE_DISCOVER_QUICK_PROMPTS,
-      systemPrompts: BASE_DISCOVER_SYSTEM_PROMPTS,
-      promptContexts: Object.values(PROMPT_CONTEXTS),
-      allowFields: [],
-      conversations: {
-        ['Discover summary']: {
-          id: '',
-          title: 'Discover summary',
-          category: 'assistant',
-          consumer: 'discover',
-          isDefault: true,
-          messages: [],
-          replacements: [],
-        },
-        ['Welcome']: {
-          id: '',
-          title: 'Welcome',
-          category: 'assistant',
-          consumer: 'discover',
-          isDefault: true,
-          messages: [],
-          replacements: [],
-        },
-      },
-    });
 
     return {
       locator: this.locator,
