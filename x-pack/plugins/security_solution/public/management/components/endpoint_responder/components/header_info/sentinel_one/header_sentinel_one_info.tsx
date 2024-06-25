@@ -36,6 +36,7 @@ export const HeaderSentinelOneInfo = memo<HeaderSentinelOneInfoProps>(
         hostName={hostName}
         lastCheckin={lastCheckin}
         agentType={agentType}
+        data-test-subj="responseConsole"
       >
         <AgentStatus
           agentId={agentId}

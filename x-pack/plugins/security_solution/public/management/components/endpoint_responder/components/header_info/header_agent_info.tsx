@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { AgentTypeVendorLogo } from '../../../../../common/components/endpoint/agents/agent_type_vendor_logo';
 import { getAgentTypeName } from '../../../../../common/translations';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -26,20 +27,25 @@ interface HeaderAgentInfoProps {
   lastCheckin: string;
   children: React.ReactNode;
   agentType?: ResponseActionAgentType;
+  'data-test-subj'?: string;
 }
 
 export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
-  ({ platform, hostName, lastCheckin, agentType, children }) => {
+  ({ platform, hostName, lastCheckin, agentType, 'data-test-subj': dataTestSubj, children }) => {
     const { euiTheme } = useEuiTheme();
-
-    // FIXME:PT working here. Need to fix layout to accommodate long values
+    const testId = useTestIdGenerator(dataTestSubj);
 
     return (
-      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+      <EuiFlexGroup
+        gutterSize="s"
+        responsive={false}
+        alignItems="center"
+        data-test-subj={testId('agentInfo')}
+      >
         <EuiFlexItem grow={false}>
-          <PlatformIcon data-test-subj="responderHeaderHostPlatformIcon" platform={platform} />
+          <PlatformIcon data-test-subj={testId('platformIcon')} platform={platform} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} className="eui-textTruncate">
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -47,7 +53,7 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
                   <EuiToolTip content={hostName} anchorClassName="eui-textTruncate">
                     <EuiText
                       size="s"
-                      data-test-subj="responderHeaderHostName"
+                      data-test-subj={testId('hostName')}
                       className="eui-textTruncate"
                     >
                       <h6 className="eui-textTruncate">{hostName}</h6>
@@ -59,7 +65,7 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="s" data-test-subj="responderHeaderLastSeen">
+              <EuiText color="subdued" size="s" data-test-subj={testId('lastSeen')}>
                 <FormattedMessage
                   id="xpack.securitySolution.responder.header.lastSeen"
                   defaultMessage="Last seen {date}"
@@ -76,7 +82,11 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
           <EuiFlexItem grow={false} css={{ paddingLeft: euiTheme.size.l }}>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="s" data-test-subj="responderHeaderIntegrationLabel">
+                <EuiText
+                  color="subdued"
+                  size="s"
+                  data-test-subj={testId('integrationSectionLabel')}
+                >
                   {INTEGRATION_SECTION_LABEL}
                 </EuiText>
               </EuiFlexItem>
@@ -86,7 +96,7 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
                     <AgentTypeVendorLogo agentType={agentType} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiText size="s" data-test-subj="responderHeaderIntegrationName">
+                    <EuiText size="s" data-test-subj={testId('integrationName')}>
                       {getAgentTypeName(agentType)}
                     </EuiText>
                   </EuiFlexItem>

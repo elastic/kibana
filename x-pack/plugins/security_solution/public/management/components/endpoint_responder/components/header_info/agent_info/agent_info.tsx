@@ -31,6 +31,7 @@ export const AgentInfo = memo<AgentInfoProps>(({ agentId, platform, hostName, ag
       hostName={hostName}
       lastCheckin={lastCheckin}
       agentType={agentType}
+      data-test-subj="responseConsole"
     >
       <AgentStatus
         agentId={agentId}
