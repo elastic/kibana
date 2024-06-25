@@ -33,7 +33,7 @@ export function InstallKibanaAssetsPanel({ installInfo, title }: InstallKibanaAs
   const assetsInstalledInCurrentSpace =
     (!installInfo.installed_kibana_space_id && spaceId === 'default') ||
     installInfo.installed_kibana_space_id === spaceId ||
-    installInfo.additionnal_spaces_installed_kibana?.[spaceId || 'default'];
+    installInfo.additional_spaces_installed_kibana?.[spaceId || 'default'];
 
   const handleClickInstall = useCallback(async () => {
     try {

@@ -181,7 +181,7 @@ async function deleteAssets(
     installed_es: installedEs,
     installed_kibana: installedKibana,
     installed_kibana_space_id: spaceId = DEFAULT_SPACE_ID,
-    additionnal_spaces_installed_kibana: installedInAdditionalSpacesKibana = {},
+    additional_spaces_installed_kibana: installedInAdditionalSpacesKibana = {},
   }: Installation,
   savedObjectsClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
@@ -289,7 +289,7 @@ export async function deleteKibanaSavedObjectsAssets({
     refsToDelete = installedPkg.attributes.installed_kibana;
     spaceIdToDelete = installedSpaceId;
   } else {
-    refsToDelete = installedPkg.attributes.additionnal_spaces_installed_kibana?.[spaceId] ?? [];
+    refsToDelete = installedPkg.attributes.additional_spaces_installed_kibana?.[spaceId] ?? [];
     spaceIdToDelete = spaceId;
   }
   if (!refsToDelete.length) return;

@@ -1322,9 +1322,9 @@ export const saveKibanaAssetsRefs = async (
         pkgName,
         saveAsAdditionnalSpace
           ? {
-              additionnal_spaces_installed_kibana: {
+              additional_spaces_installed_kibana: {
                 ...omit(
-                  installation?.attributes?.additionnal_spaces_installed_kibana ?? {},
+                  installation?.attributes?.additional_spaces_installed_kibana ?? {},
                   spaceId
                 ),
                 ...(assetRefs.length > 0 ? { [spaceId]: assetRefs } : {}),

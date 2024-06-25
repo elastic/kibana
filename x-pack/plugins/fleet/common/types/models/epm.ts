@@ -589,7 +589,7 @@ export interface StateContext<T> {
 
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
-  additionnal_spaces_installed_kibana?: Record<string, KibanaAssetReference[]>;
+  additional_spaces_installed_kibana?: Record<string, KibanaAssetReference[]>;
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
   es_index_patterns: Record<string, string>;

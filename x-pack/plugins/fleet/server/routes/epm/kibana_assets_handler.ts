@@ -61,7 +61,7 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
       logger,
       pkgName,
       pkgTitle: packageInfo.title,
-      installAsAdditionnalSpace: true,
+      installAsAdditionalSpace: true,
       spaceId,
       assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
       installedPkg: installation,

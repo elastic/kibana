@@ -669,7 +669,7 @@ export const getSavedObjectTypes = (
             dynamic: false,
             properties: {},
           },
-          additionnal_spaces_installed_kibana: {
+          additional_spaces_installed_kibana: {
             type: 'flattened',
             index: false,
           },
@@ -720,7 +720,7 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
-                additionnal_spaces_installed_kibana: { type: 'flattened', index: false },
+                additional_spaces_installed_kibana: { type: 'flattened', index: false },
               },
             },
           ],

@@ -65,7 +65,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const assetsInstalledInCurrentSpace =
     !installedSpaceId ||
     installedSpaceId === spaceId ||
-    pkgInstallationInfo?.additionnal_spaces_installed_kibana?.[spaceId || 'default'];
+    pkgInstallationInfo?.additional_spaces_installed_kibana?.[spaceId || 'default'];
   const [assetSavedObjectsByType, setAssetsSavedObjectsByType] = useState<
     Record<string, Record<string, SimpleSOAssetType & { appLink?: string }>>
   >({});
@@ -74,12 +74,12 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const kibanaAssets = useMemo(() => {
     return !installedSpaceId || installedSpaceId === spaceId
       ? pkgInstallationInfo?.installed_kibana || []
-      : pkgInstallationInfo?.additionnal_spaces_installed_kibana?.[spaceId || 'default'] || [];
+      : pkgInstallationInfo?.additional_spaces_installed_kibana?.[spaceId || 'default'] || [];
   }, [
     installedSpaceId,
     spaceId,
     pkgInstallationInfo?.installed_kibana,
-    pkgInstallationInfo?.additionnal_spaces_installed_kibana,
+    pkgInstallationInfo?.additional_spaces_installed_kibana,
   ]);
   const pkgAssets = useMemo(
     () => [...kibanaAssets, ...(pkgInstallationInfo?.installed_es || [])],

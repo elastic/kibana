@@ -94,7 +94,7 @@ export default function (providerContext: FtrProviderContext) {
           }
 
           expect(res.item.installationInfo?.installed_kibana_space_id).eql('default');
-          expect(res.item.installationInfo?.additionnal_spaces_installed_kibana).eql(undefined);
+          expect(res.item.installationInfo?.additional_spaces_installed_kibana).eql(undefined);
         });
 
         it('should allow to install kibana assets in another space', async () => {
@@ -110,10 +110,10 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(res.item.installationInfo?.installed_kibana_space_id).eql('default');
           expect(
-            Object.keys(res.item.installationInfo?.additionnal_spaces_installed_kibana ?? {})
+            Object.keys(res.item.installationInfo?.additional_spaces_installed_kibana ?? {})
           ).eql([TEST_SPACE_1]);
 
-          const dashboard = res.item.installationInfo!.additionnal_spaces_installed_kibana?.[
+          const dashboard = res.item.installationInfo!.additional_spaces_installed_kibana?.[
             TEST_SPACE_1
           ]!.find((asset) => asset.originId === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519');
           expect(dashboard).not.eql(undefined);
@@ -141,7 +141,7 @@ export default function (providerContext: FtrProviderContext) {
             throw new Error('not installed');
           }
           expect(
-            Object.keys(res.item.installationInfo?.additionnal_spaces_installed_kibana ?? {})
+            Object.keys(res.item.installationInfo?.additional_spaces_installed_kibana ?? {})
           ).eql([]);
         });
       });
@@ -205,7 +205,7 @@ export default function (providerContext: FtrProviderContext) {
           }
 
           expect(res.item.installationInfo?.installed_kibana_space_id).eql(TEST_SPACE_1);
-          expect(res.item.installationInfo?.additionnal_spaces_installed_kibana).eql(undefined);
+          expect(res.item.installationInfo?.additional_spaces_installed_kibana).eql(undefined);
         });
 
         it('should allow to install kibana assets in default space', async () => {
@@ -218,11 +218,11 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(res.item.installationInfo?.installed_kibana_space_id).eql(TEST_SPACE_1);
           expect(
-            Object.keys(res.item.installationInfo?.additionnal_spaces_installed_kibana ?? {})
+            Object.keys(res.item.installationInfo?.additional_spaces_installed_kibana ?? {})
           ).eql(['default']);
 
           const dashboard =
-            res.item.installationInfo!.additionnal_spaces_installed_kibana?.default!.find(
+            res.item.installationInfo!.additional_spaces_installed_kibana?.default!.find(
               (asset) => asset.originId === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519'
             );
           expect(dashboard).not.eql(undefined);
