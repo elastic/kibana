@@ -118,8 +118,8 @@ components:
           type: boolean
         isDefault:
           type: boolean
-        isShared:
-          type: boolean
+        consumer:
+          type: string
         updatedAt:
           type: string
         updatedBy:
@@ -238,8 +238,8 @@ components:
           type: boolean
         isDefault:
           type: boolean
-        isShared:
-          type: boolean
+        consumer:
+          type: string
 
     PromptUpdateProps:
       type: object
@@ -254,5 +254,5 @@ components:
           type: boolean
         isDefault:
           type: boolean
-        isShared:
-          type: boolean
+        consumer:
+          type: string

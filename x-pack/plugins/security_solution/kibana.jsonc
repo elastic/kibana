@@ -21,6 +21,7 @@
       "dashboard",
       "data",
       "dataViews",
+      "discover",
       "ecsDataQualityDashboard",
       "elasticAssistant",
       "embeddable",

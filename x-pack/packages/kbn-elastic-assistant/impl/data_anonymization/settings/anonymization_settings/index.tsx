@@ -13,11 +13,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
@@ -50,8 +48,6 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
   setAnonymizationFieldsBulkActions,
   setUpdatedAnonymizationData,
 }) => {
-  const { assistantDefaults } = useAssistantContext();
-
   const onListUpdated = useCallback(
     async (updates: BatchUpdateListItem[]) => {
       const updatedFieldsKeys = updates.map((u) => u.field);

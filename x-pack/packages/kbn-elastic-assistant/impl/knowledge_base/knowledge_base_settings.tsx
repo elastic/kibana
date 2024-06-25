@@ -48,10 +48,10 @@ interface Props {
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
   ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
-    const { http, currentAppId } = useAssistantContext();
     const {
       assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
       http,
+      currentAppId,
     } = useAssistantContext();
     const {
       data: kbStatus,

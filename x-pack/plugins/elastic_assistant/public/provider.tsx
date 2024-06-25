@@ -13,13 +13,10 @@ import type { Observable } from 'rxjs';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { AIAssistantDefaults } from '@kbn/elastic-assistant/impl/assistant/prompt_context/types';
 import { StartServices } from './types';
-import { useAnonymizationStore } from './components/use_anonymization_store';
 import { getComments } from './get_comments';
 import { augmentMessageCodeBlocks } from './components/helpers';
 import { useAssistantAvailability } from './use_assistant_availability';
-import { appContextService } from './services/app_context';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
   defaultMessage: 'Elastic AI Assistant',
@@ -49,50 +46,14 @@ export function AssistantProvider({
   const {
     http,
     notifications,
-    application: applicationService,
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   } = useKibana<StartServices>().services;
   const basePath = http.basePath.get();
 
   const currentAppId = useMemo(() => new Rx.BehaviorSubject(''), []);
-  const assistantDefaults = useMemo(
-    () => new Rx.BehaviorSubject<AIAssistantDefaults>({ conversations: {} }),
-    []
-  );
-  if (applicationService) {
-    applicationService.currentAppId$.subscribe((appId) => {
-      if (appId) {
-        currentAppId.next(appId);
-        assistantDefaults.next(
-          appContextService.getRegisteredAIAssistantDefaults(currentAppId.getValue() ?? '')
-        );
-      }
-    });
-  }
 
   const assistantAvailability = useAssistantAvailability();
-  // const assistantTelemetry = useAssistantTelemetry();
-
-  /* const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> => {
-      const mergedData = mergeBaseWithPersistedConversations({}, conversationsData);
-      if (assistantAvailability.isAssistantEnabled && assistantAvailability.hasAssistantPrivilege) {
-        migrateConversationsFromLocalStorage(mergedData);
-      }
-      return mergedData;
-    },
-    [
-      assistantAvailability.hasAssistantPrivilege,
-      assistantAvailability.isAssistantEnabled,
-      migrateConversationsFromLocalStorage,
-    ]
-  );
-  useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
-*/
-
-  const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
-    useAnonymizationStore();
 
   return (
     <AssistantProviderContext.Consumer>
@@ -102,16 +63,11 @@ export function AssistantProvider({
             actionTypeRegistry={actionTypeRegistry}
             augmentMessageCodeBlocks={augmentMessageCodeBlocks}
             assistantAvailability={assistantAvailability}
-            defaultAllow={defaultAllow} // to server and plugin start
-            defaultAllowReplacement={defaultAllowReplacement} // to server and plugin start
             docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
             basePath={basePath}
-            assistantDefaults={assistantDefaults}
             getComments={getComments}
             http={http}
             currentAppId={currentAppId}
-            setDefaultAllow={setDefaultAllow} // remove
-            setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
             title={ASSISTANT_TITLE}
             toasts={notifications.toasts}
           >

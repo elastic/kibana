@@ -12,11 +12,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { AIAssistantDefaults } from '@kbn/elastic-assistant/impl/assistant/prompt_context/types';
 import {
   ElasticAssistantPluginSetupDependencies,
   ElasticAssistantPluginStartDependencies,
-  ElasticAssistantPublicPluginStart,
   StartServices,
 } from './types';
 import { AssistantHeaderLink } from './components/header_link';
@@ -27,6 +25,7 @@ import { licenseService } from './use_assistant_availability/use_license';
 import { appContextService } from './services/app_context';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
+export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
 
 export class ElasticAssistantPublicPlugin
   implements
@@ -49,10 +48,7 @@ export class ElasticAssistantPublicPlugin
     return {};
   }
 
-  public start(
-    core: CoreStart,
-    dependencies: ElasticAssistantPluginStartDependencies
-  ): ElasticAssistantPublicPluginStart {
+  public start(core: CoreStart, dependencies: ElasticAssistantPluginStartDependencies) {
     const startServices = (): StartServices => {
       const { ...startPlugins } = core.security;
       licenseService.start(dependencies.licensing.license$);
@@ -77,14 +73,7 @@ export class ElasticAssistantPublicPlugin
     });
 
     appContextService.start();
-    return {
-      getAIAssistantDefaults: (pluginName: string) => {
-        return appContextService.getRegisteredAIAssistantDefaults(pluginName);
-      },
-      registerAIAssistantDefaults: (pluginName: string, assistantDefaults: AIAssistantDefaults) => {
-        return appContextService.registerAIAssistantDefaults(pluginName, assistantDefaults);
-      },
-    };
+    return {};
   }
 
   public stop() {

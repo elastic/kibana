@@ -7,15 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 
-import { once } from 'lodash/fp';
-import { firstValueFrom } from 'rxjs';
-import {
-  ElasticAssistantPluginCoreSetupDependencies,
-  ElasticAssistantPluginRouter,
-  GetElser,
-} from '../types';
-import { postAttackDiscoveryRoute } from './attack_discovery/post_attack_discovery';
 import { ElasticAssistantPluginRouter, GetElser } from '../types';
+import { postAttackDiscoveryRoute } from './attack_discovery/post_attack_discovery';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
 import { readConversationRoute } from './user_conversations/read_route';

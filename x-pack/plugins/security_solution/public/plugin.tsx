@@ -56,10 +56,6 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
-import { getBaseConversations } from './assistant/tools';
-import { PROMPT_CONTEXTS } from './assistant/content/prompt_contexts';
-import { BASE_SECURITY_QUICK_PROMPTS } from './assistant/content/quick_prompts';
-import { BASE_SECURITY_SYSTEM_PROMPTS } from './assistant/content/prompts/system';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -282,13 +278,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
-
-    plugins.elasticAssistant.registerAIAssistantDefaults(APP_UI_ID, {
-      conversations: getBaseConversations(),
-      promptContexts: Object.values(PROMPT_CONTEXTS),
-      quickPrompts: BASE_SECURITY_QUICK_PROMPTS, // to server and plugin start
-      systemPrompts: BASE_SECURITY_SYSTEM_PROMPTS,
-    });
 
     return this.contract.getStartContract(core);
   }

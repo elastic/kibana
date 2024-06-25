@@ -76,7 +76,6 @@ export interface AssistantProviderProps {
     isFlyoutMode: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
-  assistantDefaults: Rx.BehaviorSubject<AIAssistantDefaults>;
   nameSpace?: string;
   title?: string;
   toasts?: IToasts;
@@ -105,13 +104,10 @@ export interface UseAssistantContext {
   docLinks: Omit<DocLinksStart, 'links'>;
   basePath: string;
   assistantDefaults?: Rx.BehaviorSubject<AIAssistantDefaults>;
-  getComments: ({
-    currentConversation,
-    showAnonymizedValues,
-    refetchCurrentConversation,
-    isFetchingResponse,
-  }: {
-    currentConversation: Conversation;
+  getComments: (commentArgs: {
+    abortStream: () => void;
+    currentConversation?: Conversation;
+    isEnabledLangChain: boolean;
     isFetchingResponse: boolean;
     refetchCurrentConversation: () => void;
     regenerateMessage: () => void;
@@ -158,7 +154,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   children,
   getComments,
   http,
-  assistantDefaults,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
@@ -263,8 +258,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantFeatures: assistantFeatures ?? defaultAssistantFeatures,
       assistantTelemetry,
       augmentMessageCodeBlocks,
-      allQuickPrompts: assistantDefaults.getValue().quickPrompts ?? [],
-      allSystemPrompts: assistantDefaults.getValue().systemPrompts ?? [],
+      allQuickPrompts: [],
+      allSystemPrompts: [],
       basePath,
       docLinks,
       getComments,
@@ -297,7 +292,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantFeatures,
       assistantTelemetry,
       augmentMessageCodeBlocks,
-      assistantDefaults,
       basePath,
       docLinks,
       getComments,

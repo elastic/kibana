@@ -30,7 +30,6 @@ import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
-import { AssistantProvider } from '../assistant/provider';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -64,9 +63,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                       >
                         <UpsellingProvider upsellingService={upselling}>
                           <DiscoverInTimelineContextProvider>
-                            <AssistantProvider>
-                              <PageRouter history={history}>{children}</PageRouter>
-                            </AssistantProvider>
+                            <PageRouter history={history}>{children}</PageRouter>
                           </DiscoverInTimelineContextProvider>
                         </UpsellingProvider>
                       </CellActionsProvider>
