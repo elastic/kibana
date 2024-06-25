@@ -15,7 +15,7 @@ import {
   AgentStatus,
   EndpointAgentStatusById,
 } from '../../../../common/components/endpoint/agents/agent_status';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import {
   AGENT_STATUS_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
@@ -44,7 +44,7 @@ interface LinkFieldCellProps {
  * // Currently we can use the same component for both host name and username
  */
 const LinkFieldCell: VFC<LinkFieldCellProps> = ({ value }) => {
-  const { scopeId, eventId, indexName } = useRightPanelContext();
+  const { scopeId, eventId, indexName } = useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToInsightsEntities = useCallback(() => {
