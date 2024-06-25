@@ -15,7 +15,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
-    "@kbn/langchain",
     "@kbn/core-elasticsearch-server",
     "@kbn/actions-plugin",
     "@kbn/data-plugin",
@@ -30,6 +29,7 @@
     "@kbn/spaces-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/shared-ux-router",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/elastic-assistant-plugin"
   ]
 }
