@@ -122,8 +122,8 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
   }) => {
     const { owner } = useCasesContext();
     const availableOwners = useAvailableCasesOwners();
-    const defaultValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
-    const [selectedOwner, onSelectedOwner] = useState<string>(defaultValue);
+    const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
+    const [selectedOwner, onSelectedOwner] = useState<string>(defaultOwnerValue);
 
     const { data: configurations, isLoading: isLoadingCaseConfiguration } =
       useGetAllCaseConfigurations();
@@ -166,6 +166,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
           attachments={attachments}
           initialValue={initialValue}
           currentConfiguration={currentConfiguration}
+          selectedOwner={selectedOwner}
         >
           <FormFieldsWithFormContext
             withSteps={withSteps}

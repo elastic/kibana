@@ -32,6 +32,7 @@ interface Props {
   attachments?: CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
   currentConfiguration: CasesConfigurationUI;
+  selectedOwner: string;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -41,6 +42,7 @@ export const FormContext: React.FC<Props> = ({
   attachments,
   initialValue,
   currentConfiguration,
+  selectedOwner,
 }) => {
   const { appId } = useApplication();
   const { data: connectors = [] } = useGetSupportedActionConnectors();
@@ -103,7 +105,7 @@ export const FormContext: React.FC<Props> = ({
        * when creating a case.
        */
       ...getInitialCaseValue({
-        owner: currentConfiguration.owner,
+        owner: currentConfiguration.owner, // this can be empty
         connector: currentConfiguration.connector,
       }),
       ...initialValue,
@@ -112,7 +114,14 @@ export const FormContext: React.FC<Props> = ({
     schema,
     onSubmit: submitCase,
     serializer: (data: CreateCaseFormSchema) =>
-      createFormSerializer(connectors, currentConfiguration, data),
+      createFormSerializer(
+        connectors,
+        {
+          ...currentConfiguration,
+          ...(currentConfiguration.owner === '' && { owner: selectedOwner }),
+        },
+        data
+      ),
     deserializer: createFormDeserializer,
   });
 
