@@ -7,8 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { UiActionsPresentableGroup } from '@kbn/ui-actions-plugin/public';
 
-export const COMMON_EMBEDDABLE_GROUPING = {
+export const COMMON_EMBEDDABLE_GROUPING: { [key: string]: UiActionsPresentableGroup<unknown> } = {
   legacy: {
     id: 'legacy',
     getDisplayName: () =>

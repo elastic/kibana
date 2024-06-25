@@ -24,6 +24,7 @@ export { ActionInternal, createAction, IncompatibleActionError } from './actions
 export { buildContextMenuForActions } from './context_menu';
 export type {
   Presentable as UiActionsPresentable,
+  PresentableGroup as UiActionsPresentableGroup,
   PresentableGrouping as UiActionsPresentableGrouping,
 } from '@kbn/ui-actions-browser/src/types';
 export type { Trigger, RowClickContext } from '@kbn/ui-actions-browser/src/triggers';
