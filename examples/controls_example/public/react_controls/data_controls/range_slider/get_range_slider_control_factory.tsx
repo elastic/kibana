@@ -10,7 +10,7 @@ import React, { useEffect, useMemo } from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import { initializeDataControl } from '../initialize_data_control';
@@ -36,11 +36,10 @@ export const getRangesliderControlFactory = (
     getIconType: () => 'controlsHorizontal',
     getDisplayName: RangeSliderStrings.control.getDisplayName,
     isFieldCompatible: (field) => {
-      // TODO check for number field
-      return true;
+      return field.aggregatable && field.type === 'number';
     },
     CustomOptionsComponent: ({ stateManager, setControlEditorValid }) => {
-      const [step] = useBatchedPublishingSubjects(stateManager.step);
+      const step = useStateFromPublishingSubject(stateManager.step);
 
       return (
         <>
@@ -62,23 +61,22 @@ export const getRangesliderControlFactory = (
     },
     buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
-      const loadingHasNotResults$ = new BehaviorSubject<boolean>(false);
+      const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
       const step$ = new BehaviorSubject<number | undefined>(initialState.step);
       const value$ = new BehaviorSubject<RangeValue | undefined>(initialState.value);
       function setValue(nextValue: RangeValue | undefined) {
         value$.next(nextValue);
       }
-      const stateManager = {
-        step: step$,
-        value: value$,
-      };
-
+      
       const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step' | 'value'>>(
         uuid,
         RANGE_SLIDER_CONTROL_TYPE,
         initialState,
-        stateManager,
+        {
+          step: step$,
+          value: value$,
+        },
         controlGroupApi,
         services
       );
@@ -129,7 +127,7 @@ export const getRangesliderControlFactory = (
         })
       );
 
-      const dataLoadingSubscription = combineLatest([loadingMinMax$, loadingHasNotResults$])
+      const dataLoadingSubscription = combineLatest([loadingMinMax$, loadingHasNoResults$])
         .pipe(
           map((values) => {
             return values.some((value) => {
@@ -154,7 +152,6 @@ export const getRangesliderControlFactory = (
 
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
-
       const minMaxSubscription = minMax$({
         data: services.data,
         dataControlFetch$,
@@ -185,7 +182,7 @@ export const getRangesliderControlFactory = (
         }
       );
 
-      const outputFilterSubscription = value$.subscribe((value) => {
+      const valueSubscription = value$.subscribe((value) => {
         const dataView = dataControl.api.dataViews?.value?.[0];
         const fieldName = dataControl.stateManager.fieldName.value;
         const dataViewField =
@@ -216,7 +213,7 @@ export const getRangesliderControlFactory = (
         ignoreParentSettings$: controlGroupApi.ignoreParentSettings$,
         dataControlFetch$,
         setIsLoading: (isLoading: boolean) => {
-          loadingHasNotResults$.next(isLoading);
+          loadingHasNoResults$.next(isLoading);
         },
       }).subscribe((hasNoResults) => {
         selectionHasNoResults$.next(hasNoResults);
@@ -243,7 +240,7 @@ export const getRangesliderControlFactory = (
               fieldChangedSubscription.unsubscribe();
               hasNotResultsSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
-              outputFilterSubscription.unsubscribe();
+              valueSubscription.unsubscribe();
             };
           }, []);
 
