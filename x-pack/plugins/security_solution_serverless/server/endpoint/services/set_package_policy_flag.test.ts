@@ -19,10 +19,11 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
+import { ensureOnlyEventCollectionIsAllowed } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config_helpers';
 
-import { setEndpointPackagePolicyServerlessFlag } from './set_package_policy_flag';
+import { setEndpointPackagePolicyServerlessBillingFlags } from './set_package_policy_flag';
 
-describe('setEndpointPackagePolicyServerlessFlag', () => {
+describe('setEndpointPackagePolicyServerlessBillingFlags', () => {
   let esClientMock: ElasticsearchClientMock;
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let packagePolicyServiceMock: jest.Mocked<PackagePolicyClient>;
@@ -59,7 +60,7 @@ describe('setEndpointPackagePolicyServerlessFlag', () => {
     });
     packagePolicyServiceMock.bulkCreate.mockImplementation();
 
-    await setEndpointPackagePolicyServerlessFlag(
+    await setEndpointPackagePolicyServerlessBillingFlags(
       soClientMock,
       esClientMock,
       packagePolicyServiceMock
@@ -67,8 +68,10 @@ describe('setEndpointPackagePolicyServerlessFlag', () => {
 
     const expectedPolicy1 = cloneDeep(packagePolicy1);
     expectedPolicy1!.inputs[0]!.config!.policy.value.meta.serverless = true;
+    expectedPolicy1!.inputs[0]!.config!.policy.value.meta.billable = true;
     const expectedPolicy2 = cloneDeep(packagePolicy2);
     expectedPolicy2!.inputs[0]!.config!.policy.value.meta.serverless = true;
+    expectedPolicy2!.inputs[0]!.config!.policy.value.meta.billable = true;
     const expectedPolicies = [expectedPolicy1, expectedPolicy2];
     expect(packagePolicyServiceMock.list).toBeCalledWith(soClientMock, {
       page: 1,
@@ -82,7 +85,7 @@ describe('setEndpointPackagePolicyServerlessFlag', () => {
     );
   });
 
-  it('updates serverless flag for endpoint policies with the flag already set', async () => {
+  it('does NOT update serverless flag for endpoint policies with the flag already set', async () => {
     const packagePolicy1 = generatePackagePolicy(
       policyFactory(undefined, undefined, undefined, undefined, undefined, true)
     );
@@ -97,7 +100,7 @@ describe('setEndpointPackagePolicyServerlessFlag', () => {
     });
     packagePolicyServiceMock.bulkCreate.mockImplementation();
 
-    await setEndpointPackagePolicyServerlessFlag(
+    await setEndpointPackagePolicyServerlessBillingFlags(
       soClientMock,
       esClientMock,
       packagePolicyServiceMock
@@ -109,6 +112,55 @@ describe('setEndpointPackagePolicyServerlessFlag', () => {
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_ENDPOINT_PACKAGE}`,
     });
     expect(packagePolicyServiceMock.bulkUpdate).not.toBeCalled();
+  });
+
+  it('correctly updates billable flag for endpoint policies', async () => {
+    // billable: false - serverless false
+    const packagePolicy1 = generatePackagePolicy(
+      policyFactory(undefined, undefined, undefined, undefined, undefined, false)
+    );
+    // billable: true - serverless + protections
+    const packagePolicy2 = generatePackagePolicy(
+      policyFactory(undefined, undefined, undefined, undefined, undefined, true)
+    );
+    // billable: false - serverless true but event collection only
+    const packagePolicy3 = generatePackagePolicy(
+      ensureOnlyEventCollectionIsAllowed(
+        policyFactory(undefined, undefined, undefined, undefined, undefined, true)
+      )
+    );
+    // ignored since flag already set
+    const packagePolicy4 = generatePackagePolicy(
+      policyFactory(undefined, undefined, undefined, undefined, undefined, true)
+    );
+    packagePolicyServiceMock.list.mockResolvedValue({
+      items: [packagePolicy1, packagePolicy2, packagePolicy3, packagePolicy4],
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      total: 4,
+    });
+    packagePolicyServiceMock.bulkCreate.mockImplementation();
+
+    await setEndpointPackagePolicyServerlessBillingFlags(
+      soClientMock,
+      esClientMock,
+      packagePolicyServiceMock
+    );
+
+    expect(packagePolicyServiceMock.list).toBeCalledWith(soClientMock, {
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_ENDPOINT_PACKAGE}`,
+    });
+
+    const expectedPolicy2 = cloneDeep(packagePolicy2);
+    expectedPolicy2!.inputs[0]!.config!.policy.value.meta.billable = true;
+    const expectedPolicies = [expectedPolicy2];
+    expect(packagePolicyServiceMock.bulkUpdate).toBeCalledWith(
+      soClientMock,
+      esClientMock,
+      expectedPolicies
+    );
   });
 
   it('batches properly when over perPage', async () => {
@@ -127,7 +179,7 @@ describe('setEndpointPackagePolicyServerlessFlag', () => {
       });
     packagePolicyServiceMock.bulkCreate.mockImplementation();
 
-    await setEndpointPackagePolicyServerlessFlag(
+    await setEndpointPackagePolicyServerlessBillingFlags(
       soClientMock,
       esClientMock,
       packagePolicyServiceMock
