@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
-import { EditContextFlyout } from './edit_context_flyout';
+import { EditContextPanel } from './edit_context_panel';
 import { FormProvider, useForm } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -53,21 +53,14 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
 };
 
 describe('EditContextFlyout component tests', () => {
-  const onCloseMock = jest.fn();
-
   beforeEach(() => {
     render(
       <IntlProvider locale="en">
         <MockFormProvider>
-          <EditContextFlyout onClose={onCloseMock} />
+          <EditContextPanel />
         </MockFormProvider>
       </IntlProvider>
     );
-  });
-
-  it('calls onClose when the close button is clicked', () => {
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
-    expect(onCloseMock).toHaveBeenCalledTimes(1);
   });
 
   it('should see the context fields', async () => {

@@ -66,10 +66,11 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
                 isGroupLabel: true,
               },
               ...indices.map(
-                (index) =>
+                (index, num) =>
                   ({
                     label: index,
                     checked: selectedTempIndices.includes(index) ? 'on' : '',
+                    'data-test-subj': `selectIndex-${num}`,
                   } as EuiSelectableOption)
               ),
             ]}
@@ -119,7 +120,12 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={handleSaveQuery} fill disabled={!selectedTempIndices.length}>
+            <EuiButton
+              onClick={handleSaveQuery}
+              data-test-subj="saveButton"
+              fill
+              disabled={!selectedTempIndices.length}
+            >
               <FormattedMessage
                 id="xpack.searchPlayground.setupPage.addDataSource.flyout.saveButton"
                 defaultMessage="Save and continue"

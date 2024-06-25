@@ -9,7 +9,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -18,16 +17,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWatch } from 'react-hook-form';
+import { EditContextPanel } from './edit_context/edit_context_panel';
 import { ChatForm, ChatFormFields } from '../types';
 import { useManagementLink } from '../hooks/use_management_link';
-import { SourcesPanelSidebar } from './sources_panel/sources_panel_sidebar';
 import { SummarizationPanel } from './summarization_panel/summarization_panel';
 
-interface ChatSidebarProps {
-  selectedIndicesCount: number;
-}
-
-export const ChatSidebar: React.FC<ChatSidebarProps> = ({ selectedIndicesCount }) => {
+export const ChatSidebar: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const selectedModel = useWatch<ChatForm, ChatFormFields.summarizationModel>({
     name: ChatFormFields.summarizationModel,
@@ -61,45 +56,39 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ selectedIndicesCount }
       ),
     },
     {
-      title: i18n.translate('xpack.searchPlayground.sidebar.sourceTitle', {
-        defaultMessage: 'Indices',
+      title: i18n.translate('xpack.searchPlayground.sidebar.contextTitle', {
+        defaultMessage: 'Context',
       }),
-      extraAction: !!selectedIndicesCount && (
+      extraAction: (
         <EuiText size="xs">
           <p>
             <FormattedMessage
-              id="xpack.searchPlayground.sidebar.sourceIndicesCount"
-              defaultMessage="{count, number} {count, plural, one {Index} other {Indices}}"
-              values={{ count: Number(selectedIndicesCount) }}
+              id="xpack.searchPlayground.sidebar.contextLearnMore"
+              defaultMessage="Learn more"
             />
           </p>
         </EuiText>
       ),
-      children: <SourcesPanelSidebar />,
+      children: <EditContextPanel />,
     },
   ];
 
   return (
     <EuiFlexGroup direction="column" className="eui-yScroll" gutterSize="none">
       {panels?.map(({ title, children, extraAction }) => (
-        <EuiFlexGroup
-          key={title}
-          direction="column"
-          css={{ padding: euiTheme.size.l }}
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
-              <EuiTitle size="xs">
-                <h4>{title}</h4>
-              </EuiTitle>
-              {extraAction && <EuiFlexItem grow={false}>{extraAction}</EuiFlexItem>}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPanel>{children}</EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiFlexItem key={title} grow={false}>
+          <EuiFlexGroup direction="column" css={{ padding: euiTheme.size.l }} gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
+                <EuiTitle size="xs">
+                  <h4>{title}</h4>
+                </EuiTitle>
+                {extraAction && <EuiFlexItem grow={false}>{extraAction}</EuiFlexItem>}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       ))}
     </EuiFlexGroup>
   );

@@ -234,7 +234,7 @@ export const Chat = () => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={1} css={{ flexBasis: 0, minWidth: '33.3%' }}>
-          <ChatSidebar selectedIndicesCount={selectedIndicesCount} />
+          <ChatSidebar />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiForm>
