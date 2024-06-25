@@ -185,12 +185,16 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
           gutterSize="none"
         >
           {isNewPanel ? (
-            <EuiCallOut>
-              <FormattedMessage
-                id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.description"
-                defaultMessage="Field statistics provides an approximate summary and statistics for the data content along with how the field is populated."
-              />
-            </EuiCallOut>
+            <EuiCallOut
+              size="s"
+              iconType="iInCircle"
+              title={
+                <FormattedMessage
+                  id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.description"
+                  defaultMessage="Field statistics provides an approximate summary and statistics for the data content along with how the field is populated."
+                />
+              }
+            />
           ) : null}
           {initialInput?.viewType === FieldStatsInitializerViewType.ESQL && !isEsqlEnabled ? (
             <>
