@@ -14,6 +14,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { Document } from 'langchain/document';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
+  DocumentEntryType,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   Metadata,
@@ -25,7 +26,7 @@ import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elas
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 import { GetElser } from '../../types';
 import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
-import { EsKnowledgeBaseEntrySchema } from './types';
+import { EsDocumentEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 import { ESQL_DOCS_LOADED_QUERY } from '../../routes/knowledge_base/constants';
 import { getKBVectorSearchQuery, isModelAlreadyExistsError } from './helpers';
@@ -241,11 +242,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const { errors, docs_created: docsCreated } = await writer.bulk({
       documentsToCreate: documents.map((doc) =>
         transformToCreateSchema(changedAt, this.spaceId, authenticatedUser, {
-          metadata: {
-            kbResource: doc.metadata.kbResource ?? 'unknown',
-            required: doc.metadata.required ?? false,
-            source: doc.metadata.source ?? 'unknown',
-          },
+          type: DocumentEntryType.value,
+          name: 'unknown',
+          kbResource: doc.metadata.kbResource ?? 'unknown',
+          required: doc.metadata.required ?? false,
+          source: doc.metadata.source ?? 'unknown',
           text: doc.pageContent,
         })
       ),
@@ -268,7 +269,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   /**
    * Performs similarity search to retrieve LangChain Documents from the knowledge base
    */
-  public getKnowledgeBaseDocuments = async ({
+  public getKnowledgeBaseDocumentEntries = async ({
     filter,
     kbResource,
     query,
@@ -299,7 +300,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     });
 
     try {
-      const result = await esClient.search<EsKnowledgeBaseEntrySchema>({
+      const result = await esClient.search<EsDocumentEntry>({
         index: this.indexTemplateAndPattern.alias,
         size: 10,
         query: vectorSearchQuery,
@@ -309,7 +310,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         (hit) =>
           new Document({
             pageContent: hit?._source?.text ?? '',
-            metadata: hit?._source?.metadata ?? {},
+            metadata: {
+              source: hit?._source?.source,
+              required: hit?._source?.required,
+              kbResource: hit?._source?.kb_resource,
+            },
           })
       );
 

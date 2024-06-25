@@ -17,7 +17,7 @@
 import { z } from 'zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
-import { SortOrder } from '../common_attributes.gen';
+import { SortOrder } from '../../common_attributes.gen';
 import { KnowledgeBaseEntryResponse } from './common_attributes.gen';
 
 export type FindKnowledgeBaseEntriesSortField = z.infer<typeof FindKnowledgeBaseEntriesSortField>;

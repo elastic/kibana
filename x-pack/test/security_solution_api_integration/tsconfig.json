@@ -48,5 +48,6 @@
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/test-subj-selector",
     "@kbn/dev-cli-runner",
+    "@kbn/elastic-assistant-common",
   ]
 }

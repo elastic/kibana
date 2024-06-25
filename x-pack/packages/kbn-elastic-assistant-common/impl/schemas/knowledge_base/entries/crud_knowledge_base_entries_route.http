@@ -1,0 +1,41 @@
+### Create Document Entry
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+kbn-xsrf
+Elastic-Api-Version: 1
+Authorization: Basic elastic changeme
+X-Kbn-Context: %7B%22type%22%3A%22application%22%2C%22name%22%3A%22securitySolutionUI%22%2C%22url%22%3A%22%2Fkbn%2Fapp%2Fsecurity%22%7D
+Content-Type: application/json
+
+{
+  "type": "document",
+  "name": "Favorites",
+  "kbResource": "user",
+  "source": "api",
+  "required": true,
+  "text": "My favorite food is Dan Bing",
+  "users": []
+}
+
+### Create Index Entry
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+kbn-xsrf
+Elastic-Api-Version: 1
+Content-Type: application/json
+Authorization: Basic elastic changeme
+X-Kbn-Context: %7B%22type%22%3A%22application%22%2C%22name%22%3A%22securitySolutionUI%22%2C%22url%22%3A%22%2Fkbn%2Fapp%2Fsecurity%22%7D
+
+{
+  "type": "index",
+  "name": "Sample Index Entry",
+  "namespace": "default",
+  "index": "sample-index",
+  "field": "sample-field",
+  "description": "This is a sample index entry",
+  "users": []
+}
+
+
+
+
+
+

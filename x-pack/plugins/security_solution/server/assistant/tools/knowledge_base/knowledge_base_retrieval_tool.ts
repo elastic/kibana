@@ -43,7 +43,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
       func: async (input, _, cbManager) => {
         logger.debug(`KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`);
 
-        const docs = await kbDataClient.getKnowledgeBaseDocuments({
+        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
           query: input.query,
           kbResource: 'user',
           required: false,

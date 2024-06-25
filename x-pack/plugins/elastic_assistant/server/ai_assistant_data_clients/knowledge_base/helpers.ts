@@ -18,7 +18,7 @@ export const isModelAlreadyExistsError = (error: Error) => {
 };
 
 /**
- * Returns an Elasticsearch query DSL that performs a vector search against the Knowledge Base for the given query/user/filter.
+ * Returns an Elasticsearch query DSL that performs a vector search against the Knowledge Base for the given query/user/filter. Searches only for DocumentEntries, not IndexEntries as they have no content.
  *
  * @param filter - Optional filter to apply to the search
  * @param kbResource - Specific resource tag to filter for, e.g. 'esql' or 'user'
@@ -47,7 +47,7 @@ export const getKBVectorSearchQuery = ({
     ? [
         {
           term: {
-            'metadata.kbResource': kbResource,
+            kb_resource: kbResource,
           },
         },
       ]
@@ -56,7 +56,7 @@ export const getKBVectorSearchQuery = ({
     ? [
         {
           term: {
-            'metadata.required': required,
+            required,
           },
         },
       ]
