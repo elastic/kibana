@@ -335,6 +335,9 @@ export const MetricVis = ({
                   barBackground: euiThemeVars.euiColorLightShade,
                   emptyBackground: euiThemeVars.euiColorEmptyShade,
                   blendingBackground: euiThemeVars.euiColorEmptyShade,
+                  titlesTextAlign: config.metric.titlesTextAlign,
+                  valuesTextAlign: config.metric.valuesTextAlign,
+                  valueFontSize: config.metric.valueFontSize,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)
