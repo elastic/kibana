@@ -43,6 +43,7 @@ interface Props {
     React.SetStateAction<ConversationsBulkActions>
   >;
   defaultConnector?: AIConnector;
+  resetSettings?: () => void;
 }
 
 /**
@@ -59,6 +60,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   conversationsSettingsBulkActions,
   setConversationsSettingsBulkActions,
   defaultConnector,
+  resetSettings,
 }) => {
   // Prompt
   const promptContent = useMemo(
@@ -271,8 +273,9 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
         <SystemPromptSelector
           onSystemPromptDeleted={onSystemPromptDeleted}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
-          systemPrompts={systemPromptSettings}
           selectedSystemPrompt={selectedSystemPrompt}
+          resetSettings={resetSettings}
+          systemPrompts={systemPromptSettings}
         />
       </EuiFormRow>
       <EuiFormRow display="rowCompressed" label={i18n.SYSTEM_PROMPT_PROMPT} fullWidth>

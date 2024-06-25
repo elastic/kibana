@@ -27,22 +27,24 @@ import { PromptContextTemplate } from '../../prompt_context/types';
 
 interface Props {
   basePromptContexts: PromptContextTemplate[];
-  onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
-  quickPromptSettings: QuickPrompt[];
-  selectedQuickPrompt: QuickPrompt | undefined;
-  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
   handleSave: (shouldRefetchConversation?: boolean) => void;
   onCancelClick: () => void;
+  onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
+  quickPromptSettings: QuickPrompt[];
+  resetSettings?: () => void;
+  selectedQuickPrompt: QuickPrompt | undefined;
+  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
 }
 
 const QuickPromptSettingsManagementComponent = ({
   basePromptContexts,
-  onSelectedQuickPromptChange,
-  quickPromptSettings,
-  selectedQuickPrompt,
-  setUpdatedQuickPromptSettings,
   handleSave,
   onCancelClick,
+  onSelectedQuickPromptChange,
+  quickPromptSettings,
+  resetSettings,
+  selectedQuickPrompt,
+  setUpdatedQuickPromptSettings,
 }: Props) => {
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
   const [deletedQuickPrompt, setDeletedQuickPrompt] = useState<QuickPrompt | null>();
@@ -148,6 +150,7 @@ const QuickPromptSettingsManagementComponent = ({
         <QuickPromptSettingsEditor
           onSelectedQuickPromptChange={onSelectedQuickPromptChange}
           quickPromptSettings={quickPromptSettings}
+          resetSettings={resetSettings}
           selectedQuickPrompt={selectedQuickPrompt}
           setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
         />

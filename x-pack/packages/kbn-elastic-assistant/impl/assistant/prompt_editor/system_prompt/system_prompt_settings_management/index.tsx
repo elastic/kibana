@@ -45,6 +45,7 @@ interface Props {
   defaultConnector?: AIConnector;
   handleSave: (shouldRefetchConversation?: boolean) => void;
   onCancelClick: () => void;
+  resetSettings: () => void;
 }
 
 const SystemPromptSettingsManagementComponent = ({
@@ -61,6 +62,7 @@ const SystemPromptSettingsManagementComponent = ({
   defaultConnector,
   handleSave,
   onCancelClick,
+  resetSettings,
 }: Props) => {
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
   const {
@@ -190,6 +192,7 @@ const SystemPromptSettingsManagementComponent = ({
           conversationsSettingsBulkActions={conversationsSettingsBulkActions}
           setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
           defaultConnector={defaultConnector}
+          resetSettings={resetSettings}
         />
       </Flyout>
       {deleteConfirmModalVisibility && deletedPrompt?.name && (

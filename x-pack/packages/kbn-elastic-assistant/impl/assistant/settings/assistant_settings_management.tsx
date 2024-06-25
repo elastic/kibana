@@ -279,34 +279,36 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               connectors={connectors}
               conversations={conversations}
               conversationSettings={conversationSettings}
+              conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               defaultConnector={defaultConnector}
-              systemPromptSettings={systemPromptSettings}
               handleSave={handleSave}
-              selectedSystemPrompt={selectedSystemPrompt}
+              onCancelClick={onCancelClick}
               onSelectedSystemPromptChange={onHandleSelectedSystemPromptChange}
+              resetSettings={resetSettings}
+              selectedSystemPrompt={selectedSystemPrompt}
               setConversationSettings={setConversationSettings}
               setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
-              conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
-              onCancelClick={onCancelClick}
+              systemPromptSettings={systemPromptSettings}
             />
           )}
           {selectedSettingsTab === QUICK_PROMPTS_TAB && (
             <QuickPromptSettingsManagement
               basePromptContexts={basePromptContexts}
-              quickPromptSettings={quickPromptSettings}
-              onSelectedQuickPromptChange={onHandleSelectedQuickPromptChange}
-              selectedQuickPrompt={selectedQuickPrompt}
-              setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
               handleSave={handleSave}
               onCancelClick={onCancelClick}
+              onSelectedQuickPromptChange={onHandleSelectedQuickPromptChange}
+              quickPromptSettings={quickPromptSettings}
+              resetSettings={resetSettings}
+              selectedQuickPrompt={selectedQuickPrompt}
+              setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
             />
           )}
           {selectedSettingsTab === ANONYMIZATION_TAB && (
             <AnonymizationSettingsManagement
-              defaultPageSize={5}
               anonymizationFields={updatedAnonymizationData}
               anonymizationFieldsBulkActions={anonymizationFieldsBulkActions}
+              defaultPageSize={5}
               setAnonymizationFieldsBulkActions={handleChange(setAnonymizationFieldsBulkActions)}
               setUpdatedAnonymizationData={handleChange(setUpdatedAnonymizationData)}
             />

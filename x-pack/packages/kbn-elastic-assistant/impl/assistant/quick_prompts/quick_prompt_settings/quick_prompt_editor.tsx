@@ -23,6 +23,7 @@ const DEFAULT_COLOR = '#D36086';
 interface Props {
   onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
   quickPromptSettings: QuickPrompt[];
+  resetSettings?: () => void;
   selectedQuickPrompt: QuickPrompt | undefined;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
 }
@@ -30,6 +31,7 @@ interface Props {
 const QuickPromptSettingsEditorComponent = ({
   onSelectedQuickPromptChange,
   quickPromptSettings,
+  resetSettings,
   selectedQuickPrompt,
   setUpdatedQuickPromptSettings,
 }: Props) => {
@@ -139,6 +141,7 @@ const QuickPromptSettingsEditorComponent = ({
           onQuickPromptDeleted={onQuickPromptDeleted}
           onQuickPromptSelectionChange={onQuickPromptSelectionChange}
           quickPrompts={quickPromptSettings}
+          resetSettings={resetSettings}
           selectedQuickPrompt={selectedQuickPrompt}
         />
       </EuiFormRow>
