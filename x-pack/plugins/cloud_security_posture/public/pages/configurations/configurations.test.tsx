@@ -108,7 +108,7 @@ describe('<Findings />', () => {
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
       const queryInput = screen.getByTestId('queryInput');
-      userEvent.type(queryInput, `rule.section : ${finding1.rule.section}`);
+      userEvent.paste(queryInput, `rule.section : ${finding1.rule.section}`);
 
       const submitButton = screen.getByTestId('querySubmitButton');
       userEvent.click(submitButton);
@@ -143,7 +143,7 @@ describe('<Findings />', () => {
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
       const queryInput = screen.getByTestId('queryInput');
-      userEvent.type(queryInput, `rule.section : Invalid`);
+      userEvent.paste(queryInput, `rule.section : Invalid`);
 
       const submitButton = screen.getByTestId('querySubmitButton');
       userEvent.click(submitButton);
