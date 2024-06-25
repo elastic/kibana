@@ -22,7 +22,12 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       await aceEditor.setValue(editorTestSubjectSelector, JSON.stringify(query));
     },
     async getQuery() {
-      return JSON.parse(await aceEditor.getValue(editorTestSubjectSelector));
+      const value = await aceEditor.getValue(editorTestSubjectSelector);
+      try {
+        return JSON.parse(value);
+      } catch (e) {
+        return null;
+      }
     },
     async setIndexName(indexName: string) {
       await testSubjects.setValue('indexName', indexName);
