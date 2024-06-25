@@ -10,7 +10,6 @@ import { EuiDescriptionList } from '@elastic/eui';
 import { v4 as uuidV4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { useGetEndpointPolicyResponse } from '../../../hooks/endpoint/use_get_endpoint_policy_response';
 import type { HostInfo, PendingActionsResponse } from '../../../../../common/endpoint/types';
 import type { EndpointCommandDefinitionMeta } from '../types';
 import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
@@ -47,14 +46,7 @@ export const EndpointStatusActionResult = memo<
     isFetching,
     isFetched,
   } = useGetEndpointDetails(endpointId, { enabled: isPending, queryKey: [queryKey] });
-  const {
-    data: fetchedPolicyResponse,
-    isLoading: isPolicyResponseLoading,
-    isFetching: isPolicyResponseFetching,
-    isError: isPolicyResponseError,
-  } = useGetEndpointPolicyResponse(endpointId);
 
-  console.log({ fetchedPolicyResponse });
   const { data: fetchedPendingActionsSummary } = useGetEndpointPendingActionsSummary([endpointId], {
     enabled: isPending,
     queryKey: [queryKey, endpointId],
