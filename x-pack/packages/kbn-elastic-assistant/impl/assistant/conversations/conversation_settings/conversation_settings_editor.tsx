@@ -65,7 +65,6 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
         if (selectedConversation != null && selectedConversation.apiConfig) {
           const updatedConversation = {
             ...selectedConversation,
-            updatedAt: new Date(),
             apiConfig: {
               ...selectedConversation.apiConfig,
               defaultSystemPromptId: systemPromptId,
@@ -142,7 +141,6 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           const config = getGenAiConfig(connector);
           const updatedConversation = {
             ...selectedConversation,
-            updatedAt: new Date(),
             apiConfig: {
               ...selectedConversation.apiConfig,
               connectorId: connector.id,
@@ -211,7 +209,6 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
         if (selectedConversation != null && selectedConversation.apiConfig) {
           const updatedConversation = {
             ...selectedConversation,
-            updatedAt: new Date(),
             apiConfig: {
               ...selectedConversation.apiConfig,
               model,

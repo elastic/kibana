@@ -43,7 +43,6 @@ export const useConversationChanged = ({
   const onConversationSelectionChange: OnConversationSelectionChange = useCallback(
     (c = '') => {
       const isNew = typeof c === 'string';
-      const updatedAt = new Date();
       const newSelectedConversation: Conversation | undefined = isNew
         ? {
             id: '',
@@ -51,7 +50,6 @@ export const useConversationChanged = ({
             category: 'assistant',
             messages: [],
             replacements: {},
-            updatedAt,
             ...(defaultConnector
               ? {
                   apiConfig: {
@@ -63,7 +61,7 @@ export const useConversationChanged = ({
                 }
               : {}),
           }
-        : { ...c, updatedAt };
+        : c;
 
       if (newSelectedConversation && (isNew || newSelectedConversation.id === '')) {
         setConversationSettings({
