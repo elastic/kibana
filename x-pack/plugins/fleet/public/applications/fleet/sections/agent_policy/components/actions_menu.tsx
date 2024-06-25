@@ -174,7 +174,7 @@ export const AgentPolicyActionMenu = memo<{
                 </AgentPolicyDeleteProvider>,
               ];
 
-          if (!agentPolicy?.is_managed) {
+          if (authz.fleet.allAgents && !agentPolicy?.is_managed) {
             menuItems.push(
               <EuiContextMenuItem
                 icon="refresh"
