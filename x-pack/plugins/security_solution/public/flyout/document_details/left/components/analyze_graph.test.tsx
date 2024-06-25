@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
 import { AnalyzeGraph } from './analyze_graph';
 import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
@@ -34,13 +34,13 @@ describe('<AnalyzeGraph />', () => {
   it('renders analyzer graph correctly', () => {
     const contextValue = {
       eventId: 'eventId',
-    } as unknown as LeftPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const wrapper = render(
       <TestProviders>
-        <LeftPanelContext.Provider value={contextValue}>
+        <DocumentDetailsContext.Provider value={contextValue}>
           <AnalyzeGraph />
-        </LeftPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
     expect(wrapper.getByTestId(ANALYZER_GRAPH_TEST_ID)).toBeInTheDocument();
