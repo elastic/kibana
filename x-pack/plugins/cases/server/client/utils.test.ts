@@ -1398,7 +1398,7 @@ describe('utils', () => {
       ]);
     });
 
-    it('does not remove custom field from templates are empty', () => {
+    it('does not remove custom field from empty templates', () => {
       const res = removeCustomFieldFromTemplates({
         templates: [],
         customFields: [customFields[0], customFields[1]],
@@ -1409,7 +1409,7 @@ describe('utils', () => {
 
     it('returns empty array when templates are undefined', () => {
       const res = removeCustomFieldFromTemplates({
-        templates: [],
+        templates: undefined,
         customFields: [customFields[0], customFields[1]],
       });
 
