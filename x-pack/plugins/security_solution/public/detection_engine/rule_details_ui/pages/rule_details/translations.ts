@@ -14,6 +14,13 @@ export const PAGE_TITLE = i18n.translate(
   }
 );
 
+export const CUSTOMIZED_PREBUILT_RULE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.customizedPrebuiltRuleLabel',
+  {
+    defaultMessage: 'Customized Elastic rule',
+  }
+);
+
 export const BACK_TO_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.backToRulesButton',
   {

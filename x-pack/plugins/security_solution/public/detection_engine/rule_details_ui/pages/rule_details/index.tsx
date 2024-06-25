@@ -9,6 +9,7 @@
 // TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiConfirmModal,
   EuiFlexGroup,
@@ -592,15 +593,18 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 border
                 subtitle={subTitle}
                 subtitle2={
-                  <>
-                    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
+                  <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
+                    {rule?.rule_source?.type === 'external' && rule.rule_source.is_customized && (
+                      <EuiBadge color="hollow">{i18n.CUSTOMIZED_PREBUILT_RULE_LABEL}</EuiBadge>
+                    )}
+                    <EuiFlexGroup alignItems="center" gutterSize="xs">
                       <EuiFlexItem grow={false}>
                         {ruleStatusI18n.STATUS}
                         {':'}
                       </EuiFlexItem>
                       {ruleStatusInfo}
                     </EuiFlexGroup>
-                  </>
+                  </EuiFlexGroup>
                 }
                 title={title}
                 badgeOptions={badgeOptions}
