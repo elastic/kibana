@@ -113,6 +113,18 @@ export const COPY_ID_ACTION_SUCCESS = i18n.translate(
   }
 );
 
+export const ENDPOINT_ADDED_SUCCESS = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.endpointAddedSuccess',
+  {
+    defaultMessage: 'Endpoint added',
+  }
+);
+
+export const ENDPOINT_ADDED_SUCCESS_DESCRIPTION = (endpointId: string) =>
+  i18n.translate('xpack.searchInferenceEndpoints.actions.endpointAddedSuccessDescription', {
+    defaultMessage: "The inference endpoint '" + endpointId + "' was added.",
+  });
+
 export const DELETE_ACTION_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.actions.deleteSingleEndpoint',
   {
