@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiHeaderSectionItemButton, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -28,6 +28,7 @@ interface NotesButtonProps {
   toolTip?: string;
   timelineType: TimelineTypeLiteral;
   eventId?: string;
+  notesCount?: number;
 }
 
 interface SmallNotesButtonProps {
@@ -36,12 +37,20 @@ interface SmallNotesButtonProps {
   toggleShowNotes: (eventId?: string) => void;
   timelineType: TimelineTypeLiteral;
   eventId?: string;
+  notesCount?: number;
 }
 
 export const NOTES_BUTTON_CLASS_NAME = 'notes-button';
 
 const SmallNotesButton = React.memo<SmallNotesButtonProps>(
-  ({ ariaLabel = i18n.NOTES, isDisabled, toggleShowNotes, timelineType, eventId }) => {
+  ({
+    ariaLabel = i18n.NOTES,
+    isDisabled,
+    toggleShowNotes,
+    timelineType,
+    eventId,
+    notesCount = 0,
+  }) => {
     const isTemplate = timelineType === TimelineType.template;
     const onClick = useCallback(() => {
       if (eventId != null) {
@@ -52,23 +61,33 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
     }, [toggleShowNotes, eventId]);
 
     return (
-      <EuiButtonIcon
+      <EuiHeaderSectionItemButton
         aria-label={ariaLabel}
-        className={NOTES_BUTTON_CLASS_NAME}
         data-test-subj="timeline-notes-button-small"
         disabled={isDisabled}
-        iconType="editorComment"
         onClick={onClick}
-        size="s"
         isDisabled={isTemplate}
-      />
+        notification={notesCount > 0 ? true : false}
+        className={NOTES_BUTTON_CLASS_NAME}
+      >
+        <EuiIcon type="editorComment" size="m" />
+      </EuiHeaderSectionItemButton>
     );
   }
 );
 SmallNotesButton.displayName = 'SmallNotesButton';
 
 export const NotesButton = React.memo<NotesButtonProps>(
-  ({ ariaLabel, isDisabled, showNotes, timelineType, toggleShowNotes, toolTip, eventId }) =>
+  ({
+    ariaLabel,
+    isDisabled,
+    showNotes,
+    timelineType,
+    toggleShowNotes,
+    toolTip,
+    eventId,
+    notesCount,
+  }) =>
     showNotes ? (
       <SmallNotesButton
         ariaLabel={ariaLabel}
@@ -76,6 +95,7 @@ export const NotesButton = React.memo<NotesButtonProps>(
         toggleShowNotes={toggleShowNotes}
         timelineType={timelineType}
         eventId={eventId}
+        notesCount={notesCount}
       />
     ) : (
       <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
@@ -85,6 +105,7 @@ export const NotesButton = React.memo<NotesButtonProps>(
           toggleShowNotes={toggleShowNotes}
           timelineType={timelineType}
           eventId={eventId}
+          notesCount={notesCount}
         />
       </EuiToolTip>
     )

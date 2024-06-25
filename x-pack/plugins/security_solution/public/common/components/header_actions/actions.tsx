@@ -49,6 +49,8 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
+const emptyNotes: string[] = [];
+
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
   columnValues,
@@ -68,7 +70,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
-  const emptyNotes: string[] = [];
   const { timelineType } = useShallowEqualSelector((state) =>
     isTimelineScope(timelineId) ? selectTimelineById(state, timelineId) : timelineDefaults
   );
@@ -236,6 +237,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
     });
   }, [refetch, eventIdToNoteIds, openFlyout, toggleShowNotes, eventId, closeFlyout]);
 
+  const noteIds = useMemo(
+    () => (eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes),
+    [eventIdToNoteIds, eventId]
+  );
+
   return (
     <ActionsContainer>
       <>
@@ -279,13 +285,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
               toggleShowNotes={toggleNotes}
               timelineType={timelineType}
               eventId={eventId}
+              notesCount={noteIds.length}
             />
             <PinEventAction
               ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
               isAlert={isAlert(eventType)}
               key="pin-event"
               onPinClicked={handlePinClicked}
-              noteIds={eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes}
+              noteIds={noteIds}
               eventIsPinned={isEventPinned}
               timelineType={timelineType}
             />
