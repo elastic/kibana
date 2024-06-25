@@ -78,7 +78,7 @@ export const MANUAL_RULE_RUN_ALERT_LIMITATIONS = i18n.translate(
 );
 
 export const MANUAL_RULE_RUN_NOTIFIACTIONS_LIMITATIONS = i18n.translate(
-  'xpack.securitySolution.manualRuleRun.alertLimitations',
+  'xpack.securitySolution.manualRuleRun.notificationsLimitations',
   {
     defaultMessage: 'Configured rule actions will not be executed during manual rule runs.',
   }
