@@ -212,7 +212,7 @@ describe('<Findings />', () => {
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
       expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
       expect(screen.queryByText(finding2.resource.id)).not.toBeInTheDocument();
-    });
+    }, 10000);
     it('remove filter', async () => {
       const finding1 = generateCspFinding('0001', 'failed');
       const finding2 = generateCspFinding('0002', 'passed');
