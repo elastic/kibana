@@ -17,6 +17,7 @@ const apmReusableConfigSchema = schema.object(
     secretToken: schema.maybe(schema.string()),
     apiKey: schema.maybe(schema.string()),
     environment: schema.maybe(schema.string()),
+    serviceName: schema.maybe(schema.string()),
     globalLabels: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   },
   { unknowns: 'allow' }
