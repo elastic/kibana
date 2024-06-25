@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButton, EuiSpacer, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
@@ -14,8 +14,8 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { usePolicyListContext } from './policy_list_context';
 import { useIsReadOnly } from '../../lib/use_is_read_only';
 import { PolicyFromES } from '../../../../common/types';
-import { PolicyTable, ListActionHandler } from './components';
-import { getPolicyCreatePath } from '../../services/navigation';
+import { PolicyTable, ListActionHandler, ViewPolicyFlyout } from './components';
+import { getPoliciesListPath, getPolicyCreatePath } from '../../services/navigation';
 
 interface Props {
   policies: PolicyFromES[];
@@ -26,14 +26,15 @@ export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePol
   const history = useHistory();
   const isReadOnly = useIsReadOnly();
   const { setListAction } = usePolicyListContext();
+  const [flyoutPolicy, setFlyoutPolicy] = useState<PolicyFromES | null>(null);
   useEffect(() => {
     const params = new URLSearchParams(history.location.search);
     const policyParam = decodeURIComponent(params.get('policy') ?? '');
-    const flyoutPolicy = policies.find((policy) => policy.name === policyParam);
-    if (flyoutPolicy) {
-      setListAction({ actionType: 'viewPolicy', selectedPolicy: flyoutPolicy });
+    const policyFromParam = policies.find((policy) => policy.name === policyParam);
+    if (policyFromParam) {
+      setFlyoutPolicy(policyFromParam);
     } else {
-      setListAction(null);
+      setFlyoutPolicy(null);
     }
   }, [history.location.search, policies, setListAction]);
 
@@ -81,7 +82,14 @@ export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePol
   const rightSideItems = isReadOnly ? [] : [createPolicyButton];
   return (
     <>
-      <ListActionHandler updatePolicies={updatePolicies} />
+      <ListActionHandler
+        deletePolicyCallback={() => {
+          // if a flyout was open, then close it
+          history.push(getPoliciesListPath());
+          // update the policies in the list after 1 was deleted
+          updatePolicies();
+        }}
+      />
 
       <EuiPageHeader
         pageTitle={
@@ -105,7 +113,9 @@ export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePol
 
       <EuiSpacer size="l" />
 
-      <PolicyTable policies={policies} isReadOnly={isReadOnly} />
+      <PolicyTable policies={policies} />
+
+      {flyoutPolicy && <ViewPolicyFlyout policy={flyoutPolicy} />}
     </>
   );
 };

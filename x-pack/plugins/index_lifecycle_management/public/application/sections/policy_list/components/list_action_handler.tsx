@@ -11,9 +11,9 @@ import { IndexTemplatesFlyout } from '../../../components';
 import { ConfirmDelete, AddPolicyToTemplateConfirmModal, ViewPolicyFlyout } from '.';
 
 interface Props {
-  updatePolicies: () => void;
+  deletePolicyCallback: () => void;
 }
-export const ListActionHandler: React.FunctionComponent<Props> = ({ updatePolicies }) => {
+export const ListActionHandler: React.FunctionComponent<Props> = ({ deletePolicyCallback }) => {
   const { listAction, setListAction } = usePolicyListContext();
   if (listAction?.actionType === 'viewIndexTemplates') {
     return (
@@ -31,7 +31,7 @@ export const ListActionHandler: React.FunctionComponent<Props> = ({ updatePolici
       <ConfirmDelete
         policyToDelete={listAction.selectedPolicy}
         callback={() => {
-          updatePolicies();
+          deletePolicyCallback();
           setListAction(null);
         }}
         onCancel={() => {

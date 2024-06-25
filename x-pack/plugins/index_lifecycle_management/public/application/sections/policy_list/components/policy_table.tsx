@@ -11,7 +11,6 @@ import {
   EuiLink,
   EuiInMemoryTable,
   EuiToolTip,
-  EuiButtonIcon,
   EuiFlexItem,
   EuiSwitch,
   EuiSearchBarProps,
@@ -26,6 +25,7 @@ import { useHistory } from 'react-router-dom';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { hasLinkedIndices } from '../../../lib/policies';
 import { useStateWithLocalStorage } from '../../../lib/settings_local_storage';
 import { PolicyFromES } from '../../../../../common/types';
 import { useKibana } from '../../../../shared_imports';
@@ -35,43 +35,33 @@ import {
   getPolicyViewPath,
 } from '../../../services/navigation';
 import { trackUiMetric } from '../../../services/ui_metric';
-import { UIM_EDIT_CLICK, UIM_VIEW_CLICK } from '../../../constants';
+import { UIM_VIEW_CLICK } from '../../../constants';
 
-import { hasLinkedIndices } from '../../../lib/policies';
 import { usePolicyListContext } from '../policy_list_context';
 import { ManagedPolicyBadge, DeprecatedPolicyBadge } from '.';
+import { useIsReadOnly } from '../../../lib/use_is_read_only';
 
 const actionTooltips = {
-  deleteEnabled: i18n.translate('xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonText', {
-    defaultMessage: 'Delete policy',
-  }),
-  deleteDisabled: i18n.translate(
-    'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip',
-    {
-      defaultMessage: 'You cannot delete a policy that is being used by an index',
-    }
-  ),
   viewIndices: i18n.translate('xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText', {
     defaultMessage: 'View indices linked to policy',
   }),
-  addIndexTemplate: i18n.translate(
-    'xpack.indexLifecycleMgmt.policyTable.addPolicyToTemplateButtonText',
+  viewIndexTemplates: i18n.translate(
+    'xpack.indexLifecycleMgmt.policyTable.viewIndexTemplatesButtonText',
     {
-      defaultMessage: 'Add policy to index template',
+      defaultMessage: 'View index templates linked to policy',
     }
   ),
 };
 
 interface Props {
   policies: PolicyFromES[];
-  isReadOnly: boolean;
 }
 
 const SHOW_MANAGED_POLICIES_BY_DEFAULT = 'ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT';
 
-export const PolicyTable: React.FunctionComponent<Props> = ({ policies, isReadOnly }) => {
+export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   const [query, setQuery] = useState('');
-
+  const isReadOnly = useIsReadOnly();
   const history = useHistory();
   const {
     services: { getUrlForApp },
@@ -155,10 +145,8 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies, isReadOn
             <EuiLink
               className="eui-textBreakAll"
               data-test-subj="policyTablePolicyNameLink"
-              {...reactRouterNavigate(
-                history,
-                isReadOnly ? getPolicyViewPath(value) : getPolicyEditPath(value),
-                () => trackUiMetric(METRIC_TYPE.CLICK, isReadOnly ? UIM_VIEW_CLICK : UIM_EDIT_CLICK)
+              {...reactRouterNavigate(history, getPolicyViewPath(value), () =>
+                trackUiMetric(METRIC_TYPE.CLICK, UIM_VIEW_CLICK)
               )}
             >
               {value}
@@ -190,7 +178,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies, isReadOn
       sortable: ({ indexTemplates }) => (indexTemplates ?? []).length,
       render: (value: string[], policy: PolicyFromES) => {
         return value && value.length > 0 ? (
-          <EuiToolTip content={actionTooltips.viewIndices} position="left">
+          <EuiToolTip content={actionTooltips.viewIndexTemplates} position="left">
             <EuiButtonEmpty
               flush="both"
               data-test-subj="viewIndexTemplates"
@@ -239,40 +227,63 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies, isReadOn
     columns.push({
       actions: [
         {
-          render: (policy: PolicyFromES) => {
-            return (
-              <EuiToolTip content={actionTooltips.addIndexTemplate}>
-                <EuiButtonIcon
-                  data-test-subj="addPolicyToTemplate"
-                  onClick={() =>
-                    setListAction({ selectedPolicy: policy, actionType: 'addIndexTemplate' })
-                  }
-                  iconType="plusInCircle"
-                  aria-label={actionTooltips.addIndexTemplate}
-                />
-              </EuiToolTip>
-            );
-          },
+          isPrimary: true,
+          name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.editActionLabel', {
+            defaultMessage: 'Edit',
+          }),
+          description: i18n.translate(
+            'xpack.indexLifecycleMgmt.policyTable.editActionDescription',
+            {
+              defaultMessage: 'Edit this policy',
+            }
+          ),
+          type: 'icon',
+          icon: 'pencil',
+          onClick: ({ name }) => history.push(getPolicyEditPath(name)),
+          'data-test-subj': 'editPolicy',
+        },
+
+        {
+          name: i18n.translate(
+            'xpack.indexLifecycleMgmt.policyTable.addToIndexTemplateActionLabel',
+            {
+              defaultMessage: 'Add to index template',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.indexLifecycleMgmt.policyTable.addToIndexTemplateActionDescription',
+            { defaultMessage: 'Add policy to index template' }
+          ),
+          type: 'icon',
+          icon: 'plusInCircle',
+          onClick: (policy) =>
+            setListAction({ selectedPolicy: policy, actionType: 'addIndexTemplate' }),
+          'data-test-subj': 'addPolicyToTemplate',
         },
         {
-          render: (policy: PolicyFromES, enabled: boolean) => {
-            return (
-              <EuiToolTip
-                content={enabled ? actionTooltips.deleteEnabled : actionTooltips.deleteDisabled}
-              >
-                <EuiButtonIcon
-                  data-test-subj="deletePolicy"
-                  onClick={() =>
-                    setListAction({ selectedPolicy: policy, actionType: 'deletePolicy' })
+          isPrimary: true,
+          name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.deleteActionLabel', {
+            defaultMessage: 'Delete',
+          }),
+          description: (policy) => {
+            return hasLinkedIndices(policy)
+              ? i18n.translate(
+                  'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip',
+                  {
+                    defaultMessage: 'You cannot delete a policy that is being used by an index',
                   }
-                  iconType="trash"
-                  aria-label={actionTooltips.deleteEnabled}
-                  disabled={!enabled}
-                />
-              </EuiToolTip>
-            );
+                )
+              : i18n.translate('xpack.indexLifecycleMgmt.policyTable.deleteActionDescription', {
+                  defaultMessage: 'Delete this policy',
+                });
           },
-          enabled: (policy: PolicyFromES) => !hasLinkedIndices(policy),
+          type: 'icon',
+          icon: 'trash',
+          color: 'danger',
+          onClick: (policy) =>
+            setListAction({ selectedPolicy: policy, actionType: 'deletePolicy' }),
+          enabled: (policy) => !hasLinkedIndices(policy),
+          'data-test-subj': 'deletePolicy',
         },
       ],
       name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.actionsHeader', {
