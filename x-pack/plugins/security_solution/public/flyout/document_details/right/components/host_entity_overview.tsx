@@ -20,7 +20,7 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import {
   FirstLastSeen,
@@ -67,7 +67,7 @@ export interface HostEntityOverviewProps {
  * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
-  const { eventId, indexName, scopeId } = useRightPanelContext();
+  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
