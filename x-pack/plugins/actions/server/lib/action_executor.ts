@@ -6,14 +6,19 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { KibanaRequest, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  SavedObjectsErrorHelpers,
+  type AuthenticatedUser,
+  type KibanaRequest,
+  type Logger,
+  type SecurityServiceStart,
+} from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
-import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
@@ -53,7 +58,7 @@ const Millis2Nanos = 1000 * 1000;
 export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceStart;
-  security?: SecurityPluginStart;
+  security: SecurityServiceStart;
   getServices: GetServicesFunction;
   getUnsecuredServices: GetUnsecuredServicesFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
