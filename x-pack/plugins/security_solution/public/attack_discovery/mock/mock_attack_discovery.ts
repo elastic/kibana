@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscovery } from '../types';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 
 export const mockAttackDiscovery: AttackDiscovery = {
   alertIds: [
@@ -32,5 +32,6 @@ export const mockAttackDiscovery: AttackDiscovery = {
   ],
   summaryMarkdown:
     'A multi-stage malware attack was detected on {{ host.name 5e454c38-439c-4096-8478-0a55511c76e3 }} involving {{ user.name 3bdc7952-a334-4d95-8092-cd176546e18a }}. A suspicious application delivered malware, attempted credential theft, and established persistence.',
+  timestamp: '2024-06-25T21:14:40.098Z',
   title: 'Malware Attack With Credential Theft Attempt',
 };

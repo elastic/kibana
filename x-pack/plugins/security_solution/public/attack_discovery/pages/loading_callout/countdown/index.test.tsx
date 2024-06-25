@@ -13,23 +13,20 @@ import React from 'react';
 import { Countdown } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { APPROXIMATE_TIME_REMAINING } from './translations';
-import type { GenerationInterval } from '../../../types';
+import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 
 describe('Countdown', () => {
   const connectorIntervals: GenerationInterval[] = [
     {
-      connectorId: 'test-connector-1',
-      date: new Date('2024-05-16T14:13:09.838Z'),
+      date: '2024-05-16T14:13:09.838Z',
       durationMs: 173648,
     },
     {
-      connectorId: 'test-connector-1',
-      date: new Date('2024-05-16T13:59:49.620Z'),
+      date: '2024-05-16T13:59:49.620Z',
       durationMs: 146605,
     },
     {
-      connectorId: 'test-connector-1',
-      date: new Date('2024-05-16T13:47:00.629Z'),
+      date: '2024-05-16T13:47:00.629Z',
       durationMs: 255163,
     },
   ];

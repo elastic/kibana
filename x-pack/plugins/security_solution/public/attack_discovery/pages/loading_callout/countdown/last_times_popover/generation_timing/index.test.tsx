@@ -14,7 +14,7 @@ import { GenerationTiming } from '.';
 describe('GenerationTiming', () => {
   const interval = {
     connectorId: 'claudeV3SonnetUsEast1',
-    date: new Date('2024-04-15T13:48:44.397Z'),
+    date: '2024-04-15T13:48:44.397Z',
     durationMs: 5000,
   };
 

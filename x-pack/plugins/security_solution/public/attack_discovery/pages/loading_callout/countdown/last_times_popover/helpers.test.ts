@@ -9,7 +9,7 @@ import moment from 'moment';
 
 import { getAverageIntervalSeconds, getTimerPrefix } from './helpers';
 import { APPROXIMATE_TIME_REMAINING, ABOVE_THE_AVERAGE_TIME } from '../translations';
-import type { GenerationInterval } from '../../../../types';
+import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 
 describe('helpers', () => {
   describe('getAverageIntervalSeconds', () => {
@@ -22,25 +22,21 @@ describe('helpers', () => {
     });
 
     it('calculates the average interval in seconds', () => {
-      const intervals = [
+      const intervals: GenerationInterval[] = [
         {
-          connectorId: 'claudeV3SonnetUsEast1',
-          date: new Date('2024-04-15T13:48:44.397Z'),
+          date: '2024-04-15T13:48:44.397Z',
           durationMs: 85807,
         },
         {
-          connectorId: 'claudeV3SonnetUsEast1',
-          date: new Date('2024-04-15T12:41:15.255Z'),
+          date: '2024-04-15T12:41:15.255Z',
           durationMs: 12751,
         },
         {
-          connectorId: 'claudeV3SonnetUsEast1',
-          date: new Date('2024-04-12T20:59:13.238Z'),
+          date: '2024-04-12T20:59:13.238Z',
           durationMs: 46169,
         },
         {
-          connectorId: 'claudeV3SonnetUsEast1',
-          date: new Date('2024-04-12T19:34:56.701Z'),
+          date: '2024-04-12T19:34:56.701Z',
           durationMs: 86674,
         },
       ];
