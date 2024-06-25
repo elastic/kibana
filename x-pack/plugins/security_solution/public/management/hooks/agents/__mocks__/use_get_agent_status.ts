@@ -9,19 +9,21 @@ import { agentStatusMocks } from '../../../../../common/endpoint/service/respons
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { AgentStatusRecords } from '../../../../../common/endpoint/types';
 
-const useGetAgentStatusMock = (agentIds: string[] | string, agentType: ResponseActionAgentType) => {
-  const agentsIdList = Array.isArray(agentIds) ? agentIds : [agentIds];
+const useGetAgentStatusMock = jest.fn(
+  (agentIds: string[] | string, agentType: ResponseActionAgentType) => {
+    const agentsIdList = Array.isArray(agentIds) ? agentIds : [agentIds];
 
-  return {
-    data: agentsIdList.reduce<AgentStatusRecords>((acc, agentId) => {
-      acc[agentId] = agentStatusMocks.generateAgentStatus({ agentType, agentId });
+    return {
+      data: agentsIdList.reduce<AgentStatusRecords>((acc, agentId) => {
+        acc[agentId] = agentStatusMocks.generateAgentStatus({ agentType, agentId });
 
-      return acc;
-    }, {}),
-    isLoading: false,
-    isFetched: true,
-    isFetching: false,
-  };
-};
+        return acc;
+      }, {}),
+      isLoading: false,
+      isFetched: true,
+      isFetching: false,
+    };
+  }
+);
 
 export { useGetAgentStatusMock as useGetAgentStatus };
