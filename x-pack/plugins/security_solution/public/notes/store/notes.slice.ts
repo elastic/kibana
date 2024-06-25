@@ -11,6 +11,7 @@ import { createSelector } from 'reselect';
 import type { State } from '../../common/store';
 import {
   createNote as createNoteApi,
+  deleteNote as deleteNoteApi,
   fetchNotesByDocumentId as fetchNotesByDocumentIdApi,
 } from '../api/api';
 import type { NormalizedEntities, NormalizedEntity } from './normalize';
@@ -33,10 +34,12 @@ export interface NotesState extends EntityState<Note> {
   status: {
     fetchNotesByDocumentId: ReqStatus;
     createNote: ReqStatus;
+    deleteNote: ReqStatus;
   };
   error: {
     fetchNotesByDocumentId: SerializedError | HttpError | null;
     createNote: SerializedError | HttpError | null;
+    deleteNote: SerializedError | HttpError | null;
   };
 }
 
@@ -48,10 +51,12 @@ export const initialNotesState: NotesState = notesAdapter.getInitialState({
   status: {
     fetchNotesByDocumentId: ReqStatus.Idle,
     createNote: ReqStatus.Idle,
+    deleteNote: ReqStatus.Idle,
   },
   error: {
     fetchNotesByDocumentId: null,
     createNote: null,
+    deleteNote: null,
   },
 });
 
@@ -71,6 +76,15 @@ export const createNote = createAsyncThunk<NormalizedEntity<Note>, { note: BareN
     const { note } = args;
     const res = await createNoteApi({ note });
     return normalizeEntity(res);
+  }
+);
+
+export const deleteNote = createAsyncThunk<string, { id: string }, {}>(
+  'notes/deleteNote',
+  async (args) => {
+    const { id } = args;
+    await deleteNoteApi(id);
+    return id;
   }
 );
 
@@ -101,6 +115,17 @@ const notesSlice = createSlice({
       .addCase(createNote.rejected, (state, action) => {
         state.status.createNote = ReqStatus.Failed;
         state.error.createNote = action.payload ?? action.error;
+      })
+      .addCase(deleteNote.pending, (state) => {
+        state.status.deleteNote = ReqStatus.Loading;
+      })
+      .addCase(deleteNote.fulfilled, (state, action) => {
+        notesAdapter.removeOne(state, action.payload);
+        state.status.deleteNote = ReqStatus.Succeeded;
+      })
+      .addCase(deleteNote.rejected, (state, action) => {
+        state.status.deleteNote = ReqStatus.Failed;
+        state.error.deleteNote = action.payload ?? action.error;
       });
   },
 });
@@ -122,6 +147,10 @@ export const selectFetchNotesByDocumentIdError = (state: State) =>
 export const selectCreateNoteStatus = (state: State) => state.notes.status.createNote;
 
 export const selectCreateNoteError = (state: State) => state.notes.error.createNote;
+
+export const selectDeleteNoteStatus = (state: State) => state.notes.status.deleteNote;
+
+export const selectDeleteNoteError = (state: State) => state.notes.error.deleteNote;
 
 export const selectNotesByDocumentId = createSelector(
   [selectAllNotes, (state, documentId) => documentId],
