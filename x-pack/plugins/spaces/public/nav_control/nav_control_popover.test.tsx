@@ -244,7 +244,7 @@ describe('NavControlPopover', () => {
       },
     ];
 
-    const wrapper = await setup(spaces, true);
+    const wrapper = await setup(spaces, true /** isSolutionEnabled **/);
 
     await act(async () => {
       wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');

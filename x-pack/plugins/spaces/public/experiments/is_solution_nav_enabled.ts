@@ -7,9 +7,10 @@
 
 import { from, of, shareReplay } from 'rxjs';
 
-export const SOLUTION_NAV_FEATURE_FLAG_NAME = 'solutionNavEnabled';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+
+const SOLUTION_NAV_FEATURE_FLAG_NAME = 'solutionNavEnabled';
 
 export const isSolutionNavEnabled = (
   cloud?: CloudStart,
