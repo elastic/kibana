@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const uptimeRuleFieldMap = {
+import { FieldMap } from '@kbn/alerts-as-data-utils';
+
+export const uptimeRuleFieldMap: FieldMap = {
   // common fields
   'monitor.id': {
     type: 'keyword',
@@ -38,6 +40,7 @@ export const uptimeRuleFieldMap = {
   },
   'monitor.tags': {
     type: 'keyword',
+    array: true,
     required: false,
   },
   configId: {

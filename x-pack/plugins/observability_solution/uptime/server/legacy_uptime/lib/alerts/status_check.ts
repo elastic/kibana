@@ -211,7 +211,7 @@ export const getMonitorAlertDocument = (monitorSummary: MonitorSummary) => ({
   configId: monitorSummary.configId,
   'monitor.type': monitorSummary.monitorType,
   'monitor.name': monitorSummary.monitorName,
-  'monitor.tags': monitorSummary.tags ?? [],
+  'monitor.tags': monitorSummary.tags,
   'url.full': monitorSummary.monitorUrl,
   'observer.geo.name': monitorSummary.observerLocation,
   'observer.name': monitorSummary.observerName,

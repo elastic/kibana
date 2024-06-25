@@ -9540,6 +9540,7 @@ Object {
       "type": "keyword",
     },
     "monitor.tags": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9659,6 +9660,7 @@ Object {
       "type": "keyword",
     },
     "monitor.tags": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9778,6 +9780,7 @@ Object {
       "type": "keyword",
     },
     "monitor.tags": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9897,6 +9900,7 @@ Object {
       "type": "keyword",
     },
     "monitor.tags": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -10022,6 +10026,7 @@ Object {
       "type": "keyword",
     },
     "monitor.tags": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
