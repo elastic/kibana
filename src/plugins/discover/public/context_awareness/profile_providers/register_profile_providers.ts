@@ -7,6 +7,10 @@
  */
 
 import { uniq } from 'lodash';
+import {
+  githubDocumentProfileProvider,
+  githubDataSourceProfileProvider,
+} from './github_document_profile/profile';
 import type {
   DataSourceProfileService,
   DocumentProfileService,
@@ -40,6 +44,8 @@ export const registerProfileProviders = ({
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
   const documentProfileProviders = createDocumentProfileProviders(providerServices);
   const enabledProfileIds = uniq([
+    githubDocumentProfileProvider.profileId,
+    githubDataSourceProfileProvider.profileId,
     ...extractProfileIds(rootProfileProviders),
     ...extractProfileIds(dataSourceProfileProviders),
     ...extractProfileIds(documentProfileProviders),
@@ -54,13 +60,21 @@ export const registerProfileProviders = ({
 
   registerEnabledProfileProviders({
     profileService: dataSourceProfileService,
-    availableProviders: [exampleDataSourceProfileProvider, ...dataSourceProfileProviders],
+    availableProviders: [
+      exampleDataSourceProfileProvider,
+      githubDataSourceProfileProvider,
+      ...dataSourceProfileProviders,
+    ],
     enabledProfileIds,
   });
 
   registerEnabledProfileProviders({
     profileService: documentProfileService,
-    availableProviders: [exampleDocumentProfileProvider, ...documentProfileProviders],
+    availableProviders: [
+      githubDocumentProfileProvider,
+      exampleDocumentProfileProvider,
+      ...documentProfileProviders,
+    ],
     enabledProfileIds,
   });
 };
@@ -77,13 +91,12 @@ export const registerEnabledProfileProviders = <
   availableProviders: TProvider[];
   enabledProfileIds: string[];
 }) => {
-  for (const provider of availableProviders) {
-    if (enabledProfileIds.includes(provider.profileId)) {
-      profileService.registerProvider(provider);
+  for (const profile of availableProviders) {
+    if (enabledProfileIds.includes(profile.profileId)) {
+      profileService.registerProvider(profile);
     }
   }
 };
-
 const extractProfileIds = (providers: Array<BaseProfileProvider<{}>>) =>
   providers.map(({ profileId }) => profileId);
 

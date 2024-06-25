@@ -1,0 +1,119 @@
+.disco-container {
+  position: relative;
+  display: inline-block;
+  margin: 20px;
+}
+
+.avatar {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  animation: dance 1s infinite, rotate 2s infinite linear;
+}
+
+.emojis {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  margin-top: -100px;
+  margin-left: -100px;
+  pointer-events: none;
+}
+
+.emoji {
+  position: absolute;
+  font-size: 30px;
+  animation: float 2s infinite;
+}
+
+.emoji:nth-child(1) {
+  top: 0;
+  left: 50%;
+  animation-delay: 0s;
+}
+
+.emoji:nth-child(2) {
+  top: 50%;
+  left: 0;
+  animation-delay: 0.4s;
+}
+
+.emoji:nth-child(3) {
+  top: 50%;
+  right: 0;
+  animation-delay: 0.8s;
+}
+
+.emoji:nth-child(4) {
+  bottom: 0;
+  left: 50%;
+  animation-delay: 1.2s;
+}
+
+.emoji:nth-child(5) {
+  top: 50%;
+  left: 50%;
+  animation-delay: 1.6s;
+}
+
+@keyframes dance {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+.game-container {
+  position: relative;
+  width: 400px;
+  height: 600px;
+  border: 2px solid black;
+  overflow: hidden;
+  background-color: black;
+  margin: 0 auto;
+}
+
+.ship {
+  position: absolute;
+  bottom: 10%;
+  width: 40px;
+  height: 40px;
+  background-size: cover;
+  background-position: center;
+}
+
+.alien {
+  position: absolute;
+  font-size: 30px;
+  color: white;
+}
+
+.bullet {
+  position: absolute;
+  width: 5px;
+  height: 20px;
+  background-color: red;
+}
