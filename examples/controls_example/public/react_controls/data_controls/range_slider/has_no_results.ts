@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -110,6 +111,6 @@ async function hasNoResults({
       legacyHitsTotal: false,
     })
   );
-  const count = resp?.rawResponse?.hits?.total?.value;
+  const count = (resp?.rawResponse?.hits?.total as estypes.SearchTotalHits)?.value;
   return typeof count === 'number' && count === 0;
 }

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -118,7 +119,11 @@ export async function getMinMax({
 
   const resp = await lastValueFrom(searchSource.fetch$({ abortSignal }));
   return {
-    min: resp.rawResponse?.aggregations?.minAgg?.value,
-    max: resp.rawResponse?.aggregations?.maxAgg?.value,
+    min:
+      (resp.rawResponse?.aggregations?.minAgg as estypes.AggregationsSingleMetricAggregateBase)
+        ?.value ?? undefined,
+    max:
+      (resp.rawResponse?.aggregations?.maxAgg as estypes.AggregationsSingleMetricAggregateBase)
+        ?.value ?? undefined,
   };
 }
