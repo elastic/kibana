@@ -7,8 +7,9 @@
 
 import React, { memo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { NotesList } from './notes_list';
 import { fetchNotesByDocumentId } from '../../../../notes/store/notes.slice';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 
 /**
  * List all the notes for a document id and allows to create new notes associated with that document.
@@ -16,13 +17,13 @@ import { useLeftPanelContext } from '../context';
  */
 export const NotesDetails = memo(() => {
   const dispatch = useDispatch();
-  const { eventId } = useLeftPanelContext();
+  const { eventId } = useDocumentDetailsContext();
 
   useEffect(() => {
     dispatch(fetchNotesByDocumentId({ documentId: eventId }));
   }, [dispatch, eventId]);
 
-  return <></>;
+  return <NotesList eventId={eventId} />;
 });
 
 NotesDetails.displayName = 'NotesDetails';
