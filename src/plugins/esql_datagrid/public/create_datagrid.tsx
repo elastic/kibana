@@ -25,6 +25,7 @@ interface ESQLDataGridProps {
   flyoutType?: 'overlay' | 'push';
   isTableView?: boolean;
   initialColumns?: DatatableColumn[];
+  fullHeight?: boolean;
 }
 
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
@@ -34,6 +35,10 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
     const startServicesPromise = untilPluginStartServicesReady();
     return Promise.all([startServicesPromise]);
   }, []);
+
+  const getWrapper = (children: JSX.Element) => {
+    return props.fullHeight ? <div style={{ height: 500 }}>{children}</div> : <>{children}</>;
+  };
 
   const deps = value?.[0];
   if (loading || !deps) return <EuiLoadingSpinner />;
@@ -45,14 +50,14 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
       }}
     >
       <CellActionsProvider getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}>
-        <div style={{ height: 500 }}>
+        {getWrapper(
           <DataGridLazy
             data={deps.data}
             fieldFormats={deps.fieldFormats}
             core={deps.core}
             {...props}
           />
-        </div>
+        )}
       </CellActionsProvider>
     </KibanaContextProvider>
   );

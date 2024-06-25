@@ -27,6 +27,7 @@ import {
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -45,7 +46,7 @@ import {
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
-import { getSuggestions } from './helpers';
+import { getSuggestions, getGridAtrrs, type ESQLDataGridAttrs } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
@@ -86,7 +87,9 @@ export function LensEditConfigurationFlyout({
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
+  const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
+  const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
 
@@ -106,6 +109,9 @@ export function LensEditConfigurationFlyout({
     () => activeDatasource.getLayers(datasourceState),
     [activeDatasource, datasourceState]
   );
+
+  // needed for text based languages mode which works ONLY with adHoc dataviews
+  const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
 
   const dispatch = useLensDispatch();
   useEffect(() => {
@@ -128,6 +134,26 @@ export function LensEditConfigurationFlyout({
     });
     return () => s?.unsubscribe();
   }, [dispatch, output$, layers]);
+
+  useEffect(() => {
+    const getESQLGridAttrs = async () => {
+      if (!dataGridAttrs && isOfAggregateQueryType(query)) {
+        const { dataView, columns, values } = await getGridAtrrs(
+          query,
+          adHocDataViews,
+          startDependencies,
+          undefined
+        );
+
+        setDataGridAttrs({
+          values,
+          dataView,
+          columns,
+        });
+      }
+    };
+    getESQLGridAttrs();
+  }, [adHocDataViews, dataGridAttrs, query, startDependencies]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
@@ -285,9 +311,6 @@ export function LensEditConfigurationFlyout({
     visualizationState: visualization,
   });
 
-  // needed for text based languages mode which works ONLY with adHoc dataviews
-  const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
-
   const runQuery = useCallback(
     async (q, abortController) => {
       const attrs = await getSuggestions(
@@ -297,7 +320,8 @@ export function LensEditConfigurationFlyout({
         visualizationMap,
         adHocDataViews,
         setErrors,
-        abortController
+        abortController,
+        setDataGridAttrs
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -480,6 +504,62 @@ export function LensEditConfigurationFlyout({
               />
             </EuiFlexItem>
           )}
+          {isOfAggregateQueryType(query) && dataGridAttrs && (
+            <EuiFlexItem
+              grow={isESQLResultsAccordionOpen ? 1 : false}
+              css={css`
+                .euiAccordion__childWrapper {
+                  flex: ${isESQLResultsAccordionOpen ? 1 : 'none'};
+                }
+                padding: 0 ${euiThemeVars.euiSize};
+              `}
+            >
+              <EuiAccordion
+                id="esql-results"
+                buttonContent={
+                  <EuiTitle
+                    size="xxs"
+                    css={css`
+                padding: 2px;
+              }
+            `}
+                  >
+                    <h5>
+                      {i18n.translate('xpack.lens.config.ESQLQueryResults', {
+                        defaultMessage: 'ES|QL Query Results',
+                      })}
+                    </h5>
+                  </EuiTitle>
+                }
+                buttonProps={{
+                  paddingSize: 'm',
+                }}
+                initialIsOpen={isESQLResultsAccordionOpen}
+                forceState={isESQLResultsAccordionOpen ? 'open' : 'closed'}
+                onToggle={(status) => {
+                  setIsESQLResultsAccordionOpen(!isESQLResultsAccordionOpen);
+                  if (status && isSuggestionsAccordionOpen) {
+                    setIsSuggestionsAccordionOpen(!status);
+                  }
+                  if (status && isLayerAccordionOpen) {
+                    setIsLayerAccordionOpen(!status);
+                  }
+                }}
+              >
+                <>
+                  <ESQLDataGrid
+                    rows={dataGridAttrs?.values}
+                    columns={dataGridAttrs?.columns}
+                    dataView={dataGridAttrs?.dataView}
+                    query={query}
+                    flyoutType="overlay"
+                    isTableView={attributes.visualizationType !== 'lnsDatatable'}
+                  />
+                  <EuiSpacer />
+                </>
+              </EuiAccordion>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
@@ -514,6 +594,9 @@ export function LensEditConfigurationFlyout({
               onToggle={(status) => {
                 if (status && isSuggestionsAccordionOpen) {
                   setIsSuggestionsAccordionOpen(!status);
+                }
+                if (status && isESQLResultsAccordionOpen) {
+                  setIsESQLResultsAccordionOpen(!status);
                 }
                 setIsLayerAccordionOpen(!isLayerAccordionOpen);
               }}
@@ -562,6 +645,9 @@ export function LensEditConfigurationFlyout({
               toggleAccordionCb={(status) => {
                 if (!status && isLayerAccordionOpen) {
                   setIsLayerAccordionOpen(status);
+                }
+                if (status && isESQLResultsAccordionOpen) {
+                  setIsESQLResultsAccordionOpen(!status);
                 }
                 setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
               }}
