@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { mockBrowserFields } from '../../shared/mocks/mock_browser_fields';
-import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
-import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
-import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import type { RightPanelContext } from '../context';
+import { mockBrowserFields } from './mock_browser_fields';
+import { mockSearchHit } from './mock_search_hit';
+import { mockDataFormattedForFieldBrowser } from './mock_data_formatted_for_field_browser';
+import { mockGetFieldsData } from './mock_get_fields_data';
+import { mockDataAsNestedObject } from './mock_data_as_nested_object';
+import type { DocumentDetailsContext } from '../context';
 
 /**
- * Mock contextValue for right panel context
+ * Mock contextValue for left panel context
  */
-export const mockContextValue: RightPanelContext = {
+export const mockContextValue: DocumentDetailsContext = {
   eventId: 'eventId',
   indexName: 'index',
   scopeId: 'scopeId',
