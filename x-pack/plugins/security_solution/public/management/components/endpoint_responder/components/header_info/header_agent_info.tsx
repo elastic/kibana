@@ -6,27 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { AgentTypeIntegration } from '../../../../../common/components/endpoint/agent_type_integration';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { AgentTypeVendorLogo } from '../../../../../common/components/endpoint/agents/agent_type_vendor_logo';
-import { getAgentTypeName } from '../../../../../common/translations';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { Platform } from './platforms';
 import { PlatformIcon } from './platforms';
-
-const INTEGRATION_SECTION_LABEL = i18n.translate(
-  'xpack.securitySolution.headerAgentInfo.integrationSectionLabel',
-  { defaultMessage: 'Integration' }
-);
 
 interface HeaderAgentInfoProps {
   platform: Platform;
@@ -87,38 +73,7 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
 
         {agentType && (
           <EuiFlexItem grow={false} css={{ paddingLeft: euiTheme.size.l }}>
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiText
-                  color="subdued"
-                  size="s"
-                  data-test-subj={testId('integrationSectionLabel')}
-                >
-                  {INTEGRATION_SECTION_LABEL}&nbsp;
-                  <EuiIconTip
-                    content={
-                      <FormattedMessage
-                        id="xpack.securitySolution.responder.header.integrationSectionLabelTooltip"
-                        defaultMessage="The integration used to execute the command on this host"
-                      />
-                    }
-                    position="right"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup responsive={false} wrap={false} gutterSize="xs" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <AgentTypeVendorLogo agentType={agentType} />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s" data-test-subj={testId('integrationName')}>
-                      {getAgentTypeName(agentType)}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <AgentTypeIntegration agentType={agentType} data-test-subj={testId('integration')} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
