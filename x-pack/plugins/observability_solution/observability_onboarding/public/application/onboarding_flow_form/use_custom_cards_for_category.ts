@@ -29,7 +29,7 @@ export function useCustomCardsForCategory(
 
   const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
-  const { href: otelLogsUrl } = reactRouterNavigate(history, `/otelLogs/${location.search}`);
+  const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
 
   const otelCard: VirtualCard = {
     id: 'otel-logs',

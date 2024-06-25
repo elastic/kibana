@@ -66,7 +66,7 @@ export function ObservabilityOnboardingFlow() {
               <BackButton />
               <CustomLogsPanel />
             </Route>
-            <Route path="/otelLogs">
+            <Route path="/otel-logs">
               <BackButton />
               <OtelLogsPanel />
             </Route>

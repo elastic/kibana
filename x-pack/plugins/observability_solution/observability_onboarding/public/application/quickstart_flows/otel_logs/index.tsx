@@ -23,6 +23,7 @@ import {
   EuiButtonGroup,
   EuiCopy,
   EuiLink,
+  EuiImage,
 } from '@elastic/eui';
 import {
   AllDatasetsLocatorParams,
@@ -62,12 +63,16 @@ export const OtelLogsPanel: React.FC = () => {
     services: {
       share,
       http,
-      context: { isServerless, stackVersion },
+      // context: { isServerless, stackVersion },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
-  const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
-  const agentVersion = isServerless ? setup?.elasticAgentVersion : stackVersion;
+  const AGENT_CDN_BASE_URL = 'snapshots.elastic.co/8.14.2-802f0e3c/downloads/beats/elastic-agent';
+  const agentVersion = '8.14.2-SNAPSHOT';
+  // TODO uncomment before merge
+  // const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
+  // const agentVersion = isServerless ? setup?.elasticAgentVersion : stackVersion;
+  // const agentVersion = '8.14.2-45882135';
 
   const allDatasetsLocator =
     share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
@@ -367,8 +372,7 @@ spec:
         - name: elastic-opentelemetry-collector
           command: [/usr/share/elastic-agent/elastic-agent]
           args: ["otel", "-c", "/etc/elastic-agent/otel.yaml"]
-          image: chrismark/elastic-otel-dev:0.0.1
-          #image: docker.elastic.co/beats/elastic-agent:${agentVersion}
+          image: docker.elastic.co/beats/elastic-agent:${agentVersion}
           imagePullPolicy: IfNotPresent
           env:
             - name: MY_POD_IP
@@ -690,10 +694,11 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && se
                     <EuiSpacer />
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
-                        <img
-                          src={http?.staticAssets.getPluginAssetHref('dashboard_illustration.svg')}
+                        <EuiImage
+                          src={http?.staticAssets.getPluginAssetHref('waterfall_screen.svg')}
                           width={160}
                           alt="Illustration"
+                          hasShadow
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow>
