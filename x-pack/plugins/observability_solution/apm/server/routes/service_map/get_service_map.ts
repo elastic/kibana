@@ -83,6 +83,7 @@ async function getConnectionData({
             end,
             terminateAfter: config.serviceMapTerminateAfter,
             serverlessServiceMapMaxAvailableBytes: config.serverlessServiceMapMaxAvailableBytes,
+            numOfRequests: chunks.length,
             logger,
           })
         )

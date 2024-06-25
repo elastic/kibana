@@ -46,6 +46,7 @@ export async function fetchServicePathsFromTraceIds({
   end,
   terminateAfter,
   serverlessServiceMapMaxAvailableBytes,
+  numOfRequests,
 }: {
   apmEventClient: APMEventClient;
   traceIds: string[];
@@ -53,6 +54,7 @@ export async function fetchServicePathsFromTraceIds({
   end: number;
   terminateAfter: number;
   serverlessServiceMapMaxAvailableBytes: number;
+  numOfRequests: number;
 }) {
   // make sure there's a range so ES can skip shards
   const dayInMs = 24 * 60 * 60 * 1000;
@@ -86,12 +88,22 @@ export async function fetchServicePathsFromTraceIds({
     'get_service_paths_from_trace_ids_query_data',
     serviceMapParams
   );
-  // calculate how many docs we can fetch per shard by dividing the total available bytes by the average doc size
+  /*
+   * Calculate how many docs we can fetch per shard.
+   * Used in both terminate_after and tracking in the map script of the scripted_metric agg
+   * to ensure we don't fetch more than we can handle.
+   *
+   * 1. Use serverlessServiceMapMaxAvailableBytes setting, which represents our baseline request circuit breaker limit.
+   * 2. Divide by numOfRequests we fire off simultaneously to calculate bytesPerRequest.
+   * 3. Divide bytesPerRequest by the average doc size to get totalNumDocsAllowed.
+   * 4. Divide totalNumDocsAllowed by totalShards to get numDocsPerShardAllowed.
+   */
+
   const avgDocSizeInBytes = SCRIPTED_METRICS_FIELDS_TO_COPY.length * AVG_BYTES_PER_FIELD; // estimated doc size in bytes
   const totalShards = serviceMapQueryDataResponse._shards.successful;
-  const numDocsAllowed = Math.floor(serverlessServiceMapMaxAvailableBytes / avgDocSizeInBytes);
-  const numDocsPerShardAllowed = Math.floor(numDocsAllowed / totalShards);
-
+  const bytesPerRequest = Math.floor(serverlessServiceMapMaxAvailableBytes / numOfRequests);
+  const totalNumDocsAllowed = Math.floor(bytesPerRequest / avgDocSizeInBytes);
+  const numDocsPerShardAllowed = Math.floor(totalNumDocsAllowed / totalShards);
   const serviceMapAggs = {
     service_map: {
       scripted_metric: {
