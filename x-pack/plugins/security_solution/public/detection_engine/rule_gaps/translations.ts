@@ -115,7 +115,8 @@ export const BACKFILLS_TABLE_COLUMN_TOTAL = i18n.translate(
 export const BACKFILLS_TABLE_COLUMN_TOTAL_TOOLTIP = i18n.translate(
   'xpack.securitySolution.rule_gaps.backfillsTable.column.totalTooltip',
   {
-    defaultMessage: 'The total number of rule executions that will occur during the selected date and time range',
+    defaultMessage:
+      'The total number of rule executions that will occur during the selected date and time range',
   }
 );
 
@@ -164,7 +165,7 @@ export const BACKFILLS_TABLE_STOP_CONFIRMATION_SUCCESS = i18n.translate(
 export const BACKFILLS_TABLE_STOP_CONFIRMATION_ERROR = i18n.translate(
   'xpack.securitySolution.rule_gaps.backfillsTable.stop.confirmationError',
   {
-    defaultMessage: 'Error stopping run',
+    defaultMessage: 'Error stopping rule run',
   }
 );
 
