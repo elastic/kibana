@@ -24,3 +24,10 @@ export const IN_PROGRESS_MESSAGE = i18n.translate(
 export const FAILURE_MESSAGE = i18n.translate('xpack.elasticAssistant.attackDiscovery.statusFail', {
   defaultMessage: 'Attack discovery generation in progress.',
 });
+
+export const UPDATED_CONNECTORS_MESSAGE = (totalUpdates: number) =>
+  i18n.translate('xpack.elasticAssistant.attackDiscovery.statusConnectors', {
+    values: { totalUpdates },
+    defaultMessage:
+      'There {totalUpdates, plural, =1 {is} other {are}} {totalUpdates} {totalUpdates, plural, =1 {connector} other {connectors}} with new attack discovery results.',
+  });

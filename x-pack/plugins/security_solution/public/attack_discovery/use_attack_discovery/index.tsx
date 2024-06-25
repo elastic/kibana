@@ -178,7 +178,7 @@ export const useAttackDiscovery = ({
         text: getErrorToastText(error),
       });
     }
-  }, [connectorId, http, pollApi, requestBody, setLoadingConnectorId, toasts]);
+  }, [connectorId, http, requestBody, setLoadingConnectorId, toasts]);
 
   return {
     alertsContextCount,

@@ -18,6 +18,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import { UPDATED_CONNECTORS_MESSAGE } from '../connector_selector/translations';
 import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
@@ -141,7 +142,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         return (
           <EuiToolTip
             position="bottom"
-            content={`There are ${stats.newConnectorResultsCount} connectors with new attack discovery results.`}
+            content={UPDATED_CONNECTORS_MESSAGE(stats.newConnectorResultsCount)}
           >
             <EuiNotificationBadge style={{ marginLeft: 5 }}>
               {stats.newConnectorResultsCount}

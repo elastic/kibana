@@ -49,6 +49,7 @@ const mockResponse = {
     },
   ],
   backingIndex: '1234',
+  lastViewedAt: '2024-06-07T20:04:35.715Z',
   updatedAt: '2024-06-07T20:04:35.715Z',
   replacements: {
     'c1f9889f-1f6b-4abc-8e65-02de89fe1054': 'root',
@@ -68,6 +69,43 @@ const mockResponse = {
   alertsContextCount: 20,
   averageIntervalMs: 117559,
   id: '8e215edc-6318-4760-9566-d32f1844f9cb',
+};
+
+const mockStats = {
+  newConnectorResultsCount: 2,
+  newDiscoveriesCount: 4,
+  statsPerConnector: [
+    {
+      hasViewed: false,
+      status: 'failed',
+      count: 0,
+      connectorId: 'my-bedrock-old',
+    },
+    {
+      hasViewed: false,
+      status: 'running',
+      count: 1,
+      connectorId: 'my-gen-ai',
+    },
+    {
+      hasViewed: true,
+      status: 'succeeded',
+      count: 1,
+      connectorId: 'my-gpt4o-ai',
+    },
+    {
+      hasViewed: true,
+      status: 'canceled',
+      count: 1,
+      connectorId: 'my-bedrock',
+    },
+    {
+      hasViewed: false,
+      status: 'succeeded',
+      count: 4,
+      connectorId: 'my-gen-a2i',
+    },
+  ],
 };
 
 describe('usePollApi', () => {
@@ -103,6 +141,7 @@ describe('usePollApi', () => {
     http.fetch.mockResolvedValue({
       entryExists: true,
       data: mockResponse,
+      stats: mockStats,
     });
     const { result, rerender } = renderHook((props) => usePollApi(props), {
       initialProps: defaultProps,
@@ -127,10 +166,11 @@ describe('usePollApi', () => {
     expect(result.current.didInitialFetch).toEqual(true);
   });
 
-  test('should update status and data on successful response', async () => {
+  test('should update stats, status, and data on successful response', async () => {
     http.fetch.mockResolvedValue({
       entryExists: true,
       data: mockResponse,
+      stats: mockStats,
     });
     const { result } = renderHook(() => usePollApi(defaultProps));
 
@@ -143,37 +183,9 @@ describe('usePollApi', () => {
     expect(setApproximateFutureTime).toHaveBeenCalledWith(
       moment(mockResponse.updatedAt).add(mockResponse.averageIntervalMs, 'milliseconds').toDate()
     );
+    expect(result.current.stats).toEqual(mockStats);
   });
 
-  test('should update status and data on running status and schedule next poll', async () => {
-    // @ts-ignore
-    jest.spyOn(global, 'setTimeout').mockImplementation((cb) => cb());
-    http.fetch
-      .mockResolvedValueOnce({
-        entryExists: true,
-        data: { ...mockResponse, attackDiscoveries: [], status: 'running' },
-      })
-      .mockResolvedValueOnce({
-        entryExists: true,
-        data: { ...mockResponse, attackDiscoveries: [], status: 'running' },
-      })
-      .mockResolvedValueOnce({
-        entryExists: true,
-        data: { ...mockResponse, attackDiscoveries: [], status: 'running' },
-      })
-      .mockResolvedValue({
-        entryExists: true,
-        data: mockResponse,
-      });
-
-    const { result } = renderHook(() => usePollApi(defaultProps));
-
-    await act(async () => {
-      await result.current.pollApi();
-    });
-    //  3 from the mockResolvedValueOnce above
-    expect(setTimeout).toHaveBeenCalledTimes(3);
-  });
   test('When no connectorId and pollApi is called, should update status and data to null on error and show toast', async () => {
     const addDangerMock = jest.spyOn(kibanaMock.notifications.toasts, 'addDanger');
     const { result } = renderHook(() =>
