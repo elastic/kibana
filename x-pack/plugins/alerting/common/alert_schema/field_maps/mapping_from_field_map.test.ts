@@ -243,6 +243,9 @@ describe('mappingFromFieldMap', () => {
                 last_detected: {
                   type: 'date',
                 },
+                previous_action_group: {
+                  type: 'keyword',
+                },
                 reason: {
                   type: 'keyword',
                   fields: {
@@ -292,6 +295,9 @@ describe('mappingFromFieldMap', () => {
                       type: 'keyword',
                     },
                   },
+                },
+                severity_improving: {
+                  type: 'boolean',
                 },
                 start: {
                   type: 'date',

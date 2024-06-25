@@ -27,6 +27,7 @@ import {
   ALERT_END,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_PREVIOUS_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
 import {
   alertRule,
@@ -70,6 +71,7 @@ describe('buildUpdatedRecoveredAlert', () => {
       [ALERT_TIME_RANGE]: { gte: '2023-03-27T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
       [ALERT_FLAPPING]: true,
       [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
+      [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-x'],
       [ALERT_STATUS]: 'recovered',
@@ -119,6 +121,7 @@ describe('buildUpdatedRecoveredAlert', () => {
       [ALERT_TIME_RANGE]: { gte: '2023-03-27T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
       [ALERT_FLAPPING]: true,
       [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
+      [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-x'],
       [ALERT_STATUS]: 'recovered',
@@ -186,6 +189,7 @@ describe('buildUpdatedRecoveredAlert', () => {
       [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-29T12:27:28.159Z',
       [ALERT_FLAPPING]: true,
       [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
+      [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
       [ALERT_STATUS]: 'recovered',
       [ALERT_WORKFLOW_STATUS]: 'open',
       [SPACE_IDS]: ['default'],

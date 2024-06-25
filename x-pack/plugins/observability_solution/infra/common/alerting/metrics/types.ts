@@ -35,6 +35,7 @@ export enum AlertStates {
   OK,
   ALERT,
   WARNING,
+  LOW,
   NO_DATA,
   ERROR,
 }
@@ -79,6 +80,8 @@ interface BaseMetricExpressionParams {
   comparator: COMPARATORS | LEGACY_COMPARATORS;
   warningComparator?: COMPARATORS | LEGACY_COMPARATORS;
   warningThreshold?: number[];
+  lowComparator?: Comparator;
+  lowThreshold?: number[];
 }
 
 export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {

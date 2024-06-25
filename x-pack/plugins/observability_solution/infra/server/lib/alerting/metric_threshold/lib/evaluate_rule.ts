@@ -31,6 +31,7 @@ export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
   timestamp: string;
   shouldFire: boolean;
   shouldWarn: boolean;
+  shouldLow: boolean;
   isNoData: boolean;
   bucketKey: Record<string, string>;
   context?: AdditionalContext;
@@ -90,6 +91,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
           currentValues[missingGroup.key] = {
             value: null,
             trigger: false,
+            low: false,
             warn: false,
             bucketKey: missingGroup.bucketKey,
           };
@@ -99,7 +101,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const evaluations: Record<string, Evaluation> = {};
       for (const key of Object.keys(currentValues)) {
         const result = currentValues[key];
-        if (result.trigger || result.warn || result.value === null) {
+        if (result.trigger || result.warn || result.low || result.value === null) {
           evaluations[key] = {
             ...criterion,
             metric:
@@ -114,6 +116,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
             timestamp: moment(calculatedTimerange.end).toISOString(),
             shouldFire: result.trigger,
             shouldWarn: result.warn,
+            shouldLow: result.low,
             isNoData: result.value === null,
             bucketKey: result.bucketKey,
             context: {
