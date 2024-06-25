@@ -94,9 +94,6 @@ describe('8.15.0 Endpoint Package Policy migration', () => {
       });
       const migratedPolicyConfig = migratedPolicyConfigSO.attributes.inputs[0].config?.policy.value;
       expect(migratedPolicyConfig.windows.advanced).toEqual({
-        kernel: {
-          network_report_loopback: true,
-        },
         events: {
           deduplicate_network_events: false,
           ancestry_in_all_events: true,
@@ -132,9 +129,6 @@ describe('8.15.0 Endpoint Package Policy migration', () => {
       };
       const expectedPolicyConfig = cloneDeep(originalPolicyConfig);
 
-      expectedPolicyConfig.windows.advanced.kernel = {
-        network_report_loopback: true,
-      };
       expectedPolicyConfig.windows.advanced.events = {
         deduplicate_network_events: false,
         process_ancestry_length: 20,
@@ -160,14 +154,11 @@ describe('8.15.0 Endpoint Package Policy migration', () => {
       const migratedPolicyConfig = migratedPolicyConfigSO.attributes.inputs[0].config?.policy.value;
       expect(migratedPolicyConfig).toStrictEqual(expectedPolicyConfig);
     });
-    it('should backfill `advanced` fields without modifying other `events` and `kernel`', () => {
+    it('should backfill `advanced` fields without modifying other `events`', () => {
       const originalPolicyConfigSO = cloneDeep(policyDoc);
       const originalPolicyConfig = originalPolicyConfigSO.attributes.inputs[0].config?.policy.value;
       originalPolicyConfig.windows.advanced = {
         events: {
-          ping: 'pong',
-        },
-        kernel: {
           ping: 'pong',
         },
       };
@@ -183,7 +174,6 @@ describe('8.15.0 Endpoint Package Policy migration', () => {
       };
       const expectedPolicyConfig = cloneDeep(originalPolicyConfig);
 
-      expectedPolicyConfig.windows.advanced.kernel.network_report_loopback = true;
       expectedPolicyConfig.windows.advanced.events.deduplicate_network_events = false;
       expectedPolicyConfig.windows.advanced.events.process_ancestry_length = 20;
       expectedPolicyConfig.windows.advanced.events.ancestry_in_all_events = true;
@@ -207,9 +197,6 @@ describe('8.15.0 Endpoint Package Policy migration', () => {
       const originalPolicyConfigSO = cloneDeep(policyDoc);
       const originalPolicyConfig = originalPolicyConfigSO.attributes.inputs[0].config?.policy.value;
       originalPolicyConfig.windows.advanced = {
-        kernel: {
-          network_report_loopback: false,
-        },
         events: {
           deduplicate_network_events: true,
           process_ancestry_length: 10,

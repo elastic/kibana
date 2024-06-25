@@ -29,10 +29,6 @@ export const packagePolicyV13AdvancedFields: SavedObjectModelDataBackfillFn<
 
     policy.windows.advanced = {
       ...policy.windows.advanced,
-      kernel: {
-        network_report_loopback: true,
-        ...policy.windows.advanced?.kernel,
-      },
       events: {
         deduplicate_network_events: false,
         process_ancestry_length: 20,
