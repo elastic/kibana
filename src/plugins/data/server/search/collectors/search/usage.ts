@@ -87,6 +87,7 @@ export function searchUsageObserver(
   return {
     next(response: IEsSearchResponse) {
       if (isRestore || isRunningResponse(response)) return;
+      console.log('SERVER EVENT: data received from Elasticsearch');
       logger.debug(`trackSearchStatus:success, took:${response.rawResponse.took}`);
       void usage?.trackSuccess(response.rawResponse.took);
     },
