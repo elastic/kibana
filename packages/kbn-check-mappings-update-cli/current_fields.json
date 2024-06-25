@@ -291,7 +291,6 @@
   ],
   "enterprise_search_telemetry": [],
   "epm-packages": [
-    "additionnal_spaces_installed_kibana",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
