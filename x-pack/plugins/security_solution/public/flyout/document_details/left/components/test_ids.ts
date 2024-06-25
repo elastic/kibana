@@ -89,3 +89,8 @@ export const RESPONSE_NO_DATA_TEST_ID = `${RESPONSE_TEST_ID}NoData` as const;
 
 export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;
 export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;
+
+/* Notes */
+
+export const NOTES_LOADING_TEST_ID = `${PREFIX}NotesLoading` as const;
+export const NOTES_COMMENT_TEST_ID = `${PREFIX}NotesComment` as const;

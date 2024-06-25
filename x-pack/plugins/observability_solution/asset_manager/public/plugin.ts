@@ -11,6 +11,7 @@ import { Logger } from '@kbn/logging';
 import { AssetManagerPluginClass } from './types';
 import { PublicAssetsClient } from './lib/public_assets_client';
 import type { AssetManagerPublicConfig } from '../common/config';
+import { EntityClient } from './lib/entity_client';
 
 export class Plugin implements AssetManagerPluginClass {
   public config: AssetManagerPublicConfig;
@@ -31,8 +32,10 @@ export class Plugin implements AssetManagerPluginClass {
     this.logger.debug('Public is enabled');
 
     const publicAssetsClient = new PublicAssetsClient(core.http);
+    const entityClient = new EntityClient(core.http);
     return {
       publicAssetsClient,
+      entityClient,
     };
   }
 
@@ -43,8 +46,10 @@ export class Plugin implements AssetManagerPluginClass {
     }
 
     const publicAssetsClient = new PublicAssetsClient(core.http);
+    const entityClient = new EntityClient(core.http);
     return {
       publicAssetsClient,
+      entityClient,
     };
   }
 

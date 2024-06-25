@@ -7,46 +7,40 @@
 
 import { i18n } from '@kbn/i18n';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
-import React, { useEffect } from 'react';
+import React from 'react';
 import moment from 'moment';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  transparentize,
   useEuiTheme,
 } from '@elastic/eui';
-import { AlertSummaryField, TopAlert } from '@kbn/observability-plugin/public';
-import {
-  ALERT_END,
-  ALERT_START,
-  ALERT_EVALUATION_VALUES,
-  ALERT_GROUP,
-  TAGS,
-} from '@kbn/rule-data-utils';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
+import chroma from 'chroma-js';
+
+import { AlertSummaryField, RuleConditionChart, TopAlert } from '@kbn/observability-plugin/public';
+import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
+import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import type {
+  EventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
+  RangeEventAnnotationConfig,
+} from '@kbn/event-annotation-common';
+
+import { getGroupFilters } from '@kbn/observability-plugin/public';
+import type { GenericAggType } from '@kbn/observability-plugin/public';
 import { metricValueFormatter } from '../../../../common/alerting/metrics/metric_value_formatter';
 import { Threshold } from '../../common/components/threshold';
-import { withSourceProvider } from '../../../containers/metrics_source';
+import { useMetricsDataViewContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
-import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { MetricThresholdRuleTypeParams } from '..';
-import { ExpressionChart } from './expression_chart';
-import { Groups } from './groups';
-import { Tags } from './tags';
+import { AlertParams } from '../types';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
-export type MetricThresholdRule = Rule<
-  MetricThresholdRuleTypeParams & {
-    filterQueryText?: string;
-    groupBy?: string | string[];
-  }
->;
+export type MetricThresholdRule = Rule<RuleTypeParams & AlertParams>;
 
 interface Group {
   field: string;
@@ -60,80 +54,49 @@ interface MetricThresholdAlertField {
 
 export type MetricThresholdAlert = TopAlert<MetricThresholdAlertField>;
 
-const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
-const ALERT_START_ANNOTATION_ID = 'alert_start_annotation';
-const ALERT_TIME_RANGE_ANNOTATION_ID = 'alert_time_range_annotation';
-
 interface AppSectionProps {
   alert: MetricThresholdAlert;
   rule: MetricThresholdRule;
-  ruleLink: string;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
-export function AlertDetailsAppSection({
-  alert,
-  rule,
-  ruleLink,
-  setAlertSummaryFields,
-}: AppSectionProps) {
-  const { uiSettings, charts } = useKibanaContextForPlugin().services;
+export function AlertDetailsAppSection({ alert, rule, setAlertSummaryFields }: AppSectionProps) {
+  const { charts } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
-  const groupInstance = alert.fields[ALERT_GROUP]?.map((group: Group) => group.value);
   const groups = alert.fields[ALERT_GROUP];
-  const tags = alert.fields[TAGS];
-
+  const { metricsView } = useMetricsDataViewContext();
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
-  const annotations = [
-    <AlertAnnotation
-      alertStart={alert.start}
-      color={euiTheme.colors.danger}
-      dateFormat={uiSettings.get('dateFormat') || DEFAULT_DATE_FORMAT}
-      id={ALERT_START_ANNOTATION_ID}
-      key={ALERT_START_ANNOTATION_ID}
-    />,
-    <AlertActiveTimeRangeAnnotation
-      alertStart={alert.start}
-      alertEnd={alertEnd}
-      color={euiTheme.colors.danger}
-      id={ALERT_TIME_RANGE_ANNOTATION_ID}
-      key={ALERT_TIME_RANGE_ANNOTATION_ID}
-    />,
-  ];
-  useEffect(() => {
-    const alertSummaryFields = [];
-    if (groups) {
-      alertSummaryFields.push({
-        label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.source', {
-          defaultMessage: 'Source',
-        }),
-        value: <Groups groups={groups} />,
-      });
-    }
-    if (tags && tags.length > 0) {
-      alertSummaryFields.push({
-        label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.tags', {
-          defaultMessage: 'Tags',
-        }),
-        value: <Tags tags={tags} />,
-      });
-    }
-    alertSummaryFields.push({
-      label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.rule', {
-        defaultMessage: 'Rule',
-      }),
-      value: (
-        <EuiLink data-test-subj="metricsRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
-          {rule.name}
-        </EuiLink>
-      ),
-    });
+  const alertEnd = alert.fields[ALERT_END];
+  const alertStart = alert.fields[ALERT_START];
 
-    setAlertSummaryFields(alertSummaryFields);
-  }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
+  const alertStartAnnotation: PointInTimeEventAnnotationConfig = {
+    label: 'Alert',
+    type: 'manual',
+    key: {
+      type: 'point_in_time',
+      timestamp: alertStart!,
+    },
+    color: euiTheme.colors.danger,
+    icon: 'alert',
+    id: 'metric_threshold_alert_start_annotation',
+  };
+
+  const alertRangeAnnotation: RangeEventAnnotationConfig = {
+    label: `${alertEnd ? 'Alert duration' : 'Active alert'}`,
+    type: 'manual',
+    key: {
+      type: 'range',
+      timestamp: alertStart!,
+      endTimestamp: alertEnd ?? moment().toISOString(),
+    },
+    color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
+    id: `metric_threshold_${alertEnd ? 'recovered' : 'active'}_alert_range_annotation`,
+  };
+
+  const annotations: EventAnnotationConfig[] = [];
+  annotations.push(alertStartAnnotation, alertRangeAnnotation);
 
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
@@ -142,10 +105,25 @@ export function AlertDetailsAppSection({
           alert.fields[ALERT_START]!,
           alert.fields[ALERT_END],
           {
-            size: criterion.timeSize,
-            unit: criterion.timeUnit,
+            size: criterion.timeSize!,
+            unit: criterion.timeUnit!,
           }
         );
+        let metricExpression = [
+          {
+            aggType: criterion.aggType as GenericAggType,
+            name: String.fromCharCode('A'.charCodeAt(0) + index),
+            field: criterion.metric || '',
+          },
+        ];
+        if (criterion.customMetrics) {
+          metricExpression = criterion.customMetrics.map((metric) => ({
+            name: metric.name,
+            aggType: metric.aggType as GenericAggType,
+            field: metric.field || '',
+            filter: metric.filter,
+          }));
+        }
         return (
           <EuiFlexItem key={generateUniqueKey(criterion)}>
             <EuiPanel hasBorder hasShadow={false}>
@@ -183,16 +161,30 @@ export function AlertDetailsAppSection({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={5}>
-                  <ExpressionChart
-                    annotations={annotations}
-                    chartType={MetricsExplorerChartType.line}
-                    expression={criterion}
-                    filterQuery={rule.params.filterQueryText}
-                    groupBy={rule.params.groupBy}
-                    groupInstance={groupInstance}
-                    hideTitle
-                    timeRange={timeRange}
-                  />
+                  {metricsView && (
+                    <RuleConditionChart
+                      additionalFilters={getGroupFilters(groups)}
+                      metricExpression={{
+                        metrics: metricExpression,
+                        threshold: criterion.threshold,
+                        comparator: criterion.comparator,
+                        timeSize: criterion.timeSize,
+                        timeUnit: criterion.timeUnit,
+                        warningComparator: criterion.warningComparator,
+                        warningThreshold: criterion.warningThreshold,
+                      }}
+                      chartOptions={{
+                        // For alert details page, the series type needs to be changed to 'bar_stacked'
+                        // due to https://github.com/elastic/elastic-charts/issues/2323
+                        seriesType: 'bar_stacked',
+                      }}
+                      searchConfiguration={{ query: { query: '', language: '' } }}
+                      timeRange={timeRange}
+                      dataView={metricsView.dataViewReference}
+                      groupBy={rule.params.groupBy}
+                      annotations={annotations}
+                    />
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
