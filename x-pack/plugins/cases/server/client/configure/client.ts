@@ -44,7 +44,7 @@ import type { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
 import { Operations } from '../../authorization';
-import { combineAuthorizedAndOwnerFilter } from '../utils';
+import { combineAuthorizedAndOwnerFilter, removeCustomFieldFromTemplates } from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
@@ -326,6 +326,11 @@ export async function update(
       customFields: configuration.attributes.customFields,
     });
 
+    const updatedTemplates = removeCustomFieldFromTemplates({
+      templates,
+      customFields: request.customFields,
+    });
+
     await authorization.ensureAuthorized({
       operation: Operations.updateConfiguration,
       entities: [{ owner: configuration.attributes.owner, id: configuration.id }],
@@ -381,7 +386,7 @@ export async function update(
       configurationId: configuration.id,
       updatedAttributes: {
         ...queryWithoutVersionAndConnector,
-        ...(templates && { templates }),
+        ...(updatedTemplates && { templates: updatedTemplates }),
         ...(connector != null && { connector }),
         updated_at: updateDate,
         updated_by: user,

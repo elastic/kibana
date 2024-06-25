@@ -788,6 +788,132 @@ describe('client', () => {
             'Failed to get patch configure in route: Error: The following custom fields have the wrong type in the request: "text label"'
           );
         });
+
+        it('removes deleted custom field from template correctly', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+              closure_type: 'close-by-user',
+              owner: 'cases',
+            },
+            id: 'test-id',
+            version: 'test-version',
+          });
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'updated value',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith({
+            configurationId: 'test-id',
+            originalConfiguration: {
+              attributes: {
+                closure_type: 'close-by-user',
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    label: 'text label',
+                    required: false,
+                    type: 'text',
+                  },
+                ],
+                owner: 'cases',
+                templates: [
+                  {
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: 'text',
+                          value: 'custom field value 1',
+                        },
+                      ],
+                    },
+                    description: 'this is test description',
+                    key: 'template_1',
+                    name: 'template 1',
+                  },
+                ],
+              },
+              id: 'test-id',
+              version: 'test-version',
+            },
+            unsecuredSavedObjectsClient: expect.anything(),
+            updatedAttributes: {
+              customFields: [],
+              templates: [
+                {
+                  caseFields: {
+                    customFields: [],
+                  },
+                  description: 'this is test description',
+                  key: 'template_1',
+                  name: 'template 1',
+                },
+              ],
+              updated_at: expect.anything(),
+              updated_by: expect.anything(),
+            },
+          });
+        });
       });
 
       describe('assignees', () => {
