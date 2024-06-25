@@ -77,7 +77,7 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
       {notes.map((note, index) => (
         <EuiComment
           data-test-subj={`${NOTES_COMMENT_TEST_ID}-${index}`}
-          key={`note-${index}`}
+          key={note.noteId}
           username={note.createdBy}
           timestamp={<>{note.created && <FormattedRelative value={new Date(note.created)} />}</>}
           event={ADDED_A_NOTE}

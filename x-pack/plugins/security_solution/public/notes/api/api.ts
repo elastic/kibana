@@ -16,21 +16,18 @@ import { NOTE_URL } from '../../../common/constants';
  * // TODO remove the old method when the transition to the new notes system is complete
  */
 export const createNote = async ({ note }: { note: BareNote }) => {
-  let requestBody;
-
   try {
-    requestBody = JSON.stringify({ note });
+    const response = await KibanaServices.get().http.patch<{
+      data: { persistNote: { code: number; message: string; note: Note } };
+    }>(NOTE_URL, {
+      method: 'PATCH',
+      body: JSON.stringify({ note }),
+      version: '2023-10-31',
+    });
+    return response.data.persistNote.note;
   } catch (err) {
-    return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
+    throw new Error(`Failed to stringify query: ${JSON.stringify(err)}`);
   }
-  const response = await KibanaServices.get().http.patch<{
-    data: { persistNote: { code: number; message: string; note: Note } };
-  }>(NOTE_URL, {
-    method: 'PATCH',
-    body: requestBody,
-    version: '2023-10-31',
-  });
-  return response.data.persistNote.note;
 };
 
 // TODO point to the correct API when it is available
