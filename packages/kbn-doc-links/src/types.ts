@@ -534,6 +534,7 @@ export interface DocLinks {
     datastreamsManualRollover: string;
     datastreamsTSDS: string;
     datastreamsTSDSMetrics: string;
+    datastreamsDownsampling: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     packageSignatures: string;
@@ -552,9 +553,14 @@ export interface DocLinks {
     performancePresets: string;
     scalingKubernetesResourcesAndLimits: string;
     roleAndPrivileges: string;
+    proxiesSettings: string;
   }>;
+  readonly integrationDeveloper: {
+    upload: string;
+  };
   readonly ecs: {
     readonly guide: string;
+    readonly dataStreams: string;
   };
   readonly clients: {
     readonly guide: string;

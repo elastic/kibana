@@ -11,14 +11,26 @@ import { SetupRouteOptions } from '../types';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
-import { stopAndDeleteTransform } from '../../lib/entities/stop_and_delete_transform';
-import { deleteIngestPipeline } from '../../lib/entities/delete_ingest_pipeline';
-import { deleteIndex } from '../../lib/entities/delete_index';
-import { createAndInstallIngestPipeline } from '../../lib/entities/create_and_install_ingest_pipeline';
-import { createAndInstallTransform } from '../../lib/entities/create_and_install_transform';
+import {
+  stopAndDeleteHistoryTransform,
+  stopAndDeleteLatestTransform,
+} from '../../lib/entities/stop_and_delete_transform';
+import {
+  deleteHistoryIngestPipeline,
+  deleteLatestIngestPipeline,
+} from '../../lib/entities/delete_ingest_pipeline';
+import { deleteIndices } from '../../lib/entities/delete_index';
+import {
+  createAndInstallHistoryIngestPipeline,
+  createAndInstallLatestIngestPipeline,
+} from '../../lib/entities/create_and_install_ingest_pipeline';
+import {
+  createAndInstallHistoryTransform,
+  createAndInstallLatestTransform,
+} from '../../lib/entities/create_and_install_transform';
 import { startTransform } from '../../lib/entities/start_transform';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
-import { ENTITY_API_PREFIX } from '../../../common/constants_entities';
+import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 
 export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -27,7 +39,7 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.post<{ id: string }, unknown, unknown>(
     {
-      path: `${ENTITY_API_PREFIX}/definition/{id}/_reset`,
+      path: `${ENTITY_INTERNAL_API_PREFIX}/definition/{id}/_reset`,
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -43,13 +55,17 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
         const definition = await readEntityDefinition(soClient, req.params.id, logger);
 
         // Delete the transform and ingest pipeline
-        await stopAndDeleteTransform(esClient, definition, logger);
-        await deleteIngestPipeline(esClient, definition, logger);
-        await deleteIndex(esClient, definition, logger);
+        await stopAndDeleteHistoryTransform(esClient, definition, logger);
+        await stopAndDeleteLatestTransform(esClient, definition, logger);
+        await deleteHistoryIngestPipeline(esClient, definition, logger);
+        await deleteLatestIngestPipeline(esClient, definition, logger);
+        await deleteIndices(esClient, definition, logger);
 
         // Recreate everything
-        await createAndInstallIngestPipeline(esClient, definition, logger, spaceId);
-        await createAndInstallTransform(esClient, definition, logger);
+        await createAndInstallHistoryIngestPipeline(esClient, definition, logger, spaceId);
+        await createAndInstallLatestIngestPipeline(esClient, definition, logger, spaceId);
+        await createAndInstallHistoryTransform(esClient, definition, logger);
+        await createAndInstallLatestTransform(esClient, definition, logger);
         await startTransform(esClient, definition, logger);
 
         return res.ok({ body: { acknowledged: true } });

@@ -28,12 +28,9 @@ export const CONFIG_ERR = (err: string) =>
     },
   });
 
-export const INVALID_USER_PW = i18n.translate(
-  'xpack.stackConnectors.casesWebhook.invalidUsernamePassword',
-  {
-    defaultMessage: 'both user and password must be specified',
-  }
-);
+export const INVALID_AUTH = i18n.translate('xpack.stackConnectors.casesWebhook.invalidSecrets', {
+  defaultMessage: 'must specify a secrets configuration',
+});
 
 export const ALLOWED_HOSTS_ERROR = (message: string) =>
   i18n.translate('xpack.stackConnectors.casesWebhook.configuration.apiAllowedHostsError', {

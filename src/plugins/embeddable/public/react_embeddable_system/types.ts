@@ -36,21 +36,32 @@ export interface DefaultEmbeddableApi<
     HasSnapshottableState<RuntimeState> {}
 
 /**
- * A subset of the default embeddable API used in registration to allow implementors to omit aspects
- * of the API that will be automatically added by the system.
+ * Defines the subset of the default embeddable API that the `setApi` method uses, which allows implementors
+ * to omit aspects of the API that will be automatically added by `setApi`.
  */
-export type ReactEmbeddableApiRegistration<
+export type SetReactEmbeddableApiRegistration<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
+> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$'>;
+
+/**
+ * Defines the subset of the default embeddable API that the `buildApi` method uses, which allows implementors
+ * to omit aspects of the API that will be automatically added by `buildApi`.
+ */
+export type BuildReactEmbeddableApiRegistration<
+  SerializedState extends object = object,
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
 > = Omit<
-  Api,
-  | 'uuid'
-  | 'parent'
-  | 'type'
-  | 'unsavedChanges'
-  | 'resetUnsavedChanges'
-  | 'snapshotRuntimeState'
-  | 'phase$'
+  SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>,
+  'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
 >;
 
 /**
@@ -62,8 +73,11 @@ export type ReactEmbeddableApiRegistration<
  **/
 export interface ReactEmbeddableFactory<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
-  RuntimeState extends object = SerializedState
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
 > {
   /**
    * A unique key for the type of this embeddable. The React Embeddable Renderer will use this type
@@ -93,11 +107,17 @@ export interface ReactEmbeddableFactory<
    */
   buildEmbeddable: (
     initialState: RuntimeState,
+    /**
+     * `buildApi` should be used by most embeddables that are used in dashboards, since it implements the unsaved
+     * changes logic that the dashboard expects using the provided comparators
+     */
     buildApi: (
-      apiRegistration: ReactEmbeddableApiRegistration<SerializedState, Api>,
+      apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>,
       comparators: StateComparators<RuntimeState>
-    ) => Api,
+    ) => Api & HasSnapshottableState<RuntimeState>,
     uuid: string,
-    parentApi?: unknown
+    parentApi: unknown | undefined,
+    /** `setApi` should be used when the unsaved changes logic in `buildApi` is unnecessary */
+    setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>) => Api
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 }

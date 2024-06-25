@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { UpdateListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { UpdateListRequestBody } from '@kbn/securitysolution-lists-common/api';
 
 import { DESCRIPTION, LIST_ID, META, NAME, _VERSION } from '../../constants.mock';
 
-export const getUpdateListSchemaMock = (): UpdateListSchema => ({
+export const getUpdateListSchemaMock = (): UpdateListRequestBody => ({
   _version: _VERSION,
   description: DESCRIPTION,
   id: LIST_ID,
@@ -21,7 +21,7 @@ export const getUpdateListSchemaMock = (): UpdateListSchema => ({
  * Useful for end to end tests and other mechanisms which want to fill in the values
  * after doing a get of the structure.
  */
-export const getUpdateMinimalListSchemaMock = (): UpdateListSchema => ({
+export const getUpdateMinimalListSchemaMock = (): UpdateListRequestBody => ({
   description: DESCRIPTION,
   id: LIST_ID,
   name: NAME,
