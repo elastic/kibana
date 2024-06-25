@@ -115,3 +115,18 @@ interface BaseQueryApiKeyResult {
   aggregationTotal: number;
   aggregations: Record<string, estypes.SecurityQueryApiKeysApiKeyAggregate> | undefined;
 }
+
+/**
+ * Interface representing a REST API key that is managed by Kibana.
+ */
+export interface ManagedApiKey extends BaseApiKey {
+  type: 'managed';
+}
+
+/**
+ * Interface representing an API key the way it is presented in the Kibana UI  (with Kibana system
+ * API keys given its own dedicated `managed` type).
+ */
+export type CategorizedApiKey = (ApiKey | ManagedApiKey) & {
+  expired: boolean;
+};
