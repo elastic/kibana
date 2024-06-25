@@ -74,6 +74,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
             ...options,
             references,
             id: ruleId,
+            refresh: false,
           },
         })
     )) as SavedObject<RawRule>;
@@ -120,6 +121,9 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
         id: createdAlert.id,
         updateRuleAttributes: {
           scheduledTaskId,
+        },
+        savedObjectsUpdateOptions: {
+          refresh: 'wait_for',
         },
       })
     );
