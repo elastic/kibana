@@ -15,7 +15,7 @@ import { Reason } from './reason';
 import { MitreAttack } from './mitre_attack';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { isEcsAllowedValue } from '../utils/event_utils';
 import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
@@ -30,7 +30,7 @@ const KEY = 'about';
  * For all other events, it shows the event kind description, a list of event categories and event renderer.
  */
 export const AboutSection = memo(() => {
-  const { getFieldsData } = useRightPanelContext();
+  const { getFieldsData } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
   const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
 

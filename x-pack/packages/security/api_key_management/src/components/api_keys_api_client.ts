@@ -8,14 +8,22 @@
 import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 
 import type { HttpStart } from '@kbn/core/public';
-import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
+import type {
+  CreateAPIKeyParams,
+  CreateAPIKeyResult,
+  UpdateAPIKeyParams,
+  UpdateAPIKeyResult,
+} from '@kbn/security-plugin-types-server';
 
-import type { QueryFilters } from './api_keys_grid/api_keys_table';
-import type { ApiKeyToInvalidate, QueryApiKeyResult } from '../../../common/model';
-import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../../server/routes/api_keys';
+import type { ApiKeyToInvalidate, QueryApiKeyResult } from '@kbn/security-plugin-types-common';
 
 export type { CreateAPIKeyParams, CreateAPIKeyResult, UpdateAPIKeyParams, UpdateAPIKeyResult };
 
+export interface QueryFilters {
+  usernames?: string[];
+  type?: 'rest' | 'managed' | 'cross_cluster';
+  expired?: boolean;
+}
 export interface InvalidateApiKeysResponse {
   itemsInvalidated: ApiKeyToInvalidate[];
   errors: any[];
