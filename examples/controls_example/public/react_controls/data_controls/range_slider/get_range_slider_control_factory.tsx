@@ -10,7 +10,10 @@ import React, { useEffect, useMemo } from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { useBatchedPublishingSubjects, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import { initializeDataControl } from '../initialize_data_control';
@@ -68,7 +71,7 @@ export const getRangesliderControlFactory = (
       function setValue(nextValue: RangeValue | undefined) {
         value$.next(nextValue);
       }
-      
+
       const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step' | 'value'>>(
         uuid,
         RANGE_SLIDER_CONTROL_TYPE,
