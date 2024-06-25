@@ -100,17 +100,4 @@ describe('bulkInstallPackages', () => {
       expect(mockedInstallPackage).toHaveBeenCalledTimes(2);
     });
   });
-
-  test('prevents installation of forbidden packages', async () => {
-    const packagesToInstall = ['security_detection_engine', 'some_other_package'];
-
-    await bulkInstallPackages({
-      savedObjectsClient: mockSoClient,
-      packagesToInstall,
-      esClient: mockEsClient,
-      spaceId: 'default',
-    });
-
-    expect(mockedInstallPackage).toHaveBeenCalledTimes(1);
-  });
 });

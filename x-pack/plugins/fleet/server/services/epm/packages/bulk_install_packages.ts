@@ -10,8 +10,6 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import pLimit from 'p-limit';
 import { uniqBy } from 'lodash';
 
-import { PackageBulkInstallForbiddenError } from '../../../errors';
-
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 
 import { appContextService } from '../../app_context';
@@ -63,6 +61,55 @@ export async function bulkInstallPackages({
     return pkg.name;
   });
 
+  // The set of forbidden packages will be installed one at a time synchronously rather than asynchonously in bulk
+  const packagesToSingleInstall = uniquePackages.filter((pkg) =>
+    FORBIDDEN_BULK_INSTALL_PACKAGE_NAMES.includes(coerceToPackageName(pkg))
+  );
+
+  const packagesToBulkInstall = uniquePackages.filter((pkg) => {
+    return !packagesToSingleInstall.some(
+      (otherPkg) => coerceToPackageName(otherPkg) === coerceToPackageName(pkg)
+    );
+  });
+
+  const singleInstallResults: BulkInstallResponse[] = [];
+
+  if (packagesToSingleInstall.length > 0) {
+    logger.warn(
+      `The following packages are not supported in bulk installation, and will be installed separately: ${packagesToSingleInstall
+        .map(coerceToPackageName)
+        .join(', ')}`
+    );
+
+    for (const pkg of packagesToSingleInstall) {
+      const pkgName = typeof pkg === 'string' ? pkg : pkg.name;
+      const pkgRes = await Registry.fetchFindLatestPackageOrThrow(pkgName, {
+        prerelease,
+      });
+
+      const installResult = await installPackage({
+        savedObjectsClient,
+        esClient,
+        pkgkey: Registry.pkgToPkgKey(pkgRes),
+        installSource: 'registry',
+        spaceId,
+        force,
+        prerelease,
+        authorizationHeader,
+      })
+        .then((result) => {
+          return { name: pkgName, version: pkgRes.version, result };
+        })
+        .catch((error) => {
+          return { error, name: pkgName };
+        });
+
+      singleInstallResults.push(installResult);
+    }
+
+    logger.debug('Finished single package installations');
+  }
+
   const maxConcurrentInstalls =
     appContextService.getConfig()?.internal?.maxConcurrentBulkInstallations ??
     DEFAULT_MAX_CONCURRENT_INSTALLS;
@@ -76,23 +123,8 @@ export async function bulkInstallPackages({
     skipDataStreamRollover?: boolean;
     forbidden?: boolean;
   }>(
-    uniquePackages.map(async (pkg) => {
+    packagesToBulkInstall.map(async (pkg) => {
       return limiter(async () => {
-        const packageName = typeof pkg === 'string' ? pkg : pkg.name;
-        const isPackageForbidden = FORBIDDEN_BULK_INSTALL_PACKAGE_NAMES.includes(packageName);
-
-        if (isPackageForbidden) {
-          logger.warn(`Package cannot be bulk installed and will be ignored: ${packageName}`);
-
-          return Promise.resolve({
-            name: packageName,
-            version: '',
-            prerelease: undefined,
-            skipDataStreamRollover: undefined,
-            forbidden: true,
-          });
-        }
-
         if (typeof pkg === 'string') {
           return Registry.fetchFindLatestPackageOrThrow(pkg, {
             prerelease,
@@ -120,7 +152,7 @@ export async function bulkInstallPackages({
   );
 
   logger.debug(
-    `kicking off bulk install of ${packagesToInstall
+    `kicking off bulk install of ${packagesToBulkInstall
       .map((pkg) => (typeof pkg === 'string' ? pkg : pkg.name))
       .join(', ')}`
   );
@@ -131,16 +163,6 @@ export async function bulkInstallPackages({
 
       if (result.status === 'rejected') {
         return { name: packageName, error: result.reason };
-      }
-
-      if (result.value.forbidden) {
-        return {
-          name: packageName,
-          status: 'not_installed',
-          error: new PackageBulkInstallForbiddenError(
-            `Bulk installation of ${packageName} is forbidden. Please install it via the single package installation API.`
-          ),
-        };
       }
 
       const pkgKeyProps: {
@@ -206,22 +228,25 @@ export async function bulkInstallPackages({
     })
   );
 
-  return bulkInstallResults.map((result, index) => {
-    const packageName = getNameFromPackagesToInstall(packagesToInstall, index);
-    if (result.status === 'fulfilled') {
-      if (result.value && result.value.error) {
-        return {
-          name: packageName,
-          error: result.value.error,
-          installType: result.value.installType,
-        };
+  return [
+    ...singleInstallResults,
+    ...bulkInstallResults.map((result, index) => {
+      const packageName = getNameFromPackagesToInstall(packagesToInstall, index);
+      if (result.status === 'fulfilled') {
+        if (result.value && result.value.error) {
+          return {
+            name: packageName,
+            error: result.value.error,
+            installType: result.value.installType,
+          };
+        } else {
+          return result.value;
+        }
       } else {
-        return result.value;
+        return { name: packageName, error: result.reason };
       }
-    } else {
-      return { name: packageName, error: result.reason };
-    }
-  });
+    }),
+  ];
 }
 
 export function isBulkInstallError(
@@ -241,4 +266,8 @@ function getNameFromPackagesToInstall(
   const entry = packagesToInstall[index];
   if (typeof entry === 'string') return entry;
   return entry.name;
+}
+
+function coerceToPackageName(pkg: string | { name: string }) {
+  return typeof pkg === 'string' ? pkg : pkg.name;
 }
