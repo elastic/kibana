@@ -15,7 +15,7 @@ import type { State } from '../../../../common/store';
 import type { Note } from '../../../../../common/api/timeline';
 import {
   ReqStatus,
-  selectCreateNoteByDocumentIdStatus,
+  selectCreateNoteStatus,
   selectFetchNotesByDocumentIdError,
   selectFetchNotesByDocumentIdStatus,
   selectNotesByDocumentId,
@@ -54,7 +54,7 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
   const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdError(state));
   const notes: Note[] = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
 
-  const createStatus = useSelector((state: State) => selectCreateNoteByDocumentIdStatus(state));
+  const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
 
   useEffect(() => {
     if (fetchStatus === ReqStatus.Failed && fetchError) {

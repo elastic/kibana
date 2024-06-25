@@ -520,11 +520,11 @@ export const mockGlobalState: State = {
     },
     status: {
       fetchNotesByDocumentId: ReqStatus.Idle,
-      createNoteByDocumentId: ReqStatus.Idle,
+      createNote: ReqStatus.Idle,
     },
     error: {
       fetchNotesByDocumentId: null,
-      createNoteByDocumentId: null,
+      createNote: null,
     },
   },
 };

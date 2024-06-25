@@ -20,10 +20,10 @@ import { ADD_NOTE_BUTTON_TEST_ID, ADD_NOTE_MARKDOWN_TEST_ID } from './test_ids';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { State } from '../../../../common/store';
 import {
-  createNoteByDocumentId,
+  createNote,
   ReqStatus,
-  selectCreateNoteByDocumentIdError,
-  selectCreateNoteByDocumentIdStatus,
+  selectCreateNoteError,
+  selectCreateNoteStatus,
 } from '../../../../notes/store/notes.slice';
 import { MarkdownEditor } from '../../../../common/components/markdown_editor';
 
@@ -58,12 +58,12 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
   const { addError: addErrorToast } = useAppToasts();
   const [editorValue, setEditorValue] = useState('');
 
-  const createStatus = useSelector((state: State) => selectCreateNoteByDocumentIdStatus(state));
-  const createError = useSelector((state: State) => selectCreateNoteByDocumentIdError(state));
+  const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
+  const createError = useSelector((state: State) => selectCreateNoteError(state));
 
   const addNote = useCallback(() => {
     dispatch(
-      createNoteByDocumentId({
+      createNote({
         note: {
           timelineId: '',
           eventId,

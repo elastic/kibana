@@ -6,14 +6,14 @@
  */
 
 import {
-  createNoteByDocumentId,
+  createNote,
   fetchNotesByDocumentId,
   initialNotesState,
   notesReducer,
   ReqStatus,
   selectAllNotes,
-  selectCreateNoteByDocumentIdError,
-  selectCreateNoteByDocumentIdStatus,
+  selectCreateNoteError,
+  selectCreateNoteStatus,
   selectFetchNotesByDocumentIdError,
   selectFetchNotesByDocumentIdStatus,
   selectNoteById,
@@ -31,8 +31,8 @@ const initialNonEmptyState = {
     [mockNote.noteId]: mockNote,
   },
   ids: [mockNote.noteId],
-  status: { fetchNotesByDocumentId: ReqStatus.Idle, createNoteByDocumentId: ReqStatus.Idle },
-  error: { fetchNotesByDocumentId: null, createNoteByDocumentId: null },
+  status: { fetchNotesByDocumentId: ReqStatus.Idle, createNote: ReqStatus.Idle },
+  error: { fetchNotesByDocumentId: null, createNote: null },
 };
 
 describe('notesSlice', () => {
@@ -41,8 +41,8 @@ describe('notesSlice', () => {
       expect(notesReducer(initalEmptyState, { type: 'unknown' })).toEqual({
         entities: {},
         ids: [],
-        status: { fetchNotesByDocumentId: ReqStatus.Idle, createNoteByDocumentId: ReqStatus.Idle },
-        error: { fetchNotesByDocumentId: null, createNoteByDocumentId: null },
+        status: { fetchNotesByDocumentId: ReqStatus.Idle, createNote: ReqStatus.Idle },
+        error: { fetchNotesByDocumentId: null, createNote: null },
       });
     });
 
@@ -55,9 +55,9 @@ describe('notesSlice', () => {
           ids: [],
           status: {
             fetchNotesByDocumentId: ReqStatus.Loading,
-            createNoteByDocumentId: ReqStatus.Idle,
+            createNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentId: null, createNoteByDocumentId: null },
+          error: { fetchNotesByDocumentId: null, createNote: null },
         });
       });
 
@@ -79,9 +79,9 @@ describe('notesSlice', () => {
           ids: action.payload.result,
           status: {
             fetchNotesByDocumentId: ReqStatus.Succeeded,
-            createNoteByDocumentId: ReqStatus.Idle,
+            createNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentId: null, createNoteByDocumentId: null },
+          error: { fetchNotesByDocumentId: null, createNote: null },
         });
       });
 
@@ -104,9 +104,9 @@ describe('notesSlice', () => {
           ids: action.payload.result,
           status: {
             fetchNotesByDocumentId: ReqStatus.Succeeded,
-            createNoteByDocumentId: ReqStatus.Idle,
+            createNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentId: null, createNoteByDocumentId: null },
+          error: { fetchNotesByDocumentId: null, createNote: null },
         });
       });
 
@@ -118,31 +118,31 @@ describe('notesSlice', () => {
           ids: [],
           status: {
             fetchNotesByDocumentId: ReqStatus.Failed,
-            createNoteByDocumentId: ReqStatus.Idle,
+            createNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentId: 'error', createNoteByDocumentId: null },
+          error: { fetchNotesByDocumentId: 'error', createNote: null },
         });
       });
     });
 
-    describe('createNoteByDocumentId', () => {
+    describe('createNote', () => {
       it('should set correct state when creating a note by document id', () => {
-        const action = { type: createNoteByDocumentId.pending.type };
+        const action = { type: createNote.pending.type };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
           entities: {},
           ids: [],
           status: {
             fetchNotesByDocumentId: ReqStatus.Idle,
-            createNoteByDocumentId: ReqStatus.Loading,
+            createNote: ReqStatus.Loading,
           },
-          error: { fetchNotesByDocumentId: null, createNoteByDocumentId: null },
+          error: { fetchNotesByDocumentId: null, createNote: null },
         });
       });
 
       it('should set correct state when success on create a note by document id on an empty state', () => {
         const action = {
-          type: createNoteByDocumentId.fulfilled.type,
+          type: createNote.fulfilled.type,
           payload: {
             entities: {
               notes: {
@@ -158,23 +158,23 @@ describe('notesSlice', () => {
           ids: [action.payload.result],
           status: {
             fetchNotesByDocumentId: ReqStatus.Idle,
-            createNoteByDocumentId: ReqStatus.Succeeded,
+            createNote: ReqStatus.Succeeded,
           },
-          error: { fetchNotesByDocumentId: null, createNoteByDocumentId: null },
+          error: { fetchNotesByDocumentId: null, createNote: null },
         });
       });
 
       it('should set correct state when error on create a note by document id', () => {
-        const action = { type: createNoteByDocumentId.rejected.type, error: 'error' };
+        const action = { type: createNote.rejected.type, error: 'error' };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
           entities: {},
           ids: [],
           status: {
             fetchNotesByDocumentId: ReqStatus.Idle,
-            createNoteByDocumentId: ReqStatus.Failed,
+            createNote: ReqStatus.Failed,
           },
-          error: { fetchNotesByDocumentId: null, createNoteByDocumentId: 'error' },
+          error: { fetchNotesByDocumentId: null, createNote: 'error' },
         });
       });
     });
@@ -211,11 +211,11 @@ describe('notesSlice', () => {
     });
 
     it('should return create note by document id status', () => {
-      expect(selectCreateNoteByDocumentIdStatus(mockGlobalState)).toEqual(ReqStatus.Idle);
+      expect(selectCreateNoteStatus(mockGlobalState)).toEqual(ReqStatus.Idle);
     });
 
     it('should return create note by document id error', () => {
-      expect(selectCreateNoteByDocumentIdError(mockGlobalState)).toEqual(null);
+      expect(selectCreateNoteError(mockGlobalState)).toEqual(null);
     });
 
     it('should return all notes for an existing document id', () => {

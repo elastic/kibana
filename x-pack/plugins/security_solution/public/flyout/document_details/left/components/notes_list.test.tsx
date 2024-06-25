@@ -80,7 +80,7 @@ describe('NotesList', () => {
 
   it('should render create loading when user create a new note', () => {
     const state = { ...mockGlobalState };
-    state.notes.status.createNoteByDocumentId = ReqStatus.Loading;
+    state.notes.status.createNote = ReqStatus.Loading;
     const store = createMockStore(state);
 
     const { getByTestId } = render(

@@ -9,7 +9,10 @@ import type { EntityState, SerializedError } from '@reduxjs/toolkit';
 import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
 import type { State } from '../../common/store';
-import { createNote, fetchNotesByDocumentId as fetchNotesByDocumentIdApi } from '../api/api';
+import {
+  createNote as createNoteApi,
+  fetchNotesByDocumentId as fetchNotesByDocumentIdApi,
+} from '../api/api';
 import type { NormalizedEntities, NormalizedEntity } from './normalize';
 import { normalizeEntities, normalizeEntity } from './normalize';
 import type { BareNote, Note } from '../../../common/api/timeline';
@@ -29,11 +32,11 @@ interface HttpError {
 export interface NotesState extends EntityState<Note> {
   status: {
     fetchNotesByDocumentId: ReqStatus;
-    createNoteByDocumentId: ReqStatus;
+    createNote: ReqStatus;
   };
   error: {
     fetchNotesByDocumentId: SerializedError | HttpError | null;
-    createNoteByDocumentId: SerializedError | HttpError | null;
+    createNote: SerializedError | HttpError | null;
   };
 }
 
@@ -44,11 +47,11 @@ const notesAdapter = createEntityAdapter<Note>({
 export const initialNotesState: NotesState = notesAdapter.getInitialState({
   status: {
     fetchNotesByDocumentId: ReqStatus.Idle,
-    createNoteByDocumentId: ReqStatus.Idle,
+    createNote: ReqStatus.Idle,
   },
   error: {
     fetchNotesByDocumentId: null,
-    createNoteByDocumentId: null,
+    createNote: null,
   },
 });
 
@@ -62,15 +65,14 @@ export const fetchNotesByDocumentId = createAsyncThunk<
   return normalizeEntities(res);
 });
 
-export const createNoteByDocumentId = createAsyncThunk<
-  NormalizedEntity<Note>,
-  { note: BareNote },
-  {}
->('notes/createNoteByDocumentId', async (args) => {
-  const { note } = args;
-  const res = await createNote({ note });
-  return normalizeEntity(res);
-});
+export const createNote = createAsyncThunk<NormalizedEntity<Note>, { note: BareNote }, {}>(
+  'notes/createNote',
+  async (args) => {
+    const { note } = args;
+    const res = await createNoteApi({ note });
+    return normalizeEntity(res);
+  }
+);
 
 const notesSlice = createSlice({
   name: 'notes',
@@ -89,16 +91,16 @@ const notesSlice = createSlice({
         state.status.fetchNotesByDocumentId = ReqStatus.Failed;
         state.error.fetchNotesByDocumentId = action.payload ?? action.error;
       })
-      .addCase(createNoteByDocumentId.pending, (state) => {
-        state.status.createNoteByDocumentId = ReqStatus.Loading;
+      .addCase(createNote.pending, (state) => {
+        state.status.createNote = ReqStatus.Loading;
       })
-      .addCase(createNoteByDocumentId.fulfilled, (state, action) => {
+      .addCase(createNote.fulfilled, (state, action) => {
         notesAdapter.addMany(state, action.payload.entities.notes);
-        state.status.createNoteByDocumentId = ReqStatus.Succeeded;
+        state.status.createNote = ReqStatus.Succeeded;
       })
-      .addCase(createNoteByDocumentId.rejected, (state, action) => {
-        state.status.createNoteByDocumentId = ReqStatus.Failed;
-        state.error.createNoteByDocumentId = action.payload ?? action.error;
+      .addCase(createNote.rejected, (state, action) => {
+        state.status.createNote = ReqStatus.Failed;
+        state.error.createNote = action.payload ?? action.error;
       });
   },
 });
@@ -117,11 +119,9 @@ export const selectFetchNotesByDocumentIdStatus = (state: State) =>
 export const selectFetchNotesByDocumentIdError = (state: State) =>
   state.notes.error.fetchNotesByDocumentId;
 
-export const selectCreateNoteByDocumentIdStatus = (state: State) =>
-  state.notes.status.createNoteByDocumentId;
+export const selectCreateNoteStatus = (state: State) => state.notes.status.createNote;
 
-export const selectCreateNoteByDocumentIdError = (state: State) =>
-  state.notes.error.createNoteByDocumentId;
+export const selectCreateNoteError = (state: State) => state.notes.error.createNote;
 
 export const selectNotesByDocumentId = createSelector(
   [selectAllNotes, (state, documentId) => documentId],
