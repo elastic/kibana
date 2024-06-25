@@ -7,6 +7,8 @@
 
 import React, { memo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { EuiSpacer } from '@elastic/eui';
+import { AddNote } from './add_note';
 import { NotesList } from './notes_list';
 import { fetchNotesByDocumentId } from '../../../../notes/store/notes.slice';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -23,7 +25,13 @@ export const NotesDetails = memo(() => {
     dispatch(fetchNotesByDocumentId({ documentId: eventId }));
   }, [dispatch, eventId]);
 
-  return <NotesList eventId={eventId} />;
+  return (
+    <>
+      <NotesList eventId={eventId} />
+      <EuiSpacer />
+      <AddNote eventId={eventId} />
+    </>
+  );
 });
 
 NotesDetails.displayName = 'NotesDetails';
