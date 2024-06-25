@@ -118,7 +118,7 @@ describe('grouping container', () => {
   });
 
   it('Renders a null group and passes the correct filter to take actions and child component', () => {
-    takeActionItems.mockReturnValue([]);
+    takeActionItems.mockReturnValue([<span />]);
     const { getAllByTestId, getByTestId } = render(
       <I18nProvider>
         <Grouping {...testProps} />

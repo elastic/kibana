@@ -13,7 +13,7 @@ import type {
   GroupingAggregation,
   NamedAggregation,
   RawBucket,
-  StatRenderer,
+  GroupStatsItem,
 } from './src';
 
 export { getGroupingQuery, isNoneGroup, useGrouping };
@@ -24,5 +24,5 @@ export type {
   GroupingAggregation,
   NamedAggregation,
   RawBucket,
-  StatRenderer,
+  GroupStatsItem,
 };
