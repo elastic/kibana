@@ -31,7 +31,7 @@ interface Props {
   displayFancy?: (displayText: string) => React.ReactNode;
   setIsOpen?: (isOpen: boolean) => void;
   isFlyoutMode: boolean;
-  stats: AttackDiscoveryStats | null;
+  stats?: AttackDiscoveryStats | null;
 }
 
 export type AIConnector = ActionConnector & {

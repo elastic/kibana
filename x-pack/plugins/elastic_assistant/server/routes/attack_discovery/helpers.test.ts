@@ -491,7 +491,7 @@ describe('helpers', () => {
       });
     });
   });
-  describe.only('getAttackDiscoveryStats', () => {
+  describe('getAttackDiscoveryStats', () => {
     const mockDiscoveries = [
       {
         timestamp: '2024-06-13T17:55:11.360Z',

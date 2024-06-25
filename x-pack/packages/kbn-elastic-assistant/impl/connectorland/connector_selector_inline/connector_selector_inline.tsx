@@ -36,7 +36,7 @@ interface Props {
   isFlyoutMode: boolean;
   onConnectorIdSelected?: (connectorId: string) => void;
   onConnectorSelected?: (conversation: Conversation) => void;
-  stats: AttackDiscoveryStats | null;
+  stats?: AttackDiscoveryStats | null;
 }
 
 const inputContainerClassName = css`
