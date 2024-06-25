@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ApiKey } from '@kbn/security-plugin/common';
+import { ApiKey } from '@kbn/security-plugin-types-common';
 
 import { KibanaLogic } from '../../kibana';
 
@@ -61,6 +61,7 @@ export const ApiKeyPanelContent: React.FC<ApiKeyPanelContent> = ({ apiKeys, open
               <EuiFlexGroup direction="row" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-test-subj="enterpriseSearchApiKeyPanelContentButton"
                     key="viewApiKeys"
                     iconType="plusInCircle"
                     onClick={openApiKeyModal}
@@ -78,6 +79,7 @@ export const ApiKeyPanelContent: React.FC<ApiKeyPanelContent> = ({ apiKeys, open
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-test-subj="enterpriseSearchApiKeyPanelContentButton"
                     key="viewApiKeys"
                     iconType="popout"
                     iconSide="right"
