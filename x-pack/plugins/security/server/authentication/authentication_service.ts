@@ -342,13 +342,12 @@ export class AuthenticationService {
     customLogoutURL,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
-      clusterClient,
+      getClusterClient: () => Promise.resolve(clusterClient),
       logger: this.logger.get('api-key'),
       license: this.license,
       applicationName,
-      kibanaFeatures,
+      getKibanaFeatures: () => Promise.resolve(kibanaFeatures),
     });
-
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
      * to construct a server base URL (deprecated, used by the SAML provider only).

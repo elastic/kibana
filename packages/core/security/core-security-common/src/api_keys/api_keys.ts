@@ -5,12 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { APIKeys } from '@kbn/security-plugin-types-server';
 
-export type {
-  User,
-  UserRealm,
-  AuthenticatedUser,
-  AuthenticationProvider,
-} from './src/authentication';
-
-export type { APIKeysService } from './src/api_keys';
+export interface APIKeysService extends APIKeys {}

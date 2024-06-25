@@ -6,11 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type {
-  User,
-  UserRealm,
-  AuthenticatedUser,
-  AuthenticationProvider,
-} from './src/authentication';
-
-export type { APIKeysService } from './src/api_keys';
+export type { APIKeysService } from './api_keys';

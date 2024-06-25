@@ -23,6 +23,13 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
+  describe('authc.apiKeys', () => {
+    it('returns null', async () => {
+      const { apiKeys } = implementation.authc;
+      expect(apiKeys).toBeNull();
+    });
+  });
+
   describe('audit.asScoped', () => {
     it('returns null', async () => {
       const logger = implementation.audit.asScoped({} as any);

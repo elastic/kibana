@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser, APIKeysService } from '@kbn/core-security-common';
 import { AuditLogger } from './audit_logging/audit_logger';
 
 export interface SecurityRequestHandlerContext {
@@ -16,6 +16,7 @@ export interface SecurityRequestHandlerContext {
 
 export interface AuthcRequestHandlerContext {
   getCurrentUser(): AuthenticatedUser | null;
+  apiKeys: APIKeysService | null;
 }
 
 export interface AuditRequestHandlerContext {

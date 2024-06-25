@@ -7,7 +7,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser, APIKeysService } from '@kbn/core-security-common';
 
 /**
  * Core's authentication service
@@ -22,4 +22,5 @@ export interface CoreAuthenticationService {
    * @param request The request to retrieve the authenticated user for.
    */
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
+  apiKeys: APIKeysService | null;
 }

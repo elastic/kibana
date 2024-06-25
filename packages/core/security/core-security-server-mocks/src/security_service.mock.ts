@@ -15,6 +15,7 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from '@kbn/core-security-server-internal';
+import { apiKeysServiceMock } from './api_keys.mock';
 import { auditServiceMock, type MockedAuditService } from './audit.mock';
 
 const createSetupMock = () => {
@@ -33,6 +34,7 @@ const createStartMock = (): SecurityStartMock => {
   const mock = {
     authc: {
       getCurrentUser: jest.fn(),
+      apiKeys: apiKeysServiceMock,
     },
     audit: auditServiceMock.create(),
   };
@@ -58,6 +60,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
   const mock = {
     authc: {
       getCurrentUser: jest.fn(),
+      apiKeys: apiKeysServiceMock,
     },
     audit: auditServiceMock.create(),
   };
@@ -79,6 +82,7 @@ const createRequestHandlerContextMock = () => {
   const mock: jest.MockedObjectDeep<SecurityRequestHandlerContext> = {
     authc: {
       getCurrentUser: jest.fn(),
+      apiKeys: apiKeysServiceMock,
     },
     audit: {
       logger: {
