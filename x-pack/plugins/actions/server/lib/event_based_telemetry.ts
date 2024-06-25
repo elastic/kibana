@@ -12,6 +12,7 @@ export const GEN_AI_TOKEN_COUNT_EVENT: EventTypeOpts<{
   total_tokens: number;
   prompt_tokens: number;
   completion_tokens: number;
+  provider?: string;
 }> = {
   eventType: 'gen_ai_token_count',
   schema: {
@@ -41,6 +42,13 @@ export const GEN_AI_TOKEN_COUNT_EVENT: EventTypeOpts<{
       _meta: {
         description: 'Completion token count',
         optional: false,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'OpenAI provider',
+        optional: true,
       },
     },
   },

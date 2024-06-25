@@ -599,6 +599,9 @@ export class ActionExecutor {
                   total_tokens: tokenTracking.total_tokens,
                   prompt_tokens: tokenTracking.prompt_tokens,
                   completion_tokens: tokenTracking.completion_tokens,
+                  ...(actionTypeId === '.gen-ai' && config?.apiProvider != null
+                    ? { provider: config?.apiProvider }
+                    : {}),
                 });
               }
             })
