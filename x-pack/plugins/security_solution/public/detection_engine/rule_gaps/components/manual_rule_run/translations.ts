@@ -68,3 +68,18 @@ export const MANUAL_RULE_RUN_START_DATE_OUT_OF_RANGE_ERROR = (maxDaysLookback: n
     defaultMessage:
       'Manual rule run cannot be scheduled earlier than {maxDaysLookback, plural, =1 {# day} other {# days}} ago',
   });
+
+export const MANUAL_RULE_RUN_ALERT_LIMITATIONS = i18n.translate(
+  'xpack.securitySolution.manualRuleRun.alertLimitations',
+  {
+    defaultMessage:
+      'To view alerts from manual rule runs, please apply the specified date range filter on the alerts page.',
+  }
+);
+
+export const MANUAL_RULE_RUN_NOTIFIACTIONS_LIMITATIONS = i18n.translate(
+  'xpack.securitySolution.manualRuleRun.alertLimitations',
+  {
+    defaultMessage: 'Configured rule actions will not be executed during manual rule runs.',
+  }
+);
