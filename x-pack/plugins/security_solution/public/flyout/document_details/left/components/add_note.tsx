@@ -65,7 +65,7 @@ export const ATTACH_TO_TIMELINE_INFO = i18n.translate(
   'xpack.securitySolution.notes.attachToTimelineInfoLabel',
   {
     defaultMessage:
-      'If you want to create a note associated to a timeline, please save your timeline first.',
+      'The active timeline must be saved before a note can be associated with it',
   }
 );
 
