@@ -52,6 +52,7 @@ export const TokenField: FunctionComponent<TokenFieldProps> = (props) => {
       readOnly
     >
       <EuiFieldText
+        data-test-subj="apiKeyTokenField"
         controlOnly
         aria-label={i18n.translate('xpack.security.copyTokenField.tokenLabel', {
           defaultMessage: 'Token',
@@ -102,6 +103,7 @@ export const SelectableTokenField: FunctionComponent<SelectableTokenFieldProps> 
         <EuiPopover
           button={
             <EuiButtonEmpty
+              data-test-subj="selectableTokenFieldButton"
               size="xs"
               iconType="arrowDown"
               iconSide="right"
