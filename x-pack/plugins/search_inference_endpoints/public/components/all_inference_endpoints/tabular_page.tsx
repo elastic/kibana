@@ -101,7 +101,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem style={{ width: '400px' }} grow={false}>
             <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

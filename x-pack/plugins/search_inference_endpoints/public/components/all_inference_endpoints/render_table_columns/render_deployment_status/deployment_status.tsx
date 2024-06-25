@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiHealth } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { DeploymentStatusEnum } from '../../types';
+import * as i18n from './translations';
 
 interface DeploymentStatusProps {
   status: DeploymentStatusEnum;
@@ -19,17 +20,33 @@ export const DeploymentStatus: React.FC<DeploymentStatusProps> = ({ status }) =>
   }
 
   let statusColor: string;
+  let type: string;
+  let tooltip: string;
 
   switch (status) {
     case DeploymentStatusEnum.deployed:
       statusColor = 'success';
+      type = 'dot';
+      tooltip = i18n.MODEL_DEPLOYED;
       break;
     case DeploymentStatusEnum.notDeployed:
       statusColor = 'warning';
+      type = 'warning';
+      tooltip = i18n.MODEL_NOT_DEPLOYED;
       break;
     default:
       statusColor = 'danger';
+      type = 'dot';
+      tooltip = i18n.MODEL_FAILED_TO_BE_DEPLOYED;
   }
 
-  return <EuiHealth data-test-subj={`table-column-deployment-${status}`} color={statusColor} />;
+  return (
+    <EuiToolTip content={tooltip}>
+      <EuiIcon
+        type={type}
+        data-test-subj={`table-column-deployment-${status}`}
+        color={statusColor}
+      />
+    </EuiToolTip>
+  );
 };
