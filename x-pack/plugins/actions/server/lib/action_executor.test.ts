@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock, analyticsServiceMock } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { ActionType as ConnectorType } from '../types';
@@ -61,7 +61,6 @@ const securityMockStart = securityMock.createStart();
 
 const authorizationMock = actionsAuthorizationMock.create();
 const getActionsAuthorizationWithRequest = jest.fn();
-
 const actionExecutorInitializationParams = {
   logger: loggerMock,
   spaces: spacesMock,
@@ -69,6 +68,7 @@ const actionExecutorInitializationParams = {
   getServices: () => services,
   getUnsecuredServices: () => unsecuredServices,
   actionTypeRegistry: connectorTypeRegistry,
+  analyticsService: analyticsServiceMock.createAnalyticsServiceStart(),
   encryptedSavedObjectsClient,
   eventLogger,
   getActionsAuthorizationWithRequest,
