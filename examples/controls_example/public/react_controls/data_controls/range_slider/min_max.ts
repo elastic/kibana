@@ -9,7 +9,64 @@
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { lastValueFrom } from 'rxjs';
+import { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
+import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
+import { ControlGroupApi } from '../../control_group/types';
+
+export function minMax$({
+  data,
+  dataControlFetch$,
+  dataViews$,
+  fieldName$,
+  setIsLoading,
+}: {
+  data: DataPublicPluginStart;
+  dataControlFetch$: ControlGroupApi['dataControlFetch$'];
+  dataViews$: PublishesDataViews['dataViews'];
+  fieldName$: PublishingSubject<string>;
+  setIsLoading: (isLoading: boolean) => void;
+}) {
+  let prevRequestAbortController: AbortController | undefined;
+  return combineLatest([
+    dataViews$,
+    fieldName$,
+    dataControlFetch$,
+  ])
+    .pipe(
+      tap(() => {
+        if (prevRequestAbortController) {
+          prevRequestAbortController.abort();
+          prevRequestAbortController = undefined;
+        }
+      }),
+      switchMap(async ([dataViews, fieldName, dataControlFetchContext]) => {
+        const dataView = dataViews?.[0];
+        const dataViewField =
+          dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+        if (!dataView || !dataViewField) {
+          return { max: undefined, min: undefined };
+        }
+
+        try {
+          setIsLoading(true);
+          const abortController = new AbortController();
+          prevRequestAbortController = abortController;
+          return await getMinMax({
+            abortSignal: abortController.signal,
+            data,
+            dataView,
+            field: dataViewField,
+            ...dataControlFetchContext,
+          });
+        } catch (error) {
+          return { error, max: undefined, min: undefined };
+        }
+      }),
+      tap(() => {
+        setIsLoading(false);
+      })
+    );
+}
 
 export async function getMinMax({
   abortSignal,
@@ -27,7 +84,7 @@ export async function getMinMax({
   filters?: Filter[];
   query?: Query | AggregateQuery;
   timeRange?: TimeRange;
-}): Promise<{ min?: number; max?: number }> {
+}): Promise<{ min: number | undefined; max: number | undefined }> {
   const searchSource = await data.search.searchSource.create();
   searchSource.setField('size', 0);
   searchSource.setField('index', dataView);

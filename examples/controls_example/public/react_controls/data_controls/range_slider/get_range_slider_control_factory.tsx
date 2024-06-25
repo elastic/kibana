@@ -23,7 +23,7 @@ import {
 } from './types';
 import { RangeSliderStrings } from './range_slider_strings';
 import { RangeSliderControl } from './components/range_slider_control';
-import { getMinMax } from './get_min_max';
+import { minMax$ } from './min_max';
 import { hasNoResults$ } from './has_no_results';
 
 export const getRangesliderControlFactory = (
@@ -136,55 +136,26 @@ export const getRangesliderControlFactory = (
 
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
-      let prevMinMaxRequestAbortController: AbortController | undefined;
-      const minMaxSubscription = combineLatest([
-        dataControl.api.dataViews,
-        dataControl.stateManager.fieldName,
-        controlGroupApi.dataControlFetch$,
-      ])
-        .pipe(
-          tap(() => {
-            if (prevMinMaxRequestAbortController) {
-              prevMinMaxRequestAbortController.abort();
-              prevMinMaxRequestAbortController = undefined;
-            }
-          }),
-          switchMap(async ([dataViews, fieldName, dataControlFetchContext]) => {
+      
+      const minMaxSubscription = minMax$({
+        data: services.data,
+        dataControlFetch$: controlGroupApi.dataControlFetch$,
+        dataViews$: dataControl.api.dataViews,
+        fieldName$: dataControl.stateManager.fieldName,
+        setIsLoading: (isLoading: boolean) => {
+          // clear previous loading error on next loading start
+          if (isLoading && dataControl.api.blockingError.value) {
             dataControl.api.setBlockingError(undefined);
-            const dataView = dataViews?.[0];
-            const dataViewField =
-              dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-            if (!dataView || !dataViewField) {
-              return { max: undefined, min: undefined };
-            }
-
-            try {
-              loadingMinMax$.next(true);
-              const abortController = new AbortController();
-              prevMinMaxRequestAbortController = abortController;
-              return await getMinMax({
-                abortSignal: abortController.signal,
-                data: services.data,
-                dataView,
-                field: dataViewField,
-                ...dataControlFetchContext,
-              });
-            } catch (error) {
-              return { error };
-            }
-          })
-        )
-        .subscribe((next) => {
-          loadingMinMax$.next(false);
-          max$.next(
-            next?.hasOwnProperty('max') ? (next as { max: number | undefined }).max : undefined
-          );
-          min$.next(
-            next?.hasOwnProperty('min') ? (next as { min: number | undefined }).min : undefined
-          );
-          if (next?.hasOwnProperty('error')) {
-            dataControl.api.setBlockingError((next as { error: Error | undefined }).error);
           }
+          loadingMinMax$.next(isLoading);
+        }
+      })
+        .subscribe(({ error, min, max }: {error?: Error , min: number | undefined, max: number | undefined }) => {
+          if (error) {
+            dataControl.api.setBlockingError(error);
+          }
+          max$.next(max);
+          min$.next(min);
         });
 
       const outputFilterSubscription = value$.subscribe((value) => {
