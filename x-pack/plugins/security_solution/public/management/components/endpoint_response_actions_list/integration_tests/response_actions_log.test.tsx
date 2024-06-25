@@ -1102,8 +1102,8 @@ describe('Response actions history', () => {
         const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${outputCommand} failedUnknown error`,
-          `${outputCommand} failedUnknown error`,
+          `${outputCommand} failedThe following errors were encountered:An unknown error occurred`,
+          `${outputCommand} failedThe following errors were encountered:An unknown error occurred`,
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
