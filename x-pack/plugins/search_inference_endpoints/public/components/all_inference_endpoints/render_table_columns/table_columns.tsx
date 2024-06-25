@@ -29,7 +29,7 @@ export const useTableColumns = () => {
 
         return null;
       },
-      width: '16px',
+      width: '32px',
     },
     {
       field: 'endpoint',
