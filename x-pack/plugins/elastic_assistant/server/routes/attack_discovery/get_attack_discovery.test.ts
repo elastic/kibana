@@ -65,7 +65,6 @@ const mockUser = {
     name: 'my_realm_name',
   },
 } as AuthenticatedUser;
-// const findAttackDiscoveryByConnectorId = jest.fn();
 const mockDataClient = {
   findAttackDiscoveryByConnectorId: jest.fn(),
   updateAttackDiscovery: jest.fn(),
