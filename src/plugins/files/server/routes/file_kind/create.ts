@@ -31,12 +31,12 @@ export type Endpoint<M = unknown> = CreateRouteDefinition<
   FilesClient['create']
 >;
 
-export const handler: CreateHandler<Endpoint> = async ({ fileKind, files }, req, res) => {
-  const { fileService, security } = await files;
+export const handler: CreateHandler<Endpoint> = async ({ core, fileKind, files }, req, res) => {
+  const [{ security }, { fileService }] = await Promise.all([core, files]);
   const {
     body: { name, alt, meta, mimeType },
   } = req;
-  const user = security?.authc.getCurrentUser(req);
+  const user = security.authc.getCurrentUser();
   const file = await fileService.asCurrentUser().create({
     fileKind,
     name,
