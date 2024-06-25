@@ -9,5 +9,5 @@
 import { SecurityServiceConfigType } from '../utils';
 
 export function isFipsEnabled(config: SecurityServiceConfigType): boolean {
-  return config?.experimental?.fipsMode?.enabled || false;
+  return config?.experimental?.fipsMode?.enabled ?? false;
 }

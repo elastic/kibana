@@ -13,14 +13,6 @@ describe('fips', () => {
   describe('#isFipsEnabled', () => {
     let config: SecurityServiceConfigType;
 
-    beforeAll(() => {
-      config = {};
-    });
-
-    afterEach(() => {
-      config = {};
-    });
-
     it('should return `true` if config.experimental.fipsMode.enabled is `true`', () => {
       config = { experimental: { fipsMode: { enabled: true } } };
 
