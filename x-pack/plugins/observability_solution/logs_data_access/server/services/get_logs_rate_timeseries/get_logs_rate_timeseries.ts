@@ -109,7 +109,7 @@ export function createGetLogsRateTimeseries(params: RegisterServicesParams) {
           const timeseries = bucket.timeseries.buckets.map((timeseriesBucket) => {
             return {
               x: timeseriesBucket.key,
-              y: totalCount / timeseriesBucket.doc_count,
+              y: timeseriesBucket.doc_count / totalCount,
             };
           });
 

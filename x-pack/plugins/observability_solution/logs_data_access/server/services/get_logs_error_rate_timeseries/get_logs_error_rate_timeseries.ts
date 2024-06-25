@@ -86,7 +86,7 @@ export function createGetLogErrorRateTimeseries(params: RegisterServicesParams) 
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
-                fixed_interval: `${intervalString}s`,
+                fixed_interval: `1m`,
                 min_doc_count: 0,
                 extended_bounds: {
                   min: timeFrom,
@@ -112,14 +112,13 @@ export function createGetLogErrorRateTimeseries(params: RegisterServicesParams) 
 
     return buckets
       ? buckets.reduce<LogsErrorRateTimeseriesReturnType>((acc, bucket) => {
-          const totalCount = bucket.doc_count;
-
           const timeseries = bucket.timeseries.buckets.map((timeseriesBucket) => {
-            const logErrorCount = timeseriesBucket.doc_count;
+            const totalCount = timeseriesBucket.doc_count;
+            const logErrorCount = timeseriesBucket.logErrors.buckets[0]?.doc_count;
 
             return {
               x: timeseriesBucket.key,
-              y: getLogErrorRate({ logCount: totalCount, logErrorCount }),
+              y: logErrorCount ? getLogErrorRate({ logCount: totalCount, logErrorCount }) : null,
             };
           });
 

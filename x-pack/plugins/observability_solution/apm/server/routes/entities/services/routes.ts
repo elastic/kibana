@@ -70,17 +70,19 @@ const serviceLogRateTimeseriesRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { start, end, kuery, environment } = params.query;
 
-    const logsRateTimeseries = await logsDataAccessStart.services.getLogsRateTimeseries({
-      esClient: coreContext.elasticsearch.client.asCurrentUser,
-      identifyingMetadata: 'service.name',
-      timeFrom: start,
-      timeTo: end,
-      kuery,
-      serviceEnvironmentQuery: environmentQuery(environment),
-      serviceNames: [serviceName],
-    });
+    const curentPeriodlogsRateTimeseries = await logsDataAccessStart.services.getLogsRateTimeseries(
+      {
+        esClient: coreContext.elasticsearch.client.asCurrentUser,
+        identifyingMetadata: 'service.name',
+        timeFrom: start,
+        timeTo: end,
+        kuery,
+        serviceEnvironmentQuery: environmentQuery(environment),
+        serviceNames: [serviceName],
+      }
+    );
 
-    return { logsRateTimeseries };
+    return { currentPeriod: curentPeriodlogsRateTimeseries };
   },
 });
 
@@ -113,7 +115,7 @@ const serviceLogErrorRateTimeseriesRoute = createApmServerRoute({
       serviceNames: [serviceName],
     });
 
-    return { logsErrorRateTimeseries };
+    return { currentPeriod: logsErrorRateTimeseries };
   },
 });
 
