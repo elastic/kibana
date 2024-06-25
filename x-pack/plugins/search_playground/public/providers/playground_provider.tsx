@@ -5,32 +5,30 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { FC, useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { ChatForm } from '../types';
+import { useLLMsModels } from '../hooks/use_llms_models';
+import { ChatForm, ChatFormFields } from '../types';
 
-const queryClient = new QueryClient({});
-
-export interface PlaygroundProviderProps {
-  children: React.ReactNode;
-}
-
-export const PlaygroundProvider: FC<PropsWithChildren<PlaygroundProviderProps>> = ({
-  children,
-}) => {
+export const PlaygroundProvider: FC = ({ children }) => {
+  const models = useLLMsModels();
   const form = useForm<ChatForm>({
     defaultValues: {
       prompt: 'You are an assistant for question-answering tasks.',
       doc_size: 3,
       source_fields: {},
       indices: [],
+      summarization_model: {},
     },
   });
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <FormProvider {...form}>{children}</FormProvider>
-    </QueryClientProvider>
-  );
+  useEffect(() => {
+    const defaultModel = models.find((model) => !model.disabled);
+
+    if (defaultModel) {
+      form.setValue(ChatFormFields.summarizationModel, defaultModel);
+    }
+  }, [form, models]);
+
+  return <FormProvider {...form}>{children}</FormProvider>;
 };

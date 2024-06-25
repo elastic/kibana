@@ -6,17 +6,20 @@
  */
 
 import {
-  EuiAccordion,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
+  EuiPanel,
   EuiText,
   EuiTitle,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useWatch } from 'react-hook-form';
+import { ChatForm, ChatFormFields } from '../types';
+import { useManagementLink } from '../hooks/use_management_link';
 import { SourcesPanelSidebar } from './sources_panel/sources_panel_sidebar';
 import { SummarizationPanel } from './summarization_panel/summarization_panel';
 
@@ -26,62 +29,77 @@ interface ChatSidebarProps {
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({ selectedIndicesCount }) => {
   const { euiTheme } = useEuiTheme();
-  const accordions = [
+  const selectedModel = useWatch<ChatForm, ChatFormFields.summarizationModel>({
+    name: ChatFormFields.summarizationModel,
+  });
+  const managementLink = useManagementLink(selectedModel.connectorId);
+  const panels = [
     {
-      id: useGeneratedHtmlId({ prefix: 'summarizationAccordion' }),
       title: i18n.translate('xpack.searchPlayground.sidebar.summarizationTitle', {
         defaultMessage: 'Model settings',
       }),
       children: <SummarizationPanel />,
+      extraAction: (
+        <EuiButtonEmpty
+          target="_blank"
+          href={managementLink}
+          data-test-subj="manageConnectorsLink"
+          iconType="wrench"
+          size="s"
+          aria-label={i18n.translate(
+            'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorLink',
+            {
+              defaultMessage: 'Manage connector',
+            }
+          )}
+        >
+          <FormattedMessage
+            id="xpack.searchPlayground.sidebar.summarizationModel.manageConnectorTooltip"
+            defaultMessage="Manage"
+          />
+        </EuiButtonEmpty>
+      ),
     },
     {
-      id: useGeneratedHtmlId({ prefix: 'sourcesAccordion' }),
       title: i18n.translate('xpack.searchPlayground.sidebar.sourceTitle', {
         defaultMessage: 'Indices',
       }),
       extraAction: !!selectedIndicesCount && (
         <EuiText size="xs">
           <p>
-            {i18n.translate('xpack.searchPlayground.sidebar.sourceIndicesCount', {
-              defaultMessage: '{count, number} {count, plural, one {Index} other {Indices}}',
-              values: { count: Number(selectedIndicesCount) },
-            })}
+            <FormattedMessage
+              id="xpack.searchPlayground.sidebar.sourceIndicesCount"
+              defaultMessage="{count, number} {count, plural, one {Index} other {Indices}}"
+              values={{ count: Number(selectedIndicesCount) }}
+            />
           </p>
         </EuiText>
       ),
       children: <SourcesPanelSidebar />,
     },
   ];
-  const [openAccordionId, setOpenAccordionId] = useState(accordions[0].id);
 
   return (
     <EuiFlexGroup direction="column" className="eui-yScroll" gutterSize="none">
-      {accordions.map(({ id, title, extraAction, children }, index) => (
-        <EuiFlexItem
-          key={id}
-          css={{
-            borderBottom: index === accordions.length - 1 ? 'none' : euiTheme.border.thin,
-            padding: `0 ${euiTheme.size.l}`,
-            flexGrow: openAccordionId === id ? 1 : 0,
-            transition: `${euiTheme.animation.normal} ease-in-out`,
-          }}
+      {panels?.map(({ title, children, extraAction }) => (
+        <EuiFlexGroup
+          key={title}
+          direction="column"
+          css={{ padding: euiTheme.size.l }}
+          gutterSize="s"
         >
-          <EuiAccordion
-            id={id}
-            buttonContent={
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
               <EuiTitle size="xs">
-                <h5>{title}</h5>
+                <h4>{title}</h4>
               </EuiTitle>
-            }
-            extraAction={extraAction}
-            buttonProps={{ paddingSize: 'l' }}
-            forceState={openAccordionId === id ? 'open' : 'closed'}
-            onToggle={() => setOpenAccordionId(openAccordionId === id ? '' : id)}
-          >
-            {children}
-            <EuiSpacer size="l" />
-          </EuiAccordion>
-        </EuiFlexItem>
+              {extraAction && <EuiFlexItem grow={false}>{extraAction}</EuiFlexItem>}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPanel>{children}</EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ))}
     </EuiFlexGroup>
   );

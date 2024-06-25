@@ -9,7 +9,9 @@ import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { AppPluginStartDependencies } from './types';
+import { queryClient } from './utils/query_client';
 
 export const Playground = dynamic(async () => ({
   default: (await import('./components/app')).App,
@@ -28,6 +30,8 @@ export const getPlaygroundProvider =
   (props: React.ComponentProps<typeof PlaygroundProvider>) =>
     (
       <KibanaContextProvider services={{ ...core, ...services }}>
-        <PlaygroundProvider {...props} />
+        <QueryClientProvider client={queryClient}>
+          <PlaygroundProvider {...props} />
+        </QueryClientProvider>
       </KibanaContextProvider>
     );

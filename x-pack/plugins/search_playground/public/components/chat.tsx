@@ -123,7 +123,6 @@ export const Chat = () => {
         <EuiFlexItem
           grow={2}
           css={{
-            borderRight: euiTheme.border.thin,
             paddingTop: euiTheme.size.l,
             paddingBottom: euiTheme.size.l,
             // don't allow the chat to shrink below 66.6% of the screen

@@ -17,13 +17,11 @@ import { SummarizationModel } from './summarization_model';
 export const SummarizationPanel: React.FC = () => {
   const { control } = useFormContext<ChatForm>();
   const models = useLLMsModels();
-  const defaultModel = models.find((model) => !model.disabled);
 
   return (
     <>
       <Controller
         name={ChatFormFields.summarizationModel}
-        defaultValue={defaultModel}
         rules={{ required: true }}
         control={control}
         render={({ field }) => (
