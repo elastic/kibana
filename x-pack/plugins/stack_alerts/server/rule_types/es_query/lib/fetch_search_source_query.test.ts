@@ -386,7 +386,7 @@ describe('fetchSearchSourceQuery', () => {
       const linkWithoutExcludedRuns = await generateLink(
         searchSourceInstance,
         locatorMock,
-        dataViews,
+        async () => dataViews,
         dataViewMock,
         dateStart,
         dateEnd,
@@ -404,7 +404,7 @@ describe('fetchSearchSourceQuery', () => {
       const linkWithExcludedRuns = await generateLink(
         searchSourceInstance,
         locatorMock,
-        dataViews,
+        async () => dataViews,
         dataViewMock,
         dateStart,
         dateEnd,
@@ -448,7 +448,7 @@ describe('fetchSearchSourceQuery', () => {
       await generateLink(
         searchSourceInstance,
         locatorMock,
-        dataViews,
+        async () => dataViews,
         dataViewMock,
         dateStart,
         dateEnd,

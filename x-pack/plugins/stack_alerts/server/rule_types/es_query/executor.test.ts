@@ -188,7 +188,6 @@ describe('es_query executor', () => {
         params: { ...defaultProps, searchType: 'searchSource' },
         latestTimestamp: undefined,
         services: {
-          searchSourceClient: searchSourceClientMock,
           logger,
           share: undefined,
         },

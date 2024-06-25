@@ -35,9 +35,9 @@ export interface FetchSearchSourceQueryOpts {
   spacePrefix: string;
   services: {
     logger: Logger;
-    searchSourceClient: ISearchStartSearchSource;
+    getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
     share: SharePluginStart;
-    dataViews: DataViewsContract;
+    getDataViewsService: () => Promise<DataViewsContract>;
   };
   dateStart: string;
   dateEnd: string;
@@ -53,9 +53,10 @@ export async function fetchSearchSourceQuery({
   dateStart,
   dateEnd,
 }: FetchSearchSourceQueryOpts) {
-  const { logger, searchSourceClient } = services;
+  const { logger, getSearchSourceClient } = services;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
+  const searchSourceClient = await getSearchSourceClient();
   const initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
 
   const index = initialSearchSource.getField('index') as DataView;
@@ -80,7 +81,7 @@ export async function fetchSearchSourceQuery({
   const link = await generateLink(
     initialSearchSource,
     services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
-    services.dataViews,
+    services.getDataViewsService,
     index,
     dateStart,
     dateEnd,
@@ -182,7 +183,7 @@ export async function updateSearchSource(
 export async function generateLink(
   searchSource: ISearchSource,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
-  dataViews: DataViewsContract,
+  getDataViewsService: () => Promise<DataViewsContract>,
   dataViewToUpdate: DataView,
   dateStart: string,
   dateEnd: string,
@@ -200,6 +201,7 @@ export async function generateLink(
   }
 
   // make new adhoc data view
+  const dataViews = await getDataViewsService();
   const newDataView = await dataViews.create(
     {
       ...dataViewToUpdate.toSpec(false),
