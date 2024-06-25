@@ -122,7 +122,8 @@ export const ENDPOINT_ADDED_SUCCESS = i18n.translate(
 
 export const ENDPOINT_ADDED_SUCCESS_DESCRIPTION = (endpointId: string) =>
   i18n.translate('xpack.searchInferenceEndpoints.actions.endpointAddedSuccessDescription', {
-    defaultMessage: "The inference endpoint '" + endpointId + "' was added.",
+    defaultMessage: 'The inference endpoint "{endpointId}" was added.',
+    values: { endpointId },
   });
 
 export const DELETE_ACTION_LABEL = i18n.translate(
