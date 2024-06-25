@@ -12,4 +12,7 @@ export type {
   RoleIndexPrivilege,
   RoleRemoteIndexPrivilege,
   RoleRemoteClusterPrivilege,
+  ElasticsearchPrivilegesType,
+  KibanaPrivilegesType,
 } from './role';
+export { getKibanaRoleSchema, elasticsearchRoleSchema, GLOBAL_RESOURCE } from './role';

@@ -14,7 +14,6 @@ export type {
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
   ValidateAPIKeyParams,
-  APIKeys,
   GrantAPIKeyResult,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
@@ -31,3 +30,5 @@ export {
   updateRestApiKeySchema,
   updateCrossClusterApiKeySchema,
 } from './api_keys';
+
+export type { APIKeysService as APIKeys } from '@kbn/core-security-common';

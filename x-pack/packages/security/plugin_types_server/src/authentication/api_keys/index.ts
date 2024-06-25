@@ -6,6 +6,25 @@
  */
 
 export type {
+  UpdateAPIKeyParams,
+  UpdateAPIKeyResult,
+  UpdateCrossClusterAPIKeyParams,
+  UpdateRestAPIKeyParams,
+  UpdateRestAPIKeyWithKibanaPrivilegesParams,
+} from './api_keys';
+export {
+  getUpdateRestApiKeyWithKibanaPrivilegesSchema,
+  updateRestApiKeySchema,
+  updateCrossClusterApiKeySchema,
+} from './api_keys';
+
+export {
+  restApiKeySchema,
+  crossClusterApiKeySchema,
+  getRestApiKeyWithKibanaPrivilegesSchema,
+} from '@kbn/core-security-common';
+
+export type {
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   InvalidateAPIKeyResult,
@@ -15,18 +34,4 @@ export type {
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   CreateCrossClusterAPIKeyParams,
   GrantAPIKeyResult,
-  APIKeys,
-  UpdateAPIKeyParams,
-  UpdateAPIKeyResult,
-  UpdateCrossClusterAPIKeyParams,
-  UpdateRestAPIKeyParams,
-  UpdateRestAPIKeyWithKibanaPrivilegesParams,
-} from './api_keys';
-export {
-  crossClusterApiKeySchema,
-  getRestApiKeyWithKibanaPrivilegesSchema,
-  getUpdateRestApiKeyWithKibanaPrivilegesSchema,
-  restApiKeySchema,
-  updateRestApiKeySchema,
-  updateCrossClusterApiKeySchema,
-} from './api_keys';
+} from '@kbn/core-security-common';

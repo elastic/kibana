@@ -6,4 +6,20 @@
  * Side Public License, v 1.
  */
 
-export type { APIKeysService } from './api_keys';
+export type {
+  APIKeys as APIKeysService,
+  CreateAPIKeyParams,
+  CreateAPIKeyResult,
+  InvalidateAPIKeyResult,
+  InvalidateAPIKeysParams,
+  ValidateAPIKeyParams,
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+  CreateCrossClusterAPIKeyParams,
+  GrantAPIKeyResult,
+} from './api_keys';
+export {
+  restApiKeySchema,
+  crossClusterApiKeySchema,
+  getRestApiKeyWithKibanaPrivilegesSchema,
+} from './api_keys';

@@ -79,4 +79,9 @@ export {
   updateRestApiKeySchema,
   updateCrossClusterApiKeySchema,
 } from './src/authentication';
-export { GLOBAL_RESOURCE, elasticsearchRoleSchema, getKibanaRoleSchema } from './src/authorization';
+
+export {
+  GLOBAL_RESOURCE,
+  getKibanaRoleSchema,
+  elasticsearchRoleSchema,
+} from '@kbn/security-plugin-types-common';

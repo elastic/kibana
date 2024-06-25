@@ -18,7 +18,10 @@ export type {
   RoleRemoteIndexPrivilege,
   RoleRemoteClusterPrivilege,
   FeaturesPrivileges,
+  ElasticsearchPrivilegesType,
+  KibanaPrivilegesType,
 } from './src/authorization';
+export { getKibanaRoleSchema, elasticsearchRoleSchema, GLOBAL_RESOURCE } from './src/authorization';
 export type { SecurityLicense, SecurityLicenseFeatures, LoginLayout } from './src/licensing';
 export type {
   UserProfileUserInfo,

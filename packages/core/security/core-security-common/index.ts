@@ -13,4 +13,20 @@ export type {
   AuthenticationProvider,
 } from './src/authentication';
 
-export type { APIKeysService } from './src/api_keys';
+export type {
+  APIKeysService,
+  CreateAPIKeyParams,
+  CreateAPIKeyResult,
+  InvalidateAPIKeyResult,
+  InvalidateAPIKeysParams,
+  ValidateAPIKeyParams,
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+  CreateCrossClusterAPIKeyParams,
+  GrantAPIKeyResult,
+} from './src/api_keys';
+export {
+  restApiKeySchema,
+  crossClusterApiKeySchema,
+  getRestApiKeyWithKibanaPrivilegesSchema,
+} from './src/api_keys';
