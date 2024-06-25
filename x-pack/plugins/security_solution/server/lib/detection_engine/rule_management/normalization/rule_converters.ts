@@ -564,10 +564,12 @@ export const convertCreateAPIToInternalSchema = (
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuidv4();
 
-  const alertSystemActions = input.systemActions.map((action) => {
+  const alertSystemActions = input.systemActions?.map((action) => {
     const { group, ...ruleAction } = transformRuleToAlertAction(action);
     return ruleAction;
   });
+
+  console.error('alertSystemActions', JSON.stringify(alertSystemActions));
 
   const alertActions = input.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions, input.throttle);
@@ -784,7 +786,7 @@ export const internalRuleToAPIResponse = (
   const throttle = transformFromAlertThrottle(rule);
   const actions = transformToActionFrequency(alertActions, throttle);
   const systemActions = rule.systemActions.map((action) => {
-    const { id, ...transformedAction } = transformAlertToRuleAction(action);
+    const transformedAction = transformAlertToRuleAction(action);
     return transformedAction;
   });
 

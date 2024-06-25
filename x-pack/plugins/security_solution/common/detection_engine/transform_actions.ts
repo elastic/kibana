@@ -50,6 +50,7 @@ export const transformAlertToRuleAction = ({
   ...(alertsFilter && { alerts_filter: alertsFilter }),
   ...(uuid && { uuid }),
   ...(frequency && { frequency }),
+  ...(group && { group }),
 });
 
 export const transformNormalizedRuleToAlertAction = ({

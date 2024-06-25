@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { ImportRuleArgs } from '../detection_rules_client_interface';
 import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
@@ -20,11 +23,13 @@ import { validateMlAuth } from '../utils';
 import { readRules } from '../read_rules';
 
 export const importRule = async (
+  actionsClient: ActionsClient,
   rulesClient: RulesClient,
   importRulePayload: ImportRuleArgs,
   mlAuthz: MlAuthz
 ): Promise<RuleAlertType> => {
   const { ruleToImport, overwriteRules, allowMissingConnectorSecrets } = importRulePayload;
+  console.error('RULE TO IMPORT', JSON.stringify(ruleToImport));
 
   await validateMlAuth(mlAuthz, ruleToImport.type);
 
@@ -35,9 +40,21 @@ export const importRule = async (
   });
 
   if (!existingRule) {
-    const internalRule = convertCreateAPIToInternalSchema(ruleToImport, {
-      immutable: false,
-    });
+    const [oldActions, systemActions] = partition(ruleToImport.actions, (action) =>
+      actionsClient.isSystemAction(action.action_type_id)
+    );
+
+    console.error('OLD ACTIONS', oldActions);
+    console.error('sys actions 1', systemActions);
+
+    const internalRule = convertCreateAPIToInternalSchema(
+      {
+        ...ruleToImport,
+        actions: oldActions,
+        systemActions,
+      },
+      { immutable: false }
+    );
 
     return rulesClient.create<RuleParams>({
       data: internalRule,

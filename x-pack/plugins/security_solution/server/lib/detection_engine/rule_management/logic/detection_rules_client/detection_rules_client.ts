@@ -76,7 +76,7 @@ export const createDetectionRulesClient = (
 
   async importRule(args: ImportRuleArgs): Promise<RuleAlertType> {
     return withSecuritySpan('DetectionRulesClient.importRule', async () => {
-      return importRule(rulesClient, args, mlAuthz);
+      return importRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 });

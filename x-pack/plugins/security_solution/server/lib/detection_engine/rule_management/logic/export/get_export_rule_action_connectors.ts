@@ -47,10 +47,11 @@ const filterOutPredefinedActionConnectorsIds = async (
   actionsClient: ActionsClient,
   actionsIdsToExport: string[]
 ): Promise<string[]> => {
-  const allActions = await actionsClient.getAll();
+  const allActions = await actionsClient.getAll({ includeSystemActions: true });
   const predefinedActionsIds = allActions
-    .filter(({ isPreconfigured }) => isPreconfigured)
+    .filter(({ isPreconfigured, isSystemAction }) => isPreconfigured || isSystemAction)
     .map(({ id }) => id);
+  console.error('PREDEFINED ACTION IDS', predefinedActionsIds);
   if (predefinedActionsIds.length)
     return actionsIdsToExport.filter((id) => !predefinedActionsIds.includes(id));
   return actionsIdsToExport;
