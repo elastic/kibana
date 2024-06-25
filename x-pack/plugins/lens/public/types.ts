@@ -64,7 +64,7 @@ import {
 import type { LensInspector } from './lens_inspector_service';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
-import type { Document } from './persistence/saved_object_store';
+import type { LensDocument } from './persistence/saved_object_store';
 
 export type StartServices = Pick<
   CoreStart,
@@ -317,7 +317,10 @@ export type UserMessagesGetter = (
   filters?: UserMessageFilters
 ) => UserMessage[];
 
-export type AddUserMessages = (messages: UserMessage[]) => () => void;
+export type AddUserMessages = (messages: UserMessage[]) => {
+  rerender: boolean;
+  cleanup: () => void;
+};
 
 /**
  * Interface for the datasource registry
@@ -1455,7 +1458,7 @@ export type LensTopNavMenuEntryGenerator = (props: {
   query: Query;
   filters: Filter[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
-  currentDoc: Document | undefined;
+  currentDoc: LensDocument | undefined;
 }) => undefined | TopNavMenuData;
 
 export interface LensCellValueAction {
@@ -1469,3 +1472,5 @@ export interface LensCellValueAction {
 export type GetCompatibleCellValueActions = (
   data: CellValueContext['data']
 ) => Promise<LensCellValueAction[]>;
+
+export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};

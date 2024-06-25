@@ -14,13 +14,14 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
-import { Document, checkForDuplicateTitle, SavedObjectIndexStore } from '../persistence';
+import { checkForDuplicateTitle, SavedObjectIndexStore, LensDocument } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
 import { APP_ID, getFullPath } from '../../common/constants';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
 import { VisualizeEditorContext } from '../types';
 import { redirectToDashboard } from './save_modal_container_helpers';
+import { Simplify } from '../react_embeddable/types';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
@@ -28,8 +29,8 @@ type ExtraProps = Pick<LensAppProps, 'initialInput'> &
 export type SaveModalContainerProps = {
   originatingApp?: string;
   getOriginatingPath?: (dashboardId: string) => string;
-  persistedDoc?: Document;
-  lastKnownDoc?: Document;
+  persistedDoc?: LensDocument;
+  lastKnownDoc?: LensDocument;
   returnToOriginSwitchLabel?: string;
   onClose: () => void;
   onSave?: (saveProps: SaveProps) => void;
@@ -78,7 +79,7 @@ export function SaveModalContainer({
   let description;
   let savedObjectId;
   const [initializing, setInitializing] = useState(true);
-  const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(initLastKnownDoc);
+  const [lastKnownDoc, setLastKnownDoc] = useState<LensDocument | undefined>(initLastKnownDoc);
   if (lastKnownDoc) {
     title = lastKnownDoc.title;
     description = lastKnownDoc.description;
@@ -189,7 +190,7 @@ export function SaveModalContainer({
 }
 
 const getDocToSave = (
-  lastKnownDoc: Document,
+  lastKnownDoc: LensDocument,
   saveProps: SaveProps,
   references: SavedObjectReference[]
 ) => {
@@ -209,11 +210,11 @@ const getDocToSave = (
   return docToSave;
 };
 
-export const runSaveLensVisualization = async (
-  props: {
-    lastKnownDoc?: Document;
+type SaveVisualizationProps = Simplify<
+  {
+    lastKnownDoc?: LensDocument;
     getIsByValueMode: () => boolean;
-    persistedDoc?: Document;
+    persistedDoc?: LensDocument;
     originatingApp?: string;
     getOriginatingPath?: (dashboardId: string) => string;
     textBasedLanguageSave?: boolean;
@@ -232,7 +233,11 @@ export const runSaveLensVisualization = async (
       | 'stateTransfer'
       | 'attributeService'
       | 'savedObjectsTagging'
-    >,
+    >
+>;
+
+export const runSaveLensVisualization = async (
+  props: SaveVisualizationProps,
   saveProps: SaveProps,
   options: { saveToLibrary: boolean }
 ): Promise<Partial<LensAppState> | undefined> => {
@@ -314,38 +319,43 @@ export const runSaveLensVisualization = async (
     }
   }
   try {
-    let newInput = (await attributeService.wrapAttributes(
-      docToSave,
-      options.saveToLibrary,
-      originalInput
-    )) as LensEmbeddableInput;
-    if (saveProps.panelTimeRange) {
-      newInput = {
-        ...newInput,
-        timeRange: saveProps.panelTimeRange,
-      };
-    }
-    if (saveProps.returnToOrigin && redirectToOrigin) {
-      // disabling the validation on app leave because the document has been saved.
-      onAppLeave?.((actions) => {
-        return actions.default();
-      });
-      redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
-      return;
-    } else if (saveProps.dashboardId) {
-      // disabling the validation on app leave because the document has been saved.
-      onAppLeave?.((actions) => {
-        return actions.default();
-      });
-      redirectToDashboard({
-        embeddableInput: newInput,
-        dashboardId: saveProps.dashboardId,
-        stateTransfer,
-        originatingApp: props.originatingApp,
-        getOriginatingPath: props.getOriginatingPath,
-      });
-      return;
-    }
+    const newInput = stateTransfer;
+    // let newInput = (await attributeService.wrapAttributes(
+    //   docToSave,
+    //   options.saveToLibrary,
+    //   originalInput
+    // )) as LensEmbeddableInput;
+    const newDoc = {
+      ...docToSave,
+      timeRange: saveProps.panelTimeRange ?? docToSave.timeRange,
+    };
+    // if (saveProps.panelTimeRange) {
+    //   newInput = {
+    //     ...newInput,
+    //     timeRange: saveProps.panelTimeRange,
+    //   };
+    // }
+    // if (saveProps.returnToOrigin && redirectToOrigin) {
+    //   // disabling the validation on app leave because the document has been saved.
+    //   onAppLeave?.((actions) => {
+    //     return actions.default();
+    //   });
+    //   redirectToOrigin({ input: newDoc, isCopied: saveProps.newCopyOnSave });
+    //   return;
+    // } else if (saveProps.dashboardId) {
+    //   // disabling the validation on app leave because the document has been saved.
+    //   onAppLeave?.((actions) => {
+    //     return actions.default();
+    //   });
+    //   redirectToDashboard({
+    //     embeddableInput: newDoc,
+    //     dashboardId: saveProps.dashboardId,
+    //     stateTransfer,
+    //     originatingApp: props.originatingApp,
+    //     getOriginatingPath: props.getOriginatingPath,
+    //   });
+    //   return;
+    // }
 
     notifications.toasts.addSuccess(
       i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
@@ -356,14 +366,11 @@ export const runSaveLensVisualization = async (
       })
     );
 
-    if (
-      attributeService.inputIsRefType(newInput) &&
-      newInput.savedObjectId !== originalSavedObjectId
-    ) {
+    if (newDoc.savedObjectId && newDoc.savedObjectId !== originalSavedObjectId) {
       chrome.recentlyAccessed.add(
-        getFullPath(newInput.savedObjectId),
+        getFullPath(newDoc.savedObjectId),
         docToSave.title,
-        newInput.savedObjectId
+        newDoc.savedObjectId
       );
 
       // remove editor state so the connection is still broken after reload
@@ -372,15 +379,15 @@ export const runSaveLensVisualization = async (
         switchDatasource?.();
         application.navigateToApp('lens', { path: '/' });
       } else {
-        redirectTo?.(newInput.savedObjectId);
+        redirectTo?.(newDoc.savedObjectId);
       }
       return { isLinkedToOriginatingApp: false };
     }
 
-    const newDoc = {
-      ...docToSave,
-      ...newInput,
-    };
+    // const newDoc = {
+    //   ...docToSave,
+    //   ...newInput,
+    // };
 
     return {
       persistedDoc: newDoc,
@@ -393,7 +400,7 @@ export const runSaveLensVisualization = async (
   }
 };
 
-export function removePinnedFilters(doc?: Document) {
+export function removePinnedFilters(doc?: LensDocument) {
   if (!doc) return undefined;
   return {
     ...doc,

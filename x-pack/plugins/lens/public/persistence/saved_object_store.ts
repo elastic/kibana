@@ -14,7 +14,7 @@ import type { VisualizationClient } from '@kbn/visualizations-plugin/public';
 import type { LensSavedObjectAttributes, LensSearchQuery } from '../../common/content_management';
 import { getLensClient } from './lens_client';
 
-export interface Document {
+export interface LensDocument {
   savedObjectId?: string;
   type?: string;
   visualizationType: string | null;
@@ -36,7 +36,7 @@ export interface Document {
 }
 
 export interface DocumentSaver {
-  save: (vis: Document) => Promise<{ savedObjectId: string }>;
+  save: (vis: LensDocument) => Promise<{ savedObjectId: string }>;
 }
 
 export interface DocumentLoader {
@@ -52,9 +52,8 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     this.client = getLensClient(cm);
   }
 
-  save = async (vis: Document) => {
-    const { savedObjectId, type, references, ...rest } = vis;
-    const attributes = rest;
+  save = async (vis: LensDocument) => {
+    const { savedObjectId, type, references, ...attributes } = vis;
 
     if (savedObjectId) {
       const result = await this.client.update({
@@ -65,15 +64,14 @@ export class SavedObjectIndexStore implements SavedObjectStore {
         },
       });
       return { ...vis, savedObjectId: result.item.id };
-    } else {
-      const result = await this.client.create({
-        data: attributes,
-        options: {
-          references,
-        },
-      });
-      return { ...vis, savedObjectId: result.item.id };
     }
+    const result = await this.client.create({
+      data: attributes,
+      options: {
+        references,
+      },
+    });
+    return { ...vis, savedObjectId: result.item.id };
   };
 
   async load(savedObjectId: string) {

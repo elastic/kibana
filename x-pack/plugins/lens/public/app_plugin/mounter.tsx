@@ -38,7 +38,7 @@ import {
   LensByReferenceInput,
   LensByValueInput,
 } from '../embeddable/embeddable';
-import { LensAttributeService } from '../lens_attribute_service';
+import { LensAttributesService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import {
   makeConfigureStore,
@@ -83,7 +83,7 @@ function getInitialContext(history: AppMountParameters['history']) {
 export async function getLensServices(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
-  attributeService: LensAttributeService,
+  attributeService: LensAttributesService,
   initialContext?: VisualizeFieldContext | VisualizeEditorContext,
   locator?: LensAppLocator
 ): Promise<LensAppServices> {
@@ -146,7 +146,7 @@ export async function mountApp(
   params: AppMountParameters,
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
-    attributeService: LensAttributeService;
+    attributeService: LensAttributesService;
     getPresentationUtilContext: () => FC<PropsWithChildren<{}>>;
     topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
     locator?: LensAppLocator;
@@ -437,7 +437,7 @@ export async function mountApp(
   return () => {
     data.search.session.clear();
     unmountComponentAtNode(params.element);
-    lensServices.inspector.close();
+    lensServices.inspector.closeInspector();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
     stateTransfer.clearEditorState?.(APP_ID);

@@ -7,15 +7,22 @@
 
 import { i18n } from '@kbn/i18n';
 import type { VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import { getBasePath, getEditPath } from '../common/constants';
+import {
+  APP_ID,
+  getBasePath,
+  getEditPath,
+  LENS_EMBEDDABLE_TYPE,
+  LENS_ICON,
+  STAGE_ID,
+} from '../common/constants';
 import { getLensClient } from './persistence/lens_client';
 
 export const getLensAliasConfig = (): VisTypeAlias => ({
   alias: {
     path: getBasePath(),
-    app: 'lens',
+    app: APP_ID,
   },
-  name: 'lens',
+  name: APP_ID,
   promotion: true,
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
     defaultMessage: 'Lens',
@@ -27,11 +34,11 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
   note: i18n.translate('xpack.lens.visTypeAlias.note', {
     defaultMessage: 'Recommended for most users.',
   }),
-  icon: 'lensApp',
-  stage: 'production',
+  icon: LENS_ICON,
+  stage: STAGE_ID,
   appExtensions: {
     visualizations: {
-      docTypes: ['lens'],
+      docTypes: [LENS_EMBEDDABLE_TYPE],
       searchFields: ['title^3'],
       clientOptions: { update: { overwrite: true } },
       client: getLensClient,
@@ -45,10 +52,10 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
           updatedAt,
           managed,
           editor: { editUrl: getEditPath(id), editApp: 'lens' },
-          icon: 'lensApp',
-          stage: 'production',
+          icon: LENS_ICON,
+          stage: STAGE_ID,
           savedObjectType: type,
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           typeTitle: i18n.translate('xpack.lens.visTypeAlias.type', { defaultMessage: 'Lens' }),
         };
       },

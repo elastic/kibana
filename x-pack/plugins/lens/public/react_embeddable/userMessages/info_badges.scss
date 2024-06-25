@@ -1,0 +1,5 @@
+
+.lnsPanelFeatureList {
+  @include euiYScroll;
+  max-height: $euiSize * 20;
+}

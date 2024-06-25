@@ -87,7 +87,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { canTrackContentfulRender } from '@kbn/presentation-containers';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
-import { Document } from '../persistence';
+import { LensDocument } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import {
   isLensBrushEvent,
@@ -108,6 +108,7 @@ import {
   AddUserMessages,
   UserMessagesGetter,
   UserMessagesDisplayLocationId,
+  Simplify,
 } from '../types';
 
 import type {
@@ -144,7 +145,7 @@ import { getDatasourceLayers } from '../state_management/utils';
 import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { TextBasedPersistedState } from '../datasources/text_based/types';
 
-export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
+export type LensSavedObjectAttributes = Omit<LensDocument, 'savedObjectId' | 'type'>;
 
 export interface LensUnwrapMetaInfo {
   sharingSavedObjectProps?: SharingSavedObjectProps;
@@ -159,8 +160,6 @@ export interface LensUnwrapResult {
 interface PreventableEvent {
   preventDefault(): void;
 }
-
-export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
@@ -214,7 +213,7 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
   data: DataPublicPluginStart;
-  documentToExpression: (doc: Document) => Promise<DocumentToExpressionReturnType>;
+  documentToExpression: (doc: LensDocument) => Promise<DocumentToExpressionReturnType>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -293,7 +292,7 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
 }
 
 const getExpressionFromDocument = async (
-  document: Document,
+  document: LensDocument,
   documentToExpression: LensEmbeddableDeps['documentToExpression']
 ) => {
   const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
@@ -435,7 +434,7 @@ export class Embeddable
   deferEmbeddableLoad = true;
 
   private expressionRenderer: ReactExpressionRendererType;
-  private savedVis: Document | undefined;
+  private savedVis: LensDocument | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
   private isInitialized = false;

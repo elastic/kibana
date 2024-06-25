@@ -266,7 +266,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         }
 
         if (requestWarnings.length) {
-          removeSearchWarningMessagesRef.current = addUserMessages(requestWarnings);
+          removeSearchWarningMessagesRef.current = addUserMessages(requestWarnings).cleanup;
         } else if (removeSearchWarningMessagesRef.current) {
           removeSearchWarningMessagesRef.current();
           removeSearchWarningMessagesRef.current = undefined;
@@ -276,10 +276,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           dispatchLens(
             onActiveDataChange({
               activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
-                (acc, [key, value], _index, tables) => ({
-                  ...acc,
-                  [tables.length === 1 ? defaultLayerId : key]: value,
-                }),
+                (acc, [key, value], _index, tables) => {
+                  const id = tables.length === 1 ? defaultLayerId : key;
+                  acc[id] = value as Datatable;
+                  return acc;
+                },
                 {}
               ),
             })
@@ -353,7 +354,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               </>
             ),
           },
-        ]);
+        ]).cleanup;
       }
     }
   }, [
@@ -774,10 +775,9 @@ export const VisualizationWrapper = ({
         searchSessionId={searchSessionId}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
-        // @ts-expect-error upgrade typescript v4.9.5
         onData$={onData$}
         onRender$={onRenderHandler}
-        inspectorAdapters={lensInspector.adapters}
+        inspectorAdapters={lensInspector.getInspectorAdapters()}
         executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {

@@ -16,7 +16,7 @@ import type {
 } from '../../../types';
 import type { LensEmbeddableOutput } from '../../../embeddable';
 import type { LensInspector } from '../../../lens_inspector_service';
-import type { Document } from '../../../persistence';
+import type { LensDocument } from '../../../persistence';
 
 export interface FlyoutWrapperProps {
   children: JSX.Element;
@@ -52,7 +52,7 @@ export interface EditConfigPanelProps {
   /** Embeddable output observable, useful for dashboard flyout  */
   output$?: Observable<LensEmbeddableOutput>;
   /** Contains the active data, necessary for some panel configuration such as coloring */
-  lensAdapters?: LensInspector['adapters'];
+  lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   /** Optional callback called when updating the by reference embeddable */
   updateByRefInput?: (soId: string) => void;
   /** Callback for closing the edit flyout */
@@ -69,7 +69,7 @@ export interface EditConfigPanelProps {
    */
   savedObjectId?: string;
   /** Callback for saving the embeddable as a SO */
-  saveByRef?: (attrs: Document) => void;
+  saveByRef?: (attrs: LensDocument) => void;
   /** Optional callback for navigation from the header of the flyout */
   navigateToLensEditor?: () => void;
   /** If set to true it displays a header on the flyout */

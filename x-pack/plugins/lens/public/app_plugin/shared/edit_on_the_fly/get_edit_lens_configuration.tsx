@@ -28,7 +28,7 @@ import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
-import { SavedObjectIndexStore, type Document } from '../../../persistence';
+import { SavedObjectIndexStore, type LensDocument } from '../../../persistence';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { DOC_TYPE } from '../../../../common/constants';
 
@@ -132,7 +132,7 @@ export async function getEditLensConfiguration(
      * When the user applies the changes we save them to the Lens SO
      */
     const saveByRef = useCallback(
-      async (attrs: Document) => {
+      async (attrs: LensDocument) => {
         const savedObjectStore = new SavedObjectIndexStore(lensServices.contentManagement);
         await savedObjectStore.save({
           ...attrs,
