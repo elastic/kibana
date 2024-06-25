@@ -49,13 +49,11 @@ export const putSettingsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
-  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   try {
     const settings = await settingsService.saveSettings(soClient, request.body);
-    await agentPolicyService.bumpAllAgentPolicies(esClient, {
-      user: user || undefined,
-    });
+    await agentPolicyService.bumpAllAgentPolicies(esClient, { user });
     const body = {
       item: settings,
     };

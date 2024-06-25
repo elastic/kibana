@@ -14,6 +14,7 @@ import type {
   HttpServiceSetup,
   Logger,
   KibanaRequest,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 
 import { CoreKibanaRequest } from '@kbn/core/server';
@@ -61,6 +62,7 @@ class AppContextService {
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
   private experimentalFeatures?: ExperimentalFeatures;
+  private securityCoreStart: SecurityServiceStart | undefined;
   private securitySetup: SecurityPluginSetup | undefined;
   private securityStart: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
@@ -86,6 +88,7 @@ class AppContextService {
     this.encryptedSavedObjectsStart = appContext.encryptedSavedObjectsStart;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
+    this.securityCoreStart = appContext.securityCoreStart;
     this.securitySetup = appContext.securitySetup;
     this.securityStart = appContext.securityStart;
     this.savedObjects = appContext.savedObjects;
@@ -127,6 +130,10 @@ class AppContextService {
       throw new Error('Encrypted saved object start service not set.');
     }
     return this.encryptedSavedObjects;
+  }
+
+  public getSecurityCore() {
+    return this.securityCoreStart!;
   }
 
   public getSecurity() {
