@@ -33,6 +33,8 @@ describe('useSetupTechnology', () => {
   const newAgentPolicyMock = {
     name: 'mock_new_agent_policy',
     namespace: 'default',
+    is_managed: false,
+    supports_agentless: false,
   };
   const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
