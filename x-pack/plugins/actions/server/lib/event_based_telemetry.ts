@@ -7,13 +7,13 @@
 
 import type { EventTypeOpts } from '@kbn/core/server';
 
-export const AI_TOKEN_COUNT_EVENT: EventTypeOpts<{
+export const GEN_AI_TOKEN_COUNT_EVENT: EventTypeOpts<{
   actionTypeId: string;
   total_tokens: number;
   prompt_tokens: number;
   completion_tokens: number;
 }> = {
-  eventType: 'ai_token_count',
+  eventType: 'gen_ai_token_count',
   schema: {
     actionTypeId: {
       type: 'keyword',
@@ -46,4 +46,4 @@ export const AI_TOKEN_COUNT_EVENT: EventTypeOpts<{
   },
 };
 
-export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [AI_TOKEN_COUNT_EVENT];
+export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [GEN_AI_TOKEN_COUNT_EVENT];

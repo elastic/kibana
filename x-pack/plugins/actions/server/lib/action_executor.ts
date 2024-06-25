@@ -21,7 +21,7 @@ import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/se
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
+import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateConfig,
@@ -594,7 +594,7 @@ export class ActionExecutor {
                   prompt_tokens: tokenTracking.prompt_tokens,
                   completion_tokens: tokenTracking.completion_tokens,
                 });
-                analyticsService.reportEvent(AI_TOKEN_COUNT_EVENT.eventType, {
+                analyticsService.reportEvent(GEN_AI_TOKEN_COUNT_EVENT.eventType, {
                   actionTypeId,
                   total_tokens: tokenTracking.total_tokens,
                   prompt_tokens: tokenTracking.prompt_tokens,
