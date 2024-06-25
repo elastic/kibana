@@ -115,7 +115,7 @@ export const BACKFILLS_TABLE_COLUMN_TOTAL = i18n.translate(
 export const BACKFILLS_TABLE_COLUMN_TOTAL_TOOLTIP = i18n.translate(
   'xpack.securitySolution.rule_gaps.backfillsTable.column.totalTooltip',
   {
-    defaultMessage: 'The total number of rule executions this manual run will execute',
+    defaultMessage: 'The total number of rule executions that will occur during the selected date and time range',
   }
 );
 
