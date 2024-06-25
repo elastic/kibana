@@ -182,8 +182,7 @@ async function deleteAssets(
     installed_kibana: installedKibana,
     installed_kibana_space_id: spaceId = DEFAULT_SPACE_ID,
     additionnal_spaces_installed_kibana: installedInAdditionalSpacesKibana = {},
-  }: // TODO addiditionnal kibana space assets
-  Installation,
+  }: Installation,
   savedObjectsClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {

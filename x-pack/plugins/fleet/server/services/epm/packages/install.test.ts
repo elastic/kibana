@@ -382,39 +382,6 @@ describe('install', () => {
 
         expect(response.status).toEqual('installed');
       });
-
-      it('should use a scoped to package space soClient for tagging', async () => {
-        const mockedTaggingSo = savedObjectsClientMock.create();
-        jest
-          .mocked(appContextService.getInternalUserSOClientForSpaceId)
-          .mockReturnValue(mockedTaggingSo);
-        jest
-          .mocked(getInstallationObject)
-          .mockResolvedValueOnce({ attributes: { version: '1.2.0' } } as any);
-
-        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-        await installPackage({
-          spaceId: 'test',
-          installSource: 'registry',
-          pkgkey: 'apache-1.3.0',
-          savedObjectsClient: savedObjectsClientMock.create(),
-          esClient: {} as ElasticsearchClient,
-        });
-
-        expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledWith('test');
-        expect(appContextService.getSavedObjectsTagging().createTagClient).toBeCalledWith(
-          expect.objectContaining({
-            client: mockedTaggingSo,
-          })
-        );
-        expect(
-          appContextService.getSavedObjectsTagging().createInternalAssignmentService
-        ).toBeCalledWith(
-          expect.objectContaining({
-            client: mockedTaggingSo,
-          })
-        );
-      });
     });
 
     describe('with enablePackagesStateMachine = true', () => {
@@ -631,39 +598,6 @@ describe('install', () => {
         });
 
         expect(response.status).toEqual('installed');
-      });
-
-      it('should use a scoped to package space soClient for tagging', async () => {
-        const mockedTaggingSo = savedObjectsClientMock.create();
-        jest
-          .mocked(appContextService.getInternalUserSOClientForSpaceId)
-          .mockReturnValue(mockedTaggingSo);
-        jest
-          .mocked(getInstallationObject)
-          .mockResolvedValueOnce({ attributes: { version: '1.2.0', installed_kibana: [] } } as any);
-
-        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-        await installPackage({
-          spaceId: 'test',
-          installSource: 'registry',
-          pkgkey: 'apache-1.3.0',
-          savedObjectsClient: savedObjectsClientMock.create(),
-          esClient: {} as ElasticsearchClient,
-        });
-
-        expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledWith('test');
-        expect(appContextService.getSavedObjectsTagging().createTagClient).toBeCalledWith(
-          expect.objectContaining({
-            client: mockedTaggingSo,
-          })
-        );
-        expect(
-          appContextService.getSavedObjectsTagging().createInternalAssignmentService
-        ).toBeCalledWith(
-          expect.objectContaining({
-            client: mockedTaggingSo,
-          })
-        );
       });
     });
   });

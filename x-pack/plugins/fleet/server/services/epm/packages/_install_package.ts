@@ -10,11 +10,8 @@ import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
-  ISavedObjectsImporter,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-
-import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import type { PackageInstallContext } from '../../../../common/types';
@@ -74,9 +71,6 @@ export async function _installPackage({
   skipDataStreamRollover,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
-  savedObjectTagAssignmentService: IAssignmentService;
-  savedObjectTagClient: ITagsClient;
   esClient: ElasticsearchClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;

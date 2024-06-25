@@ -19,8 +19,6 @@ import type {
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
-import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
-
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
 import type { AssetReference, AssetParts, Installation, PackageSpecTags } from '../../../../types';
@@ -33,7 +31,7 @@ import {
 import { kibanaAssetsToAssetsRef, saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
 import { KibanaSOReferenceError } from '../../../../errors';
-import { appContextService } from '../../..';
+import { appContextService } from '../../../app_context';
 import { withPackageSpan } from '../../packages/utils';
 
 import { tagKibanaAssets } from './tag_assets';
@@ -167,9 +165,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installAsAdditionnalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
-  savedObjectTagAssignmentService: IAssignmentService;
-  savedObjectTagClient: ITagsClient;
   logger: Logger;
   pkgName: string;
   pkgTitle: string;
@@ -179,8 +174,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
   assetTags?: PackageSpecTags[];
   installAsAdditionnalSpace?: boolean;
 }) {
-  // Todo add a feature flag
-
   if (installedPkg && !installAsAdditionnalSpace) {
     // Install in every space => upgrades
     await installKibanaAssetsAndReferences({
@@ -225,7 +218,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
   });
 }
 
-function getSpaceAwareSaveobjectsClients(spaceId?: string) {
+export function getSpaceAwareSaveobjectsClients(spaceId?: string) {
   // Saved object client need to be scopped with the package space for saved object tagging
   const savedObjectClientWithSpace = appContextService.getInternalUserSOClientForSpaceId(spaceId);
 

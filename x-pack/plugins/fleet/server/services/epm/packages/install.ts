@@ -624,27 +624,9 @@ async function installPackageCommon(options: {
       return { error: err, installType, installSource };
     }
 
-    // Saved object client need to be scopped with the package space for saved object tagging
-    const savedObjectClientWithSpace = appContextService.getInternalUserSOClientForSpaceId(spaceId);
-
-    const savedObjectsImporter = appContextService
-      .getSavedObjects()
-      .createImporter(savedObjectClientWithSpace, { importSizeLimit: 15_000 });
-
-    const savedObjectTagAssignmentService = appContextService
-      .getSavedObjectsTagging()
-      .createInternalAssignmentService({ client: savedObjectClientWithSpace });
-
-    const savedObjectTagClient = appContextService
-      .getSavedObjectsTagging()
-      .createTagClient({ client: savedObjectClientWithSpace });
-
     // try installing the package, if there was an error, call error handler and rethrow
     return await _installPackage({
       savedObjectsClient,
-      savedObjectsImporter,
-      savedObjectTagAssignmentService,
-      savedObjectTagClient,
       esClient,
       logger,
       installedPkg,
