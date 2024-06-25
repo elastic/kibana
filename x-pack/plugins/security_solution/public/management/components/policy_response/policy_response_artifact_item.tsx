@@ -8,14 +8,7 @@
 import React, { memo } from 'react';
 import { truncate } from 'lodash';
 import styled from 'styled-components';
-import {
-  EuiButtonEmpty,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiCopy, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HostPolicyResponseAppliedArtifact } from '../../../../common/endpoint/types';
 
@@ -79,19 +72,19 @@ export const PolicyResponseArtifactItem = memo(({ artifact }: PolicyResponseArti
               </EuiToolTip>
             </StyledShaValue>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} style={{ marginTop: '-4px' }}>
             <EuiCopy
               textToCopy={artifact.sha256}
               beforeMessage={COPY_TOOLTIP.BEFORE}
               afterMessage={COPY_TOOLTIP.AFTER}
             >
               {(copy) => (
-                <EuiButtonEmpty
+                <EuiIcon
                   size="m"
-                  flush="right"
-                  iconType="copyClipboard"
+                  color="primary"
+                  type="copyClipboard"
                   onClick={copy}
-                  data-test-subj="vegaDataInspectorCopyClipboardButton"
+                  data-test-subj="endpointPolicyResponseArtifactCopyButton"
                 />
               )}
             </EuiCopy>

@@ -181,7 +181,7 @@ export const PolicyResponse = memo(
       ) => {
         return artifactIdentifiers.map((artifact) => {
           return {
-            label: <PolicyResponseArtifactItem artifact={artifact} />,
+            label: <PolicyResponseArtifactItem artifact={artifact} key={artifact.sha256} />,
             id: artifact.name,
             className: 'policy-response-artifact-item',
           };
@@ -239,7 +239,11 @@ export const PolicyResponse = memo(
         children: Object.entries(policyResponseArtifacts).map(([key, val]) => {
           return {
             label: (
-              <EuiText color="default" size="s" data-test-subj="endpointPolicyResponseArtifact">
+              <EuiText
+                color="default"
+                size="s"
+                data-test-subj={`endpointPolicyResponseArtifact${capitalize(key)}`}
+              >
                 {`${capitalize(key)} (v${val.version})`}
               </EuiText>
             ),
