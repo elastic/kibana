@@ -176,7 +176,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
 }) {
   if (installedPkg && !installAsAdditionnalSpace) {
     // Install in every space => upgrades
-    await installKibanaAssetsAndReferences({
+    const refs = await installKibanaAssetsAndReferences({
       savedObjectsClient,
       logger,
       pkgName,
@@ -203,6 +203,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
         installAsAdditionnalSpace: true,
       });
     }
+    return refs;
   }
 
   return installKibanaAssetsAndReferences({
@@ -299,7 +300,9 @@ export async function installKibanaAssetsAndReferences({
       savedObjectsClient,
       pkgName,
       assets,
-      installAsAdditionnalSpace
+      installedPkg && installedPkg.attributes.installed_kibana_space_id === spaceId
+        ? false
+        : installAsAdditionnalSpace
     );
   }
   await withPackageSpan('Create and assign package tags', () =>

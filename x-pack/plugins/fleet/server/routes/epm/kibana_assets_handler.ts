@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import { defaultFleetErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler, FleetNotFoundError } from '../../errors';
 import { appContextService } from '../../services';
 import {
   deleteKibanaAssetsAndReferencesForSpace,
@@ -51,7 +51,7 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
       !installedPkgWithAssets ||
       installedPkgWithAssets?.installation.version !== pkgVersion
     ) {
-      throw new Error('Version is not installed');
+      throw new FleetNotFoundError('Requested version is not installed');
     }
 
     const { packageInfo } = installedPkgWithAssets;
