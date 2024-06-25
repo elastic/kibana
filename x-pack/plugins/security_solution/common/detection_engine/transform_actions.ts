@@ -24,7 +24,6 @@ export const transformRuleToAlertAction = ({
   frequency,
   alerts_filter: alertsFilter,
 }: RuleAction): AlertingRuleAction => ({
-  group,
   id,
   params: params as AlertingRuleAction['params'],
   actionTypeId,
@@ -33,6 +32,7 @@ export const transformRuleToAlertAction = ({
   }),
   ...(uuid && { uuid }),
   ...(frequency && { frequency }),
+  ...(group && { group }),
 });
 
 export const transformAlertToRuleAction = ({
@@ -44,7 +44,6 @@ export const transformAlertToRuleAction = ({
   frequency,
   alertsFilter,
 }: AlertingRuleAction): RuleAction => ({
-  group,
   id,
   params,
   action_type_id: actionTypeId,

@@ -783,6 +783,13 @@ export const internalRuleToAPIResponse = (
   const alertActions = rule.actions.map(transformAlertToRuleAction);
   const throttle = transformFromAlertThrottle(rule);
   const actions = transformToActionFrequency(alertActions, throttle);
+  const systemActions = rule.systemActions.map((action) => {
+    const { id, ...transformedAction } = transformAlertToRuleAction(action);
+    return transformedAction;
+  });
+
+  console.error('alertActions', JSON.stringify(alertActions));
+  console.error('systemActions', JSON.stringify(systemActions));
 
   return {
     // saved object properties
@@ -806,7 +813,7 @@ export const internalRuleToAPIResponse = (
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
     throttle: undefined,
-    actions,
+    actions: [...actions, ...systemActions],
     // Execution summary
     execution_summary: executionSummary ?? undefined,
   };

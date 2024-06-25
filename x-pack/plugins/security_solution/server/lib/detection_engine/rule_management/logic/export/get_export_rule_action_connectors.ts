@@ -76,7 +76,14 @@ export const getRuleActionConnectorsForExport = async (
     actionConnectorDetails: defaultActionConnectorDetails,
   };
 
-  let actionsIds = [...new Set(rules.flatMap((rule) => rule.actions.map(({ id }) => id)))];
+  const ids = [
+    ...new Set(
+      rules.flatMap((rule) => rule.actions.map(({ id }) => id).filter((id) => id != null))
+    ),
+  ];
+
+  console.error('WHAT ARE THE IDS', ids);
+  let actionsIds = ids;
   if (!actionsIds.length) return exportedActionConnectors;
 
   // handle preconfigured connectors
