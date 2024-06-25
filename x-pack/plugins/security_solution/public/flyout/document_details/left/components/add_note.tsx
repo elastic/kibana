@@ -100,14 +100,14 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
     dispatch(
       createNote({
         note: {
-          timelineId: (checked && activeTimeline.savedObjectId) || '',
+          timelineId: (checked && activeTimeline?.savedObjectId) || '',
           eventId,
           note: editorValue,
         },
       })
     );
     setEditorValue('');
-  }, [activeTimeline.savedObjectId, checked, dispatch, editorValue, eventId]);
+  }, [activeTimeline?.savedObjectId, checked, dispatch, editorValue, eventId]);
 
   // show a toast if the create note call fails
   useEffect(() => {

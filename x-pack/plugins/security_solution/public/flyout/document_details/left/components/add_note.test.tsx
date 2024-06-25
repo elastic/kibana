@@ -50,6 +50,7 @@ describe('AddNote', () => {
 
     expect(getByTestId(ADD_NOTE_MARKDOWN_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ADD_NOTE_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID)).toBeInTheDocument();
   });
 
   it('should create note', () => {
