@@ -91,7 +91,7 @@ export const permissionsPolicyViolationReportSchema = schema.object(
         /**
          * The string identifying the policy-controlled feature whose policy has been violated. This string can be used for grouping and counting related reports.
          */
-        featureId: schema.string(),
+        policyId: schema.string(),
         /**
          * If known, the file where the violation occured, or null otherwise.
          */
@@ -140,6 +140,7 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
             schema.oneOf([cspViolationReportSchema, permissionsPolicyViolationReportSchema])
           ),
           cspViolationReportSchema,
+          permissionsPolicyViolationReportSchema,
         ]),
       },
       options: {
