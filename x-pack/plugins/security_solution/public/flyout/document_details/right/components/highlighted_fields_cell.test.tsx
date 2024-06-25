@@ -20,7 +20,6 @@ import { TestProviders } from '../../../../common/mock';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useGetAgentStatus } from '../../../../management/hooks/agents/use_get_agent_status';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../../../management/hooks');
 jest.mock('../../../../management/hooks/agents/use_get_agent_status');
