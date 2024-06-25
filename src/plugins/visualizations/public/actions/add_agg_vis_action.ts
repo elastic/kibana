@@ -7,7 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddableApiContext, HasType } from '@kbn/presentation-publishing';
+import {
+  apiHasAppContext,
+  EmbeddableApiContext,
+  HasType,
+  HasAppContext,
+} from '@kbn/presentation-publishing';
 import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { apiHasType } from '@kbn/presentation-publishing';
@@ -16,10 +21,10 @@ import { showNewVisModal } from '../wizard/show_new_vis';
 
 const ADD_AGG_VIS_ACTION_ID = 'ADD_AGG_VIS';
 
-type AddAggVisualizationPanelActionApi = HasType & CanAddNewPanel;
+type AddAggVisualizationPanelActionApi = HasType & CanAddNewPanel & HasAppContext;
 
 const isApiCompatible = (api: unknown | null): api is AddAggVisualizationPanelActionApi => {
-  return apiHasType(api) && apiCanAddNewPanel(api) && api.type === 'dashboard';
+  return apiHasType(api) && apiCanAddNewPanel(api) && apiHasAppContext(api);
 };
 
 export class AddAggVisualizationPanelAction implements Action<EmbeddableApiContext> {
@@ -36,7 +41,7 @@ export class AddAggVisualizationPanelAction implements Action<EmbeddableApiConte
   }
 
   public getDisplayName() {
-    return i18n.translate('visulizations.uiAction.addAggVis.displayName', {
+    return i18n.translate('visualizations.uiAction.addAggVis.displayName', {
       defaultMessage: 'Aggregation based',
     });
   }
@@ -51,7 +56,7 @@ export class AddAggVisualizationPanelAction implements Action<EmbeddableApiConte
     }
 
     showNewVisModal({
-      originatingApp: 'dashboards',
+      originatingApp: embeddable.getAppContext().currentAppId,
       outsideVisualizeApp: true,
       showAggsSelection: true,
     });
