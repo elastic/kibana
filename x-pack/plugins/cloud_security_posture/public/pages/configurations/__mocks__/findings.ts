@@ -93,6 +93,7 @@ export const mockFindingsHit: CspFinding = {
       name: 'CIS Kubernetes V1.23',
       id: 'cis_k8s',
       version: 'v1.0.0',
+      posture_type: 'kspm',
     },
     tags: ['CIS', 'Kubernetes', 'CIS 5.1.5', 'RBAC and Service Accounts'],
     remediation:

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { type TypeOf } from '@kbn/config-schema';
-import { CspFinding } from './schemas/csp_finding';
+import { CspFinding, CspFindingCloud, CspFindingOrchestrator } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
 import { getComplianceDashboardSchema } from './schemas/stats';
@@ -68,9 +68,9 @@ export interface PostureTrend extends Stats {
 export interface Cluster {
   meta: {
     assetIdentifierId: string;
-    cloud: CspFinding['cloud'];
+    cloud: CspFindingCloud;
     benchmark: CspFinding['rule']['benchmark'];
-    cluster: NonNullable<CspFinding['orchestrator']>['cluster'];
+    cluster: NonNullable<CspFindingOrchestrator>['cluster'];
     lastUpdate: string;
   };
   stats: Stats;

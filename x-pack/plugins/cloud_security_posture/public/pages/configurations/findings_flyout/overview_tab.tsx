@@ -33,6 +33,7 @@ import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CisKubernetesIcons, CodeBlock, CspFlyoutMarkdown } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
+import { CspBenchmarkRuleMetadata } from '../../../../common/types/latest';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
@@ -106,7 +107,7 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
   },
 ];
 
-export const getRemediationList = (rule: CspFinding['rule']) => [
+export const getRemediationList = (rule: CspBenchmarkRuleMetadata) => [
   {
     title: '',
     description: <CspFlyoutMarkdown>{rule.remediation}</CspFlyoutMarkdown>,

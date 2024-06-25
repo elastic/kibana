@@ -15,7 +15,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { CspFinding } from '../../../common/schemas/csp_finding';
+import { CspFindingKSPM, CspFindingCSPM } from '../../../common/schemas/csp_finding';
 import type { Cluster } from '../../../common/types_old';
 import { getPostureStatsFromAggs, failedFindingsAggQuery } from './get_grouped_findings_evaluation';
 import type { FailedFindingsQueryResult } from './get_grouped_findings_evaluation';
@@ -74,9 +74,17 @@ export const getClustersQuery = (
   },
 });
 
+// const getCloudOrCluster = (finding: CspFinding): string => {
+//   if (finding.rule.benchmark.posture_type === 'cspm') {
+//     return finding.cloud?.provider ?? '';
+//   }
+//   return finding.orchestrator?.cluster?.name ?? '';
+// };
+
 export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTrend[] =>
   clusters.map((clusterBucket) => {
-    const latestFindingHit: SearchHit<CspFinding> = clusterBucket.latestFindingTopHit.hits.hits[0];
+    const latestFindingHit: SearchHit<CspFindingCSPM | CspFindingKSPM> =
+      clusterBucket.latestFindingTopHit.hits.hits[0];
     if (!latestFindingHit._source) throw new Error('Missing findings top hits');
 
     const meta = {
@@ -84,8 +92,12 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
       assetIdentifierId: clusterBucket.key,
       lastUpdate: latestFindingHit._source['@timestamp'],
       benchmark: latestFindingHit._source.rule.benchmark,
-      cloud: latestFindingHit._source.cloud, // only available on CSPM findings
-      cluster: latestFindingHit._source.orchestrator?.cluster, // only available on KSPM findings
+      cloud:
+        latestFindingHit._source.rule.benchmark.posture_type === 'cspm' &&
+        latestFindingHit._source.cloud, // only available on CSPM findings
+      cluster:
+        latestFindingHit._source.rule.benchmark.posture_type === 'kspm' &&
+        latestFindingHit._source.orchestrator?.cluster, // only available on KSPM findings
     };
 
     // get cluster's stats
