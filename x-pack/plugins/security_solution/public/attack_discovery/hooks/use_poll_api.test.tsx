@@ -99,6 +99,34 @@ describe('usePollApi', () => {
     );
   });
 
+  test('should update didInitialFetch on connector change', async () => {
+    http.fetch.mockResolvedValue({
+      entryExists: true,
+      data: mockResponse,
+    });
+    const { result, rerender } = renderHook((props) => usePollApi(props), {
+      initialProps: defaultProps,
+    });
+
+    expect(result.current.didInitialFetch).toEqual(false);
+
+    await act(async () => {
+      await result.current.pollApi();
+    });
+
+    expect(result.current.didInitialFetch).toEqual(true);
+
+    rerender({ ...defaultProps, connectorId: 'new-connector-id' });
+
+    expect(result.current.didInitialFetch).toEqual(false);
+
+    await act(async () => {
+      await result.current.pollApi();
+    });
+
+    expect(result.current.didInitialFetch).toEqual(true);
+  });
+
   test('should update status and data on successful response', async () => {
     http.fetch.mockResolvedValue({
       entryExists: true,
