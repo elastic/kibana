@@ -80,40 +80,18 @@ describe('CrowdstrikeActionsClient class', () => {
   });
 
   it('should save response with error in case of actionResponse containing errors', async () => {
-    const doc = {
-      '@timestamp': '123',
-      EndpointActions: {
-        action_id: '123-345-567',
-        data: {
-          command: 'isolate',
-          comment: 'test comment',
-          hosts: {
-            '1-2-3': {
-              name: 'Crowdstrike-1460',
-            },
-          },
-        },
-        expiration: '123',
-        input_type: 'crowdstrike',
-        type: 'INPUT_ACTION',
-      },
-      agent: { id: ['1-2-3'] },
-      meta: {
-        hostName: 'Crowdstrike-1460',
-      },
-      user: { id: 'foo' },
-    };
-
+    // mock execute of CS action to return error
     const actionResponse = {
       data: {
         errors: [{ message: 'error message' }],
       },
     };
+    (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
 
-    // @ts-expect-error Purposely testing a private method
-    await crowdstrikeActionsClient.completeCrowdstrikeAction(actionResponse, doc);
-
-    expect(classConstructorOptions.esClient.index.mock.calls[0][0]).toEqual({
+    await crowdstrikeActionsClient.isolate(
+      createCrowdstrikeIsolationOptions({ actionId: '123-345-567' })
+    );
+    expect(classConstructorOptions.esClient.index.mock.calls[1][0]).toEqual({
       document: {
         '@timestamp': expect.any(String),
         agent: { id: ['1-2-3'] },
