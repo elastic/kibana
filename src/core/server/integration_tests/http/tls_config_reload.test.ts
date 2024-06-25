@@ -17,6 +17,7 @@ import {
   config as httpConfig,
   cspConfig,
   externalUrlConfig,
+  permissionsPolicyConfig,
 } from '@kbn/core-http-server-internal';
 import { isServerTLS, flattenCertificateChain, fetchPeerCertificate } from './tls_utils';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -24,6 +25,7 @@ import type { Logger } from '@kbn/logging';
 
 const CSP_CONFIG = cspConfig.schema.validate({});
 const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
+const PERMISSIONS_POLICY_CONFIG = permissionsPolicyConfig.schema.validate({});
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
 describe('HttpServer - TLS config', () => {
@@ -54,7 +56,12 @@ describe('HttpServer - TLS config', () => {
       },
       shutdownTimeout: '1s',
     });
-    const firstConfig = new HttpConfig(rawHttpConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    const firstConfig = new HttpConfig(
+      rawHttpConfig,
+      CSP_CONFIG,
+      EXTERNAL_URL_CONFIG,
+      PERMISSIONS_POLICY_CONFIG
+    );
 
     const config$ = new BehaviorSubject(firstConfig);
 
@@ -109,7 +116,12 @@ describe('HttpServer - TLS config', () => {
       shutdownTimeout: '1s',
     });
 
-    const secondConfig = new HttpConfig(secondRawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    const secondConfig = new HttpConfig(
+      secondRawConfig,
+      CSP_CONFIG,
+      EXTERNAL_URL_CONFIG,
+      PERMISSIONS_POLICY_CONFIG
+    );
     config$.next(secondConfig);
 
     const secondCertificate = await fetchPeerCertificate(firstConfig.host, firstConfig.port);
