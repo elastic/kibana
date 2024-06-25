@@ -9,10 +9,13 @@ import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import Boom from '@hapi/boom';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
-import { alertsAggregationsSchema } from '../../common/types';
+import { alertsAggregationsSchema, alertsGroupFilterSchema } from '../../common/types';
+import { DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE } from '../alert_data_client/constants';
 
 export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
@@ -25,7 +28,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
               featureIds: t.array(t.string),
               groupByField: t.string,
               aggregations: t.union([alertsAggregationsSchema, t.undefined]),
-              filters: t.union([t.array(t.object), t.undefined]),
+              filters: t.union([t.array(alertsGroupFilterSchema), t.undefined]),
               sort: t.union([t.array(t.object), t.undefined]),
               pageIndex: t.union([t.number, t.undefined]),
               pageSize: t.union([t.number, t.undefined]),
@@ -38,16 +41,29 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
       },
     },
     async (context, request, response) => {
+      const {
+        featureIds,
+        groupByField,
+        aggregations,
+        filters,
+        sort,
+        pageIndex = 0,
+        pageSize = DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE,
+      } = request.body;
+      if (pageIndex < 0 || pageIndex > 100) {
+        throw Boom.badRequest(`Page index is out of range (0 - 100)`);
+      }
+      if (pageSize < 0 || pageSize > 100) {
+        throw Boom.badRequest(`Page size is out of range (0 - 100)`);
+      }
       try {
-        const { featureIds, groupByField, aggregations, filters, sort, pageIndex, pageSize } =
-          request.body;
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
         const alerts = await alertsClient.getGroupAggregations({
           featureIds,
           groupByField,
           aggregations,
-          filters,
+          filters: filters as QueryDslQueryContainer[],
           sort,
           pageIndex,
           pageSize,

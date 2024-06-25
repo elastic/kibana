@@ -225,6 +225,59 @@ describe('getAlertsGroupAggregations', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Request was rejected with message: 'invalid keys \\"script\\"'"`
       );
+      await expect(
+        server.inject(
+          requestMock.create({
+            method: 'post',
+            path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
+            body: {
+              featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+              groupByField: 'kibana.alert.rule.name',
+              filters: [
+                {
+                  script: {
+                    script: '100',
+                  },
+                },
+              ],
+            },
+          }),
+          context
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Request was rejected with message: 'invalid keys \\"script\\"'"`
+      );
+    });
+
+    test('rejects with invalid pagination options', async () => {
+      await expect(
+        server.inject(
+          requestMock.create({
+            method: 'post',
+            path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
+            body: {
+              featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+              groupByField: 'kibana.alert.rule.name',
+              pageIndex: -1,
+            },
+          }),
+          context
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Page index is out of range (0 - 100)"`);
+      await expect(
+        server.inject(
+          requestMock.create({
+            method: 'post',
+            path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
+            body: {
+              featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+              groupByField: 'kibana.alert.rule.name',
+              pageSize: 1000,
+            },
+          }),
+          context
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Page size is out of range (0 - 100)"`);
     });
 
     test('rejects unknown query params', async () => {

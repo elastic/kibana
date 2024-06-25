@@ -44,7 +44,7 @@ import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import { TypeOf } from 'io-ts';
-import { DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE, MAX_ALERTS_GROUPING_QUERY_SIZE } from './constants';
+import { MAX_ALERTS_GROUPING_QUERY_SIZE } from './constants';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -1031,8 +1031,8 @@ export class AlertsClient {
     groupByField,
     aggregations,
     filters,
-    pageIndex = 0,
-    pageSize = DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE,
+    pageIndex,
+    pageSize,
     sort = [{ unitsCount: { order: 'desc' } }],
   }: {
     /**
@@ -1059,11 +1059,11 @@ export class AlertsClient {
     /**
      * The page index to start from
      */
-    pageIndex?: number;
+    pageIndex: number;
     /**
      * The page size
      */
-    pageSize?: number;
+    pageSize: number;
   }) {
     const uniqueValue = uuidv4();
     return this.find({
