@@ -321,6 +321,13 @@ for (const name of functions) {
 
     const argsArray = [];
 
+    /**
+     * Declares that 3 assertions should be run.
+     * We don't use the assertProcess function here as we need an extra assertion
+     * for the polluted prototype
+     */
+    t.plan(3);
+
     t.deepEqual(
       argsArray[2],
       pollutedObject,
@@ -328,7 +335,7 @@ for (const name of functions) {
     );
 
     const stdout = '';
-    t.plan(3);
+
     const cmd = cp.spawn(command, argsArray);
     cmd.stdout.on('data', (data) => {
       t.equal(data.toString().trim(), stdout);
