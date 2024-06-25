@@ -52,8 +52,6 @@ import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 import { AlertActionsProps } from './types';
 import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
-import { getDeleteConnectorModalConfirmationLazy } from './common/get_delete_modal_confirmation';
-import { DeleteModalConfirmationProps } from './application/components/delete_modal_confirmation';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -86,11 +84,6 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         actionTypeRegistry,
         connectorServices,
       });
-    },
-    getDeleteConnectorModalConfirmation: (
-      props: Omit<DeleteModalConfirmationProps, 'actionTypeRegistry'>
-    ) => {
-      return getDeleteConnectorModalConfirmationLazy({ ...props, connectorServices });
     },
     getAddRuleFlyout: (props) => {
       return getAddRuleFlyoutLazy({

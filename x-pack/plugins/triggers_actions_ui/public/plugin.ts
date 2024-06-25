@@ -98,8 +98,6 @@ import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
-import { DeleteModalConfirmationProps } from './application/components/delete_modal_confirmation';
-import { getDeleteConnectorModalConfirmationLazy } from './common/get_delete_modal_confirmation';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -122,9 +120,6 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditConnectorFlyout: (
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
-  getDeleteConnectorModalConfirmation: (
-    props: Omit<DeleteModalConfirmationProps, 'actionTypeRegistry'>
-  ) => ReactElement<DeleteModalConfirmationProps>;
   getAddRuleFlyout: <
     Params extends RuleTypeParams = RuleTypeParams,
     MetaData extends RuleTypeMetaData = RuleTypeMetaData
@@ -491,14 +486,6 @@ export class Plugin
         return getEditConnectorFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
-          connectorServices: this.connectorServices!,
-        });
-      },
-      getDeleteConnectorModalConfirmation: (
-        props: Omit<DeleteModalConfirmationProps, 'actionTypeRegistry'>
-      ) => {
-        return getDeleteConnectorModalConfirmationLazy({
-          ...props,
           connectorServices: this.connectorServices!,
         });
       },
