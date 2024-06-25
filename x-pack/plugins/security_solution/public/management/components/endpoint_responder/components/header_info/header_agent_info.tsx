@@ -6,14 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AgentTypeVendorLogo } from '../../../../../common/components/endpoint/agents/agent_type_vendor_logo';
@@ -39,20 +32,24 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
   ({ platform, hostName, lastCheckin, agentType, children }) => {
     const { euiTheme } = useEuiTheme();
 
+    // FIXME:PT working here. Need to fix layout to accommodate long values
+
     return (
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" justifyContent="center">
-            <PlatformIcon data-test-subj="responderHeaderHostPlatformIcon" platform={platform} />
-          </EuiFlexGroup>
+          <PlatformIcon data-test-subj="responderHeaderHostPlatformIcon" platform={platform} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="xs">
                 <EuiFlexItem grow={false} className="eui-textTruncate">
                   <EuiToolTip content={hostName} anchorClassName="eui-textTruncate">
-                    <EuiText size="s" data-test-subj="responderHeaderHostName">
+                    <EuiText
+                      size="s"
+                      data-test-subj="responderHeaderHostName"
+                      className="eui-textTruncate"
+                    >
                       <h6 className="eui-textTruncate">{hostName}</h6>
                     </EuiText>
                   </EuiToolTip>
@@ -60,8 +57,8 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
                 <EuiFlexItem grow={false}>{children}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
-              <EuiSpacer size="xs" />
               <EuiText color="subdued" size="s" data-test-subj="responderHeaderLastSeen">
                 <FormattedMessage
                   id="xpack.securitySolution.responder.header.lastSeen"
@@ -76,14 +73,14 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
         </EuiFlexItem>
 
         {agentType && (
-          <EuiFlexItem css={{ paddingLeft: euiTheme.size.l }}>
+          <EuiFlexItem grow={false} css={{ paddingLeft: euiTheme.size.l }}>
             <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiText color="subdued" size="s" data-test-subj="responderHeaderIntegrationLabel">
                   {INTEGRATION_SECTION_LABEL}
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} wrap={false} gutterSize="xs" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <AgentTypeVendorLogo agentType={agentType} />
