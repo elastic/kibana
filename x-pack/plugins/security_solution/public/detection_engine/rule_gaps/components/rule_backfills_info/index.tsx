@@ -28,6 +28,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -147,8 +148,8 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [{ canUserCRUD }] = useUserData();
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
-
-  const { data, isLoading, isError, refetch } = useFindBackfillsForRules(
+  const { timelines } = useKibana().services;
+  const { data, isLoading, isError, refetch, dataUpdatedAt } = useFindBackfillsForRules(
     {
       ruleIds: [ruleId],
       page: pageIndex + 1,
@@ -204,6 +205,15 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
           <EuiButton iconType="refresh" fill onClick={handleRefresh}>
             {i18n.BACKFILL_TABLE_REFRESH}
           </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          {timelines.getLastUpdated({
+            showUpdating: isLoading,
+            updatedAt: dataUpdatedAt,
+          })}
         </EuiFlexItem>
       </EuiFlexGroup>
 
