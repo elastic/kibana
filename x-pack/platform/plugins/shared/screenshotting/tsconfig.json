@@ -11,7 +11,9 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../../../../src/setup_node_env/tsconfig.json" },
+    {
+      "path": "../../../../../src/setup_node_env/tsconfig.json"
+    },
     "@kbn/expressions-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/cloud-plugin",
