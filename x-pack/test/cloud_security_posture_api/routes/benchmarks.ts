@@ -45,7 +45,7 @@ export default function (providerContext: FtrProviderContext) {
           (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
         );
         arraySize.push(requestedBenchmarkRules);
-        if (requestedBenchmarkRules.length < 1) {
+        if (requestedBenchmarkRules.length > 1) {
           return requestedBenchmarkRules.map((item) => item.attributes);
         } else {
           throw new Error(`No benchmark rules found for benchmark ID: ${benchmarkId}`);
@@ -58,7 +58,9 @@ export default function (providerContext: FtrProviderContext) {
     }
 
     throw new Error(
-      `Failed to retrieve benchmark rules after ${retryCount} attempts, with rule array size of ${JSON.stringify(arraySize[0])}`
+      `Failed to retrieve benchmark rules after ${retryCount} attempts, with rule array size of ${JSON.stringify(
+        arraySize[0]
+      )}`
     );
   };
 
