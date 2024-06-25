@@ -263,7 +263,7 @@ describe('Actions Plugin', () => {
           {
             id: 'system-connector-.cases',
             actionTypeId: '.cases',
-            name: 'System action: .cases',
+            name: 'Cases',
             config: {},
             secrets: {},
             isDeprecated: false,
@@ -418,6 +418,43 @@ describe('Actions Plugin', () => {
         pluginSetup.setEnabledConnectorTypes(['.server-log']);
         expect(pluginStart.isActionTypeEnabled('.server-log')).toBeTruthy();
         expect(pluginStart.isActionTypeEnabled('.slack')).toBeFalsy();
+      });
+
+      it('should set connector type enabled and check isActionTypeEnabled with plugin setup method', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.registerType({
+          id: '.slack',
+          name: 'Slack',
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.setEnabledConnectorTypes(['.server-log']);
+
+        // checking isActionTypeEnabled via plugin setup, not plugin start
+        expect(pluginSetup.isActionTypeEnabled('.server-log')).toBeTruthy();
+        expect(pluginSetup.isActionTypeEnabled('.slack')).toBeFalsy();
       });
 
       it('should set all the connector types enabled when null or ["*"] passed', async () => {
@@ -737,6 +774,12 @@ describe('Actions Plugin', () => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
+          const platinumLicense = licensingMock.createLicense({
+            license: { status: 'active', type: 'platinum' },
+          });
+          // @ts-ignore
+          plugin.licenseState.updateInformation(platinumLicense);
+
           pluginSetup.registerType({
             id: '.cases',
             name: 'Cases',
@@ -769,7 +812,7 @@ describe('Actions Plugin', () => {
             {
               id: 'system-connector-.cases',
               actionTypeId: '.cases',
-              name: 'System action: .cases',
+              name: 'Cases',
               config: {},
               secrets: {},
               isDeprecated: false,
@@ -894,6 +937,54 @@ describe('Actions Plugin', () => {
           },
         });
         expect(pluginSetup.getActionsHealth()).toEqual({ hasPermanentEncryptionKey: true });
+      });
+    });
+
+    describe('isSystemActionConnector()', () => {
+      it('should return true if the connector is a system connector', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        pluginSetup.registerType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          isSystemActionType: true,
+          executor,
+        });
+
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        expect(pluginStart.isSystemActionConnector('system-connector-.cases')).toBe(true);
+      });
+
+      it('should return false if the connector is not a system connector', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        pluginSetup.registerType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          isSystemActionType: true,
+          executor,
+        });
+
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        expect(pluginStart.isSystemActionConnector('preconfiguredServerLog')).toBe(false);
       });
     });
   });

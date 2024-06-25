@@ -670,5 +670,11 @@ export function TrainedModelsTableProvider(
         await testSubjects.existOrFail('mlDataDriftTable');
       });
     }
+
+    public async assertSpaceAwareWarningMessage(): Promise<void> {
+      await testSubjects.existOrFail('mlDeleteSpaceAwareItemCheckModalOverlay', {
+        timeout: 3_000,
+      });
+    }
   })();
 }

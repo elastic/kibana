@@ -12,14 +12,8 @@ import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { getInternalSavedObjectsClient } from '../../../lib/helpers/get_internal_saved_objects_client';
 import { APMPluginStartDependencies } from '../../../types';
 import { getApmPackagePolicies } from '../get_apm_package_policies';
-import {
-  createApmAgentConfigApiKey,
-  createApmSourceMapApiKey,
-} from './create_apm_api_keys';
-import {
-  getPackagePolicyWithApiKeys,
-  policyHasApiKey,
-} from '../get_package_policy_decorators';
+import { createApmAgentConfigApiKey, createApmSourceMapApiKey } from './create_apm_api_keys';
+import { getPackagePolicyWithApiKeys, policyHasApiKey } from '../get_package_policy_decorators';
 
 export async function addApiKeysToEveryPackagePolicyIfMissing({
   coreStartPromise,
@@ -83,12 +77,7 @@ export async function addApiKeysToPackagePolicyIfMissing({
     packagePolicyId: policy.id,
   });
 
-  const packagePolicyTrimmed = omit(policy, [
-    'id',
-    'revision',
-    'updated_at',
-    'updated_by',
-  ]);
+  const packagePolicyTrimmed = omit(policy, ['id', 'revision', 'updated_at', 'updated_by']);
   const policyWithApiKeys = getPackagePolicyWithApiKeys({
     packagePolicy: packagePolicyTrimmed,
     agentConfigApiKey,

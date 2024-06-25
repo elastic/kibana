@@ -14,30 +14,18 @@ import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import { RouteComponentProps, RouteProps } from 'react-router-dom';
-import {
-  AppMountParameters,
-  CoreStart,
-  APP_WRAPPER_CLASS,
-} from '@kbn/core/public';
+import { AppMountParameters, CoreStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
 
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  useDarkMode,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaContextProvider, useDarkMode } from '@kbn/kibana-react-plugin/public';
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
-import {
-  InspectorContextProvider,
-  useBreadcrumbs,
-} from '@kbn/observability-shared-plugin/public';
+import { InspectorContextProvider, useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
-import {
-  DASHBOARD_LABEL,
-  RumHome,
-} from '../components/app/rum_dashboard/rum_home';
+import { DASHBOARD_LABEL, RumHome } from '../components/app/rum_dashboard/rum_home';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { UXActionMenu } from '../components/app/rum_dashboard/action_menu';
 
@@ -119,58 +107,60 @@ export function UXAppRoot({
     lens,
   },
   isDev,
+  spaceId,
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   corePlugins: ApmPluginStartDeps;
   isDev: boolean;
+  spaceId: string;
 }) {
   const { history } = appMountParameters;
-  const i18nCore = core.i18n;
   const plugins = { ...deps, maps };
 
   createCallApmApi(core);
 
   return (
-    <div className={APP_WRAPPER_CLASS}>
-      <RedirectAppLinks
-        coreStart={{
-          application: core.application,
-        }}
-      >
-        <KibanaContextProvider
-          services={{
-            ...core,
-            ...plugins,
-            inspector,
-            observability,
-            observabilityShared,
-            observabilityAIAssistant,
-            embeddable,
-            exploratoryView,
-            data,
-            dataViews,
-            lens,
+    <KibanaRenderContextProvider {...core}>
+      <div className={APP_WRAPPER_CLASS}>
+        <RedirectAppLinks
+          coreStart={{
+            application: core.application,
           }}
         >
-          <KibanaThemeProvider
-            theme$={appMountParameters.theme$}
-            modify={{
-              breakpoint: {
-                xxl: 1600,
-                xxxl: 2000,
-              },
+          <KibanaContextProvider
+            services={{
+              ...core,
+              ...plugins,
+              inspector,
+              observability,
+              observabilityShared,
+              observabilityAIAssistant,
+              embeddable,
+              exploratoryView,
+              data,
+              dataViews,
+              lens,
             }}
           >
-            <PluginContext.Provider
-              value={{
-                appMountParameters,
-                exploratoryView,
-                observabilityShared,
+            <KibanaThemeProvider
+              theme={core.theme}
+              modify={{
+                breakpoint: {
+                  xxl: 1600,
+                  xxxl: 2000,
+                },
               }}
             >
-              <i18nCore.Context>
+              <PluginContext.Provider
+                value={{
+                  appMountParameters,
+                  exploratoryView,
+                  observabilityShared,
+                  spaceId,
+                }}
+              >
                 <RouterProvider history={history} router={uxRouter}>
                   <DatePickerContextProvider>
                     <InspectorContextProvider>
@@ -180,20 +170,17 @@ export function UXAppRoot({
                             <UxApp />
                           </CsmSharedContextProvider>
                         </EuiErrorBoundary>
-                        <UXActionMenu
-                          appMountParameters={appMountParameters}
-                          isDev={isDev}
-                        />
+                        <UXActionMenu appMountParameters={appMountParameters} isDev={isDev} />
                       </UrlParamsProvider>
                     </InspectorContextProvider>
                   </DatePickerContextProvider>
                 </RouterProvider>
-              </i18nCore.Context>
-            </PluginContext.Provider>
-          </KibanaThemeProvider>
-        </KibanaContextProvider>
-      </RedirectAppLinks>
-    </div>
+              </PluginContext.Provider>
+            </KibanaThemeProvider>
+          </KibanaContextProvider>
+        </RedirectAppLinks>
+      </div>
+    </KibanaRenderContextProvider>
   );
 }
 
@@ -207,12 +194,14 @@ export const renderApp = ({
   appMountParameters,
   corePlugins,
   isDev,
+  spaceId,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   appMountParameters: AppMountParameters;
   corePlugins: ApmPluginStartDeps;
   isDev: boolean;
+  spaceId: string;
 }) => {
   const { element } = appMountParameters;
 
@@ -231,6 +220,7 @@ export const renderApp = ({
       deps={deps}
       corePlugins={corePlugins}
       isDev={isDev}
+      spaceId={spaceId}
     />,
     element
   );

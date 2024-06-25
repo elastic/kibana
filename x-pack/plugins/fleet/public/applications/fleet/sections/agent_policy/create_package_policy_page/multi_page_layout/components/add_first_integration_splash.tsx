@@ -37,7 +37,7 @@ import { CreatePackagePolicyBottomBar } from '.';
 const CentralTitle = styled('h1')`
   text-align: center;
 `;
-const PaddedCentralTitle: React.FC = ({ children }) => (
+const PaddedCentralTitle: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <>
     <EuiSpacer size={'s'} />
     <EuiTitle size="l">
@@ -60,11 +60,11 @@ const CenteredEuiStepNumber = styled(EuiStepNumber)`
 // step numbers are not centered in smaller layouts without this
 const CenteredEuiImage = (props: EuiImageProps) => (
   <div style={{ margin: '0 auto' }}>
-    <EuiImage {...props} />
+    <EuiImage role="presentation" {...props} />
   </div>
 );
 
-const ResponsiveStepGroup: React.FC = ({ children }) => {
+const ResponsiveStepGroup: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const isScreenSmall = useIsWithinMaxBreakpoint('s');
 
   return (
@@ -93,20 +93,17 @@ const AddIntegrationStepsIllustrations = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <div style={{ margin: '0 auto' }}>
-              <CenteredEuiImage
-                alt="Illustration of installing the Elastic Agent"
-                src={assetsBasePath + '1_install_agent.svg'}
-              />
+              <CenteredEuiImage alt="" src={assetsBasePath + '1_install_agent.svg'} />
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText textAlign="center">
-              <h4>
+            <EuiText textAlign="center" size="xs">
+              <h2>
                 <FormattedMessage
                   id="xpack.fleet.addFirstIntegrationSplash.installAgentStepTitle"
                   defaultMessage="Install Elastic Agent"
                 />
-              </h4>
+              </h2>
             </EuiText>
             <SubtitleText>
               <FormattedMessage
@@ -124,10 +121,7 @@ const AddIntegrationStepsIllustrations = () => {
       </EuiShowFor>
       <EuiHideFor sizes={['s', 'xs']}>
         <EuiFlexItem grow={false}>
-          <CenteredEuiImage
-            alt="Illustration of an arrow pointing from left to right"
-            src={assetsBasePath + 'arrow_right_curve_over.svg'}
-          />
+          <CenteredEuiImage alt="" src={assetsBasePath + 'arrow_right_curve_over.svg'} />
         </EuiFlexItem>
       </EuiHideFor>
       <EuiFlexItem grow={false}>
@@ -136,19 +130,16 @@ const AddIntegrationStepsIllustrations = () => {
             <CenteredEuiStepNumber status="incomplete" number={2} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <CenteredEuiImage
-              alt="Illustration of adding an integration"
-              src={assetsBasePath + '2_add_integration.svg'}
-            />
+            <CenteredEuiImage alt="" src={assetsBasePath + '2_add_integration.svg'} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText textAlign="center">
-              <h4>
+            <EuiText textAlign="center" size="xs">
+              <h2>
                 <FormattedMessage
                   id="xpack.fleet.addFirstIntegrationSplash.addIntegrationStepTitle"
                   defaultMessage="Add the integration"
                 />
-              </h4>
+              </h2>
             </EuiText>
             <SubtitleText>
               <FormattedMessage
@@ -166,10 +157,7 @@ const AddIntegrationStepsIllustrations = () => {
       </EuiShowFor>
       <EuiHideFor sizes={['s', 'xs']}>
         <EuiFlexItem grow={false}>
-          <CenteredEuiImage
-            alt="Illustration of an arrow pointing from left to right"
-            src={assetsBasePath + 'arrow_right_curve_under.svg'}
-          />
+          <CenteredEuiImage alt="" src={assetsBasePath + 'arrow_right_curve_under.svg'} />
         </EuiFlexItem>
       </EuiHideFor>
       <EuiFlexItem grow={false}>
@@ -178,19 +166,16 @@ const AddIntegrationStepsIllustrations = () => {
             <CenteredEuiStepNumber status="incomplete" number={3} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <CenteredEuiImage
-              alt="Illustration of a dashboard with data"
-              src={assetsBasePath + '3_confirm_data.svg'}
-            />
+            <CenteredEuiImage alt="" src={assetsBasePath + '3_confirm_data.svg'} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText textAlign="center">
-              <h4>
+            <EuiText textAlign="center" size="xs">
+              <h2>
                 <FormattedMessage
                   id="xpack.fleet.addFirstIntegrationSplash.confirmDataStepTitle"
                   defaultMessage="Confirm incoming data"
                 />
-              </h4>
+              </h2>
             </EuiText>
             <SubtitleText>
               <FormattedMessage

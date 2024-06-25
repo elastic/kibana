@@ -54,6 +54,11 @@ export interface GetAgentUploadsResponse {
   items: AgentDiagnostics[];
 }
 
+export interface DeleteAgentUploadResponse {
+  id: string;
+  deleted: boolean;
+}
+
 export interface PostNewAgentActionRequest {
   body: {
     action: Omit<NewAgentAction, 'agents'>;
@@ -152,6 +157,16 @@ export interface PostBulkAgentReassignRequest {
   };
 }
 
+export enum RequestDiagnosticsAdditionalMetrics {
+  'CPU' = 'CPU',
+}
+
+export interface PostRequestDiagnosticsRequest {
+  body: {
+    additional_metrics: RequestDiagnosticsAdditionalMetrics[];
+  };
+}
+
 export type PostRequestDiagnosticsResponse = BulkAgentAction;
 export type PostBulkRequestDiagnosticsResponse = BulkAgentAction;
 
@@ -159,6 +174,7 @@ export interface PostRequestBulkDiagnosticsRequest {
   body: {
     agents: string[] | string;
     batchSize?: number;
+    additional_metrics: RequestDiagnosticsAdditionalMetrics[];
   };
 }
 
@@ -232,6 +248,15 @@ export interface GetAgentIncomingDataResponse {
 
 export interface GetCurrentUpgradesResponse {
   items: CurrentUpgrade[];
+}
+
+export interface GetActionStatusRequest {
+  query: {
+    perPage?: number;
+    page?: number;
+    date?: string;
+    latest?: number;
+  };
 }
 export interface GetActionStatusResponse {
   items: ActionStatus[];

@@ -6,7 +6,11 @@
  */
 import { HttpSetup } from '@kbn/core/public';
 
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
+import {
+  AsApiContract,
+  INTERNAL_BASE_ACTION_API_PATH,
+  RewriteRequestCase,
+} from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../constants';
 import type { ActionType } from '../../../types';
 
@@ -33,21 +37,22 @@ const rewriteBodyReq: RewriteRequestCase<ActionType> = ({
 export async function loadActionTypes({
   http,
   featureId,
+  includeSystemActions = false,
 }: {
   http: HttpSetup;
   featureId?: string;
+  includeSystemActions?: boolean;
 }): Promise<ActionType[]> {
+  const path = includeSystemActions
+    ? `${INTERNAL_BASE_ACTION_API_PATH}/connector_types`
+    : `${BASE_ACTION_API_PATH}/connector_types`;
+
   const res = featureId
-    ? await http.get<Parameters<typeof rewriteResponseRes>[0]>(
-        `${BASE_ACTION_API_PATH}/connector_types`,
-        {
-          query: {
-            feature_id: featureId,
-          },
-        }
-      )
-    : await http.get<Parameters<typeof rewriteResponseRes>[0]>(
-        `${BASE_ACTION_API_PATH}/connector_types`
-      );
+    ? await http.get<Parameters<typeof rewriteResponseRes>[0]>(path, {
+        query: {
+          feature_id: featureId,
+        },
+      })
+    : await http.get<Parameters<typeof rewriteResponseRes>[0]>(path, {});
   return rewriteResponseRes(res);
 }

@@ -15,9 +15,12 @@ import {
   debounceTime,
   skipUntil,
   withLatestFrom,
-} from 'rxjs/operators';
+  BehaviorSubject,
+  iif,
+  merge,
+  Observable,
+} from 'rxjs';
 import createContainer from 'constate';
-import { BehaviorSubject, iif, merge, Observable } from 'rxjs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';

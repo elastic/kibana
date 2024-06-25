@@ -14,7 +14,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('Auto open file upload wizard in maps app', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/173095
+  // Failing: See https://github.com/elastic/kibana/issues/173095
+  describe.skip('Auto open file upload wizard in maps app', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('integrations', 'browse', {
         useActualUrl: true,

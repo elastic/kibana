@@ -27,10 +27,9 @@ export function getTransactionDistributionChartData({
 
   if (Array.isArray(allTransactionsHistogram)) {
     transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
-        { defaultMessage: 'All transactions' }
-      ),
+      id: i18n.translate('xpack.apm.transactionDistribution.chart.allTransactionsLabel', {
+        defaultMessage: 'All transactions',
+      }),
       histogram: allTransactionsHistogram,
       areaSeriesColor: euiTheme.eui.euiColorVis1,
     });
@@ -38,10 +37,9 @@ export function getTransactionDistributionChartData({
 
   if (Array.isArray(failedTransactionsHistogram)) {
     transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.failedTransactionsLabel',
-        { defaultMessage: 'Failed transactions' }
-      ),
+      id: i18n.translate('xpack.apm.transactionDistribution.chart.failedTransactionsLabel', {
+        defaultMessage: 'Failed transactions',
+      }),
       histogram: failedTransactionsHistogram,
       areaSeriesColor: euiTheme.eui.euiColorVis7,
     });

@@ -77,8 +77,10 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   projectType: ServerlessProjectType;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
-  /** Path to the directory where the ES cluster will store data */
+  /** Full path where the ES cluster will store data */
   basePath: string;
+  /** Directory in basePath where the ES cluster will store data */
+  dataPath?: string;
   /** If this process exits, leave the ES cluster running in the background */
   skipTeardown?: boolean;
   /** Start the ES cluster in the background instead of remaining attached: useful for running tests */
@@ -167,9 +169,6 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--env',
   'stateless.object_store.type=fs',
-
-  '--env',
-  'stateless.object_store.bucket=stateless',
 ];
 
 // only allow certain ES args to be overwrote by options
@@ -487,6 +486,10 @@ export function resolveEsArgs(
   ) {
     const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
 
+    // The mock IDP setup requires a custom role mapping, but since native role mappings are disabled by default in
+    // Serverless, we have to re-enable them explicitly here.
+    esArgs.set('xpack.security.authc.native_role_mappings.enabled', 'true');
+
     esArgs.set(`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order`, '0');
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path`,
@@ -546,8 +549,17 @@ export function getDockerFileMountPath(hostPath: string) {
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const { basePath, clean, ssl, kibanaUrl, files, resources, projectType } = options;
-  const objectStorePath = resolve(basePath, 'stateless');
+  const {
+    basePath,
+    clean,
+    ssl,
+    kibanaUrl,
+    files,
+    resources,
+    projectType,
+    dataPath = 'stateless',
+  } = options;
+  const objectStorePath = resolve(basePath, dataPath);
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
   log.indent(4);
@@ -579,7 +591,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   log.indent(-4);
 
-  const volumeCmds = ['--volume', `${basePath}:/objectstore:z`];
+  const volumeCmds = [
+    '--volume',
+    `${basePath}:/objectstore:z`,
+    '--env',
+    `stateless.object_store.bucket=${dataPath}`,
+  ];
 
   if (files) {
     const _files = typeof files === 'string' ? [files] : files;

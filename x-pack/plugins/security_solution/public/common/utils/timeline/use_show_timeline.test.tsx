@@ -9,8 +9,9 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { updateAppLinks } from '../../links';
-import { links } from '../../links/app_links';
+import { appLinks } from '../../../app_links';
 import { useShowTimeline } from './use_show_timeline';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/overview' });
 jest.mock('react-router-dom', () => {
@@ -27,7 +28,7 @@ const mockUseSourcererDataView = jest.fn(
     dataViewId: null,
   })
 );
-jest.mock('../../containers/sourcerer', () => ({
+jest.mock('../../../sourcerer/containers', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
 
@@ -53,11 +54,12 @@ jest.mock('../../lib/kibana', () => {
 });
 
 const mockUpselling = new UpsellingService();
+const mockUiSettingsClient = uiSettingsServiceMock.createStartContract();
 
 describe('use show timeline', () => {
   beforeAll(() => {
     // initialize all App links before running test
-    updateAppLinks(links, {
+    updateAppLinks(appLinks, {
       experimentalFeatures: allowedExperimentalValues,
       capabilities: {
         navLinks: {},
@@ -70,6 +72,7 @@ describe('use show timeline', () => {
         },
       },
       upselling: mockUpselling,
+      uiSettingsClient: mockUiSettingsClient,
     });
   });
 

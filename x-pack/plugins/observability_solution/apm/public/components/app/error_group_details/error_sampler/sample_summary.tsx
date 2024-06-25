@@ -49,9 +49,7 @@ export function SampleSummary({ error }: Props) {
         </Label>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiCodeBlock isCopyable>
-        {excMessage || NOT_AVAILABLE_LABEL}
-      </EuiCodeBlock>
+      <EuiCodeBlock isCopyable>{excMessage || NOT_AVAILABLE_LABEL}</EuiCodeBlock>
       <EuiSpacer />
       <EuiText size="s">
         <Label>

@@ -12,26 +12,11 @@ export enum HostsQueries {
   uncommonProcesses = 'uncommonProcesses',
 }
 
-export enum NetworkKpiQueries {
-  dns = 'networkKpiDns',
-  networkEvents = 'networkKpiNetworkEvents',
-  tlsHandshakes = 'networkKpiTlsHandshakes',
-  uniqueFlows = 'networkKpiUniqueFlows',
-  uniquePrivateIps = 'networkKpiUniquePrivateIps',
-}
-
-export enum HostsKpiQueries {
-  kpiHosts = 'hostsKpiHosts',
-  kpiUniqueIps = 'hostsKpiUniqueIps',
-}
-
 export enum UsersQueries {
   observedDetails = 'observedUserDetails',
   managedDetails = 'managedUserDetails',
-  kpiTotalUsers = 'usersKpiTotalUsers',
   users = 'allUsers',
   authentications = 'authentications',
-  kpiAuthentications = 'usersKpiAuthentications',
 }
 
 export enum NetworkQueries {
@@ -41,6 +26,7 @@ export enum NetworkQueries {
   overview = 'overviewNetwork',
   tls = 'tls',
   topCountries = 'topCountries',
+  topNFlowCount = 'topNFlowCount',
   topNFlow = 'topNFlow',
   users = 'users',
 }
@@ -56,8 +42,6 @@ export enum CtiQueries {
   dataSource = 'dataSource',
 }
 
-export const MatrixHistogramQuery = 'matrixHistogram';
-
 export const FirstLastSeenQuery = 'firstlastseen';
 
 export enum RelatedEntitiesQueries {
@@ -67,12 +51,9 @@ export enum RelatedEntitiesQueries {
 
 export type FactoryQueryTypes =
   | HostsQueries
-  | HostsKpiQueries
   | UsersQueries
   | NetworkQueries
-  | NetworkKpiQueries
   | RiskQueries
   | CtiQueries
-  | typeof MatrixHistogramQuery
   | typeof FirstLastSeenQuery
   | RelatedEntitiesQueries;

@@ -8,10 +8,7 @@
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useEffect } from 'react';
-import {
-  formatHasRumResult,
-  hasRumDataQuery,
-} from '../../../../services/data/has_rum_data_query';
+import { formatHasRumResult, hasRumDataQuery } from '../../../../services/data/has_rum_data_query';
 import { useDataView } from '../local_uifilters/use_data_view';
 
 export function useHasRumData() {
@@ -42,5 +39,6 @@ export function useHasRumData() {
   return {
     hasData: formatHasRumResult(response, dataViewTitle).hasData,
     loading,
+    dataViewTitle,
   };
 }

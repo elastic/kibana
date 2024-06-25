@@ -26,6 +26,8 @@ export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 
 export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
 
+export const MANUAL_RULE_RUN_ACTION_BTN = '[data-test-subj="manualRuleRunAction"]';
+
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
 export const CONFIRM_DUPLICATE_RULE = '[data-test-subj="confirmModalConfirmButton"]';
 
@@ -124,6 +126,8 @@ export const MODAL_ERROR_BODY = '[data-test-subj="errorModalBody"]';
 export const MODAL_CONFIRMATION_CANCEL_BTN = '[data-test-subj="confirmModalCancelButton"]';
 
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
+
+export const RULE_DETAILS_MANUAL_RULE_RUN_BTN = '[data-test-subj="rules-details-manual-rule-run"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
@@ -285,10 +289,10 @@ export const ALERT_SUPPRESSION_DURATION_TITLE =
 export const ALERT_SUPPRESSION_DURATION_VALUE =
   '[data-test-subj="alertSuppressionDurationPropertyValue"]';
 
-export const ALERT_SUPPRESSION_FIELD_TITLE =
-  '[data-test-subj="alertSuppressionSuppressionFieldPropertyTitle"]';
-export const ALERT_SUPPRESSION_FIELD_VALUE =
-  '[data-test-subj="alertSuppressionSuppressionFieldPropertyValue"]';
+export const ALERT_SUPPRESSION_MISSING_FIELD_TITLE =
+  '[data-test-subj="alertSuppressionMissingFieldPropertyTitle"]';
+export const ALERT_SUPPRESSION_MISSING_FIELD_VALUE =
+  '[data-test-subj="alertSuppressionMissingFieldsPropertyValue"]';
 
 export const DATA_VIEW_ID_TITLE = '[data-test-subj="dataViewIdPropertyTitle"]';
 export const DATA_VIEW_ID_VALUE = '[data-test-subj="dataViewIdPropertyValue"]';

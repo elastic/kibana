@@ -8,13 +8,7 @@
 import { Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
 import * as t from 'io-ts';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiIcon,
-  EuiLoadingLogo,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiIcon, EuiLoadingLogo, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -131,24 +125,17 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
     },
     {
       'data-test-subj': 'index-pattern-tab',
-      prepend: !getIsIndexPatternTabOk(diagnosticsBundle) && (
-        <EuiIcon type="warning" color="red" />
-      ),
+      prepend: !getIsIndexPatternTabOk(diagnosticsBundle) && <EuiIcon type="warning" color="red" />,
       href: router.link('/diagnostics/index-pattern-settings', { query }),
-      label: i18n.translate(
-        'xpack.apm.diagnostics.tab.index_pattern_settings',
-        {
-          defaultMessage: 'Index pattern settings',
-        }
-      ),
+      label: i18n.translate('xpack.apm.diagnostics.tab.index_pattern_settings', {
+        defaultMessage: 'Index pattern settings',
+      }),
       isSelected: routePath === '/diagnostics/index-pattern-settings',
       isHidden: isCrossCluster || !hasAllClusterPrivileges,
     },
     {
       'data-test-subj': 'index-templates-tab',
-      prepend: !getIsIndexTemplateOk(diagnosticsBundle) && (
-        <EuiIcon type="warning" color="red" />
-      ),
+      prepend: !getIsIndexTemplateOk(diagnosticsBundle) && <EuiIcon type="warning" color="red" />,
       href: router.link('/diagnostics/index-templates', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.index_templates', {
         defaultMessage: 'Index templates',
@@ -158,9 +145,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
     },
     {
       'data-test-subj': 'data-streams-tab',
-      prepend: !getIsDataStreamTabOk(diagnosticsBundle) && (
-        <EuiIcon type="warning" color="red" />
-      ),
+      prepend: !getIsDataStreamTabOk(diagnosticsBundle) && <EuiIcon type="warning" color="red" />,
       href: router.link('/diagnostics/data-streams', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.datastreams', {
         defaultMessage: 'Data streams',
@@ -170,9 +155,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
     },
     {
       'data-test-subj': 'indices-tab',
-      prepend: !getIsIndicesTabOk(diagnosticsBundle) && (
-        <EuiIcon type="warning" color="red" />
-      ),
+      prepend: !getIsIndicesTabOk(diagnosticsBundle) && <EuiIcon type="warning" color="red" />,
       href: router.link('/diagnostics/indices', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.indices', {
         defaultMessage: 'Indices',

@@ -12,12 +12,11 @@ import { delayRetryState } from '../../../model/retry_state';
 import { throwBadResponse } from '../../../model/helpers';
 import { CLUSTER_SHARD_LIMIT_EXCEEDED_REASON } from '../../../common/constants';
 import { isTypeof } from '../../actions';
-import { getAliasActions } from '../../utils';
 import type { ModelStage } from '../types';
 
 export const createTargetIndex: ModelStage<
   'CREATE_TARGET_INDEX',
-  'UPDATE_ALIASES' | 'INDEX_STATE_UPDATE_DONE' | 'FATAL'
+  'INDEX_STATE_UPDATE_DONE' | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     const left = res.left;
@@ -36,22 +35,15 @@ export const createTargetIndex: ModelStage<
     }
   }
 
-  const aliasActions = getAliasActions({
-    currentIndex: state.currentIndex,
-    existingAliases: [],
-    indexPrefix: context.indexPrefix,
-    kibanaVersion: context.kibanaVersion,
-  });
-
   const currentIndexMeta = cloneDeep(state.indexMappings._meta!);
 
   return {
     ...state,
-    controlState: aliasActions.length ? 'UPDATE_ALIASES' : 'INDEX_STATE_UPDATE_DONE',
+    controlState: 'INDEX_STATE_UPDATE_DONE',
     previousMappings: state.indexMappings,
     currentIndexMeta,
     aliases: [],
-    aliasActions,
+    aliasActions: [],
     skipDocumentMigration: true,
     previousAlgorithm: 'zdt',
   };

@@ -6,21 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  Chart,
-  Settings,
-  AreaSeries,
-  ScaleType,
-  TooltipType,
-  Tooltip,
-  LIGHT_THEME,
-  DARK_THEME,
-} from '@elastic/charts';
-import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
+import { Chart, Settings, AreaSeries, ScaleType, TooltipType, Tooltip } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { useIsDarkMode } from '../../../../../hooks/use_is_dark_mode';
 import { useKibanaTimeZoneSetting } from '../../../../../hooks/use_kibana_time_zone_setting';
 import { TimeRange } from '../../../../../../common/time';
+import { useChartThemes } from '../../../../../hooks/use_chart_themes';
 
 interface TimeSeriesPoint {
   timestamp: number;
@@ -38,9 +28,8 @@ export const SingleMetricSparkline: React.FunctionComponent<{
   metric: TimeSeriesPoint[];
   timeRange: TimeRange;
 }> = ({ metric, timeRange }) => {
-  const isDarkMode = useIsDarkMode();
   const timeZone = useKibanaTimeZoneSetting();
-  const baseTheme = useMemo(() => (isDarkMode ? DARK_THEME : LIGHT_THEME), [isDarkMode]);
+  const { baseTheme, sparklineTheme } = useChartThemes();
 
   const xDomain = useMemo(
     () => ({
@@ -55,7 +44,7 @@ export const SingleMetricSparkline: React.FunctionComponent<{
       <Tooltip type={TooltipType.None} />
       <Settings
         showLegend={false}
-        theme={EUI_SPARKLINE_THEME_PARTIAL}
+        theme={sparklineTheme}
         baseTheme={baseTheme}
         xDomain={xDomain}
         locale={i18n.getLocale()}

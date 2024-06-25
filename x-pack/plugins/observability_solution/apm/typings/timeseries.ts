@@ -36,17 +36,11 @@ export interface RectCoordinate {
 type Accessor = Array<string | number | AccessorFn>;
 
 export type TimeSeries<
-  TCoordinate extends { x: number } =
-    | Coordinate
-    | RectCoordinate
-    | BandCoordinate
+  TCoordinate extends { x: number } = Coordinate | RectCoordinate | BandCoordinate
 > = APMChartSpec<TCoordinate>;
 
 export interface APMChartSpec<
-  TCoordinate extends { x: number } =
-    | Coordinate
-    | RectCoordinate
-    | BandCoordinate
+  TCoordinate extends { x: number } = Coordinate | RectCoordinate | BandCoordinate
 > {
   title: string;
   id?: string;

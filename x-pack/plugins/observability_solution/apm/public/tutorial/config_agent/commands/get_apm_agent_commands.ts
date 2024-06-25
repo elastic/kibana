@@ -5,57 +5,16 @@
  * 2.0.
  */
 import Mustache from 'mustache';
-import {
-  java,
-  javaVariables,
-  javaLineNumbers,
-  javaHighlightLang,
-} from './java';
-import {
-  node,
-  nodeVariables,
-  nodeLineNumbers,
-  nodeHighlightLang,
-} from './node';
-import {
-  django,
-  djangoVariables,
-  djangoLineNumbers,
-  djangoHighlightLang,
-} from './django';
-import {
-  flask,
-  flaskVariables,
-  flaskLineNumbers,
-  flaskHighlightLang,
-} from './flask';
-import {
-  rails,
-  railsVariables,
-  railsLineNumbers,
-  railsHighlightLang,
-} from './rails';
-import {
-  rack,
-  rackVariables,
-  rackLineNumbers,
-  rackHighlightLang,
-} from './rack';
+import { java, javaVariables, javaLineNumbers, javaHighlightLang } from './java';
+import { node, nodeVariables, nodeLineNumbers, nodeHighlightLang } from './node';
+import { django, djangoVariables, djangoLineNumbers, djangoHighlightLang } from './django';
+import { flask, flaskVariables, flaskLineNumbers, flaskHighlightLang } from './flask';
+import { rails, railsVariables, railsLineNumbers, railsHighlightLang } from './rails';
+import { rack, rackVariables, rackLineNumbers, rackHighlightLang } from './rack';
 import { go, goVariables, goLineNumbers, goHighlightLang } from './go';
-import {
-  dotnet,
-  dotnetVariables,
-  dotnetLineNumbers,
-  dotnetHighlightLang,
-} from './dotnet';
+import { dotnet, dotnetVariables, dotnetLineNumbers, dotnetHighlightLang } from './dotnet';
 import { php, phpVariables, phpLineNumbers, phpHighlightLang } from './php';
-import {
-  rum,
-  rumScript,
-  rumVariables,
-  rumLineNumbers,
-  rumHighlightLang,
-} from './rum';
+import { rum, rumScript, rumVariables, rumLineNumbers, rumHighlightLang } from './rum';
 
 const apmAgentCommandsMap: Record<string, string> = {
   java,

@@ -28,6 +28,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
+import semverValid from 'semver/functions/valid';
 
 import {
   AGENT_UPGRADE_COOLDOWN_IN_MIN,
@@ -50,6 +51,7 @@ import {
   useConfig,
   sendGetAgentStatus,
   useAgentVersion,
+  sendGetAllFleetServerAgents,
 } from '../../../../hooks';
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
@@ -64,7 +66,7 @@ import {
   MAINTENANCE_VALUES,
   ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION,
 } from './constants';
-import { useScheduleDateTime, sendAllFleetServerAgents } from './hooks';
+import { useScheduleDateTime } from './hooks';
 
 export interface AgentUpgradeAgentModalProps {
   onClose: () => void;
@@ -165,7 +167,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   useEffect(() => {
     const fetchFleetServerAgents = async () => {
       try {
-        const { allFleetServerAgents } = await sendAllFleetServerAgents();
+        const { allFleetServerAgents } = await sendGetAllFleetServerAgents();
         setFleetServerAgents(allFleetServerAgents);
       } catch (error) {
         return;
@@ -266,6 +268,18 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     }
   }, [agents, fleetServerAgents, isSingleAgent, latestAgentVersion, selectedVersion]);
 
+  const semverErrors = useMemo(() => {
+    if (!selectedVersion[0].value) return undefined;
+    if (!semverValid(selectedVersion[0].value)) {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.upgradeAgents.invalidSemverError"
+          defaultMessage="Invalid version, please use a valid semver version, e.g. 8.14.0"
+        />
+      );
+    }
+  }, [selectedVersion]);
+
   const [selectedMaintenanceWindow, setSelectedMaintenanceWindow] = useState([
     isSmallBatch ? maintenanceOptions[0] : maintenanceOptions[1],
   ]);
@@ -273,24 +287,30 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   const { startDatetime, onChangeStartDateTime, initialDatetime, minTime, maxTime } =
     useScheduleDateTime();
 
-  const isSubmitButtonDisabled = useMemo(
-    () =>
+  const isSingleAgentFleetServer =
+    isSingleAgent && fleetServerAgents.map((agent) => agent.id).includes(agents[0].id);
+
+  const isSubmitButtonDisabled = useMemo(() => {
+    if (!isSubmitting && isUpdating && isSingleAgent && isStuckInUpdating(agents[0])) return false;
+    return (
       isSubmitting ||
       (isUpdating && updatingAgents === 0) ||
       !selectedVersion[0].value ||
       (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)) ||
       (isSingleAgent &&
-        !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents)),
-    [
-      agents,
-      fleetServerAgents,
-      isSingleAgent,
-      isSubmitting,
-      isUpdating,
-      selectedVersion,
-      updatingAgents,
-    ]
-  );
+        !isSingleAgentFleetServer &&
+        !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents))
+    );
+  }, [
+    agents,
+    fleetServerAgents,
+    isSingleAgent,
+    isSubmitting,
+    isUpdating,
+    selectedVersion,
+    updatingAgents,
+    isSingleAgentFleetServer,
+  ]);
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
@@ -340,9 +360,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       setIsSubmitting(false);
       notifications.toasts.addError(error, {
         title: i18n.translate('xpack.fleet.upgradeAgents.fatalErrorNotificationTitle', {
-          defaultMessage:
-            'Error upgrading {count, plural, one {agent} other {{count} agents} =true {all selected agents}}',
-          values: { count: isAllAgents || agentCount },
+          defaultMessage: `Error upgrading {isAllAgents, select,
+            true {all selected agents}
+            other {{count, plural, one {agent} other {# agents}}}
+          }`,
+          values: { isAllAgents, count: agentCount },
         }),
       });
     }
@@ -379,20 +401,39 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           ) : isScheduled ? (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.scheduleUpgradeMultipleTitle"
-              defaultMessage="Schedule upgrade for {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
-              values={{ count: isAllAgents || agentCount }}
+              defaultMessage="Schedule upgrade for {isAllAgents, select,
+                true {all selected agents}
+                other {{count, plural, one {agent} other {# agents}}}
+              }"
+              values={{
+                isAllAgents,
+                count: agentCount,
+              }}
             />
           ) : isUpdating ? (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.restartUpgradeMultipleTitle"
-              defaultMessage="Restart upgrade on {updating} out of {count, plural, one {agent} other {{count} agents} =true {all agents}} stuck in updating"
-              values={{ count: isAllAgents || agentCount, updating: updatingAgents }}
+              defaultMessage="Restart upgrade on {updating} out of {isAllAgents, select,
+                true {all agents}
+                other {{count, plural, one {agent} other {# agents}}}
+              } stuck in updating"
+              values={{
+                isAllAgents,
+                count: agentCount,
+                updating: updatingAgents,
+              }}
             />
           ) : (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.upgradeMultipleTitle"
-              defaultMessage="Upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
-              values={{ count: isAllAgents || agentCount }}
+              defaultMessage="Upgrade {isAllAgents, select,
+                true {all selected agents}
+                other {{count, plural, one {agent} other {# agents}}}
+              }"
+              values={{
+                isAllAgents,
+                count: agentCount,
+              }}
             />
           )}
         </>
@@ -420,14 +461,23 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         ) : isUpdating ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.restartConfirmMultipleButtonLabel"
-            defaultMessage="Restart upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
-            values={{ count: updatingAgents }}
+            defaultMessage="Restart upgrade {isAllAgents, select,
+              true {all selected agents}
+              other {{count, plural, one {agent} other {# agents}}}
+            }"
+            values={{
+              isAllAgents: typeof updatingAgents === 'boolean',
+              count: updatingAgents,
+            }}
           />
         ) : (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.confirmMultipleButtonLabel"
-            defaultMessage="Upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
-            values={{ count: isAllAgents || agentCount }}
+            defaultMessage="Upgrade {isAllAgents, select,
+              true {all selected agents}
+              other {{count, plural, one {agent} other {# agents}}}
+            }"
+            values={{ isAllAgents, count: agentCount }}
           />
         )
       }
@@ -446,7 +496,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               <p>
                 <FormattedMessage
                   id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
-                  defaultMessage="This action will upgrade the agent running on '{hostName}'{version}. This action can not be undone. Are you sure you wish to continue?"
+                  defaultMessage="This action will upgrade the agent running on ''{hostName}''{version}. This action can not be undone. Are you sure you wish to continue?"
                   values={{
                     hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
                     version: selectedVersion[0].value
@@ -500,13 +550,15 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           defaultMessage: 'Upgrade version',
         })}
         fullWidth
-        isInvalid={isInvalid}
+        isInvalid={isInvalid || !!semverErrors}
         error={
           isInvalid ? (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.versionRequiredText"
               defaultMessage="Version is required"
             />
+          ) : !!semverErrors ? (
+            semverErrors
           ) : undefined
         }
       >
@@ -521,6 +573,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               setSelectedVersionStr(newValue);
               setSelectedVersion([{ label: newValue, value: newValue }]);
             }}
+            isInvalid={!!semverErrors}
           />
         ) : (
           <EuiComboBox

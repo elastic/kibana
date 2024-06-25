@@ -1,0 +1,301 @@
+{
+  "id": "searchConnectors",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "searchConnectors",
+        "id": "def-public.ConnectorDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "ConnectorDefinition",
+        "description": [],
+        "signature": [
+          "ConnectorClientSideDefinition",
+          " & ",
+          "ConnectorServerSideDefinition"
+        ],
+        "path": "x-pack/plugins/search_connectors/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "searchConnectors",
+      "id": "def-public.SearchConnectorsPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchConnectorsPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/search_connectors/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "searchConnectors",
+          "id": "def-public.SearchConnectorsPluginSetup.getConnectorTypes",
+          "type": "Function",
+          "tags": [],
+          "label": "getConnectorTypes",
+          "description": [],
+          "signature": [
+            "() => ",
+            "ConnectorServerSideDefinition",
+            "[]"
+          ],
+          "path": "x-pack/plugins/search_connectors/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "searchConnectors",
+      "id": "def-public.SearchConnectorsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchConnectorsPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/search_connectors/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "searchConnectors",
+          "id": "def-public.SearchConnectorsPluginStart.getConnectorTypes",
+          "type": "Function",
+          "tags": [],
+          "label": "getConnectorTypes",
+          "description": [],
+          "signature": [
+            "() => ",
+            "ConnectorDefinition",
+            "[]"
+          ],
+          "path": "x-pack/plugins/search_connectors/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "searchConnectors",
+        "id": "def-server.ConnectorServerSideDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorServerSideDefinition",
+        "description": [],
+        "path": "x-pack/plugins/search_connectors/common/connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "searchConnectors",
+            "id": "def-server.ConnectorServerSideDefinition.categories",
+            "type": "Array",
+            "tags": [],
+            "label": "categories",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/search_connectors/common/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchConnectors",
+            "id": "def-server.ConnectorServerSideDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/search_connectors/common/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchConnectors",
+            "id": "def-server.ConnectorServerSideDefinition.iconPath",
+            "type": "string",
+            "tags": [],
+            "label": "iconPath",
+            "description": [],
+            "path": "x-pack/plugins/search_connectors/common/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchConnectors",
+            "id": "def-server.ConnectorServerSideDefinition.isBeta",
+            "type": "boolean",
+            "tags": [],
+            "label": "isBeta",
+            "description": [],
+            "path": "x-pack/plugins/search_connectors/common/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchConnectors",
+            "id": "def-server.ConnectorServerSideDefinition.isNative",
+            "type": "boolean",
+            "tags": [],
+            "label": "isNative",
+            "description": [],
+            "path": "x-pack/plugins/search_connectors/common/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchConnectors",
+            "id": "def-server.ConnectorServerSideDefinition.isTechPreview",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTechPreview",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/search_connectors/common/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchConnectors",
+            "id": "def-server.ConnectorServerSideDefinition.keywords",
+            "type": "Array",
+            "tags": [],
+            "label": "keywords",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/search_connectors/common/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchConnectors",
+            "id": "def-server.ConnectorServerSideDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/search_connectors/common/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchConnectors",
+            "id": "def-server.ConnectorServerSideDefinition.serviceType",
+            "type": "string",
+            "tags": [],
+            "label": "serviceType",
+            "description": [],
+            "path": "x-pack/plugins/search_connectors/common/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "searchConnectors",
+        "id": "def-server.CONNECTOR_DEFINITIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "CONNECTOR_DEFINITIONS",
+        "description": [],
+        "signature": [
+          "ConnectorServerSideDefinition",
+          "[]"
+        ],
+        "path": "x-pack/plugins/search_connectors/common/connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "searchConnectors",
+      "id": "def-server.SearchConnectorsPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchConnectorsPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/search_connectors/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "searchConnectors",
+          "id": "def-server.SearchConnectorsPluginSetup.getConnectorTypes",
+          "type": "Function",
+          "tags": [],
+          "label": "getConnectorTypes",
+          "description": [],
+          "signature": [
+            "() => ",
+            "ConnectorServerSideDefinition",
+            "[]"
+          ],
+          "path": "x-pack/plugins/search_connectors/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "searchConnectors",
+      "id": "def-server.SearchConnectorsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchConnectorsPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/search_connectors/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

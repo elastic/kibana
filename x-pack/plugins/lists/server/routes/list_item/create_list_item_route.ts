@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  CreateListItemRequestBody,
+  CreateListItemResponse,
+} from '@kbn/securitysolution-lists-common/api';
 
-import { createListItemRequest, createListItemResponse } from '../../../common/api';
 import type { ListsPluginRouter } from '../../types';
-import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const createListItemRoute = (router: ListsPluginRouter): void => {
@@ -27,7 +30,7 @@ export const createListItemRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            body: buildRouteValidation(createListItemRequest),
+            body: buildRouteValidationWithZod(CreateListItemRequestBody),
           },
         },
         version: '2023-10-31',
@@ -35,7 +38,7 @@ export const createListItemRoute = (router: ListsPluginRouter): void => {
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { id, list_id: listId, value, meta } = request.body;
+          const { id, list_id: listId, value, meta, refresh } = request.body;
           const lists = await getListClient(context);
           const list = await lists.getList({ id: listId });
           if (list == null) {
@@ -58,17 +61,14 @@ export const createListItemRoute = (router: ListsPluginRouter): void => {
               id,
               listId,
               meta,
+              refresh,
               serializer: list.serializer,
               type: list.type,
               value,
             });
+
             if (createdListItem != null) {
-              const [validated, errors] = validate(createdListItem, createListItemResponse);
-              if (errors != null) {
-                return siemResponse.error({ body: errors, statusCode: 500 });
-              } else {
-                return response.ok({ body: validated ?? {} });
-              }
+              return response.ok({ body: CreateListItemResponse.parse(createdListItem) });
             } else {
               return siemResponse.error({
                 body: 'list item invalid',

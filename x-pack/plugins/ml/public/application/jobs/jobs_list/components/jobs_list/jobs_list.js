@@ -304,13 +304,10 @@ export class JobsList extends Component {
         field: 'latestTimestampSortValue',
         'data-test-subj': 'mlJobListColumnLatestTimestamp',
         sortable: true,
-        render: (time, item) => (
-          <span className="euiTableCellContent__text">
-            {item.latestTimestampMs === undefined
-              ? ''
-              : moment(item.latestTimestampMs).format(TIME_FORMAT)}
-          </span>
-        ),
+        render: (time, item) =>
+          item.latestTimestampMs === undefined
+            ? ''
+            : moment(item.latestTimestampMs).format(TIME_FORMAT),
         textOnly: true,
         width: '15%',
       },
@@ -393,9 +390,7 @@ export class JobsList extends Component {
         onChange={this.onTableChange}
         selection={selectionControls}
         itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-        isExpandable={true}
         sorting={sorting}
-        hasActions={true}
         rowProps={(item) => ({
           'data-test-subj': `mlJobListRow row-${item.id}`,
         })}

@@ -96,8 +96,8 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import {
   canEditRuleWithActions,
   explainLackOfPermission,
@@ -126,7 +126,7 @@ import type { BadgeOptions } from '../../../../common/components/header_page/typ
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import type { RuleResponse, Status } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
-import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
+import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
 import { EditRuleSettingButtonLink } from '../../../../detections/pages/detection_engine/rules/details/components/edit_rule_settings_button_link';
@@ -138,6 +138,8 @@ import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
+import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
+import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
@@ -179,6 +181,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearSelected,
 }) => {
   const {
+    analytics,
+    i18n: i18nStart,
+    theme,
     application: {
       navigateToApp,
       capabilities: { actions },
@@ -513,6 +518,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     confirmRuleDuplication,
   } = useBulkDuplicateExceptionsConfirmation();
 
+  const {
+    isManualRuleRunConfirmationVisible,
+    showManualRuleRunConfirmation,
+    cancelManualRuleRun,
+    confirmManualRuleRun,
+  } = useManualRuleRunConfirmation();
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -559,6 +571,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         >
           {i18n.DELETE_CONFIRMATION_BODY}
         </EuiConfirmModal>
+      )}
+      {isManualRuleRunConfirmationVisible && (
+        <ManualRuleRunModal onCancel={cancelManualRuleRun} onConfirm={confirmManualRuleRun} />
       )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
@@ -647,6 +662,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             hasActionsPrivileges
                           )}
                           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
+                          showManualRuleRunConfirmation={showManualRuleRunConfirmation}
                           confirmDeletion={confirmDeletion}
                         />
                       </EuiFlexItem>
@@ -724,11 +740,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     <Display show={!globalFullScreen}>
                       <AlertsHistogramPanel
                         filters={alertMergedFilters}
-                        query={query}
                         signalIndexName={signalIndexName}
                         defaultStackByOption={defaultRuleStackByOption}
                         updateDateRange={updateDateRangeCallback}
-                        runtimeMappings={runtimeMappings}
                       />
                       <EuiSpacer />
                     </Display>
@@ -771,7 +785,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   />
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
-                  <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
+                  <ExecutionLogTable
+                    ruleId={ruleId}
+                    selectAlertsTab={navigateToAlertsTab}
+                    analytics={analytics}
+                    i18n={i18nStart}
+                    theme={theme}
+                  />
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
                   <ExecutionEventsTable ruleId={ruleId} />

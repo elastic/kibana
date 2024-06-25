@@ -7,20 +7,21 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
   NetworkTopNFlowStrategyResponse,
   NetworkQueries,
   NetworkTopNFlowEdges,
+  NetworkTopNFlowCountStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
 
 import { getTopNFlowEdges } from './helpers';
-import { buildTopNFlowQuery } from './query.top_n_flow_network.dsl';
+import { buildTopNFlowQuery, buildTopNFlowCountQuery } from './query.top_n_flow_network.dsl';
 
 export const networkTopNFlow: SecuritySolutionFactory<NetworkQueries.topNFlow> = {
   buildDsl: (options) => {
@@ -33,26 +34,24 @@ export const networkTopNFlow: SecuritySolutionFactory<NetworkQueries.topNFlow> =
     options,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkTopNFlowStrategyResponse> => {
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response.rawResponse);
+    const { cursorStart, querySize } = options.pagination;
     const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
-    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = networkTopNFlowEdges.splice(cursorStart, querySize - cursorStart);
-    const inspect = {
-      dsl: [inspectStringifyObject(buildTopNFlowQuery(options))],
-    };
-    const showMorePagesIndicator = totalCount > fakeTotalCount;
 
-    return {
-      ...response,
-      edges,
-      inspect,
-      pageInfo: {
-        activePage: activePage ?? 0,
-        fakeTotalCount,
-        showMorePagesIndicator,
-      },
-      totalCount,
-    };
+    const inspect = { dsl: [inspectStringifyObject(buildTopNFlowQuery(options))] };
+    return { ...response, inspect, edges };
+  },
+};
+
+export const networkTopNFlowCount: SecuritySolutionFactory<NetworkQueries.topNFlowCount> = {
+  buildDsl: (options) => buildTopNFlowCountQuery(options),
+  parse: async (
+    options,
+    response: IEsSearchResponse<unknown>
+  ): Promise<NetworkTopNFlowCountStrategyResponse> => {
+    const totalCount = getOr(0, 'rawResponse.aggregations.top_n_flow_count.value', response);
+
+    const inspect = { dsl: [inspectStringifyObject(buildTopNFlowCountQuery(options))] };
+    return { ...response, inspect, totalCount };
   },
 };

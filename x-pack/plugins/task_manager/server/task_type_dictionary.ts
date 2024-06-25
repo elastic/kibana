@@ -82,7 +82,6 @@ export interface TaskRegisterDefinition {
   >;
 
   paramsSchema?: ObjectType;
-  indirectParamsSchema?: ObjectType;
 }
 
 /**
@@ -112,6 +111,10 @@ export class TaskTypeDictionary {
 
   public has(type: string) {
     return this.definitions.has(type);
+  }
+
+  public size() {
+    return this.definitions.size;
   }
 
   public get(type: string): TaskDefinition {

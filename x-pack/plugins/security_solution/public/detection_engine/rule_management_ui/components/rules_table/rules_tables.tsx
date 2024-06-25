@@ -35,6 +35,8 @@ import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 import type { FindRulesSortField } from '../../../../../common/api/detection_engine/rule_management';
 import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
+import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
+import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -109,6 +111,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   } = useBulkDuplicateExceptionsConfirmation();
 
   const {
+    isManualRuleRunConfirmationVisible,
+    showManualRuleRunConfirmation,
+    cancelManualRuleRun,
+    confirmManualRuleRun,
+  } = useManualRuleRunConfirmation();
+
+  const {
     bulkEditActionType,
     isBulkEditFlyoutVisible,
     handleBulkEditFormConfirm,
@@ -155,6 +164,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     mlJobs,
     startMlJobs,
     showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+    showManualRuleRunConfirmation,
     confirmDeletion,
   });
 
@@ -164,6 +174,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     mlJobs,
     startMlJobs,
     showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+    showManualRuleRunConfirmation,
     confirmDeletion,
   });
 
@@ -262,6 +273,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           />
         </EuiConfirmModal>
       )}
+      {isManualRuleRunConfirmationVisible && (
+        <ManualRuleRunModal onCancel={cancelManualRuleRun} onConfirm={confirmManualRuleRun} />
+      )}
       {isBulkActionConfirmationVisible && bulkAction && (
         <BulkActionDryRunConfirmation
           bulkAction={bulkAction}
@@ -297,7 +311,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           <EuiBasicTable
             itemId="id"
             items={rules}
-            isSelectable={isTableSelectable}
             noItemsMessage={NO_ITEMS_MESSAGE}
             onChange={tableOnChangeCallback}
             pagination={paginationMemo}

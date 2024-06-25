@@ -6,14 +6,18 @@
  */
 
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ExperimentalFeatures } from '../../../../../../common';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
+import type {
+  BulkActionEditPayload,
+  BulkActionEditType,
+} from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
-import { isIndexPatternsBulkEditAction } from './utils';
+import { isIndexPatternsBulkEditAction, isInvestigationFieldsBulkEditAction } from './utils';
 import { throwDryRunError } from './dry_run';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -34,6 +38,7 @@ interface DryRunBulkEditBulkActionsValidationArgs {
   rule: RuleAlertType;
   mlAuthz: MlAuthz;
   edit: BulkActionEditPayload[];
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -52,9 +57,7 @@ const throwMlAuthError = (mlAuthz: MlAuthz, ruleType: RuleType) =>
  * @param params - {@link BulkActionsValidationArgs}
  */
 export const validateBulkEnableRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
-  if (!rule.enabled) {
-    await throwMlAuthError(mlAuthz, rule.params.type);
-  }
+  await throwMlAuthError(mlAuthz, rule.params.type);
 };
 
 /**
@@ -62,9 +65,7 @@ export const validateBulkEnableRule = async ({ rule, mlAuthz }: BulkActionsValid
  * @param params - {@link BulkActionsValidationArgs}
  */
 export const validateBulkDisableRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
-  if (rule.enabled) {
-    await throwMlAuthError(mlAuthz, rule.params.type);
-  }
+  await throwMlAuthError(mlAuthz, rule.params.type);
 };
 
 /**
@@ -99,12 +100,11 @@ export const validateBulkEditRule = async ({
  * add_rule_actions, set_rule_actions can be applied to prebuilt/immutable rules
  */
 const istEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
-  return edit.every(({ type }) =>
-    [BulkActionEditTypeEnum.set_rule_actions, BulkActionEditTypeEnum.add_rule_actions].includes(
-      // @ts-expect-error upgrade typescript v4.9.5
-      type
-    )
-  );
+  const applicableActions: BulkActionEditType[] = [
+    BulkActionEditTypeEnum.set_rule_actions,
+    BulkActionEditTypeEnum.add_rule_actions,
+  ];
+  return edit.every(({ type }) => applicableActions.includes(type));
 };
 
 /**
@@ -115,6 +115,7 @@ export const dryRunValidateBulkEditRule = async ({
   rule,
   edit,
   mlAuthz,
+  experimentalFeatures,
 }: DryRunBulkEditBulkActionsValidationArgs) => {
   await validateBulkEditRule({
     ruleType: rule.params.type,
@@ -143,5 +144,16 @@ export const dryRunValidateBulkEditRule = async ({
         "ES|QL rule doesn't have index patterns"
       ),
     BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN
+  );
+
+  // check whether "custom highlighted fields" feature is enabled
+  await throwDryRunError(
+    () =>
+      invariant(
+        experimentalFeatures.bulkCustomHighlightedFieldsEnabled ||
+          !edit.some((action) => isInvestigationFieldsBulkEditAction(action.type)),
+        'Bulk custom highlighted fields action feature is disabled.'
+      ),
+    BulkActionsDryRunErrCode.INVESTIGATION_FIELDS_FEATURE
   );
 };

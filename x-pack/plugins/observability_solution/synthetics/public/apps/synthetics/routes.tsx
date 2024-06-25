@@ -29,8 +29,8 @@ import { getStepDetailsRoute } from './components/step_details_page/route_config
 import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
 import { getSettingsRouteConfig } from './components/settings/route_config';
 import { TestRunDetails } from './components/test_run_details/test_run_details';
-import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/monitor_add_page';
-import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
+import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
+import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
 import {
   InspectMonitorPortalNode,
@@ -92,7 +92,7 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_ADD_ROUTE,
-      component: MonitorAddPageWithServiceAllowed,
+      component: MonitorAddPage,
       dataTestSubj: 'syntheticsMonitorAddPage',
       restrictWidth: true,
       pageHeader: {
@@ -111,7 +111,7 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_EDIT_ROUTE,
-      component: MonitorEditPageWithServiceAllowed,
+      component: MonitorEditPage,
       dataTestSubj: 'syntheticsMonitorEditPage',
       restrictWidth: true,
       pageHeader: {
@@ -188,7 +188,7 @@ export const PageRouter: FC = () => {
 
   apiService.addInspectorRequest = addInspectorRequest;
 
-  const isUnPrivileged = useSyntheticsPrivileges();
+  const isUnprivileged = useSyntheticsPrivileges();
 
   return (
     <Routes>
@@ -205,12 +205,12 @@ export const PageRouter: FC = () => {
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
               <SyntheticsPageTemplateComponent
-                pageHeader={isUnPrivileged ? undefined : pageHeader}
+                pageHeader={isUnprivileged ? undefined : pageHeader}
                 data-test-subj={'synthetics-page-template'}
                 isPageDataLoaded={true}
                 {...pageTemplateProps}
               >
-                {isUnPrivileged || <RouteComponent />}
+                {isUnprivileged || <RouteComponent />}
               </SyntheticsPageTemplateComponent>
             </div>
           </Route>

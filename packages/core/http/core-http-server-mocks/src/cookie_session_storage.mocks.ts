@@ -22,7 +22,7 @@ type ReturnMocked<T> = {
 
 type DeepMocked<T> = jest.Mocked<ReturnMocked<T>>;
 
-const creatSessionStorageFactoryMock = <T>() => {
+const creatSessionStorageFactoryMock = <T extends object>() => {
   const mocked: DeepMocked<SessionStorageFactory<T>> = {
     asScoped: jest.fn(),
   };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ItemSet } from '@kbn/aiops-utils/types';
+import type { ItemSet } from '@kbn/ml-agg-utils';
 
 export const filteredFrequentItemSets: ItemSet[] = [
   {

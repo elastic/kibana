@@ -137,7 +137,7 @@ List of agent policies that are configured when the {fleet} app starts.
   `namespace`:::: 
     String identifying this policy's namespace.
   `inputs`:::: 
-    Array that overrides any default input settings for this integration. Follows the same schema as integration inputs, with the exception that any object in `vars` can be passed `frozen: true` in order to prevent that specific `var` from being edited by the user.
+    Map of input for the integration. Follows the same schema as the package policy API inputs, with the exception that any object in `vars` can be passed `frozen: true` in order to prevent that specific `var` from being edited by the user.
 =======
 =====
 +
@@ -151,27 +151,25 @@ xpack.fleet.packages:
 
 xpack.fleet.agentPolicies:
   - name: Preconfigured Policy
-    id: 1
+    id: preconfigured-policy
     namespace: test
     package_policies:
       - package:
           name: system
         name: System Integration
+        namespace: test
         id: preconfigured-system
         inputs:
-          - type: system/metrics
+          system-system/metrics:
             enabled: true
             vars:
-              - name: system.hostfs
-                value: home/test
+              '[system.hostfs]': home/test
             streams:
-              - data_stream:
-                  dataset: system.core
+              '[system.core]':
                 enabled: true
                 vars:
-                  - name: period
-                    value: 20s
-          - type: winlog
+                  period: 20s
+          system-winlog:
             enabled: false
 ----
 

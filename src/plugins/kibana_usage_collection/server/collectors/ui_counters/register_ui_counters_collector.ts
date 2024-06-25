@@ -27,7 +27,7 @@ interface UiCounterEvent {
   total: number;
 }
 
-export interface UiCountersUsage {
+export interface UiUsageCounters {
   dailyEvents: UiCounterEvent[];
 }
 
@@ -83,7 +83,7 @@ export async function fetchUiCounters({ soClient }: CollectorFetchContext) {
 }
 
 export function registerUiCountersUsageCollector(usageCollection: UsageCollectionSetup) {
-  const collector = usageCollection.makeUsageCollector<UiCountersUsage>({
+  const collector = usageCollection.makeUsageCollector<UiUsageCounters>({
     type: 'ui_counters',
     schema: {
       dailyEvents: {

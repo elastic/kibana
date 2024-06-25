@@ -10,11 +10,10 @@ import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { DocumentCountChart as DocumentCountChartRoot } from '@kbn/aiops-components';
-
-import type { Category } from '../../../common/api/log_categorization/types';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
+import type { DocumentCountStats } from '@kbn/aiops-log-rate-analysis/types';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import type { DocumentCountStats } from '../../get_document_stats';
 
 import { TotalCountHeader } from '../document_count_content/total_count_header';
 

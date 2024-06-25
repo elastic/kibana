@@ -11,14 +11,21 @@
 
 import { find, get, has, isEqual } from 'lodash';
 import moment from 'moment-timezone';
-import { Subject, Subscription, forkJoin } from 'rxjs';
-import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  Subject,
+  Subscription,
+  forkJoin,
+  map,
+  debounceTime,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 import PropTypes from 'prop-types';
 import React, { createRef, Fragment } from 'react';
 
 import {
   EuiCallOut,
-  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -80,6 +87,7 @@ import { TimeseriesexplorerChartDataError } from './components/timeseriesexplore
 import { ExplorerNoJobsSelected } from '../explorer/components';
 import { getDataViewsAndIndicesWithGeoFields } from '../explorer/explorer_utils';
 import { indexServiceFactory } from '../util/index_service';
+import { TimeSeriesExplorerControls } from './components/timeseriesexplorer_controls';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -455,9 +463,8 @@ export class TimeSeriesExplorer extends React.Component {
               if (
                 // If the user's focus range is not defined (i.e. no 'zoom' parameter restored from the appState URL),
                 // then calculate the default focus range to use
-                zoom === undefined &&
-                (focusRange === undefined ||
-                  this.previousSelectedForecastId !== this.props.selectedForecastId)
+                zoom === undefined ||
+                focusRange === undefined
               ) {
                 focusRange = this.mlTimeSeriesExplorer.calculateDefaultFocusRange(
                   autoZoomDuration,
@@ -468,10 +475,12 @@ export class TimeSeriesExplorer extends React.Component {
                 this.previousSelectedForecastId = this.props.selectedForecastId;
               }
 
-              this.contextChartSelected({
-                from: focusRange[0],
-                to: focusRange[1],
-              });
+              if (focusRange !== undefined) {
+                this.contextChartSelected({
+                  from: focusRange[0],
+                  to: focusRange[1],
+                });
+              }
             }
 
             this.setState(stateUpdate);
@@ -928,6 +937,7 @@ export class TimeSeriesExplorer extends React.Component {
       dateFormatTz,
       lastRefresh,
       selectedDetectorIndex,
+      selectedEntities,
       selectedJobId,
     } = this.props;
 
@@ -1151,50 +1161,21 @@ export class TimeSeriesExplorer extends React.Component {
                   <TimeSeriesExplorerHelpPopover />
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiFlexGroup style={{ float: 'right' }}>
-                {showModelBoundsCheckbox && (
-                  <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id="toggleModelBoundsCheckbox"
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
-                        defaultMessage: 'show model bounds',
-                      })}
-                      checked={showModelBounds}
-                      onChange={this.toggleShowModelBoundsHandler}
-                    />
-                  </EuiFlexItem>
-                )}
 
-                {showAnnotationsCheckbox && (
-                  <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id="toggleAnnotationsCheckbox"
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
-                        defaultMessage: 'annotations',
-                      })}
-                      checked={showAnnotations}
-                      onChange={this.toggleShowAnnotationsHandler}
-                    />
-                  </EuiFlexItem>
-                )}
-
-                {showForecastCheckbox && (
-                  <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id="toggleShowForecastCheckbox"
-                      label={
-                        <span data-test-subj={'mlForecastCheckbox'}>
-                          {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                            defaultMessage: 'show forecast',
-                          })}
-                        </span>
-                      }
-                      checked={showForecast}
-                      onChange={this.toggleShowForecastHandler}
-                    />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
+              <TimeSeriesExplorerControls
+                selectedDetectorIndex={selectedDetectorIndex}
+                selectedEntities={selectedEntities}
+                selectedJobId={selectedJobId}
+                showAnnotationsCheckbox={showAnnotationsCheckbox}
+                showAnnotations={showAnnotations}
+                showForecastCheckbox={showForecastCheckbox}
+                showForecast={showForecast}
+                showModelBoundsCheckbox={showModelBoundsCheckbox}
+                showModelBounds={showModelBounds}
+                onShowModelBoundsChange={this.toggleShowModelBoundsHandler}
+                onShowAnnotationsChange={this.toggleShowAnnotationsHandler}
+                onShowForecastChange={this.toggleShowForecastHandler}
+              />
 
               <TimeSeriesChartWithTooltips
                 chartProps={chartProps}

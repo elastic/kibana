@@ -23,6 +23,7 @@ import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { SearchConnectorsPluginSetup } from '@kbn/search-connectors-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -80,6 +81,7 @@ import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/t
 import { GlobalConfigService } from './services/global_config_service';
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
+import { getConnectorsSearchResultProvider } from './utils/connectors_search_result_provider';
 import { getIndicesSearchResultProvider } from './utils/indices_search_result_provider';
 import { getSearchResultProvider } from './utils/search_result_provider';
 
@@ -93,6 +95,7 @@ interface PluginsSetup {
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   logsShared: LogsSharedPluginSetup;
   ml?: MlPluginSetup;
+  searchConnectors?: SearchConnectorsPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -147,6 +150,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       ml,
       guidedOnboarding,
       cloud,
+      searchConnectors,
     }: PluginsSetup
   ) {
     this.globalConfigService.setup(elasticsearch.legacy.config$, cloud);
@@ -160,10 +164,15 @@ export class EnterpriseSearchPlugin implements Plugin {
       ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
       SEARCH_EXPERIENCES_PLUGIN.ID,
     ];
-    const isCloud = !!cloud.cloudId;
+    const isCloud = !!cloud?.cloudId;
 
     if (customIntegrations) {
-      registerEnterpriseSearchIntegrations(config, http, customIntegrations, isCloud);
+      registerEnterpriseSearchIntegrations(
+        config,
+        customIntegrations,
+        isCloud,
+        searchConnectors?.getConnectorTypes() || []
+      );
     }
 
     /*
@@ -265,11 +274,11 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerStatsRoutes(dependencies);
 
     // Analytics Routes (stand-alone product)
-    getStartServices().then(([coreStart, { data }]) => {
+    void getStartServices().then(([coreStart, { data }]) => {
       registerAnalyticsRoutes({ ...dependencies, data, savedObjects: coreStart.savedObjects });
     });
 
-    getStartServices().then(([, { security: securityStart }]) => {
+    void getStartServices().then(([, { security: securityStart }]) => {
       registerApiKeysRoutes(dependencies, securityStart);
     });
 
@@ -283,7 +292,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
     let savedObjectsStarted: SavedObjectsServiceStart;
 
-    getStartServices().then(([coreStart]) => {
+    void getStartServices().then(([coreStart]) => {
       savedObjectsStarted = coreStart.savedObjects;
 
       if (usageCollection) {
@@ -343,8 +352,16 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
 
     if (globalSearch) {
-      globalSearch.registerResultProvider(getSearchResultProvider(http.basePath, config, isCloud));
-      globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.basePath));
+      globalSearch.registerResultProvider(
+        getSearchResultProvider(
+          config,
+          searchConnectors?.getConnectorTypes() || [],
+          isCloud,
+          http.staticAssets.getPluginAssetHref('images/crawler.svg')
+        )
+      );
+      globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
+      globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));
     }
   }
 

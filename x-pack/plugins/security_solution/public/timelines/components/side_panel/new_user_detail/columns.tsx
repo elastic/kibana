@@ -7,9 +7,8 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { euiLightVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { DefaultFieldRenderer } from '../../field_renderers/field_renderers';
 import type { ManagedUsersTableColumns, ManagedUserTable } from './types';
 import * as i18n from './translations';
@@ -21,8 +20,8 @@ const fieldColumn: EuiBasicTableColumn<ManagedUserTable> = {
   render: (label: string, { field }) => (
     <span
       css={css`
-        font-weight: ${euiLightVars.euiFontWeightMedium};
-        color: ${euiLightVars.euiTitleColor};
+        font-weight: ${euiThemeVars.euiFontWeightMedium};
+        color: ${euiThemeVars.euiTitleColor};
       `}
     >
       {label ?? field}
@@ -45,7 +44,6 @@ export const getManagedUserTableColumns = (
           attrName={field}
           idPrefix={contextID ? `managedUser-${contextID}` : 'managedUser'}
           isDraggable={isDraggable}
-          sourcererScopeId={SourcererScopeName.default}
         />
       ) : (
         defaultToEmptyTag(value)

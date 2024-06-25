@@ -7,7 +7,7 @@
 
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
 import { Logger } from '@kbn/core/server';
@@ -86,7 +86,7 @@ export class ServiceAPIClient {
   }
 
   async checkAccountAccessStatus() {
-    if (this.authorization) {
+    if (this.authorization || !this.config?.manifestUrl) {
       // in case username/password is provided, we assume it's always allowed
       return { allowed: true, signupUrl: null };
     }
@@ -115,6 +115,10 @@ export class ServiceAPIClient {
           this.logger.error(e);
         }
       }
+    } else {
+      this.logger.debug(
+        'Failed to fetch isAllowed status. Locations were not fetched from manifest.'
+      );
     }
 
     return { allowed: false, signupUrl: null };

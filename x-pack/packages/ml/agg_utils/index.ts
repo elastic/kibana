@@ -30,6 +30,7 @@ export type {
   SignificantItemHistogramItem,
   SignificantItemType,
   HistogramField,
+  ItemSet,
   NumericColumnStats,
   NumericColumnStatsMap,
   FieldValuePair,

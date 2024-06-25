@@ -218,7 +218,7 @@ export interface HttpServiceSetup<
    * Creates cookie based session storage factory {@link SessionStorageFactory}
    * @param cookieOptions {@link SessionStorageCookieOptions} - options to configure created cookie session storage.
    */
-  createCookieSessionStorageFactory: <T>(
+  createCookieSessionStorageFactory: <T extends object>(
     cookieOptions: SessionStorageCookieOptions<T>
   ) => Promise<SessionStorageFactory<T>>;
 
@@ -402,3 +402,12 @@ export interface HttpServerInfo {
   /** The protocol used by the server */
   protocol: 'http' | 'https' | 'socket';
 }
+
+/**
+ * Defines an http protocol.
+ * (Only supporting http1 for now)
+ *
+ * - http1: regroups all http/1.x protocols
+ * - http2: h2
+ */
+export type HttpProtocol = 'http1' | 'http2';

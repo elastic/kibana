@@ -16,6 +16,7 @@ import { waitFor } from '@testing-library/react';
 import { Chance } from 'chance';
 import React, { Fragment } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+import { from } from 'rxjs';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { ConfigSchema } from '../../plugin';
 import { Subset } from '../../typings';
@@ -41,6 +42,7 @@ const ruleType: RuleTypeModel = {
   requiresAppContext: false,
   validate: validationMethod,
   ruleParamsExpression: () => <Fragment />,
+  alertDetailsAppSection: () => <Fragment />,
 };
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
@@ -51,8 +53,9 @@ const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createSt
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
-      ...kibanaStartMock.startContract(),
+      ...kibanaStartMock.startContract().services,
       cases: casesPluginMock.createStartContract(),
+      application: { currentAppId$: from('mockedApp') },
       http: {
         basePath: {
           prepend: jest.fn(),
@@ -60,9 +63,6 @@ const mockKibana = () => {
       },
       observabilityAIAssistant: mockObservabilityAIAssistant,
       theme: {},
-      triggersActionsUi: {
-        ruleTypeRegistry,
-      },
     },
   });
 };
@@ -75,6 +75,7 @@ jest.mock('../../hooks/use_fetch_rule', () => {
       rule: {
         id: 'ruleId',
         name: 'ruleName',
+        consumer: 'logs',
       },
     }),
   };
@@ -95,7 +96,6 @@ const params = {
 const config: Subset<ConfigSchema> = {
   unsafe: {
     alertDetails: {
-      metrics: { enabled: true },
       uptime: { enabled: true },
     },
   },
@@ -135,7 +135,27 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId('alertDetails')).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();
     expect(alertDetails.queryByTestId('alertDetailsPageTitle')).toBeTruthy();
-    expect(alertDetails.queryByTestId('alert-summary-container')).toBeTruthy();
+    expect(alertDetails.queryByTestId('alertDetailsTabbedContent')).toBeTruthy();
+    expect(alertDetails.queryByTestId('alert-summary-container')).toBeFalsy();
+    expect(alertDetails.queryByTestId('overviewTab')).toBeTruthy();
+    expect(alertDetails.queryByTestId('metadataTab')).toBeTruthy();
+  });
+
+  it('should show Metadata tab', async () => {
+    useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
+
+    const alertDetails = renderComponent();
+
+    await waitFor(() => expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy());
+
+    expect(alertDetails.queryByTestId('alertDetailsTabbedContent')?.textContent).toContain(
+      'Metadata'
+    );
+    alertDetails.getByText('Metadata').click();
+    expect(alertDetails.queryByTestId('metadataTabPanel')).toBeTruthy();
+    expect(alertDetails.queryByTestId('metadataTabPanel')?.textContent).toContain(
+      'kibana.alert.status'
+    );
   });
 
   it('should show error loading the alert details', async () => {

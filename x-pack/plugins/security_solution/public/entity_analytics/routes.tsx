@@ -13,11 +13,16 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 
-import { ENTITY_ANALYTICS_MANAGEMENT_PATH, SecurityPageName } from '../../common/constants';
+import {
+  ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
+  ENTITY_ANALYTICS_MANAGEMENT_PATH,
+  SecurityPageName,
+} from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { AssetCriticalityUploadPage } from './pages/asset_criticality_upload_page';
 
-const EntityAnalyticsTelemetry = () => (
+const EntityAnalyticsManagementTelemetry = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.entityAnalyticsManagement}>
       <EntityAnalyticsManagementPage />
@@ -26,22 +31,52 @@ const EntityAnalyticsTelemetry = () => (
   </PluginTemplateWrapper>
 );
 
-const EntityAnalyticsContainer: React.FC = () => {
+const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
   return (
     <Switch>
-      <Route path={ENTITY_ANALYTICS_MANAGEMENT_PATH} exact component={EntityAnalyticsTelemetry} />
+      <Route
+        path={ENTITY_ANALYTICS_MANAGEMENT_PATH}
+        exact
+        component={EntityAnalyticsManagementTelemetry}
+      />
       <Route component={NotFoundPage} />
     </Switch>
   );
-};
+});
+EntityAnalyticsManagementContainer.displayName = 'EntityAnalyticsManagementContainer';
 
-const EntityAnalytics = React.memo(EntityAnalyticsContainer);
+const EntityAnalyticsAssetClassificationTelemetry = () => (
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.entityAnalyticsAssetClassification}>
+      <AssetCriticalityUploadPage />
+      <SpyRoute pageName={SecurityPageName.entityAnalyticsAssetClassification} />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
+);
 
-const renderEntityAnalyticsRoutes = () => <EntityAnalytics />;
+const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
+  return (
+    <Switch>
+      <Route
+        path={ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH}
+        exact
+        component={EntityAnalyticsAssetClassificationTelemetry}
+      />
+      <Route component={NotFoundPage} />
+    </Switch>
+  );
+});
+
+EntityAnalyticsAssetClassificationContainer.displayName =
+  'EntityAnalyticsAssetClassificationContainer';
 
 export const routes = [
   {
     path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
-    render: renderEntityAnalyticsRoutes,
+    component: EntityAnalyticsManagementContainer,
+  },
+  {
+    path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
+    component: EntityAnalyticsAssetClassificationContainer,
   },
 ];

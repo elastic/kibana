@@ -7,12 +7,11 @@
 
 import {
   apiHasDynamicActions,
-  embeddableEnhancedDrilldownGrouping,
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
   tracksOverlays,
@@ -44,7 +43,7 @@ export interface OpenFlyoutAddDrilldownParams {
 }
 
 export type FlyoutCreateDrilldownActionApi = CanAccessViewMode &
-  HasDynamicActions &
+  Required<HasDynamicActions> &
   HasParentApi<HasType & Partial<PresentationContainer & TracksOverlays>> &
   HasSupportedTriggers &
   Partial<HasUniqueId>;
@@ -59,7 +58,6 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
   public order = 12;
-  public grouping = embeddableEnhancedDrilldownGrouping;
 
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 
@@ -125,7 +123,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
           templates={templates}
           onClose={close}
         />,
-        { theme$: core.theme.theme$ }
+        core
       ),
       {
         ownFocus: true,

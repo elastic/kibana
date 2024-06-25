@@ -39,7 +39,6 @@ export default function ({ getService }: FtrProviderContext) {
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
-          heartbeatIndices: 'heartbeat-*',
           certExpirationThreshold: 30,
           certAgeThreshold: 730,
           defaultConnectors: testActions.slice(0, 2),
@@ -79,7 +78,6 @@ export default function ({ getService }: FtrProviderContext) {
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
-          heartbeatIndices: 'heartbeat-*',
           certExpirationThreshold: 30,
           certAgeThreshold: 730,
           defaultConnectors: testActions,
@@ -122,8 +120,10 @@ const compareRules = (rule1: SanitizedRule, rule2: SanitizedRule) => {
 
 const getActionById = (rule: SanitizedRule, id: string) => {
   const actions = rule.actions.filter((action) => action.id === id);
-  const recoveredAction = actions.find((action) => action.group === 'recovered');
-  const firingAction = actions.find((action) => action.group !== 'recovered');
+  const recoveredAction = actions.find(
+    (action) => 'group' in action && action.group === 'recovered'
+  );
+  const firingAction = actions.find((action) => 'group' in action && action.group !== 'recovered');
   return {
     recoveredAction: omit(recoveredAction, ['uuid']),
     firingAction: omit(firingAction, ['uuid']),
@@ -262,6 +262,7 @@ const statusRule = {
             externalId: null,
             correlation_id: null,
             correlation_display: null,
+            additional_fields: null,
           },
           comments: [],
         },
@@ -464,6 +465,7 @@ const tlsRule = {
             externalId: null,
             correlation_id: null,
             correlation_display: null,
+            additional_fields: null,
           },
           comments: [],
         },

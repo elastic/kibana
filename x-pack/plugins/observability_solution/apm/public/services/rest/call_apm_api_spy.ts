@@ -15,15 +15,11 @@ import { type APIEndpoint } from '../../../server';
 
 const spyObj = { createCallApmApi, callApmApi };
 
-export type CallApmApiSpy = jest.SpyInstance<
-  Promise<any>,
-  Parameters<AbstractAPMClient>
->;
+export type CallApmApiSpy = jest.SpyInstance<Promise<any>, Parameters<AbstractAPMClient>>;
 
 export type CreateCallApmApiSpy = jest.SpyInstance<AbstractAPMClient>;
 
-export const getCallApmApiSpy = () =>
-  jest.spyOn(spyObj, 'callApmApi') as unknown as CallApmApiSpy;
+export const getCallApmApiSpy = () => jest.spyOn(spyObj, 'callApmApi') as unknown as CallApmApiSpy;
 
 type MockApmApiCall = <TEndpoint extends APIEndpoint>(
   endpoint: TEndpoint,

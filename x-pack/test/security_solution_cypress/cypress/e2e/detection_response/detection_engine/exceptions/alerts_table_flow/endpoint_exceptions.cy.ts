@@ -43,7 +43,7 @@ import {
 // See https://github.com/elastic/kibana/issues/163967
 describe.skip(
   'Endpoint Exceptions workflows from Alert',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     const ITEM_NAME = 'Sample Exception List Item';
     const ITEM_NAME_EDIT = 'Sample Exception List Item';

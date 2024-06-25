@@ -13,7 +13,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { Logger } from '@kbn/core/server';
-import { actionsClientMock } from './actions_client/actions_client.mock';
+import { actionsClientMock, ActionsClientMock } from './actions_client/actions_client.mock';
 import { PluginSetupContract, PluginStartContract, renderActionParameterTemplates } from './plugin';
 import { Services, UnsecuredServices } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
@@ -21,6 +21,8 @@ import { ConnectorTokenClient } from './lib/connector_token_client';
 import { unsecuredActionsClientMock } from './unsecured_actions_client/unsecured_actions_client.mock';
 export { actionsAuthorizationMock };
 export { actionsClientMock };
+export type { ActionsClientMock };
+
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const createSetupMock = () => {
@@ -33,6 +35,7 @@ const createSetupMock = () => {
     getActionsHealth: jest.fn(),
     getActionsConfigurationUtilities: jest.fn(),
     setEnabledConnectorTypes: jest.fn(),
+    isActionTypeEnabled: jest.fn(),
   };
   return mock;
 };
@@ -49,6 +52,7 @@ const createStartMock = () => {
       .mockReturnValue(actionsAuthorizationMock.create()),
     inMemoryConnectors: [],
     renderActionParameterTemplates: jest.fn(),
+    isSystemActionConnector: jest.fn(),
   };
   return mock;
 };

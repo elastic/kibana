@@ -14,7 +14,7 @@ import {
   ReplaySubject,
   Subscription,
 } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs';
 
 export const useLatest = <Value>(value: Value) => {
   const valueRef = useRef(value);

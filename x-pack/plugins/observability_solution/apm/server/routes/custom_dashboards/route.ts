@@ -58,9 +58,7 @@ const serviceDashboardsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{ serviceDashboards: SavedApmCustomDashboard[] }> => {
+  handler: async (resources): Promise<{ serviceDashboards: SavedApmCustomDashboard[] }> => {
     const { context, params } = resources;
     const { start, end } = params.query;
 

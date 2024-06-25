@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-describe('[Observability onboarding] Navigation', () => {
+// Failing: See https://github.com/elastic/kibana/issues/183341
+describe.skip('[Observability onboarding] Navigation', () => {
   beforeEach(() => {
     cy.loginAsElastic();
     cy.visitKibana('/app/observabilityOnboarding/');
@@ -33,10 +34,7 @@ describe('[Observability onboarding] Navigation', () => {
     it('navigates to kubernetes integration', () => {
       cy.getByTestSubj('obltOnboardingHomeGoToKubernetesIntegration').click();
 
-      cy.url().should(
-        'include',
-        '/app/integrations/detail/kubernetes/overview'
-      );
+      cy.url().should('include', '/app/integrations/detail/kubernetes/overview');
     });
 
     it('navigates to integrations', () => {

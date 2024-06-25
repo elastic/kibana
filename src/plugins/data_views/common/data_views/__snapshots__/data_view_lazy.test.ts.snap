@@ -1,0 +1,720 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataViewLazy addRuntimeField and removeRuntimeField add and remove composite runtime field as new fields 1`] = `
+Object {
+  "fields": Object {
+    "a": Object {
+      "type": "keyword",
+    },
+    "b": Object {
+      "type": "long",
+    },
+  },
+  "script": Object {
+    "source": "emit('hello world');",
+  },
+  "type": "composite",
+}
+`;
+
+exports[`DataViewLazy addRuntimeField and removeRuntimeField add and remove runtime field as new field 1`] = `
+Object {
+  "script": Object {
+    "source": "emit('hello world');",
+  },
+  "type": "keyword",
+}
+`;
+
+exports[`DataViewLazy toMinimalSpec can exclude fields 1`] = `
+Object {
+  "allowHidden": false,
+  "allowNoIndex": false,
+  "fieldFormats": Object {},
+  "id": "test-pattern",
+  "name": "Name",
+  "runtimeFieldMap": Object {
+    "runtime_field": Object {
+      "script": Object {
+        "source": "emit('hello world')",
+      },
+      "type": "keyword",
+    },
+  },
+  "sourceFilters": Array [],
+  "timeFieldName": "time",
+  "title": "title",
+  "type": "index-pattern",
+  "version": "2",
+}
+`;
+
+exports[`DataViewLazy toSpec can optionally exclude fields 1`] = `
+Object {
+  "allowHidden": false,
+  "allowNoIndex": false,
+  "fieldAttrs": Object {},
+  "fieldFormats": Object {},
+  "id": "test-pattern",
+  "name": "Name",
+  "runtimeFieldMap": Object {
+    "runtime_field": Object {
+      "script": Object {
+        "source": "emit('hello world')",
+      },
+      "type": "keyword",
+    },
+  },
+  "sourceFilters": Array [],
+  "timeFieldName": "time",
+  "title": "title",
+  "type": "index-pattern",
+  "version": "2",
+}
+`;
+
+exports[`DataViewLazy toSpec should match snapshot 1`] = `
+Object {
+  "allowHidden": false,
+  "allowNoIndex": false,
+  "fieldAttrs": Object {
+    "@timestamp": Object {
+      "count": 30,
+    },
+    "bytes": Object {
+      "count": 10,
+    },
+    "ssl": Object {
+      "count": 20,
+    },
+    "time": Object {
+      "count": 30,
+    },
+  },
+  "fieldFormats": Object {},
+  "fields": Object {
+    "@tags": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "keyword",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "@tags",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "string",
+    },
+    "@timestamp": Object {
+      "aggregatable": true,
+      "count": 30,
+      "esTypes": Array [
+        "date",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "@timestamp",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "date",
+    },
+    "_id": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "_id",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "_id",
+      "readFromDocValues": false,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "string",
+    },
+    "_source": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "_source",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "_source",
+      "readFromDocValues": false,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "_source",
+    },
+    "_type": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "_type",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "_type",
+      "readFromDocValues": false,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "string",
+    },
+    "area": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "geo_shape",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "area",
+      "readFromDocValues": false,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "geo_shape",
+    },
+    "bytes": Object {
+      "aggregatable": true,
+      "count": 10,
+      "esTypes": Array [
+        "long",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "bytes",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "number",
+    },
+    "custom_user_field": Object {
+      "aggregatable": true,
+      "conflictDescriptions": Object {
+        "keyword": Array [
+          "index_a",
+        ],
+        "long": Array [
+          "index_b",
+        ],
+      },
+      "count": 0,
+      "esTypes": Array [
+        "conflict",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "custom_user_field",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "conflict",
+    },
+    "extension": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "text",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "extension",
+      "readFromDocValues": false,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "string",
+    },
+    "extension.keyword": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "keyword",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "extension.keyword",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "subType": Object {
+        "multi": Object {
+          "parent": "extension",
+        },
+      },
+      "type": "string",
+    },
+    "geo.coordinates": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "geo_point",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "geo.coordinates",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "geo_point",
+    },
+    "geo.src": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "keyword",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "geo.src",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "string",
+    },
+    "hashed": Object {
+      "aggregatable": false,
+      "count": 0,
+      "esTypes": Array [
+        "murmur3",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "hashed",
+      "readFromDocValues": false,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "murmur3",
+    },
+    "ip": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "ip",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "ip",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "ip",
+    },
+    "machine.os": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "text",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "machine.os",
+      "readFromDocValues": false,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "string",
+    },
+    "machine.os.raw": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "keyword",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "machine.os.raw",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "subType": Object {
+        "multi": Object {
+          "parent": "machine.os",
+        },
+      },
+      "type": "string",
+    },
+    "non-filterable": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "text",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "non-filterable",
+      "readFromDocValues": false,
+      "scripted": false,
+      "searchable": false,
+      "shortDotsEnable": false,
+      "type": "string",
+    },
+    "non-sortable": Object {
+      "aggregatable": false,
+      "count": 0,
+      "esTypes": Array [
+        "text",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "non-sortable",
+      "readFromDocValues": false,
+      "scripted": false,
+      "searchable": false,
+      "shortDotsEnable": false,
+      "type": "string",
+    },
+    "phpmemory": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "integer",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "phpmemory",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "number",
+    },
+    "point": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "geo_point",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "point",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "geo_point",
+    },
+    "request_body": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "attachment",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "request_body",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "attachment",
+    },
+    "runtime_field": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "keyword",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "name": "runtime_field",
+      "readFromDocValues": false,
+      "runtimeField": Object {
+        "script": Object {
+          "source": "emit('hello world')",
+        },
+        "type": "keyword",
+      },
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "string",
+    },
+    "script date": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "date",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": false,
+      "lang": "painless",
+      "name": "script date",
+      "readFromDocValues": false,
+      "script": "1234",
+      "scripted": true,
+      "searchable": true,
+      "type": "date",
+    },
+    "script murmur3": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "murmur3",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": false,
+      "lang": "expression",
+      "name": "script murmur3",
+      "readFromDocValues": false,
+      "script": "1234",
+      "scripted": true,
+      "searchable": true,
+      "type": "murmur3",
+    },
+    "script number": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "long",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": false,
+      "lang": "expression",
+      "name": "script number",
+      "readFromDocValues": false,
+      "script": "1234",
+      "scripted": true,
+      "searchable": true,
+      "type": "number",
+    },
+    "script string": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "text",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": false,
+      "lang": "expression",
+      "name": "script string",
+      "readFromDocValues": false,
+      "script": "'i am a string'",
+      "scripted": true,
+      "searchable": true,
+      "type": "string",
+    },
+    "ssl": Object {
+      "aggregatable": true,
+      "count": 20,
+      "esTypes": Array [
+        "boolean",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "ssl",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "boolean",
+    },
+    "time": Object {
+      "aggregatable": true,
+      "count": 30,
+      "esTypes": Array [
+        "date",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "time",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "date",
+    },
+    "utc_time": Object {
+      "aggregatable": true,
+      "count": 0,
+      "esTypes": Array [
+        "date",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "isMapped": true,
+      "name": "utc_time",
+      "readFromDocValues": true,
+      "scripted": false,
+      "searchable": true,
+      "shortDotsEnable": false,
+      "type": "date",
+    },
+  },
+  "id": "test-pattern",
+  "name": "Name",
+  "runtimeFieldMap": Object {
+    "runtime_field": Object {
+      "script": Object {
+        "source": "emit('hello world')",
+      },
+      "type": "keyword",
+    },
+  },
+  "sourceFilters": Array [],
+  "timeFieldName": "time",
+  "title": "title",
+  "type": "index-pattern",
+  "version": "2",
+}
+`;

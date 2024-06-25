@@ -568,6 +568,7 @@ describe('Response actions history', () => {
           'Parameters',
           'Comment',
           'Hostname',
+          'Agent type',
           'Output:',
         ]
       );
@@ -1111,8 +1112,34 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should show a list of actions when opened', () => {
+    it('should show a list of actions (without `scan`) when opened', () => {
       mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
+      render();
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+      expect(filterList).toBeTruthy();
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
+        RESPONSE_ACTION_API_COMMANDS_NAMES.length - 1
+      );
+      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
+        'isolate. To check this option, press Enter.',
+        'release. To check this option, press Enter.',
+        'kill-process. To check this option, press Enter.',
+        'suspend-process. To check this option, press Enter.',
+        'processes. To check this option, press Enter.',
+        'get-file. To check this option, press Enter.',
+        'execute. To check this option, press Enter.',
+        'upload. To check this option, press Enter.',
+      ]);
+    });
+
+    it('should show a list of actions (with `scan`) when opened', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionUploadEnabled: true,
+        responseActionScanEnabled: true,
+      });
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -1131,6 +1158,7 @@ describe('Response actions history', () => {
         'get-file. To check this option, press Enter.',
         'execute. To check this option, press Enter.',
         'upload. To check this option, press Enter.',
+        'scan. To check this option, press Enter.',
       ]);
     });
 
@@ -1423,8 +1451,30 @@ describe('Response actions history', () => {
       ]);
     });
 
-    it('should show a list of agent and action types when opened in page view', () => {
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: true });
+    it('should show only action types when 3rd party vendor feature flags are set to false thus only endpoint available', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: false,
+        responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+      });
+      render({ isFlyout: false });
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+      expect(filterList).toBeTruthy();
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
+        [...RESPONSE_ACTION_TYPE].length
+      );
+      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
+        'Triggered by rule',
+        'Triggered manually',
+      ]);
+    });
+    it('should show a list of agents and action types when opened in page view', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: true,
+        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+      });
       render({ isFlyout: false });
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -1437,6 +1487,7 @@ describe('Response actions history', () => {
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
         'Elastic Defend',
         'SentinelOne',
+        'Crowdstrike',
         'Triggered by rule',
         'Triggered manually',
       ]);

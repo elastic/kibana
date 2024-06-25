@@ -30,15 +30,6 @@ import HeatmapComponent from './heatmap_component';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
-
-  return {
-    ...original,
-    getSpecId: jest.fn(() => {}),
-  };
-});
-
 const actWithTimeout = (action: Function, timer: number = 1) =>
   act(
     () =>

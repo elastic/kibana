@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { EuiText, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-
 import { css } from '@emotion/react';
-import type { Category } from '../../../../common/api/log_categorization/types';
+
+import { EuiText, EuiSpacer, useEuiTheme } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
+
 import { FormattedPatternExamples, FormattedRegex, FormattedTokens } from '../format_category';
 
 interface ExpandedRowProps {
@@ -59,7 +61,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ category, displayExamples = 
   );
 };
 
-const Section: FC<{ title: string }> = ({ title, children }) => {
+const Section: FC<PropsWithChildren<{ title: string }>> = ({ title, children }) => {
   return (
     <>
       <EuiText size="s">

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { map } from 'rxjs/operators';
-import { IKibanaSearchRequest } from '@kbn/data-plugin/public';
+import { map } from 'rxjs';
+import type { IKibanaSearchRequest } from '@kbn/search-types';
 import { ParsedDataSearchRequestDescriptor } from './types';
 
 export const flattenDataSearchResponseDescriptor = <

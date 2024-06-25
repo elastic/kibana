@@ -11,6 +11,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
 interface Options {
   apmEventClient: APMEventClient;
@@ -20,6 +21,7 @@ interface Options {
   numBuckets: number;
   environment: string;
   offset?: string;
+  randomSampler: RandomSampler;
 }
 
 async function getServiceDependenciesForTimeRange({
@@ -30,18 +32,17 @@ async function getServiceDependenciesForTimeRange({
   numBuckets,
   environment,
   offset,
+  randomSampler,
 }: Options) {
-  const statsItems = await getConnectionStats({
+  const { statsItems } = await getConnectionStats({
     apmEventClient,
     start,
     end,
     numBuckets,
-    filter: [
-      { term: { [SERVICE_NAME]: serviceName } },
-      ...environmentQuery(environment),
-    ],
+    filter: [{ term: { [SERVICE_NAME]: serviceName } }, ...environmentQuery(environment)],
     offset,
     collapseBy: 'downstream',
+    randomSampler,
   });
 
   return getConnectionStatsItemsWithRelativeImpact(statsItems);
@@ -54,16 +55,12 @@ export type ServiceDependenciesResponse = Array<
   }
 >;
 
-export async function getServiceDependencies(
-  opts: Options
-): Promise<ServiceDependenciesResponse> {
+export async function getServiceDependencies(opts: Options): Promise<ServiceDependenciesResponse> {
   const { offset, ...sharedOptions } = opts;
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     getServiceDependenciesForTimeRange(sharedOptions),
-    ...(offset
-      ? [getServiceDependenciesForTimeRange({ ...sharedOptions, offset })]
-      : [[]]),
+    ...(offset ? [getServiceDependenciesForTimeRange({ ...sharedOptions, offset })] : [[]]),
   ]);
 
   return currentPeriod.map((item) => {

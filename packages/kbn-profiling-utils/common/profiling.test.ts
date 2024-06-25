@@ -132,6 +132,7 @@ describe('getLanguageType', () => {
     FrameType.Perl,
     FrameType.Python,
     FrameType.Ruby,
+    FrameType.DotNET,
   ].map((type) =>
     it(`returns interpreted for ${type}`, () => {
       expect(getLanguageType({ frameType: type })).toEqual('INTERPRETED');

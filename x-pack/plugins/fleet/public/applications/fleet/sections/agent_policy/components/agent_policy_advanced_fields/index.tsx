@@ -59,18 +59,20 @@ import {
   useFleetServerHostsOptions,
 } from './hooks';
 
+import { CustomFields } from './custom_fields';
+
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   validation: ValidationResults;
-  isEditing?: boolean;
+  disabled?: boolean;
 }
 
 export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> = ({
   agentPolicy,
   updateAgentPolicy,
   validation,
-  isEditing = false,
+  disabled = false,
 }) => {
   const { docLinks } = useStartServices();
   const AgentTamperProtectionWrapper = useUIExtension(
@@ -116,13 +118,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const AgentTamperProtectionSectionContent = useMemo(
     () => (
       <EuiDescribedFormGroup
+        fullWidth
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.tamperingLabel"
               defaultMessage="Agent tamper protection"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -138,7 +141,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               <FormattedMessage
                 id="xpack.fleet.agentPolicyForm.tamperingSwitchLabel"
                 defaultMessage="Prevent agent tampering"
-              />
+              />{' '}
               {!policyHasElasticDefend && (
                 <span data-test-subj="tamperMissingIntegrationTooltip">
                   <EuiIconTip
@@ -160,7 +163,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           onChange={(e) => {
             updateAgentPolicy({ is_protected: e.target.checked });
           }}
-          disabled={!policyHasElasticDefend}
+          disabled={disabled || !policyHasElasticDefend}
           data-test-subj="tamperProtectionSwitch"
         />
         {agentPolicy.id && (
@@ -181,7 +184,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         )}
       </EuiDescribedFormGroup>
     ),
-    [agentPolicy.id, agentPolicy.is_protected, policyHasElasticDefend, updateAgentPolicy]
+    [agentPolicy.id, agentPolicy.is_protected, policyHasElasticDefend, updateAgentPolicy, disabled]
   );
 
   const AgentTamperProtectionSection = useMemo(() => {
@@ -208,13 +211,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   return (
     <>
       <EuiDescribedFormGroup
+        fullWidth
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.descriptionFieldLabel"
               defaultMessage="Description"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -236,10 +240,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           error={
             touchedFields.description && validation.description ? validation.description : null
           }
+          isDisabled={disabled}
           isInvalid={Boolean(touchedFields.description && validation.description)}
         >
           <EuiFieldText
-            disabled={agentPolicy.is_managed === true}
+            disabled={disabled || agentPolicy.is_managed === true}
             fullWidth
             value={agentPolicy.description}
             onChange={(e) => updateAgentPolicy({ description: e.target.value })}
@@ -252,13 +257,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
-          <h4 data-test-subj="defaultNamespaceHeader">
+          <h3 data-test-subj="defaultNamespaceHeader">
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.namespaceFieldLabel"
               defaultMessage="Default namespace"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -281,11 +287,13 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           fullWidth
           error={touchedFields.namespace && validation.namespace ? validation.namespace : null}
           isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+          isDisabled={disabled}
         >
           <EuiComboBox
             fullWidth
             singleSelection
             noSuggestions
+            isDisabled={disabled}
             selectedOptions={agentPolicy.namespace ? [{ label: agentPolicy.namespace }] : []}
             onCreateOption={(value: string) => {
               updateAgentPolicy({ namespace: value });
@@ -300,14 +308,16 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      <CustomFields updateAgentPolicy={updateAgentPolicy} agentPolicy={agentPolicy} />
       <EuiDescribedFormGroup
+        fullWidth
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.monitoringLabel"
               defaultMessage="Agent monitoring"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -322,7 +332,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         }
       >
         <EuiCheckboxGroup
-          disabled={agentPolicy.is_managed === true}
+          disabled={disabled || agentPolicy.is_managed === true}
           options={[
             {
               id: `${dataTypes.Logs}_${monitoringCheckboxIdSuffix}`,
@@ -396,12 +406,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }}
         />
       </EuiDescribedFormGroup>
-
       {AgentTamperProtectionSection}
 
       <EuiDescribedFormGroup
+        fullWidth
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.inactivityTimeoutLabel"
               defaultMessage="Inactivity timeout"
@@ -426,7 +436,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 </EuiToolTip>
               </>
             )}
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -443,10 +453,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               : null
           }
           isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
+          isDisabled={disabled}
         >
           <EuiFieldNumber
             fullWidth
-            disabled={agentPolicy.is_managed === true}
+            disabled={disabled || agentPolicy.is_managed === true}
             value={agentPolicy.inactivity_timeout || ''}
             min={0}
             onChange={(e) => {
@@ -460,13 +471,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.fleetServerHostsLabel"
               defaultMessage="Fleet Server"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -482,10 +494,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               ? validation.fleet_server_host_id
               : null
           }
+          isDisabled={disabled}
           isInvalid={Boolean(touchedFields.fleet_server_host_id && validation.fleet_server_host_id)}
         >
           <EuiSuperSelect
-            disabled={agentPolicy.is_managed === true}
+            disabled={disabled || agentPolicy.is_managed === true}
             valueOfSelected={agentPolicy.fleet_server_host_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingFleetServerHostsOption}
@@ -499,13 +512,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.dataOutputLabel"
               defaultMessage="Output for integrations"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -522,9 +536,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               : null
           }
           isInvalid={Boolean(touchedFields.data_output_id && validation.data_output_id)}
+          isDisabled={disabled}
         >
           <EuiSuperSelect
-            disabled={agentPolicy.is_managed === true}
+            disabled={disabled || agentPolicy.is_managed === true}
             valueOfSelected={agentPolicy.data_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
@@ -538,13 +553,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.monitoringOutputLabel"
               defaultMessage="Output for agent monitoring"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -561,9 +577,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               : null
           }
           isInvalid={Boolean(touchedFields.monitoring_output_id && validation.monitoring_output_id)}
+          isDisabled={disabled}
         >
           <EuiSuperSelect
-            disabled={agentPolicy.is_managed === true}
+            disabled={disabled || agentPolicy.is_managed === true}
             valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
@@ -577,14 +594,15 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.downloadSourceLabel"
-              defaultMessage="Agent Binary Download"
+              defaultMessage="Agent binary download"
               data-test-subj="agentPolicyForm.downloadSource.label"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -601,8 +619,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               : null
           }
           isInvalid={Boolean(touchedFields.download_source_id && validation.download_source_id)}
+          isDisabled={disabled}
         >
           <EuiSuperSelect
+            disabled={disabled}
             valueOfSelected={agentPolicy.download_source_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingDownloadSources}
@@ -617,70 +637,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
+        fullWidth
         title={
-          <h4>
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
-              defaultMessage="Unenrollment timeout"
-            />
-            &nbsp;
-            <EuiToolTip
-              content={i18n.translate('xpack.fleet.agentPolicyForm.unenrollmentTimeoutTooltip', {
-                defaultMessage:
-                  'This setting is deprecated and will be removed in a future release. Consider using inactivity timeout instead',
-              })}
-            >
-              <EuiBetaBadge
-                label={i18n.translate(
-                  'xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel',
-                  { defaultMessage: 'Deprecated' }
-                )}
-                size="s"
-              />
-            </EuiToolTip>
-          </h4>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
-            defaultMessage="An optional timeout in seconds. If provided, and fleet server is below version 8.7.0, an agent will automatically unenroll after being gone for this period of time."
-          />
-        }
-      >
-        <EuiFormRow
-          fullWidth
-          error={
-            touchedFields.unenroll_timeout && validation.unenroll_timeout
-              ? validation.unenroll_timeout
-              : null
-          }
-          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
-        >
-          <EuiFieldNumber
-            fullWidth
-            disabled={agentPolicy.is_managed === true}
-            value={agentPolicy.unenroll_timeout || ''}
-            min={0}
-            onChange={(e) => {
-              updateAgentPolicy({
-                unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
-              });
-            }}
-            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
-            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-      <EuiDescribedFormGroup
-        title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.hostnameFormatLabel"
               defaultMessage="Host name format"
             />
-            &nbsp;
-            <EuiBetaBadge label="beta" size="s" color="accent" />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -689,8 +653,9 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         }
       >
-        <EuiFormRow fullWidth>
+        <EuiFormRow fullWidth isDisabled={disabled}>
           <EuiRadioGroup
+            disabled={disabled}
             options={[
               {
                 id: 'hostname',
@@ -753,6 +718,63 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               });
             }}
             name="radio group"
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        fullWidth
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
+              defaultMessage="Unenrollment timeout"
+            />
+            &nbsp;
+            <EuiToolTip
+              content={i18n.translate('xpack.fleet.agentPolicyForm.unenrollmentTimeoutTooltip', {
+                defaultMessage:
+                  'This setting is deprecated and will be removed in a future release. Consider using inactivity timeout instead',
+              })}
+            >
+              <EuiBetaBadge
+                label={i18n.translate(
+                  'xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel',
+                  { defaultMessage: 'Deprecated' }
+                )}
+                size="s"
+              />
+            </EuiToolTip>
+          </h3>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, and fleet server is below version 8.7.0, an agent will automatically unenroll after being gone for this period of time."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.unenroll_timeout && validation.unenroll_timeout
+              ? validation.unenroll_timeout
+              : null
+          }
+          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+          isDisabled={disabled}
+        >
+          <EuiFieldNumber
+            fullWidth
+            disabled={disabled || agentPolicy.is_managed === true}
+            value={agentPolicy.unenroll_timeout || ''}
+            min={0}
+            onChange={(e) => {
+              updateAgentPolicy({
+                unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
+              });
+            }}
+            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

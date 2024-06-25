@@ -242,7 +242,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
 
       const originalPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
-      await panelActions.unlinkFromLibary(originalPanel);
+      await panelActions.legacyUnlinkFromLibrary(originalPanel);
       await testSubjects.existOrFail('unlinkPanelSuccess');
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
@@ -255,7 +255,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('save lens panel to embeddable library', async () => {
       const originalPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
-      await panelActions.saveToLibrary('lnsPieVis - copy', originalPanel);
+      await panelActions.legacySaveToLibrary('lnsPieVis - copy', originalPanel);
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis-copy');
       const libraryActionExists = await testSubjects.descendantExists(
@@ -320,6 +320,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       // check the success state
       await PageObjects.dashboard.verifyNoRenderErrors();
+    });
+
+    it('should work in lens with by-value charts', async () => {
+      // create a new dashboard, then a new visualization in Lens.
+      await PageObjects.dashboard.navigateToApp();
+      await PageObjects.dashboard.clickNewDashboard();
+      await testSubjects.click('dashboardEditorMenuButton');
+      await testSubjects.click('visType-lens');
+      // Configure it and save to return to the dashboard.
+      await PageObjects.lens.waitForField('@timestamp');
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+      await PageObjects.lens.save('test', true);
+      // Edit the visualization now and get back to Lens editor
+      await testSubjects.click('embeddablePanelToggleMenuIcon');
+      await testSubjects.click('embeddablePanelAction-ACTION_CONFIGURE_IN_LENS');
+      await testSubjects.click('navigateToLensEditorLink');
+      // Click on Share, then Copy link and paste the link in a new tab.
+      const url = await PageObjects.lens.getUrl();
+      await browser.openNewTab();
+      await browser.navigateTo(url);
+      expect(await PageObjects.lens.getTitle()).to.be('test');
+      // need to make sure there aren't extra tabs or it will impact future test suites
+      // close any new tabs that were opened
+      const windowHandlers = await browser.getAllWindowHandles();
+      if (windowHandlers.length > 1) {
+        await browser.closeCurrentWindow();
+        await browser.switchToWindow(windowHandlers[0]);
+      }
     });
   });
 }

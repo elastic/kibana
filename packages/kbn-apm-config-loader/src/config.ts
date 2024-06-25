@@ -7,13 +7,13 @@
  */
 
 import { join } from 'path';
-import deepmerge from 'deepmerge';
-import { merge } from 'lodash';
+import { merge, isEmpty } from 'lodash';
 import { execSync } from 'child_process';
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
 import type { AgentConfigOptions } from 'elastic-apm-node';
 import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
+import { getFlattenedObject } from '@kbn/std';
 import type { ApmConfigSchema } from './apm_config';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
@@ -79,7 +79,8 @@ export class ApmConfiguration {
   }
 
   public getConfig(serviceName: string): AgentConfigOptions {
-    const { servicesOverrides = {} } = this.getConfigFromKibanaConfig();
+    const kibanaConfig = this.getConfigFromKibanaConfig();
+    const { servicesOverrides = {} } = merge(kibanaConfig, this.getConfigFromEnv(kibanaConfig));
 
     let baseConfig = {
       ...this.getBaseConfig(),
@@ -129,6 +130,15 @@ export class ApmConfiguration {
       ) {
         this.baseConfig = merge(this.baseConfig, centralizedConfig);
       }
+
+      if (this.baseConfig?.globalLabels) {
+        // Global Labels need to be a key/value pair...
+        // Dotted names will be renamed to underscored ones by the agent, but we need to provide key/value pairs
+        // https://github.com/elastic/apm-agent-nodejs/issues/4096#issuecomment-2181621221
+        this.baseConfig.globalLabels = getFlattenedObject(
+          this.baseConfig.globalLabels as Record<string, unknown>
+        );
+      }
     }
 
     return this.baseConfig;
@@ -139,9 +149,18 @@ export class ApmConfiguration {
    */
   private getConfigFromEnv(configFromKibanaConfig: AgentConfigOptions): AgentConfigOptions {
     const config: AgentConfigOptions = {};
+    const servicesOverrides: Record<string, AgentConfigOptions> = {};
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
       config.active = true;
+    }
+
+    if (process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE === 'false') {
+      merge(servicesOverrides, {
+        'kibana-frontend': {
+          active: false,
+        },
+      });
     }
 
     if (process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY === 'true') {
@@ -184,6 +203,10 @@ export class ApmConfiguration {
           return [key, val.join('=')];
         })
       );
+    }
+
+    if (!isEmpty(servicesOverrides)) {
+      merge(config, { servicesOverrides });
     }
 
     return config;
@@ -296,10 +319,7 @@ export class ApmConfiguration {
     const { servicesOverrides, redactUsers, ...configFromKibanaConfig } =
       this.getConfigFromKibanaConfig();
     const configFromEnv = this.getConfigFromEnv(configFromKibanaConfig);
-    const config = [configFromKibanaConfig, configFromEnv].reduce<AgentConfigOptions>(
-      (acc, conf) => deepmerge(acc, conf),
-      {}
-    );
+    const config = merge({}, configFromKibanaConfig, configFromEnv);
 
     if (config.active === false && config.contextPropagationOnly !== false) {
       throw new Error(

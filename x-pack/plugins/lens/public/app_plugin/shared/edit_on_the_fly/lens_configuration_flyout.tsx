@@ -37,7 +37,11 @@ import {
   useLensDispatch,
 } from '../../../state_management';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import { EXPRESSION_BUILD_ERROR_ID, extractReferencesFromState } from '../../../utils';
+import {
+  EXPRESSION_BUILD_ERROR_ID,
+  extractReferencesFromState,
+  getAbsoluteDateRange,
+} from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
@@ -82,6 +86,7 @@ export function LensEditConfigurationFlyout({
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
+  const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
 
@@ -92,6 +97,10 @@ export function LensEditConfigurationFlyout({
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
 
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
+
+  framePublicAPI.absDateRange = getAbsoluteDateRange(
+    startDependencies.data.query.timefilter.timefilter
+  );
 
   const layers = useMemo(
     () => activeDatasource.getLayers(datasourceState),
@@ -229,7 +238,6 @@ export function LensEditConfigurationFlyout({
       },
       references,
       visualizationType: visualization.activeId,
-      title: visualization.activeId ?? '',
     };
     if (savedObjectId) {
       saveByRef?.(attrs);
@@ -296,6 +304,7 @@ export function LensEditConfigurationFlyout({
         setErrors([]);
         updateSuggestion?.(attrs);
       }
+      setIsVisualizationLoading(false);
     },
     [
       startDependencies,
@@ -366,6 +375,8 @@ export function LensEditConfigurationFlyout({
         isSaveable={isSaveable}
       >
         <LayerConfiguration
+          // TODO: remove this once we support switching to any chart in Discover
+          onlyAllowSwitchToSubtypes
           getUserMessages={getUserMessages}
           attributes={attributes}
           coreStart={coreStart}
@@ -409,14 +420,24 @@ export function LensEditConfigurationFlyout({
               flex-direction: column;
             }
             .euiAccordion__childWrapper {
-              overflow-y: auto !important;
               ${euiScrollBarStyles(euiTheme)}
+              overflow-y: auto !important;
+              pointer-events: none;
               padding-left: ${euiThemeVars.euiFormMaxWidth};
               margin-left: -${euiThemeVars.euiFormMaxWidth};
+              > * {
+                pointer-events: auto;
+              }
 
               .euiAccordion-isOpen & {
                 block-size: auto !important;
                 flex: 1;
+              }
+            }
+            .lnsIndexPatternDimensionEditor-advancedOptions {
+              .euiAccordion__childWrapper {
+                flex: none;
+                overflow: hidden !important;
               }
             }
           `}
@@ -449,29 +470,26 @@ export function LensEditConfigurationFlyout({
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
                   if (q) {
+                    setIsVisualizationLoading(true);
                     await runQuery(q, a);
                   }
                 }}
                 isDisabled={false}
                 allowQueryCancellation
+                isLoading={isVisualizationLoading}
               />
             </EuiFlexItem>
           )}
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
-                .euiAccordion__childWrapper {
-                  flex: ${isLayerAccordionOpen ? 1 : 'none'}
-                }
+              .euiAccordion__childWrapper {
+                flex: ${isLayerAccordionOpen ? 1 : 'none'};
               }
+              padding: 0 ${euiThemeVars.euiSize};
             `}
           >
             <EuiAccordion
-              css={css`
-                .euiAccordion__triggerWrapper {
-                  padding: 0 ${euiThemeVars.euiSize};
-                }
-              `}
               id="layer-configuration"
               buttonContent={
                 <EuiTitle
@@ -502,8 +520,6 @@ export function LensEditConfigurationFlyout({
             >
               <>
                 <LayerConfiguration
-                  // TODO: remove this prop once we add support for multiple layers (form-based mode)
-                  shouldDisplayChartSwitch={!!textBasedMode}
                   attributes={attributes}
                   getUserMessages={getUserMessages}
                   coreStart={coreStart}

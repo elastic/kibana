@@ -21,6 +21,7 @@ export const createNewPackagePolicyMock = (): NewPackagePolicy => {
     namespace: 'default',
     enabled: true,
     policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
+    policy_ids: ['93c46720-c217-11ea-9906-b5b8a21b268e'],
     package: {
       name: 'endpoint',
       title: 'Elastic Endpoint',
@@ -87,6 +88,8 @@ export const createFleetAuthzMock = (): FleetAuthz => {
       allAgents: true,
       allSettings: true,
       readSettings: true,
+      addAgents: true,
+      addFleetServers: true,
     },
     integrations: {
       readPackageInfo: true,

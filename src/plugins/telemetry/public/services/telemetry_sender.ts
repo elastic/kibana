@@ -8,7 +8,7 @@
 
 import type { Subscription } from 'rxjs';
 import { fromEvent, interval, merge } from 'rxjs';
-import { exhaustMap } from 'rxjs/operators';
+import { exhaustMap } from 'rxjs';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LOCALSTORAGE_KEY, PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 import { TelemetryService } from './telemetry_service';

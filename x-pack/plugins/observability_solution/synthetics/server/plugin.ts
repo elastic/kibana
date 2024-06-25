@@ -25,7 +25,7 @@ import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor
 import { initSyntheticsServer } from './server';
 import { uptimeFeature } from './feature';
 
-import { registerUptimeSavedObjects, savedObjectsAdapter } from './saved_objects/saved_objects';
+import { registerUptimeSavedObjects } from './saved_objects/saved_objects';
 import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
@@ -34,25 +34,20 @@ import { uptimeRuleTypeFieldMap } from './alert_rules/common';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
-  private initContext: PluginInitializerContext;
-  private logger: Logger;
+  private readonly logger: Logger;
   private server?: SyntheticsServerSetup;
   private syntheticsService?: SyntheticsService;
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
-  constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
-    this.initContext = initializerContext;
-    this.logger = initializerContext.logger.get();
+  constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
+    this.logger = initContext.logger.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
   }
 
   public setup(core: CoreSetup, plugins: SyntheticsPluginsSetupDependencies) {
     const config = this.initContext.config.get<UptimeConfig>();
 
-    savedObjectsAdapter.config = config;
-
-    this.logger = this.initContext.logger.get();
     const { ruleDataService } = plugins.ruleRegistry;
 
     const ruleDataClient = ruleDataService.initializeIndex({
@@ -82,7 +77,7 @@ export class Plugin implements PluginType {
 
     this.syntheticsService = new SyntheticsService(this.server);
 
-    this.syntheticsService.setup(plugins.taskManager);
+    this.syntheticsService.setup(plugins.taskManager).catch(() => {});
 
     this.syntheticsMonitorClient = new SyntheticsMonitorClient(this.syntheticsService, this.server);
 
@@ -110,11 +105,12 @@ export class Plugin implements PluginType {
       this.server.encryptedSavedObjects = pluginsStart.encryptedSavedObjects;
       this.server.savedObjectsClient = this.savedObjectsClient;
       this.server.spaces = pluginsStart.spaces;
+      this.server.isElasticsearchServerless = coreStart.elasticsearch.getCapabilities().serverless;
     }
 
     this.syntheticsService?.start(pluginsStart.taskManager);
 
-    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart);
+    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart).catch(() => {});
   }
 
   public stop() {}

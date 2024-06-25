@@ -23,21 +23,12 @@ interface Props {
 
 export function ErrorOverviewLink({ serviceName, query, ...rest }: Props) {
   const router = useApmRouter();
-  const errorOverviewLink = router.link(
-    '/mobile-services/{serviceName}/errors-and-crashes',
-    {
-      path: {
-        serviceName,
-      },
-      query,
-    }
-  );
+  const errorOverviewLink = router.link('/mobile-services/{serviceName}/errors-and-crashes', {
+    path: {
+      serviceName,
+    },
+    query,
+  });
 
-  return (
-    <EuiLink
-      data-test-subj="apmErrorOverviewLinkLink"
-      href={errorOverviewLink}
-      {...rest}
-    />
-  );
+  return <EuiLink data-test-subj="apmErrorOverviewLinkLink" href={errorOverviewLink} {...rest} />;
 }

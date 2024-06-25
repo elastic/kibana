@@ -6,11 +6,12 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
 
 import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { some } from 'lodash';
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
@@ -27,11 +28,10 @@ interface Props {
   selectedConnectorId?: string;
   displayFancy?: (displayText: string) => React.ReactNode;
   setIsOpen?: (isOpen: boolean) => void;
+  isFlyoutMode: boolean;
 }
 
 export type AIConnector = ActionConnector & {
-  // ex: Bedrock, OpenAI
-  connectorTypeTitle: string;
   // related to OpenAI connectors, ex: Azure OpenAI, OpenAI
   apiProvider?: OpenAiProviderType;
 };
@@ -44,6 +44,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     selectedConnectorId,
     onConnectorSelectionChange,
     setIsOpen,
+    isFlyoutMode,
   }) => {
     const { actionTypeRegistry, http, assistantAvailability } = useAssistantContext();
     // Connector Modal State
@@ -52,14 +53,8 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
-    const {
-      data: aiConnectors,
-      isLoading: isLoadingConnectors,
-      isFetching: isFetchingConnectors,
-      refetch: refetchConnectors,
-    } = useLoadConnectors({ actionTypeRegistry, http });
+    const { data: aiConnectors, refetch: refetchConnectors } = useLoadConnectors({ http });
 
-    const isLoading = isLoadingConnectors || isFetchingConnectors;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
     const addNewConnectorOption = useMemo(() => {
@@ -91,14 +86,15 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       () =>
         (aiConnectors ?? []).map((connector) => {
           const connectorTypeTitle =
-            getGenAiConfig(connector)?.apiProvider ?? connector.connectorTypeTitle;
+            getGenAiConfig(connector)?.apiProvider ??
+            getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
           const connectorDetails = connector.isPreconfigured
             ? i18n.PRECONFIGURED_CONNECTOR
             : connectorTypeTitle;
           return {
             value: connector.id,
             'data-test-subj': connector.id,
-            inputDisplay: displayFancy ? displayFancy(connector.name) : connector.name,
+            inputDisplay: displayFancy?.(connector.name) ?? connector.name,
             dropdownDisplay: (
               <React.Fragment key={connector.id}>
                 <strong>{connector.name}</strong>
@@ -111,7 +107,12 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             ),
           };
         }),
-      [aiConnectors, displayFancy]
+      [actionTypeRegistry, aiConnectors, displayFancy]
+    );
+
+    const connectorExists = useMemo(
+      () => some(aiConnectors, ['id', selectedConnectorId]),
+      [aiConnectors, selectedConnectorId]
     );
 
     // Only include add new connector option if user has privilege
@@ -151,37 +152,50 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       (connector: ActionConnector) => {
         onConnectorSelectionChange({
           ...connector,
-          connectorTypeTitle: getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId)),
         });
         refetchConnectors?.();
         cleanupAndCloseModal();
       },
-      [actionTypeRegistry, cleanupAndCloseModal, onConnectorSelectionChange, refetchConnectors]
+      [cleanupAndCloseModal, onConnectorSelectionChange, refetchConnectors]
     );
 
     return (
       <>
-        <EuiSuperSelect
-          aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
-          compressed={true}
-          data-test-subj="connector-selector"
-          disabled={localIsDisabled}
-          hasDividers={true}
-          isLoading={isLoading}
-          isOpen={modalForceOpen}
-          onChange={onChange}
-          options={allConnectorOptions}
-          valueOfSelected={selectedConnectorId ?? ''}
-        />
-        {isConnectorModalVisible && (
-          <AddConnectorModal
-            actionTypeRegistry={actionTypeRegistry}
-            actionTypes={actionTypes}
-            onClose={() => setIsConnectorModalVisible(false)}
-            onSaveConnector={onSaveConnector}
-            onSelectActionType={(actionType: ActionType) => setSelectedActionType(actionType)}
-            selectedActionType={selectedActionType}
+        {isFlyoutMode && !connectorExists && !connectorOptions.length ? (
+          <EuiButtonEmpty
+            data-test-subj="addNewConnectorButton"
+            iconType="plusInCircle"
+            size="xs"
+            onClick={() => setIsConnectorModalVisible(true)}
+          >
+            {i18n.ADD_CONNECTOR}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiSuperSelect
+            aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
+            compressed={true}
+            data-test-subj="connector-selector"
+            disabled={localIsDisabled}
+            hasDividers={true}
+            isOpen={modalForceOpen}
+            onChange={onChange}
+            options={allConnectorOptions}
+            valueOfSelected={selectedConnectorId}
+            popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
           />
+        )}
+        {isConnectorModalVisible && (
+          // Crashing management app otherwise
+          <Suspense fallback>
+            <AddConnectorModal
+              actionTypeRegistry={actionTypeRegistry}
+              actionTypes={actionTypes}
+              onClose={() => setIsConnectorModalVisible(false)}
+              onSaveConnector={onSaveConnector}
+              onSelectActionType={(actionType: ActionType) => setSelectedActionType(actionType)}
+              selectedActionType={selectedActionType}
+            />
+          </Suspense>
         )}
       </>
     );

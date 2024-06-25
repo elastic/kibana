@@ -6,18 +6,48 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ChatOpenAI } from '@langchain/openai';
-import { streamFactory } from '@kbn/ml-response-stream/server';
-import { Logger } from '@kbn/logging';
-import { IRouter } from '@kbn/core/server';
-import { fetchFields } from './utils/fetch_query_source_fields';
+import type { Logger } from '@kbn/logging';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { sendMessageEvent, SendMessageEventData } from './analytics/events';
+import { fetchFields } from './lib/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
-import { ConversationalChain } from './utils/conversational_chain';
-import { Prompt } from './utils/prompt';
+import { ConversationalChain } from './lib/conversational_chain';
 import { errorHandler } from './utils/error_handler';
-import { APIRoutes } from './types';
+import { handleStreamResponse } from './utils/handle_stream_response';
+import {
+  APIRoutes,
+  SearchPlaygroundPluginStart,
+  SearchPlaygroundPluginStartDependencies,
+} from './types';
+import { getChatParams } from './lib/get_chat_params';
+import { fetchIndices } from './lib/fetch_indices';
+import { isNotNullish } from '../common/is_not_nullish';
+import { MODELS } from '../common/models';
 
-export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) {
+export function createRetriever(esQuery: string) {
+  return (question: string) => {
+    try {
+      const replacedQuery = esQuery.replace(/{query}/g, question.replace(/"/g, '\\"'));
+      const query = JSON.parse(replacedQuery);
+      return query;
+    } catch (e) {
+      throw Error(e);
+    }
+  };
+}
+
+export function defineRoutes({
+  logger,
+  router,
+  getStartServices,
+}: {
+  logger: Logger;
+  router: IRouter;
+  getStartServices: StartServicesAccessor<
+    SearchPlaygroundPluginStartDependencies,
+    SearchPlaygroundPluginStart
+  >;
+}) {
   router.post(
     {
       path: APIRoutes.POST_QUERY_SOURCE_FIELDS,
@@ -45,65 +75,93 @@ export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) 
       path: APIRoutes.POST_CHAT_MESSAGE,
       validate: {
         body: schema.object({
-          data: schema.any(),
+          data: schema.object({
+            connector_id: schema.string(),
+            indices: schema.string(),
+            prompt: schema.string(),
+            citations: schema.boolean(),
+            elasticsearch_query: schema.string(),
+            summarization_model: schema.maybe(schema.string()),
+            doc_size: schema.number(),
+            source_fields: schema.string(),
+          }),
           messages: schema.any(),
         }),
       },
     },
     errorHandler(async (context, request, response) => {
+      const [{ analytics }, { actions }] = await getStartServices();
       const { client } = (await context.core).elasticsearch;
-
       const aiClient = Assist({
         es_client: client.asCurrentUser,
       } as AssistClientOptionsWithClient);
-
       const { messages, data } = await request.body;
-
-      const model = new ChatOpenAI({
-        openAIApiKey: data.api_key,
-      });
-
-      const chain = ConversationalChain({
-        model,
-        rag: {
-          index: data.indices,
-          retriever: (question: string) => {
-            try {
-              const query = JSON.parse(data.elasticsearchQuery.replace(/{query}/g, question));
-              return query.query;
-            } catch (e) {
-              log.error('Failed to parse the Elasticsearch query', e);
-            }
-          },
-        },
-        prompt: Prompt(data.prompt, {
+      const { chatModel, chatPrompt, connector } = await getChatParams(
+        {
+          connectorId: data.connector_id,
+          model: data.summarization_model,
           citations: data.citations,
-          context: true,
-          type: 'openai',
-        }),
-      });
+          prompt: data.prompt,
+        },
+        { actions, logger, request }
+      );
 
-      const stream = await chain.stream(aiClient, messages);
+      let sourceFields = {};
 
-      const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
-
-      const reader = (stream as ReadableStream).getReader();
-      const textDecoder = new TextDecoder();
-
-      async function pushStreamUpdate() {
-        reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-          if (done) {
-            end();
-            return;
-          }
-          push(textDecoder.decode(value));
-          pushStreamUpdate();
-        });
+      try {
+        sourceFields = JSON.parse(data.source_fields);
+        sourceFields = Object.keys(sourceFields).reduce((acc, key) => {
+          // @ts-ignore
+          acc[key] = sourceFields[key][0];
+          return acc;
+        }, {});
+      } catch (e) {
+        logger.error('Failed to parse the source fields', e);
+        throw Error(e);
       }
 
-      pushStreamUpdate();
+      const model = MODELS.find((m) => m.model === data.summarization_model);
+      const modelPromptLimit = model?.promptTokenLimit;
 
-      return response.ok(responseWithHeaders);
+      const chain = ConversationalChain({
+        model: chatModel,
+        rag: {
+          index: data.indices,
+          retriever: createRetriever(data.elasticsearch_query),
+          content_field: sourceFields,
+          size: Number(data.doc_size),
+          inputTokensLimit: modelPromptLimit,
+        },
+        prompt: chatPrompt,
+      });
+
+      let stream: ReadableStream<Uint8Array>;
+
+      try {
+        stream = await chain.stream(aiClient, messages);
+
+        analytics.reportEvent<SendMessageEventData>(sendMessageEvent.eventType, {
+          connectorType:
+            connector.actionTypeId +
+            (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
+          model: data.summarization_model ?? '',
+          isCitationsEnabled: data.citations,
+        });
+
+        return handleStreamResponse({ logger, stream, response, request });
+      } catch (e) {
+        logger.error('Failed to create the chat stream', e);
+
+        if (typeof e === 'object') {
+          return response.badRequest({
+            body: {
+              message: e.message,
+            },
+          });
+        }
+
+        throw e;
+      }
     })
   );
 
@@ -140,6 +198,37 @@ export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) 
 
       return response.ok({
         body: { apiKey },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  // SECURITY: We don't apply any authorization tags to this route because all actions performed
+  // on behalf of the user making the request and governed by the user's own cluster privileges.
+  router.get(
+    {
+      path: APIRoutes.GET_INDICES,
+      validate: {
+        query: schema.object({
+          search_query: schema.maybe(schema.string()),
+          size: schema.number({ defaultValue: 10, min: 0 }),
+        }),
+      },
+    },
+    errorHandler(async (context, request, response) => {
+      const { search_query: searchQuery, size } = request.query;
+      const {
+        client: { asCurrentUser },
+      } = (await context.core).elasticsearch;
+
+      const { indexNames } = await fetchIndices(asCurrentUser, searchQuery);
+
+      const indexNameSlice = indexNames.slice(0, size).filter(isNotNullish);
+
+      return response.ok({
+        body: {
+          indices: indexNameSlice,
+        },
         headers: { 'content-type': 'application/json' },
       });
     })

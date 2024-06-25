@@ -6,7 +6,7 @@
  */
 
 import { combineLatest, Observable } from 'rxjs';
-import { filter, startWith, map } from 'rxjs/operators';
+import { filter, startWith, map } from 'rxjs';
 import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { isNumber, mapValues } from 'lodash';
 import { Logger } from '@kbn/core/server';
@@ -190,7 +190,8 @@ export function createTaskRunAggregator(
         (taskEvent: TaskLifecycleEvent) =>
           isTaskManagerStatEvent(taskEvent) && taskEvent.id === 'pollingDelay'
       ),
-      map(() => new Date().toISOString())
+      map(() => new Date().toISOString()),
+      startWith(new Date().toISOString())
     ),
     // get the average ratio of polled tasks by their persistency
     taskPollingLifecycle.events.pipe(

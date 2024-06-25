@@ -68,9 +68,9 @@ export class TestReporter implements Reporter {
 
   onStepEnd(journey: Journey, step: Step, result: StepEndResult) {
     const { status, end, start, error } = result;
-    const message = `${symbols[status]}  Step: '${
-      step.name
-    }' ${status} (${renderDuration((end - start) * 1000)} ms)`;
+    const message = `${symbols[status]}  Step: '${step.name}' ${status} (${renderDuration(
+      (end - start) * 1000
+    )} ms)`;
     this.write(indent(message));
     if (error) {
       this.write(renderError(error));
@@ -82,45 +82,33 @@ export class TestReporter implements Reporter {
     this.journeys.get(journey.name)?.push({ name: step.name, ...result });
   }
 
-  async onJourneyEnd(
-    journey: Journey,
-    { error, start, end, status }: JourneyEndResult
-  ) {
+  async onJourneyEnd(journey: Journey, { error, start, end, status }: JourneyEndResult) {
     const { failed, succeeded, skipped } = this.metrics;
     const total = failed + succeeded + skipped;
     if (total === 0 && error) {
       this.write(renderError(error));
     }
-    const message = `${symbols[status]} Took  (${renderDuration(
-      end - start
-    )} seconds)`;
+    const message = `${symbols[status]} Took  (${renderDuration(end - start)} seconds)`;
     this.write(message);
 
     await fs.promises.mkdir('.journeys/failed_steps', { recursive: true });
 
-    await gatherScreenshots(
-      join(CACHE_PATH, 'screenshots'),
-      async (screenshot) => {
-        const { data, step } = screenshot;
+    await gatherScreenshots(join(CACHE_PATH, 'screenshots'), async (screenshot) => {
+      const { data, step } = screenshot;
 
-        if (status === 'failed') {
-          await (async () => {
-            await fs.promises.writeFile(
-              join('.journeys/failed_steps/', `${step.name}.jpg`),
-              data,
-              {
-                encoding: 'base64',
-              }
-            );
-          })();
-        }
+      if (status === 'failed') {
+        await (async () => {
+          await fs.promises.writeFile(join('.journeys/failed_steps/', `${step.name}.jpg`), data, {
+            encoding: 'base64',
+          });
+        })();
       }
-    );
+    });
   }
 
   onEnd() {
-    const failedJourneys = Array.from(this.journeys.entries()).filter(
-      ([, steps]) => steps.some((step) => step.status === 'failed')
+    const failedJourneys = Array.from(this.journeys.entries()).filter(([, steps]) =>
+      steps.some((step) => step.status === 'failed')
     );
 
     if (failedJourneys.length > 0) {
@@ -130,9 +118,7 @@ export class TestReporter implements Reporter {
           this.write(`\n+++ ${name}`);
           steps.forEach((stepResult) => {
             const { status, end, start, error, name: stepName } = stepResult;
-            const message = `${
-              symbols[status]
-            }  Step: '${stepName}' ${status} (${renderDuration(
+            const message = `${symbols[status]}  Step: '${stepName}' ${status} (${renderDuration(
               (end - start) * 1000
             )} ms)`;
             this.write(indent(message));
@@ -144,8 +130,8 @@ export class TestReporter implements Reporter {
       });
     }
 
-    const successfulJourneys = Array.from(this.journeys.entries()).filter(
-      ([, steps]) => steps.every((step) => step.status === 'succeeded')
+    const successfulJourneys = Array.from(this.journeys.entries()).filter(([, steps]) =>
+      steps.every((step) => step.status === 'succeeded')
     );
 
     successfulJourneys.forEach(([journeyName, steps]) => {
@@ -154,10 +140,7 @@ export class TestReporter implements Reporter {
       } catch (e) {
         // eslint-disable-next-line no-console
         console.log(
-          'Failed to delete video file for path ' +
-            '.journeys/videos/' +
-            journeyName +
-            '.webm'
+          'Failed to delete video file for path ' + '.journeys/videos/' + journeyName + '.webm'
         );
       }
     });

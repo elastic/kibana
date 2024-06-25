@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  termQuery,
-  rangeQuery,
-  wildcardQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, termQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,

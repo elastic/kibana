@@ -13,7 +13,8 @@ import { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../common/run
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { validateMonitor } from './monitor_validation';
-import { getPrivateLocationsForMonitor, hydrateMonitorFields } from './add_monitor';
+import { getPrivateLocationsForMonitor } from './add_monitor/utils';
+import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 
 export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -64,9 +65,10 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     try {
       const newMonitorId = id ?? uuidV4();
 
-      const monitorWithNamespace = hydrateMonitorFields({
+      const addMonitorAPI = new AddEditMonitorAPI(routeContext);
+
+      const monitorWithNamespace = addMonitorAPI.hydrateMonitorFields({
         normalizedMonitor,
-        routeContext,
         newMonitorId,
       });
 

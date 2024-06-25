@@ -12,12 +12,6 @@ interface Options {
   savedObjectsClient: SavedObjectsClientContract;
   customDashboardId: string;
 }
-export async function deleteServiceDashboard({
-  savedObjectsClient,
-  customDashboardId,
-}: Options) {
-  return savedObjectsClient.delete(
-    APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-    customDashboardId
-  );
+export async function deleteServiceDashboard({ savedObjectsClient, customDashboardId }: Options) {
+  return savedObjectsClient.delete(APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE, customDashboardId);
 }

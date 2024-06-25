@@ -19,8 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
  */
 type NotArray<T> = T extends unknown[] ? never : T;
 export const addIdToItem = <T>(item: NotArray<T>): T => {
-  // @ts-expect-error upgrade typescript v4.9.5
-  const maybeId: typeof item & { id?: string } = item;
+  const maybeId = item as typeof item & { id?: string };
   if (maybeId.id != null) {
     return item;
   } else {
@@ -42,8 +41,7 @@ export const removeIdFromItem = <T>(
       },
       Exclude<keyof T, 'id'>
     > => {
-  // @ts-expect-error upgrade typescript v4.9.5
-  const maybeId: typeof item & { id?: string } = item;
+  const maybeId = item as typeof item & { id?: string };
   if (maybeId.id != null) {
     const { id, ...noId } = maybeId;
     return noId;

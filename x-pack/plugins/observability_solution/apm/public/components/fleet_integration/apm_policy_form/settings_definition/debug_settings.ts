@@ -14,10 +14,9 @@ export function getDebugSettings(): SettingsRow[] {
       key: 'expvar_enabled',
       type: 'boolean',
       labelAppend: OPTIONAL_LABEL,
-      rowTitle: i18n.translate(
-        'xpack.apm.fleet_integration.settings.debug.expvarEnabledTitle',
-        { defaultMessage: 'Enable APM Server Golang expvar support' }
-      ),
+      rowTitle: i18n.translate('xpack.apm.fleet_integration.settings.debug.expvarEnabledTitle', {
+        defaultMessage: 'Enable APM Server Golang expvar support',
+      }),
       rowDescription: i18n.translate(
         'xpack.apm.fleet_integration.settings.debug.expvarEnabledDescription',
         { defaultMessage: 'Exposed under /debug/vars' }
@@ -27,10 +26,9 @@ export function getDebugSettings(): SettingsRow[] {
       key: 'pprof_enabled',
       type: 'boolean',
       labelAppend: OPTIONAL_LABEL,
-      rowTitle: i18n.translate(
-        'xpack.apm.fleet_integration.settings.debug.pprofEnabledTitle',
-        { defaultMessage: 'Enable APM Server pprof support' }
-      ),
+      rowTitle: i18n.translate('xpack.apm.fleet_integration.settings.debug.pprofEnabledTitle', {
+        defaultMessage: 'Enable APM Server pprof support',
+      }),
       rowDescription: i18n.translate(
         'xpack.apm.fleet_integration.settings.debug.pprofEnabledDescription',
         {

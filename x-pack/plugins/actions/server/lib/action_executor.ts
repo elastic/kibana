@@ -15,6 +15,7 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateConfig,
@@ -44,6 +45,7 @@ import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
+import { isBidirectionalConnectorType } from './bidirectional_connectors';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -315,7 +317,7 @@ export class ActionExecutor {
         new Error(
           `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         ),
-        TaskErrorSource.USER
+        TaskErrorSource.FRAMEWORK
       );
     }
 
@@ -506,6 +508,7 @@ export class ActionExecutor {
             rawResult.errorSource = TaskErrorSource.USER;
           }
         } catch (err) {
+          const errorSource = getErrorSource(err) || TaskErrorSource.FRAMEWORK;
           if (err.reason === ActionExecutionErrorReason.Authorization) {
             rawResult = err.result;
           } else {
@@ -516,7 +519,7 @@ export class ActionExecutor {
               serviceMessage: err.message,
               error: err,
               retry: true,
-              errorSource: TaskErrorSource.USER,
+              errorSource,
             };
           }
         }
@@ -698,8 +701,8 @@ const ensureAuthorizedToExecute = async ({
         additionalPrivileges,
         actionTypeId,
       });
-    } else if (actionTypeId === '.sentinelone') {
-      // SentinelOne sub-actions require that a user have `all` privilege to Actions and Connectors.
+    } else if (isBidirectionalConnectorType(actionTypeId)) {
+      // SentinelOne and Crowdstrike sub-actions require that a user have `all` privilege to Actions and Connectors.
       // This is a temporary solution until a more robust RBAC approach can be implemented for sub-actions
       await authorization.ensureAuthorized({
         operation: 'execute',

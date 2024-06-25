@@ -102,9 +102,7 @@ describe('getKueryWithMobileCrashFilter', () => {
       groupId: '1',
       kuery: 'foo.bar: test',
     });
-    expect(result).toBe(
-      'foo.bar: test and error.type: crash and error.grouping_key: 1'
-    );
+    expect(result).toBe('foo.bar: test and error.type: crash and error.grouping_key: 1');
   });
 });
 describe('getKueryWithMobileErrorFilter', () => {
@@ -134,8 +132,6 @@ describe('getKueryWithMobileErrorFilter', () => {
       groupId: '1',
       kuery: 'foo.bar: test',
     });
-    expect(result).toBe(
-      'foo.bar: test and NOT error.type: crash and error.grouping_key: 1'
-    );
+    expect(result).toBe('foo.bar: test and NOT error.type: crash and error.grouping_key: 1');
   });
 });

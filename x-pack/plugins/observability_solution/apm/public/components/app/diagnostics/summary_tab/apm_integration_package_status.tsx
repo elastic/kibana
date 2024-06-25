@@ -23,11 +23,7 @@ export function ApmIntegrationPackageStatus() {
   const packageVersion = diagnosticsBundle?.fleetPackageInfo.version;
 
   return (
-    <TabStatus
-      isLoading={isLoading}
-      isOk={isInstalled}
-      data-test-subj="integrationPackageStatus"
-    >
+    <TabStatus isLoading={isLoading} isOk={isInstalled} data-test-subj="integrationPackageStatus">
       {isLoading
         ? '...'
         : isInstalled

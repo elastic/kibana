@@ -161,6 +161,30 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         await collapseBtn.click();
         await this.expectSectionClosed(sectionId);
       },
+      async isCollapsed() {
+        const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton');
+        return (await collapseNavBtn.getAttribute('aria-expanded')) === 'false';
+      },
+      async isExpanded() {
+        return !(await this.isCollapsed());
+      },
+      /**
+       * Toggles collapsed state of sidenav
+       */
+      async toggle(collapsed?: boolean) {
+        const currentlyCollapsed = await this.isCollapsed();
+        const shouldBeCollapsed = collapsed ?? !currentlyCollapsed;
+
+        if (currentlyCollapsed !== shouldBeCollapsed) {
+          log.debug(
+            'ServerlessCommonNavigation.sidenav.toggle',
+            shouldBeCollapsed ? 'Collapsing' : 'Expanding'
+          );
+
+          const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton');
+          await collapseNavBtn.click();
+        }
+      },
     },
     breadcrumbs: {
       async expectExists() {
@@ -285,6 +309,27 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       },
       async clickEmbeddedConsoleControlBar() {
         await testSubjects.click('consoleEmbeddedControlBar');
+      },
+      async expectEmbeddedConsoleNotebooksButtonExists() {
+        await testSubjects.existOrFail('consoleEmbeddedNotebooksButton');
+      },
+      async clickEmbeddedConsoleNotebooksButton() {
+        await testSubjects.click('consoleEmbeddedNotebooksButton');
+      },
+      async expectEmbeddedConsoleNotebooksToBeOpen() {
+        await testSubjects.existOrFail('consoleEmbeddedNotebooksContainer');
+      },
+      async expectEmbeddedConsoleNotebooksToBeClosed() {
+        await testSubjects.missingOrFail('consoleEmbeddedNotebooksContainer');
+      },
+      async expectEmbeddedConsoleNotebookListItemToBeAvailable(id: string) {
+        await testSubjects.existOrFail(`console-embedded-notebook-select-btn-${id}`);
+      },
+      async clickEmbeddedConsoleNotebook(id: string) {
+        await testSubjects.click(`console-embedded-notebook-select-btn-${id}`);
+      },
+      async expectEmbeddedConsoleNotebookToBeAvailable(id: string) {
+        await testSubjects.click(`console-embedded-notebook-select-btn-${id}`);
       },
     },
   };

@@ -16,12 +16,24 @@ import {
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { IntegrationIcon } from '../common';
 import { FieldsList } from './fields_list';
+import { IntegrationActionsMenu } from './integration_actions_menu';
 
-export function IntegrationSummary({ integration }: { integration: Integration }) {
+export function IntegrationSummary({
+  integration,
+  dashboardsLoading,
+}: {
+  integration: Integration;
+  dashboardsLoading: boolean;
+}) {
   const { name, version } = integration;
+
+  const integrationActionsMenu = (
+    <IntegrationActionsMenu integration={integration} dashboardsLoading={dashboardsLoading} />
+  );
   return (
     <FieldsList
       title={flyoutIntegrationDetailsText}
+      actionsMenu={integrationActionsMenu}
       fields={[
         {
           fieldTitle: flyoutIntegrationNameText,
@@ -38,10 +50,12 @@ export function IntegrationSummary({ integration }: { integration: Integration }
               </EuiFlexGroup>
             </EuiBadge>
           ),
+          isLoading: false,
         },
         {
           fieldTitle: flyoutIntegrationVersionText,
           fieldValue: version,
+          isLoading: false,
         },
       ]}
     />

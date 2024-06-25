@@ -5,31 +5,23 @@
  * 2.0.
  */
 
-import { ApiConfig, Replacement } from '@kbn/elastic-assistant-common';
-
-export type ConversationRole = 'system' | 'user' | 'assistant';
+import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
 
 export interface MessagePresentation {
   delay?: number;
   stream?: boolean;
 }
 
-export interface Message {
-  role: ConversationRole;
+// The ClientMessage is different from the Message in that it content
+// can be undefined and reader is the correct type which is unavailable in Zod
+export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
   reader?: ReadableStreamDefaultReader<Uint8Array>;
-  replacements?: Replacement[];
   content?: string;
-  timestamp: string;
-  isError?: boolean;
   presentation?: MessagePresentation;
-  traceData?: {
-    transactionId: string;
-    traceId: string;
-  };
 }
 
 export interface ConversationTheme {
-  title?: JSX.Element | string;
+  title?: string;
   titleIcon?: string;
   user?: {
     name?: string;
@@ -60,10 +52,10 @@ export interface Conversation {
   consumer: string;
   id: string;
   title: string;
-  messages: Message[];
+  messages: ClientMessage[];
   updatedAt?: Date;
   createdAt?: Date;
-  replacements: Replacement[];
+  replacements: Replacements;
   isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
 }
@@ -75,11 +67,15 @@ export interface AssistantTelemetry {
     role: string;
     isEnabledKnowledgeBase: boolean;
     isEnabledRAGAlerts: boolean;
+    actionTypeId: string;
+    model?: string;
+    provider?: string;
   }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
   reportAssistantSettingToggled: (params: {
     isEnabledKnowledgeBase?: boolean;
     isEnabledRAGAlerts?: boolean;
+    assistantStreamingEnabled?: boolean;
   }) => void;
 }
 
@@ -92,4 +88,6 @@ export interface AssistantAvailability {
   hasConnectorsAllPrivilege: boolean;
   // When true, user has `Read` privilege for `Connectors and Actions` (show/execute ui capabilities)
   hasConnectorsReadPrivilege: boolean;
+  // When true, user has `Edit` privilege for `AnonymizationFields`
+  hasUpdateAIAssistantAnonymization: boolean;
 }

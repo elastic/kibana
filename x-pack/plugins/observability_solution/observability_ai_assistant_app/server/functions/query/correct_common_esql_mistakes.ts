@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { isArray } from 'lodash';
-import type { Logger } from '@kbn/logging';
-
-const DELIMITER_TOKENS = ['`', "'", '"', ['(', ')']];
+const STRING_DELIMITER_TOKENS = ['`', "'", '"'];
 const ESCAPE_TOKEN = '\\\\';
 
 // this function splits statements by a certain token,
@@ -18,6 +15,9 @@ function split(value: string, splitToken: string) {
   const statements: string[] = [];
 
   let delimiterToken: string | undefined;
+
+  let groupingCount: number = 0;
+
   let currentStatement: string = '';
 
   const trimmed = value.trim().split('');
@@ -27,7 +27,11 @@ function split(value: string, splitToken: string) {
 
     if (
       !delimiterToken &&
-      trimmed.slice(index, index + splitToken.length).join('') === splitToken
+      groupingCount === 0 &&
+      trimmed
+        .slice(index, index + splitToken.length)
+        .join('')
+        .toLowerCase() === splitToken.toLowerCase()
     ) {
       index += splitToken.length - 1;
       statements.push(currentStatement.trim());
@@ -41,13 +45,16 @@ function split(value: string, splitToken: string) {
       // end identifier
       delimiterToken = undefined;
     } else if (!delimiterToken && trimmed[index - 1] !== ESCAPE_TOKEN) {
-      const applicableToken = DELIMITER_TOKENS.find(
-        (token) => token === char || (isArray(token) && token[0] === char)
-      );
+      const applicableToken = STRING_DELIMITER_TOKENS.includes(char) ? char : undefined;
+
       if (applicableToken) {
         // start identifier
-        delimiterToken = isArray(applicableToken) ? applicableToken[1] : applicableToken;
+        delimiterToken = applicableToken;
         continue;
+      } else if (char === '(') {
+        groupingCount++;
+      } else if (char === ')') {
+        groupingCount--;
       }
     }
   }
@@ -59,7 +66,7 @@ function split(value: string, splitToken: string) {
   return statements;
 }
 
-function splitIntoCommands(query: string) {
+export function splitIntoCommands(query: string) {
   const commands: string[] = split(query, '|');
 
   return commands.map((command) => {
@@ -77,17 +84,43 @@ function replaceSingleQuotesWithDoubleQuotes(command: string) {
   return command.replace(regex, '"');
 }
 
+function removeColumnQuotesAndEscape(column: string) {
+  const plainColumnIdentifier = column.replaceAll(/^"(.*)"$/g, `$1`).replaceAll(/^'(.*)'$/g, `$1`);
+
+  if (isValidColumnName(plainColumnIdentifier)) {
+    return plainColumnIdentifier;
+  }
+
+  return '`' + plainColumnIdentifier + '`';
+}
+
 function replaceAsKeywordWithAssignments(command: string) {
   return command.replaceAll(/^STATS\s*(.*)/g, (__, statsOperations: string) => {
     return `STATS ${statsOperations.replaceAll(
-      /(,\s*)?(.*?)\sAS\s([`a-zA-Z0-9.\-_]+)/g,
-      '$1$3 = $2'
+      /(,\s*)?(.*?)\s(AS|as)\s([`a-zA-Z0-9.\-_]+)/g,
+      '$1$4 = $2'
     )}`;
   });
 }
 
 function isValidColumnName(column: string) {
-  return column.match(/^`.*`$/) || column.match(/^[@A-Za-z\._\-]+$/);
+  return Boolean(column.match(/^`.*`$/) || column.match(/^[@A-Za-z\._\-\d]+$/));
+}
+
+function escapeColumns(line: string) {
+  const [, command, body] = line.match(/^([A-Za-z_]+)(.*)$/ms) ?? ['', '', ''];
+
+  const escapedBody = split(body.trim(), ',')
+    .map((statement) => {
+      const [lhs, rhs] = split(statement, '=');
+      if (!rhs) {
+        return lhs;
+      }
+      return `${removeColumnQuotesAndEscape(lhs)} = ${rhs}`;
+    })
+    .join(', ');
+
+  return `${command} ${escapedBody}`;
 }
 
 function verifyKeepColumns(
@@ -101,7 +134,7 @@ function verifyKeepColumns(
   const availableColumns = columnsInKeep.concat();
 
   for (const { name, command } of nextCommands) {
-    if (['STATS', 'KEEP', 'DROP', 'DISSECT', 'GROK', 'ENRICH'].includes(name || '')) {
+    if (['STATS', 'KEEP', 'DROP', 'DISSECT', 'GROK', 'ENRICH', 'RENAME'].includes(name || '')) {
       // these operations alter columns in a way that is hard to analyze, so we abort
       break;
     }
@@ -146,44 +179,109 @@ function verifyKeepColumns(
   return `KEEP ${columnsInKeep.join(', ')}`;
 }
 
-export function correctCommonEsqlMistakes(content: string, log: Logger) {
-  return content.replaceAll(/```esql\n(.*?)\n```/gms, (_, query: string) => {
-    const commands = splitIntoCommands(query);
-
-    const formattedCommands: string[] = commands.map(({ name, command }, index) => {
-      let formattedCommand = command;
-
-      switch (name) {
-        case 'FROM':
-          formattedCommand = formattedCommand
-            .replaceAll(/FROM "(.*)"/g, 'FROM `$1`')
-            .replaceAll(/FROM '(.*)'/g, 'FROM `$1`');
-          break;
-
-        case 'WHERE':
-        case 'EVAL':
-          formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
-          break;
-
-        case 'STATS':
-          formattedCommand = replaceAsKeywordWithAssignments(formattedCommand);
-          break;
-
-        case 'KEEP':
-          formattedCommand = verifyKeepColumns(formattedCommand, commands.slice(index + 1));
-          break;
+function escapeExpressionsInSort(sortCommand: string) {
+  const columnsInSort = split(sortCommand.replace(/^SORT\s*/, ''), ',')
+    .map((statement) => split(statement, '=')?.[0].trim())
+    .map((columnAndSortOrder) => {
+      let [, column, sortOrder = ''] =
+        columnAndSortOrder.match(/^(.*?)\s+(ASC|DESC\s*([A-Z\s]+)?)?$/i) || [];
+      if (!column) {
+        return columnAndSortOrder;
       }
-      return formattedCommand;
+
+      if (sortOrder) sortOrder = ` ${sortOrder}`;
+
+      if (!column.match(/^`?[a-zA-Z0-9_\.@]+`?$/)) {
+        column = `\`${column}\``;
+      }
+
+      return `${column}${sortOrder}`;
     });
 
-    const correctedFormattedQuery = formattedCommands.join('\n| ');
+  return `SORT ${columnsInSort.join(', ')}`;
+}
 
-    const originalFormattedQuery = commands.map((cmd) => cmd.command).join('\n| ');
+function ensureEqualityOperators(whereCommand: string) {
+  const body = whereCommand.split(/^WHERE /)[1];
 
-    if (originalFormattedQuery !== correctedFormattedQuery) {
-      log.debug(`Modified query from: ${originalFormattedQuery}\nto:\n${correctedFormattedQuery}`);
+  const byChar = body.split('');
+
+  let next = '';
+  let isColumnName = false;
+  byChar.forEach((char, index) => {
+    next += char;
+
+    if (!isColumnName && char === '=' && byChar[index - 1] === ' ' && byChar[index + 1] === ' ') {
+      next += '=';
     }
 
-    return '```esql\n' + correctedFormattedQuery + '\n```';
+    if (!isColumnName && (char === '`' || char.match(/[a-z@]/i))) {
+      isColumnName = true;
+    } else if (isColumnName && (char === '`' || !char.match(/[a-z@0-9]/i))) {
+      isColumnName = false;
+    }
   });
+
+  return `WHERE ${next}`;
+}
+
+export function correctCommonEsqlMistakes(query: string): {
+  isCorrection: boolean;
+  input: string;
+  output: string;
+} {
+  const commands = splitIntoCommands(query.trim());
+
+  const formattedCommands: string[] = commands.map(({ name, command }, index) => {
+    let formattedCommand = command;
+
+    switch (name) {
+      case 'FROM':
+        formattedCommand = formattedCommand
+          .replaceAll(/FROM "(.*)"/g, 'FROM $1')
+          .replaceAll(/FROM '(.*)'/g, 'FROM $1')
+          .replaceAll(/FROM `(.*)`/g, 'FROM $1');
+        break;
+
+      case 'WHERE':
+        formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
+        formattedCommand = ensureEqualityOperators(formattedCommand);
+        break;
+
+      case 'EVAL':
+        formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
+        formattedCommand = escapeColumns(formattedCommand);
+        break;
+
+      case 'STATS':
+        formattedCommand = replaceAsKeywordWithAssignments(formattedCommand);
+        const [before, after] = split(formattedCommand, ' BY ');
+        formattedCommand = escapeColumns(before);
+        if (after) {
+          formattedCommand += ` BY ${after}`;
+        }
+        break;
+
+      case 'KEEP':
+        formattedCommand = verifyKeepColumns(formattedCommand, commands.slice(index + 1));
+        break;
+
+      case 'SORT':
+        formattedCommand = escapeExpressionsInSort(formattedCommand);
+        break;
+    }
+    return formattedCommand;
+  });
+
+  const output = formattedCommands.join('\n| ');
+
+  const originalFormattedQuery = commands.map((cmd) => cmd.command).join('\n| ');
+
+  const isCorrection = output !== originalFormattedQuery;
+
+  return {
+    input: query,
+    output,
+    isCorrection,
+  };
 }

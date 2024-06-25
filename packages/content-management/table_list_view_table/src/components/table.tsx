@@ -35,10 +35,15 @@ import { TagFilterPanel } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
 import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
 import type { SortColumnField } from './table_sort_select';
+import {
+  UserFilterPanel,
+  UserFilterContextProvider,
+  NULL_USER as USER_FILTER_NULL_USER,
+} from './user_filter_panel';
 
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
-  'items' | 'selectedIds' | 'searchQuery' | 'tableSort' | 'pagination'
+  'items' | 'selectedIds' | 'searchQuery' | 'tableSort' | 'pagination' | 'tableFilter'
 >;
 
 type TagManagementProps = Pick<
@@ -59,8 +64,10 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   renderCreateButton: () => React.ReactElement | undefined;
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
+  onFilterChange: (filter: Partial<State<T>['tableFilter']>) => void;
   onTableSearchChange: (arg: { query: Query | null; queryText: string }) => void;
   clearTagSelection: () => void;
+  createdByEnabled: boolean;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -72,6 +79,7 @@ export function Table<T extends UserContentCommonSchema>({
   pagination,
   tableColumns,
   tableSort,
+  tableFilter,
   hasUpdatedAtMetadata,
   entityName,
   entityNamePlural,
@@ -83,11 +91,13 @@ export function Table<T extends UserContentCommonSchema>({
   onTableChange,
   onTableSearchChange,
   onSortChange,
+  onFilterChange,
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
   clearTagSelection,
+  createdByEnabled,
 }: Props<T>) {
-  const { getTagList } = useServices();
+  const { getTagList, isTaggingEnabled } = useServices();
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -171,7 +181,9 @@ export function Table<T extends UserContentCommonSchema>({
     };
   }, [hasUpdatedAtMetadata, onSortChange, tableSort]);
 
-  const tagFilterPanel = useMemo<SearchFilterConfig>(() => {
+  const tagFilterPanel = useMemo<SearchFilterConfig | null>(() => {
+    if (!isTaggingEnabled()) return null;
+
     return {
       type: 'custom_component',
       component: () => {
@@ -192,6 +204,7 @@ export function Table<T extends UserContentCommonSchema>({
   }, [
     isPopoverOpen,
     isInUse,
+    isTaggingEnabled,
     closePopover,
     options,
     totalActiveFilters,
@@ -200,9 +213,20 @@ export function Table<T extends UserContentCommonSchema>({
     clearTagSelection,
   ]);
 
+  const userFilterPanel = useMemo<SearchFilterConfig | null>(() => {
+    return createdByEnabled
+      ? {
+          type: 'custom_component',
+          component: UserFilterPanel,
+        }
+      : null;
+  }, [createdByEnabled]);
+
   const searchFilters = useMemo(() => {
-    return [tableSortSelectFilter, tagFilterPanel];
-  }, [tableSortSelectFilter, tagFilterPanel]);
+    return [tableSortSelectFilter, tagFilterPanel, userFilterPanel].filter(
+      (f: SearchFilterConfig | null): f is SearchFilterConfig => Boolean(f)
+    );
+  }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel]);
 
   const search = useMemo((): Search => {
     return {
@@ -226,23 +250,60 @@ export function Table<T extends UserContentCommonSchema>({
     />
   );
 
+  const visibleItems = React.useMemo(() => {
+    if (tableFilter?.createdBy?.length > 0) {
+      return items.filter((item) => {
+        if (item.createdBy) return tableFilter.createdBy.includes(item.createdBy);
+        else if (item.managed) return false;
+        else return tableFilter.createdBy.includes(USER_FILTER_NULL_USER);
+      });
+    }
+
+    return items;
+  }, [items, tableFilter]);
+
+  const { allUsers, showNoUserOption } = useMemo(() => {
+    if (!createdByEnabled) return { allUsers: [], showNoUserOption: false };
+
+    let _showNoUserOption = false;
+    const users = new Set<string>();
+    items.forEach((item) => {
+      if (item.createdBy) {
+        users.add(item.createdBy);
+      } else if (!item.managed) {
+        // show no user option only if there is an item without createdBy that is not a "managed" item
+        _showNoUserOption = true;
+      }
+    });
+    return { allUsers: Array.from(users), showNoUserOption: _showNoUserOption };
+  }, [createdByEnabled, items]);
+
   return (
-    <EuiInMemoryTable<T>
-      itemId="id"
-      items={items}
-      columns={tableColumns}
-      pagination={pagination}
-      loading={isFetchingItems}
-      message={noItemsMessage}
-      selection={selection}
-      search={search}
-      executeQueryOptions={{ enabled: false }}
-      sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
-      onChange={onTableChange}
-      data-test-subj="itemsInMemTable"
-      rowHeader="attributes.title"
-      tableCaption={tableCaption}
-      isSelectable
-    />
+    <UserFilterContextProvider
+      enabled={createdByEnabled}
+      allUsers={allUsers}
+      onSelectedUsersChange={(selectedUsers) => {
+        onFilterChange({ createdBy: selectedUsers });
+      }}
+      selectedUsers={tableFilter.createdBy}
+      showNoUserOption={showNoUserOption}
+    >
+      <EuiInMemoryTable<T>
+        itemId="id"
+        items={visibleItems}
+        columns={tableColumns}
+        pagination={pagination}
+        loading={isFetchingItems}
+        message={noItemsMessage}
+        selection={selection}
+        search={search}
+        executeQueryOptions={{ enabled: false }}
+        sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
+        onChange={onTableChange}
+        data-test-subj="itemsInMemTable"
+        rowHeader="attributes.title"
+        tableCaption={tableCaption}
+      />
+    </UserFilterContextProvider>
   );
 }

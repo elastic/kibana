@@ -192,7 +192,7 @@ export class CoreAppsService {
               body: schema.recordOf(schema.string(), schema.any()),
             },
             response: {
-              '200': { body: schema.object({ ok: schema.boolean() }) },
+              '200': { body: () => schema.object({ ok: schema.boolean() }) },
             },
           },
         },
@@ -283,9 +283,8 @@ export class CoreAppsService {
       );
     });
 
-    for (const [pluginName] of uiPlugins.public) {
-      const pluginInfo = uiPlugins.internal.get(pluginName);
-      if (!pluginInfo) continue; // assuming we will never hit this case; a public entry should have internal info registered
+    for (const [pluginName, pluginInfo] of uiPlugins.internal) {
+      if (!pluginInfo.publicAssetsDir) continue;
       /**
        * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
        * Eventually we only want to serve from the sha scoped path

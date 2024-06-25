@@ -71,6 +71,14 @@
       "tags": {
         "ignore_above": 1024,
         "type": "keyword"
+      },
+      "url": {
+        "properties": {
+          "domain": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          }
+        }
       }
     }
   },

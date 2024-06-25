@@ -11,15 +11,10 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { ApiKeyCallout } from './api_key_callout';
 import { AgentConfigInstructions } from '../agent_config_instructions';
-import {
-  INSTRUCTION_VARIANT,
-  AgentInstructions,
-} from '../instruction_variants';
+import { INSTRUCTION_VARIANT, AgentInstructions } from '../instruction_variants';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
-export const createNodeAgentInstructions = (
-  commonOptions: AgentInstructions
-): EuiStepProps[] => {
+export const createNodeAgentInstructions = (commonOptions: AgentInstructions): EuiStepProps[] => {
   const {
     baseUrl,
     apmServerUrl,

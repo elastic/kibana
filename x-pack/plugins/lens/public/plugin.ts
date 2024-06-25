@@ -17,7 +17,6 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   ExpressionsServiceSetup,
@@ -63,7 +62,7 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import { registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -164,7 +163,6 @@ export interface LensPluginStartDependencies {
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
-  dashboard: DashboardStart;
   visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
@@ -181,6 +179,7 @@ export interface LensPluginStartDependencies {
   eventAnnotationService: EventAnnotationServiceType;
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 export interface LensPublicSetup {
@@ -386,6 +385,21 @@ export class LensPlugin {
         'lens',
         new EmbeddableFactory(getStartServicesForEmbeddable)
       );
+
+      embeddable.registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
+        CONTENT_ID,
+        (savedObject) => {
+          if (!savedObject.managed) {
+            return { savedObjectId: savedObject.id };
+          }
+
+          const panel = {
+            attributes: savedObjectToEmbeddableAttributes(savedObject),
+          };
+
+          return panel;
+        }
+      );
     }
 
     if (share) {
@@ -395,6 +409,15 @@ export class LensPlugin {
         downloadCsvShareProvider({
           uiSettings: core.uiSettings,
           formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+          atLeastGold: () => {
+            let isGold = false;
+            startServices()
+              .plugins.licensing?.license$.pipe()
+              .subscribe((license) => {
+                isGold = license.hasAtLeast('gold');
+              });
+            return isGold;
+          },
         })
       );
     }
@@ -429,21 +452,6 @@ export class LensPlugin {
         return getTimeZone(core.uiSettings);
       },
       () => startServices().plugins.data.nowProvider.get()
-    );
-
-    registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
-      CONTENT_ID,
-      (savedObject) => {
-        if (!savedObject.managed) {
-          return { savedObjectId: savedObject.id };
-        }
-
-        const panel = {
-          attributes: savedObjectToEmbeddableAttributes(savedObject),
-        };
-
-        return panel;
-      }
     );
 
     const getPresentationUtilContext = () =>
@@ -626,11 +634,7 @@ export class LensPlugin {
       visualizeAggBasedVisAction(core.application)
     );
 
-    const editInLensAction = new ConfigureInLensPanelAction(
-      startDependencies,
-      core.overlays,
-      core.theme
-    );
+    const editInLensAction = new ConfigureInLensPanelAction(startDependencies, core);
     // dashboard edit panel action
     startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
 

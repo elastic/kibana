@@ -7,7 +7,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { firstValueFrom } from 'rxjs';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { CriticalError } from '@kbn/core-base-server-internal';
@@ -17,7 +17,6 @@ import { LoggingService, ILoggingSystem } from '@kbn/core-logging-server-interna
 import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
 import { NodeService } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import { EnvironmentService } from '@kbn/core-environment-server-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-server-internal';
 import { PrebootService } from '@kbn/core-preboot-server-internal';
@@ -53,25 +52,15 @@ import type {
 import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
+import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
+import { coreConfig, type CoreConfigType } from './core_config';
+import { registerRootEvents, reportKibanaStartedEvent, type UptimeSteps } from './events';
 
 const coreId = Symbol('core');
-const KIBANA_STARTED_EVENT = 'kibana_started';
 
 /** @internal */
-interface UptimePerStep {
-  start: number;
-  end: number;
-}
-
-/** @internal */
-interface UptimeSteps {
-  constructor: UptimePerStep;
-  preboot: UptimePerStep;
-  setup: UptimePerStep;
-  start: UptimePerStep;
-}
 
 export class Server {
   public readonly configService: ConfigService;
@@ -101,6 +90,7 @@ export class Server {
   private readonly customBranding: CustomBrandingService;
   private readonly userSettingsService: UserSettingsService;
   private readonly security: SecurityService;
+  private readonly userProfile: UserProfileService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -150,6 +140,7 @@ export class Server {
     this.customBranding = new CustomBrandingService(core);
     this.userSettingsService = new UserSettingsService(core);
     this.security = new SecurityService(core);
+    this.userProfile = new UserProfileService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -158,16 +149,22 @@ export class Server {
     this.uptimePerStep.constructor = { start: constructorStartUptime, end: performance.now() };
   }
 
-  public async preboot() {
+  public async preboot(): Promise<InternalCorePreboot | undefined> {
     this.log.debug('prebooting server');
+
+    const config = await firstValueFrom(this.configService.atPath<CoreConfigType>(coreConfig.path));
+    const { disablePreboot } = config.lifecycle;
+    if (disablePreboot) {
+      this.log.info('preboot phase is disabled - skipping');
+    }
+
     const prebootStartUptime = performance.now();
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
+    // service required for plugin discovery
     const analyticsPreboot = this.analytics.preboot();
-
     const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
-
     this.nodeRoles = nodePreboot.roles;
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
@@ -176,57 +173,74 @@ export class Server {
       node: nodePreboot,
     });
 
-    // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also
-    // silent deprecation warnings until `setup` stage where we'll validate config once again.
-    await ensureValidConfiguration(this.configService, { logDeprecations: false });
+    if (!disablePreboot) {
+      // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also
+      // silent deprecation warnings until `setup` stage where we'll validate config once again.
+      await ensureValidConfiguration(this.configService, { logDeprecations: false });
+    }
 
-    const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
-    const contextServicePreboot = this.context.preboot({
-      pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
-    });
-    const httpPreboot = await this.http.preboot({ context: contextServicePreboot });
-
-    // setup i18n prior to any other service, to have translations ready
-    await this.i18n.preboot({ http: httpPreboot, pluginPaths });
-
-    this.capabilities.preboot({ http: httpPreboot });
-    const elasticsearchServicePreboot = await this.elasticsearch.preboot();
+    // services we need to preboot even when preboot is disabled
     const uiSettingsPreboot = await this.uiSettings.preboot();
-    await this.status.preboot({ http: httpPreboot });
-
-    const renderingPreboot = await this.rendering.preboot({ http: httpPreboot, uiPlugins });
-    const httpResourcesPreboot = this.httpResources.preboot({
-      http: httpPreboot,
-      rendering: renderingPreboot,
-    });
-
     const loggingPreboot = this.logging.preboot({ loggingSystem: this.loggingSystem });
 
-    const corePreboot: InternalCorePreboot = {
-      analytics: analyticsPreboot,
-      context: contextServicePreboot,
-      elasticsearch: elasticsearchServicePreboot,
-      http: httpPreboot,
-      uiSettings: uiSettingsPreboot,
-      httpResources: httpResourcesPreboot,
-      logging: loggingPreboot,
-      preboot: this.prebootService.preboot(),
-    };
+    let corePreboot: InternalCorePreboot | undefined;
 
-    await this.plugins.preboot(corePreboot);
+    if (!disablePreboot) {
+      const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
 
-    httpPreboot.registerRouteHandlerContext<PrebootRequestHandlerContext, 'core'>(
-      coreId,
-      'core',
-      () => {
-        return new PrebootCoreRouteHandlerContext(corePreboot);
-      }
-    );
+      const contextServicePreboot = this.context.preboot({
+        pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
+      });
 
-    this.coreApp.preboot(corePreboot, uiPlugins);
+      const httpPreboot = await this.http.preboot({ context: contextServicePreboot });
+
+      // setup i18n prior to any other service, to have translations ready
+      const i18nPreboot = await this.i18n.preboot({ http: httpPreboot, pluginPaths });
+
+      this.capabilities.preboot({ http: httpPreboot });
+
+      const elasticsearchServicePreboot = await this.elasticsearch.preboot();
+
+      await this.status.preboot({ http: httpPreboot });
+
+      const renderingPreboot = await this.rendering.preboot({
+        http: httpPreboot,
+        uiPlugins,
+        i18n: i18nPreboot,
+      });
+
+      const httpResourcesPreboot = this.httpResources.preboot({
+        http: httpPreboot,
+        rendering: renderingPreboot,
+      });
+
+      corePreboot = {
+        analytics: analyticsPreboot,
+        context: contextServicePreboot,
+        elasticsearch: elasticsearchServicePreboot,
+        http: httpPreboot,
+        uiSettings: uiSettingsPreboot,
+        httpResources: httpResourcesPreboot,
+        logging: loggingPreboot,
+        preboot: this.prebootService.preboot(),
+      };
+
+      await this.plugins.preboot(corePreboot);
+
+      httpPreboot.registerRouteHandlerContext<PrebootRequestHandlerContext, 'core'>(
+        coreId,
+        'core',
+        () => {
+          return new PrebootCoreRouteHandlerContext(corePreboot!);
+        }
+      );
+
+      this.coreApp.preboot(corePreboot, uiPlugins);
+    }
 
     prebootTransaction.end();
     this.uptimePerStep.preboot = { start: prebootStartUptime, end: performance.now() };
+
     return corePreboot;
   }
 
@@ -237,7 +251,7 @@ export class Server {
 
     const analyticsSetup = this.analytics.setup();
 
-    this.registerKibanaStartedEventType(analyticsSetup);
+    registerRootEvents(analyticsSetup);
 
     const environmentSetup = this.environment.setup();
 
@@ -251,6 +265,7 @@ export class Server {
     const executionContextSetup = this.executionContext.setup();
     const docLinksSetup = this.docLinks.setup();
     const securitySetup = this.security.setup();
+    const userProfileSetup = this.userProfile.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -317,6 +332,7 @@ export class Server {
       uiPlugins,
       customBranding: customBrandingSetup,
       userSettings: userSettingsServiceSetup,
+      i18n: i18nServiceSetup,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
@@ -348,6 +364,7 @@ export class Server {
       coreUsageData: coreUsageDataSetup,
       userSettings: userSettingsServiceSetup,
       security: securitySetup,
+      userProfile: userProfileSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -368,9 +385,16 @@ export class Server {
 
     const analyticsStart = this.analytics.start();
     const securityStart = this.security.start();
+    const userProfileStart = this.userProfile.start();
+    this.userSettingsService.start({ userProfile: userProfileStart });
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
+
     const elasticsearchStart = await this.elasticsearch.start();
+    this.uptimePerStep.elasticsearch = {
+      waitTime: elasticsearchStart.metrics.elasticsearchWaitTime,
+    };
+
     const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
@@ -379,6 +403,9 @@ export class Server {
       docLinks: docLinkStart,
       node: await this.node.start(),
     });
+    this.uptimePerStep.savedObjects = {
+      migrationTime: savedObjectsStart.metrics.migrationDuration,
+    };
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 
     soStartSpan?.end();
@@ -420,6 +447,7 @@ export class Server {
       coreUsageData: coreUsageDataStart,
       deprecations: deprecationsStart,
       security: securityStart,
+      userProfile: userProfileStart,
     };
 
     await this.plugins.start(this.coreStart);
@@ -429,7 +457,11 @@ export class Server {
     startTransaction.end();
 
     this.uptimePerStep.start = { start: startStartUptime, end: performance.now() };
-    this.reportKibanaStartedEvents(analyticsStart);
+
+    reportKibanaStartedEvent({
+      uptimeSteps: this.uptimePerStep as UptimeSteps,
+      analytics: analyticsStart,
+    });
 
     return this.coreStart;
   }
@@ -451,6 +483,7 @@ export class Server {
     this.node.stop();
     this.deprecations.stop();
     this.security.stop();
+    this.userProfile.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
@@ -465,126 +498,5 @@ export class Server {
 
   public setupCoreConfig() {
     registerServiceConfig(this.configService);
-  }
-
-  /**
-   * Register the legacy KIBANA_STARTED_EVENT.
-   * @param analyticsSetup The {@link AnalyticsServiceSetup}
-   * @private
-   */
-  private registerKibanaStartedEventType(analyticsSetup: AnalyticsServiceSetup) {
-    analyticsSetup.registerEventType<{ uptime_per_step: UptimeSteps }>({
-      eventType: KIBANA_STARTED_EVENT,
-      schema: {
-        uptime_per_step: {
-          properties: {
-            constructor: {
-              properties: {
-                start: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until the constructor was called',
-                  },
-                },
-                end: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until the constructor finished',
-                  },
-                },
-              },
-            },
-            preboot: {
-              properties: {
-                start: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `preboot` was called',
-                  },
-                },
-                end: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `preboot` finished',
-                  },
-                },
-              },
-            },
-            setup: {
-              properties: {
-                start: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `setup` was called',
-                  },
-                },
-                end: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `setup` finished',
-                  },
-                },
-              },
-            },
-            start: {
-              properties: {
-                start: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `start` was called',
-                  },
-                },
-                end: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `start` finished',
-                  },
-                },
-              },
-            },
-          },
-          _meta: {
-            description:
-              'Number of seconds the Node.js process has been running until each phase of the server execution is called and finished.',
-          },
-        },
-      },
-    });
-  }
-
-  /**
-   * Reports the new and legacy KIBANA_STARTED_EVENT.
-   * @param analyticsStart The {@link AnalyticsServiceStart}.
-   * @private
-   */
-  private reportKibanaStartedEvents(analyticsStart: AnalyticsServiceStart) {
-    // Report the legacy KIBANA_STARTED_EVENT.
-    analyticsStart.reportEvent(KIBANA_STARTED_EVENT, { uptime_per_step: this.uptimePerStep });
-
-    const ups = this.uptimePerStep;
-
-    // Report the metric-shaped KIBANA_STARTED_EVENT.
-    reportPerformanceMetricEvent(analyticsStart, {
-      eventName: KIBANA_STARTED_EVENT,
-      duration: ups.start!.end - ups.constructor!.start,
-      key1: 'time_to_constructor',
-      value1: ups.constructor!.start,
-      key2: 'constructor_time',
-      value2: ups.constructor!.end - ups.constructor!.start,
-      key3: 'preboot_time',
-      value3: ups.preboot!.end - ups.preboot!.start,
-      key4: 'setup_time',
-      value4: ups.setup!.end - ups.setup!.start,
-      key5: 'start_time',
-      value5: ups.start!.end - ups.start!.start,
-    });
   }
 }

@@ -11,7 +11,7 @@ import { EuiBasicTable, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
-import { switchMap, takeWhile, tap } from 'rxjs/operators';
+import { switchMap, takeWhile, tap } from 'rxjs';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { CategorizationJobCreator } from '../../../../../common/job_creator';
@@ -125,7 +125,7 @@ export const CategoryStoppedPartitions: FC = () => {
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsExistCallout"
-                defaultMessage="Per-partition categorization and stop_on_warn settings are enabled. Some partitions in job '{jobId}' are unsuitable for categorization and have been excluded from further categorization or anomaly detection analysis."
+                defaultMessage="Per-partition categorization and stop_on_warn settings are enabled. Some partitions in job ''{jobId}'' are unsuitable for categorization and have been excluded from further categorization or anomaly detection analysis."
                 values={{
                   jobId: jobCreator.jobId,
                 }}

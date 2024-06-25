@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import { SLODefinitionResponse } from '@kbn/slo-schema';
 import { ComponentStory } from '@storybook/react';
-import { SLOResponse } from '@kbn/slo-schema';
-
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
+import React from 'react';
+import { KibanaReactStorybookDecorator } from '../../utils/kibana_react.storybook_decorator';
 import { SloSelector as Component } from './slo_selector';
 
 export default {
@@ -20,7 +19,7 @@ export default {
 
 const Template: ComponentStory<typeof Component> = () => (
   // eslint-disable-next-line no-console
-  <Component onSelected={(slo: SLOResponse | undefined) => console.log(slo)} />
+  <Component onSelected={(slo: SLODefinitionResponse | undefined) => console.log(slo)} />
 );
 const defaultProps = {};
 

@@ -15,9 +15,10 @@ import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { emptySloList, sloList } from '../../data/slo/slo';
-import { useCapabilities } from '../../hooks/use_capabilities';
+import { usePermissions } from '../../hooks/use_permissions';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
+import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
@@ -25,6 +26,8 @@ import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/pub
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SlosPage } from './slos';
+import { useGetSettings } from '../slo_settings/use_get_settings';
+import { useCreateDataView } from '../../hooks/use_create_data_view';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -36,18 +39,26 @@ jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
 jest.mock('../../hooks/use_create_slo');
+jest.mock('../slo_settings/use_get_settings');
 jest.mock('../../hooks/use_delete_slo');
+jest.mock('../../hooks/use_delete_slo_instance');
 jest.mock('../../hooks/use_fetch_historical_summary');
+jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_capabilities');
+jest.mock('../../hooks/use_create_data_view');
 
+const useGetSettingsMock = useGetSettings as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useFetchSloListMock = useFetchSloList as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
+const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
-const useCapabilitiesMock = useCapabilities as jest.Mock;
+const usePermissionsMock = usePermissions as jest.Mock;
+const useCreateDataViewMock = useCreateDataView as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
+
 TagsListMock.mockReturnValue(<div>Tags list</div>);
 
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
@@ -55,9 +66,12 @@ HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
 const mockCreateSlo = jest.fn();
 const mockDeleteSlo = jest.fn();
+const mockDeleteInstance = jest.fn();
 
 useCreateSloMock.mockReturnValue({ mutate: mockCreateSlo });
-useDeleteSloMock.mockReturnValue({ mutate: mockDeleteSlo });
+useDeleteSloMock.mockReturnValue({ mutateAsync: mockDeleteSlo });
+useDeleteSloInstanceMock.mockReturnValue({ mutateAsync: mockDeleteInstance });
+useCreateDataViewMock.mockReturnValue({});
 
 const mockNavigate = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -124,6 +138,11 @@ const mockKibana = () => {
           hasQuerySuggestions: () => {},
         },
       },
+      executionContext: {
+        get: () => ({
+          name: 'slo',
+        }),
+      },
     },
   });
 };
@@ -132,7 +151,17 @@ describe('SLOs Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockKibana();
-    useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
+    useGetSettingsMock.mockReturnValue({
+      isLoading: false,
+      data: {
+        useAllRemoteClusters: false,
+        selectedRemoteClusters: [],
+      },
+    });
+    usePermissionsMock.mockReturnValue({
+      isLoading: false,
+      data: { hasAllReadRequested: true, hasAllWriteRequested: true },
+    });
     jest
       .spyOn(Router, 'useLocation')
       .mockReturnValue({ pathname: '/slos', search: '', state: '', hash: '' });
@@ -150,6 +179,7 @@ describe('SLOs Page', () => {
         data: {},
       });
     });
+
     it('navigates to the SLOs Welcome Page', async () => {
       await act(async () => {
         render(<SlosPage />);
@@ -182,9 +212,28 @@ describe('SLOs Page', () => {
       });
     });
 
+    it('navigates to the SLOs Welcome Page when the user has not the request read permissions', async () => {
+      useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
+      useFetchHistoricalSummaryMock.mockReturnValue({
+        isLoading: false,
+        data: historicalSummaryData,
+      });
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: { hasAllReadRequested: false, hasAllWriteRequested: false },
+      });
+
+      await act(async () => {
+        render(<SlosPage />);
+      });
+
+      await waitFor(() => {
+        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+      });
+    });
+
     it('should have a create new SLO button', async () => {
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
-
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
         data: historicalSummaryData,
@@ -322,7 +371,7 @@ describe('SLOs Page', () => {
 
         button.click();
 
-        screen.getByTestId('confirmModalConfirmButton').click();
+        screen.getByTestId('observabilitySolutionSloDeleteModalConfirmButton').click();
 
         expect(mockDeleteSlo).toBeCalledWith({
           id: sloList.results.at(0)?.id,

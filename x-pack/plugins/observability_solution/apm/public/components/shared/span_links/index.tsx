@@ -32,12 +32,7 @@ interface Props {
 
 type LinkType = 'children' | 'parents';
 
-export function SpanLinks({
-  spanLinksCount,
-  traceId,
-  spanId,
-  processorEvent,
-}: Props) {
+export function SpanLinks({ spanLinksCount, traceId, spanId, processorEvent }: Props) {
   const {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
@@ -50,33 +45,29 @@ export function SpanLinks({
     spanLinksCount.linkedChildren ? 'children' : 'parents'
   );
 
-  const [spanLinksCalloutDismissed, setSpanLinksCalloutDismissed] =
-    useLocalStorage('apm.spanLinksCalloutDismissed', false);
+  const [spanLinksCalloutDismissed, setSpanLinksCalloutDismissed] = useLocalStorage(
+    'apm.spanLinksCalloutDismissed',
+    false
+  );
 
   const [kuery, setKuery] = useState('');
 
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (selectedLinkType === 'children') {
-        return callApmApi(
-          'GET /internal/apm/traces/{traceId}/span_links/{spanId}/children',
-          {
-            params: {
-              path: { traceId, spanId },
-              query: { kuery, start, end },
-            },
-          }
-        );
-      }
-      return callApmApi(
-        'GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents',
-        {
+        return callApmApi('GET /internal/apm/traces/{traceId}/span_links/{spanId}/children', {
           params: {
             path: { traceId, spanId },
-            query: { kuery, start, end, processorEvent },
+            query: { kuery, start, end },
           },
-        }
-      );
+        });
+      }
+      return callApmApi('GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents', {
+        params: {
+          path: { traceId, spanId },
+          query: { kuery, start, end, processorEvent },
+        },
+      });
     },
     [selectedLinkType, kuery, traceId, spanId, start, end, processorEvent]
   );

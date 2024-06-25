@@ -207,6 +207,23 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   : '-',
             },
             {
+              title: i18n.translate('xpack.fleet.agentDetails.privilegeModeLabel', {
+                defaultMessage: 'Privilege mode',
+              }),
+              description:
+                agent.local_metadata.elastic.agent.unprivileged === true ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModeUnprivilegedText"
+                    defaultMessage="Running as non-root"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
+                    defaultMessage="Running as root"
+                  />
+                ),
+            },
+            {
               title: i18n.translate('xpack.fleet.agentDetails.releaseLabel', {
                 defaultMessage: 'Agent release',
               }),

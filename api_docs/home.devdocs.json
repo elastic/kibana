@@ -326,48 +326,19 @@
           },
           {
             "parentPluginId": "home",
-            "id": "def-public.AddDataTab.component",
+            "id": "def-public.AddDataTab.getComponent",
             "type": "Function",
             "tags": [],
-            "label": "component",
+            "label": "getComponent",
             "description": [],
             "signature": [
-              "React.FunctionComponent<{}>"
+              "() => JSX.Element"
             ],
             "path": "src/plugins/home/public/services/add_data/add_data_service.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "home",
-                "id": "def-public.AddDataTab.component.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "P & { children?: React.ReactNode; }"
-                ],
-                "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "home",
-                "id": "def-public.AddDataTab.component.$2",
-                "type": "Any",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

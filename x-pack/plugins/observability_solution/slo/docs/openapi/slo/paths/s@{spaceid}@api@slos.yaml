@@ -1,5 +1,5 @@
 post:
-  summary: Creates an SLO.
+  summary: Create an SLO
   operationId: createSloOp
   description: >
     You must have `all` privileges for the **SLOs** feature in the
@@ -50,7 +50,7 @@ post:
     - url: https://localhost:5601
 
 get:
-  summary: Retrieves a paginated list of SLOs
+  summary: Get a paginated list of SLOs
   operationId: findSlosOp
   description: >
     You must have the `read` privileges for the **SLOs** feature in the
@@ -97,6 +97,11 @@ get:
         enum: [asc, desc]
         default: asc
       example: asc
+    - name: hideStale
+      in: query
+      description: Hide stale SLOs from the list as defined by stale SLO threshold in SLO settings
+      schema:
+        type: boolean
   responses:
     '200':
       description: Successful request

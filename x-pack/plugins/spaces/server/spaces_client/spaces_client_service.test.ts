@@ -20,7 +20,7 @@ const debugLogger = jest.fn();
 describe('SpacesClientService', () => {
   describe('#setup', () => {
     it('allows a single repository factory to be set', () => {
-      const service = new SpacesClientService(debugLogger);
+      const service = new SpacesClientService(debugLogger, 'traditional');
       const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
       const repositoryFactory = jest.fn();
@@ -32,7 +32,7 @@ describe('SpacesClientService', () => {
     });
 
     it('allows a single client wrapper to be set', () => {
-      const service = new SpacesClientService(debugLogger);
+      const service = new SpacesClientService(debugLogger, 'traditional');
       const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
       const clientWrapper = jest.fn();
@@ -46,7 +46,7 @@ describe('SpacesClientService', () => {
 
   describe('#start', () => {
     it('throws if config is not available', () => {
-      const service = new SpacesClientService(debugLogger);
+      const service = new SpacesClientService(debugLogger, 'traditional');
       service.setup({ config$: new Rx.Observable<ConfigType>() });
       const coreStart = coreMock.createStart();
       const start = service.start(coreStart);
@@ -60,7 +60,7 @@ describe('SpacesClientService', () => {
 
     describe('without a custom repository factory or wrapper', () => {
       it('returns an instance of the spaces client using the scoped repository', () => {
-        const service = new SpacesClientService(debugLogger);
+        const service = new SpacesClientService(debugLogger, 'traditional');
         service.setup({ config$: Rx.of(spacesConfig) });
 
         const coreStart = coreMock.createStart();
@@ -78,7 +78,7 @@ describe('SpacesClientService', () => {
     });
 
     it('uses the custom repository factory when set', () => {
-      const service = new SpacesClientService(debugLogger);
+      const service = new SpacesClientService(debugLogger, 'traditional');
       const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
       const customRepositoryFactory = jest.fn();
@@ -98,7 +98,7 @@ describe('SpacesClientService', () => {
     });
 
     it('wraps the client in the wrapper when registered', () => {
-      const service = new SpacesClientService(debugLogger);
+      const service = new SpacesClientService(debugLogger, 'traditional');
       const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
       const wrapper = Symbol() as unknown as ISpacesClient;
@@ -123,7 +123,7 @@ describe('SpacesClientService', () => {
     });
 
     it('wraps the client in the wrapper when registered, using the custom repository factory when configured', () => {
-      const service = new SpacesClientService(debugLogger);
+      const service = new SpacesClientService(debugLogger, 'traditional');
       const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
       const customRepositoryFactory = jest.fn();

@@ -1,0 +1,629 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "87773ce7",
+   "metadata": {
+    "id": "87773ce7"
+   },
+   "source": [
+    "# Semantic search quick start\n",
+    "\n",
+    "[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elastic/elasticsearch-labs/blob/main/notebooks/search/00-quick-start.ipynb)\n",
+    "\n",
+    "This interactive notebook will introduce you to some basic operations with Elasticsearch, using the official [Elasticsearch Python client](https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html).\n",
+    "You'll perform semantic search using [Sentence Transformers](https://www.sbert.net) for text embedding. Learn how to integrate traditional text-based search with semantic search, for a hybrid search system."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a32202e2",
+   "metadata": {
+    "id": "a32202e2"
+   },
+   "source": [
+    "## Create Elastic Cloud deployment\n",
+    "\n",
+    "If you don't have an Elastic Cloud deployment, sign up [here](https://cloud.elastic.co/registration?utm_source=github&utm_content=elasticsearch-labs-notebook) for a free trial.\n",
+    "\n",
+    "Once logged in to your Elastic Cloud account, go to the [Create deployment](https://cloud.elastic.co/deployments/create) page and select **Create deployment**. Leave all settings with their default values."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "52a6a607",
+   "metadata": {
+    "id": "52a6a607"
+   },
+   "source": [
+    "## Install packages and import modules\n",
+    "\n",
+    "To get started, we'll need to connect to our Elastic deployment using the Python client.\n",
+    "Because we're using an Elastic Cloud deployment, we'll use the **Cloud ID** to identify our deployment.\n",
+    "\n",
+    "First we need to install the `elasticsearch` Python client."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ffc5fa6f",
+   "metadata": {
+    "id": "ffc5fa6f"
+   },
+   "outputs": [],
+   "source": [
+    "!pip install -qU elasticsearch sentence-transformers"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "28AH8LhI-0UD",
+   "metadata": {
+    "id": "28AH8LhI-0UD"
+   },
+   "source": [
+    "# Setup the Embedding Model\n",
+    "\n",
+    "For this example, we're using `all-MiniLM-L6-v2`, part of the `sentence_transformers` library. You can read more about this model on [Huggingface](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "WHC3hHGW-wbI",
+   "metadata": {
+    "id": "WHC3hHGW-wbI"
+   },
+   "outputs": [],
+   "source": [
+    "from sentence_transformers import SentenceTransformer\n",
+    "\n",
+    "model = SentenceTransformer(\"all-MiniLM-L6-v2\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0241694c",
+   "metadata": {
+    "id": "0241694c"
+   },
+   "source": [
+    "## Initialize the Elasticsearch client\n",
+    "\n",
+    "Now we can instantiate the [Elasticsearch python client](https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/index.html), providing the cloud id and password in your deployment."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f38e0397",
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "f38e0397",
+    "outputId": "ad6df489-d242-4229-a42a-39c5ca19d124"
+   },
+   "outputs": [],
+   "source": [
+    "from elasticsearch import Elasticsearch\n",
+    "from getpass import getpass\n",
+    "\n",
+    "# https://www.elastic.co/search-labs/tutorials/install-elasticsearch/elastic-cloud#finding-your-cloud-id\n",
+    "ELASTIC_CLOUD_ID = getpass(\"Elastic Cloud ID: \")\n",
+    "\n",
+    "# https://www.elastic.co/search-labs/tutorials/install-elasticsearch/elastic-cloud#creating-an-api-key\n",
+    "ELASTIC_API_KEY = getpass(\"Elastic Api Key: \")\n",
+    "\n",
+    "# Create the client instance\n",
+    "client = Elasticsearch(\n",
+    "    # For local development\n",
+    "    # hosts=[\"http://localhost:9200\"]\n",
+    "    cloud_id=ELASTIC_CLOUD_ID,\n",
+    "    api_key=ELASTIC_API_KEY,\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fcd165fa",
+   "metadata": {
+    "id": "fcd165fa"
+   },
+   "source": [
+    "If you're running Elasticsearch locally or self-managed, you can pass in the Elasticsearch host instead. [Read more](https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html#_verifying_https_with_certificate_fingerprints_python_3_10_or_later) on how to connect to Elasticsearch locally."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cb6ad7e9-0636-4cf3-a803-bf160fe16b33",
+   "metadata": {},
+   "source": [
+    "### Enable Telemetry\n",
+    "\n",
+    "Knowing that you are using this notebook helps us decide where to invest our efforts to improve our products. We would like to ask you that you run the following code to let us gather anonymous usage statistics. See [telemetry.py](https://github.com/elastic/elasticsearch-labs/blob/main/telemetry/telemetry.py) for details. Thank you!"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3b04f442-729d-406d-b826-654483498df6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "!curl -O -s https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/telemetry/telemetry.py\n",
+    "from telemetry import enable_telemetry\n",
+    "\n",
+    "client = enable_telemetry(client, \"00-quick-start\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d12b707c-e89d-4b43-bee5-edb1beb84839",
+   "metadata": {},
+   "source": [
+    "### Test the Client\n",
+    "Before you continue, confirm that the client has connected with this test."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "25c618eb",
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "25c618eb",
+    "outputId": "30a6ba5b-5109-4457-ddfe-5633a077ca9b"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{'name': 'instance-0000000000', 'cluster_name': 'a72482be54904952ba46d53c3def7740', 'cluster_uuid': 'g8BE52TtT32pGBbRzP_oKA', 'version': {'number': '8.12.2', 'build_flavor': 'default', 'build_type': 'docker', 'build_hash': '48a287ab9497e852de30327444b0809e55d46466', 'build_date': '2024-02-19T10:04:32.774273190Z', 'build_snapshot': False, 'lucene_version': '9.9.2', 'minimum_wire_compatibility_version': '7.17.0', 'minimum_index_compatibility_version': '7.0.0'}, 'tagline': 'You Know, for Search'}\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(client.info())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "61e1e6d8",
+   "metadata": {
+    "id": "61e1e6d8"
+   },
+   "source": [
+    "## Index some test data\n",
+    "\n",
+    "Our client is set up and connected to our Elastic deployment.\n",
+    "Now we need some data to test out the basics of Elasticsearch queries.\n",
+    "We'll use a small index of books with the following fields:\n",
+    "\n",
+    "- `title`\n",
+    "- `authors`\n",
+    "- `publish_date`\n",
+    "- `num_reviews`\n",
+    "- `publisher`\n",
+    "\n",
+    "### Create an index\n",
+    "\n",
+    "First ensure that you do not have a previously created index with the name `book_index`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "_OAahfg-tqrf",
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "_OAahfg-tqrf",
+    "outputId": "d8f81ba4-cdc9-4e30-edf7-6d5bb16920eb"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "ObjectApiResponse({'acknowledged': True})"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "client.indices.delete(index=\"book_index\", ignore_unavailable=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "064b761a-565d-42f4-9b4a-4df4f190fd3b",
+   "metadata": {},
+   "source": [
+    "🔐 NOTE: at any time you can come back to this section and run the `delete` function above to remove your index and start from scratch.\n",
+    "\n",
+    "Let's create an Elasticsearch index with the correct mappings for our test data. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "6bc95238",
+   "metadata": {
+    "id": "6bc95238"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "ObjectApiResponse({'acknowledged': True, 'shards_acknowledged': True, 'index': 'book_index'})"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Define the mapping\n",
+    "mappings = {\n",
+    "    \"properties\": {\n",
+    "        \"title_vector\": {\n",
+    "            \"type\": \"dense_vector\",\n",
+    "            \"dims\": 384,\n",
+    "            \"index\": \"true\",\n",
+    "            \"similarity\": \"cosine\",\n",
+    "        }\n",
+    "    }\n",
+    "}\n",
+    "\n",
+    "# Create the index\n",
+    "client.indices.create(index=\"book_index\", mappings=mappings)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "075f5eb6",
+   "metadata": {
+    "id": "075f5eb6"
+   },
+   "source": [
+    "### Index test data\n",
+    "\n",
+    "Run the following command to upload some test data, containing information about 10 popular programming books from this [dataset](https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/notebooks/search/data.json).\n",
+    "`model.encode` will encode the text into a vector on the fly, using the model we initialized earlier."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "008d723e",
+   "metadata": {
+    "id": "008d723e"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "ObjectApiResponse({'errors': False, 'took': 88, 'items': [{'index': {'_index': 'book_index', '_id': 'caRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 0, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'cqRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 1, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'c6RpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 2, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'dKRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 3, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'daRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 4, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'dqRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 5, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'd6RpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 6, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'eKRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 7, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'eaRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 8, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'eqRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 9, '_primary_term': 1, 'status': 201}}]})"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import json\n",
+    "from urllib.request import urlopen\n",
+    "\n",
+    "url = \"https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/notebooks/search/data.json\"\n",
+    "response = urlopen(url)\n",
+    "books = json.loads(response.read())\n",
+    "\n",
+    "operations = []\n",
+    "for book in books:\n",
+    "    operations.append({\"index\": {\"_index\": \"book_index\"}})\n",
+    "    # Transforming the title into an embedding using the model\n",
+    "    book[\"title_vector\"] = model.encode(book[\"title\"]).tolist()\n",
+    "    operations.append(book)\n",
+    "client.bulk(index=\"book_index\", operations=operations, refresh=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cd8b03e0",
+   "metadata": {
+    "id": "cd8b03e0"
+   },
+   "source": [
+    "## Aside: Pretty printing Elasticsearch responses\n",
+    "\n",
+    "Your API calls will return hard-to-read nested JSON.\n",
+    "We'll create a little function called `pretty_response` to return nice, human-readable outputs from our examples."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "f12ce2c9",
+   "metadata": {
+    "id": "f12ce2c9"
+   },
+   "outputs": [],
+   "source": [
+    "def pretty_response(response):\n",
+    "    if len(response[\"hits\"][\"hits\"]) == 0:\n",
+    "        print(\"Your search returned no results.\")\n",
+    "    else:\n",
+    "        for hit in response[\"hits\"][\"hits\"]:\n",
+    "            id = hit[\"_id\"]\n",
+    "            publication_date = hit[\"_source\"][\"publish_date\"]\n",
+    "            score = hit[\"_score\"]\n",
+    "            title = hit[\"_source\"][\"title\"]\n",
+    "            summary = hit[\"_source\"][\"summary\"]\n",
+    "            publisher = hit[\"_source\"][\"publisher\"]\n",
+    "            num_reviews = hit[\"_source\"][\"num_reviews\"]\n",
+    "            authors = hit[\"_source\"][\"authors\"]\n",
+    "            pretty_output = f\"\\nID: {id}\\nPublication date: {publication_date}\\nTitle: {title}\\nSummary: {summary}\\nPublisher: {publisher}\\nReviews: {num_reviews}\\nAuthors: {authors}\\nScore: {score}\"\n",
+    "            print(pretty_output)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "39bdefe0",
+   "metadata": {
+    "id": "39bdefe0"
+   },
+   "source": [
+    "## Making queries\n",
+    "\n",
+    "Now that we have indexed the books, we want to perform a semantic search for books that are similar to a given query.\n",
+    "We embed the query and perform a search."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "Df7hwcIjYwMT",
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "Df7hwcIjYwMT",
+    "outputId": "e63884d7-d4a5-4f5d-ea43-fc2f0793f040"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: eaRpvY4BKY8PuI1qPluy\n",
+      "Publication date: 2008-05-15\n",
+      "Title: JavaScript: The Good Parts\n",
+      "Summary: A deep dive into the parts of JavaScript that are essential to writing maintainable code\n",
+      "Publisher: oreilly\n",
+      "Reviews: 51\n",
+      "Authors: ['douglas crockford']\n",
+      "Score: 0.8042828\n",
+      "\n",
+      "ID: daRpvY4BKY8PuI1qPluy\n",
+      "Publication date: 2015-03-27\n",
+      "Title: You Don't Know JS: Up & Going\n",
+      "Summary: Introduction to JavaScript and programming as a whole\n",
+      "Publisher: oreilly\n",
+      "Reviews: 36\n",
+      "Authors: ['kyle simpson']\n",
+      "Score: 0.6989136\n",
+      "\n",
+      "ID: dqRpvY4BKY8PuI1qPluy\n",
+      "Publication date: 2018-12-04\n",
+      "Title: Eloquent JavaScript\n",
+      "Summary: A modern introduction to programming\n",
+      "Publisher: no starch press\n",
+      "Reviews: 38\n",
+      "Authors: ['marijn haverbeke']\n",
+      "Score: 0.6796988\n",
+      "\n",
+      "ID: caRpvY4BKY8PuI1qPluy\n",
+      "Publication date: 2019-10-29\n",
+      "Title: The Pragmatic Programmer: Your Journey to Mastery\n",
+      "Summary: A guide to pragmatic programming for software engineers and developers\n",
+      "Publisher: addison-wesley\n",
+      "Reviews: 30\n",
+      "Authors: ['andrew hunt', 'david thomas']\n",
+      "Score: 0.6206549\n",
+      "\n",
+      "ID: eqRpvY4BKY8PuI1qPluy\n",
+      "Publication date: 2012-06-27\n",
+      "Title: Introduction to the Theory of Computation\n",
+      "Summary: Introduction to the theory of computation and complexity theory\n",
+      "Publisher: cengage learning\n",
+      "Reviews: 33\n",
+      "Authors: ['michael sipser']\n",
+      "Score: 0.60087687\n",
+      "\n",
+      "ID: eKRpvY4BKY8PuI1qPluy\n",
+      "Publication date: 2011-05-13\n",
+      "Title: The Clean Coder: A Code of Conduct for Professional Programmers\n",
+      "Summary: A guide to professional conduct in the field of software engineering\n",
+      "Publisher: prentice hall\n",
+      "Reviews: 20\n",
+      "Authors: ['robert c. martin']\n",
+      "Score: 0.571234\n",
+      "\n",
+      "ID: d6RpvY4BKY8PuI1qPluy\n",
+      "Publication date: 1994-10-31\n",
+      "Title: Design Patterns: Elements of Reusable Object-Oriented Software\n",
+      "Summary: Guide to design patterns that can be used in any object-oriented language\n",
+      "Publisher: addison-wesley\n",
+      "Reviews: 45\n",
+      "Authors: ['erich gamma', 'richard helm', 'ralph johnson', 'john vlissides']\n",
+      "Score: 0.56499225\n",
+      "\n",
+      "ID: c6RpvY4BKY8PuI1qPluy\n",
+      "Publication date: 2020-04-06\n",
+      "Title: Artificial Intelligence: A Modern Approach\n",
+      "Summary: Comprehensive introduction to the theory and practice of artificial intelligence\n",
+      "Publisher: pearson\n",
+      "Reviews: 39\n",
+      "Authors: ['stuart russell', 'peter norvig']\n",
+      "Score: 0.5605484\n",
+      "\n",
+      "ID: dKRpvY4BKY8PuI1qPluy\n",
+      "Publication date: 2008-08-11\n",
+      "Title: Clean Code: A Handbook of Agile Software Craftsmanship\n",
+      "Summary: A guide to writing code that is easy to read, understand and maintain\n",
+      "Publisher: prentice hall\n",
+      "Reviews: 55\n",
+      "Authors: ['robert c. martin']\n",
+      "Score: 0.5422694\n",
+      "\n",
+      "ID: cqRpvY4BKY8PuI1qPluy\n",
+      "Publication date: 2019-05-03\n",
+      "Title: Python Crash Course\n",
+      "Summary: A fast-paced, no-nonsense guide to programming in Python\n",
+      "Publisher: no starch press\n",
+      "Reviews: 42\n",
+      "Authors: ['eric matthes']\n",
+      "Score: 0.52540874\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\",\n",
+    "    knn={\n",
+    "        \"field\": \"title_vector\",\n",
+    "        \"query_vector\": model.encode(\"javascript books\"),\n",
+    "        \"k\": 10,\n",
+    "        \"num_candidates\": 100,\n",
+    "    },\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "LdJCpbQMeml5",
+   "metadata": {
+    "id": "LdJCpbQMeml5"
+   },
+   "source": [
+    "## Filtering\n",
+    "\n",
+    "Filter context is mostly used for filtering structured data. For example, use filter context to answer questions like:\n",
+    "\n",
+    "- _Does this timestamp fall into the range 2015 to 2016?_\n",
+    "- _Is the status field set to \"published\"?_\n",
+    "\n",
+    "Filter context is in effect whenever a query clause is passed to a filter parameter, such as the `filter` or `must_not` parameters in a `bool` query.\n",
+    "\n",
+    "[Learn more](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-filter-context.html#filter-context) about filter context in the Elasticsearch docs."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "dRSrPMyFf7w7",
+   "metadata": {
+    "id": "dRSrPMyFf7w7"
+   },
+   "source": [
+    "### Example: Keyword Filtering\n",
+    "\n",
+    "This is an example of adding a keyword filter to the query.\n",
+    "\n",
+    "The example retrieves the top books that are similar to \"javascript books\" based on their title vectors, and also Addison-Wesley as publisher."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "WoE0yTchfj3A",
+   "metadata": {
+    "id": "WoE0yTchfj3A"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: caRpvY4BKY8PuI1qPluy\n",
+      "Publication date: 2019-10-29\n",
+      "Title: The Pragmatic Programmer: Your Journey to Mastery\n",
+      "Summary: A guide to pragmatic programming for software engineers and developers\n",
+      "Publisher: addison-wesley\n",
+      "Reviews: 30\n",
+      "Authors: ['andrew hunt', 'david thomas']\n",
+      "Score: 0.6206549\n",
+      "\n",
+      "ID: d6RpvY4BKY8PuI1qPluy\n",
+      "Publication date: 1994-10-31\n",
+      "Title: Design Patterns: Elements of Reusable Object-Oriented Software\n",
+      "Summary: Guide to design patterns that can be used in any object-oriented language\n",
+      "Publisher: addison-wesley\n",
+      "Reviews: 45\n",
+      "Authors: ['erich gamma', 'richard helm', 'ralph johnson', 'john vlissides']\n",
+      "Score: 0.56499225\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\",\n",
+    "    knn={\n",
+    "        \"field\": \"title_vector\",\n",
+    "        \"query_vector\": model.encode(\"javascript books\"),\n",
+    "        \"k\": 10,\n",
+    "        \"num_candidates\": 100,\n",
+    "        \"filter\": {\"term\": {\"publisher.keyword\": \"addison-wesley\"}},\n",
+    "    },\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d9edaa20-b8e8-4ce4-99b1-58b81de29dd5",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "colab": {
+   "provenance": []
+  },
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

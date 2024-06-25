@@ -11,7 +11,7 @@
         "tags": [],
         "label": "AssetManagerPublicPluginSetup",
         "description": [],
-        "path": "x-pack/plugins/asset_manager/public/types.ts",
+        "path": "x-pack/plugins/observability_solution/asset_manager/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -25,7 +25,21 @@
             "signature": [
               "IPublicAssetsClient"
             ],
-            "path": "x-pack/plugins/asset_manager/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/asset_manager/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "assetManager",
+            "id": "def-public.AssetManagerPublicPluginSetup.entityClient",
+            "type": "Object",
+            "tags": [],
+            "label": "entityClient",
+            "description": [],
+            "signature": [
+              "IEntityClient"
+            ],
+            "path": "x-pack/plugins/observability_solution/asset_manager/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -39,7 +53,7 @@
         "tags": [],
         "label": "AssetManagerPublicPluginStart",
         "description": [],
-        "path": "x-pack/plugins/asset_manager/public/types.ts",
+        "path": "x-pack/plugins/observability_solution/asset_manager/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,7 +67,21 @@
             "signature": [
               "IPublicAssetsClient"
             ],
-            "path": "x-pack/plugins/asset_manager/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/asset_manager/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "assetManager",
+            "id": "def-public.AssetManagerPublicPluginStart.entityClient",
+            "type": "Object",
+            "tags": [],
+            "label": "entityClient",
+            "description": [],
+            "signature": [
+              "IEntityClient"
+            ],
+            "path": "x-pack/plugins/observability_solution/asset_manager/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -73,7 +101,7 @@
         "signature": [
           "\"assetManager\""
         ],
-        "path": "x-pack/plugins/asset_manager/public/index.ts",
+        "path": "x-pack/plugins/observability_solution/asset_manager/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -97,7 +125,7 @@
         "signature": [
           "{ readonly alphaEnabled?: boolean | undefined; readonly sourceIndices: Readonly<{} & { logs: string; }>; }"
         ],
-        "path": "x-pack/plugins/asset_manager/common/config.ts",
+        "path": "x-pack/plugins/observability_solution/asset_manager/common/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -112,7 +140,7 @@
         "signature": [
           "{ baseDateTime?: string | number | undefined; excludeEans?: string[] | undefined; refresh?: boolean | \"wait_for\" | undefined; } | null"
         ],
-        "path": "x-pack/plugins/asset_manager/server/routes/sample_assets.ts",
+        "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/sample_assets.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -131,7 +159,7 @@
         "AssetClient",
         "; } | undefined"
       ],
-      "path": "x-pack/plugins/asset_manager/server/plugin.ts",
+      "path": "x-pack/plugins/observability_solution/asset_manager/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -147,7 +175,7 @@
       "signature": [
         "{} | undefined"
       ],
-      "path": "x-pack/plugins/asset_manager/server/plugin.ts",
+      "path": "x-pack/plugins/observability_solution/asset_manager/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

@@ -280,11 +280,12 @@ export default function ({ getService }: FtrProviderContext) {
       it('multi-metric job creation navigates through the multi-metric job wizard and sets all needed fields', async () => {
         await ml.testExecution.logTestStep('job creation displays the time range step');
         await ml.jobWizardCommon.assertTimeRangeSectionExists();
+        await ml.commonUI.assertDatePickerDataTierOptionsVisible(true);
 
         await ml.testExecution.logTestStep('job creation sets the time range');
         await ml.jobWizardCommon.clickUseFullDataButton(
-          'Jun 12, 2019 @ 00:04:19.000',
-          'Jul 12, 2019 @ 23:45:36.000'
+          'Jun 12, 2023 @ 00:04:19.000',
+          'Jul 12, 2023 @ 23:45:36.000'
         );
 
         await ml.testExecution.logTestStep(
@@ -500,8 +501,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('job creation sets the time range');
         await ml.jobWizardCommon.clickUseFullDataButton(
-          'Jun 12, 2019 @ 00:04:19.000',
-          'Jul 12, 2019 @ 23:45:36.000'
+          'Jun 12, 2023 @ 00:04:19.000',
+          'Jul 12, 2023 @ 23:45:36.000'
         );
 
         await ml.testExecution.logTestStep('population job creation displays the event rate chart');

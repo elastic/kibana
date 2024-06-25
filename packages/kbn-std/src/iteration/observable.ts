@@ -7,7 +7,7 @@
  */
 
 import { from } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { mergeMap } from 'rxjs';
 
 import { IterableInput, AsyncMapFn } from './types';
 

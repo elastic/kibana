@@ -6,17 +6,17 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 import { generateSummaryTransformForOccurrences } from './generators/occurrences';
-import { generateSummaryTransformForTimeslicesAndRolling } from './generators/timeslices_rolling';
 import { generateSummaryTransformForTimeslicesAndCalendarAligned } from './generators/timeslices_calendar_aligned';
+import { generateSummaryTransformForTimeslicesAndRolling } from './generators/timeslices_rolling';
 
 export interface SummaryTransformGenerator {
-  generate(slo: SLO): TransformPutTransformRequest;
+  generate(slo: SLODefinition): TransformPutTransformRequest;
 }
 
 export class DefaultSummaryTransformGenerator implements SummaryTransformGenerator {
-  public generate(slo: SLO): TransformPutTransformRequest {
+  public generate(slo: SLODefinition): TransformPutTransformRequest {
     if (slo.budgetingMethod === 'occurrences') {
       return generateSummaryTransformForOccurrences(slo);
     } else if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'rolling') {

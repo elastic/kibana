@@ -43,6 +43,7 @@ export class CommonPageObject extends FtrService {
     const NEW_FEATURES_TOUR_STORAGE_KEYS = {
       RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
       TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
+      FLYOUT: 'securitySolution.documentDetails.newFeaturesTour.v8.14',
     };
 
     const tourStorageKeys = Object.values(NEW_FEATURES_TOUR_STORAGE_KEYS);

@@ -98,7 +98,7 @@ function buildFormulaLayer(
   layer: LensMetricConfig,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'] {
   const baseLayer: PersistedIndexPatternLayer = {
     columnOrder: [ACCESSOR, HISTOGRAM_COLUMN_NAME],

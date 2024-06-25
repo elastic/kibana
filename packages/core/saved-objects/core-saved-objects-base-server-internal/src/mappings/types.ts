@@ -66,6 +66,7 @@ export interface V2AlgoIndexMappingMeta {
    * the md5 hash of that mapping's value when the index was created.
    *
    * @remark: Only defined for indices using the v2 migration algorithm.
+   * @deprecated Replaced by mappingVersions (FIPS-compliant initiative)
    */
   migrationMappingPropertyHashes?: { [k: string]: string };
   /**
@@ -74,20 +75,20 @@ export interface V2AlgoIndexMappingMeta {
    * @remark: Only defined for indices using the v2 migration algorithm.
    */
   indexTypesMap?: IndexTypesMap;
+  /**
+   * The current virtual version of the mapping of the index.
+   */
+  mappingVersions?: { [k: string]: string };
 }
 
 /** @internal */
 export interface ZdtAlgoIndexMappingMeta {
   /**
    * The current virtual version of the mapping of the index.
-   *
-   * @remark: Only defined for indices using the zdt migration algorithm.
    */
   mappingVersions?: { [k: string]: string };
   /**
    * The current virtual versions of the documents of the index.
-   *
-   * @remark: Only defined for indices using the zdt migration algorithm.
    */
   docVersions?: { [k: string]: string };
   /**

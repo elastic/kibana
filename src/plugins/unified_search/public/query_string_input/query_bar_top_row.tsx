@@ -20,7 +20,7 @@ import {
 } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { EMPTY } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { throttle } from 'lodash';
 import {
   EuiFlexGroup,
@@ -60,14 +60,25 @@ import type {
 } from '../typeahead/suggestions_component';
 import './query_bar.scss';
 
+const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
+
 export const strings = {
   getNeedsUpdatingLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
       defaultMessage: 'Needs updating',
     }),
+  getUpdateButtonLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.updateButton', {
+      defaultMessage: 'Update',
+    }),
   getRefreshQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refresh', {
       defaultMessage: 'Refresh query',
+    }),
+  getRefreshButtonLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refreshButton', {
+      defaultMessage: 'Refresh',
     }),
   getCancelQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cancel', {
@@ -76,6 +87,10 @@ export const strings = {
   getRunQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
       defaultMessage: 'Run query',
+    }),
+  getRunButtonLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.runButton', {
+      defaultMessage: 'Run',
     }),
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
@@ -152,7 +167,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
-  hideTextBasedRunQueryLabel?: boolean;
   onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
@@ -545,12 +559,19 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
+      const textBasedRunShortcut = `${COMMAND_KEY} + Enter`;
       const buttonLabelUpdate = strings.getNeedsUpdatingLabel();
-      const buttonLabelRefresh = strings.getRefreshQueryLabel();
-      const buttonLabelRun = strings.getRunQueryLabel();
+      const buttonLabelRefresh = Boolean(isQueryLangSelected)
+        ? textBasedRunShortcut
+        : strings.getRefreshQueryLabel();
+      const buttonLabelRun = textBasedRunShortcut;
 
-      const iconDirty = Boolean(isQueryLangSelected) ? 'play' : 'kqlFunction';
+      const iconDirty = Boolean(isQueryLangSelected) ? 'playFilled' : 'kqlFunction';
       const tooltipDirty = Boolean(isQueryLangSelected) ? buttonLabelRun : buttonLabelUpdate;
+
+      const isDirtyButtonLabel = Boolean(isQueryLangSelected)
+        ? strings.getRunButtonLabel()
+        : strings.getUpdateButtonLabel();
 
       const button = props.customSubmitButton ? (
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
@@ -567,16 +588,17 @@ export const QueryBarTopRow = React.memo(
               onClick={onClickSubmitButton}
               size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
               color={props.isDirty ? 'success' : 'primary'}
-              fill={props.isDirty}
+              fill={false}
               needsUpdate={props.isDirty}
               data-test-subj="querySubmitButton"
-              // @ts-expect-error Need to fix expecting `children` in EUI
               toolTipProps={{
                 content: props.isDirty ? tooltipDirty : buttonLabelRefresh,
                 delay: 'long',
                 position: 'bottom',
               }}
-            />
+            >
+              {props.isDirty ? isDirtyButtonLabel : strings.getRefreshButtonLabel()}
+            </EuiSuperUpdateButton>
           )}
         </EuiFlexItem>
       );
@@ -724,8 +746,9 @@ export const QueryBarTopRow = React.memo(
               })
             }
             isDisabled={props.isDisabled}
-            hideRunQueryText={props.hideTextBasedRunQueryLabel}
+            hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
+            isLoading={props.isLoading}
           />
         )
       );

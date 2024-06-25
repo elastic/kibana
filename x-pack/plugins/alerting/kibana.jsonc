@@ -25,6 +25,7 @@
       "management",
       "esUiShared",
       "unifiedSearch",
+      "embeddable"
     ],
     "optionalPlugins": [
       "usageCollection",

@@ -16,41 +16,25 @@ describe('Diagnostics', () => {
         cy.visitKibana('/app/apm/diagnostics');
 
         // integration package
-        cy.get('[data-test-subj="integrationPackageStatus_Badge"]').should(
-          'have.text',
-          'OK'
-        );
+        cy.get('[data-test-subj="integrationPackageStatus_Badge"]').should('have.text', 'OK');
 
         // data stream
-        cy.get('[data-test-subj="dataStreamsStatus_Badge"]').should(
-          'have.text',
-          'OK'
-        );
+        cy.get('[data-test-subj="dataStreamsStatus_Badge"]').should('have.text', 'OK');
 
         // Index template
-        cy.get('[data-test-subj="indexTemplatesStatus_Badge"]').should(
-          'have.text',
-          'OK'
-        );
+        cy.get('[data-test-subj="indexTemplatesStatus_Badge"]').should('have.text', 'OK');
 
         // Index template
-        cy.get('[data-test-subj="fieldMappingStatus_Badge"]').should(
-          'have.text',
-          'OK'
-        );
+        cy.get('[data-test-subj="fieldMappingStatus_Badge"]').should('have.text', 'OK');
       });
     });
 
     describe('when importing a file', () => {
       it('shows the remove button', () => {
         importBundle();
-        cy.get('[data-test-subj="apmImportCardRemoveReportButton"]').should(
-          'exist'
-        );
+        cy.get('[data-test-subj="apmImportCardRemoveReportButton"]').should('exist');
         clearBundle();
-        cy.get('[data-test-subj="apmImportCardRemoveReportButton"]').should(
-          'not.exist'
-        );
+        cy.get('[data-test-subj="apmImportCardRemoveReportButton"]').should('not.exist');
       });
 
       it('can display summary tab', () => {
@@ -58,10 +42,7 @@ describe('Diagnostics', () => {
         cy.get('[data-test-subj="summary-tab"]').click();
 
         // integration package
-        cy.get('[data-test-subj="integrationPackageStatus_Badge"]').should(
-          'have.text',
-          'OK'
-        );
+        cy.get('[data-test-subj="integrationPackageStatus_Badge"]').should('have.text', 'OK');
 
         cy.get('[data-test-subj="integrationPackageStatus_Content"]').should(
           'have.text',
@@ -69,22 +50,13 @@ describe('Diagnostics', () => {
         );
 
         // data stream
-        cy.get('[data-test-subj="dataStreamsStatus_Badge"]').should(
-          'have.text',
-          'OK'
-        );
+        cy.get('[data-test-subj="dataStreamsStatus_Badge"]').should('have.text', 'OK');
 
         // Index template
-        cy.get('[data-test-subj="indexTemplatesStatus_Badge"]').should(
-          'have.text',
-          'OK'
-        );
+        cy.get('[data-test-subj="indexTemplatesStatus_Badge"]').should('have.text', 'OK');
 
         // Index template
-        cy.get('[data-test-subj="fieldMappingStatus_Badge"]').should(
-          'have.text',
-          'Warning'
-        );
+        cy.get('[data-test-subj="fieldMappingStatus_Badge"]').should('have.text', 'Warning');
       });
 
       it('can display index template tab', () => {
@@ -103,15 +75,9 @@ describe('Diagnostics', () => {
         importBundle();
         cy.get('[data-test-subj="indices-tab"]').click();
 
-        cy.get('[data-test-subj="indicedWithProblems"] .euiTableRow').should(
-          'have.length',
-          138
-        );
+        cy.get('[data-test-subj="indicedWithProblems"] .euiTableRow').should('have.length', 138);
 
-        cy.get('[data-test-subj="indicedWithoutProblems"] .euiTableRow').should(
-          'have.length',
-          27
-        );
+        cy.get('[data-test-subj="indicedWithoutProblems"] .euiTableRow').should('have.length', 27);
       });
     });
   });
@@ -135,9 +101,9 @@ describe('Diagnostics', () => {
         cy.visitKibana('/app/apm/diagnostics');
 
         const tabs = ['Summary', 'Documents', 'Import/Export'];
-        cy.get(
-          '[data-test-subj="apmDiagnosticsTemplate"] .euiTabs .euiTab'
-        ).each((tab, i) => cy.wrap(tab).should('have.text', tabs[i]));
+        cy.get('[data-test-subj="apmDiagnosticsTemplate"] .euiTabs .euiTab').each((tab, i) =>
+          cy.wrap(tab).should('have.text', tabs[i])
+        );
       });
     });
 
@@ -146,10 +112,7 @@ describe('Diagnostics', () => {
         importBundle();
         cy.get('[data-test-subj="documents-tab"]').click();
 
-        cy.get('[data-test-subj="documents-table"] .euiTableRow').should(
-          'have.length',
-          10
-        );
+        cy.get('[data-test-subj="documents-table"] .euiTableRow').should('have.length', 10);
       });
     });
   });

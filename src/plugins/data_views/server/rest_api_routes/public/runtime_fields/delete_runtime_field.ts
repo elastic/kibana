@@ -20,6 +20,7 @@ import {
   SPECIFIC_RUNTIME_FIELD_PATH,
   SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
   INITIAL_REST_VERSION,
+  DELETE_RUNTIME_FIELD_DESCRIPTION,
 } from '../../../constants';
 
 interface DeleteRuntimeFieldArgs {
@@ -38,7 +39,7 @@ export const deleteRuntimeField = async ({
   name,
 }: DeleteRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDataViewLazy(id);
   const field = dataView.getRuntimeField(name);
 
   if (!field) {
@@ -51,7 +52,7 @@ export const deleteRuntimeField = async ({
 };
 
 const deleteRuntimeFieldRouteFactory =
-  (path: string) =>
+  (path: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -60,7 +61,7 @@ const deleteRuntimeFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.delete({ path, access: 'public' }).addVersion(
+    router.versioned.delete({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -78,7 +79,7 @@ const deleteRuntimeFieldRouteFactory =
           },
           response: {
             200: {
-              body: schema.never(),
+              body: () => schema.never(),
             },
           },
         },
@@ -110,7 +111,8 @@ const deleteRuntimeFieldRouteFactory =
   };
 
 export const registerDeleteRuntimeFieldRoute = deleteRuntimeFieldRouteFactory(
-  SPECIFIC_RUNTIME_FIELD_PATH
+  SPECIFIC_RUNTIME_FIELD_PATH,
+  DELETE_RUNTIME_FIELD_DESCRIPTION
 );
 
 export const registerDeleteRuntimeFieldRouteLegacy = deleteRuntimeFieldRouteFactory(

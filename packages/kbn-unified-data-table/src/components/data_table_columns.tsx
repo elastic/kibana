@@ -13,12 +13,12 @@ import {
   type EuiDataGridColumnCellAction,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
 import { ControlColumns, CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
-import type { ValueToStringConverter, DataTableColumnTypes } from '../types';
+import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton } from './data_table_document_selection';
@@ -26,6 +26,24 @@ import { defaultTimeColumnWidth, ROWS_HEIGHT_OPTIONS } from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
+
+const getColumnDisplayName = (
+  columnName: string,
+  dataViewFieldDisplayName: string | undefined,
+  columnDisplay: string | undefined
+) => {
+  if (columnDisplay) {
+    return columnDisplay;
+  }
+
+  if (columnName === '_source') {
+    return i18n.translate('unifiedDataTable.grid.documentHeader', {
+      defaultMessage: 'Document',
+    });
+  }
+
+  return dataViewFieldDisplayName || columnName;
+};
 
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
@@ -93,10 +111,11 @@ function buildEuiGridColumn({
   editField,
   columnCellActions,
   visibleCellActions,
-  columnTypes,
+  columnsMeta,
   showColumnTokens,
   headerRowHeight,
   customGridColumnsConfiguration,
+  columnDisplay,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -113,22 +132,33 @@ function buildEuiGridColumn({
   editField?: (fieldName: string) => void;
   columnCellActions?: EuiDataGridColumnCellAction[];
   visibleCellActions?: number;
-  columnTypes?: DataTableColumnTypes;
+  columnsMeta?: DataTableColumnsMeta;
   showColumnTokens?: boolean;
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  columnDisplay?: string;
 }) {
-  const dataViewField = dataView.getFieldByName(columnName);
+  const dataViewField = !isPlainRecord
+    ? dataView.getFieldByName(columnName)
+    : new DataViewField({
+        name: columnName,
+        type: columnsMeta?.[columnName]?.type ?? 'unknown',
+        esTypes: columnsMeta?.[columnName]?.esType
+          ? ([columnsMeta[columnName].esType] as string[])
+          : undefined,
+        searchable: true,
+        aggregatable: false,
+      });
   const editFieldButton =
     editField &&
     dataViewField &&
     buildEditFieldButton({ hasEditDataViewPermission, dataView, field: dataViewField, editField });
-  const columnDisplayName =
-    columnName === '_source'
-      ? i18n.translate('unifiedDataTable.grid.documentHeader', {
-          defaultMessage: 'Document',
-        })
-      : dataViewField?.displayName || columnName;
+
+  const columnDisplayName = getColumnDisplayName(
+    columnName,
+    dataViewField?.displayName,
+    columnDisplay
+  );
 
   let cellActions: EuiDataGridColumnCellAction[];
 
@@ -140,19 +170,22 @@ function buildEuiGridColumn({
       : [];
   }
 
-  const columnType = columnTypes?.[columnName] ?? dataViewField?.type;
+  const columnType = columnsMeta?.[columnName]?.type ?? dataViewField?.type;
 
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(columnType),
-    isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
+    isSortable:
+      isSortEnabled &&
+      // TODO: would be great to have something like `sortable` flag for text based columns too
+      ((isPlainRecord && columnName !== '_source') || dataViewField?.sortable === true),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized
           dataView={dataView}
           columnName={columnName}
           columnDisplayName={columnDisplayName}
-          columnTypes={columnTypes}
+          columnsMeta={columnsMeta}
           showColumnTokens={showColumnTokens}
           headerRowHeight={headerRowHeight}
         />
@@ -199,6 +232,7 @@ function buildEuiGridColumn({
         dataView={dataView}
         dataViewField={dataViewField}
         headerRowHeight={headerRowHeight}
+        columnLabel={columnDisplay}
       />
     );
     if (numberOfColumns > 1) {
@@ -241,7 +275,7 @@ export function getEuiGridColumns({
   onFilter,
   editField,
   visibleCellActions,
-  columnTypes,
+  columnsMeta,
   showColumnTokens,
   headerRowHeightLines,
   customGridColumnsConfiguration,
@@ -260,10 +294,10 @@ export function getEuiGridColumns({
   };
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   editField?: (fieldName: string) => void;
   visibleCellActions?: number;
-  columnTypes?: DataTableColumnTypes;
+  columnsMeta?: DataTableColumnsMeta;
   showColumnTokens?: boolean;
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -289,10 +323,11 @@ export function getEuiGridColumns({
       onFilter,
       editField,
       visibleCellActions,
-      columnTypes,
+      columnsMeta,
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,
+      columnDisplay: settings?.columns?.[column]?.display,
     })
   );
 }
@@ -300,7 +335,7 @@ export function getEuiGridColumns({
 export function canPrependTimeFieldColumn(
   columns: string[],
   timeFieldName: string | undefined,
-  columnTypes: DataTableColumnTypes | undefined,
+  columnsMeta: DataTableColumnsMeta | undefined,
   showTimeCol: boolean,
   isPlainRecord: boolean
 ) {
@@ -309,7 +344,7 @@ export function canPrependTimeFieldColumn(
   }
 
   if (isPlainRecord) {
-    return !!columnTypes && timeFieldName in columnTypes && columns.includes('_source');
+    return !!columnsMeta && timeFieldName in columnsMeta && columns.includes('_source');
   }
 
   return true;

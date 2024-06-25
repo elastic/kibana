@@ -88,9 +88,7 @@ describe('APM Onboarding', () => {
       cy.visitKibana('/app/apm/onboarding');
     });
     it('when no data is present', () => {
-      cy.intercept('GET', '/internal/apm/observability_overview/has_data').as(
-        'hasData'
-      );
+      cy.intercept('GET', '/internal/apm/observability_overview/has_data').as('hasData');
       cy.getByTestSubj('checkAgentStatus').click();
       cy.wait('@hasData');
       cy.getByTestSubj('agentStatusWarningCallout').should('exist');
@@ -103,9 +101,7 @@ describe('APM Onboarding', () => {
           to: new Date(end).getTime(),
         })
       );
-      cy.intercept('GET', '/internal/apm/observability_overview/has_data').as(
-        'hasData'
-      );
+      cy.intercept('GET', '/internal/apm/observability_overview/has_data').as('hasData');
       cy.getByTestSubj('checkAgentStatus').click();
       cy.wait('@hasData');
       cy.getByTestSubj('agentStatusSuccessCallout').should('exist');

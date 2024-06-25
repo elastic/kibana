@@ -12,15 +12,16 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, ROW_HEIGHT_OPTION, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
   type UnifiedDataTableProps,
-  type DataTableColumnTypes,
+  type DataTableColumnsMeta,
   DataLoadingState as DiscoverGridLoadingState,
+  getRenderCustomToolbarWithElements,
 } from '@kbn/unified-data-table';
 import { DiscoverGrid } from '../components/discover_grid';
 import './saved_search_grid.scss';
 import { DiscoverGridFlyout } from '../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
-import { getRenderCustomToolbarWithElements } from '../components/discover_grid/render_custom_toolbar';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
+import { useProfileAccessor } from '../context_awareness';
 
 export interface DiscoverGridEmbeddableProps
   extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
@@ -49,7 +50,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      customColumnTypes?: DataTableColumnTypes
+      customColumnsMeta?: DataTableColumnsMeta
     ) => (
       <DiscoverGridFlyout
         dataView={props.dataView}
@@ -57,7 +58,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
-        columnTypes={customColumnTypes}
+        columnsMeta={customColumnsMeta}
         savedSearchId={props.savedSearchId}
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}
@@ -77,7 +78,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     ]
   );
 
-  const renderCustomToolbar = useMemo(
+  const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
         leftSide:
@@ -87,6 +88,12 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       }),
     [props.totalHitCount]
   );
+
+  const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
+  const cellRenderers = useMemo(() => {
+    const getCellRenderers = getCellRenderersAccessor(() => ({}));
+    return getCellRenderers();
+  }, [getCellRenderersAccessor]);
 
   return (
     <SavedSearchEmbeddableBase
@@ -104,7 +111,9 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={renderDocumentView}
-        renderCustomToolbar={renderCustomToolbar}
+        renderCustomToolbar={renderCustomToolbarWithElements}
+        externalCustomRenderers={cellRenderers}
+        enableComparisonMode
         showColumnTokens
         configHeaderRowHeight={3}
         showFullScreenButton={false}

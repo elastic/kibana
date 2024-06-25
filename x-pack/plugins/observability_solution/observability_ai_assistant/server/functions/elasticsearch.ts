@@ -14,7 +14,6 @@ export function registerElasticsearchFunction({
   functions.registerFunction(
     {
       name: 'elasticsearch',
-      contexts: ['core'],
       description:
         'Call Elasticsearch APIs on behalf of the user. Make sure the request body is valid for the API that you are using. Only call this function when the user has explicitly requested it.',
       descriptionForUser: 'Call Elasticsearch APIs on behalf of the user',
@@ -39,15 +38,14 @@ export function registerElasticsearchFunction({
       },
     },
     async ({ arguments: { method, path, body } }) => {
-      const response = await (
-        await resources.context.core
-      ).elasticsearch.client.asCurrentUser.transport.request({
+      const esClient = (await resources.context.core).elasticsearch.client;
+      const response = esClient.asCurrentUser.transport.request({
         method,
         path,
         body,
       });
 
-      return { content: response };
+      return { content: { response } };
     }
   );
 }

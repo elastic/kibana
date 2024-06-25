@@ -1,0 +1,328 @@
+{
+ "cells": [
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "s49gpkvZ7q53"
+   },
+   "source": [
+    "# Hybrid Search using RRF\n",
+    "\n",
+    "[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elastic/elasticsearch-labs/blob/main/notebooks/search/02-hybrid-search.ipynb)\n",
+    "\n",
+    "In this example we'll use the reciprocal rank fusion algorithm to combine the results of BM25 and kNN semantic search.\n",
+    "We'll use the same dataset we used in our [quickstart](https://github.com/elastic/elasticsearch-labs/blob/main/notebooks/search/00-quick-start.ipynb) guide.\n",
+    "\n",
+    "You can use RRF for hybrid search out of the box, without any additional configuration. This example demonstrates how RRF ranking works at a basic level."
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "gaTFHLJC-Mgi"
+   },
+   "source": [
+    "# Install packages and initialize the Elasticsearch Python client\n",
+    "\n",
+    "To get started, we'll need to connect to our Elastic deployment using the Python client.\n",
+    "Because we're using an Elastic Cloud deployment, we'll use the **Cloud ID** to identify our deployment.\n",
+    "\n",
+    "First we need to `pip` install the packages we need for this example."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "K9Q1p2C9-wce",
+    "outputId": "204d5aee-571e-4363-be6e-f87d058f2d29"
+   },
+   "outputs": [],
+   "source": [
+    "!pip install -qU elasticsearch sentence_transformers"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "gEzq2Z1wBs3M"
+   },
+   "source": [
+    "Next we need to import the `elasticsearch` module and the `getpass` module.\n",
+    "`getpass` is part of the Python standard library and is used to securely prompt for credentials."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "id": "uP_GTVRi-d96"
+   },
+   "outputs": [],
+   "source": [
+    "from elasticsearch import Elasticsearch\n",
+    "from sentence_transformers import SentenceTransformer\n",
+    "from getpass import getpass\n",
+    "\n",
+    "model = SentenceTransformer(\"all-MiniLM-L6-v2\")"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "AMSePFiZCRqX"
+   },
+   "source": [
+    "Now we can instantiate the Python Elasticsearch client.\n",
+    "First we prompt the user for their password and Cloud ID.\n",
+    "\n",
+    "🔐 NOTE: `getpass` enables us to securely prompt the user for credentials without echoing them to the terminal, or storing it in memory.\n",
+    "\n",
+    "Then we create a `client` object that instantiates an instance of the `Elasticsearch` class."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "h0MdAZ53CdKL",
+    "outputId": "96ea6f81-f935-4d51-c4a7-af5a896180f1"
+   },
+   "outputs": [],
+   "source": [
+    "# https://www.elastic.co/search-labs/tutorials/install-elasticsearch/elastic-cloud#finding-your-cloud-id\n",
+    "ELASTIC_CLOUD_ID = getpass(\"Elastic Cloud ID: \")\n",
+    "\n",
+    "# https://www.elastic.co/search-labs/tutorials/install-elasticsearch/elastic-cloud#creating-an-api-key\n",
+    "ELASTIC_API_KEY = getpass(\"Elastic Api Key: \")\n",
+    "\n",
+    "# Create the client instance\n",
+    "client = Elasticsearch(\n",
+    "    # For local development\n",
+    "    # hosts=[\"http://localhost:9200\"]\n",
+    "    cloud_id=ELASTIC_CLOUD_ID,\n",
+    "    api_key=ELASTIC_API_KEY,\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Enable Telemetry\n",
+    "\n",
+    "Knowing that you are using this notebook helps us decide where to invest our efforts to improve our products. We would like to ask you that you run the following code to let us gather anonymous usage statistics. See [telemetry.py](https://github.com/elastic/elasticsearch-labs/blob/main/telemetry/telemetry.py) for details. Thank you!"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "!curl -O -s https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/telemetry/telemetry.py\n",
+    "from telemetry import enable_telemetry\n",
+    "\n",
+    "client = enable_telemetry(client, \"02-hybrid-search\")"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "bRHbecNeEDL3"
+   },
+   "source": [
+    "### Test the Client\n",
+    "Before you continue, confirm that the client has connected with this test."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "rdiUKqZbEKfF",
+    "outputId": "43b6f1cd-a43e-4dbe-caa5-7fd170464881"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{'name': 'instance-0000000011', 'cluster_name': 'd1bd36862ce54c7b903e2aacd4cd7f0a', 'cluster_uuid': 'tIkh0X_UQKmMFQKSfUw-VQ', 'version': {'number': '8.9.0', 'build_flavor': 'default', 'build_type': 'docker', 'build_hash': '8aa461beb06aa0417a231c345a1b8c38fb498a0d', 'build_date': '2023-07-19T14:43:58.555259655Z', 'build_snapshot': False, 'lucene_version': '9.7.0', 'minimum_wire_compatibility_version': '7.17.0', 'minimum_index_compatibility_version': '7.0.0'}, 'tagline': 'You Know, for Search'}\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(client.info())"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "enHQuT57DhD1"
+   },
+   "source": [
+    "Refer to https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html#connect-self-managed-new to learn how to connect to a self-managed deployment.\n",
+    "\n",
+    "Read https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html#connect-self-managed-new to learn how to connect using API keys.\n"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "WgWDMgf9NkHL"
+   },
+   "source": [
+    "## Pretty printing Elasticsearch responses\n",
+    "\n",
+    "Let's add a helper function to print Elasticsearch responses in a readable format. This function is similar to the one that was used in the [quickstart](https://github.com/elastic/elasticsearch-labs/blob/main/notebooks/search/00-quick-start.ipynb) guide."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def pretty_response(response):\n",
+    "    if len(response[\"hits\"][\"hits\"]) == 0:\n",
+    "        print(\"Your search returned no results.\")\n",
+    "    else:\n",
+    "        for hit in response[\"hits\"][\"hits\"]:\n",
+    "            id = hit[\"_id\"]\n",
+    "            publication_date = hit[\"_source\"][\"publish_date\"]\n",
+    "            rank = hit[\"_rank\"]\n",
+    "            title = hit[\"_source\"][\"title\"]\n",
+    "            summary = hit[\"_source\"][\"summary\"]\n",
+    "            pretty_output = f\"\\nID: {id}\\nPublication date: {publication_date}\\nTitle: {title}\\nSummary: {summary}\\nRank: {rank}\"\n",
+    "            print(pretty_output)"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "MrBCHdH1u8Wd"
+   },
+   "source": [
+    "# Querying Documents with Hybrid Search\n",
+    "\n",
+    "🔐 NOTE: Before you can run the query in this section, you need the `book_index` dataset from our [quick start](https://github.com/elastic/elasticsearch-labs/blob/main/notebooks/search/00-quick-start.ipynb). If you haven't worked through the quick start, please follow the steps described there to create an Elasticsearch deployment with the dataset in it, and then come back to run the query here.\n",
+    "\n",
+    "Now we need to perform a query using two different search strategies:\n",
+    "- Semantic search using the \"all-MiniLM-L6-v2\" embedding model\n",
+    "- Keyword search using the \"title\" field\n",
+    "\n",
+    "We then use [Reciprocal Rank Fusion (RRF)](https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html) to balance the scores to provide a final list of documents, ranked in order of relevance. RRF is a ranking algorithm for combining results from different information retrieval strategies.\n",
+    "\n",
+    "Note that _score is null, and we instead use _rank to show our top-ranked documents."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: IAOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2019-05-03\n",
+      "Title: Python Crash Course\n",
+      "Summary: A fast-paced, no-nonsense guide to programming in Python\n",
+      "Rank: 1\n",
+      "\n",
+      "ID: HwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2019-10-29\n",
+      "Title: The Pragmatic Programmer: Your Journey to Mastery\n",
+      "Summary: A guide to pragmatic programming for software engineers and developers\n",
+      "Rank: 2\n",
+      "\n",
+      "ID: JAOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2018-12-04\n",
+      "Title: Eloquent JavaScript\n",
+      "Summary: A modern introduction to programming\n",
+      "Rank: 3\n",
+      "\n",
+      "ID: IwOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2015-03-27\n",
+      "Title: You Don't Know JS: Up & Going\n",
+      "Summary: Introduction to JavaScript and programming as a whole\n",
+      "Rank: 4\n",
+      "\n",
+      "ID: KAOa7osBiUNHLMdf3q2r\n",
+      "Publication date: 2012-06-27\n",
+      "Title: Introduction to the Theory of Computation\n",
+      "Summary: Introduction to the theory of computation and complexity theory\n",
+      "Rank: 5\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"book_index\",\n",
+    "    size=5,\n",
+    "    query={\"match\": {\"summary\": \"python programming\"}},\n",
+    "    knn={\n",
+    "        \"field\": \"title_vector\",\n",
+    "        \"query_vector\": model.encode(\n",
+    "            \"python programming\"\n",
+    "        ).tolist(),  # generate embedding for query so it can be compared to `title_vector`\n",
+    "        \"k\": 5,\n",
+    "        \"num_candidates\": 10,\n",
+    "    },\n",
+    "    rank={\"rrf\": {}},\n",
+    ")\n",
+    "\n",
+    "pretty_response(response)"
+   ]
+  }
+ ],
+ "metadata": {
+  "colab": {
+   "provenance": []
+  },
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.13"
+  },
+  "vscode": {
+   "interpreter": {
+    "hash": "b0fa6594d8f4cbf19f97940f81e996739fb7646882a419484c72d19e05852a7e"
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

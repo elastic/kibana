@@ -19,11 +19,8 @@ function getConfigPath() {
   return Path.resolve(
     REPO_ROOT,
     'packages',
-    'kbn-monaco',
+    'kbn-esql-validation-autocomplete',
     'src',
-    'esql',
-    'lib',
-    'ast',
     'validation'
   );
 }
@@ -64,6 +61,9 @@ function createIndexRequest(
           if (type === 'cartesian_point') {
             esType = 'point';
           }
+          if (type === 'cartesian_shape') {
+            esType = 'shape';
+          }
           if (type === 'unsupported') {
             esType = 'integer_range';
           }
@@ -77,7 +77,7 @@ function createIndexRequest(
 }
 
 interface JSONConfig {
-  testCases: Array<{ query: string; error: boolean }>;
+  testCases: Array<{ query: string; error: string[] }>;
   indexes: string[];
   policies: Array<{
     name: string;
@@ -152,6 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       for (const policy of policies) {
         log.info(`deleting policy "${policy}"...`);
+        // TODO: Maybe `policy` -> `policy.name`?
         await es.enrich.deletePolicy({ name: policy }, { ignore: [404] });
       }
     }
@@ -240,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
             for (const { query, error } of queryToErrors) {
               const jsonBody = await sendESQLQuery(query);
 
-              const clientSideHasError = error;
+              const clientSideHasError = Boolean(error.length);
               const serverSideHasError = Boolean(jsonBody.error);
 
               if (clientSideHasError !== serverSideHasError) {

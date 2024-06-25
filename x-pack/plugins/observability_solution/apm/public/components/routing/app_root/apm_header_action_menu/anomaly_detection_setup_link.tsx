@@ -24,8 +24,7 @@ import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
 export function AnomalyDetectionSetupLink() {
   const { query } = useApmParams('/*');
 
-  const environment =
-    ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
+  const environment = ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
 
   const { core } = useApmPluginContext();
 
@@ -40,32 +39,22 @@ export function AnomalyDetectionSetupLink() {
 
   if (anomalyDetectionSetupState === AnomalyDetectionSetupState.Failure) {
     color = 'warning';
-    tooltipText = i18n.translate(
-      'xpack.apm.anomalyDetectionSetup.jobFetchFailureText',
-      {
-        defaultMessage: 'Could not determine state of anomaly detection setup.',
-      }
-    );
+    tooltipText = i18n.translate('xpack.apm.anomalyDetectionSetup.jobFetchFailureText', {
+      defaultMessage: 'Could not determine state of anomaly detection setup.',
+    });
     icon = 'machineLearningApp';
   } else if (
     anomalyDetectionSetupState === AnomalyDetectionSetupState.NoJobs ||
-    anomalyDetectionSetupState ===
-      AnomalyDetectionSetupState.NoJobsForEnvironment
+    anomalyDetectionSetupState === AnomalyDetectionSetupState.NoJobsForEnvironment
   ) {
     color = 'warning';
     tooltipText = getNoJobsMessage(anomalyDetectionSetupState, environment);
     icon = 'machineLearningApp';
-  } else if (
-    anomalyDetectionSetupState === AnomalyDetectionSetupState.UpgradeableJobs
-  ) {
+  } else if (anomalyDetectionSetupState === AnomalyDetectionSetupState.UpgradeableJobs) {
     color = 'success';
-    tooltipText = i18n.translate(
-      'xpack.apm.anomalyDetectionSetup.upgradeableJobsText',
-      {
-        defaultMessage:
-          'Updates available for existing anomaly detection jobs.',
-      }
-    );
+    tooltipText = i18n.translate('xpack.apm.anomalyDetectionSetup.upgradeableJobsText', {
+      defaultMessage: 'Updates available for existing anomaly detection jobs.',
+    });
     icon = 'wrench';
   }
 
@@ -85,9 +74,7 @@ export function AnomalyDetectionSetupLink() {
       data-test-subj="apmAnomalyDetectionHeaderLink"
     >
       {pre}
-      <span style={{ marginInlineStart: theme.eui.euiSizeS }}>
-        {ANOMALY_DETECTION_LINK_LABEL}
-      </span>
+      <span style={{ marginInlineStart: theme.eui.euiSizeS }}>{ANOMALY_DETECTION_LINK_LABEL}</span>
     </EuiHeaderLink>
   );
 
@@ -103,9 +90,7 @@ export function AnomalyDetectionSetupLink() {
 }
 
 function getNoJobsMessage(
-  state:
-    | AnomalyDetectionSetupState.NoJobs
-    | AnomalyDetectionSetupState.NoJobsForEnvironment,
+  state: AnomalyDetectionSetupState.NoJobs | AnomalyDetectionSetupState.NoJobsForEnvironment,
   environment: string
 ) {
   if (state === AnomalyDetectionSetupState.NoJobs) {
@@ -114,16 +99,12 @@ function getNoJobsMessage(
     });
   }
 
-  return i18n.translate(
-    'xpack.apm.anomalyDetectionSetup.notEnabledForEnvironmentText',
-    {
-      defaultMessage: `Anomaly detection is not yet enabled for the environment "{currentEnvironment}". Click to continue setup.`,
-      values: { currentEnvironment: getEnvironmentLabel(environment) },
-    }
-  );
+  return i18n.translate('xpack.apm.anomalyDetectionSetup.notEnabledForEnvironmentText', {
+    defaultMessage: `Anomaly detection is not yet enabled for the environment "{currentEnvironment}". Click to continue setup.`,
+    values: { currentEnvironment: getEnvironmentLabel(environment) },
+  });
 }
 
-const ANOMALY_DETECTION_LINK_LABEL = i18n.translate(
-  'xpack.apm.anomalyDetectionSetup.linkLabel',
-  { defaultMessage: `Anomaly detection` }
-);
+const ANOMALY_DETECTION_LINK_LABEL = i18n.translate('xpack.apm.anomalyDetectionSetup.linkLabel', {
+  defaultMessage: `Anomaly detection`,
+});

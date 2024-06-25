@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-describe('[Logs onboarding] Give Feedback', () => {
+// Failing: See https://github.com/elastic/kibana/issues/183341
+describe.skip('[Logs onboarding] Give Feedback', () => {
   beforeEach(() => {
     cy.loginAsElastic();
     cy.visitKibana('/app/observabilityOnboarding');
@@ -22,8 +23,6 @@ describe('[Logs onboarding] Give Feedback', () => {
   });
 
   it('feedback button is not present in the landing page', () => {
-    cy.getByTestSubj('observabilityOnboardingPageGiveFeedback').should(
-      'not.exist'
-    );
+    cy.getByTestSubj('observabilityOnboardingPageGiveFeedback').should('not.exist');
   });
 });

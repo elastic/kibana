@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiTitle, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useLink } from '../../../../hooks';
+import { useAuthz, useLink } from '../../../../hooks';
 import type { DownloadSource } from '../../../../types';
 import { DownloadSourceTable } from '../download_source_table';
 
@@ -23,6 +23,8 @@ export const AgentBinarySection: React.FunctionComponent<AgentBinarySectionProps
   deleteDownloadSource,
 }) => {
   const { getHref } = useLink();
+  const authz = useAuthz();
+  const hasAllSettingsPrivileges = authz.fleet.allSettings;
 
   return (
     <>
@@ -45,18 +47,23 @@ export const AgentBinarySection: React.FunctionComponent<AgentBinarySectionProps
       <DownloadSourceTable
         downloadSources={downloadSources}
         deleteDownloadSource={deleteDownloadSource}
+        hasAllSettingsPrivileges={hasAllSettingsPrivileges}
       />
-      <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        iconType="plusInCircle"
-        href={getHref('settings_create_download_sources')}
-        data-test-subj="addDownloadSourcesBtn"
-      >
-        <FormattedMessage
-          id="xpack.fleet.settings.downloadSourcesSection.CreateButtonLabel"
-          defaultMessage="Add agent binary source"
-        />
-      </EuiButtonEmpty>
+      {hasAllSettingsPrivileges && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            iconType="plusInCircle"
+            href={getHref('settings_create_download_sources')}
+            data-test-subj="addDownloadSourcesBtn"
+          >
+            <FormattedMessage
+              id="xpack.fleet.settings.downloadSourcesSection.CreateButtonLabel"
+              defaultMessage="Add agent binary source"
+            />
+          </EuiButtonEmpty>
+        </>
+      )}
     </>
   );
 };

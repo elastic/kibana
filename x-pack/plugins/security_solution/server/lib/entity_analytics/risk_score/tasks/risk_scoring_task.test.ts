@@ -20,6 +20,7 @@ import {
   removeRiskScoringTask,
   runTask,
 } from './risk_scoring_task';
+import type { ConfigType } from '../../../../config';
 
 const ISO_8601_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
@@ -27,7 +28,8 @@ const entityAnalyticsConfig = {
   riskEngine: {
     alertSampleSizePerShard: 10_000,
   },
-};
+} as unknown as ConfigType['entityAnalytics'];
+
 describe('Risk Scoring Task', () => {
   let mockRiskEngineDataClient: ReturnType<typeof riskEngineDataClientMock.create>;
   let mockRiskScoreService: ReturnType<typeof riskScoreServiceMock.create>;
@@ -57,6 +59,7 @@ describe('Risk Scoring Task', () => {
         logger: mockLogger,
         telemetry: mockTelemetry,
         entityAnalyticsConfig,
+        auditLogger: undefined,
       });
       expect(mockTaskManagerSetup.registerTaskDefinitions).toHaveBeenCalled();
     });
@@ -70,6 +73,7 @@ describe('Risk Scoring Task', () => {
         logger: mockLogger,
         telemetry: mockTelemetry,
         entityAnalyticsConfig,
+        auditLogger: undefined,
       });
       expect(mockTaskManagerSetup.registerTaskDefinitions).not.toHaveBeenCalled();
     });
@@ -470,19 +474,6 @@ describe('Risk Scoring Task', () => {
             expect.stringContaining('task was cancelled')
           );
         });
-
-        it('schedules the transform to run now', async () => {
-          await runTask({
-            getRiskScoreService,
-            isCancelled: mockIsCancelled,
-            logger: mockLogger,
-            taskInstance: riskScoringTaskInstanceMock,
-            telemetry: mockTelemetry,
-            entityAnalyticsConfig,
-          });
-
-          expect(mockRiskScoreService.scheduleLatestTransformNow).toHaveBeenCalledTimes(1);
-        });
       });
 
       describe('when execution was successful', () => {
@@ -515,6 +506,19 @@ describe('Risk Scoring Task', () => {
           });
 
           expect(mockRiskScoreService.scheduleLatestTransformNow).toHaveBeenCalledTimes(1);
+        });
+
+        it('refreshes the risk score index', async () => {
+          await runTask({
+            getRiskScoreService,
+            isCancelled: mockIsCancelled,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
+            entityAnalyticsConfig,
+          });
+
+          expect(mockRiskScoreService.refreshRiskScoreIndex).toHaveBeenCalledTimes(1);
         });
       });
 

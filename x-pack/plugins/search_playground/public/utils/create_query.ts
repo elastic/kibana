@@ -5,33 +5,123 @@
  * 2.0.
  */
 
-import { IndicesQuerySourceFields } from '../types';
+import { IndicesQuerySourceFields, QuerySourceFields } from '../types';
 
-type IndexFields = Record<string, string[]>;
+export type IndexFields = Record<string, string[]>;
 
 // These fields are used to suggest the fields to use for the query
 // If the field is not found in the suggested fields,
 // we will use the first field for BM25 and all fields for vectors
-const SUGGESTED_SPARSE_FIELDS = [
+export const SUGGESTED_SPARSE_FIELDS = [
   'vector.tokens', // LangChain field
 ];
 
-const SUGGESTED_BM25_FIELDS = ['title', 'body_content', 'text', 'content'];
+export const SUGGESTED_BM25_FIELDS = [
+  'title',
+  'body_content',
+  'page_content_text',
+  'text',
+  'content',
+  `text_field`,
+];
 
-const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
+export const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
 
-const SUGGESTED_SOURCE_FIELDS = ['body_content', 'content', 'text'];
+const SUGGESTED_SOURCE_FIELDS = [
+  'body_content',
+  'content',
+  'text',
+  'page_content_text',
+  'text_field',
+];
 
 interface Matches {
   queryMatches: any[];
   knnMatches: any[];
 }
 
-export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQuerySourceFields) {
+interface ReRankOptions {
+  rrf: boolean;
+}
+
+export function createQuery(
+  fields: IndexFields,
+  sourceFields: IndexFields,
+  fieldDescriptors: IndicesQuerySourceFields,
+  rerankOptions: ReRankOptions = {
+    rrf: true,
+  }
+) {
+  const indices = Object.keys(fieldDescriptors);
   const boolMatches = Object.keys(fields).reduce<Matches>(
     (acc, index) => {
-      const indexFields = fields[index];
-      const indexFieldDescriptors = fieldDescriptors[index];
+      const indexFields: string[] = fields[index];
+      const indexFieldDescriptors: QuerySourceFields = fieldDescriptors[index];
+
+      const semanticMatches = indexFields.map((field) => {
+        const semanticField = indexFieldDescriptors.semantic_fields.find((x) => x.field === field);
+        const isSourceField = sourceFields[index].includes(field);
+
+        // this is needed to get the inner_hits for the source field
+        // we cant rely on only the semantic field
+        // in future inner_hits option will be added to semantic
+        if (semanticField && isSourceField) {
+          if (semanticField.embeddingType === 'dense_vector') {
+            const filter =
+              semanticField.indices.length < indices.length
+                ? { filter: { terms: { _index: semanticField.indices } } }
+                : {};
+
+            return {
+              nested: {
+                path: `${semanticField.field}.inference.chunks`,
+                query: {
+                  knn: {
+                    field: `${semanticField.field}.inference.chunks.embeddings`,
+                    ...filter,
+                    query_vector_builder: {
+                      text_embedding: {
+                        model_id: semanticField.inferenceId,
+                        model_text: '{query}',
+                      },
+                    },
+                  },
+                },
+                inner_hits: {
+                  size: 2,
+                  _source: [`${semanticField.field}.inference.chunks.text`],
+                },
+              },
+            };
+          } else if (semanticField.embeddingType === 'sparse_vector') {
+            return {
+              nested: {
+                path: `${semanticField.field}.inference.chunks`,
+                query: {
+                  sparse_vector: {
+                    inference_id: semanticField.inferenceId,
+                    field: `${semanticField.field}.inference.chunks.embeddings`,
+                    query: '{query}',
+                  },
+                },
+                inner_hits: {
+                  size: 2,
+                  _source: [`${semanticField.field}.inference.chunks.text`],
+                },
+              },
+            };
+          }
+        } else if (semanticField) {
+          return {
+            semantic: {
+              field: semanticField.field,
+              query: '{query}',
+            },
+          };
+        } else {
+          return null;
+        }
+      });
 
       const sparseMatches =
         indexFields.map((field) => {
@@ -42,9 +132,9 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
           if (elserField) {
             // when another index has the same field, we don't want to duplicate the match rule
             const hasExistingSparseMatch = acc.queryMatches.find(
-              (x: any) =>
-                x?.text_expansion?.[field] &&
-                x?.text_expansion?.[field].model_id === elserField?.model_id
+              (x) =>
+                x?.sparse_vector?.field === field &&
+                x?.sparse_vector?.inference_id === elserField?.model_id
             );
 
             if (hasExistingSparseMatch) {
@@ -52,11 +142,10 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
             }
 
             return {
-              text_expansion: {
-                [elserField.field]: {
-                  model_id: elserField.model_id,
-                  model_text: '{query}',
-                },
+              sparse_vector: {
+                field: elserField.field,
+                inference_id: elserField.model_id,
+                query: '{query}',
               },
             };
           }
@@ -84,14 +173,22 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
           );
 
           if (denseVectorField) {
+            // when the knn field isn't found in all indices, we need a filter to ensure we only use the field from the correct index
+            const filter =
+              denseVectorField.indices.length < indices.length
+                ? { filter: { terms: { _index: denseVectorField.indices } } }
+                : {};
+
             return {
-              field: denseVectorField.field,
-              k: 10,
-              num_candidates: 100,
-              query_vector_builder: {
-                text_embedding: {
-                  model_id: denseVectorField.model_id,
-                  model_text: '{query}',
+              knn: {
+                field: denseVectorField.field,
+                num_candidates: 100,
+                ...filter,
+                query_vector_builder: {
+                  text_embedding: {
+                    model_id: denseVectorField.model_id,
+                    model_text: '{query}',
+                  },
                 },
               },
             };
@@ -100,7 +197,7 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
         })
         .filter((x) => !!x);
 
-      const matches = [...sparseMatches, bm25Match].filter((x) => !!x);
+      const matches = [...sparseMatches, ...semanticMatches, bm25Match].filter((x) => !!x);
 
       return {
         queryMatches: [...acc.queryMatches, ...matches],
@@ -113,18 +210,73 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
     }
   );
 
-  return {
-    ...(boolMatches.queryMatches.length > 0
-      ? {
+  // for single Elser support to make it easy to read - skips bool query
+  if (boolMatches.queryMatches.length === 1 && boolMatches.knnMatches.length === 0) {
+    return {
+      retriever: {
+        standard: {
+          query: boolMatches.queryMatches[0],
+        },
+      },
+    };
+  }
+
+  // for single Dense vector support to make it easy to read - skips bool query
+  if (boolMatches.queryMatches.length === 0 && boolMatches.knnMatches.length === 1) {
+    return {
+      retriever: {
+        standard: {
+          query: boolMatches.knnMatches[0],
+        },
+      },
+    };
+  }
+
+  const matches = [...boolMatches.queryMatches, ...boolMatches.knnMatches];
+
+  if (matches.length === 0) {
+    return {
+      retriever: {
+        standard: {
           query: {
-            bool: {
-              should: boolMatches.queryMatches,
-              minimum_should_match: 1,
-            },
+            match_all: {},
           },
-        }
-      : {}),
-    ...(boolMatches.knnMatches.length > 0 ? { knn: boolMatches.knnMatches } : {}),
+        },
+      },
+    };
+  }
+
+  // determine if we need to use a rrf query
+  if (rerankOptions.rrf) {
+    const retrievers = matches.map((clause) => {
+      return {
+        standard: {
+          query: clause,
+        },
+      };
+    });
+
+    return {
+      retriever: {
+        rrf: {
+          retrievers,
+        },
+      },
+    };
+  }
+
+  // No RRF - add all the matches (DENSE + BM25 + SPARSE) to the bool query
+  return {
+    retriever: {
+      standard: {
+        query: {
+          bool: {
+            should: matches,
+            minimum_should_match: 1,
+          },
+        },
+      },
+    },
   };
 }
 
@@ -133,13 +285,31 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
     (acc: IndexFields, index: string) => {
       const indexFieldDescriptors = fieldDescriptors[index];
 
+      // semantic_text fields are prioritized
+      if (indexFieldDescriptors.semantic_fields.length > 0) {
+        return {
+          ...acc,
+          [index]: indexFieldDescriptors.semantic_fields.map((x) => x.field),
+        };
+      }
+
+      // if there are no source fields, we don't need to suggest anything
+      if (indexFieldDescriptors.source_fields.length === 0) {
+        return {
+          ...acc,
+          [index]: [],
+        };
+      }
+
       const suggested = indexFieldDescriptors.source_fields.filter((x) =>
         SUGGESTED_SOURCE_FIELDS.includes(x)
       );
 
+      const fields = suggested.length === 0 ? [indexFieldDescriptors.source_fields[0]] : suggested;
+
       return {
         ...acc,
-        [index]: suggested,
+        [index]: fields,
       };
     },
     {}
@@ -154,7 +324,9 @@ export function getDefaultQueryFields(fieldDescriptors: IndicesQuerySourceFields
       const indexFieldDescriptors = fieldDescriptors[index];
       const fields: string[] = [];
 
-      if (indexFieldDescriptors.elser_query_fields.length > 0) {
+      if (indexFieldDescriptors.semantic_fields.length > 0) {
+        fields.push(...indexFieldDescriptors.semantic_fields.map((x) => x.field));
+      } else if (indexFieldDescriptors.elser_query_fields.length > 0) {
         const suggested = indexFieldDescriptors.elser_query_fields.filter((x) =>
           SUGGESTED_SPARSE_FIELDS.includes(x.field)
         );

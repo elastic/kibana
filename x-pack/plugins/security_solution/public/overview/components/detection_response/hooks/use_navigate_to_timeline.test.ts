@@ -45,11 +45,11 @@ describe('useAlertCountByRuleByStatus', () => {
     jest.clearAllMocks();
   });
 
-  it('should handle an empty array', () => {
+  it('should handle an empty array', async () => {
     const { result } = renderUseNavigatgeToTimeline();
     const openTimelineWithFilters = result.current.openTimelineWithFilters;
 
-    openTimelineWithFilters([]);
+    await openTimelineWithFilters([]);
 
     expect(mockDispatch.mock.calls[0][0]).toEqual(
       updateProviders({
@@ -59,11 +59,11 @@ describe('useAlertCountByRuleByStatus', () => {
     );
   });
 
-  it('should handle 1 filter passed', () => {
+  it('should handle 1 filter passed', async () => {
     const { result } = renderUseNavigatgeToTimeline();
     const openTimelineWithFilters = result.current.openTimelineWithFilters;
 
-    openTimelineWithFilters([[mock.hostFilter]]);
+    await openTimelineWithFilters([[mock.hostFilter]]);
 
     expect(mockDispatch.mock.calls[0][0]).toEqual(
       updateProviders({
@@ -73,11 +73,11 @@ describe('useAlertCountByRuleByStatus', () => {
     );
   });
 
-  it('should handle many filter passed ( AND query )', () => {
+  it('should handle many filter passed ( AND query )', async () => {
     const { result } = renderUseNavigatgeToTimeline();
     const openTimelineWithFilters = result.current.openTimelineWithFilters;
 
-    openTimelineWithFilters([mock.ANDFilterGroup1]);
+    await openTimelineWithFilters([mock.ANDFilterGroup1]);
 
     expect(mockDispatch.mock.calls[0][0]).toEqual(
       updateProviders({
@@ -87,11 +87,11 @@ describe('useAlertCountByRuleByStatus', () => {
     );
   });
 
-  it('should handle many AND filter groups passed ( OR query with ANDS )', () => {
+  it('should handle many AND filter groups passed ( OR query with ANDS )', async () => {
     const { result } = renderUseNavigatgeToTimeline();
     const openTimelineWithFilters = result.current.openTimelineWithFilters;
 
-    openTimelineWithFilters(mock.ORFilterGroup);
+    await openTimelineWithFilters(mock.ORFilterGroup);
 
     expect(mockDispatch.mock.calls[0][0]).toEqual(
       updateProviders({

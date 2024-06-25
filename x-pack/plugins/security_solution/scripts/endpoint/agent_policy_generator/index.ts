@@ -38,13 +38,15 @@ export const cli = () => {
           kibana: 'http://127.0.0.1:5601',
           username: 'elastic',
           password: 'changeme',
+          apikey: undefined,
         },
         help: `
-        --count               Number of agent policies to create. Default: 10
-        --concurrency         Number of concurrent agent policies can be created. Default: 10
-        --kibana              The URL to kibana including credentials. Default: http://127.0.0.1:5601
-        --username            The username to use for authentication. Default: elastic
-        --password            The password to use for authentication. Default: changeme
+        --count            Number of agent policies to create. Default: 10
+        --concurrency      Number of concurrent agent policies can be created. Default: 10
+        --kibana           The URL to kibana including credentials. Default: http://127.0.0.1:5601
+        --username         The username to use for authentication for local or cloud environment. Default: elastic
+        --password         The password to use for authentication for local or cloud environment. Default: changeme
+        --apikey           API key for authenticating for Serverless environment. Default: -
       `,
       },
     }
@@ -56,6 +58,8 @@ const agentPolicyGenerator: RunFn = async ({ flags, log }) => {
     url: flags.kibana as string,
     username: flags.username as string,
     password: flags.password as string,
+    apiKey: flags.apikey as string,
+    log,
   });
 
   const totalPoliciesCount = flags.count as unknown as number;

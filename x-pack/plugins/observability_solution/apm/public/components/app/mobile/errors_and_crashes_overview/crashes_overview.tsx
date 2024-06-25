@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,11 +14,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useCrashGroupDistributionFetcher } from '../../../../hooks/use_crash_group_distribution_fetcher';
 import { MobileErrorsAndCrashesTreemap } from '../charts/mobile_errors_and_crashes_treemap';
 import { MobileCrashGroupList } from './crash_group_list';
-import {
-  FETCH_STATUS,
-  isPending,
-  useFetcher,
-} from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -119,11 +109,7 @@ export function MobileCrashesOverview() {
             },
           }
         ).then((response) => {
-          const currentPageGroupIds = orderBy(
-            response.errorGroups,
-            sortField,
-            sortDirection
-          )
+          const currentPageGroupIds = orderBy(response.errorGroups, sortField, sortDirection)
             .slice(page * pageSize, (page + 1) * pageSize)
             .map(({ groupId }) => groupId)
             .sort();
@@ -150,8 +136,7 @@ export function MobileCrashesOverview() {
     ]
   );
 
-  const { requestId, mobileCrashGroupMainStatistics, currentPageGroupIds } =
-    crashGroupListData;
+  const { requestId, mobileCrashGroupMainStatistics, currentPageGroupIds } = crashGroupListData;
   const {
     data: mobileCrashGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
     status: mobileCrashGroupDetailedStatisticsStatus,
@@ -169,10 +154,7 @@ export function MobileCrashesOverview() {
                 start,
                 end,
                 numBuckets: 20,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
+                offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               },
               body: {
                 groupIds: JSON.stringify(currentPageGroupIds),
@@ -236,10 +218,9 @@ export function MobileCrashesOverview() {
         <EuiPanel hasBorder={true}>
           <EuiTitle size="xs">
             <h3>
-              {i18n.translate(
-                'xpack.apm.serviceDetails.metrics.crashes.title',
-                { defaultMessage: 'Crashes' }
-              )}
+              {i18n.translate('xpack.apm.serviceDetails.metrics.crashes.title', {
+                defaultMessage: 'Crashes',
+              })}
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
@@ -247,9 +228,7 @@ export function MobileCrashesOverview() {
           <MobileCrashGroupList
             mainStatistics={mobileCrashGroupMainStatistics}
             serviceName={serviceName}
-            detailedStatisticsLoading={isPending(
-              mobileCrashGroupDetailedStatisticsStatus
-            )}
+            detailedStatisticsLoading={isPending(mobileCrashGroupDetailedStatisticsStatus)}
             detailedStatistics={mobileCrashGroupDetailedStatistics}
             comparisonEnabled={comparisonEnabled}
             initialSortField={sortField}

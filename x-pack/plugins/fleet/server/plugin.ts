@@ -8,7 +8,7 @@
 import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -41,6 +41,7 @@ import type {
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FieldsMetadataServerSetup } from '@kbn/fields-metadata-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -85,6 +86,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   PLUGIN_ID,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
@@ -124,6 +126,7 @@ import { PolicyWatcher } from './services/agent_policy_watch';
 import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
 import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
+import { registerIntegrationFieldsExtractor } from './services/register_integration_fields_extractor';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -134,6 +137,7 @@ export interface FleetSetupDeps {
   spaces?: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
+  fieldsMetadata: FieldsMetadataServerSetup;
 }
 
 export interface FleetStartDeps {
@@ -183,6 +187,7 @@ const allSavedObjectTypes = [
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -277,7 +282,7 @@ export class FleetPlugin
     });
   }
 
-  public setup(core: CoreSetup, deps: FleetSetupDeps) {
+  public setup(core: CoreSetup<FleetStartDeps, FleetStartContract>, deps: FleetSetupDeps) {
     this.httpSetup = core.http;
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
@@ -286,10 +291,13 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    registerSavedObjects(core.savedObjects);
+    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
+
+    registerSavedObjects(core.savedObjects, {
+      useSpaceAwareness: experimentalFeatures.useSpaceAwareness,
+    });
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
-    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
     // Register feature
     if (deps.features) {
       deps.features.registerKibanaFeature({
@@ -332,9 +340,9 @@ export class FleetPlugin
                         id: `agents_all`,
                         api: [`${PLUGIN_ID}-agents-read`, `${PLUGIN_ID}-agents-all`],
                         name: 'All',
-                        ui: ['read', 'all'],
+                        ui: ['agents_read', 'agents_all'],
                         savedObject: {
-                          all: [],
+                          all: allSavedObjectTypes,
                           read: allSavedObjectTypes,
                         },
                         includeIn: 'all',
@@ -343,7 +351,7 @@ export class FleetPlugin
                         id: `agents_read`,
                         api: [`${PLUGIN_ID}-agents-read`],
                         name: 'Read',
-                        ui: ['read'],
+                        ui: ['agents_read'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -369,9 +377,9 @@ export class FleetPlugin
                           `${PLUGIN_ID}-agent-policies-all`,
                         ],
                         name: 'All',
-                        ui: ['read', 'all'],
+                        ui: ['agent_policies_read', 'agent_policies_all'],
                         savedObject: {
-                          all: [],
+                          all: allSavedObjectTypes,
                           read: allSavedObjectTypes,
                         },
                         includeIn: 'all',
@@ -380,7 +388,7 @@ export class FleetPlugin
                         id: `agent_policies_read`,
                         api: [`${PLUGIN_ID}-agent-policies-read`],
                         name: 'Read',
-                        ui: ['read'],
+                        ui: ['agent_policies_read'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -403,9 +411,9 @@ export class FleetPlugin
                         id: `settings_all`,
                         api: [`${PLUGIN_ID}-settings-read`, `${PLUGIN_ID}-settings-all`],
                         name: 'All',
-                        ui: ['read', 'all'],
+                        ui: ['settings_read', 'settings_all'],
                         savedObject: {
-                          all: [],
+                          all: allSavedObjectTypes,
                           read: allSavedObjectTypes,
                         },
                         includeIn: 'all',
@@ -414,7 +422,7 @@ export class FleetPlugin
                         id: `settings_read`,
                         api: [`${PLUGIN_ID}-settings-read`],
                         name: 'Read',
-                        ui: ['read'],
+                        ui: ['settings_read'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -513,6 +521,18 @@ export class FleetPlugin
               asInternalUser: agentService.asInternalUser,
             };
           },
+          get uninstallTokenService() {
+            const uninstallTokenService = new UninstallTokenService(
+              appContextService.getEncryptedSavedObjectsStart()!.getClient({
+                includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+              }),
+              appContextService.getInternalUserSOClientForSpaceId(soClient.getCurrentNamespace())
+            );
+
+            return {
+              asCurrentUser: uninstallTokenService,
+            };
+          },
           get packagePolicyService() {
             const service = plugin.setupPackagePolicyService();
 
@@ -569,6 +589,9 @@ export class FleetPlugin
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
     });
+
+    // Register fields metadata extractor
+    registerIntegrationFieldsExtractor({ core, fieldsMetadata: deps.fieldsMetadata });
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
@@ -611,12 +634,14 @@ export class FleetPlugin
       uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
-    this.telemetryEventsSender.start(plugins.telemetry, core);
-    this.bulkActionsResolver?.start(plugins.taskManager);
-    this.fleetUsageSender?.start(plugins.taskManager);
-    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
-    startFleetUsageLogger(plugins.taskManager);
-    this.fleetMetricsTask?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser);
+    this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
+    this.bulkActionsResolver?.start(plugins.taskManager).catch(() => {});
+    this.fleetUsageSender?.start(plugins.taskManager).catch(() => {});
+    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    startFleetUsageLogger(plugins.taskManager).catch(() => {});
+    this.fleetMetricsTask
+      ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
+      .catch(() => {});
 
     const logger = appContextService.getLogger();
 
@@ -649,18 +674,24 @@ export class FleetPlugin
           )
           .toPromise();
 
+        const randomIntFromInterval = (min: number, max: number) => {
+          return Math.floor(Math.random() * (max - min + 1) + min);
+        };
+
         // Retry Fleet setup w/ backoff
         await backOff(
           async () => {
             await setupFleet(
               new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-              core.elasticsearch.client.asInternalUser
+              core.elasticsearch.client.asInternalUser,
+              { useLock: true }
             );
           },
           {
             numOfAttempts: setupAttempts,
+            delayFirstAttempt: true,
             // 1s initial backoff
-            startingDelay: 1000,
+            startingDelay: randomIntFromInterval(100, 1000),
             // 5m max backoff
             maxDelay: 60000 * 5,
             timeMultiple: 2,
@@ -684,7 +715,7 @@ export class FleetPlugin
         );
 
         // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
-        this.initializeUninstallTokens();
+        this.initializeUninstallTokens().catch(() => {});
 
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,

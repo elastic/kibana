@@ -97,3 +97,35 @@ export const SCHEMA_SEARCH_MODEL_VERSION_1 = SCHEMA_SEARCH_BASE.extends({
 export const SCHEMA_SEARCH_MODEL_VERSION_2 = SCHEMA_SEARCH_MODEL_VERSION_1.extends({
   headerRowHeight: schema.maybe(schema.number()),
 });
+
+export const SCHEMA_SEARCH_MODEL_VERSION_3 = SCHEMA_SEARCH_MODEL_VERSION_2.extends({
+  visContext: schema.maybe(
+    schema.oneOf([
+      // existing value
+      schema.object({
+        // unified histogram state
+        suggestionType: schema.string(),
+        requestData: schema.object({
+          dataViewId: schema.maybe(schema.string()),
+          timeField: schema.maybe(schema.string()),
+          timeInterval: schema.maybe(schema.string()),
+          breakdownField: schema.maybe(schema.string()),
+        }),
+        // lens attributes
+        attributes: schema.recordOf(schema.string(), schema.any()),
+      }),
+      // cleared previous value
+      schema.object({}),
+    ])
+  ),
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_4 = SCHEMA_SEARCH_MODEL_VERSION_3.extends({
+  viewMode: schema.maybe(
+    schema.oneOf([
+      schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
+      schema.literal(VIEW_MODE.PATTERN_LEVEL),
+      schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
+    ])
+  ),
+});

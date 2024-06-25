@@ -19,13 +19,11 @@ import type { Refetch } from '../../store/inputs/model';
 interface UseRefetchByRestartingSessionProps {
   inputId?: InputsModelId;
   queryId: string;
-  skip?: boolean;
 }
 
 export const useRefetchByRestartingSession = ({
   inputId,
   queryId,
-  skip,
 }: UseRefetchByRestartingSessionProps): {
   session: MutableRefObject<ISessionService>;
   refetchByRestartingSession: Refetch;
@@ -56,10 +54,10 @@ export const useRefetchByRestartingSession = ({
          * like most of our components, it refetches when receiving a new search
          * session ID.
          **/
-        searchSessionId: skip ? undefined : searchSessionId,
+        searchSessionId,
       })
     );
-  }, [dispatch, queryId, selectedInspectIndex, skip]);
+  }, [dispatch, queryId, selectedInspectIndex]);
 
   /**
    * This is for refetching alert index when the first rule just created

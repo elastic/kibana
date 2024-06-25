@@ -14,14 +14,22 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import { ALERTS_PATH } from '../../../../common/constants';
 import { useUpdateUrlParam } from '../../utils/global_query_string';
 import { useShallowEqualSelector } from '../use_selector';
 import { URL_PARAM_KEY } from '../use_url_state';
 import type { FlyoutUrlState } from './types';
 
+/**
+ * The state of the old flyout of the table in the Alerts page is stored in local storage.
+ * This hook was created to sync the data stored in local storage to the url.
+ * This is only be needed with the old flyout.
+ * // TODO remove this hook entirely when we delete the old flyout code
+ */
 export const useSyncFlyoutUrlParam = () => {
-  const updateUrlParam = useUpdateUrlParam<FlyoutUrlState>(URL_PARAM_KEY.eventFlyout);
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+  const updateUrlParam = useUpdateUrlParam<FlyoutUrlState>(URL_PARAM_KEY.flyout);
   const { pathname } = useLocation();
   const dispatch = useDispatch();
   const getDataTable = dataTableSelectors.getTableByIdSelector();
@@ -32,6 +40,8 @@ export const useSyncFlyoutUrlParam = () => {
   );
 
   useEffect(() => {
+    if (!expandableFlyoutDisabled) return;
+
     const isOnAlertsPage = pathname === ALERTS_PATH;
     if (isOnAlertsPage && expandedDetail != null && expandedDetail?.query) {
       updateUrlParam(expandedDetail.query.panelView ? expandedDetail.query : null);
@@ -45,5 +55,5 @@ export const useSyncFlyoutUrlParam = () => {
       // Clear the reference from the url
       updateUrlParam(null);
     }
-  }, [dispatch, expandedDetail, pathname, updateUrlParam]);
+  }, [dispatch, expandedDetail, expandableFlyoutDisabled, pathname, updateUrlParam]);
 };

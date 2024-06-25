@@ -7,7 +7,9 @@
 
 import * as t from 'io-ts';
 
-export const ResultDocument = t.type({
+import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
+
+const ResultDocumentInterface = t.interface({
   batchId: t.string,
   indexName: t.string,
   isCheckAll: t.boolean,
@@ -17,20 +19,63 @@ export const ResultDocument = t.type({
   ecsFieldCount: t.number,
   customFieldCount: t.number,
   incompatibleFieldCount: t.number,
+  incompatibleFieldMappingItems: t.array(
+    t.type({
+      fieldName: t.string,
+      expectedValue: t.string,
+      actualValue: t.string,
+      description: t.string,
+    })
+  ),
+  incompatibleFieldValueItems: t.array(
+    t.type({
+      fieldName: t.string,
+      expectedValues: t.array(t.string),
+      actualValues: t.array(t.type({ name: t.string, count: t.number })),
+      description: t.string,
+    })
+  ),
   sameFamilyFieldCount: t.number,
   sameFamilyFields: t.array(t.string),
+  sameFamilyFieldItems: t.array(
+    t.type({
+      fieldName: t.string,
+      expectedValue: t.string,
+      actualValue: t.string,
+      description: t.string,
+    })
+  ),
   unallowedMappingFields: t.array(t.string),
   unallowedValueFields: t.array(t.string),
   sizeInBytes: t.number,
-  ilmPhase: t.string,
   markdownComments: t.array(t.string),
   ecsVersion: t.string,
-  indexId: t.string,
   error: t.union([t.string, t.null]),
 });
+
+const ResultDocumentOptional = t.partial({
+  indexPattern: t.string,
+  checkedBy: t.string,
+  indexId: t.string,
+  ilmPhase: t.string,
+});
+
+export const ResultDocument = t.intersection([ResultDocumentInterface, ResultDocumentOptional]);
 export type ResultDocument = t.TypeOf<typeof ResultDocument>;
 
-export const PostResultBody = ResultDocument;
+export const PostIndexResultBody = ResultDocument;
 
-export const GetResultQuery = t.type({ pattern: t.string });
-export type GetResultQuery = t.TypeOf<typeof GetResultQuery>;
+export const GetIndexResultsLatestParams = t.type({ pattern: t.string });
+export type GetIndexResultsLatestParams = t.TypeOf<typeof GetIndexResultsLatestParams>;
+
+export const GetIndexResultsParams = t.type({
+  pattern: t.string,
+});
+
+export const GetIndexResultsQuery = t.partial({
+  size: StringToPositiveNumber,
+  from: StringToPositiveNumber,
+  startDate: t.string,
+  endDate: t.string,
+  outcome: t.union([t.literal('pass'), t.literal('fail')]),
+});

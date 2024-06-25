@@ -20,12 +20,8 @@ describe('duration formatters', () => {
       expect(asDuration(0)).toEqual('0 μs');
       expect(asDuration(1)).toEqual('1 μs');
       expect(asDuration(toMicroseconds(1, 'milliseconds'))).toEqual('1,000 μs');
-      expect(asDuration(toMicroseconds(1000, 'milliseconds'))).toEqual(
-        '1,000 ms'
-      );
-      expect(asDuration(toMicroseconds(10000, 'milliseconds'))).toEqual(
-        '10,000 ms'
-      );
+      expect(asDuration(toMicroseconds(1000, 'milliseconds'))).toEqual('1,000 ms');
+      expect(asDuration(toMicroseconds(10000, 'milliseconds'))).toEqual('10,000 ms');
       expect(asDuration(toMicroseconds(20, 'seconds'))).toEqual('20 s');
       expect(asDuration(toMicroseconds(10, 'minutes'))).toEqual('600 s');
       expect(asDuration(toMicroseconds(11, 'minutes'))).toEqual('11 min');
@@ -44,43 +40,21 @@ describe('duration formatters', () => {
     // Formatting with a default threshold of 10 for more detail for single values
     it('formats correctly with defaults', () => {
       expect(getDurationFormatter(987654)(987654).formatted).toEqual('988 ms');
-      expect(getDurationFormatter(1000000)(1000000).formatted).toEqual(
-        '1,000 ms'
-      );
-      expect(getDurationFormatter(1234567)(1234567).formatted).toEqual(
-        '1,235 ms'
-      );
-      expect(getDurationFormatter(9876543)(9876543).formatted).toEqual(
-        '9,877 ms'
-      );
-      expect(getDurationFormatter(10000000)(10000000).formatted).toEqual(
-        '10,000 ms'
-      );
-      expect(getDurationFormatter(12345678)(12345678).formatted).toEqual(
-        '12 s'
-      );
+      expect(getDurationFormatter(1000000)(1000000).formatted).toEqual('1,000 ms');
+      expect(getDurationFormatter(1234567)(1234567).formatted).toEqual('1,235 ms');
+      expect(getDurationFormatter(9876543)(9876543).formatted).toEqual('9,877 ms');
+      expect(getDurationFormatter(10000000)(10000000).formatted).toEqual('10,000 ms');
+      expect(getDurationFormatter(12345678)(12345678).formatted).toEqual('12 s');
     });
 
     // Formatting useful for axis ticks with a lower threshold where less detail is sufficient
     it('formats correctly with a threshold of 0.9999', () => {
-      expect(getDurationFormatter(987654, 0.9999)(987654).formatted).toEqual(
-        '988 ms'
-      );
-      expect(getDurationFormatter(1000000, 0.9999)(1000000).formatted).toEqual(
-        '1 s'
-      );
-      expect(getDurationFormatter(1234567, 0.9999)(1234567).formatted).toEqual(
-        '1 s'
-      );
-      expect(getDurationFormatter(9876543, 0.9999)(9876543).formatted).toEqual(
-        '10 s'
-      );
-      expect(
-        getDurationFormatter(10000000, 0.9999)(10000000).formatted
-      ).toEqual('10 s');
-      expect(
-        getDurationFormatter(12345678, 0.9999)(12345678).formatted
-      ).toEqual('12 s');
+      expect(getDurationFormatter(987654, 0.9999)(987654).formatted).toEqual('988 ms');
+      expect(getDurationFormatter(1000000, 0.9999)(1000000).formatted).toEqual('1 s');
+      expect(getDurationFormatter(1234567, 0.9999)(1234567).formatted).toEqual('1 s');
+      expect(getDurationFormatter(9876543, 0.9999)(9876543).formatted).toEqual('10 s');
+      expect(getDurationFormatter(10000000, 0.9999)(10000000).formatted).toEqual('10 s');
+      expect(getDurationFormatter(12345678, 0.9999)(12345678).formatted).toEqual('12 s');
     });
   });
 

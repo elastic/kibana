@@ -75,9 +75,7 @@ export function DependencyDetailTemplate({ children }: Props) {
       label: i18n.translate('xpack.apm.DependencyDetailOperations.title', {
         defaultMessage: 'Operations',
       }),
-      isSelected:
-        path === '/dependencies/operations' ||
-        path === '/dependencies/operation',
+      isSelected: path === '/dependencies/operations' || path === '/dependencies/operation',
       append: <BetaBadge icon="beta" />,
     },
   ];
@@ -94,19 +92,13 @@ export function DependencyDetailTemplate({ children }: Props) {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SpanIcon
-                type={metadata?.spanType}
-                subtype={metadata?.spanSubtype}
-              />
+              <SpanIcon type={metadata?.spanType} subtype={metadata?.spanSubtype} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
       }}
     >
-      <SearchBar
-        showTimeComparison
-        searchBarPlaceholder={unifiedSearchBarPlaceholder}
-      />
+      <SearchBar showTimeComparison searchBarPlaceholder={unifiedSearchBarPlaceholder} />
       {children}
     </ApmMainTemplate>
   );

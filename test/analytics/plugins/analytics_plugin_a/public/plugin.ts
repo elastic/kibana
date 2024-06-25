@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject, filter, firstValueFrom, ReplaySubject } from 'rxjs';
-import { takeWhile, tap, toArray } from 'rxjs/operators';
+import { takeWhile, tap, toArray } from 'rxjs';
 import type { Plugin, CoreSetup, CoreStart, TelemetryCounter, Event } from '@kbn/core/server';
 import type { Action } from './custom_shipper';
 import { CustomShipper } from './custom_shipper';

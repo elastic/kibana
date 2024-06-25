@@ -8,7 +8,7 @@
 
 import { cloneDeep, defaultsDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 
 import { UserProvidedValues } from '@kbn/core-ui-settings-common';
 import {

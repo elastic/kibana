@@ -7,23 +7,19 @@
 
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
-import {
-  type Logger,
-  SavedObjectsErrorHelpers,
-  type StartServicesAccessor,
-} from '@kbn/core/server';
+import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
 import {
-  type AfterKeys,
   type IdentifierType,
   RiskScoreEntity,
 } from '../../../../../common/entity_analytics/risk_engine';
-import type { StartPlugins } from '../../../../plugin';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from '../risk_score_data_client';
@@ -44,7 +40,7 @@ import {
   AssetCriticalityDataClient,
   assetCriticalityServiceFactory,
 } from '../../asset_criticality';
-import type { EntityAnalyticsConfig } from '../../types';
+import type { EntityAnalyticsConfig, EntityAnalyticsRoutesDeps } from '../../types';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -61,13 +57,15 @@ export const registerRiskScoringTask = ({
   getStartServices,
   kibanaVersion,
   logger,
+  auditLogger,
   taskManager,
   telemetry,
   entityAnalyticsConfig,
 }: {
-  getStartServices: StartServicesAccessor<StartPlugins>;
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
   logger: Logger;
+  auditLogger: AuditLogger | undefined;
   taskManager: TaskManagerSetupContract | undefined;
   telemetry: AnalyticsServiceSetup;
   entityAnalyticsConfig: EntityAnalyticsConfig;
@@ -85,6 +83,7 @@ export const registerRiskScoringTask = ({
       const assetCriticalityDataClient = new AssetCriticalityDataClient({
         esClient,
         logger,
+        auditLogger,
         namespace,
       });
 
@@ -99,6 +98,7 @@ export const registerRiskScoringTask = ({
         esClient,
         namespace,
         soClient,
+        auditLogger,
       });
       const riskScoreDataClient = new RiskScoreDataClient({
         logger,
@@ -106,6 +106,7 @@ export const registerRiskScoringTask = ({
         esClient,
         namespace,
         soClient,
+        auditLogger,
       });
 
       return riskScoreServiceFactory({
@@ -309,15 +310,20 @@ export const runTask = async ({
     };
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
 
-    riskScoreService.scheduleLatestTransformNow();
-
     if (isCancelled()) {
       log('task was cancelled');
       telemetry.reportEvent(RISK_SCORE_EXECUTION_CANCELLATION_EVENT.eventType, telemetryEvent);
     }
 
+    if (scoresWritten > 0) {
+      log('refreshing risk score index and scheduling transform');
+      await riskScoreService.refreshRiskScoreIndex();
+      await riskScoreService.scheduleLatestTransformNow();
+    }
+
     log('task run completed');
     log(JSON.stringify({ ...telemetryEvent, runs }));
+
     return {
       state: updatedState,
     };

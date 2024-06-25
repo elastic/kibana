@@ -25,17 +25,11 @@ export function getServerlessTypeFromCloudData(
   cloudProvider?: string,
   cloudServiceName?: string
 ): ServerlessType | undefined {
-  if (
-    cloudProvider?.toLowerCase() === 'aws' &&
-    cloudServiceName?.toLowerCase() === 'lambda'
-  ) {
+  if (cloudProvider?.toLowerCase() === 'aws' && cloudServiceName?.toLowerCase() === 'lambda') {
     return ServerlessType.AWS_LAMBDA;
   }
 
-  if (
-    cloudProvider?.toLowerCase() === 'azure' &&
-    cloudServiceName?.toLowerCase() === 'functions'
-  ) {
+  if (cloudProvider?.toLowerCase() === 'azure' && cloudServiceName?.toLowerCase() === 'functions') {
     return ServerlessType.AZURE_FUNCTIONS;
   }
 }

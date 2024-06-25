@@ -20,6 +20,7 @@ import {
 } from './get_maintenance_windows';
 import { getFakeKibanaRequest } from './rule_loader';
 import { TaskRunnerContext } from './types';
+import { FilterStateStore } from '@kbn/es-query';
 
 const logger = loggingSystemMock.create().get();
 const mockBasePathService = { set: jest.fn() };
@@ -206,7 +207,7 @@ describe('filterMaintenanceWindows', () => {
               type: 'phrase',
             },
             $state: {
-              store: 'appState',
+              store: FilterStateStore.APP_STATE,
             },
             query: {
               match_phrase: {
@@ -274,7 +275,7 @@ describe('filterMaintenanceWindowsIds', () => {
               type: 'phrase',
             },
             $state: {
-              store: 'appState',
+              store: FilterStateStore.APP_STATE,
             },
             query: {
               match_phrase: {

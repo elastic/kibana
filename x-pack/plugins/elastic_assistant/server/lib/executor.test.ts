@@ -16,23 +16,30 @@ import { PassThrough } from 'stream';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { loggerMock } from '@kbn/logging-mocks';
+import * as ParseStream from './parse_stream';
 const request = {
   body: {
     subAction: 'invokeAI',
     message: 'hello',
   },
 } as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-const onLlmResponse = jest.fn();
+const onLlmResponse = jest.fn(async () => {}); // We need it to be a promise, or it'll crash because of missing `.catch`
 const connectorId = 'testConnectorId';
+const mockLogger = loggerMock.create();
 const testProps: Omit<Props, 'actions'> = {
   params: {
     subAction: 'invokeAI',
     subActionParams: { messages: [{ content: 'hello', role: 'user' }] },
   },
+  actionTypeId: '.bedrock',
   request,
   connectorId,
   onLlmResponse,
+  logger: mockLogger,
 };
+
+const handleStreamStorageSpy = jest.spyOn(ParseStream, 'handleStreamStorage');
 
 describe('executeAction', () => {
   beforeEach(() => {
@@ -74,6 +81,13 @@ describe('executeAction', () => {
     expect(JSON.stringify(result)).toStrictEqual(
       JSON.stringify(readableStream.pipe(new PassThrough()))
     );
+
+    expect(handleStreamStorageSpy).toHaveBeenCalledWith({
+      actionTypeId: '.bedrock',
+      onMessageSent: onLlmResponse,
+      logger: mockLogger,
+      responseStream: readableStream,
+    });
   });
 
   it('should throw an error if the actions plugin fails to retrieve the actions client', async () => {

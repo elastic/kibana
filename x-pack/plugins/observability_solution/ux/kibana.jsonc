@@ -15,7 +15,6 @@
       "licensing",
       "triggersActionsUi",
       "observabilityShared",
-      "observabilityAIAssistant",
       "embeddable",
       "inspector",
       "apm"
@@ -29,7 +28,9 @@
       "observability",
       "security",
       "maps",
-      "lens"
+      "lens",
+      "observabilityAIAssistant",
+      "spaces"
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -14,6 +14,7 @@ export * from './os';
 export * from './trusted_apps';
 export * from './utility_types';
 export * from './agents';
+export * from './sentinel_one';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 
 /**
@@ -948,6 +949,7 @@ export interface PolicyConfig {
     cluster_uuid: string;
     cluster_name: string;
     serverless: boolean;
+    billable?: boolean;
     heartbeatinterval?: number;
   };
   global_manifest_version: 'latest' | string;
@@ -973,7 +975,7 @@ export interface PolicyConfig {
       registry: boolean;
       security: boolean;
     };
-    malware: ProtectionFields & BlocklistFields;
+    malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     memory_protection: ProtectionFields & SupportedFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
@@ -999,6 +1001,7 @@ export interface PolicyConfig {
       };
     };
     antivirus_registration: {
+      mode: AntivirusRegistrationModes;
       enabled: boolean;
     };
     attack_surface_reduction: {
@@ -1014,7 +1017,7 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: ProtectionFields & BlocklistFields;
+    malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
@@ -1044,7 +1047,7 @@ export interface PolicyConfig {
       session_data: boolean;
       tty_io: boolean;
     };
-    malware: ProtectionFields & BlocklistFields;
+    malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
@@ -1120,11 +1123,21 @@ export interface BlocklistFields {
   blocklist: boolean;
 }
 
+export interface OnWriteScanFields {
+  on_write_scan: boolean;
+}
+
 /** Policy protection mode options */
 export enum ProtectionModes {
   detect = 'detect',
   prevent = 'prevent',
   off = 'off',
+}
+
+export enum AntivirusRegistrationModes {
+  enabled = 'enabled',
+  disabled = 'disabled',
+  sync = 'sync_with_malware_prevent',
 }
 
 /**

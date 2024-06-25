@@ -25,7 +25,6 @@ import { BehaviorSubject } from 'rxjs';
 
 import type {
   AppMountParameters,
-  CoreStart,
   CustomBrandingStart,
   FatalErrorsStart,
   HttpStart,
@@ -34,10 +33,11 @@ import type {
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { LoginFormProps } from './components';
 import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
+import type { StartServices } from '../..';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
@@ -368,16 +368,14 @@ export class LoginPage extends Component<Props, State> {
 }
 
 export function renderLoginPage(
-  i18nStart: CoreStart['i18n'],
-  { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
+  services: StartServices,
+  { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
   ReactDOM.render(
-    <i18nStart.Context>
-      <KibanaThemeProvider theme$={theme$}>
-        <LoginPage {...props} />
-      </KibanaThemeProvider>
-    </i18nStart.Context>,
+    <KibanaRenderContextProvider {...services}>
+      <LoginPage {...props} />
+    </KibanaRenderContextProvider>,
     element
   );
 

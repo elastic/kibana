@@ -14,15 +14,7 @@ import {
   Subject,
   type Subscription,
 } from 'rxjs';
-import {
-  map,
-  distinctUntilChanged,
-  filter,
-  tap,
-  debounceTime,
-  takeUntil,
-  delay,
-} from 'rxjs/operators';
+import { map, distinctUntilChanged, filter, tap, debounceTime, takeUntil, delay } from 'rxjs';
 import { isDeepStrictEqual } from 'util';
 import type { PluginName } from '@kbn/core-base-common';
 import { ServiceStatusLevels, type CoreStatus, type ServiceStatus } from '@kbn/core-status-common';

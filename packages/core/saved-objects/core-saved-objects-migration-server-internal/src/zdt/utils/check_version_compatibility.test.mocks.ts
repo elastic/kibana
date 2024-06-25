@@ -19,3 +19,13 @@ jest.doMock('@kbn/core-saved-objects-base-server-internal', () => {
     getVirtualVersionMap: getVirtualVersionMapMock,
   };
 });
+
+export const getUpdatedRootFieldsMock = jest.fn();
+
+jest.doMock('../../core/compare_mappings', () => {
+  const actual = jest.requireActual('../../core/compare_mappings');
+  return {
+    ...actual,
+    getUpdatedRootFields: getUpdatedRootFieldsMock,
+  };
+});

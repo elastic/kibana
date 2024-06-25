@@ -25,9 +25,7 @@ describe('TransactionDistributionChart', () => {
         { doc_count: 10 },
       ] as HistogramItem[];
 
-      expect(
-        replaceHistogramZerosWithMinimumDomainValue(mockHistogram)
-      ).toEqual([
+      expect(replaceHistogramZerosWithMinimumDomainValue(mockHistogram)).toEqual([
         { doc_count: 10 },
         { doc_count: 10 },
         { doc_count: 0.0001 },

@@ -207,8 +207,6 @@ export const AnomaliesTable: React.FunctionComponent<{
           items={tableItems}
           itemId="id"
           itemIdToExpandedRowMap={expandedIdsRowContents}
-          isExpandable={true}
-          hasActions={true}
           columns={columns}
           sorting={tableSortOptions}
           onChange={handleTableChange}
@@ -232,7 +230,7 @@ const AnomalyMessage = ({ anomaly }: { anomaly: TableItem }) => {
     'xpack.infra.logs.analysis.anomaliesTableMoreThanExpectedAnomalyMessage',
     {
       defaultMessage:
-        'more log messages in this {type, select, logRate {dataset} logCategory {category}} than expected',
+        'more log messages in this {type, select, logRate {dataset} logCategory {category} other{#}} than expected',
       values: { type },
     }
   );
@@ -241,7 +239,7 @@ const AnomalyMessage = ({ anomaly }: { anomaly: TableItem }) => {
     'xpack.infra.logs.analysis.anomaliesTableFewerThanExpectedAnomalyMessage',
     {
       defaultMessage:
-        'fewer log messages in this {type, select, logRate {dataset} logCategory {category}} than expected',
+        'fewer log messages in this {type, select, logRate {dataset} logCategory {category} other{#}} than expected',
       values: { type },
     }
   );

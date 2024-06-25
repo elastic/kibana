@@ -9,13 +9,12 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { HostPanelKey } from '../../../../../flyout/entity_details/host_right';
 import type { ExpandedDetailType } from '../../../../../../common/types';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import { getScopedActions, isTimelineScope } from '../../../../../helpers';
+import { getScopedActions } from '../../../../../helpers';
 import { HostDetailsLink } from '../../../../../common/components/links';
 import type { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -49,7 +48,7 @@ const HostNameComponent: React.FC<Props> = ({
   title,
   value,
 }) => {
-  const isNewHostDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newHostDetailsFlyout');
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openRightPanel } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
@@ -57,6 +56,7 @@ const HostNameComponent: React.FC<Props> = ({
   const hostName = `${value}`;
   const isInTimelineContext =
     hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
+
   const openHostDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
@@ -65,49 +65,51 @@ const HostNameComponent: React.FC<Props> = ({
         onClick();
       }
 
-      if (eventContext && isInTimelineContext) {
-        const { timelineID, tabType } = eventContext;
+      if (!eventContext || !isInTimelineContext) {
+        return;
+      }
 
-        if (isNewHostDetailsFlyoutEnabled && !isTimelineScope(timelineID)) {
-          openRightPanel({
-            id: HostPanelKey,
-            params: {
-              hostName,
-              contextID: contextId,
-              scopeId: TableId.alertsOnAlertsPage,
-              isDraggable,
-            },
-          });
-        } else {
-          const updatedExpandedDetail: ExpandedDetailType = {
-            panelView: 'hostDetail',
-            params: {
-              hostName,
-            },
-          };
-          const scopedActions = getScopedActions(timelineID);
-          if (scopedActions) {
-            dispatch(
-              scopedActions.toggleDetailPanel({
-                ...updatedExpandedDetail,
-                id: timelineID,
-                tabType: tabType as TimelineTabs,
-              })
-            );
-          }
+      const { timelineID, tabType } = eventContext;
+
+      if (!expandableFlyoutDisabled) {
+        openRightPanel({
+          id: HostPanelKey,
+          params: {
+            hostName,
+            contextID: contextId,
+            scopeId: timelineID,
+            isDraggable,
+          },
+        });
+      } else {
+        const updatedExpandedDetail: ExpandedDetailType = {
+          panelView: 'hostDetail',
+          params: {
+            hostName,
+          },
+        };
+        const scopedActions = getScopedActions(timelineID);
+        if (scopedActions) {
+          dispatch(
+            scopedActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              id: timelineID,
+              tabType: tabType as TimelineTabs,
+            })
+          );
         }
       }
     },
     [
-      onClick,
-      eventContext,
-      isInTimelineContext,
-      isNewHostDetailsFlyoutEnabled,
-      openRightPanel,
-      hostName,
       contextId,
-      isDraggable,
       dispatch,
+      eventContext,
+      expandableFlyoutDisabled,
+      hostName,
+      isDraggable,
+      isInTimelineContext,
+      onClick,
+      openRightPanel,
     ]
   );
 

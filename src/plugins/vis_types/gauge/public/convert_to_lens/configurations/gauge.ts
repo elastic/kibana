@@ -8,6 +8,7 @@
 
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { GaugeVisConfiguration } from '@kbn/visualizations-plugin/common';
+import { getDefaultGaugeArgsFromParams } from '../../to_ast';
 import { GaugeVisParams } from '../../types';
 
 export const getConfiguration = (
@@ -24,18 +25,14 @@ export const getConfiguration = (
     maxAccessor: string;
   }
 ): GaugeVisConfiguration => {
-  const showLabels = Boolean(params.gauge.labels.show);
   return {
+    ...getDefaultGaugeArgsFromParams(params.gauge),
     layerId,
     layerType: 'data',
     palette,
     metricAccessor,
     minAccessor,
     maxAccessor,
-    shape: 'horizontalBullet',
-    ticksPosition: 'bands',
-    labelMajorMode: 'auto',
     colorMode: palette ? 'palette' : 'none',
-    labelMinor: showLabels ? params.gauge.style.subText : undefined,
   };
 };

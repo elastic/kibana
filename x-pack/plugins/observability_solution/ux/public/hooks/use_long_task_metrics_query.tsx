@@ -39,8 +39,7 @@ export function useLongTaskMetricsQuery() {
 
     const pkey = Number(percentile).toFixed(1);
 
-    const { longTaskSum, longTaskCount, longTaskMax } =
-      esQueryResponse.aggregations ?? {};
+    const { longTaskSum, longTaskCount, longTaskMax } = esQueryResponse.aggregations ?? {};
 
     return {
       noOfLongTasks: longTaskCount?.values[pkey] ?? 0,

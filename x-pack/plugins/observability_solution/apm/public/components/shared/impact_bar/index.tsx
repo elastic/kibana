@@ -26,14 +26,5 @@ export function ImpactBar({
   color = 'primary',
   ...rest
 }: ImpactBarProps) {
-  return (
-    <EuiProgress
-      size={size}
-      value={value}
-      max={max}
-      color={color}
-      style={style}
-      {...rest}
-    />
-  );
+  return <EuiProgress size={size} value={value} max={max} color={color} style={style} {...rest} />;
 }

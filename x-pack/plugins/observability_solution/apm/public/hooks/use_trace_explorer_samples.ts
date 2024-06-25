@@ -8,9 +8,7 @@
 import { useMemo } from 'react';
 import { createSharedUseFetcher } from './create_shared_use_fetcher';
 
-const sharedUseFetcher = createSharedUseFetcher(
-  'GET /internal/apm/traces/find'
-);
+const sharedUseFetcher = createSharedUseFetcher('GET /internal/apm/traces/find');
 
 const useTraceExplorerSamples = () => {
   const result = sharedUseFetcher.useFetcherResult();

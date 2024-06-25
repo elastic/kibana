@@ -37,7 +37,7 @@ import {
   submitEditedExceptionItem,
   submitNewExceptionItem,
 } from '../../../../../tasks/exceptions';
-import { deleteAlertsAndRules, deleteExceptionLists } from '../../../../../tasks/api_calls/common';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -54,14 +54,14 @@ import {
 import {
   createExceptionList,
   createExceptionListItem,
-  deleteExceptionList,
+  deleteExceptionLists,
 } from '../../../../../tasks/api_calls/exceptions';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Add/edit exception from rule details',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '3 alerts';
     const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
@@ -79,9 +79,6 @@ describe(
       login();
       deleteAlertsAndRules();
       deleteExceptionLists();
-
-      const exceptionList = getExceptionList();
-      deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
     });
 
     describe('existing list and items', () => {

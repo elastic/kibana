@@ -35,8 +35,8 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
       },
     } as unknown as CoreStart;
 
-    it('does not save any new saved object', () => {
-      migrateLegacyAPMIndicesToSpaceAware({
+    it('does not save any new saved object', async () => {
+      await migrateLegacyAPMIndicesToSpaceAware({
         coreStart: core,
         logger: loggerMock,
       });

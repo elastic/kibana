@@ -14,7 +14,6 @@ import {
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getDetails } from '../../../../tasks/rule_details';
 import { ruleFields } from '../../../../data/detection_engine';
-import { getTimeline } from '../../../../objects/timeline';
 import { getExistingRule, getNewRule } from '../../../../objects/rule';
 
 import {
@@ -42,6 +41,7 @@ import {
   THREAT_TACTIC,
   THREAT_TECHNIQUE,
   TIMELINE_TEMPLATE_DETAILS,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 
 import { createTimeline } from '../../../../tasks/api_calls/timelines';
@@ -58,7 +58,7 @@ describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, function
     login();
     deleteAlertsAndRules();
     deleteConnectors();
-    createTimeline(getTimeline()).then((response) => {
+    createTimeline().then((response) => {
       createRule({
         ...getNewRule({
           rule_id: 'rulez',
@@ -154,8 +154,10 @@ describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, function
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'Security Timeline');
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
-      getDetails(RUNS_EVERY_DETAILS).should('have.text', ruleFields.ruleInterval);
-      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', '55m');
+      getDetails(RUNS_EVERY_DETAILS)
+        .find(INTERVAL_ABBR_VALUE)
+        .should('have.text', ruleFields.ruleInterval);
+      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).find(INTERVAL_ABBR_VALUE).should('have.text', '55m');
     });
   });
 

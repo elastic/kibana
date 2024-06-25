@@ -14,9 +14,7 @@ describe('UserAgentSummaryItem', () => {
     const props = { original: 'Other' };
 
     it('renders', () => {
-      expect(() =>
-        mountWithTheme(<UserAgentSummaryItem {...props} />)
-      ).not.toThrowError();
+      expect(() => mountWithTheme(<UserAgentSummaryItem {...props} />)).not.toThrowError();
     });
 
     describe('with a version', () => {

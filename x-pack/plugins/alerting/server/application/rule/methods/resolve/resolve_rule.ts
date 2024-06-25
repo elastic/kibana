@@ -66,13 +66,17 @@ Promise<ResolvedSanitizedRule<Params>> {
     })
   );
 
-  const ruleDomain = transformRuleAttributesToRuleDomain(result.attributes, {
-    id: result.id,
-    logger: context.logger,
-    ruleType: context.ruleTypeRegistry.get(result.attributes.alertTypeId),
-    references: result.references,
-    includeSnoozeData,
-  });
+  const ruleDomain = transformRuleAttributesToRuleDomain(
+    result.attributes,
+    {
+      id: result.id,
+      logger: context.logger,
+      ruleType: context.ruleTypeRegistry.get(result.attributes.alertTypeId),
+      references: result.references,
+      includeSnoozeData,
+    },
+    context.isSystemAction
+  );
 
   const rule = transformRuleDomainToRule(ruleDomain);
 

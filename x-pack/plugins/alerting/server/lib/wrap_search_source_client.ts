@@ -6,8 +6,8 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { ISearchOptions } from '@kbn/search-types';
 import {
-  ISearchOptions,
   ISearchSource,
   ISearchStartSearchSource,
   SearchSource,

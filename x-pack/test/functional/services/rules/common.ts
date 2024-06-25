@@ -42,9 +42,9 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
     async defineIndexThresholdAlert(alertName: string) {
       await browser.refresh();
       await this.clickCreateAlertButton();
+      await testSubjects.click(`.index-threshold-SelectOption`);
       await testSubjects.scrollIntoView('ruleNameInput');
       await testSubjects.setValue('ruleNameInput', alertName);
-      await testSubjects.click(`.index-threshold-SelectOption`);
       await testSubjects.scrollIntoView('selectIndexExpression');
       await testSubjects.click('selectIndexExpression');
       await comboBox.set('thresholdIndexesComboBox', 'k');

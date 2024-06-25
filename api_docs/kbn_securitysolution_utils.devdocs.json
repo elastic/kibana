@@ -228,7 +228,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"match\" | \"wildcard\" | \"match_any\""
+                  "\"wildcard\" | \"match\" | \"match_any\""
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
@@ -237,62 +237,6 @@
               {
                 "parentPluginId": "@kbn/securitysolution-utils",
                 "id": "def-common.hasSimpleExecutableName.$1.value",
-                "type": "string",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-common.hasWildcardAndInvalidOperator",
-        "type": "Function",
-        "tags": [],
-        "label": "hasWildcardAndInvalidOperator",
-        "description": [],
-        "signature": [
-          "({ operator, value, }: { operator: \"match\" | \"wildcard\" | \"match_any\"; value: string; }) => boolean"
-        ],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/securitysolution-utils",
-            "id": "def-common.hasWildcardAndInvalidOperator.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  operator,\n  value,\n}",
-            "description": [],
-            "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/securitysolution-utils",
-                "id": "def-common.hasWildcardAndInvalidOperator.$1.operator",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "operator",
-                "description": [],
-                "signature": [
-                  "\"match\" | \"wildcard\" | \"match_any\""
-                ],
-                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/securitysolution-utils",
-                "id": "def-common.hasWildcardAndInvalidOperator.$1.value",
                 "type": "string",
                 "tags": [],
                 "label": "value",
@@ -413,7 +357,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"match\" | \"wildcard\" | \"match_any\""
+                  "\"wildcard\" | \"match\" | \"match_any\""
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
@@ -578,6 +522,65 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.validateHasWildcardWithWrongOperator",
+        "type": "Function",
+        "tags": [],
+        "label": "validateHasWildcardWithWrongOperator",
+        "description": [],
+        "signature": [
+          "({ operator, value, }: { operator: \"wildcard\" | \"match\" | \"nested\" | \"exists\" | \"match_any\"; value: string | string[]; }) => boolean"
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.validateHasWildcardWithWrongOperator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  operator,\n  value,\n}",
+            "description": [],
+            "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.validateHasWildcardWithWrongOperator.$1.operator",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "operator",
+                "description": [],
+                "signature": [
+                  "\"wildcard\" | \"match\" | \"nested\" | \"exists\" | \"match_any\""
+                ],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.validateHasWildcardWithWrongOperator.$1.value",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string | string[]"
+                ],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
         "id": "def-common.validatePotentialWildcardInput",
         "type": "Function",
         "tags": [],
@@ -671,7 +674,7 @@
         "label": "validateWildcardInput",
         "description": [],
         "signature": [
-          "(value?: string | undefined) => string | undefined"
+          "(value: string | string[]) => string | undefined"
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
@@ -680,17 +683,17 @@
           {
             "parentPluginId": "@kbn/securitysolution-utils",
             "id": "def-common.validateWildcardInput.$1",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "value",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | string[]"
             ],
             "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -790,7 +793,29 @@
         "label": "EntryTypes",
         "description": [],
         "signature": [
-          "\"match\" | \"wildcard\" | \"match_any\""
+          "\"wildcard\" | \"match\" | \"match_any\""
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.EventFiltersTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "EventFiltersTypes",
+        "description": [],
+        "signature": [
+          "\"nested\" | \"exists\" | ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.EntryTypes",
+            "text": "EntryTypes"
+          }
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
@@ -832,7 +857,7 @@
         "label": "TrustedAppEntryTypes",
         "description": [],
         "signature": [
-          "\"match\" | \"wildcard\""
+          "\"wildcard\" | \"match\""
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,

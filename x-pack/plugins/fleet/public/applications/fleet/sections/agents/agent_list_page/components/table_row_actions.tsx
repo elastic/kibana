@@ -14,7 +14,8 @@ import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/
 import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useLink } from '../../../../hooks';
+import { useLink } from '../../../../hooks';
+import { useAuthz } from '../../../../../../hooks/use_authz';
 import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -39,7 +40,7 @@ export const TableRowActions: React.FunctionComponent<{
   onRequestDiagnosticsClick,
 }) => {
   const { getHref } = useLink();
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const authz = useAuthz();
 
   const isUnenrolling = agent.status === 'unenrolling';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -55,7 +56,7 @@ export const TableRowActions: React.FunctionComponent<{
     </EuiContextMenuItem>,
   ];
 
-  if (agentPolicy?.is_managed === false) {
+  if (authz.fleet.allAgents && agentPolicy?.is_managed === false) {
     menuItems.push(
       <EuiContextMenuItem
         icon="tag"
@@ -85,7 +86,7 @@ export const TableRowActions: React.FunctionComponent<{
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="agentUnenrollBtn"
-        disabled={!hasFleetAllPrivileges || !agent.active}
+        disabled={!agent.active}
         icon="trash"
         onClick={() => {
           onUnenrollClick();
@@ -119,7 +120,7 @@ export const TableRowActions: React.FunctionComponent<{
       </EuiContextMenuItem>
     );
 
-    if (isStuckInUpdating(agent)) {
+    if (authz.fleet.allAgents && isStuckInUpdating(agent)) {
       menuItems.push(
         <EuiContextMenuItem
           key="agentRestartUpgradeBtn"
@@ -137,7 +138,7 @@ export const TableRowActions: React.FunctionComponent<{
       );
     }
 
-    if (agentTamperProtectionEnabled && agent.policy_id) {
+    if (authz.fleet.allAgents && agentTamperProtectionEnabled && agent.policy_id) {
       menuItems.push(
         <EuiContextMenuItem
           icon="minusInCircle"
@@ -158,13 +159,13 @@ export const TableRowActions: React.FunctionComponent<{
     }
   }
 
-  if (diagnosticFileUploadEnabled) {
+  if (authz.fleet.readAgents && diagnosticFileUploadEnabled) {
     menuItems.push(
       <EuiContextMenuItem
         key="requestAgentDiagnosticsBtn"
         icon="download"
         data-test-subj="requestAgentDiagnosticsBtn"
-        disabled={!hasFleetAllPrivileges || !isAgentRequestDiagnosticsSupported(agent)}
+        disabled={!isAgentRequestDiagnosticsSupported(agent)}
         onClick={() => {
           onRequestDiagnosticsClick();
         }}

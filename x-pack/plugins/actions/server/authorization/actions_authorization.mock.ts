@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsAuthorization } from './actions_authorization';
+import type { ActionsAuthorization } from './actions_authorization';
 
 export type ActionsAuthorizationMock = jest.Mocked<PublicMethodsOf<ActionsAuthorization>>;
 

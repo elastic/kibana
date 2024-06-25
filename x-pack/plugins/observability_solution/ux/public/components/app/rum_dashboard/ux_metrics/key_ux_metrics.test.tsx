@@ -45,20 +45,10 @@ describe('KeyUXMetrics', () => {
 
     // Tests include the word "info" between the task and time to account for the rendered text coming from
     // the EuiIcon (tooltip) embedded within each stat description
-    expect(
-      getAllByText(checkText('Longest long task durationInfo271 ms'))[0]
-    ).toBeInTheDocument();
-    expect(
-      getAllByText(checkText('Total long tasks durationInfo520 ms'))[0]
-    ).toBeInTheDocument();
-    expect(
-      getAllByText(checkText('No. of long tasksInfo3'))[0]
-    ).toBeInTheDocument();
-    expect(
-      getAllByText(checkText('Total blocking timeInfo271 ms'))[0]
-    ).toBeInTheDocument();
-    expect(
-      getAllByText(checkText('First contentful paintInfo1.27 s'))[0]
-    ).toBeInTheDocument();
+    expect(getAllByText(checkText('Longest long task durationInfo271 ms'))[0]).toBeInTheDocument();
+    expect(getAllByText(checkText('Total long tasks durationInfo520 ms'))[0]).toBeInTheDocument();
+    expect(getAllByText(checkText('No. of long tasksInfo3'))[0]).toBeInTheDocument();
+    expect(getAllByText(checkText('Total blocking timeInfo271 ms'))[0]).toBeInTheDocument();
+    expect(getAllByText(checkText('First contentful paintInfo1.27 s'))[0]).toBeInTheDocument();
   });
 });

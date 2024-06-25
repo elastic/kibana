@@ -28,8 +28,7 @@ export function TruncateHeightSection({ children, previewHeight }: Props) {
 
   useEffect(() => {
     if (contentContainerEl.current) {
-      const shouldShow =
-        contentContainerEl.current.scrollHeight > previewHeight;
+      const shouldShow = contentContainerEl.current.scrollHeight > previewHeight;
       setShowToggle(shouldShow);
     }
   }, [children, previewHeight]);

@@ -69,11 +69,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await aiops.logRateAnalysisPage.assertSearchPanelExists();
 
-      await ml.testExecution.logTestStep('displays empty prompt');
-      await aiops.logRateAnalysisPage.assertNoWindowParametersEmptyPromptExists();
+      await ml.testExecution.logTestStep('displays prompt');
+      if (testData.expected.prompt === 'empty') {
+        await aiops.logRateAnalysisPage.assertNoWindowParametersEmptyPromptExists();
+      } else if (testData.expected.prompt === 'change-point') {
+        await aiops.logRateAnalysisPage.assertChangePointDetectedPromptExists();
+      } else {
+        throw new Error('Invalid prompt');
+      }
 
       await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
       await aiops.logRateAnalysisPage.clickDocumentCountChart(testData.chartClickCoordinates);
+
+      if (!testData.autoRun) {
+        await aiops.logRateAnalysisPage.assertNoAutoRunButtonExists();
+        await aiops.logRateAnalysisPage.clickNoAutoRunButton();
+      }
+
       await aiops.logRateAnalysisPage.assertAnalysisSectionExists();
 
       if (testData.brushDeviationTargetTimestamp) {
@@ -203,6 +215,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await aiops.logRateAnalysisResultsGroupsTable.expandRow();
         await aiops.logRateAnalysisResultsGroupsTable.scrollAnalysisTableIntoView();
 
+        await ml.testExecution.logTestStep('open the column filter');
+        await aiops.logRateAnalysisPage.assertFilterPopoverButtonExists(
+          'aiopsColumnFilterButton',
+          false
+        );
+        await aiops.logRateAnalysisPage.clickFilterPopoverButton('aiopsColumnFilterButton', true);
+        await aiops.logRateAnalysisPage.assertFieldSelectorFieldNameList(
+          testData.expected.columnSelectorPopover
+        );
+
+        await ml.testExecution.logTestStep('filter columns');
+        await aiops.logRateAnalysisPage.setFieldSelectorSearch(testData.columnSelectorSearch);
+        await aiops.logRateAnalysisPage.assertFieldSelectorFieldNameList([
+          testData.columnSelectorSearch,
+        ]);
+        await aiops.logRateAnalysisPage.clickFieldSelectorListItem(
+          'aiopsFieldSelectorFieldNameListItem'
+        );
+        await aiops.logRateAnalysisPage.assertFieldFilterApplyButtonExists(false);
+        await aiops.logRateAnalysisPage.clickFieldFilterApplyButton('aiopsColumnFilterButton');
+
         const analysisTable = await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
 
         const actualAnalysisTable = orderBy(analysisTable, ['fieldName', 'fieldValue']);
@@ -219,8 +252,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         await ml.testExecution.logTestStep('open the field filter');
-        await aiops.logRateAnalysisPage.assertFieldFilterPopoverButtonExists(false);
-        await aiops.logRateAnalysisPage.clickFieldFilterPopoverButton(true);
+        await aiops.logRateAnalysisPage.assertFilterPopoverButtonExists(
+          'aiopsFieldFilterButton',
+          false
+        );
+        await aiops.logRateAnalysisPage.clickFilterPopoverButton('aiopsFieldFilterButton', true);
         await aiops.logRateAnalysisPage.assertFieldSelectorFieldNameList(
           testData.expected.fieldSelectorPopover
         );
@@ -237,7 +273,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         if (testData.fieldSelectorApplyAvailable) {
           await ml.testExecution.logTestStep('regroup results');
-          await aiops.logRateAnalysisPage.clickFieldFilterApplyButton();
+          await aiops.logRateAnalysisPage.clickFieldFilterApplyButton('aiopsFieldFilterButton');
 
           const filteredAnalysisGroupsTable =
             await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();

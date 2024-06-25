@@ -9,7 +9,11 @@ import { EuiHealth } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
-import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import {
+  AgentStatus,
+  EndpointAgentStatus,
+} from '../../../../common/components/endpoint/agents/agent_status';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -17,25 +21,25 @@ import { DefaultFieldRenderer } from '../../../../timelines/components/field_ren
 import * as i18n from './translations';
 import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
 import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
-import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 interface Props {
   contextID?: string;
   data: EndpointFields | null;
-  sourcererScopeId?: SourcererScopeName;
+  scopeId?: string;
 }
 
-export const EndpointOverview = React.memo<Props>(({ contextID, data, sourcererScopeId }) => {
+export const EndpointOverview = React.memo<Props>(({ contextID, data, scopeId }) => {
+  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
   const getDefaultRenderer = useCallback(
     (fieldName: string, fieldData: EndpointFields, attrName: string) => (
       <DefaultFieldRenderer
         rowItems={[getOr('', fieldName, fieldData)]}
         attrName={attrName}
         idPrefix={contextID ? `endpoint-overview-${contextID}` : 'endpoint-overview'}
-        sourcererScopeId={sourcererScopeId}
+        scopeId={scopeId}
       />
     ),
-    [contextID, sourcererScopeId]
+    [contextID, scopeId]
   );
   const descriptionLists: Readonly<DescriptionList[][]> = useMemo(() => {
     const appliedPolicy = data?.hostInfo?.metadata.Endpoint.policy.applied;
@@ -78,18 +82,23 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data, sourcererS
         {
           title: i18n.FLEET_AGENT_STATUS,
           description:
+            // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled and removed
             data != null && data.hostInfo ? (
-              <EndpointAgentStatus
-                endpointHostInfo={data.hostInfo}
-                data-test-subj="endpointHostAgentStatus"
-              />
+              agentStatusClientEnabled ? (
+                <AgentStatus agentId={data.hostInfo.metadata.agent.id} agentType="endpoint" />
+              ) : (
+                <EndpointAgentStatus
+                  endpointHostInfo={data.hostInfo}
+                  data-test-subj="endpointHostAgentStatus"
+                />
+              )
             ) : (
               getEmptyTagValue()
             ),
         },
       ],
     ];
-  }, [data, getDefaultRenderer]);
+  }, [agentStatusClientEnabled, data, getDefaultRenderer]);
 
   return (
     <>

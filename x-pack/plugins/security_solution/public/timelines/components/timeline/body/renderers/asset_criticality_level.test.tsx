@@ -21,7 +21,7 @@ const defaultProps = {
   fieldType: 'testType',
   isAggregatable: true,
   isDraggable: true,
-  value: 'low',
+  value: 'low_impact',
 };
 
 describe('AssetCriticalityLevel', () => {
@@ -30,6 +30,6 @@ describe('AssetCriticalityLevel', () => {
       wrapper: TestProviders,
     });
 
-    expect(getByTestId('AssetCriticalityLevel-score-badge')).toHaveTextContent('low');
+    expect(getByTestId('AssetCriticalityLevel-score-badge')).toHaveTextContent('Low Impact');
   });
 });

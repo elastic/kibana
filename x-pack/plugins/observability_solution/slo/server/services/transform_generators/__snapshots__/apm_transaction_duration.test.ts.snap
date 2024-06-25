@@ -195,11 +195,6 @@ Object {
       "field": "slo.id",
     },
   },
-  "slo.instanceId": Object {
-    "terms": Object {
-      "field": "slo.instanceId",
-    },
-  },
   "slo.revision": Object {
     "terms": Object {
       "field": "slo.revision",
@@ -264,11 +259,6 @@ Object {
       "field": "slo.id",
     },
   },
-  "slo.instanceId": Object {
-    "terms": Object {
-      "field": "slo.instanceId",
-    },
-  },
   "slo.revision": Object {
     "terms": Object {
       "field": "slo.revision",
@@ -326,11 +316,6 @@ Object {
   "slo.id": Object {
     "terms": Object {
       "field": "slo.id",
-    },
-  },
-  "slo.instanceId": Object {
-    "terms": Object {
-      "field": "slo.instanceId",
     },
   },
   "slo.revision": Object {
@@ -397,11 +382,6 @@ Object {
       "field": "slo.id",
     },
   },
-  "slo.instanceId": Object {
-    "terms": Object {
-      "field": "slo.instanceId",
-    },
-  },
   "slo.revision": Object {
     "terms": Object {
       "field": "slo.revision",
@@ -420,13 +400,13 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 3,
+    "version": 3.3,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3",
-    "pipeline": ".slo-observability.sli.pipeline-v3",
+    "index": ".slo-observability.sli-v3.3",
+    "pipeline": ".slo-observability.sli.pipeline-v3.3",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -488,9 +468,175 @@ Object {
           "field": "slo.id",
         },
       },
-      "slo.instanceId": Object {
+      "slo.revision": Object {
         "terms": Object {
-          "field": "slo.instanceId",
+          "field": "slo.revision",
+        },
+      },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": "metrics-apm*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "metricset.name": "transaction",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.duration.histogram",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "match": Object {
+              "service.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "service.environment": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.type": "irrelevant",
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {
+      "slo.id": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo.revision": Object {
+        "script": Object {
+          "source": "emit(1)",
+        },
+        "type": "long",
+      },
+    },
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "1m",
+      "field": "@timestamp",
+    },
+  },
+  "transform_id": "slo-irrelevant-1",
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator returns the expected transform params for timeslices slo using a timesliceTarget = 0 1`] = `
+Object {
+  "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3.3,
+  },
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
+  "dest": Object {
+    "index": ".slo-observability.sli-v3.3",
+    "pipeline": ".slo-observability.sli.pipeline-v3.3",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "_numerator": Object {
+        "range": Object {
+          "field": "transaction.duration.histogram",
+          "keyed": true,
+          "ranges": Array [
+            Object {
+              "key": "target",
+              "to": 500000,
+            },
+          ],
+        },
+      },
+      "slo.denominator": Object {
+        "value_count": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      "slo.isGoodSlice": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "goodEvents": "slo.numerator.value",
+            "totalEvents": "slo.denominator.value",
+          },
+          "script": "params.goodEvents / params.totalEvents > 0 ? 1 : 0",
+        },
+      },
+      "slo.numerator": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "numerator": "_numerator['target']>_count",
+          },
+          "script": "params.numerator",
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "@timestamp",
+          "fixed_interval": "2m",
+        },
+      },
+      "service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+        },
+      },
+      "service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
+      "slo.id": Object {
+        "terms": Object {
+          "field": "slo.id",
         },
       },
       "slo.revision": Object {
@@ -573,12 +719,6 @@ Object {
         },
         "type": "keyword",
       },
-      "slo.instanceId": Object {
-        "script": Object {
-          "source": "emit('*')",
-        },
-        "type": "keyword",
-      },
       "slo.revision": Object {
         "script": Object {
           "source": "emit(1)",
@@ -602,13 +742,13 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 3,
+    "version": 3.3,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3",
-    "pipeline": ".slo-observability.sli.pipeline-v3",
+    "index": ".slo-observability.sli-v3.3",
+    "pipeline": ".slo-observability.sli.pipeline-v3.3",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -661,11 +801,6 @@ Object {
           "field": "slo.id",
         },
       },
-      "slo.instanceId": Object {
-        "terms": Object {
-          "field": "slo.instanceId",
-        },
-      },
       "slo.revision": Object {
         "terms": Object {
           "field": "slo.revision",
@@ -743,12 +878,6 @@ Object {
       "slo.id": Object {
         "script": Object {
           "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "slo.instanceId": Object {
-        "script": Object {
-          "source": "emit('*')",
         },
         "type": "keyword",
       },

@@ -131,9 +131,9 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
 
     // When the form is cancelled and we're showing the discard warning,
     // reset the timeline and close the modal.
-    const handleCancel = useCallback(() => {
+    const handleCancel = useCallback(async () => {
       if (showWarning) {
-        resetTimeline();
+        await resetTimeline();
       }
       closeSaveTimeline();
     }, [closeSaveTimeline, resetTimeline, showWarning]);

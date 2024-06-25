@@ -16,13 +16,7 @@ import { Environment } from '../../../../../common/environment_rt';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 
-function FullTraceButton({
-  isLoading,
-  isDisabled,
-}: {
-  isLoading?: boolean;
-  isDisabled?: boolean;
-}) {
+function FullTraceButton({ isLoading, isDisabled }: { isLoading?: boolean; isDisabled?: boolean }) {
   return (
     <EuiButton
       data-test-subj="apmFullTraceButtonViewFullTraceButton"
@@ -72,12 +66,9 @@ export function MaybeViewTraceLink({
   if (!rootWaterfallTransaction) {
     return (
       <EuiToolTip
-        content={i18n.translate(
-          'xpack.apm.transactionDetails.noTraceParentButtonTooltip',
-          {
-            defaultMessage: 'The trace parent cannot be found',
-          }
-        )}
+        content={i18n.translate('xpack.apm.transactionDetails.noTraceParentButtonTooltip', {
+          defaultMessage: 'The trace parent cannot be found',
+        })}
       >
         <FullTraceButton isDisabled />
       </EuiToolTip>
@@ -91,12 +82,9 @@ export function MaybeViewTraceLink({
   if (isRoot) {
     return (
       <EuiToolTip
-        content={i18n.translate(
-          'xpack.apm.transactionDetails.viewingFullTraceButtonTooltip',
-          {
-            defaultMessage: 'Currently viewing the full trace',
-          }
-        )}
+        content={i18n.translate('xpack.apm.transactionDetails.viewingFullTraceButtonTooltip', {
+          defaultMessage: 'Currently viewing the full trace',
+        })}
       >
         <FullTraceButton isDisabled />
       </EuiToolTip>

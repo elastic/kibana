@@ -10,6 +10,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import { useMlKibana } from '../../../contexts/kibana';
@@ -17,7 +18,7 @@ import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
-import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
+import { preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { NavigateToPageButton } from '../../components/navigate_to_page_button';
 
@@ -25,6 +26,10 @@ enum MODE {
   NEW_JOB,
   DATAVISUALIZER,
 }
+
+const Page = dynamic(async () => ({
+  default: (await import('../../../jobs/new_job/pages/index_or_search')).Page,
+}));
 
 interface IndexOrSearchPageProps extends PageProps {
   nextStepPath: string;

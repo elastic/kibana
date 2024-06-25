@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export { MIGRATION_CLIENT_OPTIONS } from './constants';
 export { SavedObjectsService } from './saved_objects_service';
 export type {
   InternalSavedObjectsServiceStart,

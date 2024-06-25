@@ -9,7 +9,7 @@
 import { compact, isEqual, isUndefined, omitBy } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';

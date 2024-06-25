@@ -36,7 +36,10 @@ export const AnalyticsCollectionDataViewLogic = kea<
   },
   listeners: ({ actions }) => ({
     fetchedAnalyticsCollection: async (collection) => {
-      actions.setDataView(await findOrCreateDataView(collection));
+      const dataView = await findOrCreateDataView(collection);
+      if (dataView) {
+        actions.setDataView(dataView);
+      }
     },
   }),
   path: ['enterprise_search', 'analytics', 'collection', 'dataView'],

@@ -15,7 +15,7 @@ import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
@@ -46,13 +46,7 @@ import { VisualizationMissedSavedObjectError } from '../components/visualization
 import VisualizationError from '../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { SerializedVis, Vis } from '../vis';
-import {
-  getApplication,
-  getExecutionContext,
-  getExpressions,
-  getTheme,
-  getUiActions,
-} from '../services';
+import { getApplication, getExecutionContext, getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
@@ -362,7 +356,13 @@ export class VisualizeEmbeddable
     }
 
     if (this.warningDomNode) {
-      render(<Warnings warnings={warnings || []} />, this.warningDomNode);
+      const { core } = this.deps.start();
+      render(
+        <KibanaRenderContextProvider {...core}>
+          <Warnings warnings={warnings || []} />
+        </KibanaRenderContextProvider>,
+        this.warningDomNode
+      );
     }
   }
 
@@ -447,13 +447,14 @@ export class VisualizeEmbeddable
 
     this.domNode = div;
     super.render(this.domNode);
+    const { core } = this.deps.start();
 
     render(
-      <KibanaThemeProvider theme$={getTheme().theme$}>
+      <KibanaRenderContextProvider {...core}>
         <div className="visChart__spinner">
           <EuiLoadingChart mono size="l" />
         </div>
-      </KibanaThemeProvider>,
+      </KibanaRenderContextProvider>,
       this.domNode
     );
 
@@ -621,7 +622,7 @@ export class VisualizeEmbeddable
     }
 
     if (this.handler && !abortController.signal.aborted) {
-      await this.handler.update(this.expression, expressionParams);
+      this.handler.update(this.expression, expressionParams);
     }
   }
 
@@ -667,12 +668,14 @@ export class VisualizeEmbeddable
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const { data, spaces, savedObjectsTaggingOss } = await this.deps.start().plugins;
+    const { plugins, core } = this.deps.start();
+    const { data, spaces, savedObjectsTaggingOss } = plugins;
     const savedVis = await getSavedVisualization({
       search: data.search,
       dataViews: data.dataViews,
       spaces,
       savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+      ...core,
     });
     if (!savedVis) {
       throw new Error('Error creating a saved vis object');

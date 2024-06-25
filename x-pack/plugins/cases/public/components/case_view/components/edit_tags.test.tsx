@@ -42,18 +42,11 @@ describe('EditTags ', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('renders no tags, and then edit', async () => {
+  it('renders no tags message', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
     expect(await screen.findByTestId('no-tags')).toBeInTheDocument();
-
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('no-tags')).not.toBeInTheDocument();
-    });
-
-    expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
+    expect(await screen.findByTestId('tag-list-edit-button')).toBeInTheDocument();
   });
 
   it('edit tag from options on submit', async () => {

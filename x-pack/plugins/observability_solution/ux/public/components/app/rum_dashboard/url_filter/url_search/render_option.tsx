@@ -29,16 +29,10 @@ export type UrlOption<T = { [key: string]: any }> = {
   title: string;
 } & EuiSelectableOption<T>;
 
-export function selectableRenderOptions(
-  option: UrlOption,
-  searchValue: string
-) {
+export function selectableRenderOptions(option: UrlOption, searchValue: string) {
   return (
     <>
-      <EuiHighlight
-        className="euiSelectableTemplateSitewide__listItemTitle"
-        search={searchValue}
-      >
+      <EuiHighlight className="euiSelectableTemplateSitewide__listItemTitle" search={searchValue}>
         {option.label}
       </EuiHighlight>
       {renderOptionMeta(option.meta)}

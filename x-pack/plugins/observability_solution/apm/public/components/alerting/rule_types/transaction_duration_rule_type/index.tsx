@@ -11,10 +11,7 @@ import { defaults, map, omit } from 'lodash';
 import React, { useCallback, useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  ForLastExpression,
-  TIME_UNITS,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { ForLastExpression, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
@@ -22,11 +19,7 @@ import { SearchConfigurationType } from '../../../../../common/rules/schema';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import {
-  FETCH_STATUS,
-  isPending,
-  useFetcher,
-} from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import {
   getMaxY,
@@ -72,18 +65,15 @@ export interface TransactionDurationRuleParams {
 }
 
 const TRANSACTION_ALERT_AGGREGATION_TYPES: Record<AggregationType, string> = {
-  [AggregationType.Avg]: i18n.translate(
-    'xpack.apm.transactionDurationAlert.aggregationType.avg',
-    { defaultMessage: 'Average' }
-  ),
-  [AggregationType.P95]: i18n.translate(
-    'xpack.apm.transactionDurationAlert.aggregationType.95th',
-    { defaultMessage: '95th percentile' }
-  ),
-  [AggregationType.P99]: i18n.translate(
-    'xpack.apm.transactionDurationAlert.aggregationType.99th',
-    { defaultMessage: '99th percentile' }
-  ),
+  [AggregationType.Avg]: i18n.translate('xpack.apm.transactionDurationAlert.aggregationType.avg', {
+    defaultMessage: 'Average',
+  }),
+  [AggregationType.P95]: i18n.translate('xpack.apm.transactionDurationAlert.aggregationType.95th', {
+    defaultMessage: '95th percentile',
+  }),
+  [AggregationType.P99]: i18n.translate('xpack.apm.transactionDurationAlert.aggregationType.99th', {
+    defaultMessage: '99th percentile',
+  }),
 };
 
 interface Props {
@@ -122,27 +112,24 @@ export function TransactionDurationRuleType(props: Props) {
         windowUnit: params.windowUnit,
       });
       if (params.windowSize && start && end) {
-        return callApmApi(
-          'GET /internal/apm/rule_types/transaction_duration/chart_preview',
-          {
-            params: {
-              query: {
-                aggregationType: params.aggregationType,
-                environment: params.environment,
-                serviceName: params.serviceName,
-                transactionType: params.transactionType,
-                transactionName: params.transactionName,
-                interval,
-                start,
-                end,
-                groupBy: params.groupBy,
-                searchConfiguration: params.searchConfiguration?.query?.query
-                  ? JSON.stringify(params.searchConfiguration)
-                  : undefined,
-              },
+        return callApmApi('GET /internal/apm/rule_types/transaction_duration/chart_preview', {
+          params: {
+            query: {
+              aggregationType: params.aggregationType,
+              environment: params.environment,
+              serviceName: params.serviceName,
+              transactionType: params.transactionType,
+              transactionName: params.transactionName,
+              interval,
+              start,
+              end,
+              groupBy: params.groupBy,
+              searchConfiguration: params.searchConfiguration?.query?.query
+                ? JSON.stringify(params.searchConfiguration)
+                : undefined,
             },
-          }
-        );
+          },
+        });
       }
     },
     [
@@ -216,10 +203,7 @@ export function TransactionDurationRuleType(props: Props) {
     <EnvironmentField
       currentValue={params.environment}
       onChange={(value) =>
-        setRuleParams(
-          'environment',
-          value !== '' ? value : ENVIRONMENT_ALL.value
-        )
+        setRuleParams('environment', value !== '' ? value : ENVIRONMENT_ALL.value)
       }
       serviceName={params.serviceName}
     />,
@@ -258,12 +242,8 @@ export function TransactionDurationRuleType(props: Props) {
       onChange={(value) => setRuleParams('threshold', value || 0)}
     />,
     <ForLastExpression
-      onChangeWindowSize={(timeWindowSize) =>
-        setRuleParams('windowSize', timeWindowSize || '')
-      }
-      onChangeWindowUnit={(timeWindowUnit) =>
-        setRuleParams('windowUnit', timeWindowUnit)
-      }
+      onChangeWindowSize={(timeWindowSize) => setRuleParams('windowSize', timeWindowSize || '')}
+      onChangeWindowUnit={(timeWindowUnit) => setRuleParams('windowUnit', timeWindowUnit)}
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
       errors={{
@@ -273,20 +253,14 @@ export function TransactionDurationRuleType(props: Props) {
     />,
   ];
 
-  const fields = [
-    ...(!ruleParams.useKqlFilter ? filterFields : []),
-    ...criteriaFields,
-  ];
+  const fields = [...(!ruleParams.useKqlFilter ? filterFields : []), ...criteriaFields];
 
   const groupAlertsBy = (
     <>
       <EuiFormRow
-        label={i18n.translate(
-          'xpack.apm.ruleFlyout.transactionDuration.createAlertPerText',
-          {
-            defaultMessage: 'Group alerts by',
-          }
-        )}
+        label={i18n.translate('xpack.apm.ruleFlyout.transactionDuration.createAlertPerText', {
+          defaultMessage: 'Group alerts by',
+        })}
         helpText={i18n.translate(
           'xpack.apm.ruleFlyout.transactionDuration.createAlertPerHelpText',
           {
@@ -301,11 +275,7 @@ export function TransactionDurationRuleType(props: Props) {
           onChange={onGroupByChange}
           options={{ groupBy: ruleParams.groupBy }}
           fields={[TRANSACTION_NAME]}
-          preSelectedOptions={[
-            SERVICE_NAME,
-            SERVICE_ENVIRONMENT,
-            TRANSACTION_TYPE,
-          ]}
+          preSelectedOptions={[SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE]}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />

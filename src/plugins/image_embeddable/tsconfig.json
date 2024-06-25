@@ -1,29 +1,30 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": ["public/**/*", "common/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/embeddable-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/files-plugin",
     "@kbn/security-plugin",
     "@kbn/shared-ux-file-context",
     "@kbn/shared-ux-file-upload",
     "@kbn/shared-ux-file-picker",
     "@kbn/shared-ux-file-types",
-    "@kbn/i18n-react",
     "@kbn/shared-ux-file-mocks",
-    "@kbn/i18n",
-    "@kbn/core-http-browser",
     "@kbn/shared-ux-file-image",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core-http-browser",
     "@kbn/ui-actions-plugin",
-    "@kbn/screenshot-mode-plugin"
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-publishing",
+    "@kbn/react-kibana-mount",
+    "@kbn/security-plugin-types-public",
+    "@kbn/embeddable-enhanced-plugin"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

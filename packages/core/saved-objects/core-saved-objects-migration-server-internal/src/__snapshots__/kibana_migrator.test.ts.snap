@@ -2,22 +2,6 @@
 
 exports[`KibanaMigrator getActiveMappings returns full index mappings w/ core properties 1`] = `
 Object {
-  "_meta": Object {
-    "migrationMappingPropertyHashes": Object {
-      "amap": "510f1f0adb69830cf8a1c5ce2923ed82",
-      "bmap": "510f1f0adb69830cf8a1c5ce2923ed82",
-      "coreMigrationVersion": "2f4316de49999235636386fe51dc06c1",
-      "created_at": "00da57df13e94e9d98437d13ace4bfe0",
-      "managed": "88cf246b441a6362458cb6a56ca3f7d7",
-      "namespace": "2f4316de49999235636386fe51dc06c1",
-      "namespaces": "2f4316de49999235636386fe51dc06c1",
-      "originId": "2f4316de49999235636386fe51dc06c1",
-      "references": "7997cf5a56cc02bdc9c93361bde732b0",
-      "type": "2f4316de49999235636386fe51dc06c1",
-      "typeMigrationVersion": "539e3ecebb3abc1133618094cc3b7ae7",
-      "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
-    },
-  },
   "dynamic": "strict",
   "properties": Object {
     "amap": Object {
@@ -39,6 +23,9 @@ Object {
     },
     "created_at": Object {
       "type": "date",
+    },
+    "created_by": Object {
+      "type": "keyword",
     },
     "managed": Object {
       "type": "boolean",
@@ -74,6 +61,9 @@ Object {
     },
     "updated_at": Object {
       "type": "date",
+    },
+    "updated_by": Object {
+      "type": "keyword",
     },
   },
 }

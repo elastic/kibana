@@ -32,7 +32,7 @@ interface CreateTransformArgs {
 }
 
 export const useCreateTransform = () => {
-  const { http, i18n: i18nStart, theme } = useAppDependencies();
+  const { http, ...startServices } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
 
@@ -42,10 +42,7 @@ export const useCreateTransform = () => {
         defaultMessage: 'An error occurred creating the transform {transformId}:',
         values: { transformId },
       }),
-      text: toMountPoint(<ToastNotificationText text={getErrorMessage(error)} />, {
-        theme,
-        i18n: i18nStart,
-      }),
+      text: toMountPoint(<ToastNotificationText text={getErrorMessage(error)} />, startServices),
     });
   }
 

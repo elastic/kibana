@@ -14,8 +14,10 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
+          aria-modal="true"
           class="euiModal emotion-euiModal-defaultMaxWidth"
           data-test-subj="EditModal"
+          role="dialog"
           tabindex="0"
         >
           <button
@@ -77,7 +79,7 @@ Object {
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText euiFieldText--fullWidth"
+                          class="euiFieldText emotion-euiFieldText-fullWidth"
                           data-test-subj="editModalNameTextField"
                           id="generated-id"
                           name="name"
@@ -107,13 +109,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--euiTextArea"
+                      class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--euiTextArea emotion-euiTextArea"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <textarea
-                          class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
+                          class="euiTextArea emotion-euiTextArea-vertical-fullWidth"
                           data-test-subj="editModalDescriptionTextField"
                           id="generated-id"
                           name="description"

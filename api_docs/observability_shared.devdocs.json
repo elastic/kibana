@@ -65,7 +65,7 @@
               },
               "<object, unknown>, pluginsSetup: ",
               "ObservabilitySharedSetup",
-              ") => { locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
+              ") => { registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -376,7 +376,7 @@
         "label": "EmbeddableFlamegraph",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "({ height, ...props }: Props) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
         "deprecated": false,
@@ -387,7 +387,7 @@
             "id": "def-public.EmbeddableFlamegraph.$1",
             "type": "Object",
             "tags": [],
-            "label": "props",
+            "label": "{ height, ...props }",
             "description": [],
             "signature": [
               "Props"
@@ -682,7 +682,7 @@
                     "section": "def-common.Trigger",
                     "text": "Trigger"
                   },
-                  ") => void; readonly getTrigger: (triggerId: string) => ",
+                  ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
                   "TriggerContract",
                   "<object>; readonly registerAction: <Context extends object>(definition: ",
                   {
@@ -785,6 +785,166 @@
                   "{ [x: string]: any; }"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability_shared/public/services/get_context_menu_items_from_actions.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.getSurveyFeedbackURL",
+        "type": "Function",
+        "tags": [],
+        "label": "getSurveyFeedbackURL",
+        "description": [],
+        "signature": [
+          "({ formUrl, formConfig, kibanaVersion, sanitizedPath, isCloudEnv, isServerlessEnv, nodeType, }: { formUrl: string; formConfig?: ",
+          "FormConfig",
+          " | undefined; kibanaVersion?: string | undefined; deploymentType?: string | undefined; sanitizedPath?: string | undefined; mlJobType?: string | undefined; isCloudEnv?: boolean | undefined; isServerlessEnv?: boolean | undefined; nodeType?: ",
+          "NodeType",
+          " | undefined; }) => string"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.getSurveyFeedbackURL.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  formUrl,\n  formConfig,\n  kibanaVersion,\n  sanitizedPath,\n  isCloudEnv,\n  isServerlessEnv,\n  nodeType,\n}",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.getSurveyFeedbackURL.$1.formUrl",
+                "type": "string",
+                "tags": [],
+                "label": "formUrl",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.getSurveyFeedbackURL.$1.formConfig",
+                "type": "Object",
+                "tags": [],
+                "label": "formConfig",
+                "description": [],
+                "signature": [
+                  "FormConfig",
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.getSurveyFeedbackURL.$1.kibanaVersion",
+                "type": "string",
+                "tags": [],
+                "label": "kibanaVersion",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.getSurveyFeedbackURL.$1.deploymentType",
+                "type": "string",
+                "tags": [],
+                "label": "deploymentType",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.getSurveyFeedbackURL.$1.sanitizedPath",
+                "type": "string",
+                "tags": [],
+                "label": "sanitizedPath",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.getSurveyFeedbackURL.$1.mlJobType",
+                "type": "string",
+                "tags": [],
+                "label": "mlJobType",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.getSurveyFeedbackURL.$1.isCloudEnv",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isCloudEnv",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.getSurveyFeedbackURL.$1.isServerlessEnv",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isServerlessEnv",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.getSurveyFeedbackURL.$1.nodeType",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "nodeType",
+                "description": [],
+                "signature": [
+                  "NodeType",
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1472,9 +1632,7 @@
         "label": "useEditableSettings",
         "description": [],
         "signature": [
-          "(app: ",
-          "ObservabilityApp",
-          ", settingsKeys: string[]) => { fields: Record<string, ",
+          "(settingsKeys: string[]) => { fields: Record<string, ",
           {
             "pluginId": "@kbn/management-settings-types",
             "scope": "common",
@@ -1522,7 +1680,7 @@
             "section": "def-common.UiSettingsType",
             "text": "UiSettingsType"
           },
-          ">; saveAll: () => Promise<void>; isSaving: boolean; cleanUnsavedChanges: () => void; }"
+          ">; saveAll: () => Promise<void>; isSaving: boolean; cleanUnsavedChanges: () => void; saveSingleSetting: (id: string, change: string | number | boolean | (string | number)[] | null | undefined) => Promise<void>; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_editable_settings.tsx",
         "deprecated": false,
@@ -1531,21 +1689,6 @@
           {
             "parentPluginId": "observabilityShared",
             "id": "def-public.useEditableSettings.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "app",
-            "description": [],
-            "signature": [
-              "ObservabilityApp"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_editable_settings.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.useEditableSettings.$2",
             "type": "Array",
             "tags": [],
             "label": "settingsKeys",
@@ -2207,6 +2350,108 @@
             "label": "metric",
             "description": [],
             "path": "x-pack/plugins/observability_solution/observability_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.AssetDetailsLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "AssetDetailsLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityShared",
+            "scope": "public",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-public.AssetDetailsLocatorParams",
+            "text": "AssetDetailsLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AssetDetailsLocatorParams.assetType",
+            "type": "string",
+            "tags": [],
+            "label": "assetType",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AssetDetailsLocatorParams.assetId",
+            "type": "string",
+            "tags": [],
+            "label": "assetId",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AssetDetailsLocatorParams.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AssetDetailsLocatorParams._a",
+            "type": "Object",
+            "tags": [],
+            "label": "_a",
+            "description": [],
+            "signature": [
+              "{ time?: { from?: string | undefined; to?: string | undefined; } | undefined; interval?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.AssetDetailsLocatorParams.assetDetails",
+            "type": "Object",
+            "tags": [],
+            "label": "assetDetails",
+            "description": [],
+            "signature": [
+              "{ tabId?: string | undefined; dashboardId?: string | undefined; dateRange?: { from: string; to: string; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3132,6 +3377,36 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.ASSET_DETAILS_FLYOUT_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ASSET_DETAILS_FLYOUT_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"ASSET_DETAILS_FLYOUT_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_flyout_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.ASSET_DETAILS_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ASSET_DETAILS_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"ASSET_DETAILS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.casesFeatureId",
         "type": "string",
         "tags": [],
@@ -3209,6 +3484,21 @@
           "\"EMBEDDABLE_STACK_TRACES\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.INVENTORY_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "INVENTORY_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"INVENTORY_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/inventory_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3311,7 +3601,7 @@
         "label": "ObservabilitySharedPluginSetup",
         "description": [],
         "signature": [
-          "{ locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
+          "{ registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
           "Observable",
           "<",
           {
@@ -3524,6 +3814,46 @@
   "common": {
     "classes": [],
     "functions": [
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.colorTransformer",
+        "type": "Function",
+        "tags": [],
+        "label": "colorTransformer",
+        "description": [],
+        "signature": [
+          "(color: ",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.Color",
+            "text": "Color"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/color_palette.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.colorTransformer.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "\"color0\" | \"color1\" | \"color2\" | \"color3\" | \"color4\" | \"color5\" | \"color6\" | \"color7\" | \"color8\" | \"color9\""
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/color_palette.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observabilityShared",
         "id": "def-common.getInspectResponse",
@@ -3896,6 +4226,21 @@
           "\"transaction.experience.cls\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.Color",
+        "type": "Type",
+        "tags": [],
+        "label": "Color",
+        "description": [],
+        "signature": [
+          "\"color0\" | \"color1\" | \"color2\" | \"color3\" | \"color4\" | \"color5\" | \"color6\" | \"color7\" | \"color8\" | \"color9\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/color_palette.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -20,6 +20,9 @@ jest.mock('../../../../../kibana_services', () => {
         },
       };
     },
+    getSpaceId() {
+      return 'default';
+    },
   };
 });
 
@@ -52,7 +55,7 @@ describe('createLayerDescriptor', () => {
             applyGlobalQuery: true,
             applyGlobalTime: true,
             id: '12345',
-            indexPatternId: 'apm_static_index_pattern_id',
+            indexPatternId: 'apm_static_data_view_id_default',
             metrics: [
               {
                 field: 'transaction.duration.us',
@@ -135,7 +138,7 @@ describe('createLayerDescriptor', () => {
         applyGlobalTime: true,
         geoField: 'client.geo.location',
         id: '12345',
-        indexPatternId: 'apm_static_index_pattern_id',
+        indexPatternId: 'apm_static_data_view_id_default',
         metrics: [
           {
             field: 'transaction.duration.us',
@@ -181,7 +184,7 @@ describe('createLayerDescriptor', () => {
         applyGlobalTime: true,
         geoField: 'client.geo.location',
         id: '12345',
-        indexPatternId: 'apm_static_index_pattern_id',
+        indexPatternId: 'apm_static_data_view_id_default',
         metrics: [
           {
             field: 'transaction.duration.us',

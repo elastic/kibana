@@ -102,6 +102,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
     <>
       <StorageDetails
         formatBytes={formatBytes}
+        formatNumber={formatNumber}
         ilmPhases={ilmPhases}
         onIndexSelected={onIndexSelected}
         patterns={patterns}

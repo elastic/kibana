@@ -103,12 +103,13 @@ const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, pa
 }, []);
 
 const volumeCmdTest = async (volumeCmd: string[]) => {
-  expect(volumeCmd).toHaveLength(20);
+  expect(volumeCmd).toHaveLength(22);
   expect(volumeCmd).toEqual(
     expect.arrayContaining([
       ...getESp12Volume(),
       ...serverlessResources,
       `${baseEsPath}:/objectstore:z`,
+      `stateless.object_store.bucket=${serverlessDir}`,
       `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
       `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`,
     ])
@@ -437,7 +438,6 @@ describe('resolveEsArgs()', () => {
       kibanaUrl: 'https://localhost:5601/',
     });
 
-    expect(esArgs).toHaveLength(26);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -446,6 +446,8 @@ describe('resolveEsArgs()', () => {
         "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
         "--env",
         "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.authc.native_role_mappings.enabled=true",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
         "--env",
@@ -476,7 +478,6 @@ describe('resolveEsArgs()', () => {
       kibanaUrl: 'https://localhost:5601/',
     });
 
-    expect(esArgs).toHaveLength(8);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -564,7 +565,7 @@ describe('setupServerlessVolumes()', () => {
     const pathsNotIncludedInCmd = requiredPaths.filter(
       (path) => !volumeCmd.some((cmd) => cmd.includes(path))
     );
-    expect(volumeCmd).toHaveLength(22);
+    expect(volumeCmd).toHaveLength(24);
     expect(pathsNotIncludedInCmd).toEqual([]);
   });
 
@@ -597,6 +598,25 @@ describe('setupServerlessVolumes()', () => {
       'Unsupported ES serverless --resources value(s):\n  /absolute/path/invalid\n\n' +
         'Valid resources: operator_users.yml | role_mapping.yml | service_tokens | users | users_roles | roles.yml'
     );
+  });
+
+  test('should override data path when passed', async () => {
+    const dataPath = 'stateless-cluster-ftr';
+
+    mockFs({
+      [baseEsPath]: {},
+    });
+
+    const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
+      basePath: baseEsPath,
+      dataPath,
+    });
+
+    expect(volumeCmd).toEqual(
+      expect.arrayContaining([`stateless.object_store.bucket=${dataPath}`])
+    );
+    await expect(Fsp.access(`${baseEsPath}/${dataPath}`)).resolves.not.toThrow();
   });
 });
 

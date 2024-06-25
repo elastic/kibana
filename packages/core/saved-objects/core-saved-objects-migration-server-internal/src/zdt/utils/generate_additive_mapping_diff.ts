@@ -11,15 +11,17 @@ import type {
   SavedObjectsMappingProperties,
 } from '@kbn/core-saved-objects-server';
 import {
-  IndexMappingMeta,
+  type IndexMapping,
   getVirtualVersionsFromMappingMeta,
   getVirtualVersionMap,
   getModelVersionDelta,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { getUpdatedRootFields } from '../../core/compare_mappings';
+import { getBaseMappings } from '../../core/build_active_mappings';
 
 interface GenerateAdditiveMappingsDiffOpts {
   types: SavedObjectsType[];
-  meta: IndexMappingMeta;
+  mapping: IndexMapping;
   deletedTypes: string[];
 }
 
@@ -32,9 +34,15 @@ interface GenerateAdditiveMappingsDiffOpts {
  */
 export const generateAdditiveMappingDiff = ({
   types,
-  meta,
+  mapping,
   deletedTypes,
 }: GenerateAdditiveMappingsDiffOpts): SavedObjectsMappingProperties => {
+  const meta = mapping._meta;
+  if (!meta) {
+    // should never occur given we only generate additive mapping diff when we've recognized a zdt index
+    throw new Error('Cannot generate additive mapping diff: meta not present on index');
+  }
+
   const typeVersions = getVirtualVersionMap(types);
   const mappingVersion = getVirtualVersionsFromMappingMeta({
     meta,
@@ -68,6 +76,14 @@ export const generateAdditiveMappingDiff = ({
   changedTypes.forEach((type) => {
     addedMappings[type] = typeMap[type].mappings;
   });
+
+  const changedRootFields = getUpdatedRootFields(mapping);
+  if (changedRootFields.length) {
+    const baseMappings = getBaseMappings();
+    changedRootFields.forEach((changedRootField) => {
+      addedMappings[changedRootField] = baseMappings.properties[changedRootField];
+    });
+  }
 
   return addedMappings;
 };

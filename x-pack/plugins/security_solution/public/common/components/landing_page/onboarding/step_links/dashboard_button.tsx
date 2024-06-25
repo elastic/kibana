@@ -19,23 +19,32 @@ import { AddIntegrationCallout } from './add_integration_callout';
 import { GO_TO_DASHBOARDS, VIEW_DASHBOARDS_CALLOUT_TITLE } from './translations';
 
 const DashboardButtonComponent = () => {
-  const { toggleTaskCompleteStatus, finishedSteps } = useStepContext();
+  const { toggleTaskCompleteStatus, finishedSteps, onStepLinkClicked } = useStepContext();
   const isIntegrationsStepComplete = finishedSteps[
     AddAndValidateYourDataCardsId.addIntegrations
   ]?.has(AddIntegrationsSteps.connectToDataSources);
 
   const onClick = useCallback(() => {
+    onStepLinkClicked({
+      originStepId: ViewDashboardSteps.analyzeData,
+      stepLinkId: SecurityPageName.dashboards,
+    });
     toggleTaskCompleteStatus({
       stepId: ViewDashboardSteps.analyzeData,
+      stepLinkId: SecurityPageName.dashboards,
       cardId: AddAndValidateYourDataCardsId.viewDashboards,
       sectionId: SectionId.addAndValidateYourData,
       undo: false,
+      trigger: 'click',
     });
-  }, [toggleTaskCompleteStatus]);
+  }, [onStepLinkClicked, toggleTaskCompleteStatus]);
   return (
     <>
       {!isIntegrationsStepComplete && (
-        <AddIntegrationCallout stepName={VIEW_DASHBOARDS_CALLOUT_TITLE} />
+        <AddIntegrationCallout
+          stepName={VIEW_DASHBOARDS_CALLOUT_TITLE}
+          stepId={ViewDashboardSteps.analyzeData}
+        />
       )}
 
       <LinkButton

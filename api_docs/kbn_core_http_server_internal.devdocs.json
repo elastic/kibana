@@ -136,6 +136,17 @@
             "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.CspConfig.reportOnlyHeader",
+            "type": "string",
+            "tags": [],
+            "label": "reportOnlyHeader",
+            "description": [],
+            "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -266,6 +277,20 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.HttpConfig.protocol",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "protocol",
+            "description": [],
+            "signature": [
+              "\"http1\" | \"http2\""
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
             "id": "def-common.HttpConfig.host",
             "type": "string",
             "tags": [],
@@ -328,6 +353,20 @@
             "description": [],
             "signature": [
               "{ enabled: boolean; allowCredentials: boolean; allowOrigin: string[]; }"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.HttpConfig.oas",
+            "type": "Object",
+            "tags": [],
+            "label": "oas",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; }"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
@@ -757,6 +796,58 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.HttpServer.getRouters",
+            "type": "Function",
+            "tags": [],
+            "label": "getRouters",
+            "description": [],
+            "signature": [
+              "({ pluginId }?: ",
+              "GetRoutersOptions",
+              ") => { routers: ",
+              "Router",
+              "<",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RequestHandlerContextBase",
+                "text": "RequestHandlerContextBase"
+              },
+              ">[]; versionedRouters: ",
+              {
+                "pluginId": "@kbn/core-http-router-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpRouterServerInternalPluginApi",
+                "section": "def-common.CoreVersionedRouter",
+                "text": "CoreVersionedRouter"
+              },
+              "[]; }"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.HttpServer.getRouters.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ pluginId }",
+                "description": [],
+                "signature": [
+                  "GetRoutersOptions"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -821,6 +912,22 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.StaticAssets.isUsingCdn",
+            "type": "Function",
+            "tags": [],
+            "label": "isUsingCdn",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -1158,6 +1265,24 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.InternalStaticAssets.isUsingCdn",
+            "type": "Function",
+            "tags": [],
+            "label": "isUsingCdn",
+            "description": [
+              "\nReturns true if a CDN has been configured and should be used to serve static assets.\nShould only be used in scenarios where different behavior has to be used when CDN is enabled or not."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
             "id": "def-common.InternalStaticAssets.getPluginAssetHref",
             "type": "Function",
             "tags": [],
@@ -1338,7 +1463,7 @@
         "label": "HttpConfigType",
         "description": [],
         "signature": [
-          "{ readonly uuid?: string | undefined; readonly basePath?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; readonly host: string; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; readonly port: number; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly versioned: Readonly<{} & { versionResolution: \"none\" | \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; useVersionResolutionStrategyForInternalPaths: string[]; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly cdn: Readonly<{ url?: string | undefined; } & {}>; readonly securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
+          "{ readonly uuid?: string | undefined; readonly basePath?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; readonly host: string; readonly http2: Readonly<{} & { allowUnsecure: boolean; }>; readonly protocol: \"http1\" | \"http2\"; readonly port: number; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly cdn: Readonly<{ url?: string | null | undefined; } & {}>; readonly oas: Readonly<{} & { enabled: boolean; }>; readonly securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1490,7 +1615,15 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<string[]>; strict: ",
+              "<string[]>; report_only: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<Readonly<{} & { form_action: string[]; }> | undefined>; strict: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",

@@ -6,7 +6,7 @@
  */
 
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { Duration, SLO, toDurationUnit } from '../../../../domain/models';
+import { Duration, SLODefinition, toDurationUnit } from '../../../../domain/models';
 import { BurnRateRuleParams, WindowSchema } from '../types';
 import { getDelayInSecondsFromSLO } from '../../../../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../../../../domain/services/get_lookback_date_range';
@@ -56,7 +56,7 @@ function buildWindowAgg(
   id: string,
   type: WindowType,
   threshold: number,
-  slo: SLO,
+  slo: SLODefinition,
   dateRange: { from: Date; to: Date }
 ) {
   const aggs = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
@@ -102,7 +102,7 @@ function buildWindowAgg(
 
 function buildWindowAggs(
   startedAt: Date,
-  slo: SLO,
+  slo: SLODefinition,
   burnRateWindows: BurnRateWindowWithDuration[],
   delayInSeconds = 0
 ) {
@@ -157,7 +157,7 @@ function buildEvaluation(burnRateWindows: BurnRateWindowWithDuration[]) {
 
 export function buildQuery(
   startedAt: Date,
-  slo: SLO,
+  slo: SLODefinition,
   params: BurnRateRuleParams,
   afterKey?: EvaluationAfterKey
 ) {

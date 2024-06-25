@@ -7,15 +7,11 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
-import url from 'url';
-import { kbnTestConfig } from '@kbn/test';
-import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
+  enableInfrastructureAssetCustomDashboards,
+  enableInfrastructureHostsView,
+} from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -26,6 +22,7 @@ import {
   DATE_PICKER_FORMAT,
 } from './constants';
 import { generateAddServicesToExistingHost } from './helpers';
+import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
@@ -40,7 +37,7 @@ const tableEntries = [
     normalizedLoad: '0.5%',
     memoryUsage: '18.4%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '17.6%',
+    diskSpaceUsage: '35.1%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -51,7 +48,7 @@ const tableEntries = [
     normalizedLoad: '0%',
     memoryUsage: '18.2%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '17.8%',
+    diskSpaceUsage: '35.7%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -62,7 +59,7 @@ const tableEntries = [
     normalizedLoad: '0%',
     memoryUsage: '15.9%',
     memoryFree: '3.3 GB',
-    diskSpaceUsage: '16.3%',
+    diskSpaceUsage: '32.5%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -73,7 +70,7 @@ const tableEntries = [
     normalizedLoad: '1.4%',
     memoryUsage: '18%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '17.5%',
+    diskSpaceUsage: '35%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -84,7 +81,7 @@ const tableEntries = [
     normalizedLoad: '0%',
     memoryUsage: '16.5%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '16.3%',
+    diskSpaceUsage: '32.6%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -95,7 +92,7 @@ const tableEntries = [
     normalizedLoad: '0.1%',
     memoryUsage: '13.8%',
     memoryFree: '3.3 GB',
-    diskSpaceUsage: '16.9%',
+    diskSpaceUsage: '33.8%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -103,6 +100,7 @@ const tableEntries = [
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
+  const security = getService('security');
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const find = getService('find');
@@ -110,6 +108,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const observability = getService('observability');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
   const pageObjects = getPageObjects([
     'assetDetails',
     'common',
@@ -123,19 +122,63 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   // Helpers
 
-  const getKibanaServerUrl = () => {
-    const kibanaServerUrl = url.format(kbnTestConfig.getUrlParts() as url.UrlObject);
-    const kibanaServerUrlWithAuth = url
-      .format({
-        ...url.parse(kibanaServerUrl),
-        auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
-      })
-      .slice(0, -1);
-    return kibanaServerUrlWithAuth;
+  const loginWithReadOnlyUserAndNavigateToHostsFlyout = async () => {
+    await security.role.create('global_hosts_read_privileges_role', {
+      elasticsearch: {
+        indices: [{ names: ['metricbeat-*'], privileges: ['read', 'view_index_metadata'] }],
+      },
+      kibana: [
+        {
+          feature: {
+            infrastructure: ['read'],
+            advancedSettings: ['read'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    });
+
+    await security.user.create('global_hosts_read_privileges_user', {
+      password: 'global_hosts_read_privileges_user-password',
+      roles: ['global_hosts_read_privileges_role'],
+      full_name: 'test user',
+    });
+
+    await pageObjects.security.forceLogout();
+
+    await pageObjects.security.login(
+      'global_hosts_read_privileges_user',
+      'global_hosts_read_privileges_user-password',
+      {
+        expectSpaceSelector: false,
+      }
+    );
+
+    await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+    await pageObjects.header.waitUntilLoadingHasFinished();
+    await pageObjects.timePicker.setAbsoluteRange(
+      START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
+      END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+    );
+
+    await waitForPageToLoad();
+
+    await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+  };
+
+  const logoutAndDeleteReadOnlyUser = async () => {
+    await pageObjects.security.forceLogout();
+    await Promise.all([
+      security.role.delete('global_hosts_read_privileges_role'),
+      security.user.delete('global_hosts_read_privileges_user'),
+    ]);
   };
 
   const setHostViewEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
+
+  const setCustomDashboardsEnabled = (value: boolean = true) =>
+    kibanaServer.uiSettings.update({ [enableInfrastructureAssetCustomDashboards]: value });
 
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
@@ -154,39 +197,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
 
   describe('Hosts View', function () {
-    let synthtraceApmClient: any;
+    let synthtraceApmClient: ApmSynthtraceEsClient;
     before(async () => {
-      const kibanaClient = new ApmSynthtraceKibanaClient({
-        target: getKibanaServerUrl(),
-        logger: createLogger(LogLevel.debug),
-      });
-      const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
-      await kibanaClient.installApmPackage(kibanaVersion);
-      synthtraceApmClient = new ApmSynthtraceEsClient({
+      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
+      synthtraceApmClient = await getApmSynthtraceEsClient({
         client: esClient,
-        logger: createLogger(LogLevel.info),
-        version: kibanaVersion,
-        refreshAfterIndex: true,
+        packageVersion: version,
       });
-      await Promise.all([
-        synthtraceApmClient.index(
-          generateAddServicesToExistingHost({
-            from: DATES.metricsAndLogs.hosts.processesDataStartDate,
-            to: DATES.metricsAndLogs.hosts.processesDataEndDate,
-            hostName: 'Jennys-MBP.fritz.box',
-            servicesPerHost: 3,
-          })
-        ),
+
+      const services = generateAddServicesToExistingHost({
+        from: DATES.metricsAndLogs.hosts.processesDataStartDate,
+        to: DATES.metricsAndLogs.hosts.processesDataEndDate,
+        hostName: 'Jennys-MBP.fritz.box',
+        servicesPerHost: 3,
+      });
+
+      await browser.setWindowSize(1600, 1200);
+
+      return Promise.all([
+        synthtraceApmClient.index(services),
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
-        kibanaServer.savedObjects.cleanStandardList(),
       ]);
-      await browser.setWindowSize(1600, 1200);
     });
 
     after(async () => {
-      await Promise.all([
+      return Promise.all([
+        apmSynthtraceKibanaClient.uninstallApmPackage(),
         synthtraceApmClient.clean(),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
@@ -210,6 +248,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('#Single Host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
+        await setCustomDashboardsEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
@@ -228,12 +267,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         after(async () => {
           await retry.try(async () => {
-            await pageObjects.infraHostsView.clickCloseFlyoutButton();
+            await pageObjects.infraHome.clickCloseFlyoutButton();
           });
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/176951
-        describe.skip('Overview Tab', () => {
+        describe('Overview Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickOverviewTab();
           });
@@ -254,9 +292,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should render 9 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(9);
+          [
+            { metric: 'cpu', chartsCount: 2 },
+            { metric: 'memory', chartsCount: 1 },
+            { metric: 'disk', chartsCount: 2 },
+            { metric: 'network', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+              const hosts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
+              expect(hosts.length).to.equal(chartsCount);
+            });
           });
 
           it('should show all section as collapsible', async () => {
@@ -320,6 +365,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
+        describe('Metrics Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetricsTab();
+          });
+
+          it('should show metrics content', async () => {
+            await pageObjects.assetDetails.metricsChartsContentExists();
+          });
+        });
+
         describe('Processes Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickProcessesTab();
@@ -337,6 +392,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should render logs tab', async () => {
             await pageObjects.assetDetails.logsExists();
+          });
+        });
+
+        describe('Dashboards Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickDashboardsTab();
+          });
+
+          it('should render dashboards tab splash screen with option to add dashboard', async () => {
+            await pageObjects.assetDetails.addDashboardExists();
           });
         });
 
@@ -462,7 +527,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'cpuUsage', value: '0.8%' },
           { metric: 'normalizedLoad1m', value: '0.3%' },
           { metric: 'memoryUsage', value: '16.8%' },
-          { metric: 'diskUsage', value: '17.1%' },
+          { metric: 'diskUsage', value: '35.7%' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
             await retry.try(async () => {
@@ -487,9 +552,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await browser.scrollTop();
         });
 
-        it('should load 12 lens metric charts', async () => {
+        it('should load 11 lens metric charts', async () => {
           const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
-          expect(metricCharts.length).to.equal(12);
+          expect(metricCharts.length).to.equal(11);
         });
 
         it('should have an option to open the chart in lens', async () => {
@@ -623,7 +688,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'cpuUsage', value: '0.9%' },
               { metric: 'normalizedLoad1m', value: '0.2%' },
               { metric: 'memoryUsage', value: '17.5%' },
-              { metric: 'diskUsage', value: '17.2%' },
+              { metric: 'diskUsage', value: '35.7%' },
             ].map(async ({ metric, value }) => {
               await retry.try(async () => {
                 const tileValue =
@@ -763,6 +828,39 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
           expect(hostDataLastPage).to.eql(tableEntries[0]);
+        });
+      });
+    });
+
+    describe('#Permissions: Read Only User - Single Host Flyout', () => {
+      describe('Dashboards Tab', () => {
+        before(async () => {
+          await setCustomDashboardsEnabled(true);
+          await loginWithReadOnlyUserAndNavigateToHostsFlyout();
+          await pageObjects.assetDetails.clickDashboardsTab();
+        });
+
+        after(async () => {
+          await retry.try(async () => {
+            await pageObjects.infraHome.clickCloseFlyoutButton();
+          });
+          await logoutAndDeleteReadOnlyUser();
+        });
+
+        it('should render dashboards tab splash screen with disabled option to add dashboard', async () => {
+          await pageObjects.assetDetails.addDashboardExists();
+          const elementToHover = await pageObjects.assetDetails.getAddDashboardButton();
+          await retry.try(async () => {
+            await elementToHover.moveMouseTo();
+            await testSubjects.existOrFail('infraCannotAddDashboardTooltip');
+          });
+        });
+
+        it('should not render dashboards tab if the feature is disabled', async () => {
+          await setCustomDashboardsEnabled(false);
+          await pageObjects.assetDetails.clickOverviewTab();
+          await browser.refresh();
+          await !pageObjects.assetDetails.dashboardsTabExists();
         });
       });
     });

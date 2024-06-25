@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  rangeQuery,
-  wildcardQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { ApmTransactionDocumentType } from '../../../common/document_type';
 import {
   SERVICE_NAME,
@@ -22,10 +18,7 @@ import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import {
-  getLatencyAggregation,
-  getLatencyValue,
-} from '../../lib/helpers/latency_aggregation_type';
+import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,
@@ -79,69 +72,63 @@ export async function getServiceTransactionGroups({
   useDurationSummary: boolean;
   searchQuery?: string;
 }): Promise<ServiceTransactionGroupsResponse> {
-  const field = getDurationFieldForTransactions(
-    documentType,
-    useDurationSummary
-  );
+  const field = getDurationFieldForTransactions(documentType, useDurationSummary);
 
-  const response = await apmEventClient.search(
-    'get_service_transaction_groups',
-    {
-      apm: {
-        sources: [
-          {
-            documentType,
-            rollupInterval,
-          },
-        ],
-      },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { term: { [SERVICE_NAME]: serviceName } },
-              {
-                bool: {
-                  should: [
-                    { term: { [TRANSACTION_NAME]: txGroupsDroppedBucketName } },
-                    { term: { [TRANSACTION_TYPE]: transactionType } },
-                  ],
-                },
+  const response = await apmEventClient.search('get_service_transaction_groups', {
+    apm: {
+      sources: [
+        {
+          documentType,
+          rollupInterval,
+        },
+      ],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            {
+              bool: {
+                should: [
+                  { term: { [TRANSACTION_NAME]: txGroupsDroppedBucketName } },
+                  { term: { [TRANSACTION_TYPE]: transactionType } },
+                ],
               },
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...wildcardQuery(TRANSACTION_NAME, searchQuery),
-            ],
+            },
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...wildcardQuery(TRANSACTION_NAME, searchQuery),
+          ],
+        },
+      },
+      aggs: {
+        total_duration: { sum: { field } },
+        transaction_overflow_count: {
+          sum: {
+            field: TRANSACTION_OVERFLOW_COUNT,
           },
         },
-        aggs: {
-          total_duration: { sum: { field } },
-          transaction_overflow_count: {
-            sum: {
-              field: TRANSACTION_OVERFLOW_COUNT,
-            },
+        transaction_groups: {
+          terms: {
+            field: TRANSACTION_NAME,
+            size: MAX_NUMBER_OF_TX_GROUPS,
+            order: { _count: 'desc' },
           },
-          transaction_groups: {
-            terms: {
-              field: TRANSACTION_NAME,
-              size: MAX_NUMBER_OF_TX_GROUPS,
-              order: { _count: 'desc' },
+          aggs: {
+            transaction_group_total_duration: {
+              sum: { field },
             },
-            aggs: {
-              transaction_group_total_duration: {
-                sum: { field },
-              },
-              ...getLatencyAggregation(latencyAggregationType, field),
-              ...getOutcomeAggregation(documentType),
-            },
+            ...getLatencyAggregation(latencyAggregationType, field),
+            ...getOutcomeAggregation(documentType),
           },
         },
       },
-    }
-  );
+    },
+  });
 
   const totalDuration = response.aggregations?.total_duration.value;
 
@@ -149,8 +136,7 @@ export async function getServiceTransactionGroups({
     response.aggregations?.transaction_groups.buckets.map((bucket) => {
       const errorRate = calculateFailedTransactionRate(bucket);
 
-      const transactionGroupTotalDuration =
-        bucket.transaction_group_total_duration.value || 0;
+      const transactionGroupTotalDuration = bucket.transaction_group_total_duration.value || 0;
 
       return {
         name: bucket.key as string,
@@ -164,9 +150,7 @@ export async function getServiceTransactionGroups({
           value: bucket.doc_count,
         }),
         errorRate,
-        impact: totalDuration
-          ? (transactionGroupTotalDuration * 100) / totalDuration
-          : 0,
+        impact: totalDuration ? (transactionGroupTotalDuration * 100) / totalDuration : 0,
         alertsCount: 0,
       };
     }) ?? [];
@@ -176,10 +160,8 @@ export async function getServiceTransactionGroups({
       ...transactionGroup,
       transactionType,
     })),
-    maxCountExceeded:
-      (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) > 0,
-    transactionOverflowCount:
-      response.aggregations?.transaction_overflow_count.value ?? 0,
+    maxCountExceeded: (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) > 0,
+    transactionOverflowCount: response.aggregations?.transaction_overflow_count.value ?? 0,
     hasActiveAlerts: false,
   };
 }

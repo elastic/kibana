@@ -67,6 +67,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         created_at: response.body.created_at,
         updated_at: response.body.updated_at,
         execution_status: response.body.execution_status,
+        mapped_params: {
+          risk_score: 40,
+          severity: '40-medium',
+        },
         ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
         ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
       });
@@ -126,6 +130,48 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           error: 'Not Found',
           message: `Saved object [alert/${createdAlert.id}] not found`,
         });
+    });
+
+    it('should not allow updating default action without group', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData())
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+      const updatedData = {
+        name: 'bcd',
+        tags: ['bar'],
+        params: {
+          foo: true,
+          risk_score: 40,
+          severity: 'medium',
+        },
+        schedule: { interval: '12s' },
+        actions: [
+          {
+            // group is missing
+            id: 'test-id',
+            params: {},
+          },
+        ],
+        throttle: '1m',
+        notify_when: 'onThrottleInterval',
+      };
+
+      const response = await supertest
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send(updatedData);
+
+      expect(response.status).to.eql(400);
+      expect(response.body).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Group is not defined in action test-id',
+      });
     });
 
     describe('legacy', () => {

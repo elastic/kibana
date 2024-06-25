@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export { BackLink } from './back_link';
 export { AddIntegrationButton } from './add_integration_button';
 export { UpdateIcon } from './update_icon';
 export { IntegrationAgentPolicyCount } from './integration_agent_policy_count';

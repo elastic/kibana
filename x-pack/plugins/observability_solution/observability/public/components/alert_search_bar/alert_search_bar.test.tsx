@@ -26,11 +26,14 @@ describe('ObservabilityAlertSearchBar', () => {
     const observabilityAlertSearchBarProps: ObservabilityAlertSearchBarProps = {
       appName: 'testAppName',
       kuery: '',
+      filters: [],
       onRangeFromChange: jest.fn(),
       onRangeToChange: jest.fn(),
       onKueryChange: jest.fn(),
       onStatusChange: jest.fn(),
       onEsQueryChange: jest.fn(),
+      onFiltersChange: jest.fn(),
+      setSavedQuery: jest.fn(),
       rangeTo: 'now',
       rangeFrom: 'now-15m',
       status: 'all',
@@ -132,7 +135,7 @@ describe('ObservabilityAlertSearchBar', () => {
       status: 'all',
     });
 
-    expect(mockedOnEsQueryChange).toHaveBeenCalledWith({
+    const esQueryChangeParams = {
       bool: {
         filter: [
           {
@@ -150,6 +153,56 @@ describe('ObservabilityAlertSearchBar', () => {
                 gte: mockedFrom,
                 lte: mockedTo,
               }),
+            },
+          },
+        ],
+        must: [],
+        must_not: [],
+        should: [],
+      },
+    };
+    expect(mockedOnEsQueryChange).toHaveBeenCalledTimes(2);
+    expect(mockedOnEsQueryChange).toHaveBeenNthCalledWith(1, esQueryChangeParams);
+    expect(mockedOnEsQueryChange).toHaveBeenNthCalledWith(2, esQueryChangeParams);
+  });
+
+  it('should include filters in es query', async () => {
+    const mockedOnEsQueryChange = jest.fn();
+    const mockedFrom = '2022-11-15T09:38:13.604Z';
+    const mockedTo = '2022-11-15T09:53:13.604Z';
+    const filters = [
+      {
+        meta: {},
+        query: {
+          'service.name': {
+            value: 'synth-node-0',
+          },
+        },
+      },
+    ];
+
+    renderComponent({
+      onEsQueryChange: mockedOnEsQueryChange,
+      rangeFrom: mockedFrom,
+      rangeTo: mockedTo,
+      filters,
+    });
+
+    expect(mockedOnEsQueryChange).toHaveBeenCalledWith({
+      bool: {
+        filter: [
+          {
+            range: {
+              'kibana.alert.time_range': expect.objectContaining({
+                format: 'strict_date_optional_time',
+                gte: mockedFrom,
+                lte: mockedTo,
+              }),
+            },
+          },
+          {
+            'service.name': {
+              value: 'synth-node-0',
             },
           },
         ],

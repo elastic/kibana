@@ -6,11 +6,7 @@
  */
 
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import {
-  TelemetryEventTypes,
-  ITelemetryClient,
-  SearchQuerySubmittedParams,
-} from './types';
+import { TelemetryEventTypes, ITelemetryClient, SearchQuerySubmittedParams } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
   constructor(private analytics: AnalyticsServiceSetup) {}

@@ -26,11 +26,7 @@ import { ServicesTable } from './services_table';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { StorageChart } from './storage_chart';
 import { PermissionDenied } from './prompts/permission_denied';
-import {
-  useFetcher,
-  FETCH_STATUS,
-  isPending,
-} from '../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS, isPending } from '../../../hooks/use_fetcher';
 import { SummaryStats } from './summary_stats';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { TipsAndResources } from './resources/tips_and_resources';
@@ -47,12 +43,9 @@ const CALLOUT_DISMISS_INITIAL_STATE: Record<CalloutType, boolean> = {
   optimizePerformance: false,
 };
 
-const dismissButtonText = i18n.translate(
-  'xpack.apm.storageExplorer.callout.dimissButton',
-  {
-    defaultMessage: 'Dismiss',
-  }
-);
+const dismissButtonText = i18n.translate('xpack.apm.storageExplorer.callout.dimissButton', {
+  defaultMessage: 'Dismiss',
+});
 
 export function StorageExplorer() {
   const { core } = useApmPluginContext();
@@ -67,41 +60,35 @@ export function StorageExplorer() {
     CALLOUT_DISMISS_INITIAL_STATE
   );
 
-  const { data: hasPrivilegesData, status: hasPrivilegesStatus } = useFetcher(
-    (callApmApi) => {
-      return callApmApi('GET /internal/apm/storage_explorer/privileges');
-    },
-    []
-  );
+  const { data: hasPrivilegesData, status: hasPrivilegesStatus } = useFetcher((callApmApi) => {
+    return callApmApi('GET /internal/apm/storage_explorer/privileges');
+  }, []);
 
   const { data: isCrossClusterSearchData } = useFetcher(
     (callApmApi) => {
       if (!calloutDismissed.crossClusterSearch) {
-        return callApmApi(
-          'GET /internal/apm/storage_explorer/is_cross_cluster_search'
-        );
+        return callApmApi('GET /internal/apm/storage_explorer/is_cross_cluster_search');
       }
     },
     [calloutDismissed]
   );
 
-  const { data: summaryStatsData, status: summaryStatsStatus } =
-    useProgressiveFetcher(
-      (callApmApi) => {
-        return callApmApi('GET /internal/apm/storage_explorer_summary_stats', {
-          params: {
-            query: {
-              indexLifecyclePhase,
-              environment,
-              kuery,
-              start,
-              end,
-            },
+  const { data: summaryStatsData, status: summaryStatsStatus } = useProgressiveFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/storage_explorer_summary_stats', {
+        params: {
+          query: {
+            indexLifecyclePhase,
+            environment,
+            kuery,
+            start,
+            end,
           },
-        });
-      },
-      [indexLifecyclePhase, environment, kuery, start, end]
-    );
+        },
+      });
+    },
+    [indexLifecyclePhase, environment, kuery, start, end]
+  );
 
   const loadingSummaryStats = isPending(summaryStatsStatus);
 
@@ -144,12 +131,9 @@ export function StorageExplorer() {
 
       {!calloutDismissed.optimizePerformance && (
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.apm.storageExplorer.longLoadingTimeCalloutTitle',
-            {
-              defaultMessage: 'Long loading time?',
-            }
-          )}
+          title={i18n.translate('xpack.apm.storageExplorer.longLoadingTimeCalloutTitle', {
+            defaultMessage: 'Long loading time?',
+          })}
           iconType="timeRefresh"
         >
           <p>
@@ -162,12 +146,9 @@ export function StorageExplorer() {
                     data-test-subj="apmStorageExplorerKibanaAdvancedSettingsLink"
                     href={getKibanaAdvancedSettingsHref(core)}
                   >
-                    {i18n.translate(
-                      'xpack.apm.storageExplorer.longLoadingTimeCalloutLink',
-                      {
-                        defaultMessage: 'Kibana advanced settings',
-                      }
-                    )}
+                    {i18n.translate('xpack.apm.storageExplorer.longLoadingTimeCalloutLink', {
+                      defaultMessage: 'Kibana advanced settings',
+                    })}
                   </EuiLink>
                 ),
               }}
@@ -187,42 +168,35 @@ export function StorageExplorer() {
         </EuiCallOut>
       )}
 
-      {!calloutDismissed.crossClusterSearch &&
-        isCrossClusterSearchData?.isCrossClusterSearch && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.apm.storageExplorer.crossClusterSearchCalloutTitle',
-                {
-                  defaultMessage: 'Searching across clusters?',
-                }
-              )}
-              iconType="search"
+      {!calloutDismissed.crossClusterSearch && isCrossClusterSearchData?.isCrossClusterSearch && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            title={i18n.translate('xpack.apm.storageExplorer.crossClusterSearchCalloutTitle', {
+              defaultMessage: 'Searching across clusters?',
+            })}
+            iconType="search"
+          >
+            <p>
+              {i18n.translate('xpack.apm.storageExplorer.crossClusterSearchCalloutText', {
+                defaultMessage:
+                  'While getting document count works with cross-cluster search, index statistics such as size are only displayed for data that are stored in this cluster.',
+              })}
+            </p>
+            <EuiButton
+              data-test-subj="apmStorageExplorerButton"
+              onClick={() =>
+                setCalloutDismissed({
+                  ...calloutDismissed,
+                  crossClusterSearch: true,
+                })
+              }
             >
-              <p>
-                {i18n.translate(
-                  'xpack.apm.storageExplorer.crossClusterSearchCalloutText',
-                  {
-                    defaultMessage:
-                      'While getting document count works with cross-cluster search, index statistics such as size are only displayed for data that are stored in this cluster.',
-                  }
-                )}
-              </p>
-              <EuiButton
-                data-test-subj="apmStorageExplorerButton"
-                onClick={() =>
-                  setCalloutDismissed({
-                    ...calloutDismissed,
-                    crossClusterSearch: true,
-                  })
-                }
-              >
-                {dismissButtonText}
-              </EuiButton>
-            </EuiCallOut>
-          </>
-        )}
+              {dismissButtonText}
+            </EuiButton>
+          </EuiCallOut>
+        </>
+      )}
 
       <EuiSpacer />
       <SummaryStats

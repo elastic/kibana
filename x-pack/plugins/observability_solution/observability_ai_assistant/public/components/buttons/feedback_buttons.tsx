@@ -39,7 +39,7 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
   };
 
   return (
-    <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s">
+    <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s" wrap>
       <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="s">
           <em>

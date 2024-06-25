@@ -24,7 +24,6 @@
       "licensing",
       "observability",
       "observabilityShared",
-      "observabilityAIAssistant",
       "ruleRegistry",
       "security",
       "share",
@@ -34,7 +33,7 @@
       "unifiedSearch",
       "bfetch"
     ],
-    "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "spaces", "telemetry"],
+    "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "spaces", "telemetry", "observabilityAIAssistant"],
     "requiredBundles": [
       "fleet",
       "kibanaReact",

@@ -226,8 +226,6 @@ export const MonitorListComponent: ({
         aria-label={labels.getDescriptionLabel(items.length)}
         error={error?.body?.message || error?.message}
         loading={loading || isPending}
-        isExpandable={true}
-        hasActions={true}
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
         items={items}
@@ -235,7 +233,7 @@ export const MonitorListComponent: ({
           <NoItemsMessage loading={Boolean(loading || isPending)} filters={filters} />
         }
         columns={columns}
-        tableLayout={'auto'}
+        tableLayout="auto"
         rowProps={
           hideExtraColumns
             ? ({ monitor_id: monitorId }) => ({

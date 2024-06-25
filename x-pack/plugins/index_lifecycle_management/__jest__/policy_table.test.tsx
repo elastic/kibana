@@ -209,7 +209,7 @@ describe('policy table', () => {
     expect(deprecatedPolicies.length).toBe(0);
 
     // Enable filtering by deprecated policies
-    const searchInput = rendered.find('.euiFieldSearch').first();
+    const searchInput = rendered.find('input.euiFieldSearch').first();
     (searchInput.instance() as unknown as HTMLInputElement).value = 'is:policy.deprecated';
     searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
     rendered.update();
@@ -221,7 +221,7 @@ describe('policy table', () => {
 
   test('filters based on content of search input', () => {
     const rendered = mountWithIntl(component);
-    const searchInput = rendered.find('.euiFieldSearch').first();
+    const searchInput = rendered.find('input.euiFieldSearch').first();
     (searchInput.instance() as unknown as HTMLInputElement).value = 'testy0';
     searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
     rendered.update();
@@ -307,11 +307,11 @@ describe('policy table', () => {
     const policyName = findTestSubject(firstRow, 'policyTablePolicyNameLink').text();
     expect(policyName).toBe(`${testPolicy.name}`);
     const policyIndexTemplates = findTestSubject(firstRow, 'policy-indexTemplates').text();
-    expect(policyIndexTemplates).toBe(`Linked index templates${testPolicy.indexTemplates.length}`);
+    expect(policyIndexTemplates).toBe(`${testPolicy.indexTemplates.length}`);
     const policyIndices = findTestSubject(firstRow, 'policy-indices').text();
-    expect(policyIndices).toBe(`Linked indices${testPolicy.indices.length}`);
+    expect(policyIndices).toBe(`${testPolicy.indices.length}`);
     const policyModifiedDate = findTestSubject(firstRow, 'policy-modifiedDate').text();
-    expect(policyModifiedDate).toBe(`Modified date${testDateFormatted}`);
+    expect(policyModifiedDate).toBe(`${testDateFormatted}`);
   });
   test('opens a flyout with index templates', () => {
     const rendered = mountWithIntl(component);

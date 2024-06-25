@@ -183,6 +183,7 @@
     "GetTrainedModelDownloadList",
     "GetElserConfig",
     "InstallElasticTrainedModel",
+    "ModelsDownloadStatus",
 
     "Alerting",
     "PreviewAlert",
@@ -192,9 +193,6 @@
 
     "ModelManagement",
     "GetModelManagementNodesOverview",
-    "GetModelManagementMemoryUsage",
-
-    "JsonSchema",
-    "GetJsonSchema"
+    "GetModelManagementMemoryUsage"
   ]
 }

@@ -89,7 +89,6 @@ export const ErrorStateCallout: React.FC = () => {
 const ErrorBody: React.FC = () => {
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { config, cloud } = useValues(KibanaLogic);
-  const isCloudEnabled = cloud.isCloudEnabled;
   return (
     <>
       <p>
@@ -106,7 +105,7 @@ const ErrorBody: React.FC = () => {
         />
       </p>
       <EuiCodeBlock css={{ textAlign: 'left' }}>{errorConnectingMessage}</EuiCodeBlock>
-      {isCloudEnabled ? cloudError(cloud) : nonCloudError()}
+      {cloud?.isCloudEnabled ? cloudError(cloud) : nonCloudError()}
     </>
   );
 };

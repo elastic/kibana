@@ -3,36 +3,7 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [
-      {
-        "parentPluginId": "imageEmbeddable",
-        "id": "def-public.ImageClickContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "ImageClickContext",
-        "description": [],
-        "path": "src/plugins/image_embeddable/public/actions/image_click_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "imageEmbeddable",
-            "id": "def-public.ImageClickContext.embeddable",
-            "type": "Object",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              "ImageEmbeddable"
-            ],
-            "path": "src/plugins/image_embeddable/public/actions/image_click_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [
       {

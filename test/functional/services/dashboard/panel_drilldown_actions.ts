@@ -22,7 +22,7 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
       await testSubjects.existOrFail(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
-    async expectMissingCreateDrilldwonAction() {
+    async expectMissingCreateDrilldownAction() {
       log.debug('expectMissingCreateDrilldownAction');
       await testSubjects.existOrFail(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
@@ -62,7 +62,7 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
     async getActionHrefByText(text: string) {
       log.debug(`getActionHref: "${text}"`);
       const item = await this.getActionWebElementByText(text);
-      return item.getAttribute('href');
+      return (await item.getAttribute('href')) ?? '';
     }
 
     async openHrefByText(text: string) {

@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { combineLatest, debounceTime, ReplaySubject, takeUntil } from 'rxjs';
+import {
+  firstValueFrom,
+  from,
+  of,
+  ReplaySubject,
+  shareReplay,
+  take,
+  combineLatest,
+  map,
+} from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type {
-  SolutionNavigationDefinition,
-  SolutionNavigationDefinitions,
-} from '@kbn/core-chrome-browser';
+import type { Space } from '@kbn/spaces-plugin/public';
+import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { definition as esDefinition } from '@kbn/solution-nav-es';
-import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
-import {
-  ENABLE_SOLUTION_NAV_UI_SETTING_ID,
-  OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID,
-  DEFAULT_SOLUTION_NAV_UI_SETTING_ID,
-} from '../common';
-import {
+import { SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
+import type {
   NavigationPublicSetup,
   NavigationPublicStart,
   NavigationPublicSetupDependencies,
   NavigationPublicStartDependencies,
-  ConfigSchema,
-  SolutionNavigation,
+  AddSolutionNavigationArg,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
@@ -48,8 +48,9 @@ export class NavigationPublicPlugin
   private readonly stop$ = new ReplaySubject<void>(1);
   private coreStart?: CoreStart;
   private depsStart?: NavigationPublicStartDependencies;
+  private isSolutionNavExperiementEnabled$ = of(false);
 
-  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(_core: CoreSetup): NavigationPublicSetup {
     return {
@@ -66,9 +67,10 @@ export class NavigationPublicPlugin
     this.coreStart = core;
     this.depsStart = depsStart;
 
-    const { unifiedSearch, cloud } = depsStart;
+    const { unifiedSearch, cloud, cloudExperiments, spaces } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
+    const activeSpace$ = spaces?.getActiveSpace$() ?? of(undefined);
 
     /*
      *
@@ -90,20 +92,29 @@ export class NavigationPublicPlugin
       return createTopNav(customUnifiedSearch ?? unifiedSearch, customExtensions ?? extensions);
     };
 
-    const config = this.initializerContext.config.get();
-    const {
-      solutionNavigation: { featureOn: isSolutionNavigationFeatureOn },
-    } = config;
-
     const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-    const isSolutionNavEnabled = isSolutionNavigationFeatureOn && onCloud && !isServerless;
 
-    if (isSolutionNavEnabled) {
-      chrome.project.setCloudUrls(cloud);
-      this.addDefaultSolutionNavigation({ chrome });
-      this.susbcribeToSolutionNavUiSettings(core);
+    if (cloudExperiments && onCloud && !isServerless) {
+      this.isSolutionNavExperiementEnabled$ = from(
+        cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false).catch(() => false)
+      ).pipe(shareReplay(1));
     }
+
+    // Initialize the solution navigation if it is enabled
+    combineLatest([this.isSolutionNavExperiementEnabled$, activeSpace$])
+      .pipe(take(1))
+      .subscribe(([isEnabled, activeSpace]) => {
+        this.initiateChromeStyleAndSideNav(chrome, {
+          isFeatureEnabled: isEnabled,
+          isServerless,
+          activeSpace,
+        });
+
+        if (!isEnabled) return;
+
+        chrome.project.setCloudUrls(cloud!);
+      });
 
     return {
       ui: {
@@ -111,46 +122,25 @@ export class NavigationPublicPlugin
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
         createTopNavWithCustomContext: createCustomTopNav,
       },
-      addSolutionNavigation: (
-        solutionNavigation: Omit<SolutionNavigation, 'sideNavComponent'> & {
-          /** Data test subj for the side navigation */
-          dataTestSubj?: string;
-          /** Panel content provider for the side navigation */
-          panelContentProvider?: PanelContentProvider;
-        }
-      ) => {
-        if (!isSolutionNavEnabled) return;
-        return this.addSolutionNavigation(solutionNavigation);
+      addSolutionNavigation: (solutionNavigation) => {
+        firstValueFrom(this.isSolutionNavExperiementEnabled$).then((isEnabled) => {
+          if (!isEnabled) return;
+          this.addSolutionNavigation(solutionNavigation);
+        });
       },
-      isSolutionNavigationEnabled: () => isSolutionNavEnabled,
+      isSolutionNavEnabled$: combineLatest([
+        this.isSolutionNavExperiementEnabled$,
+        activeSpace$,
+      ]).pipe(
+        map(([isFeatureEnabled, activeSpace]) => {
+          return getIsProjectNav(isFeatureEnabled, activeSpace?.solution) && !isServerless;
+        })
+      ),
     };
   }
 
   public stop() {
     this.stop$.next();
-  }
-
-  private susbcribeToSolutionNavUiSettings(core: CoreStart) {
-    const chrome = core.chrome as InternalChromeStart;
-
-    combineLatest([
-      core.settings.globalClient.get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
-      core.settings.globalClient.get$(OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID),
-      core.settings.globalClient.get$(DEFAULT_SOLUTION_NAV_UI_SETTING_ID),
-    ])
-      .pipe(takeUntil(this.stop$), debounceTime(10))
-      .subscribe(([enabled, status, defaultSolution]) => {
-        if (!enabled) {
-          chrome.project.changeActiveSolutionNavigation(null);
-        } else {
-          // TODO: Here we will need to check if the user has opt-in or not.... (value set in their user profile)
-          const changeImmediately = status === 'visible';
-          chrome.project.changeActiveSolutionNavigation(
-            changeImmediately ? defaultSolution : null,
-            { onlyIfNotSet: true }
-          );
-        }
-      });
   }
 
   private getSideNavComponent({
@@ -176,37 +166,42 @@ export class NavigationPublicPlugin
     );
   }
 
-  private addSolutionNavigation(
-    solutionNavigation: SolutionNavigation & {
-      /** Data test subj for the side navigation */
-      dataTestSubj?: string;
-      /** Panel content provider for the side navigation */
-      panelContentProvider?: PanelContentProvider;
-    }
-  ) {
+  private addSolutionNavigation(solutionNavigation: AddSolutionNavigationArg) {
     if (!this.coreStart) throw new Error('coreStart is not available');
     const { dataTestSubj, panelContentProvider, ...rest } = solutionNavigation;
-    const sideNavComponent =
-      solutionNavigation.sideNavComponent ??
-      this.getSideNavComponent({ dataTestSubj, panelContentProvider });
+    const sideNavComponent = this.getSideNavComponent({ dataTestSubj, panelContentProvider });
     const { project } = this.coreStart.chrome as InternalChromeStart;
     project.updateSolutionNavigations({
       [solutionNavigation.id]: { ...rest, sideNavComponent },
     });
   }
 
-  private addDefaultSolutionNavigation({ chrome }: { chrome: InternalChromeStart }) {
-    const solutionNavs: SolutionNavigationDefinitions = {
-      es: {
-        ...esDefinition,
-        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'svlSearchSideNav' }),
-      },
-      oblt: {
-        ...obltDefinition,
-        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'svlObservabilitySideNav' }),
-      },
-    };
+  private initiateChromeStyleAndSideNav(
+    chrome: InternalChromeStart,
+    {
+      isFeatureEnabled,
+      isServerless,
+      activeSpace,
+    }: { isFeatureEnabled: boolean; isServerless: boolean; activeSpace?: Space }
+  ) {
+    const solutionView = activeSpace?.solution;
+    const isProjectNav = getIsProjectNav(isFeatureEnabled, solutionView) && !isServerless;
 
-    chrome.project.updateSolutionNavigations(solutionNavs, true);
+    // On serverless the chrome style is already set by the serverless plugin
+    if (!isServerless) {
+      chrome.setChromeStyle(isProjectNav ? 'project' : 'classic');
+    }
+
+    if (isProjectNav) {
+      chrome.project.changeActiveSolutionNavigation(solutionView!);
+    }
   }
+}
+
+function getIsProjectNav(isFeatureEnabled: boolean, solutionView?: string) {
+  return isFeatureEnabled && Boolean(solutionView) && isKnownSolutionView(solutionView);
+}
+
+function isKnownSolutionView(solution?: string) {
+  return Boolean(solution) && ['oblt', 'es', 'security'].includes(solution!);
 }

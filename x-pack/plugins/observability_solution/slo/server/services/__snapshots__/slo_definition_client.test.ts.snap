@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SLODefinitionClient happy path fetches the SLO Definition from the remote summary index when a remoteName is specified 1`] = `
+Object {
+  "remote": Object {
+    "kibanaUrl": "http://myhost.com/mock-server-basepath",
+    "remoteName": "remote_cluster",
+  },
+  "slo": Object {
+    "budgetingMethod": "occurrences",
+    "createdAt": 2024-01-01T00:00:00.000Z,
+    "description": "irrelevant",
+    "enabled": true,
+    "groupBy": "*",
+    "id": "fixed-id",
+    "indicator": Object {
+      "params": Object {
+        "environment": "irrelevant",
+        "index": "metrics-apm*",
+        "service": "irrelevant",
+        "threshold": 500,
+        "transactionName": "irrelevant",
+        "transactionType": "irrelevant",
+      },
+      "type": "sli.apm.transactionDuration",
+    },
+    "name": "irrelevant",
+    "objective": Object {
+      "target": 0.999,
+      "timesliceTarget": undefined,
+      "timesliceWindow": undefined,
+    },
+    "revision": 1,
+    "settings": Object {
+      "frequency": Duration {
+        "unit": "m",
+        "value": 1,
+      },
+      "preventInitialBackfill": false,
+      "syncDelay": Duration {
+        "unit": "m",
+        "value": 1,
+      },
+    },
+    "tags": Array [
+      "critical",
+      "k8s",
+    ],
+    "timeWindow": Object {
+      "duration": Duration {
+        "unit": "d",
+        "value": 7,
+      },
+      "type": "rolling",
+    },
+    "updatedAt": 2024-01-01T00:00:00.000Z,
+    "version": 1,
+  },
+}
+`;

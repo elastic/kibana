@@ -20,6 +20,7 @@ import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { RunOpts } from '../types';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 describe('threshold_executor', () => {
   let alertServices: RuleExecutorServicesMock;
@@ -110,6 +111,7 @@ describe('threshold_executor', () => {
         spaceId: 'default',
         runOpts: {} as RunOpts<ThresholdRuleParams>,
         licensing,
+        experimentalFeatures: {} as ExperimentalFeatures,
       });
       expect(response.state).toEqual({
         initialized: true,
@@ -175,6 +177,7 @@ describe('threshold_executor', () => {
         spaceId: 'default',
         runOpts: {} as RunOpts<ThresholdRuleParams>,
         licensing,
+        experimentalFeatures: {} as ExperimentalFeatures,
       });
       expect(result.warningMessages).toEqual([
         `The following exceptions won't be applied to rule execution: ${

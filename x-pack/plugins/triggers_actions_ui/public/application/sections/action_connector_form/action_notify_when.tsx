@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { RuleAction, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,7 +27,7 @@ import {
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { RuleNotifyWhenType, RuleAction, NotifyWhenSelectOptions } from '../../../types';
+import { RuleNotifyWhenType, NotifyWhenSelectOptions } from '../../../types';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
@@ -245,7 +245,6 @@ export const ActionNotifyWhen = ({
   const summaryOptions = useMemo(
     () => [
       <SummaryContextMenuOption
-        className="euiSuperSelect__item"
         key="summary"
         onClick={() => selectSummaryOption(true)}
         icon={frequency.summary ? 'check' : 'empty'}
@@ -255,7 +254,6 @@ export const ActionNotifyWhen = ({
         {SUMMARY_OF_ALERTS}
       </SummaryContextMenuOption>,
       <SummaryContextMenuOption
-        className="euiSuperSelect__item"
         key="for_each"
         onClick={() => selectSummaryOption(false)}
         icon={!frequency.summary ? 'check' : 'empty'}
@@ -392,4 +390,5 @@ const SUMMARY_OF_ALERTS = i18n.translate(
 
 const SummaryContextMenuOption = euiStyled(EuiContextMenuItem)`
   min-width: 300px;
+  padding: ${({ theme }) => theme.eui.euiSizeS};
 `;

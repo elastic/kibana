@@ -8,9 +8,9 @@
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { sloSchema } from '@kbn/slo-schema';
+import { sloDefinitionSchema } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
-import { SLO, StoredSLO } from '../domain/models';
+import { SLODefinition, StoredSLODefinition } from '../domain/models';
 import { SLOIdConflict, SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 import { aStoredSLO, createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
@@ -21,9 +21,9 @@ const ANOTHER_SLO = createSLO();
 const INVALID_SLO_ID = 'invalid-slo-id';
 
 function soFindResponse(
-  sloList: SLO[],
+  sloList: SLODefinition[],
   includeInvalidStoredSLO: boolean = false
-): SavedObjectsFindResponse<StoredSLO> {
+): SavedObjectsFindResponse<StoredSLODefinition> {
   return {
     page: 1,
     per_page: 25,
@@ -32,7 +32,7 @@ function soFindResponse(
     saved_objects: [
       ...sloList.map((slo) => ({
         id: slo.id,
-        attributes: sloSchema.encode(slo),
+        attributes: sloDefinitionSchema.encode(slo),
         type: SO_SLO_TYPE,
         references: [],
         score: 1,
@@ -97,10 +97,14 @@ describe('KibanaSavedObjectsSLORepository', () => {
         perPage: 1,
         filter: `slo.attributes.id:(${slo.id})`,
       });
-      expect(soClientMock.create).toHaveBeenCalledWith(SO_SLO_TYPE, sloSchema.encode(slo), {
-        id: undefined,
-        overwrite: true,
-      });
+      expect(soClientMock.create).toHaveBeenCalledWith(
+        SO_SLO_TYPE,
+        sloDefinitionSchema.encode(slo),
+        {
+          id: undefined,
+          overwrite: true,
+        }
+      );
     });
 
     it('throws when the SLO id already exists and "throwOnConflict" is true', async () => {
@@ -134,10 +138,14 @@ describe('KibanaSavedObjectsSLORepository', () => {
         perPage: 1,
         filter: `slo.attributes.id:(${slo.id})`,
       });
-      expect(soClientMock.create).toHaveBeenCalledWith(SO_SLO_TYPE, sloSchema.encode(slo), {
-        id: 'my-id',
-        overwrite: true,
-      });
+      expect(soClientMock.create).toHaveBeenCalledWith(
+        SO_SLO_TYPE,
+        sloDefinitionSchema.encode(slo),
+        {
+          id: 'my-id',
+          overwrite: true,
+        }
+      );
     });
   });
 

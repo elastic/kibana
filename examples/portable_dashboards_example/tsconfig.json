@@ -21,9 +21,9 @@
     "@kbn/data-views-plugin",
     "@kbn/visualizations-plugin",
     "@kbn/developer-examples-plugin",
-    "@kbn/embeddable-examples-plugin",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/controls-plugin",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/presentation-publishing"
   ]
 }

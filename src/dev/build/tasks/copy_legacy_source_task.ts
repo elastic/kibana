@@ -21,6 +21,7 @@ export const CopyLegacySource: Task = {
     const select = [
       'yarn.lock',
       '.npmrc',
+      '.puppeteerrc',
       'config/kibana.yml',
       'config/node.options',
       '.i18nrc.json',

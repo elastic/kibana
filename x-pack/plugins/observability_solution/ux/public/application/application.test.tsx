@@ -37,8 +37,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-const mockAIAssistantPlugin =
-  observabilityAIAssistantPluginMock.createStartContract();
+const mockAIAssistantPlugin = observabilityAIAssistantPluginMock.createStartContract();
 
 const mockPlugin = {
   data: {
@@ -137,18 +136,12 @@ export const mockApmPluginContextValue = {
 
 describe('renderUxApp', () => {
   it('has an error boundary for the UXAppRoot', async () => {
-    const wrapper = mount(
-      <UXAppRoot {...(mockApmPluginContextValue as any)} />
-    );
+    const wrapper = mount(<UXAppRoot {...(mockApmPluginContextValue as any)} />);
 
-    wrapper
-      .find(RumHome)
-      .simulateError(new Error('Oh no, an unexpected error!'));
+    wrapper.find(RumHome).simulateError(new Error('Oh no, an unexpected error!'));
 
     expect(wrapper.find(RumHome)).toHaveLength(0);
     expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
-    expect(wrapper.find(EuiErrorBoundary).text()).toMatch(
-      /Error: Oh no, an unexpected error!/
-    );
+    expect(wrapper.find(EuiErrorBoundary).text()).toMatch(/Error: Oh no, an unexpected error!/);
   });
 });

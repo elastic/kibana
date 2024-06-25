@@ -6,10 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-} from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import qs from 'query-string';
@@ -18,7 +15,10 @@ import { Redirect } from 'react-router-dom';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import {
+  LatencyAggregationType,
+  latencyAggregationTypeRt,
+} from '../../../../common/latency_aggregation_types';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { AlertsOverview, ALERT_STATUS_ALL } from '../../app/alerts_overview';
@@ -56,11 +56,7 @@ function page({
 } {
   return {
     element: (
-      <ApmServiceTemplate
-        title={title}
-        selectedTab={tab}
-        searchBarOptions={searchBarOptions}
-      >
+      <ApmServiceTemplate title={title} selectedTab={tab} searchBarOptions={searchBarOptions}>
         {element}
       </ApmServiceTemplate>
     ),
@@ -70,17 +66,11 @@ function page({
 function RedirectNodesToMetrics() {
   const { query, path } = useApmParams('/services/{serviceName}/nodes');
   const search = qs.stringify(query);
-  return (
-    <Redirect
-      to={{ pathname: `/services/${path.serviceName}/metrics`, search }}
-    />
-  );
+  return <Redirect to={{ pathname: `/services/${path.serviceName}/metrics`, search }} />;
 }
 
 function RedirectNodeMetricsToMetricsDetails() {
-  const { query, path } = useApmParams(
-    '/services/{serviceName}/nodes/{serviceNodeName}/metrics'
-  );
+  const { query, path } = useApmParams('/services/{serviceName}/nodes/{serviceNodeName}/metrics');
   const search = qs.stringify(query);
   return (
     <Redirect
@@ -116,7 +106,7 @@ export const serviceDetailRoute = {
             comparisonEnabled: toBooleanRt,
           }),
           t.partial({
-            latencyAggregationType: t.string,
+            latencyAggregationType: latencyAggregationTypeRt,
             transactionType: t.string,
             refreshPaused: t.union([t.literal('true'), t.literal('false')]),
             refreshInterval: t.string,

@@ -16,6 +16,10 @@ import type {
   PluginSetupContract as AlertingPluginSetup,
   PluginStartContract as AlertingPluginStart,
 } from '@kbn/alerting-plugin/server';
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStartContract,
+} from '@kbn/actions-plugin/server';
 import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
@@ -47,6 +51,7 @@ import type { ExperimentalFeatures } from '../common';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
+  actions: ActionsPluginSetup;
   cases: CasesServerSetup;
   cloud: CloudSetup;
   data: DataPluginSetup;
@@ -84,6 +89,7 @@ export interface SecuritySolutionPluginStartDependencies {
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
   share: SharePluginStart;
+  actions: ActionsPluginStartContract;
 }
 
 export interface SecuritySolutionPluginSetup {

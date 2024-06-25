@@ -89,9 +89,7 @@ describe('transformServiceMapResponses', () => {
       expect(connection.data.target).toBe('opbeans-node');
     }
 
-    expect(
-      elements.find((element) => element.data.id === '>opbeans-node')
-    ).toBeUndefined();
+    expect(elements.find((element) => element.data.id === '>opbeans-node')).toBeUndefined();
   });
 
   it('adds connection for messaging-based external destinations', () => {
@@ -122,8 +120,7 @@ describe('transformServiceMapResponses', () => {
     expect(connections.length).toBe(2);
 
     const sendMessageConnection = connections.find(
-      (element) =>
-        'source' in element.data && element.data.source === 'opbeans-java'
+      (element) => 'source' in element.data && element.data.source === 'opbeans-java'
     );
 
     expect(sendMessageConnection).toHaveProperty('data');
@@ -131,27 +128,19 @@ describe('transformServiceMapResponses', () => {
 
     if (sendMessageConnection?.data && 'target' in sendMessageConnection.data) {
       expect(sendMessageConnection.data.target).toBe('>kafka/some-queue');
-      expect(sendMessageConnection.data.id).toBe(
-        'opbeans-java~>kafka/some-queue'
-      );
+      expect(sendMessageConnection.data.id).toBe('opbeans-java~>kafka/some-queue');
     }
 
     const receiveMessageConnection = connections.find(
-      (element) =>
-        'target' in element.data && element.data.target === 'opbeans-node'
+      (element) => 'target' in element.data && element.data.target === 'opbeans-node'
     );
 
     expect(receiveMessageConnection).toHaveProperty('data');
     expect(receiveMessageConnection?.data).toHaveProperty('target');
 
-    if (
-      receiveMessageConnection?.data &&
-      'source' in receiveMessageConnection.data
-    ) {
+    if (receiveMessageConnection?.data && 'source' in receiveMessageConnection.data) {
       expect(receiveMessageConnection.data.source).toBe('>kafka/some-queue');
-      expect(receiveMessageConnection.data.id).toBe(
-        '>kafka/some-queue~opbeans-node'
-      );
+      expect(receiveMessageConnection.data.id).toBe('>kafka/some-queue~opbeans-node');
     }
   });
 

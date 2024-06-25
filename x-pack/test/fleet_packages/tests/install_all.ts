@@ -18,6 +18,8 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const logger = getService('log');
+  const API_VERSION = '2023-10-31';
+  const API_VERSION_HEADER_NAME = 'elastic-api-version';
 
   function installPackage(
     name: string,
@@ -27,6 +29,7 @@ export default function (providerContext: FtrProviderContext) {
     return supertest
       .post(`/api/fleet/epm/packages/${name}/${version}`)
       .set('kbn-xsrf', 'xxx')
+      .set(API_VERSION_HEADER_NAME, API_VERSION)
       .send({ force: true })
       .expect(200)
       .then(() => {
@@ -45,6 +48,7 @@ export default function (providerContext: FtrProviderContext) {
     return supertest
       .delete(`/api/fleet/epm/packages/${name}/${version}`)
       .set('kbn-xsrf', 'xxx')
+      .set(API_VERSION_HEADER_NAME, API_VERSION)
       .expect(200)
       .then(() => {
         return { name, success: true };
@@ -59,7 +63,10 @@ export default function (providerContext: FtrProviderContext) {
     it('should work and install all packages', async () => {
       const {
         body: { items: packages },
-      } = await supertest.get('/api/fleet/epm/packages?prerelease=true').expect(200);
+      } = await supertest
+        .get('/api/fleet/epm/packages?prerelease=true')
+        .set(API_VERSION_HEADER_NAME, API_VERSION)
+        .expect(200);
       const allResults = [];
       for (const pkg of packages) {
         // skip deprecated failing package https://github.com/elastic/integrations/issues/4947

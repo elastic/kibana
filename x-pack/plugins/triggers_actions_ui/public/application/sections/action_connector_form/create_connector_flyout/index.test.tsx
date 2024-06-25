@@ -11,8 +11,8 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor, act } from '@testing-library/react';
 import CreateConnectorFlyout from '.';
-import { betaBadgeProps } from '../beta_badge_props';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import { TECH_PREVIEW_LABEL } from '../../translations';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   ...(jest.requireActual('../../../lib/action_connector_api') as any),
@@ -402,7 +402,7 @@ describe('CreateConnectorFlyout', () => {
         />
       );
       await act(() => Promise.resolve());
-      expect(queryByText(betaBadgeProps.label)).not.toBeInTheDocument();
+      expect(queryByText(TECH_PREVIEW_LABEL)).not.toBeInTheDocument();
     });
 
     it('does not show beta badge when isExperimental is false', async () => {
@@ -416,7 +416,7 @@ describe('CreateConnectorFlyout', () => {
         />
       );
       await act(() => Promise.resolve());
-      expect(queryByText(betaBadgeProps.label)).not.toBeInTheDocument();
+      expect(queryByText(TECH_PREVIEW_LABEL)).not.toBeInTheDocument();
     });
 
     it('shows beta badge when isExperimental is true', async () => {
@@ -430,7 +430,7 @@ describe('CreateConnectorFlyout', () => {
         />
       );
       await act(() => Promise.resolve());
-      expect(getByText(betaBadgeProps.label)).toBeInTheDocument();
+      expect(getByText(TECH_PREVIEW_LABEL)).toBeInTheDocument();
     });
   });
 

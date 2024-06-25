@@ -9,7 +9,7 @@
 import { PassThrough } from 'stream';
 
 import * as Rx from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs';
 import { OptimizerUpdate } from '@kbn/optimizer';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { createReplaceSerializer } from '@kbn/jest-serializers';

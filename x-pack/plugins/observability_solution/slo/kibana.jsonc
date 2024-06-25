@@ -11,15 +11,18 @@
       "slo"
     ],
     "requiredPlugins": [
+      "aiops",
       "alerting",
       "cases",
       "charts",
       "contentManagement",
       "controls",
+      "dashboard",
       "data",
       "dataViews",
       "lens",
       "dataViewEditor",
+      "dataViewFieldEditor",
       "fieldFormats",
       "observability",
       "observabilityShared",
@@ -34,14 +37,14 @@
       "presentationUtil",
       "features",
       "licensing",
-      "observabilityAIAssistant",
       "usageCollection",
     ],
     "optionalPlugins": [
       "cloud",
       "spaces",
       "serverless",
-      "discover"
+      "discover",
+      "observabilityAIAssistant"
     ],
     "requiredBundles": [
       "kibanaReact",

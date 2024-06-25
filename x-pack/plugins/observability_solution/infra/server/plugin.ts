@@ -96,10 +96,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         traditional: schema.boolean({ defaultValue: true }),
         serverless: schema.boolean({ defaultValue: false }),
       }),
-      osqueryEnabled: offeringBasedSchema({
-        traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: false }),
-      }),
+      osqueryEnabled: schema.boolean({ defaultValue: true }),
       inventoryThresholdAlertRuleEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
         serverless: schema.boolean({ defaultValue: true }),
@@ -122,6 +119,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
        * enabling this feature flag.
        */
       profilingEnabled: schema.boolean({ defaultValue: false }),
+      ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
   exposeToBrowser: publicConfigKeys,

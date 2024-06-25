@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { get } from 'lodash';
 import { schema } from '../..';
+import { META_FIELD_X_OAS_ANY } from '../oas_meta_fields';
 
 test('works for any value', () => {
   expect(schema.any().validate(true)).toBe(true);
@@ -28,6 +30,12 @@ test('includes namespace in failure', () => {
   ).toThrowErrorMatchingInlineSnapshot(
     `"[foo-namespace]: expected value of type [any] but got [undefined]"`
   );
+});
+
+test('meta', () => {
+  expect(get(schema.any().getSchema().describe(), 'metas[0]')).toEqual({
+    [META_FIELD_X_OAS_ANY]: true,
+  });
 });
 
 describe('#defaultValue', () => {

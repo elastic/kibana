@@ -9,9 +9,14 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { monaco } from '../monaco_imports';
-import type { SyntaxErrors, LangValidation, EditorError, BaseWorkerDefinition } from '../types';
+import type {
+  SyntaxErrors,
+  LangValidation,
+  MonacoEditorError,
+  BaseWorkerDefinition,
+} from '../types';
 
-const toDiagnostics = (error: EditorError): monaco.editor.IMarkerData => {
+const toDiagnostics = (error: MonacoEditorError): monaco.editor.IMarkerData => {
   return {
     ...error,
     severity: monaco.MarkerSeverity.Error,

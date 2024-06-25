@@ -8,15 +8,15 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { cluster, indices } from './monitoring_config';
 
-export function createShipperApiKey(
-  esClient: ElasticsearchClient,
-  name: string
-) {
+export function createShipperApiKey(esClient: ElasticsearchClient, name: string) {
   // Based on https://www.elastic.co/guide/en/fleet/master/grant-access-to-elasticsearch.html#create-api-key-standalone-agent
   return esClient.security.createApiKey({
     body: {
       name: `standalone_agent_logs_onboarding_${name}`,
-      metadata: { application: 'logs' },
+      metadata: {
+        managed: true,
+        application: 'logs',
+      },
       role_descriptors: {
         standalone_agent: {
           cluster,

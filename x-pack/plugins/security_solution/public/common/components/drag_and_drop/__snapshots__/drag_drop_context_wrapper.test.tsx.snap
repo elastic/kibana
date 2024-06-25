@@ -530,6 +530,30 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "searchable": true,
             "type": "date",
           },
+          "event.kind": Object {
+            "aggregatable": true,
+            "category": "event",
+            "description": "This defined the type of event eg. alerts",
+            "esTypes": Array [
+              "keyword",
+            ],
+            "example": "signal",
+            "format": "string",
+            "indexes": Array [
+              "apm-*-transaction*",
+              "auditbeat-*",
+              "endgame-*",
+              "filebeat-*",
+              "logs-*",
+              "packetbeat-*",
+              "traces-apm*",
+              "winlogbeat-*",
+              "-*elastic-cloud-logs-*",
+            ],
+            "name": "event.kind",
+            "searchable": true,
+            "type": "string",
+          },
           "event.severity": Object {
             "aggregatable": true,
             "category": "event",
@@ -644,6 +668,21 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
               },
             },
             "type": "date",
+          },
+        },
+      },
+      "process": Object {
+        "fields": Object {
+          "process.args": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "format": "",
+            "name": "process.args",
+            "readFromDocValues": true,
+            "searchable": true,
+            "type": "string",
           },
         },
       },

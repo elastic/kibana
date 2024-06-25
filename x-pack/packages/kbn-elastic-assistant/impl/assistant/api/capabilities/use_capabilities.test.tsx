@@ -11,12 +11,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { useCapabilities, UseCapabilitiesParams } from './use_capabilities';
-import { API_VERSIONS } from '@kbn/elastic-assistant-common';
-
-const statusResponse = { assistantModelEvaluation: true, assistantStreamingEnabled: false };
+import { API_VERSIONS, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 const http = {
-  get: jest.fn().mockResolvedValue(statusResponse),
+  get: jest.fn().mockResolvedValue(defaultAssistantFeatures),
 };
 const toasts = {
   addError: jest.fn(),

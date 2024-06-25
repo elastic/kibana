@@ -6,8 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { filter, switchMap } from 'rxjs';
-import { throttleTime } from 'rxjs/operators';
+import { filter, switchMap, throttleTime } from 'rxjs';
 
 import type {
   AnalyticsServiceSetup as CoreAnalyticsServiceSetup,

@@ -7,7 +7,7 @@
  */
 
 import { defer, Subject } from 'rxjs';
-import { finalize, map, delayWhen, filter } from 'rxjs/operators';
+import { finalize, map, delayWhen, filter } from 'rxjs';
 import { once } from 'lodash';
 import { createPageVisibility$ } from './page_visibility';
 

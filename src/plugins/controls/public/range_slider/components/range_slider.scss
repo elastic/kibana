@@ -5,10 +5,11 @@
     background-color: transparent;
 
     .euiFormControlLayout__childrenWrapper {
+      background-color: transparent;
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
-      border-top-right-radius: $euiBorderRadius - 1px;
-      border-bottom-right-radius: $euiBorderRadius - 1px;
+      border-top-right-radius: $euiBorderRadius;
+      border-bottom-right-radius: $euiBorderRadius;
 
       .euiFormControlLayoutDelimited__delimiter, .euiFormControlLayoutIcons--static {
         height: auto !important;

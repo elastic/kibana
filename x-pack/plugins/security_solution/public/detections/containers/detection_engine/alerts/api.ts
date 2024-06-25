@@ -30,7 +30,7 @@ import type {
   CheckSignalIndex,
   UpdateAlertStatusByIdsProps,
 } from './types';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint/endpoint_isolation';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 /**
@@ -143,7 +143,7 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIn
  */
 export const checkSignalIndex = async ({ signal }: BasicSignals): Promise<CheckSignalIndex> =>
   KibanaServices.get().http.fetch<CheckSignalIndex>(DETECTION_ENGINE_ALERTS_INDEX_URL, {
-    version: '2023-10-31',
+    version: '1',
     method: 'GET',
     signal,
   });

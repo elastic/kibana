@@ -25,13 +25,7 @@ export function ApmAgents({ policy, newPolicy, onChange }: Props) {
   return (
     <div>
       {ApmAgentInstructionsMappings.map(
-        ({
-          agentName,
-          title,
-          createAgentInstructions,
-          variantId,
-          AgentRuntimeAttachment,
-        }) => (
+        ({ agentName, title, createAgentInstructions, variantId, AgentRuntimeAttachment }) => (
           <Fragment key={agentName}>
             <EuiPanel>
               <AgentInstructionsAccordion

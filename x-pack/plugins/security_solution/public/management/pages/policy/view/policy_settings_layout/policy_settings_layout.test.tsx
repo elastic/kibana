@@ -16,7 +16,11 @@ import { getUserPrivilegesMockDefaultValue } from '../../../../../common/compone
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import { allFleetHttpMocks } from '../../../../mocks';
 import userEvent from '@testing-library/user-event';
-import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../policy_settings_form/mocks';
+import {
+  expectIsViewOnly,
+  getPolicySettingsFormTestSubjects,
+  setMalwareMode,
+} from '../policy_settings_form/mocks';
 import { cloneDeep, set } from 'lodash';
 import { ProtectionModes } from '../../../../../../common/endpoint/types';
 import { waitFor, cleanup } from '@testing-library/react';
@@ -89,15 +93,7 @@ describe('When rendering PolicySettingsLayout', () => {
 
       // Turn off malware
       userEvent.click(getByTestId(testSubj.malware.enableDisableSwitch));
-      set(policySettings, 'windows.malware.mode', ProtectionModes.off);
-      set(policySettings, 'mac.malware.mode', ProtectionModes.off);
-      set(policySettings, 'linux.malware.mode', ProtectionModes.off);
-      set(policySettings, 'windows.malware.blocklist', false);
-      set(policySettings, 'mac.malware.blocklist', false);
-      set(policySettings, 'linux.malware.blocklist', false);
-      set(policySettings, 'windows.popup.malware.enabled', false);
-      set(policySettings, 'mac.popup.malware.enabled', false);
-      set(policySettings, 'linux.popup.malware.enabled', false);
+      setMalwareMode(policySettings, true);
 
       // Turn off Behaviour Protection
       userEvent.click(getByTestId(testSubj.behaviour.enableDisableSwitch));

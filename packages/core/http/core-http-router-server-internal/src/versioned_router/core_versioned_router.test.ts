@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '@kbn/core-http-server';
-import { createRouter } from './mocks';
+import { Router } from '../router';
 import { CoreVersionedRouter } from '.';
+import { createRouter } from './mocks';
 
 describe('Versioned router', () => {
-  let router: IRouter;
+  let router: Router;
   beforeEach(() => {
     router = createRouter();
   });
@@ -22,5 +22,54 @@ describe('Versioned router', () => {
     versionedRouter.post({ path: '/test', access: 'internal' });
     versionedRouter.delete({ path: '/test', access: 'internal' });
     expect(versionedRouter.getRoutes()).toHaveLength(3);
+  });
+
+  it('registers pluginId if router has one', () => {
+    const pluginId = Symbol('test');
+    const versionedRouter = CoreVersionedRouter.from({ router: createRouter({ pluginId }) });
+    expect(versionedRouter.pluginId).toBe(pluginId);
+  });
+
+  it('provides the expected metadata', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    versionedRouter.get({ path: '/test/{id}', access: 'internal', deprecated: true });
+    versionedRouter.post({
+      path: '/test',
+      access: 'internal',
+      summary: 'Post test',
+      description: 'Post test description',
+    });
+    versionedRouter.delete({ path: '/test', access: 'internal' });
+    expect(versionedRouter.getRoutes()).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "handlers": Array [],
+          "method": "get",
+          "options": Object {
+            "access": "internal",
+            "deprecated": true,
+          },
+          "path": "/test/{id}",
+        },
+        Object {
+          "handlers": Array [],
+          "method": "post",
+          "options": Object {
+            "access": "internal",
+            "description": "Post test description",
+            "summary": "Post test",
+          },
+          "path": "/test",
+        },
+        Object {
+          "handlers": Array [],
+          "method": "delete",
+          "options": Object {
+            "access": "internal",
+          },
+          "path": "/test",
+        },
+      ]
+    `);
   });
 });

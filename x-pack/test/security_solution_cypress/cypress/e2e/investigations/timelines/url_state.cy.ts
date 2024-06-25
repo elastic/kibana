@@ -6,7 +6,6 @@
  */
 
 import { encode } from '@kbn/rison';
-import { getTimeline } from '../../../objects/timeline';
 import { TIMELINE_HEADER } from '../../../screens/timeline';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -24,7 +23,7 @@ describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
     login();
     deleteTimelines();
     visit(TIMELINES_URL);
-    createTimeline(getTimeline()).then((response) => {
+    createTimeline().then((response) => {
       timelineSavedObjectId = response.body.data.persistTimeline.timeline.savedObjectId;
       return response.body.data.persistTimeline.timeline.savedObjectId;
     });

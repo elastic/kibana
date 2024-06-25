@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { ActionType } from '@kbn/actions-plugin/common';
 import {
   ActionConnector,
@@ -20,6 +20,7 @@ interface Props {
   onSaveConnector: (connector: ActionConnector) => void;
   onSelectActionType: (actionType: ActionType) => void;
   selectedActionType: ActionType | null;
+  actionTypeSelectorInline?: boolean;
 }
 export const AddConnectorModal: React.FC<Props> = React.memo(
   ({
@@ -29,24 +30,26 @@ export const AddConnectorModal: React.FC<Props> = React.memo(
     onSaveConnector,
     onSelectActionType,
     selectedActionType,
-  }) =>
-    !selectedActionType ? (
+    actionTypeSelectorInline = false,
+  }) => (
+    <>
       <ActionTypeSelectorModal
         actionTypes={actionTypes}
         actionTypeRegistry={actionTypeRegistry}
         onClose={onClose}
         onSelect={onSelectActionType}
+        actionTypeSelectorInline={actionTypeSelectorInline}
       />
-    ) : (
-      <Suspense fallback={'Loading..'}>
+      {selectedActionType && (
         <ConnectorAddModal
           actionType={selectedActionType}
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
           postSaveEventHandler={onSaveConnector}
         />
-      </Suspense>
-    )
+      )}
+    </>
+  )
 );
 
 AddConnectorModal.displayName = 'AddConnectorModal';

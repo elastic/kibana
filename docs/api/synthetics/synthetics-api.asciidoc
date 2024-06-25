@@ -3,6 +3,16 @@
 
 The following APIs are available for Synthetics.
 
+* <<add-monitor-api, Add monitor>> - Add a new monitor to Synthetics app.
+
+* <<update-monitor-api, Update monitor>> - Update an existing monitor in Synthetics app.
+
+* <<delete-monitors-api, Delete monitor>> - Delete an existing monitor from Synthetics app.
+
+* <<get-monitor-api, Get monitor>> to get a monitor.
+
+* <<find-monitors-api, Find monitors>> to find monitors.
+
 * <<get-parameters-api, Get Parameters API>> to get a parameter(s).
 
 * <<add-parameters-api, Create Parameter API>> to create a parameter.
@@ -17,6 +27,11 @@ The following APIs are available for Synthetics.
 
 * <<get-private-locations-api, Get Private Locations API>> to get a list of private locations
 
+include::monitors/add-monitor-api.asciidoc[leveloffset=+1]
+include::monitors/update-monitor-api.asciidoc[leveloffset=+1]
+include::monitors/delete-monitor-api.asciidoc[leveloffset=+1]
+include::monitors/get-monitor-api.asciidoc[leveloffset=+1]
+include::monitors/find-monitors-api.asciidoc[leveloffset=+1]
 include::params/add-param.asciidoc[leveloffset=+1]
 include::params/get-params.asciidoc[leveloffset=+1]
 include::params/edit-param.asciidoc[leveloffset=+1]

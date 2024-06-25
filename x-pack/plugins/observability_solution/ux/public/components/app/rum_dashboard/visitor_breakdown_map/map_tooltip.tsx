@@ -64,19 +64,14 @@ function MapToolTipComponent({
           properties: mbProperties,
         });
         items.forEach((item) => {
-          if (
-            item.getPropertyKey() === COUNTRY_NAME ||
-            item.getPropertyKey() === REGION_NAME
-          ) {
+          if (item.getPropertyKey() === COUNTRY_NAME || item.getPropertyKey() === REGION_NAME) {
             setRegionName(item.getRawValue() as string);
           }
           if (
             item.getPropertyKey() === TRANSACTION_DURATION_REGION ||
             item.getPropertyKey() === TRANSACTION_DURATION_COUNTRY
           ) {
-            setPageLoadDuration(
-              formatPageLoadValue(+(item.getRawValue() as string))
-            );
+            setPageLoadDuration(formatPageLoadValue(+(item.getRawValue() as string)));
           }
         });
       }
@@ -100,9 +95,7 @@ function MapToolTipComponent({
           compressed={true}
           style={{ width: 300 }}
         >
-          <TitleItem className="eui-textNoWrap">
-            {I18LABELS.avgPageLoadDuration}
-          </TitleItem>
+          <TitleItem className="eui-textNoWrap">{I18LABELS.avgPageLoadDuration}</TitleItem>
           <DescriptionItem>{pageLoadDuration}</DescriptionItem>
         </EuiDescriptionList>
       </>

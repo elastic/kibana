@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { reduce, map } from 'rxjs/operators';
+import { reduce, map } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { GlobalSearchRouter } from '../types';
 import { GlobalSearchFindError } from '../../common/errors';

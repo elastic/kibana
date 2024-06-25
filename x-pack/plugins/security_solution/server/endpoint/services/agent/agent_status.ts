@@ -17,24 +17,23 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { SentinelOneGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import { stringify } from '../../utils/stringify';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
-import type { AgentStatusApiResponse } from '../../../../common/endpoint/types';
+import type { AgentStatusInfo } from '../../../../common/endpoint/types';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
 export interface GetAgentStatusOptions {
   // NOTE: only sentinel_one currently supported
-  agentType: ResponseActionAgentType & 'sentinel_one';
+  agentType: ResponseActionAgentType;
   agentIds: string[];
   connectorActionsClient: ActionsClient;
   logger: Logger;
 }
-
-export const getAgentStatus = async ({
+export const getSentinelOneAgentStatus = async ({
   agentType,
   agentIds,
   connectorActionsClient,
   logger,
-}: GetAgentStatusOptions): Promise<AgentStatusApiResponse['data']> => {
+}: GetAgentStatusOptions): Promise<AgentStatusInfo> => {
   let connectorList: ConnectorWithExtraFindData[] = [];
 
   try {
@@ -84,11 +83,11 @@ export const getAgentStatus = async ({
 
   logger.debug(`Response from SentinelOne API:\n${stringify(agentDetailsById)}`);
 
-  return agentIds.reduce<AgentStatusApiResponse['data']>((acc, agentId) => {
+  return agentIds.reduce<AgentStatusInfo>((acc, agentId) => {
     const thisAgentDetails = agentDetailsById[agentId];
     const thisAgentStatus = {
       agentType,
-      id: agentId,
+      agentId,
       found: false,
       isolated: false,
       isPendingUninstall: false,

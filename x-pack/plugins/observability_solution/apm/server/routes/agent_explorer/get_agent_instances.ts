@@ -6,11 +6,7 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 import {
   AGENT_NAME,
@@ -106,9 +102,7 @@ export async function getAgentInstances({
       environments: agentInstance.environments.buckets.map(
         (environmentBucket) => environmentBucket.key as string
       ),
-      agentVersion: agentInstance.sample.top[0].metrics[
-        AGENT_VERSION
-      ] as string,
+      agentVersion: agentInstance.sample.top[0].metrics[AGENT_VERSION] as string,
       lastReport: agentInstance.sample.top[0].sort[0] as string,
     })) ?? []
   );

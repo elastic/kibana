@@ -1,0 +1,30 @@
+steps:
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/create_periodic_test_docker_image.sh
+    label: Build kibana image
+    key: build_image
+    agents:
+      queue: n2-16-spot
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/upload_image_metadata.sh
+    label: 'Upload runtime info'
+    key: upload_runtime_info
+    depends_on: build_image
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 300
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 2
+
+  - group: 'Execute Cypress Tests'
+    key: test_execution
+    depends_on: build_image
+    steps:
+      - label: Running ESS Cypress Tests
+        command: "echo 'Running ESS Cypress Tests'"

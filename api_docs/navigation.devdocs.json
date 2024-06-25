@@ -80,9 +80,7 @@
                     "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<",
-                  "ConfigSchema",
-                  ">"
+                  "<object>"
                 ],
                 "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
@@ -805,6 +803,21 @@
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.intl",
+            "type": "Object",
+            "tags": [],
+            "label": "intl",
+            "description": [],
+            "signature": [
+              "IntlShape",
+              " | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -814,13 +827,23 @@
     "misc": [
       {
         "parentPluginId": "navigation",
-        "id": "def-public.SolutionNavigationOptInStatus",
+        "id": "def-public.AddSolutionNavigationArg",
         "type": "Type",
         "tags": [],
-        "label": "SolutionNavigationOptInStatus",
+        "label": "AddSolutionNavigationArg",
         "description": [],
         "signature": [
-          "\"hidden\" | \"visible\" | \"ask\""
+          "Omit<",
+          "SolutionNavigation",
+          ", \"sideNavComponent\"> & { dataTestSubj?: string | undefined; panelContentProvider?: ",
+          {
+            "pluginId": "@kbn/shared-ux-chrome-navigation",
+            "scope": "public",
+            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
+            "section": "def-public.ContentProvider",
+            "text": "ContentProvider"
+          },
+          " | undefined; }"
         ],
         "path": "src/plugins/navigation/public/types.ts",
         "deprecated": false,
@@ -835,7 +858,7 @@
         "label": "SolutionType",
         "description": [],
         "signature": [
-          "\"security\" | \"es\" | \"oblt\""
+          "\"security\" | \"analytics\" | \"es\" | \"oblt\""
         ],
         "path": "src/plugins/navigation/public/types.ts",
         "deprecated": false,
@@ -1074,8 +1097,14 @@
             "Add a solution navigation to the header nav switcher."
           ],
           "signature": [
-            "(solutionNavigation: ",
-            "SolutionNavigation",
+            "(solutionNavigationAgg: ",
+            {
+              "pluginId": "navigation",
+              "scope": "public",
+              "docId": "kibNavigationPluginApi",
+              "section": "def-public.AddSolutionNavigationArg",
+              "text": "AddSolutionNavigationArg"
+            },
             ") => void"
           ],
           "path": "src/plugins/navigation/public/types.ts",
@@ -1085,12 +1114,18 @@
             {
               "parentPluginId": "navigation",
               "id": "def-public.NavigationPublicStart.addSolutionNavigation.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
-              "label": "solutionNavigation",
+              "label": "solutionNavigationAgg",
               "description": [],
               "signature": [
-                "SolutionNavigation"
+                {
+                  "pluginId": "navigation",
+                  "scope": "public",
+                  "docId": "kibNavigationPluginApi",
+                  "section": "def-public.AddSolutionNavigationArg",
+                  "text": "AddSolutionNavigationArg"
+                }
               ],
               "path": "src/plugins/navigation/public/types.ts",
               "deprecated": false,
@@ -1102,23 +1137,20 @@
         },
         {
           "parentPluginId": "navigation",
-          "id": "def-public.NavigationPublicStart.isSolutionNavigationEnabled",
-          "type": "Function",
+          "id": "def-public.NavigationPublicStart.isSolutionNavEnabled$",
+          "type": "Object",
           "tags": [],
-          "label": "isSolutionNavigationEnabled",
+          "label": "isSolutionNavEnabled$",
           "description": [
-            "\nUse this handler verify if the solution navigation is enabled."
+            "Flag to indicate if the solution navigation is enabled."
           ],
           "signature": [
-            "() => boolean"
+            "Observable",
+            "<boolean>"
           ],
           "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": [
-            "true if the solution navigation is enabled, false otherwise."
-          ]
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -1141,43 +1173,13 @@
     "misc": [
       {
         "parentPluginId": "navigation",
-        "id": "def-common.DEFAULT_SOLUTION_NAV_UI_SETTING_ID",
+        "id": "def-common.SOLUTION_NAV_FEATURE_FLAG_NAME",
         "type": "string",
         "tags": [],
-        "label": "DEFAULT_SOLUTION_NAV_UI_SETTING_ID",
+        "label": "SOLUTION_NAV_FEATURE_FLAG_NAME",
         "description": [],
         "signature": [
-          "\"solutionNav:default\""
-        ],
-        "path": "src/plugins/navigation/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "navigation",
-        "id": "def-common.ENABLE_SOLUTION_NAV_UI_SETTING_ID",
-        "type": "string",
-        "tags": [],
-        "label": "ENABLE_SOLUTION_NAV_UI_SETTING_ID",
-        "description": [],
-        "signature": [
-          "\"solutionNav:enable\""
-        ],
-        "path": "src/plugins/navigation/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "navigation",
-        "id": "def-common.OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID",
-        "description": [],
-        "signature": [
-          "\"solutionNav:optInStatus\""
+          "\"solutionNavEnabled\""
         ],
         "path": "src/plugins/navigation/common/constants.ts",
         "deprecated": false,

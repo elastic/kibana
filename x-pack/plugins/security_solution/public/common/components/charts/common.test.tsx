@@ -23,15 +23,6 @@ import { LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');
 
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
-
-  return {
-    ...original,
-    getSpecId: jest.fn(() => {}),
-  };
-});
-
 describe('WrappedByAutoSizer', () => {
   it('should render correct default height', () => {
     const wrapper = shallow(<WrappedByAutoSizer />);

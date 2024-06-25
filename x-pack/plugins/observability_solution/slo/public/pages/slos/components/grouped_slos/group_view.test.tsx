@@ -46,6 +46,8 @@ describe('Group View', () => {
     useFetchSloGroupsMock.mockReturnValue({
       isError: true,
       isLoading: false,
+      isRefetching: false,
+      refetch: jest.fn(),
     });
     const { queryByTestId, getByTestId } = render(
       <GroupView groupBy="slo.tags" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
@@ -65,6 +67,7 @@ describe('Group View', () => {
         total: 0,
         results: [],
       },
+      refetch: jest.fn(),
     });
 
     const { queryByTestId, getByTestId } = render(
@@ -78,6 +81,7 @@ describe('Group View', () => {
   it('should show loading indicator', async () => {
     useFetchSloGroupsMock.mockReturnValue({
       isLoading: true,
+      refetch: jest.fn(),
     });
 
     const { queryByTestId, getByTestId } = render(
@@ -101,20 +105,69 @@ describe('Group View', () => {
             {
               group: 'production',
               groupBy: 'slo.tags',
-              summary: { total: 3, worst: 0.95, healthy: 2, violated: 1, degrading: 0, noData: 0 },
+              summary: {
+                total: 3,
+                worst: {
+                  sliValue: 1,
+                  status: 'healthy',
+                  slo: {
+                    id: 'irrelevant',
+                    instanceId: 'irrelevant',
+                    name: 'irrelevant',
+                    groupings: {},
+                  },
+                },
+                healthy: 2,
+                violated: 1,
+                degrading: 0,
+                noData: 0,
+              },
             },
             {
               group: 'something',
               groupBy: 'slo.tags',
-              summary: { total: 1, worst: 0.9, healthy: 0, violated: 1, degrading: 0, noData: 0 },
+              summary: {
+                total: 1,
+                worst: {
+                  sliValue: 1,
+                  status: 'healthy',
+                  slo: {
+                    id: 'irrelevant',
+                    instanceId: 'irrelevant',
+                    name: 'irrelevant',
+                    groupings: {},
+                  },
+                },
+                healthy: 0,
+                violated: 1,
+                degrading: 0,
+                noData: 0,
+              },
             },
             {
               group: 'anything',
               groupBy: 'slo.tags',
-              summary: { total: 2, worst: 0.85, healthy: 1, violated: 0, degrading: 0, noData: 1 },
+              summary: {
+                total: 2,
+                worst: {
+                  sliValue: 1,
+                  status: 'healthy',
+                  slo: {
+                    id: 'irrelevant',
+                    instanceId: 'irrelevant',
+                    name: 'irrelevant',
+                    groupings: {},
+                  },
+                },
+                healthy: 1,
+                violated: 0,
+                degrading: 0,
+                noData: 1,
+              },
             },
           ],
         },
+        refetch: jest.fn(),
       });
       const { queryAllByTestId, getByTestId } = render(
         <GroupView
@@ -158,11 +211,12 @@ describe('Group View', () => {
           results: [
             {
               group: 'production',
-              groupBy: 'tags',
+              groupBy: 'slo.tags',
               summary: { total: 3, worst: 0.95, healthy: 2, violated: 1, degrading: 0, noData: 0 },
             },
           ],
         },
+        refetch: jest.fn(),
       });
 
       const { queryAllByTestId } = render(

@@ -6,12 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 interface Props {
   items: React.ReactNode[];
@@ -36,10 +31,9 @@ export function ContextMenu({ items }: Props) {
           display="base"
           size="s"
           iconType="boxesVertical"
-          aria-label={i18n.translate(
-            'xpack.apm.serviceDashboards.contextMenu.moreLabel',
-            { defaultMessage: 'More' }
-          )}
+          aria-label={i18n.translate('xpack.apm.serviceDashboards.contextMenu.moreLabel', {
+            defaultMessage: 'More',
+          })}
           onClick={onButtonClick}
         />
       }

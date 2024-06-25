@@ -27,8 +27,11 @@ export interface IncompatibleMappingException {
 }
 
 /**
- * Updates an index's mappings and runs an pickupUpdatedMappings task so that the mapping
- * changes are "picked up". Returns a taskId to track progress.
+ * Attempts to update the SO index mappings.
+ * Includes an automatic retry mechanism for retriable errors.
+ * Returns an 'update_mappings_succeeded' upon success.
+ * If changes in the mappings are NOT compatible and the update fails on ES side,
+ * this method will return an 'incompatible_mapping_exception'.
  */
 export const updateMappings = ({
   client,

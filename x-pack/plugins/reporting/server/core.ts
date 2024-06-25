@@ -6,9 +6,9 @@
  */
 
 import * as Rx from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { map, take } from 'rxjs';
 
-import type {
+import {
   AnalyticsServiceStart,
   CoreSetup,
   DocLinksServiceSetup,
@@ -237,41 +237,6 @@ export class ReportingCore {
     return exportTypes;
   }
 
-  /**
-   * If xpack.reporting.roles.enabled === true, register Reporting as a feature
-   * that is controlled by user role names
-   */
-  public registerFeature() {
-    const { features } = this.getPluginSetupDeps();
-    const deprecatedRoles = this.getDeprecatedAllowedRoles();
-
-    if (deprecatedRoles !== false) {
-      // refer to roles.allow configuration (deprecated path)
-      const allowedRoles = ['superuser', ...(deprecatedRoles ?? [])];
-      const privileges = allowedRoles.map((role) => ({
-        requiredClusterPrivileges: [],
-        requiredRoles: [role],
-        ui: [],
-      }));
-
-      // self-register as an elasticsearch feature (deprecated)
-      features.registerElasticsearchFeature({
-        id: 'reporting',
-        catalogue: ['reporting'],
-        management: {
-          insightsAndAlerting: ['reporting'],
-        },
-        privileges,
-      });
-    } else {
-      this.logger.debug(
-        `Reporting roles configuration is disabled. Please assign access to Reporting use Kibana feature controls for applications.`
-      );
-      // trigger application to register Reporting as a subfeature
-      features.enableReportingUiCapabilities();
-    }
-  }
-
   /*
    * Returns configurable server info
    */
@@ -418,6 +383,10 @@ export class ReportingCore {
     return new ReportingEventLogger(report, task);
   }
 
+  /**
+   * @deprecated
+   * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
+   */
   public async getCsvSearchSourceImmediate() {
     const startDeps = await this.getPluginStartDeps();
 

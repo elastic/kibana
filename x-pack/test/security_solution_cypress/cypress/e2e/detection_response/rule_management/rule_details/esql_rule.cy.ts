@@ -24,7 +24,7 @@ import { visit } from '../../../../tasks/navigation';
 
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
 
-describe('Detection ES|QL rules, details view', { tags: ['@ess'] }, () => {
+describe('Detection ES|QL rules, details view', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getEsqlRule();
 
   beforeEach(() => {
@@ -42,8 +42,6 @@ describe('Detection ES|QL rules, details view', { tags: ['@ess'] }, () => {
         getDetails(ESQL_QUERY_DETAILS).should('have.text', rule.query);
 
         getDetails(RULE_TYPE_DETAILS).contains('ES|QL');
-        // ensures ES|QL rule in technical preview
-        getDetails(RULE_TYPE_DETAILS).contains('Technical Preview');
       });
     });
   });

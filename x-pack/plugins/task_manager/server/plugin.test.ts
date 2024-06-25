@@ -9,7 +9,7 @@ import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { TaskManagerConfig } from './config';
 import { Subject } from 'rxjs';
-import { bufferCount, take } from 'rxjs/operators';
+import { bufferCount, take } from 'rxjs';
 import { CoreStatus, ServiceStatusLevels } from '@kbn/core/server';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';

@@ -7,11 +7,22 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import { SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart } from './types';
+import { sendMessageEvent } from './analytics/events';
+import {
+  SearchPlaygroundPluginSetup,
+  SearchPlaygroundPluginStart,
+  SearchPlaygroundPluginStartDependencies,
+} from './types';
 import { defineRoutes } from './routes';
 
 export class SearchPlaygroundPlugin
-  implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>
+  implements
+    Plugin<
+      SearchPlaygroundPluginSetup,
+      SearchPlaygroundPluginStart,
+      {},
+      SearchPlaygroundPluginStartDependencies
+    >
 {
   private readonly logger: Logger;
 
@@ -19,17 +30,25 @@ export class SearchPlaygroundPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(
+    core: CoreSetup<SearchPlaygroundPluginStartDependencies, SearchPlaygroundPluginStart>
+  ) {
     this.logger.debug('searchPlayground: Setup');
     const router = core.http.createRouter();
 
-    defineRoutes({ router, log: this.logger });
+    defineRoutes({ router, logger: this.logger, getStartServices: core.getStartServices });
+
+    this.registerAnalyticsEvents(core);
 
     return {};
   }
 
   public start(core: CoreStart) {
     return {};
+  }
+
+  private registerAnalyticsEvents(core: CoreSetup) {
+    core.analytics.registerEventType(sendMessageEvent);
   }
 
   public stop() {}

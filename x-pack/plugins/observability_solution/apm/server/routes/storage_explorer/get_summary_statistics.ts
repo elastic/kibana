@@ -6,11 +6,7 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  termQuery,
-  kqlQuery,
-  rangeQuery,
-} from '@kbn/observability-plugin/server';
+import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
@@ -65,17 +61,12 @@ async function getTracesPerMinute({
       query: {
         bool: {
           filter: [
-            ...getBackwardCompatibleDocumentTypeFilter(
-              searchAggregatedTransactions
-            ),
+            ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...rangeQuery(start, end),
             ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-              ? termQuery(
-                  TIER,
-                  indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
-                )
+              ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
               : []),
             isRootTransaction(searchAggregatedTransactions),
           ],
@@ -84,9 +75,7 @@ async function getTracesPerMinute({
       aggs: {
         traces_count: {
           value_count: {
-            field: getDurationFieldForTransactions(
-              searchAggregatedTransactions
-            ),
+            field: getDurationFieldForTransactions(searchAggregatedTransactions),
           },
         },
       },
@@ -138,10 +127,7 @@ async function getMainSummaryStats({
               ...kqlQuery(kuery),
               ...rangeQuery(start, end),
               ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                ? termQuery(
-                    TIER,
-                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
-                  )
+                ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
                 : []),
             ],
           },

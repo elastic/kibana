@@ -20,10 +20,10 @@ fi
   export KIBANA_CI_GITHUB_TOKEN
 
   KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
-  export KIBANA_DOCKER_USERNAME
-
   KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
-  export KIBANA_DOCKER_PASSWORD
+  if (command -v docker && docker version) &> /dev/null; then
+    echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
+  fi
 }
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
@@ -122,6 +122,12 @@ EOF
 
   SONAR_LOGIN=$(vault_get sonarqube token)
   export SONAR_LOGIN
+
+  ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
+  export ELASTIC_APM_SERVER_URL
+
+  ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
+  export ELASTIC_APM_API_KEY
 }
 
 # Set up GCS Service Account for CDN

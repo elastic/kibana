@@ -242,7 +242,7 @@ describe('EntityAnalyticsAnomalies', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('anomalies-table-column-count').textContent).toEqual('Count'); // 'Count' is always rendered by only displayed on mobile
+    expect(getByTestId('anomalies-table-column-count')).toHaveTextContent('');
   });
 
   it('renders a warning message when jobs are incompatible', () => {

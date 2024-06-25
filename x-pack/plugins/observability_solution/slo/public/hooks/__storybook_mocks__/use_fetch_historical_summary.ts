@@ -10,13 +10,13 @@ import { HEALTHY_ROLLING_SLO, historicalSummaryData } from '../../data/slo/histo
 import { Params, UseFetchHistoricalSummaryResponse } from '../use_fetch_historical_summary';
 
 export const useFetchHistoricalSummary = ({
-  list = [],
+  sloList = [],
 }: Params): UseFetchHistoricalSummaryResponse => {
   const data: FetchHistoricalSummaryResponse = [];
-  list.forEach(({ sloId, instanceId }) =>
+  sloList.forEach(({ id, instanceId }) =>
     data.push({
-      sloId,
-      instanceId,
+      sloId: id,
+      instanceId: instanceId!,
       data: historicalSummaryData.find((datum) => datum.sloId === HEALTHY_ROLLING_SLO)!.data,
     })
   );

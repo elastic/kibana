@@ -94,10 +94,12 @@ const testVisTypeAliases: VisTypeAlias[] = [
 
 storiesOf('components/WorkpadHeader/EditorMenu', module).add('default', () => (
   <EditorMenu
+    addPanelActions={[]}
     factories={testFactories}
     promotedVisTypes={testVisTypes}
     visTypeAliases={testVisTypeAliases}
     createNewVisType={() => action('createNewVisType')}
-    createNewEmbeddable={() => action('createNewEmbeddable')}
+    createNewEmbeddableFromFactory={() => action('createNewEmbeddableFromFactory')}
+    createNewEmbeddableFromAction={() => action('createNewEmbeddableFromAction')}
   />
 ));

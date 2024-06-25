@@ -6,7 +6,7 @@
  */
 
 import type { RouteDefinitionParams } from '../..';
-import { transformElasticsearchRoleToRole } from '../../../authorization';
+import { compareRolesByName, transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 
@@ -15,11 +15,20 @@ export function defineGetAllRolesRoutes({
   authz,
   getFeatures,
   logger,
+  buildFlavor,
+  config,
 }: RouteDefinitionParams) {
   router.get(
-    { path: '/api/security/role', validate: false },
+    {
+      path: '/api/security/role',
+      options: {
+        summary: `Get all roles`,
+      },
+      validate: false,
+    },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
+        const hideReservedRoles = buildFlavor === 'serverless';
         const esClient = (await context.core).elasticsearch.client;
         const [features, elasticsearchRoles] = await Promise.all([
           getFeatures(),
@@ -39,17 +48,10 @@ export function defineGetAllRolesRoutes({
                 logger
               )
             )
-            .sort((roleA, roleB) => {
-              if (roleA.name < roleB.name) {
-                return -1;
-              }
-
-              if (roleA.name > roleB.name) {
-                return 1;
-              }
-
-              return 0;
-            }),
+            .filter((role) => {
+              return !hideReservedRoles || !role.metadata?._reserved;
+            })
+            .sort(compareRolesByName),
         });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

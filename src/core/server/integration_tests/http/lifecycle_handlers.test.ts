@@ -10,7 +10,7 @@ import supertest from 'supertest';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { IRouter, RouteRegistrar } from '@kbn/core-http-server';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createConfigService, createHttpServer } from '@kbn/core-http-server-mocks';
+import { createConfigService, createHttpService } from '@kbn/core-http-server-mocks';
 import { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { schema } from '@kbn/config-schema';
@@ -61,7 +61,7 @@ describe('core lifecycle handlers', () => {
   beforeEach(async () => {
     const configService = createConfigService(testConfig);
     logger = loggerMock.create();
-    server = createHttpServer({ configService, logger });
+    server = createHttpService({ configService, logger });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');
@@ -243,7 +243,7 @@ describe('core lifecycle handlers', () => {
           restrictInternalApis: true,
         },
       });
-      server = createHttpServer({ configService });
+      server = createHttpService({ configService });
       await server.preboot({ context: contextServiceMock.createPrebootContract() });
       const serverSetup = await server.setup(setupDeps);
       router = serverSetup.createRouter('/');
@@ -317,7 +317,7 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
 
   beforeEach(async () => {
     const configService = createConfigService({ server: { restrictInternalApis: true } });
-    server = createHttpServer({ configService });
+    server = createHttpService({ configService });
 
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const serverSetup = await server.setup(setupDeps);
@@ -382,7 +382,7 @@ describe('core lifecycle handlers with no strict client version check', () => {
         },
       },
     });
-    server = createHttpServer({ configService, logger, buildNum: 1234 });
+    server = createHttpService({ configService, logger, buildNum: 1234 });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');

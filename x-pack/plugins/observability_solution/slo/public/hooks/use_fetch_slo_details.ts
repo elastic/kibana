@@ -31,10 +31,12 @@ export interface UseFetchSloDetailsResponse {
 export function useFetchSloDetails({
   sloId,
   instanceId,
+  remoteName,
   shouldRefetch,
 }: {
   sloId?: string;
   instanceId?: string;
+  remoteName?: string | null;
   shouldRefetch?: boolean;
 }): UseFetchSloDetailsResponse {
   const { http } = useKibana().services;
@@ -47,6 +49,7 @@ export function useFetchSloDetails({
           const response = await http.get<GetSLOResponse>(`/api/observability/slos/${sloId}`, {
             query: {
               ...(!!instanceId && instanceId !== ALL_VALUE && { instanceId }),
+              ...(remoteName && { remoteName }),
             },
             signal,
           });

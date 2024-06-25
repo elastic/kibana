@@ -75,10 +75,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
 
     const esCapabilities = await getESCapabilities(resources);
 
-    const [mlClient, indices] = await Promise.all([
-      getMlClient(resources),
-      getApmIndices(),
-    ]);
+    const [mlClient, indices] = await Promise.all([getMlClient(resources), getApmIndices()]);
 
     if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
@@ -115,9 +112,7 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
       config: resources.config,
       kuery: '',
     });
-    const size = await coreContext.uiSettings.client.get<number>(
-      maxSuggestions
-    );
+    const size = await coreContext.uiSettings.client.get<number>(maxSuggestions);
     const environments = await getAllEnvironments({
       includeMissing: true,
       searchAggregatedTransactions,
@@ -147,10 +142,7 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
       getMlClient(resources),
       resources.core
         .start()
-        .then(
-          (start): ElasticsearchClient =>
-            start.elasticsearch.client.asInternalUser
-        ),
+        .then((start): ElasticsearchClient => start.elasticsearch.client.asInternalUser),
     ]);
 
     const esCapabilities = await getESCapabilities(resources);

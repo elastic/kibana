@@ -57,7 +57,7 @@ export function TableHeader({
             sortOrder={
               sortOrder.length
                 ? sortOrder
-                : getDefaultSort(dataView, defaultSortOrder, hideTimeColumn)
+                : getDefaultSort(dataView, defaultSortOrder, hideTimeColumn, false)
             }
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}

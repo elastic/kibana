@@ -23,11 +23,7 @@ export function IndexTemplatesStatus() {
   const tabStatus = getIsIndexTemplateOk(diagnosticsBundle);
 
   return (
-    <TabStatus
-      isLoading={isLoading}
-      isOk={tabStatus}
-      data-test-subj="indexTemplatesStatus"
-    >
+    <TabStatus isLoading={isLoading} isOk={tabStatus} data-test-subj="indexTemplatesStatus">
       Index templates
       <EuiLink
         data-test-subj="apmIndexTemplatesStatusSeeDetailsLink"
@@ -44,17 +40,13 @@ export function getIsIndexTemplateOk(diagnosticsBundle?: DiagnosticsBundle) {
     return true;
   }
 
-  const hasNonStandardIndexTemplates =
-    diagnosticsBundle.apmIndexTemplates?.some(
-      ({ isNonStandard }) => isNonStandard
-    );
-
-  const isEveryExpectedApmIndexTemplateInstalled =
-    diagnosticsBundle.apmIndexTemplates.every(
-      ({ exists, isNonStandard }) => isNonStandard || exists
-    );
-
-  return (
-    isEveryExpectedApmIndexTemplateInstalled && !hasNonStandardIndexTemplates
+  const hasNonStandardIndexTemplates = diagnosticsBundle.apmIndexTemplates?.some(
+    ({ isNonStandard }) => isNonStandard
   );
+
+  const isEveryExpectedApmIndexTemplateInstalled = diagnosticsBundle.apmIndexTemplates.every(
+    ({ exists, isNonStandard }) => isNonStandard || exists
+  );
+
+  return isEveryExpectedApmIndexTemplateInstalled && !hasNonStandardIndexTemplates;
 }

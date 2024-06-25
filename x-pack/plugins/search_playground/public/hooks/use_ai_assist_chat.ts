@@ -52,8 +52,15 @@ const getStreamedResponse = async (
     appendMessage(message) {
       mutate([...chatRequest.messages, message], false);
     },
-    handleFailure() {
-      mutate(previousMessages, false);
+    handleFailure(errorMessage) {
+      const systemErrorMessage = {
+        id: uuidv4(),
+        content: errorMessage,
+        role: MessageRole.system,
+        createdAt: new Date(),
+      };
+      // concating the last question and error message with existing chat history
+      mutate([...previousMessages, chatRequest.messages.slice(-1)[0], systemErrorMessage], false);
     },
     onUpdate(merged) {
       mutate([...chatRequest.messages, ...merged], false);
@@ -173,12 +180,13 @@ export function useAIAssistChat({
   );
 
   const reload = useCallback(
-    async ({ options }: ChatRequestOptions = {}) => {
+    async ({ options, data }: ChatRequestOptions = {}) => {
       if (messagesRef.current.length === 0) return null;
 
       const chatRequest: ChatRequest = {
         messages: messagesRef.current,
         options,
+        data,
       };
 
       return triggerRequest(chatRequest);

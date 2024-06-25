@@ -36,19 +36,16 @@ export function AgentKeys() {
   const { toasts } = useApmPluginContext().core.notifications;
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [createdAgentKey, setCreatedAgentKey] =
-    useState<CreateApiKeyResponse>();
+  const [createdAgentKey, setCreatedAgentKey] = useState<CreateApiKeyResponse>();
 
-  const {
-    data: { areApiKeysEnabled, canManage } = INITIAL_DATA,
-    status: privilegesStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      return callApmApi('GET /internal/apm/agent_keys/privileges');
-    },
-    [],
-    { showToastOnError: false }
-  );
+  const { data: { areApiKeysEnabled, canManage } = INITIAL_DATA, status: privilegesStatus } =
+    useFetcher(
+      (callApmApi) => {
+        return callApmApi('GET /internal/apm/agent_keys/privileges');
+      },
+      [],
+      { showToastOnError: false }
+    );
 
   const {
     data,
@@ -86,12 +83,9 @@ export function AgentKeys() {
               fill={true}
               iconType="plusInCircle"
             >
-              {i18n.translate(
-                'xpack.apm.settings.agentKeys.createAgentKeyButton',
-                {
-                  defaultMessage: 'Create APM agent key',
-                }
-              )}
+              {i18n.translate('xpack.apm.settings.agentKeys.createAgentKeyButton', {
+                defaultMessage: 'Create APM agent key',
+              })}
             </EuiButton>
           </EuiFlexItem>
         )}
@@ -124,8 +118,7 @@ export function AgentKeys() {
           onError={(keyName: string, message: string) => {
             toasts.addDanger(
               i18n.translate('xpack.apm.settings.agentKeys.crate.failed', {
-                defaultMessage:
-                  'Error creating APM agent key "{keyName}". Error: "{message}"',
+                defaultMessage: 'Error creating APM agent key "{keyName}". Error: "{message}"',
                 values: { keyName, message },
               })
             );
@@ -134,14 +127,8 @@ export function AgentKeys() {
         />
       )}
       <AgentKeysContent
-        loading={
-          privilegesStatus === FETCH_STATUS.LOADING ||
-          status === FETCH_STATUS.LOADING
-        }
-        requestFailed={
-          privilegesStatus === FETCH_STATUS.FAILURE ||
-          status === FETCH_STATUS.FAILURE
-        }
+        loading={privilegesStatus === FETCH_STATUS.LOADING || status === FETCH_STATUS.LOADING}
+        requestFailed={privilegesStatus === FETCH_STATUS.FAILURE || status === FETCH_STATUS.FAILURE}
         canManage={canManage}
         areApiKeysEnabled={areApiKeysEnabled}
         agentKeys={agentKeys}
@@ -180,12 +167,9 @@ function AgentKeysContent({
           titleSize="xs"
           title={
             <h2>
-              {i18n.translate(
-                'xpack.apm.settings.agentKeys.agentKeysLoadingPromptTitle',
-                {
-                  defaultMessage: 'Loading APM agent keys...',
-                }
-              )}
+              {i18n.translate('xpack.apm.settings.agentKeys.agentKeysLoadingPromptTitle', {
+                defaultMessage: 'Loading APM agent keys...',
+              })}
             </h2>
           }
         />
@@ -198,12 +182,9 @@ function AgentKeysContent({
           iconType="warning"
           title={
             <h2>
-              {i18n.translate(
-                'xpack.apm.settings.agentKeys.agentKeysErrorPromptTitle',
-                {
-                  defaultMessage: 'Could not load APM agent keys.',
-                }
-              )}
+              {i18n.translate('xpack.apm.settings.agentKeys.agentKeysErrorPromptTitle', {
+                defaultMessage: 'Could not load APM agent keys.',
+              })}
             </h2>
           }
         />
@@ -245,12 +226,9 @@ function AgentKeysContent({
             fill={true}
             iconType="plusInCircle"
           >
-            {i18n.translate(
-              'xpack.apm.settings.agentKeys.createAgentKeyButton',
-              {
-                defaultMessage: 'Create APM agent key',
-              }
-            )}
+            {i18n.translate('xpack.apm.settings.agentKeys.createAgentKeyButton', {
+              defaultMessage: 'Create APM agent key',
+            })}
           </EuiButton>
         }
       />
@@ -258,9 +236,7 @@ function AgentKeysContent({
   }
 
   if (agentKeys && !isEmpty(agentKeys)) {
-    return (
-      <AgentKeysTable agentKeys={agentKeys ?? []} onKeyDelete={onKeyDelete} />
-    );
+    return <AgentKeysTable agentKeys={agentKeys ?? []} onKeyDelete={onKeyDelete} />;
   }
 
   return null;

@@ -50,6 +50,8 @@ properties:
     type: number
   agents:
     type: number
+  unprivileged_agents:
+    type: number 
   agent_features:
     type: array
     items:
@@ -69,6 +71,22 @@ properties:
     type: object
     description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
     nullable: true
+  advanced_settings:
+    type: object
+    description: Advanced settings stored in the agent policy, e.g. agent_limits_go_max_procs
+    nullable: true
+  supports_agentless:
+    type: boolean
+    description: Indicates whether the agent policy supports agentless integrations. Only allowed in a serverless environment.
+  global_data_tags:
+    type: array
+    items:
+      type: object
+      additionalProperties:
+        oneOf:
+          - type: string
+          - type: number
+      description: User defined data tags that are added to all of the inputs. The values can be strings or numbers.
 required:
   - id
   - status

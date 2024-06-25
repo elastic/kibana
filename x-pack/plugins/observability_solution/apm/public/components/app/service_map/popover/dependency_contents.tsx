@@ -21,20 +21,14 @@ import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
-type DependencyReturn =
-  APIReturnType<'GET /internal/apm/service-map/dependency'>;
+type DependencyReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
 const INITIAL_STATE: Partial<DependencyReturn> = {
   currentPeriod: undefined,
   previousPeriod: undefined,
 };
 
-export function DependencyContents({
-  elementData,
-  environment,
-  start,
-  end,
-}: ContentsProps) {
+export function DependencyContents({ elementData, environment, start, end }: ContentsProps) {
   const nodeData = elementData as NodeDataDefinition;
 
   const { query } = useAnyOfApmParams(
@@ -59,10 +53,7 @@ export function DependencyContents({
               environment,
               start,
               end,
-              offset:
-                comparisonEnabled && isTimeComparison(offset)
-                  ? offset
-                  : undefined,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
             },
           },
         });

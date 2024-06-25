@@ -368,6 +368,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlayCloseButton"
                     size="s"
                     onClick={
                       itemCheckRespSummary?.canTakeAnyAction &&

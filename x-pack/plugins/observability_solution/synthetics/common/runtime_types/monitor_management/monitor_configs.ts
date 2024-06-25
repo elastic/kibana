@@ -15,7 +15,7 @@ export enum MonitorTypeEnum {
   BROWSER = 'browser',
 }
 
-export const MonitorTypeCodec = tEnum<MonitorTypeEnum>('MonitorType', MonitorTypeEnum);
+export const MonitorTypeCodec = tEnum<MonitorTypeEnum>('type', MonitorTypeEnum);
 
 export enum HTTPMethod {
   GET = 'GET',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -27,8 +27,10 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
 
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="baseline" wrap direction="column">
-      <div>
-        {first}
+      <EuiFlexItem className="eui-textTruncate">
+        <EuiToolTip delay="long" content={first}>
+          <p className="eui-textTruncate">{first}</p>
+        </EuiToolTip>
         {shouldShowMore && (
           <>
             {' ... '}
@@ -37,7 +39,7 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
               onClick={toggle}
             >
               <FormattedMessage
-                id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
+                id="xpack.infra.assetDetails.tabs.metadata.seeMore"
                 defaultMessage="+{count} more"
                 values={{
                   count: others.length,
@@ -46,12 +48,12 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
             </EuiLink>
           </>
         )}
-      </div>
+      </EuiFlexItem>
       {isExpanded && others.map((item, index) => <EuiFlexItem key={index}>{item}</EuiFlexItem>)}
       {hasOthers && isExpanded && (
         <EuiFlexItem>
           <EuiLink data-test-subj="infraExpandableContentShowLessLink" onClick={toggle}>
-            {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
+            {i18n.translate('xpack.infra.assetDetails.tabs.metadata.seeLess', {
               defaultMessage: 'Show less',
             })}
           </EuiLink>

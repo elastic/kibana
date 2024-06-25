@@ -16,18 +16,11 @@ import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { EuiText } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import {
-  EnvironmentField,
-  ServiceField,
-  TransactionTypeField,
-} from '../../utils/fields';
+import { EnvironmentField, ServiceField, TransactionTypeField } from '../../utils/fields';
 import { AlertMetadata } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { PopoverExpression } from '../../ui_components/popover_expression';
-import {
-  AnomalySeverity,
-  SelectAnomalySeverity,
-} from './select_anomaly_severity';
+import { AnomalySeverity, SelectAnomalySeverity } from './select_anomaly_severity';
 import { SelectAnomalyDetector } from './select_anomaly_detector';
 import {
   ANOMALY_DETECTOR_SELECTOR_OPTIONS,
@@ -73,15 +66,13 @@ export function AnomalyRuleType(props: Props) {
       windowSize: 30,
       windowUnit: TIME_UNITS.MINUTE,
       anomalySeverityType: ML_ANOMALY_SEVERITY.CRITICAL,
-      anomalyDetectorTypes: ANOMALY_DETECTOR_SELECTOR_OPTIONS.map(
-        (detector) => detector.type
-      ),
+      anomalyDetectorTypes: ANOMALY_DETECTOR_SELECTOR_OPTIONS.map((detector) => detector.type),
       environment: ENVIRONMENT_ALL.value,
     }
   );
 
-  const anomalyDetectorsSelectedLabels = params.anomalyDetectorTypes.map(
-    (type) => getApmMlDetectorLabel(type)
+  const anomalyDetectorsSelectedLabels = params.anomalyDetectorTypes.map((type) =>
+    getApmMlDetectorLabel(type)
   );
 
   const fields = [
@@ -130,12 +121,9 @@ export function AnomalyRuleType(props: Props) {
     </PopoverExpression>,
     <PopoverExpression
       value={<AnomalySeverity type={params.anomalySeverityType} />}
-      title={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyRuleType.anomalySeverity',
-        {
-          defaultMessage: 'Has anomaly with severity',
-        }
-      )}
+      title={i18n.translate('xpack.apm.transactionDurationAnomalyRuleType.anomalySeverity', {
+        defaultMessage: 'Has anomaly with severity',
+      })}
     >
       <SelectAnomalySeverity
         value={params.anomalySeverityType}

@@ -244,7 +244,6 @@ export const RelationsParameter = () => {
                     defaultMessage: 'No relationship defined',
                   }
                 )}
-                hasActions
               />
 
               {/* Add relation button */}

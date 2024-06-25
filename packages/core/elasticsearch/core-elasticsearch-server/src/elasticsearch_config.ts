@@ -14,7 +14,11 @@ import type { ElasticsearchApiToRedactInLogs } from './client';
  */
 export interface IElasticsearchConfig {
   /**
-   * The interval between health check requests Kibana sends to the Elasticsearch.
+   * The interval between health check requests Kibana sends to the Elasticsearch before the first green signal.
+   */
+  readonly healthCheckStartupDelay: Duration;
+  /**
+   * The interval between health check requests Kibana sends to the Elasticsearch after the first green signal.
    */
   readonly healthCheckDelay: Duration;
 
@@ -145,6 +149,12 @@ export interface IElasticsearchConfig {
    * Extends the list of APIs that should be redacted in logs.
    */
   readonly apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
+
+  /**
+   * The maximum time to retain the DNS lookup resolutions.
+   * Set to 0 to disable the cache (default Node.js behavior)
+   */
+  readonly dnsCacheTtl: Duration;
 }
 
 /**

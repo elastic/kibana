@@ -24,7 +24,6 @@ export {
   calculateExcludeFilters,
   checkForUnknownDocs,
   waitForIndexStatus,
-  initAction,
   cloneIndex,
   waitForTask,
   updateAndPickupMappings,
@@ -40,6 +39,7 @@ export {
   fetchIndices,
   waitForReindexTask,
   waitForPickupUpdatedMappingsTask,
+  checkClusterRoutingAllocationEnabled,
 } from './src/actions';
 export type {
   OpenPitResponse,
@@ -61,4 +61,3 @@ export {
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,
 } from './src/core';
-export { MIGRATION_CLIENT_OPTIONS } from './src/run_resilient_migrator';

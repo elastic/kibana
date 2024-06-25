@@ -6,14 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
 import { pick } from 'lodash';
 import useMount from 'react-use/lib/useMount';
 import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/common';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
-import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../types';
+import {
+  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramInputMessage,
+  UnifiedHistogramRequestContext,
+  UnifiedHistogramVisContext,
+} from '../types';
 import {
   createStateService,
   UnifiedHistogramStateOptions,
@@ -21,7 +25,8 @@ import {
 } from './services/state_service';
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
-import { topPanelHeightSelector, currentSuggestionSelector } from './utils/state_selectors';
+import { topPanelHeightSelector } from './utils/state_selectors';
+import { exportVisContext } from '../utils/external_vis_context';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
@@ -44,7 +49,10 @@ export type UnifiedHistogramContainerProps = {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
   isChartLoading?: boolean;
-  table?: Datatable;
+  onVisContextChanged?: (
+    nextVisContext: UnifiedHistogramVisContext | undefined,
+    externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
+  ) => void;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'
@@ -55,11 +63,13 @@ export type UnifiedHistogramContainerProps = {
   | 'timeRange'
   | 'relativeTimeRange'
   | 'columns'
+  | 'table'
   | 'container'
   | 'renderCustomChartToggleActions'
   | 'children'
   | 'onBrushEnd'
   | 'onFilter'
+  | 'externalVisContext'
   | 'withDefaultActions'
   | 'disabledActions'
   | 'abortController'
@@ -86,7 +96,7 @@ export type UnifiedHistogramApi = {
 export const UnifiedHistogramContainer = forwardRef<
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps
->((containerProps, ref) => {
+>(({ onVisContextChanged, ...containerProps }, ref) => {
   const [layoutProps, setLayoutProps] = useState<LayoutProps>();
   const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
   const [lensSuggestionsApi, setLensSuggestionsApi] = useState<LensSuggestionsApi>();
@@ -129,7 +139,6 @@ export const UnifiedHistogramContainer = forwardRef<
     });
   }, [input$, stateService]);
   const { dataView, query, searchSessionId, requestAdapter, isChartLoading } = containerProps;
-  const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const stateProps = useStateProps({
     stateService,
@@ -138,6 +147,19 @@ export const UnifiedHistogramContainer = forwardRef<
     searchSessionId,
     requestAdapter,
   });
+
+  const handleVisContextChange: UnifiedHistogramLayoutProps['onVisContextChanged'] | undefined =
+    useMemo(() => {
+      if (!onVisContextChanged) {
+        return undefined;
+      }
+
+      return (visContext, externalVisContextStatus) => {
+        const minifiedVisContext = exportVisContext(visContext);
+
+        onVisContextChanged(minifiedVisContext, externalVisContextStatus);
+      };
+    }, [onVisContextChanged]);
 
   // Don't render anything until the container is initialized
   if (!layoutProps || !lensSuggestionsApi || !api) {
@@ -149,7 +171,7 @@ export const UnifiedHistogramContainer = forwardRef<
       {...containerProps}
       {...layoutProps}
       {...stateProps}
-      currentSuggestion={currentSuggestion}
+      onVisContextChanged={handleVisContextChange}
       isChartLoading={Boolean(isChartLoading)}
       topPanelHeight={topPanelHeight}
       input$={input$}

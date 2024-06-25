@@ -27,11 +27,11 @@ export const IconChartVerticalBullet = ({
     >
       {title ? <title id={titleId}>{title}</title> : null}
       <path
-        className={colors.subdued}
+        className={colors.accent}
         d="M16 22a1 1 0 01-1-1V4a1 1 0 011-1h4a1 1 0 011 1v17a1 1 0 01-1 1h-4z"
       />
       <path
-        className={colors.accent}
+        className={colors.subdued}
         d="M10 0h2a1 1 0 011 1v20a1 1 0 01-1 1h-2a1 1 0 110-2h1v-3h-1a1 1 0 110-2h1v-3h-1a1 1 0 110-2h1V7h-1a1 1 0 010-2h1V2h-1a1 1 0 010-2z"
       />
     </svg>

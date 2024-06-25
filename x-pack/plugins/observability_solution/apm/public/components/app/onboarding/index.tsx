@@ -31,8 +31,7 @@ export function Onboarding() {
   const { config } = useApmPluginContext();
   const { docLinks, observabilityShared } = services;
   const guideLink =
-    docLinks?.links.kibana.guide ||
-    'https://www.elastic.co/guide/en/kibana/current/index.html';
+    docLinks?.links.kibana.guide || 'https://www.elastic.co/guide/en/kibana/current/index.html';
 
   const baseUrl = docLinks?.ELASTIC_WEBSITE_URL || 'https://www.elastic.co/';
 
@@ -41,20 +40,15 @@ export function Onboarding() {
       setApiKeyLoading(true);
       const privileges: PrivilegeType[] = [PrivilegeType.EVENT];
 
-      const { agentKey } = await callApmApi(
-        'POST /api/apm/agent_keys 2023-10-31',
-        {
-          signal: null,
-          params: {
-            body: {
-              name: `onboarding-${(Math.random() + 1)
-                .toString(36)
-                .substring(7)}`,
-              privileges,
-            },
+      const { agentKey } = await callApmApi('POST /api/apm/agent_keys 2023-10-31', {
+        signal: null,
+        params: {
+          body: {
+            name: `onboarding-${(Math.random() + 1).toString(36).substring(7)}`,
+            privileges,
           },
-        }
-      );
+        },
+      });
 
       setAgentApiKey({
         apiKey: agentKey.encoded,
@@ -108,14 +102,7 @@ export function Onboarding() {
         createAgentKey
       ),
     ]);
-  }, [
-    agentApiKey,
-    baseUrl,
-    config,
-    apiKeyLoading,
-    agentStatus,
-    agentStatusLoading,
-  ]);
+  }, [agentApiKey, baseUrl, config, apiKeyLoading, agentStatus, agentStatusLoading]);
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
   return (

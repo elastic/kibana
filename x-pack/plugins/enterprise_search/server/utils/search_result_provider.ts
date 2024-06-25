@@ -7,11 +7,10 @@
 
 import { from, takeUntil } from 'rxjs';
 
-import { IBasePath } from '@kbn/core-http-server';
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
 import { i18n } from '@kbn/i18n';
 
-import { CONNECTOR_DEFINITIONS, ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import { ConnectorServerSideDefinition } from '@kbn/search-connectors-plugin/server';
 
 import { ConfigType } from '..';
 import {
@@ -33,7 +32,6 @@ type ServiceDefinition =
     };
 
 export function toSearchResult({
-  basePath,
   iconPath,
   isCloud,
   isNative,
@@ -42,7 +40,6 @@ export function toSearchResult({
   serviceType,
   url,
 }: {
-  basePath: IBasePath;
   iconPath?: string;
   isCloud: boolean;
   isNative?: boolean;
@@ -57,11 +54,12 @@ export function toSearchResult({
       ? 'native'
       : 'connector_client'
     : null;
+  const newUrl = isCrawler
+    ? `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/crawlers/new_crawler`
+    : `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`;
 
   return {
-    icon: iconPath
-      ? basePath.prepend(`/plugins/enterpriseSearch/assets/source_icons/${iconPath}`)
-      : 'logoEnterpriseSearch',
+    icon: iconPath || 'logoEnterpriseSearch',
     id: serviceType,
     score,
     title: name,
@@ -69,22 +67,17 @@ export function toSearchResult({
       defaultMessage: 'Search',
     }),
     url: {
-      path:
-        url ??
-        `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/${
-          isCrawler
-            ? 'crawler'
-            : `connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`
-        }`,
+      path: url ?? newUrl,
       prependBasePath: true,
     },
   };
 }
 
 export function getSearchResultProvider(
-  basePath: IBasePath,
   config: ConfigType,
-  isCloud: boolean
+  connectorTypes: ConnectorServerSideDefinition[],
+  isCloud: boolean,
+  crawlerIconPath: string
 ): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, maxResults }) => {
@@ -98,7 +91,7 @@ export function getSearchResultProvider(
         ...(config.hasWebCrawler
           ? [
               {
-                iconPath: 'crawler.svg',
+                iconPath: crawlerIconPath,
                 keywords: ['crawler', 'web', 'website', 'internet', 'google'],
                 name: i18n.translate('xpack.enterpriseSearch.searchProvider.webCrawler.name', {
                   defaultMessage: 'Elastic Web Crawler',
@@ -107,7 +100,7 @@ export function getSearchResultProvider(
               },
             ]
           : []),
-        ...(config.hasConnectors ? CONNECTOR_DEFINITIONS : []),
+        ...(config.hasConnectors ? connectorTypes : []),
         ...(config.canDeployEntSearch
           ? [
               {
@@ -150,7 +143,6 @@ export function getSearchResultProvider(
             score = 50;
           }
           return toSearchResult({
-            basePath,
             iconPath,
             isCloud,
             isNative,

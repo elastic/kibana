@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClient } from '@kbn/core/server';
+import { type AuthenticatedUser, type KibanaRequest, SavedObjectsClient } from '@kbn/core/server';
 import type {
   AuditServiceSetup,
   AuthorizationServiceSetup,
@@ -19,9 +19,10 @@ interface Deps {
   audit: AuditServiceSetup;
   authz: AuthorizationServiceSetup;
   spaces?: SpacesPluginSetup;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
-export const setupSpacesClient = ({ audit, authz, spaces }: Deps) => {
+export const setupSpacesClient = ({ audit, authz, spaces, getCurrentUser }: Deps) => {
   if (!spaces) {
     return;
   }
@@ -41,6 +42,7 @@ export const setupSpacesClient = ({ audit, authz, spaces }: Deps) => {
           auditLogger: audit.asScoped(request),
           checkPrivileges: authz.checkSavedObjectsPrivilegesWithRequest(request),
           errors: SavedObjectsClient.errors,
+          getCurrentUser: () => getCurrentUser(request),
         })
       : undefined;
     return new SecureSpacesClientWrapper(

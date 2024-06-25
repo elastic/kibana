@@ -6,6 +6,7 @@
  */
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+
 import type { ObservabilityAIAssistantConfig } from './config';
 
 export type { ObservabilityAIAssistantServerRouteRepository } from './routes/get_global_observability_ai_assistant_route_repository';
@@ -16,6 +17,15 @@ export type {
   ObservabilityAIAssistantServerStart,
   ObservabilityAIAssistantServerSetup,
 } from './types';
+
+export {
+  aiAssistantResponseLanguage,
+  aiAssistantLogsIndexPattern,
+  aiAssistantSimulatedFunctionCalling,
+  aiAssistantSearchConnectorIndexPattern,
+} from '../common';
+
+export { streamIntoObservable } from './service/util/stream_into_observable';
 
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
   deprecations: ({ unusedFromRoot }) => [

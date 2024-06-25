@@ -82,6 +82,7 @@ export const prepareModelVersionTestKit = async ({
     loggerFactory,
     kibanaIndex,
     defaultIndexTypesMap: {},
+    hashToVersionMap: {},
     kibanaVersion,
     kibanaBranch,
     nodeRoles: defaultNodeRoles,
@@ -201,7 +202,8 @@ const getElasticsearchClient = async (
     logger: loggerFactory.get('elasticsearch'),
     type: 'data',
     agentFactoryProvider: new AgentManager(
-      loggerFactory.get('elasticsearch-service', 'agent-manager')
+      loggerFactory.get('elasticsearch-service', 'agent-manager'),
+      { dnsCacheTtlInSeconds: esClientConfig.dnsCacheTtl?.asSeconds() ?? 0 }
     ),
     kibanaVersion,
   });
@@ -213,6 +215,7 @@ const getMigrator = async ({
   kibanaIndex,
   typeRegistry,
   defaultIndexTypesMap,
+  hashToVersionMap,
   loggerFactory,
   kibanaVersion,
   kibanaBranch,
@@ -224,6 +227,7 @@ const getMigrator = async ({
   kibanaIndex: string;
   typeRegistry: ISavedObjectTypeRegistry;
   defaultIndexTypesMap: IndexTypesMap;
+  hashToVersionMap: Record<string, string>;
   loggerFactory: LoggerFactory;
   kibanaVersion: string;
   kibanaBranch: string;
@@ -250,6 +254,7 @@ const getMigrator = async ({
     kibanaIndex,
     typeRegistry,
     defaultIndexTypesMap,
+    hashToVersionMap,
     soMigrationsConfig: soConfig.migration,
     kibanaVersion,
     logger: loggerFactory.get('savedobjects-service'),

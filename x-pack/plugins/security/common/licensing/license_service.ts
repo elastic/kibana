@@ -6,7 +6,7 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
@@ -77,6 +77,7 @@ export class SecurityLicenseService {
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRoleRemoteIndexPrivileges: false,
+        allowRemoteClusterPrivileges: false,
         allowRbac: false,
         allowSubFeaturePrivileges: false,
         allowUserProfileCollaboration: false,
@@ -98,6 +99,7 @@ export class SecurityLicenseService {
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRoleRemoteIndexPrivileges: false,
+        allowRemoteClusterPrivileges: false,
         allowRbac: false,
         allowSubFeaturePrivileges: false,
         allowUserProfileCollaboration: false,
@@ -119,6 +121,7 @@ export class SecurityLicenseService {
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,
       allowRoleFieldLevelSecurity: isLicensePlatinumOrBetter,
       allowRoleRemoteIndexPrivileges: isLicensePlatinumOrBetter,
+      allowRemoteClusterPrivileges: isLicensePlatinumOrBetter,
       allowRbac: true,
       allowUserProfileCollaboration: isLicenseStandardOrBetter,
     };

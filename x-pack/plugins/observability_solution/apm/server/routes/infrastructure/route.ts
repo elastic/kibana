@@ -13,8 +13,7 @@ import { getContainerHostNames } from './get_host_names';
 import { createInfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 const infrastructureRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/infrastructure_attributes',
+  endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure_attributes',
   params: t.type({
     path: t.type({
       serviceName: t.string,

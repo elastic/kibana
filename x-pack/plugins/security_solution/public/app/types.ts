@@ -26,12 +26,14 @@ import type { StartServices } from '../types';
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
  */
-export interface RenderAppProps extends AppMountParameters {
+export interface RenderAppProps
+  extends Omit<AppMountParameters, 'appBasePath' | 'onAppLeave' | 'setHeaderActionMenu'> {
   services: StartServices;
   store: Store<State, Action>;
-  subPluginRoutes: RouteProps[];
+  subPluginRoutes?: RouteProps[];
   usageCollection?: UsageCollectionSetup;
   elasticAssistant?: ElasticAssistantPublicPluginStart;
+  children?: React.ReactNode;
 }
 
 import type { State, SubPluginsInitReducer } from '../common/store';

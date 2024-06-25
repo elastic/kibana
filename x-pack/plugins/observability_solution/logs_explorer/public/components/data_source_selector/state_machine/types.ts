@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
-import { SearchDataViews } from '../../../hooks/use_data_views';
+import { FilterDataViews, SearchDataViews } from '../../../hooks/use_data_views';
 import {
   DataSourceSelection,
   DataSourceSelectionChangeHandler,
@@ -19,6 +19,7 @@ import {
 } from '../../../hooks/use_integrations';
 import type { IHashedCache } from '../../../../common/hashed_cache';
 import { DataSourceSelectorSearchParams, PanelId, TabId } from '../types';
+import { DataViewsFilterParams } from '../../../state_machines/data_views';
 
 export interface DefaultDataSourceSelectorContext {
   selection: DataSourceSelection;
@@ -26,6 +27,7 @@ export interface DefaultDataSourceSelectorContext {
   panelId: PanelId;
   searchCache: IHashedCache<PanelId | TabId, DataSourceSelectorSearchParams>;
   search: DataSourceSelectorSearchParams;
+  dataViewsFilter: DataViewsFilterParams;
 }
 
 export type DataSourceSelectorTypestate =
@@ -117,6 +119,10 @@ export type DataSourceSelectorEvent =
       selection: DataViewDescriptor;
     }
   | {
+      type: 'FILTER_BY_TYPE';
+      filter: DataViewsFilterParams;
+    }
+  | {
       type: 'SELECT_ALL_LOGS';
     }
   | {
@@ -134,6 +140,7 @@ export type DataSourceSelectorEvent =
 export interface DataSourceSelectorStateMachineDependencies {
   initialContext?: Partial<DefaultDataSourceSelectorContext>;
   onDataViewsSearch: SearchDataViews;
+  onDataViewsFilter: FilterDataViews;
   onDataViewsSort: SearchDataViews;
   onIntegrationsLoadMore: LoadMoreIntegrations;
   onIntegrationsReload: ReloadIntegrations;

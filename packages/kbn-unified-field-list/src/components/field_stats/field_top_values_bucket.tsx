@@ -112,6 +112,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               </EuiText>
             )}
           </EuiFlexItem>
+
           <EuiFlexItem
             grow={false}
             data-test-subj={`${dataTestSubject}-topValues-formattedPercentage`}

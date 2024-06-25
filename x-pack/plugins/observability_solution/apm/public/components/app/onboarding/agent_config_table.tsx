@@ -28,8 +28,7 @@ function ConfigurationValueColumn({
   createApiKey?: () => void;
   createApiKeyLoading?: boolean;
 }) {
-  const shouldRenderCreateApiKeyButton =
-    columnKey === 'apiKey' && value === null;
+  const shouldRenderCreateApiKeyButton = columnKey === 'apiKey' && value === null;
 
   if (shouldRenderCreateApiKeyButton) {
     return (
@@ -54,12 +53,9 @@ function ConfigurationValueColumn({
       {value && (
         <EuiButtonIcon
           data-test-subj="apmConfigurationValueColumnButton"
-          aria-label={i18n.translate(
-            'xpack.apm.onboarding.column.value.copyIconText',
-            {
-              defaultMessage: 'Copy to clipboard',
-            }
-          )}
+          aria-label={i18n.translate('xpack.apm.onboarding.column.value.copyIconText', {
+            defaultMessage: 'Copy to clipboard',
+          })}
           color="text"
           iconType="copy"
           onClick={() => copyToClipboard(value)}

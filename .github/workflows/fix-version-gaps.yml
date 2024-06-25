@@ -33,7 +33,7 @@ jobs:
           path: ./actions
 
       - name: Install Actions
-        run: npm install --production --prefix ./actions
+        run: npm ci --omit=dev --prefix ./actions
 
       - name: Run Fix Gaps
         uses: ./actions/fix-version-gaps

@@ -75,15 +75,12 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
-  const columns: Array<
-    EuiBasicTableColumn<ServerlessActiveInstances['activeInstances'][0]>
-  > = [
+  const columns: Array<EuiBasicTableColumn<ServerlessActiveInstances['activeInstances'][0]>> = [
     {
       field: 'serverlessFunctionName',
-      name: i18n.translate(
-        'xpack.apm.serverlessMetrics.activeInstances.functionName',
-        { defaultMessage: 'Function name' }
-      ),
+      name: i18n.translate('xpack.apm.serverlessMetrics.activeInstances.functionName', {
+        defaultMessage: 'Function name',
+      }),
       sortable: true,
       truncateText: true,
       render: (_, item) => {
@@ -104,10 +101,9 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
     },
     {
       field: 'serverlessDurationAvg',
-      name: i18n.translate(
-        'xpack.apm.serverlessMetrics.serverlessFunctions.functionDuration',
-        { defaultMessage: 'Function duration' }
-      ),
+      name: i18n.translate('xpack.apm.serverlessMetrics.serverlessFunctions.functionDuration', {
+        defaultMessage: 'Function duration',
+      }),
       sortable: true,
       render: (_, { serverlessDurationAvg, timeseries }) => {
         return (
@@ -122,10 +118,9 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
     },
     {
       field: 'billedDurationAvg',
-      name: i18n.translate(
-        'xpack.apm.serverlessMetrics.activeInstances.billedDuration',
-        { defaultMessage: 'Billed duration' }
-      ),
+      name: i18n.translate('xpack.apm.serverlessMetrics.activeInstances.billedDuration', {
+        defaultMessage: 'Billed duration',
+      }),
       sortable: true,
       render: (_, { billedDurationAvg, timeseries }) => {
         return (
@@ -140,10 +135,9 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
     },
     {
       field: 'avgMemoryUsed',
-      name: i18n.translate(
-        'xpack.apm.serverlessMetrics.activeInstances.memoryUsageAvg',
-        { defaultMessage: 'Memory usage avg.' }
-      ),
+      name: i18n.translate('xpack.apm.serverlessMetrics.activeInstances.memoryUsageAvg', {
+        defaultMessage: 'Memory usage avg.',
+      }),
       sortable: true,
       render: (_, { avgMemoryUsed }) => {
         return asDynamicBytes(avgMemoryUsed);
@@ -151,10 +145,9 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
     },
     {
       field: 'memorySize',
-      name: i18n.translate(
-        'xpack.apm.serverlessMetrics.activeInstances.memorySize',
-        { defaultMessage: 'Memory size' }
-      ),
+      name: i18n.translate('xpack.apm.serverlessMetrics.activeInstances.memorySize', {
+        defaultMessage: 'Memory size',
+      }),
       sortable: true,
       render: (_, { memorySize }) => {
         return asDynamicBytes(memorySize);
@@ -175,10 +168,9 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
   const charts: Array<TimeSeries<Coordinate>> = useMemo(
     () => [
       {
-        title: i18n.translate(
-          'xpack.apm.serverlessMetrics.activeInstances.title',
-          { defaultMessage: 'Active instances' }
-        ),
+        title: i18n.translate('xpack.apm.serverlessMetrics.activeInstances.title', {
+          defaultMessage: 'Active instances',
+        }),
         data: data.timeseries,
         type: 'bar',
         color: palette[2],
@@ -193,10 +185,9 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate(
-                'xpack.apm.serverlessMetrics.activeInstances.title',
-                { defaultMessage: 'Active instances' }
-              )}
+              {i18n.translate('xpack.apm.serverlessMetrics.activeInstances.title', {
+                defaultMessage: 'Active instances',
+              })}
             </h2>
           </EuiTitle>
         </EuiFlexItem>

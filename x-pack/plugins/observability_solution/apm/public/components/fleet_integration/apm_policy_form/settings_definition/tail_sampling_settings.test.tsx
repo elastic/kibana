@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  getTailSamplingSettings,
-  isTailBasedSamplingValid,
-} from './tail_sampling_settings';
+import { getTailSamplingSettings, isTailBasedSamplingValid } from './tail_sampling_settings';
 
 const DOCS_LINK =
   'https://www.elastic.co/guide/en/apm/guide/master/configure-tail-based-sampling.html';

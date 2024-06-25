@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
+import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
@@ -16,7 +17,10 @@ import type { MlRoute } from '../..';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { ChangePointDetectionPage as Page } from '../../../aiops';
+
+const Page = dynamic(async () => ({
+  default: (await import('../../../aiops')).ChangePointDetectionPage,
+}));
 
 export const changePointDetectionRouteFactory = (
   navigateToPath: NavigateToPath,

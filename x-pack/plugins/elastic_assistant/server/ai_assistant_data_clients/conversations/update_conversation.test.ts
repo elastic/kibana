@@ -21,14 +21,14 @@ export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => (
   title: 'test',
   apiConfig: {
     connectorId: '1',
-    connectorTypeTitle: 'test-connector',
+    actionTypeId: '.gen-ai',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
     provider: 'OpenAI',
   },
   excludeFromLastConversationStorage: false,
   messages: [],
-  replacements: [],
+  replacements: {},
 });
 
 const mockUser1 = {
@@ -43,8 +43,8 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   id: 'test',
   title: 'test',
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: '1',
-    connectorTypeTitle: 'test-connector',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
     provider: 'OpenAI',
@@ -63,7 +63,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
       timestamp: '2024-02-14T22:29:43.862Z',
     },
   ],
-  replacements: [],
+  replacements: {},
   createdAt: '2020-04-20T15:25:31.830Z',
   namespace: 'default',
   isDefault: false,
@@ -151,6 +151,10 @@ describe('transformToUpdateScheme', () => {
           content: 'Message 3',
           role: 'user',
           timestamp: '2011-10-05T14:48:00.000Z',
+          traceData: {
+            traceId: 'something',
+            transactionId: 'something',
+          },
         },
         {
           content: 'Message 4',
@@ -163,8 +167,8 @@ describe('transformToUpdateScheme', () => {
       id: conversation.id,
       title: 'test',
       api_config: {
+        action_type_id: '.gen-ai',
         connector_id: '1',
-        connector_type_title: 'test-connector',
         default_system_prompt_id: 'default-system-prompt',
         model: 'test-model',
         provider: 'OpenAI',
@@ -180,8 +184,8 @@ describe('transformToUpdateScheme', () => {
           reader: undefined,
           role: 'user',
           trace_data: {
-            trace_id: undefined,
-            transaction_id: undefined,
+            trace_id: 'something',
+            transaction_id: 'something',
           },
         },
         {
@@ -190,10 +194,6 @@ describe('transformToUpdateScheme', () => {
           is_error: undefined,
           reader: undefined,
           role: 'user',
-          trace_data: {
-            trace_id: undefined,
-            transaction_id: undefined,
-          },
         },
       ],
     };

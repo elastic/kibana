@@ -9,13 +9,13 @@
 import { updateFields } from './update_fields';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataView } from '../../../../common';
+import { DataViewLazy } from '../../../../common';
 
 describe('create runtime field', () => {
-  it('call usageCollection', () => {
+  it('call usageCollection', async () => {
     const usageCollection = getUsageCollection();
 
-    dataViewsService.get.mockImplementation(
+    dataViewsService.getDataViewLazy.mockImplementation(
       async (id: string) =>
         ({
           addRuntimeField: jest.fn(),
@@ -24,10 +24,10 @@ describe('create runtime field', () => {
             getByName: jest.fn().mockReturnValueOnce(undefined).mockReturnValueOnce({}),
           },
           getFieldsByRuntimeFieldName: jest.fn().mockReturnValueOnce({}),
-        } as unknown as DataView)
+        } as unknown as DataViewLazy)
     );
 
-    updateFields({
+    await updateFields({
       dataViewsService,
       counterName: 'POST /path',
       usageCollection,

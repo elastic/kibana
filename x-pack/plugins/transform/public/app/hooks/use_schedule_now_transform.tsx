@@ -24,7 +24,7 @@ import { ToastNotificationText } from '../components';
 import { useRefreshTransformList } from './use_refresh_transform_list';
 
 export const useScheduleNowTransforms = () => {
-  const { http, i18n: i18nStart, theme } = useAppDependencies();
+  const { http, ...startServices } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
 
@@ -46,10 +46,7 @@ export const useScheduleNowTransforms = () => {
               'An error occurred calling the request to schedule the transform to process data instantly.',
           }
         ),
-        text: toMountPoint(<ToastNotificationText text={getErrorMessage(error)} />, {
-          theme,
-          i18n: i18nStart,
-        }),
+        text: toMountPoint(<ToastNotificationText text={getErrorMessage(error)} />, startServices),
       }),
     onSuccess: (results) => {
       for (const transformId in results) {

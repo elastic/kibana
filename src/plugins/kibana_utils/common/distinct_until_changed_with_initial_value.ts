@@ -7,7 +7,7 @@
  */
 
 import { MonoTypeOperatorFunction, queueScheduler, scheduled, from } from 'rxjs';
-import { concatAll, distinctUntilChanged, skip } from 'rxjs/operators';
+import { concatAll, distinctUntilChanged, skip } from 'rxjs';
 
 export function distinctUntilChangedWithInitialValue<T>(
   initialValue: T | Promise<T>,

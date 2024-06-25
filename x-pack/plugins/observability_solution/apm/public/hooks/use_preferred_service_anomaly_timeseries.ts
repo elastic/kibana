@@ -11,9 +11,7 @@ import { useApmServiceContext } from '../context/apm_service/use_apm_service_con
 import { useEnvironmentsContext } from '../context/environments_context/use_environments_context';
 import { useServiceAnomalyTimeseriesContext } from '../context/service_anomaly_timeseries/use_service_anomaly_timeseries_context';
 
-export function usePreferredServiceAnomalyTimeseries(
-  detectorType: AnomalyDetectorType
-) {
+export function usePreferredServiceAnomalyTimeseries(detectorType: AnomalyDetectorType) {
   const { allAnomalyTimeseries } = useServiceAnomalyTimeseriesContext();
 
   const { preferredEnvironment } = useEnvironmentsContext();

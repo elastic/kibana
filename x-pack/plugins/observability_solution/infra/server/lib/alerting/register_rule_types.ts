@@ -12,24 +12,27 @@ import { registerInventoryThresholdRuleType } from './inventory_metric_threshold
 import { registerLogThresholdRuleType } from './log_threshold/register_log_threshold_rule_type';
 import { InfraBackendLibs } from '../infra_types';
 import type { InfraConfig } from '../../types';
+import { MetricThresholdAlert } from './metric_threshold/metric_threshold_executor';
+import { LogThresholdAlert } from './log_threshold/log_threshold_executor';
 
 export const LOGS_RULES_ALERT_CONTEXT = 'observability.logs';
 // Defines which alerts-as-data index logs rules will use
-export const LogsRulesTypeAlertDefinition: IRuleTypeAlerts = {
+export const LogsRulesTypeAlertDefinition: IRuleTypeAlerts<LogThresholdAlert> = {
   context: LOGS_RULES_ALERT_CONTEXT,
   mappings: { fieldMap: legacyExperimentalFieldMap },
   useEcs: true,
   useLegacyAlerts: true,
+  shouldWrite: true,
 };
 
 export const METRICS_RULES_ALERT_CONTEXT = 'observability.metrics';
 // Defines which alerts-as-data index metrics rules will use
-export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
+export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<MetricThresholdAlert> = {
   context: METRICS_RULES_ALERT_CONTEXT,
   mappings: { fieldMap: legacyExperimentalFieldMap },
   useEcs: true,
   useLegacyAlerts: true,
-  shouldWrite: false,
+  shouldWrite: true,
 };
 
 const registerRuleTypes = (

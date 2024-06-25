@@ -52,6 +52,7 @@ describe('Cases Ui Plugin', () => {
       },
       security: securityMock.createSetup(),
       management: managementPluginMock.createSetupContract(),
+      triggersActionsUi: triggersActionsUiMock.createStart(),
     };
 
     pluginsStart = {
@@ -141,6 +142,7 @@ describe('Cases Ui Plugin', () => {
         hooks: {
           useCasesAddToExistingCaseModal: expect.any(Function),
           useCasesAddToNewCaseFlyout: expect.any(Function),
+          useIsAddToCaseOpen: expect.any(Function),
         },
         ui: {
           getAllCasesSelectorModal: expect.any(Function),

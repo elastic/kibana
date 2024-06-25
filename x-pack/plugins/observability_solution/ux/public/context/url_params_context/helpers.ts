@@ -34,10 +34,7 @@ export function getDateRange({
   rangeFrom,
   rangeTo,
 }: {
-  state?: Pick<
-    UrlParams,
-    'rangeFrom' | 'rangeTo' | 'start' | 'end' | 'exactStart' | 'exactEnd'
-  >;
+  state?: Pick<UrlParams, 'rangeFrom' | 'rangeTo' | 'start' | 'end' | 'exactStart' | 'exactEnd'>;
   rangeFrom?: string;
   rangeTo?: string;
 }) {

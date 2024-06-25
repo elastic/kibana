@@ -8,20 +8,20 @@
 
 import React, { useMemo } from 'react';
 import { css, CSSObject } from '@emotion/react';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
+import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { DataTableColumnTypes } from '../types';
+import type { DataTableColumnsMeta } from '../types';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 
 interface DataTableColumnHeaderProps {
   dataView: DataView;
   columnName: string | null;
   columnDisplayName: string;
-  columnTypes?: DataTableColumnTypes;
+  columnsMeta?: DataTableColumnsMeta;
   headerRowHeight?: number;
   showColumnTokens?: boolean;
 }
@@ -30,7 +30,7 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
   columnDisplayName,
   showColumnTokens,
   columnName,
-  columnTypes,
+  columnsMeta,
   dataView,
   headerRowHeight,
 }) => {
@@ -39,7 +39,7 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
       {showColumnTokens && (
         <DataTableColumnToken
           columnName={columnName}
-          columnTypes={columnTypes}
+          columnsMeta={columnsMeta}
           dataView={dataView}
         />
       )}
@@ -49,12 +49,12 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
 };
 
 const DataTableColumnToken: React.FC<
-  Pick<DataTableColumnHeaderProps, 'columnName' | 'columnTypes' | 'dataView'>
+  Pick<DataTableColumnHeaderProps, 'columnName' | 'columnsMeta' | 'dataView'>
 > = (props) => {
-  const { columnName, columnTypes, dataView } = props;
+  const { columnName, columnsMeta, dataView } = props;
   const columnToken = useMemo(
-    () => getRenderedToken({ columnName, columnTypes, dataView }),
-    [columnName, columnTypes, dataView]
+    () => getRenderedToken({ columnName, columnsMeta, dataView }),
+    [columnName, columnsMeta, dataView]
   );
 
   return columnToken ? (
@@ -73,16 +73,18 @@ const fieldIconCss: CSSObject = { verticalAlign: 'bottom' };
 function getRenderedToken({
   dataView,
   columnName,
-  columnTypes,
-}: Pick<DataTableColumnHeaderProps, 'dataView' | 'columnName' | 'columnTypes'>) {
+  columnsMeta,
+}: Pick<DataTableColumnHeaderProps, 'dataView' | 'columnName' | 'columnsMeta'>) {
   if (!columnName || columnName === '_source') {
     return null;
   }
 
   // for text-based searches
-  if (columnTypes) {
-    return columnTypes[columnName] && columnTypes[columnName] !== 'unknown' ? ( // renders an icon or nothing
-      <FieldIcon type={columnTypes[columnName]} css={fieldIconCss} />
+  if (columnsMeta) {
+    const columnMeta = columnsMeta[columnName];
+    const columnIconType = getTextBasedColumnIconType(columnMeta);
+    return columnIconType && columnIconType !== 'unknown' ? ( // renders an icon or nothing
+      <FieldIcon type={columnIconType} css={fieldIconCss} />
     ) : null;
   }
 
@@ -103,12 +105,14 @@ export const DataTableTimeColumnHeader = ({
   dataView,
   dataViewField,
   headerRowHeight = 1,
+  columnLabel,
 }: {
   dataView: DataView;
   dataViewField?: DataViewField;
   headerRowHeight?: number;
+  columnLabel?: string;
 }) => {
-  const timeFieldName = dataViewField?.customLabel ?? dataView.timeFieldName;
+  const timeFieldName = columnLabel || (dataViewField?.customLabel ?? dataView.timeFieldName);
   const primaryTimeAriaLabel = i18n.translate(
     'unifiedDataTable.tableHeader.timeFieldIconTooltipAriaLabel',
     {
@@ -127,11 +131,9 @@ export const DataTableTimeColumnHeader = ({
         text-align: left;
       `}
     >
-      <EuiToolTip content={primaryTimeTooltip}>
-        <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-          {timeFieldName} <EuiIcon type="clock" />
-        </ColumnHeaderTruncateContainer>
-      </EuiToolTip>
+      <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
+        {timeFieldName} <EuiIconTip type="clock" content={primaryTimeTooltip} />
+      </ColumnHeaderTruncateContainer>
     </div>
   );
 };

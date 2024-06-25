@@ -6,8 +6,7 @@
  */
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-
-import type { GroupTableItem } from '../../components/log_rate_analysis_results_table/types';
+import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 import { buildExtendedBaseFilterCriteria } from './build_extended_base_filter_criteria';
 

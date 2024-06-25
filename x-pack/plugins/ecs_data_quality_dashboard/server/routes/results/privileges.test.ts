@@ -9,12 +9,6 @@ import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/a
 import { requestContextMock } from '../../__mocks__/request_context';
 import { checkIndicesPrivileges } from './privileges';
 
-// const mockHasPrivileges =
-//   context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
-// mockHasPrivileges.mockResolvedValueOnce({
-//   has_all_requested: true,
-// } as unknown as SecurityHasPrivilegesResponse);
-
 describe('checkIndicesPrivileges', () => {
   const { context } = requestContextMock.createTools();
   const { client } = context.core.elasticsearch;

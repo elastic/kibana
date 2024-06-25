@@ -21,7 +21,6 @@ export type {
   TaskRunCreatorFunction,
   RunContext,
   IntervalSchedule,
-  LoadIndirectParamsResult,
 } from './task';
 
 export { TaskStatus, TaskPriority } from './task';

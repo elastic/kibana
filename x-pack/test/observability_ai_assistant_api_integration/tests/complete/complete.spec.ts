@@ -48,7 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('Complete', () => {
+  describe('/internal/observability_ai_assistant/chat/complete', () => {
     let proxy: LlmProxy;
     let connectorId: string;
 
@@ -56,20 +56,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       params: { screenContexts?: ObservabilityAIAssistantScreenContextRequest[] },
       cb: (conversationSimulator: LlmResponseSimulator) => Promise<void>
     ) {
-      const titleInterceptor = proxy.intercept(
-        'title',
-        (body) =>
-          (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming).functions?.find(
-            (fn) => fn.name === 'title_conversation'
-          ) !== undefined
-      );
+      const titleInterceptor = proxy.intercept('title', (body) => isFunctionTitleRequest(body));
 
       const conversationInterceptor = proxy.intercept(
         'conversation',
-        (body) =>
-          (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming).functions?.find(
-            (fn) => fn.name === 'title_conversation'
-          ) === undefined
+        (body) => !isFunctionTitleRequest(body)
       );
 
       const responsePromise = new Promise<Response>((resolve, reject) => {
@@ -202,7 +193,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             role: MessageRole.Assistant,
             function_call: {
               name: 'context',
-              arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },
           },
@@ -281,17 +271,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           },
         });
-        expect(omit(events[3], 'conversation.id', 'conversation.last_updated')).to.eql({
+
+        expect(
+          omit(
+            events[3],
+            'conversation.id',
+            'conversation.last_updated',
+            'conversation.token_count'
+          )
+        ).to.eql({
           type: StreamingChatResponseEventType.ConversationCreate,
           conversation: {
             title: 'My generated title',
-            token_count: {
-              completion: 7,
-              prompt: 2262,
-              total: 2269,
-            },
           },
         });
+
+        const tokenCount = (events[3] as ConversationCreateEvent).conversation.token_count!;
+
+        expect(tokenCount.completion).to.be.greaterThan(0);
+        expect(tokenCount.prompt).to.be.greaterThan(0);
+
+        expect(tokenCount.total).to.eql(tokenCount.completion + tokenCount.prompt);
       });
 
       after(async () => {
@@ -301,7 +301,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         )[0]?.conversation.id;
 
         await observabilityAIAssistantAPIClient
-          .writeUser({
+          .adminUser({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -377,7 +377,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql(0);
 
         const conversations = await observabilityAIAssistantAPIClient
-          .writeUser({
+          .editorUser({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
           })
           .expect(200);
@@ -421,7 +421,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .complete();
 
         const createResponse = await observabilityAIAssistantAPIClient
-          .writeUser({
+          .editorUser({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -439,7 +439,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
 
         const conversationId = conversationCreatedEvent.conversation.id;
-        const fullConversation = await observabilityAIAssistantAPIClient.readUser({
+        const fullConversation = await observabilityAIAssistantAPIClient.editorUser({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
           params: {
             path: {
@@ -453,7 +453,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .complete();
 
         const updatedResponse = await observabilityAIAssistantAPIClient
-          .writeUser({
+          .editorUser({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -483,7 +483,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await observabilityAIAssistantAPIClient
-          .writeUser({
+          .editorUser({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -495,19 +495,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('has correct token count for a new conversation', async () => {
-        expect(conversationCreatedEvent.conversation.token_count).to.eql({
-          completion: 21,
-          prompt: 2262,
-          total: 2283,
-        });
+        expect(conversationCreatedEvent.conversation.token_count?.completion).to.be.greaterThan(0);
+        expect(conversationCreatedEvent.conversation.token_count?.prompt).to.be.greaterThan(0);
+        expect(conversationCreatedEvent.conversation.token_count?.total).to.be.greaterThan(0);
       });
 
       it('has correct token count for the updated conversation', async () => {
-        expect(conversationUpdatedEvent.conversation.token_count).to.eql({
-          completion: 31,
-          prompt: 4522,
-          total: 4553,
-        });
+        expect(conversationUpdatedEvent.conversation.token_count!.total).to.be.greaterThan(
+          conversationCreatedEvent.conversation.token_count!.total
+        );
       });
     });
 
@@ -526,5 +522,5 @@ function decodeEvents(body: Readable | string) {
 
 function isFunctionTitleRequest(body: string) {
   const parsedBody = JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
-  return parsedBody.functions?.find((fn) => fn.name === 'title_conversation') !== undefined;
+  return parsedBody.tools?.find((fn) => fn.function.name === 'title_conversation') !== undefined;
 }

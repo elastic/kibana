@@ -49,13 +49,10 @@ export function ConfirmDeleteModal({ agentKey, onCancel, onConfirm }: Props) {
 
   return (
     <EuiConfirmModal
-      title={i18n.translate(
-        'xpack.apm.settings.agentKeys.deleteConfirmModal.title',
-        {
-          defaultMessage: 'Delete APM agent key "{name}"?',
-          values: { name },
-        }
-      )}
+      title={i18n.translate('xpack.apm.settings.agentKeys.deleteConfirmModal.title', {
+        defaultMessage: 'Delete APM agent key "{name}"?',
+        values: { name },
+      })}
       onCancel={onCancel}
       onConfirm={async () => {
         setIsDeleting(true);
@@ -63,18 +60,12 @@ export function ConfirmDeleteModal({ agentKey, onCancel, onConfirm }: Props) {
         setIsDeleting(false);
         onConfirm();
       }}
-      cancelButtonText={i18n.translate(
-        'xpack.apm.settings.agentKeys.deleteConfirmModal.cancel',
-        {
-          defaultMessage: 'Cancel',
-        }
-      )}
-      confirmButtonText={i18n.translate(
-        'xpack.apm.settings.agentKeys.deleteConfirmModal.delete',
-        {
-          defaultMessage: 'Delete',
-        }
-      )}
+      cancelButtonText={i18n.translate('xpack.apm.settings.agentKeys.deleteConfirmModal.cancel', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate('xpack.apm.settings.agentKeys.deleteConfirmModal.delete', {
+        defaultMessage: 'Delete',
+      })}
       confirmButtonDisabled={isDeleting}
       buttonColor="danger"
       defaultFocusedButton="confirm"

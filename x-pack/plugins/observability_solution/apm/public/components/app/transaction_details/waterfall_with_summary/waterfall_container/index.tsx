@@ -42,9 +42,7 @@ export function WaterfallContainer({
   const { legends, items, orphanTraceItemsCount } = waterfall;
 
   // Service colors are needed to color the dot in the error popover
-  const serviceLegends = legends.filter(
-    ({ type }) => type === WaterfallLegendType.ServiceName
-  );
+  const serviceLegends = legends.filter(({ type }) => type === WaterfallLegendType.ServiceName);
   const serviceColors = serviceLegends.reduce((colorMap, legend) => {
     return {
       ...colorMap,
@@ -54,9 +52,7 @@ export function WaterfallContainer({
 
   // only color by span type if there are only events for one service
   const colorBy =
-    serviceLegends.length > 1
-      ? WaterfallLegendType.ServiceName
-      : WaterfallLegendType.SpanType;
+    serviceLegends.length > 1 ? WaterfallLegendType.ServiceName : WaterfallLegendType.SpanType;
 
   const displayedLegends = legends.filter((legend) => legend.type === colorBy);
 
@@ -111,16 +107,11 @@ export function WaterfallContainer({
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <WaterfallLegends
-              legends={legendsWithFallbackLabel}
-              type={colorBy}
-            />
+            <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
           </EuiFlexItem>
           {orphanTraceItemsCount > 0 ? (
             <EuiFlexItem grow={false}>
-              <OrphanTraceItemsWarning
-                orphanTraceItemsCount={orphanTraceItemsCount}
-              />
+              <OrphanTraceItemsWarning orphanTraceItemsCount={orphanTraceItemsCount} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>

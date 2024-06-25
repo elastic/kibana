@@ -30,7 +30,7 @@ export function useAdHocApmDataView() {
       try {
         const displayError = false;
         return await services.dataViews.create(
-          { title: indexPattern },
+          { title: indexPattern, timeFieldName: '@timestamp' },
           undefined,
           displayError
         );

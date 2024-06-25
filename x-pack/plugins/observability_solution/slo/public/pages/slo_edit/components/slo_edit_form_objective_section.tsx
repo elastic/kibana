@@ -7,6 +7,7 @@
 
 import {
   EuiCallOut,
+  EuiCheckbox,
   EuiFieldNumber,
   EuiFlexGrid,
   EuiFlexItem,
@@ -18,10 +19,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TimeWindow } from '@kbn/slo-schema';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { TimeWindowType } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   BUDGETING_METHOD_OPTIONS,
   CALENDARALIGNED_TIMEWINDOW_OPTIONS,
@@ -43,10 +44,11 @@ export function SloEditFormObjectiveSection() {
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowTypeSelect = useGeneratedHtmlId({ prefix: 'timeWindowTypeSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
+  const preventBackfillCheckbox = useGeneratedHtmlId({ prefix: 'preventBackfill' });
   const timeWindowType = watch('timeWindow.type');
   const indicator = watch('indicator.type');
 
-  const [timeWindowTypeState, setTimeWindowTypeState] = useState<TimeWindow | undefined>(
+  const [timeWindowTypeState, setTimeWindowTypeState] = useState<TimeWindowType | undefined>(
     defaultValues?.timeWindow?.type
   );
 
@@ -186,7 +188,7 @@ export function SloEditFormObjectiveSection() {
             <p>
               <FormattedMessage
                 id="xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage"
-                defaultMessage="The Synthetics availability indicator requires the budgeting method to be set to 'Occurances'."
+                defaultMessage="The Synthetics availability indicator requires the budgeting method to be set to 'Occurrences'."
               />
             </p>
           </EuiCallOut>
@@ -277,6 +279,43 @@ export function SloEditFormObjectiveSection() {
                   max={99.999}
                   step={0.001}
                   onChange={(event) => onChange(event.target.value)}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+
+      <EuiSpacer size="l" />
+
+      <EuiFlexGrid columns={3}>
+        <EuiFlexItem>
+          <EuiFormRow isInvalid={getFieldState('settings.preventInitialBackfill').invalid}>
+            <Controller
+              name="settings.preventInitialBackfill"
+              control={control}
+              render={({ field: { ref, onChange, ...field } }) => (
+                <EuiCheckbox
+                  id={preventBackfillCheckbox}
+                  label={
+                    <span>
+                      {i18n.translate('xpack.slo.sloEdit.settings.preventInitialBackfill.label', {
+                        defaultMessage: 'Prevent initial backfill of data',
+                      })}
+                      <EuiIconTip
+                        content={i18n.translate(
+                          'xpack.slo.sloEdit.settings.preventInitialBackfill.tooltip',
+                          {
+                            defaultMessage:
+                              'Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.',
+                          }
+                        )}
+                        position="top"
+                      />
+                    </span>
+                  }
+                  checked={Boolean(field.value)}
+                  onChange={(event: any) => onChange(event.target.checked)}
                 />
               )}
             />

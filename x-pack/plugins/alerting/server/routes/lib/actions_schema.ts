@@ -13,7 +13,7 @@ import { validateHours } from './validate_hours';
 
 export const actionsSchema = schema.arrayOf(
   schema.object({
-    group: schema.string(),
+    group: schema.maybe(schema.string()),
     id: schema.string(),
     params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
     frequency: schema.maybe(
@@ -79,4 +79,15 @@ export const actionsSchema = schema.arrayOf(
     use_alert_data_for_template: schema.maybe(schema.boolean()),
   }),
   { defaultValue: [] }
+);
+
+export const systemActionsSchema = schema.maybe(
+  schema.arrayOf(
+    schema.object({
+      id: schema.string(),
+      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+      uuid: schema.maybe(schema.string()),
+    }),
+    { defaultValue: [] }
+  )
 );

@@ -19,11 +19,7 @@ import { getComparisonEnabled } from '../../../shared/time_comparison/get_compar
 import { toBoolean } from '../../../../context/url_params_context/helpers';
 import { RenderRedirectTo } from '../../redirect_to';
 
-export function RedirectWithOffset({
-  children,
-}: {
-  children: React.ReactElement;
-}) {
+export function RedirectWithOffset({ children }: { children: React.ReactElement }) {
   const { core } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
@@ -32,15 +28,8 @@ export function RedirectWithOffset({
 
   // Redirect when 'comparisonType' is set as we now use offset instead
   // or when 'comparisonEnabled' is not set as it's now required
-  if (
-    matchesRoute &&
-    ('comparisonType' in query || !('comparisonEnabled' in query))
-  ) {
-    const {
-      comparisonType,
-      comparisonEnabled: urlComparisonEnabled,
-      ...queryRest
-    } = query;
+  if (matchesRoute && ('comparisonType' in query || !('comparisonEnabled' in query))) {
+    const { comparisonType, comparisonEnabled: urlComparisonEnabled, ...queryRest } = query;
 
     const comparisonEnabled = getComparisonEnabled({
       core,

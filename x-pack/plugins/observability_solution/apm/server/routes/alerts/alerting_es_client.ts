@@ -12,17 +12,11 @@ export type APMEventESSearchRequestParams = ESSearchRequest & {
   body: { size: number; track_total_hits: boolean | number };
 };
 
-export async function alertingEsClient<
-  TParams extends APMEventESSearchRequestParams
->({
+export async function alertingEsClient<TParams extends APMEventESSearchRequestParams>({
   scopedClusterClient,
   params,
 }: {
-  scopedClusterClient: RuleExecutorServices<
-    never,
-    never,
-    never
-  >['scopedClusterClient'];
+  scopedClusterClient: RuleExecutorServices<never, never, never>['scopedClusterClient'];
   params: TParams;
 }): Promise<ESSearchResponse<unknown, TParams>> {
   const response = await scopedClusterClient.asCurrentUser.search({

@@ -6,9 +6,8 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { Observable } from 'rxjs';
 
-import { CoreStart, ScopedHistory, CoreTheme } from '@kbn/core/public';
+import { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { LicensingPluginSetup, ILicense } from '@kbn/licensing-plugin/public';
 import { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import { ClientConfigType } from '../types';
@@ -33,7 +32,6 @@ export interface AppDependencies {
     initialLicense: ILicense;
   };
   config: ClientConfigType;
-  theme$: Observable<CoreTheme>;
 }
 
 export const AppContextProvider = ({

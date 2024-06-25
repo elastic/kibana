@@ -414,8 +414,7 @@ export const useNavigateToWizardWithClonedJob = () => {
       data: { dataViews },
       http: { basePath },
       application: { capabilities },
-      theme,
-      i18n: i18nStart,
+      ...startServices
     },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
@@ -464,7 +463,7 @@ export const useNavigateToWizardWithClonedJob = () => {
                 </EuiText>
               ) : null}
             </>,
-            { theme, i18n: i18nStart }
+            startServices
           ),
         });
       }

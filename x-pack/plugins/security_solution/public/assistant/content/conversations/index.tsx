@@ -23,7 +23,7 @@ export const BASE_SECURITY_CONVERSATIONS: Record<string, Conversation> = {
     consumer: 'security',
     isDefault: true,
     messages: [],
-    replacements: [],
+    replacements: {},
   },
   [DATA_QUALITY_DASHBOARD_CONVERSATION_ID]: {
     id: '',
@@ -32,7 +32,7 @@ export const BASE_SECURITY_CONVERSATIONS: Record<string, Conversation> = {
     consumer: 'security',
     isDefault: true,
     messages: [],
-    replacements: [],
+    replacements: {},
   },
   [DETECTION_RULES_CONVERSATION_ID]: {
     id: '',
@@ -41,7 +41,7 @@ export const BASE_SECURITY_CONVERSATIONS: Record<string, Conversation> = {
     consumer: 'security',
     isDefault: true,
     messages: [],
-    replacements: [],
+    replacements: {},
   },
   [EVENT_SUMMARY_CONVERSATION_ID]: {
     id: '',
@@ -50,7 +50,7 @@ export const BASE_SECURITY_CONVERSATIONS: Record<string, Conversation> = {
     consumer: 'security',
     isDefault: true,
     messages: [],
-    replacements: [],
+    replacements: {},
   },
   [TIMELINE_CONVERSATION_TITLE]: {
     excludeFromLastConversationStorage: true,
@@ -60,7 +60,7 @@ export const BASE_SECURITY_CONVERSATIONS: Record<string, Conversation> = {
     consumer: 'security',
     isDefault: true,
     messages: [],
-    replacements: [],
+    replacements: {},
   },
   [WELCOME_CONVERSATION_TITLE]: {
     id: '',
@@ -69,6 +69,6 @@ export const BASE_SECURITY_CONVERSATIONS: Record<string, Conversation> = {
     consumer: 'security',
     isDefault: true,
     messages: [],
-    replacements: [],
+    replacements: {},
   },
 };

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const TABLE_COLUMN_LABEL = {
   alertsCount: i18n.translate('xpack.infra.hostsViewPage.table.alertsColumnHeader', {
-    defaultMessage: 'Active alerts',
+    defaultMessage: 'Alerts',
   }),
 
   title: i18n.translate('xpack.infra.hostsViewPage.table.nameColumnHeader', {
@@ -21,7 +21,7 @@ export const TABLE_COLUMN_LABEL = {
   }),
 
   diskSpaceUsage: i18n.translate('xpack.infra.hostsViewPage.table.diskUsageColumnHeader', {
-    defaultMessage: 'Disk Usage (avg.)',
+    defaultMessage: 'Disk Usage (max)',
   }),
 
   tx: i18n.translate('xpack.infra.hostsViewPage.table.txColumnHeader', {
@@ -46,5 +46,11 @@ export const TABLE_COLUMN_LABEL = {
 
   toggleDialogAction: i18n.translate('xpack.infra.hostsViewPage.table.toggleDialogWithDetails', {
     defaultMessage: 'Toggle dialog with details',
+  }),
+};
+
+export const TABLE_CONTENT_LABEL = {
+  activeAlerts: i18n.translate('xpack.infra.hostsViewPage.table.tooltip.activeAlertsExplanation', {
+    defaultMessage: 'Active alerts',
   }),
 };

@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, memo } from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import {
   isThresholdRule,
@@ -21,8 +22,6 @@ import {
 import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
-import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
-import { useIsEsqlRuleTypeEnabled } from '../../../../common/components/hooks';
 
 interface SelectRuleTypeProps {
   describedByIds: string[];
@@ -49,7 +48,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
     const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
     const setEsql = useCallback(() => setType('esql'), [setType]);
 
-    const isEsqlRuleTypeEnabled = useIsEsqlRuleTypeEnabled();
+    const { isEsqlRuleTypeEnabled } = useEsqlAvailability();
 
     const eqlSelectableConfig = useMemo(
       () => ({
@@ -195,11 +194,11 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
               />
             </EuiFlexItem>
           )}
-          {isEsqlRuleTypeEnabled && (!isUpdateView || esqlSelectableConfig.isSelected) && (
+          {((!isUpdateView && isEsqlRuleTypeEnabled) || esqlSelectableConfig.isSelected) && (
             <EuiFlexItem>
               <EuiCard
                 data-test-subj="esqlRuleType"
-                title={<TechnicalPreviewBadge label={i18n.ESQL_TYPE_TITLE} />}
+                title={i18n.ESQL_TYPE_TITLE}
                 titleSize="xs"
                 description={i18n.ESQL_TYPE_DESCRIPTION}
                 icon={<EuiIcon type="logoElasticsearch" size="l" />}

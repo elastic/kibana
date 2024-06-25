@@ -8,7 +8,7 @@ export function getAccessQuery({
   user,
   namespace,
 }: {
-  user: { name: string; id?: string };
+  user?: { name: string; id?: string };
   namespace?: string;
 }) {
   return [
@@ -18,16 +18,8 @@ export function getAccessQuery({
           {
             bool: {
               should: [
-                {
-                  term: {
-                    'user.name': user.name,
-                  },
-                },
-                {
-                  term: {
-                    public: true,
-                  },
-                },
+                { term: { public: true } },
+                ...(user ? [{ term: { 'user.name': user.name } }] : []),
               ],
               minimum_should_match: 1,
             },

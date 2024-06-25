@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -16,12 +16,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
-import { ActionTypeRegistryContract, RuleAction, suspendedComponentWithProps } from '../../../..';
+import { ActionTypeRegistryContract, suspendedComponentWithProps } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
 import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';
+import { RuleUiAction } from '../../../../types';
 
 export interface RuleActionsProps {
-  ruleActions: RuleAction[];
+  ruleActions: RuleUiAction[];
   actionTypeRegistry: ActionTypeRegistryContract;
   legacyNotifyWhen?: RuleNotifyWhenType | null;
 }
@@ -51,11 +52,21 @@ export function RuleActions({
     );
   }
 
-  const getNotifyText = (action: RuleAction) =>
-    (NOTIFY_WHEN_OPTIONS.find((options) => options.value === action.frequency?.notifyWhen)
-      ?.inputDisplay ||
-      action.frequency?.notifyWhen) ??
-    legacyNotifyWhen;
+  const getNotifyText = (action: RuleUiAction, isSystemAction?: boolean): string | ReactNode => {
+    if (isSystemAction) {
+      return NOTIFY_WHEN_OPTIONS[1].inputDisplay;
+    }
+
+    if ('frequency' in action) {
+      const notifyWhen = NOTIFY_WHEN_OPTIONS.find(
+        (options) => options.value === action.frequency?.notifyWhen
+      );
+
+      return notifyWhen?.inputDisplay ?? action.frequency?.notifyWhen ?? legacyNotifyWhen ?? '';
+    }
+
+    return '';
+  };
 
   const getActionIconClass = (actionGroupId?: string): IconType | undefined => {
     const actionGroup = actionTypeRegistry.list().find((group) => group.id === actionGroupId);
@@ -70,11 +81,13 @@ export function RuleActions({
   };
 
   if (isLoadingActionConnectors) return <EuiLoadingSpinner size="s" />;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       {ruleActions.map((action, index) => {
         const { actionTypeId, id } = action;
         const actionName = getActionName(id);
+
         return (
           <EuiFlexItem key={index}>
             <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
@@ -95,10 +108,17 @@ export function RuleActions({
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText
-                      data-test-subj={`actionConnectorName-${index}-${actionName || actionTypeId}`}
+                      data-test-subj={`actionConnectorName-notify-text${index}-${
+                        actionName || actionTypeId
+                      }`}
                       size="xs"
                     >
-                      {String(getNotifyText(action))}
+                      {String(
+                        getNotifyText(
+                          action,
+                          actionTypeRegistry.get(actionTypeId).isSystemActionType
+                        )
+                      )}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>

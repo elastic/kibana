@@ -17,6 +17,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -199,6 +200,10 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
     });
   }, []);
 
+  const valueListsFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'valueListsFlyoutTitle',
+  });
+
   if (!showFlyout) {
     return null;
   }
@@ -219,10 +224,10 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
 
   return (
     <>
-      <EuiFlyout onClose={onClose} maxWidth={800}>
+      <EuiFlyout onClose={onClose} maxWidth={800} aria-labelledby={valueListsFlyoutTitleId}>
         <EuiFlyoutHeader>
           <EuiTitle>
-            <h2>{i18n.VALUE_LISTS_FLYOUT_TITLE}</h2>
+            <h2 id={valueListsFlyoutTitleId}>{i18n.VALUE_LISTS_FLYOUT_TITLE}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

@@ -126,6 +126,12 @@ const registerHttpRequestMockHelpers = (
     error?: ResponseError
   ) => mockResponse('GET', `${API_BASE_PATH}/mapping/${indexName}`, response, error);
 
+  const setUpdateIndexMappingsResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('PUT', `${API_BASE_PATH}/mapping/${indexName}`, response, error);
+
   const setLoadIndexStatsResponse = (
     indexName: string,
     response?: HttpResponse,
@@ -203,6 +209,9 @@ const registerHttpRequestMockHelpers = (
   const setCreateIndexResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('PUT', `${INTERNAL_API_BASE_PATH}/indices/create`, response, error);
 
+  const setInferenceModels = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/inference/all`, response, error);
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
@@ -216,6 +225,7 @@ const registerHttpRequestMockHelpers = (
     setCreateTemplateResponse,
     setLoadIndexSettingsResponse,
     setLoadIndexMappingResponse,
+    setUpdateIndexMappingsResponse,
     setLoadIndexStatsResponse,
     setUpdateIndexSettingsResponse,
     setSimulateTemplateResponse,
@@ -231,6 +241,7 @@ const registerHttpRequestMockHelpers = (
     setGetFieldsFromIndices,
     setGetPrivilegesResponse,
     setCreateEnrichPolicy,
+    setInferenceModels,
   };
 };
 

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { Type } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
@@ -15,9 +14,10 @@ import type {
   RequestHandler,
   IKibanaResponse,
   RouteConfigOptions,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
   RequestHandlerContextBase,
   RouteValidationFunction,
+  LazyValidator,
 } from '../..';
 
 type RqCtx = RequestHandlerContextBase;
@@ -32,7 +32,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
   'validate' | 'options'
 > & {
-  options?: Omit<RouteConfigOptions<Method>, 'access'>;
+  options?: Omit<RouteConfigOptions<Method>, 'access' | 'description' | 'deprecated'>;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
   /**
@@ -53,6 +53,43 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    * @default false
    */
   enableQueryVersion?: boolean;
+
+  /**
+   * Short summary of this route. Required for all routes used in OAS documentation.
+   *
+   * @example
+   * ```ts
+   * router.get({
+   *  path: '/api/foo/{id}',
+   *  access: 'public',
+   *  summary: `Get foo resources for an ID`,
+   * })
+   * ```
+   */
+  summary?: string;
+
+  /**
+   * Optional API description, which supports [CommonMark](https://spec.commonmark.org) markdown formatting
+   *
+   * @example
+   * ```ts
+   * router.get({
+   *  path: '/api/foo/{id}',
+   *  access: 'public',
+   *  summary: `Get foo resources for an ID`,
+   *  description: `Foo resources require **X** and **Y** `read` permissions to access.`,
+   * })
+   * ```
+   */
+  description?: string;
+
+  /**
+   * Declares this operation to be deprecated. Consumers SHOULD refrain from usage
+   * of this route. This will be surfaced in OAS documentation.
+   *
+   * @default false
+   */
+  deprecated?: boolean;
 };
 
 /**
@@ -186,11 +223,62 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 }
 
 /** @public */
-export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
+export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigRequest<P, Q, B>;
 
 /** @public */
+export interface VersionedRouteCustomResponseBodyValidation {
+  /** A custom validation function */
+  custom: RouteValidationFunction<unknown>;
+}
+
+/** @public */
+export type VersionedResponseBodyValidation =
+  | LazyValidator
+  | VersionedRouteCustomResponseBodyValidation;
+
+/**
+ * Map of response status codes to response schemas
+ *
+ * @note Instantiating response schemas is expensive, especially when it is
+ *       not needed in most cases. See example below to ensure this is lazily
+ *       provided.
+ *
+ * @note The {@link TypeOf} type utility from @kbn/config-schema can extract
+ *       types from lazily created schemas
+ *
+ * @example
+ * ```ts
+ * // Avoid this:
+ * const badResponseSchema = schema.object({ foo: foo.string() });
+ * // Do this:
+ * const goodResponseSchema = () => schema.object({ foo: foo.string() });
+ *
+ * type ResponseType = TypeOf<typeof goodResponseSchema>;
+ * ...
+ * .addVersion(
+ *  { ... validation: { response: { 200: { body: goodResponseSchema } } } },
+ *  handlerFn
+ * )
+ * ...
+ * ```
+ * @example
+ * ```ts
+ * {
+ *    200: {
+ *       body: schema.stream()
+ *       bodyContentType: 'application/octet-stream'
+ *    }
+ * }
+ * @public
+ */
 export interface VersionedRouteResponseValidation {
-  [statusCode: number]: { body: RouteValidationFunction<unknown> | Type<unknown> };
+  [statusCode: number]: {
+    /**
+     * A string representing the mime type of the response body.
+     */
+    bodyContentType?: string;
+    body: VersionedResponseBodyValidation;
+  };
   unsafe?: { body?: boolean };
 }
 
@@ -198,16 +286,18 @@ export interface VersionedRouteResponseValidation {
  * Versioned route validation
  * @public
  */
-export interface FullValidationConfig<P, Q, B> {
+export interface VersionedRouteValidation<P, Q, B> {
   /**
    * Validation to run against route inputs: params, query and body
    * @public
    */
   request?: VersionedRouteRequestValidation<P, Q, B>;
   /**
-   * Validation to run against route output
+   * Validation to run against route output.
+   *
    * @note This validation is only intended to run in development. Do not use this
    *       for setting default values!
+   *
    * @public
    */
   response?: VersionedRouteResponseValidation;
@@ -226,9 +316,11 @@ export interface AddVersionOpts<P, Q, B> {
   version: ApiVersion;
   /**
    * Validation for this version of a route
+   * @note if providing a function to lazily load your validation schemas assume
+   *       that the function will only be called once.
    * @public
    */
-  validate: false | FullValidationConfig<P, Q, B>;
+  validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
 }
 
 /**

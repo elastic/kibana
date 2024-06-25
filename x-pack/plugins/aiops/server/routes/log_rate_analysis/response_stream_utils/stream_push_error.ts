@@ -7,26 +7,24 @@
 
 import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
+import {
+  addError,
+  type AiopsLogRateAnalysisApiAction,
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 
 import type { LogDebugMessage } from './log_debug_message';
-
-import {
-  addErrorAction,
-  type AiopsLogRateAnalysisApiAction,
-} from '../../../../common/api/log_rate_analysis/actions';
 
 /**
  * Helper function that will push an error message to the stream.
  * This is implemented as a factory that receives the necessary dependencies
  * which then returns the actual helper function.
  */
-export const streamPushErrorFactory = <T extends ApiVersion>(
-  push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'],
+export const streamPushErrorFactory = (
+  push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction>['push'],
   logDebugMessage: LogDebugMessage
 ) => {
   return function pushError(m: string) {
     logDebugMessage('Push error.');
-    push(addErrorAction(m));
+    push(addError(m));
   };
 };

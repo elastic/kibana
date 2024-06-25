@@ -23,6 +23,13 @@ import { TopNResponse } from '../common/topn';
 import type { SetupDataCollectionInstructions } from '../server/routes/setup/get_cloud_setup_instructions';
 import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 
+export interface APMTransactionsPerService {
+  [serviceName: string]: {
+    serviceName: string;
+    transactions: Array<{ name: string | null; samples: number | null }>;
+  };
+}
+
 export interface ProfilingSetupStatus {
   has_setup: boolean;
   has_data: boolean;
@@ -77,6 +84,13 @@ export interface Services {
     http: AutoAbortedHttpService;
     indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   }) => Promise<IndicesStorageDetailsAPIResponse>;
+  fetchTopNFunctionAPMTransactions: (params: {
+    http: AutoAbortedHttpService;
+    timeFrom: number;
+    timeTo: number;
+    functionName: string;
+    serviceNames: string[];
+  }) => Promise<APMTransactionsPerService>;
 }
 
 export function getServices(): Services {
@@ -166,6 +180,17 @@ export function getServices(): Services {
         { query }
       )) as IndicesStorageDetailsAPIResponse;
       return eventsMetricsSizeTimeseries;
+    },
+    fetchTopNFunctionAPMTransactions: ({ functionName, http, serviceNames, timeFrom, timeTo }) => {
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        functionName,
+        serviceNames: JSON.stringify(serviceNames),
+      };
+      return http.get(paths.APMTransactions, {
+        query,
+      }) as Promise<APMTransactionsPerService>;
     },
   };
 }

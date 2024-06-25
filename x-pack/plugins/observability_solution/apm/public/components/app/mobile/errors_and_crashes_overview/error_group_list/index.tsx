@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
-  LEFT_ALIGNMENT,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiBadge, EuiToolTip, RIGHT_ALIGNMENT, LEFT_ALIGNMENT, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useMemo } from 'react';
@@ -74,9 +68,7 @@ function MobileErrorGroupList({
   initialSortDirection,
   isLoading,
 }: Props) {
-  const { query } = useApmParams(
-    '/mobile-services/{serviceName}/errors-and-crashes'
-  );
+  const { query } = useApmParams('/mobile-services/{serviceName}/errors-and-crashes');
   const { offset } = query;
   const columns = useMemo(() => {
     return [
@@ -93,13 +85,10 @@ function MobileErrorGroupList({
               iconProps={{
                 className: 'eui-alignTop',
               }}
-              content={i18n.translate(
-                'xpack.apm.errorsTable.groupIdColumnDescription',
-                {
-                  defaultMessage:
-                    'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
-                }
-              )}
+              content={i18n.translate('xpack.apm.errorsTable.groupIdColumnDescription', {
+                defaultMessage:
+                  'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
+              })}
             />
           </>
         ),
@@ -108,11 +97,7 @@ function MobileErrorGroupList({
         width: `${unit * 6}px`,
         render: (_, item: ErrorGroupItem) => {
           return (
-            <GroupIdLink
-              serviceName={serviceName}
-              groupId={item.groupId}
-              query={query}
-            >
+            <GroupIdLink serviceName={serviceName} groupId={item.groupId} query={query}>
               {item.groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
@@ -149,15 +134,8 @@ function MobileErrorGroupList({
         render: (_, item: ErrorGroupItem) => {
           return (
             <MessageAndCulpritCell>
-              <EuiToolTip
-                id="error-message-tooltip"
-                content={item.name || NOT_AVAILABLE_LABEL}
-              >
-                <MessageLink
-                  serviceName={serviceName}
-                  groupId={item.groupId}
-                  query={query}
-                >
+              <EuiToolTip id="error-message-tooltip" content={item.name || NOT_AVAILABLE_LABEL}>
+                <MessageLink serviceName={serviceName} groupId={item.groupId} query={query}>
                   {item.name || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>
@@ -187,11 +165,7 @@ function MobileErrorGroupList({
         }),
         align: LEFT_ALIGNMENT,
         render: (_, { lastSeen }) =>
-          lastSeen ? (
-            <TimestampTooltip time={lastSeen} timeUnit="minutes" />
-          ) : (
-            NOT_AVAILABLE_LABEL
-          ),
+          lastSeen ? <TimestampTooltip time={lastSeen} timeUnit="minutes" /> : NOT_AVAILABLE_LABEL,
       },
       {
         field: 'occurrences',
@@ -202,12 +176,12 @@ function MobileErrorGroupList({
         dataType: 'number',
         align: RIGHT_ALIGNMENT,
         render: (_, { occurrences, groupId }) => {
-          const currentPeriodTimeseries =
-            detailedStatistics?.currentPeriod?.[groupId]?.timeseries;
+          const currentPeriodTimeseries = detailedStatistics?.currentPeriod?.[groupId]?.timeseries;
           const previousPeriodTimeseries =
             detailedStatistics?.previousPeriod?.[groupId]?.timeseries;
-          const { currentPeriodColor, previousPeriodColor } =
-            getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
+          const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+            ChartType.FAILED_TRANSACTION_RATE
+          );
 
           return (
             <SparkPlot
@@ -215,19 +189,14 @@ function MobileErrorGroupList({
               color={currentPeriodColor}
               isLoading={detailedStatisticsLoading}
               series={currentPeriodTimeseries}
-              valueLabel={i18n.translate(
-                'xpack.apm.serviceOverview.errorsTableOccurrences',
-                {
-                  defaultMessage: `{occurrences} occ.`,
-                  values: {
-                    occurrences: asInteger(occurrences),
-                  },
-                }
-              )}
+              valueLabel={i18n.translate('xpack.apm.serviceOverview.errorsTableOccurrences', {
+                defaultMessage: `{occurrences} occ.`,
+                values: {
+                  occurrences: asInteger(occurrences),
+                },
+              })}
               comparisonSeries={
-                comparisonEnabled && isTimeComparison(offset)
-                  ? previousPeriodTimeseries
-                  : undefined
+                comparisonEnabled && isTimeComparison(offset) ? previousPeriodTimeseries : undefined
               }
               comparisonSeriesColor={previousPeriodColor}
             />

@@ -20,6 +20,7 @@
       "data",
       "dataViews",
       "dataViewEditor",
+      "embeddable",
       "fieldFormats",
       "uiActions",
       "presentationUtil",
@@ -29,7 +30,6 @@
       "inspector",
       "lens",
       "observabilityShared",
-      "observabilityAIAssistant",
       "ruleRegistry",
       "triggersActionsUi",
       "security",
@@ -39,7 +39,8 @@
       "dashboard",
       "expressions",
       "logsExplorer",
-      "licensing"
+      "licensing",
+      "navigation"
     ],
     "optionalPlugins": [
       "discover",
@@ -48,7 +49,8 @@
       "cloud",
       "spaces",
       "serverless",
-      "guidedOnboarding"
+      "guidedOnboarding",
+      "observabilityAIAssistant",
     ],
     "requiredBundles": [
       "data",

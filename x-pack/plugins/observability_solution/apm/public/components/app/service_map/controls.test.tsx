@@ -28,9 +28,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
         ]}
       >
         <MockApmPluginContextWrapper>
-          <ThemeContext.Provider value={{ eui: lightTheme }}>
-            {children}
-          </ThemeContext.Provider>
+          <ThemeContext.Provider value={{ eui: lightTheme }}>{children}</ThemeContext.Provider>
         </MockApmPluginContextWrapper>
       </MemoryRouter>
       s
@@ -46,9 +44,7 @@ describe('Controls', () => {
 
       const button = await findByTestId('viewFullMapButton');
 
-      expect(button.getAttribute('href')).toEqual(
-        '/basepath/app/apm/service-map'
-      );
+      expect(button.getAttribute('href')).toEqual('/basepath/app/apm/service-map');
     });
   });
 });

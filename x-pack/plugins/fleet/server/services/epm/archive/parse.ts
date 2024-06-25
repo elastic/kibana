@@ -128,6 +128,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'icons',
   'policy_templates',
   'release',
+  'agent',
   'elasticsearch',
 ] as const;
 

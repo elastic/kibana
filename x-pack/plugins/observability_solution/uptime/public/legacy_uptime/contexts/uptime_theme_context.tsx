@@ -6,7 +6,7 @@
  */
 
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
-import React, { createContext, useMemo } from 'react';
+import React, { createContext, useMemo, FC, PropsWithChildren } from 'react';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { UptimeAppColors } from '../app/uptime_app';
 
@@ -44,7 +44,10 @@ interface ThemeContextProps {
   darkMode: boolean;
 }
 
-export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMode, children }) => {
+export const UptimeThemeContextProvider: FC<PropsWithChildren<ThemeContextProps>> = ({
+  darkMode,
+  children,
+}) => {
   let colors: UptimeAppColors;
   if (darkMode) {
     colors = {

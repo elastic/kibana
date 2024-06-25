@@ -74,14 +74,14 @@ describe('Perform bulk action route', () => {
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         success: true,
-        anonymization_fields_count: 2,
+        anonymization_fields_count: 3,
         attributes: {
           results: someBulkActionResults(),
           summary: {
             failed: 0,
             skipped: 0,
-            succeeded: 2,
-            total: 2,
+            succeeded: 3,
+            total: 3,
           },
         },
       });
@@ -94,7 +94,7 @@ describe('Perform bulk action route', () => {
         (await clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.getWriter())
           .bulk as jest.Mock
       ).mockResolvedValue({
-        docs_created: [mockAnonymizationField, mockAnonymizationField],
+        docs_created: [mockAnonymizationField],
         docs_updated: [],
         docs_deleted: [],
         errors: [
@@ -111,7 +111,7 @@ describe('Perform bulk action route', () => {
             document: { id: 'failed-anonymization-field-id-3', name: 'Detect Root/Admin Users' },
           },
         ],
-        total: 5,
+        total: 4,
       });
       clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.findDocuments.mockResolvedValueOnce(
         Promise.resolve(getEmptyFindResult())
@@ -130,9 +130,9 @@ describe('Perform bulk action route', () => {
         attributes: {
           summary: {
             failed: 3,
-            succeeded: 2,
+            succeeded: 1,
             skipped: 0,
-            total: 5,
+            total: 4,
           },
           errors: [
             {

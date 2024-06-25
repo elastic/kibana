@@ -65,7 +65,7 @@ export const useAddToCaseActions = ({
 
   const { activeStep, incrementStep, setStep, isTourShown } = useTourContext();
 
-  const onCaseSuccess = () => {
+  const onCaseSuccess = useCallback(() => {
     if (onSuccess) {
       onSuccess();
     }
@@ -73,7 +73,7 @@ export const useAddToCaseActions = ({
     if (refetch) {
       refetch();
     }
-  };
+  }, [onSuccess, refetch]);
 
   const afterCaseCreated = useCallback(async () => {
     if (isTourShown(SecurityStepId.alertsCases)) {
@@ -92,17 +92,25 @@ export const useAddToCaseActions = ({
     [activeStep, isTourShown]
   );
 
-  const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout({
-    onClose: onMenuItemClick,
-    onSuccess: onCaseSuccess,
-    afterCaseCreated,
-    ...prefillCasesValue,
-  });
+  const createCaseArgs = useMemo(() => {
+    return {
+      onClose: onMenuItemClick,
+      onSuccess: onCaseSuccess,
+      afterCaseCreated,
+      ...prefillCasesValue,
+    };
+  }, [onMenuItemClick, onCaseSuccess, afterCaseCreated, prefillCasesValue]);
 
-  const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal({
-    onClose: onMenuItemClick,
-    onSuccess: onCaseSuccess,
-  });
+  const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout(createCaseArgs);
+
+  const selectCaseArgs = useMemo(() => {
+    return {
+      onClose: onMenuItemClick,
+      onSuccess: onCaseSuccess,
+    };
+  }, [onMenuItemClick, onCaseSuccess]);
+
+  const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal(selectCaseArgs);
 
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`

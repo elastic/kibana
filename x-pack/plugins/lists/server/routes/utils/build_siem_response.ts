@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core/server';
+import {
+  CustomHttpResponseOptions,
+  HttpResponsePayload,
+  KibanaResponseFactory,
+  ResponseError,
+} from '@kbn/core/server';
 
 /**
  * Copied from x-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts
@@ -48,22 +53,24 @@ const statusToErrorMessage = (
 export class SiemResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
-  // @ts-expect-error upgrade typescript v4.9.5
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  error<T>({ statusCode, body, headers, bypassErrorFormat }: CustomHttpResponseOptions<T>) {
+  error<T extends HttpResponsePayload | ResponseError>({
+    statusCode,
+    body,
+    headers,
+    bypassErrorFormat,
+  }: CustomHttpResponseOptions<T>) {
     // KibanaResponse is not exported so we cannot use a return type here and that is why the linter is turned off above
-    // @ts-expect-error upgrade typescript v4.9.5
     const contentType: CustomHttpResponseOptions<T>['headers'] = {
       'content-type': 'application/json',
     };
-    // @ts-expect-error upgrade typescript v4.9.5
     const defaultedHeaders: CustomHttpResponseOptions<T>['headers'] = {
       ...contentType,
       ...(headers ?? {}),
     };
 
     const formattedBody = bypassErrorFormat
-      ? body
+      ? Object.assign<{}, unknown>({}, body) // eslint-disable-line prefer-object-spread
       : { message: body ?? statusToErrorMessage(statusCode) };
 
     return this.response.custom({

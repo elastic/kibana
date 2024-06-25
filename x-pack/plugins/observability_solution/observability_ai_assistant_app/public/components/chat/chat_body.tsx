@@ -36,12 +36,14 @@ import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
+import { useSimulatedFunctionCalling } from '../../hooks/use_simulated_function_calling';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
+import { SimulatedFunctionCallingCallout } from './simulated_function_calling_callout';
 import { WelcomeMessage } from './welcome_message';
 
 const fullHeightClassName = css`
@@ -90,6 +92,11 @@ const animClassName = css`
     ${euiThemeVars.euiAnimSlightBounce} ${euiThemeVars.euiAnimSpeedNormal} forwards;
 `;
 
+const containerClassName = css`
+  min-width: 0;
+  max-height: 100%;
+`;
+
 const PADDING_AND_BORDER = 32;
 
 export function ChatBody({
@@ -122,6 +129,8 @@ export function ChatBody({
 
   const chatService = useObservabilityAIAssistantChatService();
 
+  const { simulatedFunctionCallingEnabled } = useSimulatedFunctionCalling();
+
   const { conversation, messages, next, state, stop, saveTitle } = useConversation({
     initialConversationId,
     initialMessages,
@@ -153,12 +162,6 @@ export function ChatBody({
       title = EMPTY_CONVERSATION_TITLE;
     }
   }
-
-  const containerClassName = css`
-    background: white;
-    min-width: 0;
-    max-height: 100%;
-  `;
 
   const headerContainerClassName = css`
     padding-right: ${showLinkToConversationsApp ? '32px' : '0'};
@@ -221,7 +224,10 @@ export function ChatBody({
   });
 
   const handleCopyConversation = () => {
-    const content = JSON.stringify({ title: initialTitle, messages });
+    const content = JSON.stringify({
+      title: initialTitle,
+      messages: conversation.value?.messages ?? messages,
+    });
 
     navigator.clipboard?.writeText(content || '');
   };
@@ -339,7 +345,20 @@ export function ChatBody({
               className={animClassName}
             >
               {connectors.connectors?.length === 0 || messages.length === 1 ? (
-                <WelcomeMessage connectors={connectors} knowledgeBase={knowledgeBase} />
+                <WelcomeMessage
+                  connectors={connectors}
+                  knowledgeBase={knowledgeBase}
+                  onSelectPrompt={(message) =>
+                    next(
+                      messages.concat([
+                        {
+                          '@timestamp': new Date().toISOString(),
+                          message: { content: message, role: MessageRole.User },
+                        },
+                      ])
+                    )
+                  }
+                />
               ) : (
                 <ChatTimeline
                   messages={messages}
@@ -367,6 +386,12 @@ export function ChatBody({
             </EuiPanel>
           </div>
         </EuiFlexItem>
+
+        {simulatedFunctionCallingEnabled ? (
+          <EuiFlexItem grow={false}>
+            <SimulatedFunctionCallingCallout />
+          </EuiFlexItem>
+        ) : null}
 
         <EuiFlexItem
           grow={false}

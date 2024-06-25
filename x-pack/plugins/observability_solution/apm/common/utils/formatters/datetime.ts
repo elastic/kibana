@@ -18,8 +18,7 @@ function formatTimezone(momentTime: moment.Moment) {
 
   const utcOffsetHours = momentTime.utcOffset() / 60;
 
-  const customTimezoneFormat =
-    utcOffsetHours > 0 ? `+${utcOffsetHours}` : utcOffsetHours;
+  const customTimezoneFormat = utcOffsetHours > 0 ? `+${utcOffsetHours}` : utcOffsetHours;
 
   const utcOffsetFormatted = Number.isInteger(utcOffsetHours)
     ? customTimezoneFormat
@@ -70,10 +69,7 @@ export const getDateDifference = ({
   precise?: boolean;
 }) => end.diff(start, unitOfTime, precise);
 
-function getFormatsAccordingToDateDifference(
-  start: moment.Moment,
-  end: moment.Moment
-) {
+function getFormatsAccordingToDateDifference(start: moment.Moment, end: moment.Moment) {
   if (getDateDifference({ start, end, unitOfTime: 'years' }) >= 5) {
     return { dateFormat: getDateFormat('years') };
   }
@@ -117,9 +113,7 @@ export function asAbsoluteDateTime(
   const momentTime = moment(time);
   const formattedTz = formatTimezone(momentTime);
 
-  return momentTime.format(
-    `${getDateFormat('days')}, ${getTimeFormat(timeUnit)} ${formattedTz}`
-  );
+  return momentTime.format(`${getDateFormat('days')}, ${getTimeFormat(timeUnit)} ${formattedTz}`);
 }
 
 /**
@@ -148,9 +142,7 @@ export function asRelativeDateTimeRange(start: number, end: number) {
   );
 
   if (timeFormat) {
-    const startFormatted = momentStartTime.format(
-      `${dateFormat}, ${timeFormat}`
-    );
+    const startFormatted = momentStartTime.format(`${dateFormat}, ${timeFormat}`);
     const endFormatted = momentEndTime.format(timeFormat);
     const formattedTz = formatTimezone(momentStartTime);
     return `${startFormatted} - ${endFormatted} ${formattedTz}`;

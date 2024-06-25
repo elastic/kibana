@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import {
-  SERVICE_NAME,
-  TRANSACTION_DURATION,
-} from '../../../common/es_fields/apm';
+import { SERVICE_NAME, TRANSACTION_DURATION } from '../../../common/es_fields/apm';
 import { getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
@@ -72,53 +65,50 @@ async function getMobileDetailedStatisticsByField({
     minBucketSize: 60,
   });
 
-  const response = await apmEventClient.search(
-    `get_mobile_detailed_statistics_by_field`,
-    {
-      apm: {
-        sources: [
-          {
-            documentType: ApmDocumentType.TransactionEvent,
-            rollupInterval: RollupInterval.None,
-          },
-        ],
-      },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-          },
+  const response = await apmEventClient.search(`get_mobile_detailed_statistics_by_field`, {
+    apm: {
+      sources: [
+        {
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
         },
-        aggs: {
-          detailed_statistics: {
-            terms: {
-              field,
-              include: fieldValues,
-              size: fieldValues.length,
-            },
-            aggs: {
-              timeseries: {
-                date_histogram: {
-                  field: '@timestamp',
-                  fixed_interval: intervalString,
-                  min_doc_count: 0,
-                  extended_bounds: {
-                    min: startWithOffset,
-                    max: endWithOffset,
-                  },
+      ],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
+        },
+      },
+      aggs: {
+        detailed_statistics: {
+          terms: {
+            field,
+            include: fieldValues,
+            size: fieldValues.length,
+          },
+          aggs: {
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: intervalString,
+                min_doc_count: 0,
+                extended_bounds: {
+                  min: startWithOffset,
+                  max: endWithOffset,
                 },
-                aggs: {
-                  latency: {
-                    avg: {
-                      field: TRANSACTION_DURATION,
-                    },
+              },
+              aggs: {
+                latency: {
+                  avg: {
+                    field: TRANSACTION_DURATION,
                   },
                 },
               },
@@ -126,8 +116,8 @@ async function getMobileDetailedStatisticsByField({
           },
         },
       },
-    }
-  );
+    },
+  });
 
   const buckets = response.aggregations?.detailed_statistics.buckets ?? [];
 

@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { subscribeBreadcrumbs } from './breadcrumbs';
+import { startNavigation } from './navigation';
 import { createServices } from './common/services';
 import { registerUpsellings } from './upselling/register_upsellings';
 import type {
@@ -40,13 +40,12 @@ export class SecuritySolutionEssPlugin
     const { securitySolution, licensing } = startDeps;
     const services = createServices(core, startDeps);
 
+    startNavigation(services);
+    setOnboardingSettings(services);
+
     licensing.license$.subscribe((license) => {
       registerUpsellings(securitySolution.getUpselling(), license, services);
     });
-
-    setOnboardingSettings(services);
-
-    subscribeBreadcrumbs(services);
 
     return {};
   }

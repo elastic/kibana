@@ -103,6 +103,9 @@ describe('duplicateRule', () => {
       name: expect.anything(), // covered in a separate test
       params: {
         ...rule.params,
+        ruleSource: {
+          type: 'internal',
+        },
         ruleId: expect.anything(), // covered in a separate test
       },
       tags: rule.tags,
@@ -220,22 +223,6 @@ describe('duplicateRule', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             requiredFields: [],
-          }),
-        })
-      );
-    });
-
-    it('resets setup guide to an empty string', async () => {
-      const rule = createPrebuiltRule();
-      rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
-      const result = await duplicateRule({
-        rule,
-      });
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            setup: '',
           }),
         })
       );

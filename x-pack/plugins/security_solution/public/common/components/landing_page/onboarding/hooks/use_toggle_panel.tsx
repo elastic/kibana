@@ -31,7 +31,7 @@ import { OnboardingActions } from '../types';
 import { findCardSectionByStepId } from '../helpers';
 import type { SecurityProductTypes } from '../configs';
 import { ALL_PRODUCT_LINES, ProductLine } from '../configs';
-import { useSpaceId } from '../../../../hooks/use_space_id';
+import { useKibana } from '../../../../lib/kibana';
 
 const syncExpandedCardStepsToStorageFromURL = (
   onboardingStorage: OnboardingStorage,
@@ -72,15 +72,17 @@ const syncExpandedCardStepsFromStorageToURL = (
 export const useTogglePanel = ({
   productTypes,
   onboardingSteps,
+  spaceId,
 }: {
   productTypes?: SecurityProductTypes;
   onboardingSteps: StepId[];
+  spaceId: string | undefined;
 }) => {
+  const { telemetry } = useKibana().services;
   const { navigateTo } = useNavigateTo();
 
   const { hash: detailName } = useLocation();
   const stepIdFromHash = detailName.split('#')[1];
-  const spaceId = useSpaceId();
 
   const onboardingStorage = useMemo(() => new OnboardingStorage(spaceId), [spaceId]);
   const {
@@ -136,27 +138,6 @@ export const useTogglePanel = ({
     return getAllExpandedCardStepsFromStorage();
   }, [onboardingStorage, getAllExpandedCardStepsFromStorage, stepIdFromHash]);
 
-  const onStepClicked: OnStepClicked = useCallback(
-    ({ stepId, cardId, isExpanded }) => {
-      dispatch({
-        type: OnboardingActions.ToggleExpandedStep,
-        payload: { stepId, cardId, isStepExpanded: isExpanded },
-      });
-      if (isExpanded) {
-        // It allows Only One step open at a time
-        resetAllExpandedCardStepsToStorage();
-        addExpandedCardStepToStorage(cardId, stepId);
-      } else {
-        removeExpandedCardStepFromStorage(cardId, stepId);
-      }
-    },
-    [
-      addExpandedCardStepToStorage,
-      removeExpandedCardStepFromStorage,
-      resetAllExpandedCardStepsToStorage,
-    ]
-  );
-
   const [state, dispatch] = useReducer(reducer, {
     activeProducts: activeProductsInitialStates,
     activeSections: activeSectionsInitialStates,
@@ -167,8 +148,34 @@ export const useTogglePanel = ({
     onboardingSteps,
   });
 
+  const onStepClicked: OnStepClicked = useCallback(
+    ({ stepId, cardId, isExpanded, trigger }) => {
+      dispatch({
+        type: OnboardingActions.ToggleExpandedStep,
+        payload: { stepId, cardId, isStepExpanded: isExpanded },
+      });
+      if (isExpanded) {
+        // It allows Only One step open at a time
+        resetAllExpandedCardStepsToStorage();
+        addExpandedCardStepToStorage(cardId, stepId);
+        telemetry.reportOnboardingHubStepOpen({
+          stepId,
+          trigger,
+        });
+      } else {
+        removeExpandedCardStepFromStorage(cardId, stepId);
+      }
+    },
+    [
+      addExpandedCardStepToStorage,
+      removeExpandedCardStepFromStorage,
+      resetAllExpandedCardStepsToStorage,
+      telemetry,
+    ]
+  );
+
   const toggleTaskCompleteStatus: ToggleTaskCompleteStatus = useCallback(
-    ({ stepId, cardId, sectionId, undo }) => {
+    ({ stepId, stepLinkId, cardId, sectionId, undo, trigger }) => {
       dispatch({
         type: undo ? OnboardingActions.RemoveFinishedStep : OnboardingActions.AddFinishedStep,
         payload: { stepId, cardId, sectionId },
@@ -177,9 +184,10 @@ export const useTogglePanel = ({
         removeFinishedStepFromStorage(cardId, stepId, state.onboardingSteps);
       } else {
         addFinishedStepToStorage(cardId, stepId);
+        telemetry.reportOnboardingHubStepFinished({ stepId, stepLinkId, trigger });
       }
     },
-    [addFinishedStepToStorage, removeFinishedStepFromStorage, state.onboardingSteps]
+    [addFinishedStepToStorage, removeFinishedStepFromStorage, state.onboardingSteps, telemetry]
   );
 
   const onProductSwitchChanged = useCallback(
@@ -233,12 +241,15 @@ export const useTogglePanel = ({
         if (state.expandedCardSteps[matchedCard.id]?.expandedSteps.includes(matchedStep.id)) {
           return;
         }
+
+        // The step is opened by navigation instead of clicking directly on the step. e.g.: clicking a stepLink
         // Toggle step and sync the expanded card step to storage & reducer
         onStepClicked({
           stepId: matchedStep.id,
           cardId: matchedCard.id,
           sectionId: matchedSection.id,
           isExpanded: true,
+          trigger: 'navigation',
         });
 
         navigateTo({

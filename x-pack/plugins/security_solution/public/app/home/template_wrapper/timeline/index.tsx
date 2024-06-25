@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { noop } from 'lodash/fp';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineWrapper } from '../../../../timelines/wrapper';
@@ -19,7 +20,9 @@ export const Timeline = React.memo(() => {
 
   const { onAppLeave } = useKibana().services;
 
-  return <TimelineWrapper timelineId={TimelineId.active} onAppLeave={onAppLeave} />;
+  return (
+    <TimelineWrapper timelineId={TimelineId.active} onAppLeave={onAppLeave ? onAppLeave : noop} />
+  );
 });
 
 Timeline.displayName = 'Timeline';

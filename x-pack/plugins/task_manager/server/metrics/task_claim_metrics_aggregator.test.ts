@@ -46,7 +46,9 @@ describe('TaskClaimMetricsAggregator', () => {
     expect(taskClaimMetricsAggregator.collect()).toEqual({
       success: 0,
       total: 0,
+      total_errors: 0,
       duration: { counts: [], values: [] },
+      duration_values: [],
     });
   });
 
@@ -54,7 +56,9 @@ describe('TaskClaimMetricsAggregator', () => {
     expect(taskClaimMetricsAggregator.initialMetric()).toEqual({
       success: 0,
       total: 0,
+      total_errors: 0,
       duration: { counts: [], values: [] },
+      duration_values: [],
     });
   });
 
@@ -64,7 +68,9 @@ describe('TaskClaimMetricsAggregator', () => {
     expect(taskClaimMetricsAggregator.collect()).toEqual({
       success: 2,
       total: 2,
+      total_errors: 0,
       duration: { counts: [2], values: [100] },
+      duration_values: [10, 10],
     });
   });
 
@@ -74,7 +80,9 @@ describe('TaskClaimMetricsAggregator', () => {
     expect(taskClaimMetricsAggregator.collect()).toEqual({
       success: 0,
       total: 2,
+      total_errors: 2,
       duration: { counts: [], values: [] },
+      duration_values: [],
     });
   });
 
@@ -89,14 +97,18 @@ describe('TaskClaimMetricsAggregator', () => {
     expect(taskClaimMetricsAggregator.collect()).toEqual({
       success: 4,
       total: 7,
+      total_errors: 3,
       duration: { counts: [4], values: [100] },
+      duration_values: [10, 10, 10, 10],
     });
 
     taskClaimMetricsAggregator.reset();
     expect(taskClaimMetricsAggregator.collect()).toEqual({
       success: 0,
       total: 0,
+      total_errors: 0,
       duration: { counts: [], values: [] },
+      duration_values: [],
     });
   });
 });

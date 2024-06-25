@@ -12,6 +12,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiCopy,
+  EuiFieldText,
   EuiFormControlLayout,
   EuiHorizontalRule,
   EuiPopover,
@@ -19,7 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { FunctionComponent, ReactElement } from 'react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -50,12 +51,11 @@ export const TokenField: FunctionComponent<TokenFieldProps> = (props) => {
       style={{ backgroundColor: 'transparent' }}
       readOnly
     >
-      <input
-        type="text"
+      <EuiFieldText
+        controlOnly
         aria-label={i18n.translate('xpack.security.copyTokenField.tokenLabel', {
           defaultMessage: 'Token',
         })}
-        className="euiFieldText euiFieldText--inGroup"
         value={props.value}
         style={{
           fontFamily: euiThemeVars.euiCodeFontFamily,
@@ -83,10 +83,15 @@ export interface SelectableTokenFieldProps extends Omit<EuiFieldTextProps, 'valu
 
 export const SelectableTokenField: FunctionComponent<SelectableTokenFieldProps> = (props) => {
   const { options, ...rest } = props;
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-  const [selectedOption, setSelectedOption] = React.useState<SelectableTokenFieldOption>(
-    options[0]
-  );
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<SelectableTokenFieldOption>(options[0]);
+
+  useEffect(() => {
+    if (options.length > 0) {
+      setSelectedOption(options[0]);
+    }
+  }, [options]);
+
   const selectedIndex = options.findIndex((c) => c.key === selectedOption.key);
   const closePopover = () => setIsPopoverOpen(false);
 

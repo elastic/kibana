@@ -42,7 +42,7 @@ describe('UptimeEsClient', () => {
 
       expect(esClient.search).toHaveBeenCalledWith(
         {
-          index: 'heartbeat-*',
+          index: 'synthetics-*',
           ...mockSearchParams,
         },
         { meta: true }
@@ -72,7 +72,7 @@ describe('UptimeEsClient', () => {
       await expect(uptimeEsClient.search(mockSearchParams)).rejects.toThrow(mockError);
       expect(esClient.search).toHaveBeenCalledWith(
         {
-          index: 'heartbeat-*',
+          index: 'synthetics-*',
           ...mockSearchParams,
         },
         { meta: true }
@@ -90,7 +90,7 @@ describe('UptimeEsClient', () => {
 
       expect(esClient.count).toHaveBeenCalledWith(mockCountParams, { meta: true });
       expect(result).toEqual({
-        indices: 'heartbeat-*',
+        indices: 'synthetics-*',
         result: {
           body: {},
           headers: {

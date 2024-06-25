@@ -11,7 +11,7 @@ import { assertNever } from '@kbn/std';
 import { toDuration } from './duration';
 
 export const INDICATOR_CUSTOM_KQL = i18n.translate('xpack.slo.indicators.customKql', {
-  defaultMessage: 'Custom KQL',
+  defaultMessage: 'Custom Query',
 });
 
 export const INDICATOR_CUSTOM_METRIC = i18n.translate('xpack.slo.indicators.customMetric', {

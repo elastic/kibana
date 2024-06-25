@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { IconType } from '@elastic/eui';
 import type { ObservabilityAIAssistantChatService } from '../public';
 import type { CompatibleJSONSchema, FunctionResponse } from './functions/types';
 
@@ -50,7 +51,7 @@ export interface TokenCount {
 
 export interface Conversation {
   '@timestamp': string;
-  user: {
+  user?: {
     id?: string;
     name: string;
   };
@@ -68,7 +69,7 @@ export interface Conversation {
 }
 
 export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
-  conversation: { title: string; token_count?: TokenCount };
+  conversation: { title: string; token_count?: TokenCount; id?: string };
 };
 
 export type ConversationCreateRequest = ConversationRequestBase;
@@ -86,7 +87,18 @@ export interface KnowledgeBaseEntry {
   public: boolean;
   labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
+  user?: {
+    name: string;
+  };
 }
+
+export interface UserInstruction {
+  doc_id: string;
+  text: string;
+  system?: boolean;
+}
+
+export type UserInstructionOrPlainText = string | UserInstruction;
 
 export interface ObservabilityAIAssistantScreenContextRequest {
   screenDescription?: string;
@@ -98,7 +110,7 @@ export interface ObservabilityAIAssistantScreenContextRequest {
   actions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
 }
 
-export type ScreenContextActionRespondFunction<TArguments extends unknown> = ({}: {
+export type ScreenContextActionRespondFunction<TArguments> = ({}: {
   args: TArguments;
   signal: AbortSignal;
   connectorId: string;
@@ -106,11 +118,17 @@ export type ScreenContextActionRespondFunction<TArguments extends unknown> = ({}
   messages: Message[];
 }) => Promise<FunctionResponse>;
 
-export interface ScreenContextActionDefinition<TArguments = undefined> {
+export interface ScreenContextActionDefinition<TArguments = any> {
   name: string;
   description: string;
   parameters?: CompatibleJSONSchema;
   respond: ScreenContextActionRespondFunction<TArguments>;
+}
+
+export interface StarterPrompt {
+  title: string;
+  prompt: string;
+  icon: IconType;
 }
 
 export interface ObservabilityAIAssistantScreenContext {
@@ -120,5 +138,6 @@ export interface ObservabilityAIAssistantScreenContext {
     description: string;
     value: any;
   }>;
-  actions?: ScreenContextActionDefinition[];
+  actions?: Array<ScreenContextActionDefinition<any>>;
+  starterPrompts?: StarterPrompt[];
 }

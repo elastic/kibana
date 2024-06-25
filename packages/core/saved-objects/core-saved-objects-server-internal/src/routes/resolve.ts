@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { RouteAccess } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -17,16 +18,21 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
 }
 
 export const registerResolveRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.get(
     {
       path: '/resolve/{type}/{id}',
+      options: {
+        access,
+        description: `Resolve a saved object`,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -34,25 +40,25 @@ export const registerResolveRoute = (
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
+    router.handleLegacyErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'get',
         path: '/api/saved_objects/resolve/{type}/{id}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
+      const { type, id } = request.params;
       const { savedObjects } = await context.core;
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsResolve({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsResolve({ request, types: [type] }).catch(() => {});
       if (!allowHttpApiAccess) {
         throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
       }
       const result = await savedObjects.client.resolve(type, id, {
         migrationVersionCompatibility: 'compatible',
       });
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

@@ -9,21 +9,18 @@ import { queue } from 'async';
 
 import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
-
 import {
-  addSignificantItemsAction,
-  updateLoadingStateAction,
-} from '../../../../common/api/log_rate_analysis/actions';
-
-import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
-
-import { fetchSignificantCategories } from '../queries/fetch_significant_categories';
-import { fetchSignificantTermPValues } from '../queries/fetch_significant_term_p_values';
-
+  addSignificantItems,
+  updateLoadingState,
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
+import { fetchSignificantCategories } from '@kbn/aiops-log-rate-analysis/queries/fetch_significant_categories';
+import { fetchSignificantTermPValues } from '@kbn/aiops-log-rate-analysis/queries/fetch_significant_term_p_values';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import {
   LOADED_FIELD_CANDIDATES,
@@ -31,6 +28,20 @@ import {
   PROGRESS_STEP_P_VALUES,
 } from '../response_stream_utils/constants';
 import type { ResponseStreamFetchOptions } from '../response_stream_factory';
+
+interface FieldCandidate {
+  fieldCandidate: string;
+}
+const isFieldCandidate = (d: unknown): d is FieldCandidate =>
+  isPopulatedObject(d, ['fieldCandidate']);
+
+interface TextFieldCandidate {
+  textFieldCandidate: string;
+}
+const isTextFieldCandidate = (d: unknown): d is FieldCandidate =>
+  isPopulatedObject(d, ['textFieldCandidate']);
+
+type Candidate = FieldCandidate | TextFieldCandidate;
 
 export const significantItemsHandlerFactory =
   <T extends ApiVersion>({
@@ -41,7 +52,6 @@ export const significantItemsHandlerFactory =
     requestBody,
     responseStream,
     stateHandler,
-    version,
   }: ResponseStreamFetchOptions<T>) =>
   async ({
     fieldCandidates,
@@ -51,64 +61,26 @@ export const significantItemsHandlerFactory =
     textFieldCandidates: string[];
   }) => {
     let fieldCandidatesCount = fieldCandidates.length;
+    const textFieldCandidatesCount = textFieldCandidates.length;
 
     // This will store the combined count of detected significant log patterns and keywords
     let fieldValuePairsCount = 0;
 
     const significantCategories: SignificantItem[] = [];
 
-    if (version === '1') {
-      significantCategories.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'1'>).overrides?.significantTerms?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
-        ) ?? [])
-      );
-    }
-
-    if (version === '2') {
-      significantCategories.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
-        ) ?? [])
-      );
-    }
-
-    // Get significant categories of text fields
-    if (textFieldCandidates.length > 0) {
-      significantCategories.push(
-        ...(await fetchSignificantCategories(
-          client,
-          requestBody,
-          textFieldCandidates,
-          logger,
-          stateHandler.sampleProbability(),
-          responseStream.pushError,
-          abortSignal
-        ))
-      );
-
-      if (significantCategories.length > 0) {
-        responseStream.push(addSignificantItemsAction(significantCategories, version));
-      }
-    }
+    significantCategories.push(
+      ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
+        (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
+      ) ?? [])
+    );
 
     const significantTerms: SignificantItem[] = [];
 
-    if (version === '1') {
-      significantTerms.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'1'>).overrides?.significantTerms?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
-        ) ?? [])
-      );
-    }
-
-    if (version === '2') {
-      significantTerms.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
-        ) ?? [])
-      );
-    }
+    significantTerms.push(
+      ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
+        (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
+      ) ?? [])
+    );
 
     const fieldsToSample = new Set<string>();
 
@@ -129,42 +101,70 @@ export const significantItemsHandlerFactory =
 
     logDebugMessage('Fetch p-values.');
 
-    const pValuesQueue = queue(async function (fieldCandidate: string) {
-      stateHandler.loaded((1 / fieldCandidatesCount) * loadingStepSizePValues, false);
+    const loadingStep =
+      (1 / (fieldCandidatesCount + textFieldCandidatesCount)) * loadingStepSizePValues;
 
-      let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
+    const pValuesQueue = queue(async function (payload: Candidate) {
+      if (isFieldCandidate(payload)) {
+        const { fieldCandidate } = payload;
+        let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
-      try {
-        pValues = await fetchSignificantTermPValues(
+        try {
+          pValues = await fetchSignificantTermPValues(
+            client,
+            requestBody,
+            [fieldCandidate],
+            logger,
+            stateHandler.sampleProbability(),
+            responseStream.pushError,
+            abortSignal
+          );
+        } catch (e) {
+          if (!isRequestAbortedError(e)) {
+            logger.error(
+              `Failed to fetch p-values for '${fieldCandidate}', got: \n${e.toString()}`
+            );
+            responseStream.pushError(`Failed to fetch p-values for '${fieldCandidate}'.`);
+          }
+          return;
+        }
+
+        remainingFieldCandidates = remainingFieldCandidates.filter((d) => d !== fieldCandidate);
+
+        if (pValues.length > 0) {
+          pValues.forEach((d) => {
+            fieldsToSample.add(d.fieldName);
+          });
+          significantTerms.push(...pValues);
+
+          responseStream.push(addSignificantItems(pValues));
+
+          fieldValuePairsCount += pValues.length;
+        }
+      } else if (isTextFieldCandidate(payload)) {
+        const { textFieldCandidate } = payload;
+
+        const significantCategoriesForField = await fetchSignificantCategories(
           client,
           requestBody,
-          [fieldCandidate],
+          [textFieldCandidate],
           logger,
           stateHandler.sampleProbability(),
           responseStream.pushError,
           abortSignal
         );
-      } catch (e) {
-        if (!isRequestAbortedError(e)) {
-          logger.error(`Failed to fetch p-values for '${fieldCandidate}', got: \n${e.toString()}`);
-          responseStream.pushError(`Failed to fetch p-values for '${fieldCandidate}'.`);
+
+        if (significantCategoriesForField.length > 0) {
+          significantCategories.push(...significantCategoriesForField);
+          responseStream.push(addSignificantItems(significantCategoriesForField));
+          fieldValuePairsCount += significantCategoriesForField.length;
         }
-        return;
       }
 
-      remainingFieldCandidates = remainingFieldCandidates.filter((d) => d !== fieldCandidate);
-
-      if (pValues.length > 0) {
-        pValues.forEach((d) => {
-          fieldsToSample.add(d.fieldName);
-        });
-        significantTerms.push(...pValues);
-
-        responseStream.push(addSignificantItemsAction(pValues, version));
-      }
+      stateHandler.loaded(loadingStep, false);
 
       responseStream.push(
-        updateLoadingStateAction({
+        updateLoadingState({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
           loadingState: i18n.translate(
@@ -182,18 +182,24 @@ export const significantItemsHandlerFactory =
       );
     }, MAX_CONCURRENT_QUERIES);
 
-    pValuesQueue.push(fieldCandidates, (err) => {
-      if (err) {
-        logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
-        responseStream.pushError(`Failed to fetch p-values.`);
-        pValuesQueue.kill();
-        responseStream.end();
-      } else if (stateHandler.shouldStop()) {
-        logDebugMessage('shouldStop fetching p-values.');
-        pValuesQueue.kill();
-        responseStream.end();
+    pValuesQueue.push(
+      [
+        ...textFieldCandidates.map((d) => ({ textFieldCandidate: d })),
+        ...fieldCandidates.map((d) => ({ fieldCandidate: d })),
+      ],
+      (err) => {
+        if (err) {
+          logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
+          responseStream.pushError(`Failed to fetch p-values.`);
+          pValuesQueue.kill();
+          responseStream.end();
+        } else if (stateHandler.shouldStop()) {
+          logDebugMessage('shouldStop fetching p-values.');
+          pValuesQueue.kill();
+          responseStream.end();
+        }
       }
-    });
+    );
     await pValuesQueue.drain();
 
     fieldValuePairsCount = significantCategories.length + significantTerms.length;

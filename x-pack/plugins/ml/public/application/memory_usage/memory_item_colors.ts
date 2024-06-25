@@ -9,7 +9,7 @@ import {
   euiPaletteComplementary,
   euiPaletteForTemperature,
   euiPaletteGray,
-  euiPalettePositive,
+  euiPaletteGreen,
   euiPaletteWarm,
 } from '@elastic/eui';
 import type { MlSavedObjectType } from '../../../common/types/saved_objects';
@@ -21,7 +21,7 @@ export function getMemoryItemColor(typeIn: MemoryItem) {
     case 'anomaly-detector':
       return euiPaletteWarm(5)[1];
     case 'data-frame-analytics':
-      return euiPalettePositive(5)[2];
+      return euiPaletteGreen(5)[2];
     case 'trained-model':
       return euiPaletteForTemperature(5)[1];
     case 'estimated-available-memory':

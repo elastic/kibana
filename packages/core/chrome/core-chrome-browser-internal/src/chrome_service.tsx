@@ -9,9 +9,8 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
-import { mergeMap, map, takeUntil } from 'rxjs/operators';
+import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
-import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
@@ -83,13 +82,16 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
-  private readonly projectNavigation = new ProjectNavigationService();
+  private readonly projectNavigation: ProjectNavigationService;
   private mutationObserver: MutationObserver | undefined;
   private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
   private logger: Logger;
+  private isServerless = false;
 
   constructor(private readonly params: ConstructorParams) {
     this.logger = params.coreContext.logger.get('chrome-browser');
+    this.isServerless = params.coreContext.env.packageInfo.buildFlavor === 'serverless';
+    this.projectNavigation = new ProjectNavigationService(this.isServerless);
   }
 
   /**
@@ -199,7 +201,10 @@ export class ChromeService {
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
-    const chromeStyle$ = new BehaviorSubject<ChromeStyle>('classic');
+    // ChromeStyle is set to undefined by default, which means that no header will be rendered until
+    // setChromeStyle(). This is to avoid a flickering between the "classic" and "project" header meanwhile
+    // we load the user profile to check if the user opted out of the new solution navigation.
+    const chromeStyleSubject$ = new BehaviorSubject<ChromeStyle | undefined>(undefined);
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -211,16 +216,20 @@ export class ChromeService {
       return `kbnVersion-${formattedVersionClass}`;
     };
 
+    const chromeStyle$ = chromeStyleSubject$.pipe(
+      filter((style): style is ChromeStyle => style !== undefined),
+      takeUntil(this.stop$)
+    );
     const setChromeStyle = (style: ChromeStyle) => {
-      if (style === chromeStyle$.getValue()) return;
-      chromeStyle$.next(style);
+      if (style === chromeStyleSubject$.getValue()) return;
+      chromeStyleSubject$.next(style);
     };
 
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
     const bodyClasses$ = combineLatest([
       headerBanner$,
       this.isVisible$!,
-      chromeStyle$,
+      chromeStyleSubject$,
       application.currentActionMenu$,
     ]).pipe(
       map(([headerBanner, isVisible, chromeStyle, actionMenu]) => {
@@ -242,7 +251,6 @@ export class ChromeService {
       http,
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
-      setChromeStyle,
     });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();
@@ -265,7 +273,7 @@ export class ChromeService {
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
     const validateChromeStyle = () => {
-      const chromeStyle = chromeStyle$.getValue();
+      const chromeStyle = chromeStyleSubject$.getValue();
       if (chromeStyle !== 'project') {
         // Helps ensure callers go through the serverless plugin to get here.
         throw new Error(
@@ -283,9 +291,9 @@ export class ChromeService {
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
       ChildrenId extends string = Id
-    >(navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
+    >(id: string, navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
       validateChromeStyle();
-      projectNavigation.initNavigation(navigationTree$);
+      projectNavigation.initNavigation(id, navigationTree$);
     }
 
     const setProjectBreadcrumbs = (
@@ -305,14 +313,6 @@ export class ChromeService {
       projectNavigation.setProjectName(projectName);
     };
 
-    const isIE = () => {
-      const ua = window.navigator.userAgent;
-      const msie = ua.indexOf('MSIE '); // IE 10 or older
-      const trident = ua.indexOf('Trident/'); // IE 11
-
-      return msie > 0 || trident > 0;
-    };
-
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning({
         title: mountReactNode(
@@ -324,29 +324,8 @@ export class ChromeService {
       });
     }
 
-    if (isIE()) {
-      notifications.toasts.addWarning({
-        title: mountReactNode(
-          <FormattedMessage
-            id="core.chrome.browserDeprecationWarning"
-            defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
-            values={{
-              link: (
-                <EuiLink target="_blank" href="https://www.elastic.co/support/matrix" external>
-                  <FormattedMessage
-                    id="core.chrome.browserDeprecationLink"
-                    defaultMessage="the support matrix on our website"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        ),
-      });
-    }
-
     const getHeaderComponent = () => {
-      const defaultChromeStyle = chromeStyle$.getValue();
+      const defaultChromeStyle = chromeStyleSubject$.getValue();
 
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
@@ -360,6 +339,8 @@ export class ChromeService {
             </div>
           );
         }
+
+        if (chromeStyle === undefined) return null;
 
         // render header
         if (chromeStyle === 'project') {
@@ -390,6 +371,7 @@ export class ChromeService {
                 globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                 actionMenu$={application.currentActionMenu$}
                 breadcrumbs$={currentProjectBreadcrumbs$}
+                customBranding$={customBranding$}
                 helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
                 helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
                 helpMenuLinks$={helpMenuLinks$}
@@ -526,8 +508,9 @@ export class ChromeService {
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
-      getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
+      getChromeStyle$: () => chromeStyle$,
       getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
+      getActiveSolutionNavId$: () => projectNavigation.getActiveSolutionNavId$(),
       project: {
         setHome: setProjectHome,
         setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),

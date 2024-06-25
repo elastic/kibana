@@ -24,7 +24,7 @@ export { HTTPAuthorizationHeader } from './authentication';
 export type { CasesSupportedOperations } from './authorization';
 export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common';
-export { ROUTE_TAG_CAN_REDIRECT } from './routes/tags';
+export { ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW } from './routes/tags';
 
 // Re-export types from the plugin directly to enhance the developer experience for consumers of the Security plugin.
 export type {

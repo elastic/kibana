@@ -25,11 +25,7 @@ export function FieldMappingStatus() {
   const isOk = getIsIndicesTabOk(diagnosticsBundle);
 
   return (
-    <TabStatus
-      isLoading={isLoading}
-      isOk={isOk}
-      data-test-subj="fieldMappingStatus"
-    >
+    <TabStatus isLoading={isLoading} isOk={isOk} data-test-subj="fieldMappingStatus">
       Indices
       <EuiLink
         data-test-subj="apmFieldMappingStatusSeeDetailsLink"

@@ -130,7 +130,7 @@ export const FieldTypesHelpPopover: FC<{
             compressed={true}
             rowHeader="firstName"
             columns={columnsSidebar}
-            responsive={false}
+            responsiveBreakpoint={false}
           />
         </EuiPanel>
         <EuiPanel color="transparent" paddingSize="s">

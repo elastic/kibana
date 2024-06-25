@@ -1,0 +1,16 @@
+---
+name: heartbeat
+fields:
+  base:
+    fields: "*"
+  log:
+    fields:
+      level: {}
+      logger: {}
+  event:
+    fields:
+      action: {}
+      outcome: {}
+      type: {}
+      url: {}
+      duration: {}

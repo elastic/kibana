@@ -9,6 +9,8 @@ import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import semverIsValid from 'semver/functions/valid';
 
+import { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
+
 import { SO_SEARCH_LIMIT, AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
 
 import { NewAgentActionSchema } from '../models';
@@ -163,12 +165,22 @@ export const PostRequestDiagnosticsActionRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
+  body: schema.nullable(
+    schema.object({
+      additional_metrics: schema.maybe(
+        schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
+      ),
+    })
+  ),
 };
 
 export const PostBulkRequestDiagnosticsActionRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     batchSize: schema.maybe(schema.number()),
+    additional_metrics: schema.maybe(
+      schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
+    ),
   }),
 };
 
@@ -182,6 +194,12 @@ export const GetAgentUploadFileRequestSchema = {
   params: schema.object({
     fileId: schema.string(),
     fileName: schema.string(),
+  }),
+};
+
+export const DeleteAgentUploadFileRequestSchema = {
+  params: schema.object({
+    fileId: schema.string(),
   }),
 };
 
@@ -247,6 +265,16 @@ export const GetActionStatusRequestSchema = {
   query: schema.object({
     page: schema.number({ defaultValue: 0 }),
     perPage: schema.number({ defaultValue: 20 }),
+    date: schema.maybe(
+      schema.string({
+        validate: (v: string) => {
+          if (!moment(v).isValid()) {
+            return 'not a valid date';
+          }
+        },
+      })
+    ),
+    latest: schema.maybe(schema.number()),
     errorSize: schema.number({ defaultValue: 5 }),
   }),
 };

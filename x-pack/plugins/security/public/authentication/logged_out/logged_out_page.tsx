@@ -10,16 +10,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 
-import type {
-  AppMountParameters,
-  CoreStart,
-  CustomBrandingStart,
-  IBasePath,
-} from '@kbn/core/public';
+import type { AppMountParameters, CustomBrandingStart, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { parseNextURL } from '@kbn/std';
 
-import { parseNext } from '../../../common/parse_next';
+import type { StartServices } from '../..';
 import { AuthenticationStatePage } from '../components';
 
 interface Props {
@@ -39,7 +35,7 @@ export function LoggedOutPage({ basePath, customBranding }: Props) {
       }
       logo={customBrandingValue?.logo}
     >
-      <EuiButton href={parseNext(window.location.href, basePath.serverBasePath)}>
+      <EuiButton href={parseNextURL(window.location.href, basePath.serverBasePath)}>
         <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Log in" />
       </EuiButton>
     </AuthenticationStatePage>
@@ -47,16 +43,14 @@ export function LoggedOutPage({ basePath, customBranding }: Props) {
 }
 
 export function renderLoggedOutPage(
-  i18nStart: CoreStart['i18n'],
-  { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
+  services: StartServices,
+  { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
   ReactDOM.render(
-    <i18nStart.Context>
-      <KibanaThemeProvider theme$={theme$}>
-        <LoggedOutPage {...props} />
-      </KibanaThemeProvider>
-    </i18nStart.Context>,
+    <KibanaRenderContextProvider {...services}>
+      <LoggedOutPage {...props} />
+    </KibanaRenderContextProvider>,
     element
   );
 

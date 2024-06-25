@@ -8,22 +8,14 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useLoadingState } from './use_loading_state';
 import { useDatePickerContext, type UseDateRangeProviderProps } from './use_date_picker';
-import { BehaviorSubject, EMPTY, of, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, of, Subject, Subscription, skip } from 'rxjs';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { skip } from 'rxjs/operators';
 
 jest.mock('./use_date_picker');
 jest.mock('../../../hooks/use_kibana');
-jest.mock('rxjs', () => {
-  const rxjs = jest.requireActual('rxjs');
-  return {
-    ...jest.requireActual('rxjs'),
-    debounceTime: rxjs.tap,
-  };
-});
 jest.mock('@kbn/data-plugin/public', () => ({
   ...jest.requireActual('@kbn/data-plugin/public'),
   waitUntilNextSessionCompletes$: jest.fn(),

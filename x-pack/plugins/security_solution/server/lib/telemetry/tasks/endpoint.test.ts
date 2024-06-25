@@ -49,7 +49,7 @@ describe('endpoint telemetry task test', () => {
     );
 
     expect(mockTelemetryReceiver.fetchFleetAgents).toHaveBeenCalled();
-    expect(mockTelemetryReceiver.fetchEndpointMetrics).toHaveBeenCalledWith(
+    expect(mockTelemetryReceiver.fetchEndpointMetricsAbstract).toHaveBeenCalledWith(
       testTaskExecutionPeriod.last,
       testTaskExecutionPeriod.current
     );

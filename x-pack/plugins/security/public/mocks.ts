@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 
-import { authenticationMock } from './authentication/index.mock';
+import { authenticationMock, authorizationMock } from './authentication/index.mock';
 import { navControlServiceMock } from './nav_control/index.mock';
 import { getUiApiMock } from './ui_api/index.mock';
 import { licenseMock } from '../common/licensing/index.mock';
@@ -17,19 +17,24 @@ import { mockAuthenticatedUser } from '../common/model/authenticated_user.mock';
 function createSetupMock() {
   return {
     authc: authenticationMock.createSetup(),
+    authz: authorizationMock.createStart(),
     license: licenseMock.create(),
   };
 }
 function createStartMock() {
   return {
     authc: authenticationMock.createStart(),
+    authz: authorizationMock.createStart(),
     navControlService: navControlServiceMock.createStart(),
     userProfiles: {
       getCurrent: jest.fn(),
       bulkGet: jest.fn(),
       suggest: jest.fn(),
       update: jest.fn(),
+      partialUpdate: jest.fn(),
       userProfile$: of({}),
+      userProfileLoaded$: of(true),
+      enabled$: of(true),
     },
     uiApi: getUiApiMock.createStart(),
   };

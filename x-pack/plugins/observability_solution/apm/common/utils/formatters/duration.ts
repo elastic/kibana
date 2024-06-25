@@ -26,10 +26,7 @@ interface ConvertedDuration {
   formatted: string;
 }
 
-export type TimeFormatter = (
-  value: Maybe<number>,
-  options?: FormatterOptions
-) => ConvertedDuration;
+export type TimeFormatter = (value: Maybe<number>, options?: FormatterOptions) => ConvertedDuration;
 
 type TimeFormatterBuilder = (
   max: number,
@@ -51,10 +48,7 @@ function getUnitLabelAndConvertedValue(
         unitLabel: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
           defaultMessage: 'h',
         }),
-        convertedValue: asDecimalOrInteger(
-          moment.duration(ms).asHours(),
-          threshold
-        ),
+        convertedValue: asDecimalOrInteger(moment.duration(ms).asHours(), threshold),
       };
     }
     case 'minutes': {
@@ -62,10 +56,7 @@ function getUnitLabelAndConvertedValue(
         unitLabel: i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
           defaultMessage: 'min',
         }),
-        convertedValue: asDecimalOrInteger(
-          moment.duration(ms).asMinutes(),
-          threshold
-        ),
+        convertedValue: asDecimalOrInteger(moment.duration(ms).asMinutes(), threshold),
       };
     }
     case 'seconds': {
@@ -73,10 +64,7 @@ function getUnitLabelAndConvertedValue(
         unitLabel: i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
           defaultMessage: 's',
         }),
-        convertedValue: asDecimalOrInteger(
-          moment.duration(ms).asSeconds(),
-          threshold
-        ),
+        convertedValue: asDecimalOrInteger(moment.duration(ms).asSeconds(), threshold),
       };
     }
     case 'milliseconds': {
@@ -84,10 +72,7 @@ function getUnitLabelAndConvertedValue(
         unitLabel: i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
           defaultMessage: 'ms',
         }),
-        convertedValue: asDecimalOrInteger(
-          moment.duration(ms).asMilliseconds(),
-          threshold
-        ),
+        convertedValue: asDecimalOrInteger(moment.duration(ms).asMilliseconds(), threshold),
       };
     }
     case 'microseconds': {

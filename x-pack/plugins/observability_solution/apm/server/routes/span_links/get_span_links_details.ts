@@ -152,46 +152,47 @@ export async function getSpanLinksDetails({
   const linkedSpans = chunkedResponses.flat();
 
   // Creates a map for all span links details found
-  const spanLinksDetailsMap = linkedSpans.reduce<
-    Record<string, SpanLinkDetails>
-  >((acc, { _source: source }) => {
-    const commonDetails = {
-      serviceName: source.service.name,
-      agentName: source.agent.name,
-      environment: source.service.environment as Environment,
-      transactionId: source.transaction?.id,
-    };
-
-    if (source.processor.event === ProcessorEvent.transaction) {
-      const transaction = source as TransactionRaw;
-      const key = `${transaction.trace.id}:${transaction.transaction.id}`;
-      acc[key] = {
-        traceId: source.trace.id,
-        spanId: transaction.transaction.id,
-        details: {
-          ...commonDetails,
-          spanName: transaction.transaction.name,
-          duration: transaction.transaction.duration.us,
-        },
+  const spanLinksDetailsMap = linkedSpans.reduce<Record<string, SpanLinkDetails>>(
+    (acc, { _source: source }) => {
+      const commonDetails = {
+        serviceName: source.service.name,
+        agentName: source.agent.name,
+        environment: source.service.environment as Environment,
+        transactionId: source.transaction?.id,
       };
-    } else {
-      const span = source as SpanRaw;
-      const key = `${span.trace.id}:${span.span.id}`;
-      acc[key] = {
-        traceId: source.trace.id,
-        spanId: span.span.id,
-        details: {
-          ...commonDetails,
-          spanName: span.span.name,
-          duration: span.span.duration.us,
-          spanSubtype: span.span.subtype,
-          spanType: span.span.type,
-        },
-      };
-    }
 
-    return acc;
-  }, {});
+      if (source.processor.event === ProcessorEvent.transaction) {
+        const transaction = source as TransactionRaw;
+        const key = `${transaction.trace.id}:${transaction.transaction.id}`;
+        acc[key] = {
+          traceId: source.trace.id,
+          spanId: transaction.transaction.id,
+          details: {
+            ...commonDetails,
+            spanName: transaction.transaction.name,
+            duration: transaction.transaction.duration.us,
+          },
+        };
+      } else {
+        const span = source as SpanRaw;
+        const key = `${span.trace.id}:${span.span.id}`;
+        acc[key] = {
+          traceId: source.trace.id,
+          spanId: span.span.id,
+          details: {
+            ...commonDetails,
+            spanName: span.span.name,
+            duration: span.span.duration.us,
+            spanSubtype: span.span.subtype,
+            spanType: span.span.type,
+          },
+        };
+      }
+
+      return acc;
+    },
+    {}
+  );
 
   // It's important to keep the original order of the span links,
   // so loops trough the original list merging external links and links with details.
@@ -205,9 +206,7 @@ export async function getSpanLinksDetails({
       }
 
       // When kuery is not set, returns external links, if not hides this item.
-      return isEmpty(kuery)
-        ? { traceId: item.trace.id, spanId: item.span.id }
-        : undefined;
+      return isEmpty(kuery) ? { traceId: item.trace.id, spanId: item.span.id } : undefined;
     })
   );
 }

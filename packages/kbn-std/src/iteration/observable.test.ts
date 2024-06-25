@@ -7,7 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs';
 
 import { map$, mapWithLimit$ } from './observable';
 import { list, sleep, generator } from './test_helpers';

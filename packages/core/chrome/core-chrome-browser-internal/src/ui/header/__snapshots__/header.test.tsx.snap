@@ -21,7 +21,7 @@ Array [
     </div>
   </div>,
   <button
-    class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
+    class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly-showOnFocus"
     tabindex="0"
     type="button"
   >
@@ -194,7 +194,7 @@ Array [
             >
               <span
                 aria-current="page"
-                class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncatedLast-onlyChild-euiTextColor-default"
+                class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-onlyChild-isTruncatedLast"
                 data-test-subj="breadcrumb first last"
                 title="test"
               >

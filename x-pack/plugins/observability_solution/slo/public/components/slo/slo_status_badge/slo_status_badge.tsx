@@ -33,25 +33,31 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
           </EuiToolTip>
         )}
         {slo.summary.status === 'HEALTHY' && (
-          <EuiBadge color="success">
-            {i18n.translate('xpack.slo.sloStatusBadge.healthy', {
-              defaultMessage: 'Healthy',
-            })}
-          </EuiBadge>
+          <div>
+            <EuiBadge color="success">
+              {i18n.translate('xpack.slo.sloStatusBadge.healthy', {
+                defaultMessage: 'Healthy',
+              })}
+            </EuiBadge>
+          </div>
         )}
         {slo.summary.status === 'DEGRADING' && (
-          <EuiBadge color="warning">
-            {i18n.translate('xpack.slo.sloStatusBadge.degrading', {
-              defaultMessage: 'Degrading',
-            })}
-          </EuiBadge>
+          <div>
+            <EuiBadge color="warning">
+              {i18n.translate('xpack.slo.sloStatusBadge.degrading', {
+                defaultMessage: 'Degrading',
+              })}
+            </EuiBadge>
+          </div>
         )}
         {slo.summary.status === 'VIOLATED' && (
-          <EuiBadge color="danger">
-            {i18n.translate('xpack.slo.sloStatusBadge.violated', {
-              defaultMessage: 'Violated',
-            })}
-          </EuiBadge>
+          <div>
+            <EuiBadge color="danger">
+              {i18n.translate('xpack.slo.sloStatusBadge.violated', {
+                defaultMessage: 'Violated',
+              })}
+            </EuiBadge>
+          </div>
         )}
       </EuiFlexItem>
 

@@ -181,9 +181,14 @@ export const LogEntryFlyout = ({
           }
         >
           <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <LogAIAssistant observabilityAIAssistant={observabilityAIAssistant} doc={logEntry} />
-            </EuiFlexItem>
+            {observabilityAIAssistant && (
+              <EuiFlexItem grow={false}>
+                <LogAIAssistant
+                  observabilityAIAssistant={observabilityAIAssistant}
+                  doc={logEntry}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />
             </EuiFlexItem>
@@ -203,6 +208,9 @@ export const LogEntryFlyout = ({
     </EuiFlyout>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default LogEntryFlyout;
 
 const loadingProgressMessage = i18n.translate('xpack.logsShared.logFlyout.loadingMessage', {
   defaultMessage: 'Searching log entry in shards',

@@ -156,29 +156,12 @@ export const INPUT_ERRORS = {
     ),
   wildcardWithWrongOperatorWarning: (index: number) =>
     i18n.translate('xpack.securitySolution.trustedapps.create.conditionWrongOperatorMsg', {
-      defaultMessage: `[{row}] Using a '*' or a '?' in the value with the 'IS' operator can make the entry ineffective. Change the operator to 'matches' to ensure wildcards run properly.`,
+      defaultMessage: `[{row}] Using a "*" or a "?" in the value with the "is" operator can make the entry ineffective. Change the operator to "matches" to ensure wildcards run properly.`,
       values: { row: index + 1 },
     }),
-};
-
-export const CONFIRM_WARNING_MODAL_LABELS = {
-  title: i18n.translate('xpack.securitySolution.trustedapps.confirmWarningModal.title', {
-    defaultMessage: 'Confirm trusted application',
-  }),
-  body: i18n.translate('xpack.securitySolution.trustedapps.confirmWarningModal.body', {
-    defaultMessage:
-      'Using a "*" or a "?" in the value and with the "IS" operator can make the entry ineffective. Change the operator to ‘matches’ to ensure wildcards run properly. Select “cancel” to revise your entry, or "add" to continue with entry in its current state.',
-  }),
-  confirmButton: i18n.translate(
-    'xpack.securitySolution.trustedapps.confirmWarningModal.confirmButtonText',
-    {
-      defaultMessage: 'Add',
-    }
-  ),
-  cancelButton: i18n.translate(
-    'xpack.securitySolution.trustedapps.confirmWarningModal.cancelButtonText',
-    {
-      defaultMessage: 'Cancel',
-    }
-  ),
+  wildcardWithWrongField: (index: number) =>
+    i18n.translate('xpack.securitySolution.trustedapps.create.conditionWrongFieldMsg', {
+      defaultMessage: `[{row}] Wildcards (? or *) are not supported for hash or signature entries.`,
+      values: { row: index + 1 },
+    }),
 };

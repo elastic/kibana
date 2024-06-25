@@ -7,25 +7,28 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { CRAWLER_SERVICE_TYPE } from '@kbn/search-connectors';
 
-import { CONNECTORS } from '../search_index/connector/constants';
+import { KibanaLogic } from '../../../shared/kibana';
 
 export interface ConnectorTypeProps {
   serviceType: string;
 }
 
 export const ConnectorType: React.FC<ConnectorTypeProps> = ({ serviceType }) => {
-  const connector = CONNECTORS.find((c) => c.serviceType === serviceType);
+  const { connectorTypes } = useValues(KibanaLogic);
+  const connector = connectorTypes.find((c) => c.serviceType === serviceType);
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      {connector && connector.icon && (
+      {connector && connector.iconPath && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={connector.icon} size="m" />
+          <EuiIcon type={connector.iconPath} size="m" />
         </EuiFlexItem>
       )}
       <EuiFlexItem>

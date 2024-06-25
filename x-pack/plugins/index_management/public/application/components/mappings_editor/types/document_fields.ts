@@ -7,10 +7,12 @@
 
 import { ReactNode } from 'react';
 
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { ModelConfig } from '@kbn/inference_integration_flyout';
 import { GenericObject } from './mappings_editor';
 
-import { FieldConfig, RuntimeField } from '../shared_imports';
 import { PARAMETERS_DEFINITION } from '../constants';
+import { FieldConfig, RuntimeField } from '../shared_imports';
 
 export interface DataTypeDefinition {
   label: string;
@@ -59,6 +61,7 @@ export type MainType =
   | 'shape'
   | 'search_as_you_type'
   | 'sparse_vector'
+  | 'semantic_text'
   | 'date'
   | 'date_nanos'
   | 'geo_point'
@@ -87,7 +90,8 @@ export type NumericType =
   | 'double'
   | 'float'
   | 'half_float'
-  | 'scaled_float';
+  | 'scaled_float'
+  | 'unsigned_long';
 
 export type RangeType =
   | 'integer_range'
@@ -154,13 +158,16 @@ export type ParameterName =
   | 'points_only'
   | 'path'
   | 'dims'
+  | 'inference_id'
+  | 'reference_field'
   | 'depth_limit'
   | 'relations'
   | 'max_shingle_size'
   | 'value'
   | 'meta'
   | 'time_series_metric'
-  | 'time_series_dimension';
+  | 'time_series_dimension'
+  | 'subobjects';
 
 export interface Parameter {
   fieldConfig: FieldConfig;
@@ -179,6 +186,9 @@ interface FieldBasic {
   subType?: SubType;
   properties?: { [key: string]: Omit<Field, 'name'> };
   fields?: { [key: string]: Omit<Field, 'name'> };
+  referenceField?: string;
+  inferenceId?: string;
+  inference_id?: string;
 
   // other* exist together as a holder of types that the mappings editor does not yet know about but
   // enables the user to create mappings with them.
@@ -237,4 +247,17 @@ export interface NormalizedRuntimeField {
 
 export interface NormalizedRuntimeFields {
   [id: string]: NormalizedRuntimeField;
+}
+export enum DefaultInferenceModels {
+  elser_model_2 = 'elser_model_2',
+  e5 = 'e5',
+}
+
+export enum DeploymentState {
+  'DEPLOYED' = 'deployed',
+  'NOT_DEPLOYED' = 'not_deployed',
+}
+export interface CustomInferenceEndpointConfig {
+  taskType: InferenceTaskType;
+  modelConfig: ModelConfig;
 }

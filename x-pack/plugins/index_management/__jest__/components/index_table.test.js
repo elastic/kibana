@@ -75,7 +75,7 @@ const status = (rendered, row = 0) => {
   rendered.update();
   return findTestSubject(rendered, 'indexTableCell-status')
     .at(row)
-    .find('.euiTableCellContent')
+    .find('div.euiTableCellContent')
     .text();
 };
 
@@ -298,7 +298,7 @@ describe('index table', () => {
     await runAllPromises();
     rendered.update();
 
-    const searchInput = rendered.find('.euiFieldSearch').first();
+    const searchInput = rendered.find('input.euiFieldSearch').first();
     searchInput.instance().value = 'testy0';
     searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
     rendered.update();

@@ -5,18 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React, { CSSProperties } from 'react';
-import { Observable } from 'rxjs';
-import { CoreTheme } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { EuiErrorBoundary } from '@elastic/eui';
+import { Observable } from 'rxjs';
+
+import { CoreSetup, CoreTheme } from '@kbn/core/public';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { MetricRendererConfig } from '../../common/types';
 
@@ -49,17 +50,19 @@ export const getMetricRenderer =
       });
 
       render(
-        <EuiErrorBoundary>
-          <KibanaThemeProvider theme$={theme$}>
-            <MetricComponent
-              label={config.label}
-              labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
-              metric={config.metric}
-              metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
-              metricFormat={config.metricFormat}
-            />
-          </KibanaThemeProvider>
-        </EuiErrorBoundary>,
+        <KibanaErrorBoundaryProvider analytics={undefined}>
+          <KibanaErrorBoundary>
+            <KibanaThemeProvider theme={{ theme$ }}>
+              <MetricComponent
+                label={config.label}
+                labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
+                metric={config.metric}
+                metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
+                metricFormat={config.metricFormat}
+              />
+            </KibanaThemeProvider>
+          </KibanaErrorBoundary>
+        </KibanaErrorBoundaryProvider>,
         domNode,
         () => handlers.done()
       );

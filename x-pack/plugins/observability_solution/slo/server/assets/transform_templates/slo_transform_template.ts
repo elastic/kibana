@@ -11,8 +11,11 @@ import {
   TransformPutTransformRequest,
   TransformSource,
   TransformTimeSync,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_RESOURCES_VERSION } from '../../../common/constants';
+import { SLODefinition } from '../../domain/models';
 
 export interface TransformSettings {
   frequency: TransformPutTransformRequest['frequency'];
@@ -27,31 +30,56 @@ export const getSLOTransformTemplate = (
   destination: TransformDestination,
   groupBy: TransformPivot['group_by'] = {},
   aggregations: TransformPivot['aggregations'] = {},
-  settings: TransformSettings
-): TransformPutTransformRequest => ({
-  transform_id: transformId,
-  description,
-  source,
-  frequency: settings.frequency,
-  dest: destination,
-  settings: {
-    deduce_mappings: false,
-    unattended: true,
-  },
-  sync: {
-    time: {
-      field: settings.sync_field,
-      delay: settings.sync_delay,
+  settings: TransformSettings,
+  slo: SLODefinition
+): TransformPutTransformRequest => {
+  const formattedSource = buildSourceWithFilters(source, slo);
+  return {
+    transform_id: transformId,
+    description,
+    source: formattedSource,
+    frequency: settings.frequency,
+    dest: destination,
+    settings: {
+      deduce_mappings: false,
+      unattended: true,
     },
-  },
-  pivot: {
-    group_by: groupBy,
-    aggregations,
-  },
-  defer_validation: true,
-  _meta: {
-    version: SLO_RESOURCES_VERSION,
-    managed: true,
-    managed_by: 'observability',
-  },
-});
+    sync: {
+      time: {
+        field: settings.sync_field,
+        delay: settings.sync_delay,
+      },
+    },
+    pivot: {
+      group_by: groupBy,
+      aggregations,
+    },
+    defer_validation: true,
+    _meta: {
+      version: SLO_RESOURCES_VERSION,
+      managed: true,
+      managed_by: 'observability',
+    },
+  };
+};
+
+const buildGroupingFilters = (slo: SLODefinition): QueryDslQueryContainer[] => {
+  // build exists filters for each groupBy field to make sure the field exists
+  const groups = [slo.groupBy].flat().filter((group) => !!group && group !== ALL_VALUE);
+  return groups.map((group) => ({ exists: { field: group } }));
+};
+
+const buildSourceWithFilters = (source: TransformSource, slo: SLODefinition): TransformSource => {
+  const groupingFilters = buildGroupingFilters(slo);
+  const sourceFilters = [source.query?.bool?.filter].flat() || [];
+  return {
+    ...source,
+    query: {
+      ...source.query,
+      bool: {
+        ...source.query?.bool,
+        filter: [...sourceFilters, ...groupingFilters] as QueryDslQueryContainer[],
+      },
+    },
+  };
+};

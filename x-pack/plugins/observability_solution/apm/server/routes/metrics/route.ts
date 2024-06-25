@@ -41,8 +41,7 @@ const metricsChartsRoute = createApmServerRoute({
     const { params, config } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const { serviceName } = params.path;
-    const { agentName, environment, kuery, serviceNodeName, start, end } =
-      params.query;
+    const { agentName, environment, kuery, serviceNodeName, start, end } = params.query;
 
     const charts = await getMetricsChartDataByAgent({
       environment,
@@ -69,9 +68,7 @@ const serviceMetricsJvm = createApmServerRoute({
     query: t.intersection([kueryRt, rangeRt, environmentRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{ serviceNodes: ServiceNodesResponse }> => {
+  handler: async (resources): Promise<{ serviceNodes: ServiceNodesResponse }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;

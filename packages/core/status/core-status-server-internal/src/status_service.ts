@@ -15,10 +15,10 @@ import {
   tap,
   BehaviorSubject,
 } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay, takeUntil, debounceTime } from 'rxjs/operators';
+import { map, distinctUntilChanged, shareReplay, takeUntil, debounceTime } from 'rxjs';
 import { isDeepStrictEqual } from 'util';
 
-import type { RootSchema } from '@kbn/analytics-client';
+import type { RootSchema } from '@kbn/ebt/client';
 import type { Logger, LogMeta } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginName } from '@kbn/core-base-common';

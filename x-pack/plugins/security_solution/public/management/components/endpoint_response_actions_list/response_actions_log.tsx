@@ -65,6 +65,9 @@ export const ResponseActionsLog = memo<
     const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
       'responseActionsSentinelOneV1Enabled'
     );
+    const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
+      'responseActionsCrowdstrikeManualHostIsolationEnabled'
+    );
 
     // Used to decide if display global loader or not (only the fist time tha page loads)
     const [isFirstAttempt, setIsFirstAttempt] = useState(true);
@@ -86,11 +89,12 @@ export const ResponseActionsLog = memo<
       if (!isFlyout) {
         setQueryParams((prevState) => ({
           ...prevState,
-          agentTypes: isSentinelOneV1Enabled
-            ? agentTypesFromUrl?.length
-              ? agentTypesFromUrl
-              : prevState.agentTypes
-            : [],
+          agentTypes:
+            isSentinelOneV1Enabled || isCrowdstrikeEnabled
+              ? agentTypesFromUrl?.length
+                ? agentTypesFromUrl
+                : prevState.agentTypes
+              : [],
           commands: commandsFromUrl?.length
             ? commandsFromUrl.map(
                 (commandFromUrl) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[commandFromUrl]
@@ -113,6 +117,7 @@ export const ResponseActionsLog = memo<
       commandsFromUrl,
       agentIdsFromUrl,
       isFlyout,
+      isCrowdstrikeEnabled,
       isSentinelOneV1Enabled,
       statusesFromUrl,
       setQueryParams,

@@ -43,11 +43,7 @@ export interface Step {
   title?: string;
 }
 
-export function createWizardContext<
-  T,
-  StepKey extends string,
-  InitialStepKey extends StepKey
->({
+export function createWizardContext<T, StepKey extends string, InitialStepKey extends StepKey>({
   initialState,
   initialStep,
   steps,
@@ -89,13 +85,7 @@ export function createWizardContext<
     };
   }, {});
 
-  function Page({
-    step,
-    Component,
-  }: {
-    step: StepKey;
-    Component: ComponentType;
-  }) {
+  function Page({ step, Component }: { step: StepKey; Component: ComponentType }) {
     const { setCurrentStep } = useWizard();
     useEffect(() => {
       setCurrentStep(step);
@@ -174,11 +164,7 @@ export function createWizardContext<
             }
           },
           goBack() {
-            if (
-              history.length === 1 ||
-              pathRef.current.length === 1 ||
-              !transitionDuration
-            ) {
+            if (history.length === 1 || pathRef.current.length === 1 || !transitionDuration) {
               history.goBack();
             }
 

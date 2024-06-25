@@ -11,7 +11,6 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   ActionConnector,
   ActionType,
-  RuleAction,
   GenericValidationResult,
   ActionConnectorMode,
   ActionVariables,
@@ -19,11 +18,16 @@ import {
 } from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
-import { RuleNotifyWhen, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import {
+  RuleNotifyWhen,
+  RuleNotifyWhenType,
+  SanitizedRuleAction,
+} from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
@@ -410,19 +414,21 @@ describe('action_type_form', () => {
       frequency: DEFAULT_FREQUENCY,
     };
     const wrapper = render(
-      <IntlProvider locale="en">
-        {getActionTypeForm({
-          index: 1,
-          actionItem,
-          setActionFrequencyProperty: () => {
-            actionItem.frequency = {
-              notifyWhen: RuleNotifyWhen.ACTIVE,
-              throttle: null,
-              summary: true,
-            };
-          },
-        })}
-      </IntlProvider>
+      <EuiThemeProvider>
+        <IntlProvider locale="en">
+          {getActionTypeForm({
+            index: 1,
+            actionItem,
+            setActionFrequencyProperty: () => {
+              actionItem.frequency = {
+                notifyWhen: RuleNotifyWhen.ACTIVE,
+                throttle: null,
+                summary: true,
+              };
+            },
+          })}
+        </IntlProvider>
+      </EuiThemeProvider>
     );
 
     const summaryOrPerRuleSelect = wrapper.getByTestId('summaryOrPerRuleSelect');
@@ -654,7 +660,7 @@ function getActionTypeForm({
 }: {
   index?: number;
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>;
-  actionItem?: RuleAction;
+  actionItem?: SanitizedRuleAction;
   defaultActionGroupId?: string;
   connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>;
   actionTypeIndex?: Record<string, ActionType>;
@@ -686,7 +692,7 @@ function getActionTypeForm({
     secrets: {},
   };
 
-  const actionItemDefault: RuleAction = {
+  const actionItemDefault = {
     id: '123',
     actionTypeId: '.pagerduty',
     group: 'trigger',

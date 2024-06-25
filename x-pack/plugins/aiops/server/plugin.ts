@@ -16,7 +16,7 @@ import type {
 } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { PLUGIN_ID } from '../common';
+import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import { isActiveLicense } from './lib/license';
 import type {
   AiopsLicense,
@@ -45,7 +45,7 @@ export class AiopsPlugin
     plugins: AiopsPluginSetupDeps
   ) {
     this.logger.debug('aiops: Setup');
-    this.usageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(AIOPS_PLUGIN_ID);
 
     // Subscribe to license changes and store the current license in `currentLicense`.
     // This way we can pass on license changes to the route factory having always
@@ -62,7 +62,7 @@ export class AiopsPlugin
     const router = core.http.createRouter<DataRequestHandlerContext>();
 
     // Register server side APIs
-    core.getStartServices().then(([coreStart, depsStart]) => {
+    void core.getStartServices().then(([coreStart, depsStart]) => {
       defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart, this.usageCounter);
       defineCategorizationFieldValidationRoute(router, aiopsLicense, this.usageCounter);
     });

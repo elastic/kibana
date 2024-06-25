@@ -80,7 +80,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={true}>
-          <EuiTitle size="xxs">
+          <EuiTitle size="xxs" data-test-subj="fieldPopoverHeader_fieldDisplayName">
             <h5 className="eui-textBreakWord">{field.displayName}</h5>
           </EuiTitle>
         </EuiFlexItem>

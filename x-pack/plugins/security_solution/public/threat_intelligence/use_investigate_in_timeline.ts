@@ -16,7 +16,7 @@ import { useStartTransaction } from '../common/lib/apm/use_start_transaction';
 import { timelineActions } from '../timelines/store';
 import { useCreateTimeline } from '../timelines/hooks/use_create_timeline';
 import type { CreateTimelineProps } from '../detections/components/alerts_table/types';
-import { dispatchUpdateTimeline } from '../timelines/components/open_timeline/helpers';
+import { useUpdateTimeline } from '../timelines/components/open_timeline/use_update_timeline';
 
 interface UseInvestigateInTimelineActionProps {
   /**
@@ -59,11 +59,13 @@ export const useInvestigateInTimeline = ({
     timelineType: TimelineType.default,
   });
 
+  const updateTimeline = useUpdateTimeline();
+
   const createTimeline = useCallback(
-    ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
-      clearActiveTimeline();
+    async ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+      await clearActiveTimeline();
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
-      dispatchUpdateTimeline(dispatch)({
+      updateTimeline({
         duplicate: true,
         from: fromTimeline,
         id: TimelineId.active,
@@ -75,9 +77,9 @@ export const useInvestigateInTimeline = ({
         },
         to: toTimeline,
         ruleNote,
-      })();
+      });
     },
-    [dispatch, updateTimelineIsLoading, clearActiveTimeline]
+    [updateTimeline, updateTimelineIsLoading, clearActiveTimeline]
   );
 
   const investigateInTimelineClick = useCallback(async () => {

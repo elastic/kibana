@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiButtonIcon,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiBasicTableColumn, EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { ActionMenu } from '@kbn/observability-shared-plugin/public';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import {
-  getServiceNodeName,
-  SERVICE_NODE_NAME_MISSING,
-} from '../../../../../common/service_nodes';
+import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import {
   asMillisecondDuration,
   asPercent,
@@ -30,15 +23,11 @@ import { ListMetric } from '../../../shared/list_metric';
 import { getLatencyColumnLabel } from '../../../shared/transactions_table/get_latency_column_label';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { InstanceActionsMenu } from './instance_actions_menu';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../../../shared/charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 
 type ServiceInstanceMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
-type MainStatsServiceInstanceItem =
-  ServiceInstanceMainStatistics['currentPeriod'][0];
+type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
 type ServiceInstanceDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
@@ -72,15 +61,13 @@ export function getColumns({
   return [
     {
       field: 'serviceNodeName',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTableColumnNodeName',
-        { defaultMessage: 'Node name' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnNodeName', {
+        defaultMessage: 'Node name',
+      }),
       width: '30%',
       render: (_, item) => {
         const { serviceNodeName } = item;
-        const isMissingServiceNodeName =
-          serviceNodeName === SERVICE_NODE_NAME_MISSING;
+        const isMissingServiceNodeName = serviceNodeName === SERVICE_NODE_NAME_MISSING;
         const text = getServiceNodeName(serviceNodeName);
 
         const link = (
@@ -106,8 +93,7 @@ export function getColumns({
       name: getLatencyColumnLabel(latencyAggregationType),
       align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, latency }) => {
-        const currentPeriodTimestamp =
-          detailedStatsData?.currentPeriod?.[serviceNodeName]?.latency;
+        const currentPeriodTimestamp = detailedStatsData?.currentPeriod?.[serviceNodeName]?.latency;
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.latency;
 
@@ -123,9 +109,7 @@ export function getColumns({
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled && isTimeComparison(offset)
-                ? previousPeriodTimestamp
-                : undefined
+              comparisonEnabled && isTimeComparison(offset) ? previousPeriodTimestamp : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -135,10 +119,9 @@ export function getColumns({
     },
     {
       field: 'throughput',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTableColumnThroughput',
-        { defaultMessage: 'Throughput' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnThroughput', {
+        defaultMessage: 'Throughput',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, throughput }) => {
         const currentPeriodTimestamp =
@@ -159,9 +142,7 @@ export function getColumns({
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled && isTimeComparison(offset)
-                ? previousPeriodTimestamp
-                : undefined
+              comparisonEnabled && isTimeComparison(offset) ? previousPeriodTimestamp : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -171,10 +152,9 @@ export function getColumns({
     },
     {
       field: 'errorRate',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTableColumnErrorRate',
-        { defaultMessage: 'Failed transaction rate' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnErrorRate', {
+        defaultMessage: 'Failed transaction rate',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, errorRate }) => {
         const currentPeriodTimestamp =
@@ -195,9 +175,7 @@ export function getColumns({
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled && isTimeComparison(offset)
-                ? previousPeriodTimestamp
-                : undefined
+              comparisonEnabled && isTimeComparison(offset) ? previousPeriodTimestamp : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -207,10 +185,9 @@ export function getColumns({
     },
     {
       field: 'cpuUsage',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTableColumnCpuUsage',
-        { defaultMessage: 'CPU usage (avg.)' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnCpuUsage', {
+        defaultMessage: 'CPU usage (avg.)',
+      }),
       align: RIGHT_ALIGNMENT,
       sortable: true,
       render: (_, { serviceNodeName, cpuUsage }) => {
@@ -219,9 +196,7 @@ export function getColumns({
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.cpuUsage;
 
-        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.CPU_USAGE
-        );
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(ChartType.CPU_USAGE);
 
         return (
           <ListMetric
@@ -232,9 +207,7 @@ export function getColumns({
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled && isTimeComparison(offset)
-                ? previousPeriodTimestamp
-                : undefined
+              comparisonEnabled && isTimeComparison(offset) ? previousPeriodTimestamp : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -243,10 +216,9 @@ export function getColumns({
     },
     {
       field: 'memoryUsage',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTableColumnMemoryUsage',
-        { defaultMessage: 'Memory usage (avg.)' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.instancesTableColumnMemoryUsage', {
+        defaultMessage: 'Memory usage (avg.)',
+      }),
       align: RIGHT_ALIGNMENT,
       sortable: true,
       render: (_, { serviceNodeName, memoryUsage }) => {
@@ -268,9 +240,7 @@ export function getColumns({
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled && isTimeComparison(offset)
-                ? previousPeriodTimestamp
-                : undefined
+              comparisonEnabled && isTimeComparison(offset) ? previousPeriodTimestamp : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -283,22 +253,17 @@ export function getColumns({
         return (
           <ActionMenu
             id="instanceActionMenu"
-            closePopover={() =>
-              toggleRowActionMenu(instanceItem.serviceNodeName)
-            }
+            closePopover={() => toggleRowActionMenu(instanceItem.serviceNodeName)}
             isOpen={itemIdToOpenActionMenuRowMap[instanceItem.serviceNodeName]}
             anchorPosition="leftCenter"
             button={
               <EuiButtonIcon
-                aria-label={i18n.translate(
-                  'xpack.apm.getColumns.euiButtonIcon.editLabel',
-                  { defaultMessage: 'Edit' }
-                )}
+                aria-label={i18n.translate('xpack.apm.getColumns.euiButtonIcon.editLabel', {
+                  defaultMessage: 'Edit',
+                })}
                 data-test-subj={`instanceActionsButton_${instanceItem.serviceNodeName}`}
                 iconType="boxesHorizontal"
-                onClick={() =>
-                  toggleRowActionMenu(instanceItem.serviceNodeName)
-                }
+                onClick={() => toggleRowActionMenu(instanceItem.serviceNodeName)}
               />
             }
           >
@@ -322,14 +287,10 @@ export function getColumns({
             data-test-subj={`instanceDetailsButton_${instanceItem.serviceNodeName}`}
             onClick={() => toggleRowDetails(instanceItem.serviceNodeName)}
             aria-label={
-              itemIdToExpandedRowMap[instanceItem.serviceNodeName]
-                ? 'Collapse'
-                : 'Expand'
+              itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'Collapse' : 'Expand'
             }
             iconType={
-              itemIdToExpandedRowMap[instanceItem.serviceNodeName]
-                ? 'arrowUp'
-                : 'arrowDown'
+              itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'arrowUp' : 'arrowDown'
             }
           />
         );

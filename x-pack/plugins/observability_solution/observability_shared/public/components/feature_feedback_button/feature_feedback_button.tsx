@@ -14,7 +14,7 @@ const KIBANA_DEPLOYMENT_TYPE_PARAM = 'entry.573002982';
 const SANITIZED_PATH_PARAM = 'entry.1876422621';
 const ML_JOB_TYPE = 'entry.170406579';
 
-type NodeType = 'host' | 'pod';
+export type NodeType = 'host' | 'pod';
 
 const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string | undefined => {
   if (isServerlessEnv) {
@@ -29,13 +29,14 @@ const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): str
 const getMLJobType = (mlJobType: NodeType) =>
   mlJobType === 'pod' ? 'Pod Anomalies' : 'Host Anomalies';
 
-const getSurveyFeedbackURL = ({
+export const getSurveyFeedbackURL = ({
   formUrl,
   formConfig,
   kibanaVersion,
-  deploymentType,
   sanitizedPath,
-  mlJobType,
+  isCloudEnv,
+  isServerlessEnv,
+  nodeType,
 }: {
   formUrl: string;
   formConfig?: FormConfig;
@@ -43,7 +44,17 @@ const getSurveyFeedbackURL = ({
   deploymentType?: string;
   sanitizedPath?: string;
   mlJobType?: string;
+  isCloudEnv?: boolean;
+  isServerlessEnv?: boolean;
+  nodeType?: NodeType;
 }) => {
+  const deploymentType =
+    isCloudEnv !== undefined || isServerlessEnv !== undefined
+      ? getDeploymentType(isCloudEnv, isServerlessEnv)
+      : undefined;
+
+  const mlJobType = nodeType ? getMLJobType(nodeType) : undefined;
+
   const url = new URL(formUrl);
   if (kibanaVersion) {
     url.searchParams.append(
@@ -70,7 +81,7 @@ const getSurveyFeedbackURL = ({
   return url.href;
 };
 
-interface FormConfig {
+export interface FormConfig {
   kibanaVersionQueryParam?: string;
   kibanaDeploymentTypeQueryParam?: string;
   sanitizedPathQueryParam?: string;
@@ -109,21 +120,16 @@ export const FeatureFeedbackButton = ({
     />
   ),
 }: FeatureFeedbackButtonProps) => {
-  const deploymentType =
-    isCloudEnv !== undefined || isServerlessEnv !== undefined
-      ? getDeploymentType(isCloudEnv, isServerlessEnv)
-      : undefined;
-  const mlJobType = nodeType ? getMLJobType(nodeType) : undefined;
-
   return (
     <EuiButton
       href={getSurveyFeedbackURL({
         formUrl,
         formConfig,
         kibanaVersion,
-        deploymentType,
+        isCloudEnv,
+        nodeType,
+        isServerlessEnv,
         sanitizedPath,
-        mlJobType,
       })}
       target="_blank"
       color={defaultButton ? undefined : 'warning'}

@@ -7,10 +7,7 @@
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/es_fields/apm';
+import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Environment } from '../../../common/environment_rt';
@@ -35,9 +32,7 @@ export async function getEnvironments({
   start: number;
   end: number;
 }): Promise<Environment[]> {
-  const operationName = serviceName
-    ? 'get_environments_for_service'
-    : 'get_environments';
+  const operationName = serviceName ? 'get_environments_for_service' : 'get_environments';
 
   const params = {
     apm: {
@@ -52,10 +47,7 @@ export async function getEnvironments({
       size: 0,
       query: {
         bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            ...termQuery(SERVICE_NAME, serviceName),
-          ],
+          filter: [...rangeQuery(start, end), ...termQuery(SERVICE_NAME, serviceName)],
         },
       },
       aggs: {

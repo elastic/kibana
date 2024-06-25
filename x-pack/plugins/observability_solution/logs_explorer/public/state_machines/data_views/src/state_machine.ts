@@ -17,6 +17,10 @@ import type {
 } from './types';
 import { loadDataViews, searchDataViews } from './services/data_views_service';
 
+export function getSearchCacheKey(context: DataViewsContext) {
+  return { search: context.search, filter: context.filter };
+}
+
 export const createPureDataViewsStateMachine = (
   initialContext: DefaultDataViewsContext = createDefaultContext()
 ) =>
@@ -55,6 +59,9 @@ export const createPureDataViewsStateMachine = (
                 SORT_DATA_VIEWS: {
                   actions: ['storeSearch', 'searchDataViews'],
                 },
+                FILTER_DATA_VIEWS: {
+                  actions: ['storeFilter', 'searchDataViews'],
+                },
                 SELECT_DATA_VIEW: {
                   actions: ['navigateToDiscoverDataView'],
                 },
@@ -89,6 +96,9 @@ export const createPureDataViewsStateMachine = (
           // Store search from search event
           ...('search' in event && { search: event.search }),
         })),
+        storeFilter: assign((_context, event) => ({
+          ...('filter' in event && { filter: event.filter }),
+        })),
         storeDataViews: assign((_context, event) =>
           'data' in event && !isError(event.data)
             ? { dataViewsSource: event.data, dataViews: event.data }
@@ -97,14 +107,17 @@ export const createPureDataViewsStateMachine = (
         searchDataViews: assign((context) => {
           if (context.dataViewsSource !== null) {
             return {
-              dataViews: searchDataViews(context.dataViewsSource, context.search),
+              dataViews: searchDataViews(context.dataViewsSource, {
+                search: context.search,
+                filter: context.filter,
+              }),
             };
           }
           return {};
         }),
         storeInCache: (context, event) => {
           if ('data' in event && !isError(event.data)) {
-            context.cache.set(context.search, event.data);
+            context.cache.set(getSearchCacheKey(context), event.data);
           }
         },
         storeError: assign((_context, event) =>

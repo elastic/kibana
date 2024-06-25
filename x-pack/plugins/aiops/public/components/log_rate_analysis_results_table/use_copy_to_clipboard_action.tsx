@@ -11,10 +11,10 @@ import { EuiCopy, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { isSignificantItem, type SignificantItem } from '@kbn/ml-agg-utils';
+import type { GroupTableItem, TableItemAction } from '@kbn/aiops-log-rate-analysis/state';
 
 import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
-import type { GroupTableItem, TableItemAction } from './types';
 
 const copyToClipboardButtonLabel = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardButtonLabel',

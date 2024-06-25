@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { delay, finalize, switchMap, tap } from 'rxjs/operators';
+import { delay, finalize, switchMap, tap } from 'rxjs';
 import { debounce, isEqual } from 'lodash';
 import { waitUntilNextSessionCompletes$, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { setExecutionContext, LensGetState, LensDispatch } from '..';

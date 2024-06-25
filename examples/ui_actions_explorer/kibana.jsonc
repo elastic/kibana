@@ -12,8 +12,6 @@
       "uiActionsExamples",
       "developerExamples"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }

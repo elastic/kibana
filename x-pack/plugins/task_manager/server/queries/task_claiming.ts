@@ -9,7 +9,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import { Subject, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { groupBy, isPlainObject } from 'lodash';
 
 import { Logger } from '@kbn/core/server';
@@ -109,8 +109,10 @@ export class TaskClaiming {
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
     this.unusedTypes = opts.unusedTypes;
-    this.taskClaimer = getTaskClaimer(opts.strategy);
+    this.taskClaimer = getTaskClaimer(this.logger, opts.strategy);
     this.events$ = new Subject<TaskClaim>();
+
+    this.logger.info(`using task claiming strategy: ${opts.strategy}`);
   }
 
   private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
@@ -175,6 +177,7 @@ export class TaskClaiming {
         definitions: this.definitions,
         taskMaxAttempts: this.taskMaxAttempts,
         excludedTaskTypes: this.excludedTaskTypes,
+        logger: this.logger,
       };
       return this.taskClaimer(opts).pipe(map((claimResult) => asOk(claimResult)));
     }

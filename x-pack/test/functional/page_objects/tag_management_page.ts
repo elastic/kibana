@@ -95,9 +95,10 @@ class TagModal extends FtrService {
    */
   async getFormValues(): Promise<Required<FillTagFormFields>> {
     return {
-      name: await this.testSubjects.getAttribute('createModalField-name', 'value'),
-      color: await this.testSubjects.getAttribute('~createModalField-color', 'value'),
-      description: await this.testSubjects.getAttribute('createModalField-description', 'value'),
+      name: (await this.testSubjects.getAttribute('createModalField-name', 'value')) ?? '',
+      color: (await this.testSubjects.getAttribute('~createModalField-color', 'value')) ?? '',
+      description:
+        (await this.testSubjects.getAttribute('createModalField-description', 'value')) ?? '',
     };
   }
 
@@ -349,10 +350,9 @@ export class TagManagementPageObject extends FtrService {
         firstRow
       );
       await actionButton.click();
-      await this.testSubjects.click(`tagsTableAction-${action}`);
-    } else {
-      await this.testSubjects.click(`tagsTableAction-${action}`);
     }
+
+    await this.testSubjects.click(`tagsTableAction-${action}`);
   }
 
   /**
@@ -381,7 +381,7 @@ export class TagManagementPageObject extends FtrService {
   async clickEdit(tagName: string) {
     const tagRow = await this.getRowByName(tagName);
     if (tagRow) {
-      const editButton = await this.testSubjects.findDescendant('tagsTableAction-edit', tagRow);
+      const editButton = await tagRow.findByTestSubject('tagsTableAction-edit');
       await editButton?.click();
     }
   }

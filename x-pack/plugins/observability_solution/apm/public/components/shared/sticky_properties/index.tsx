@@ -61,10 +61,7 @@ function getPropertyLabel({ fieldName, label }: Partial<IStickyProperty>) {
   return <PropertyLabel>{label}</PropertyLabel>;
 }
 
-function getPropertyValue({
-  val,
-  truncated = false,
-}: Partial<IStickyProperty>) {
+function getPropertyValue({ val, truncated = false }: Partial<IStickyProperty>) {
   if (truncated) {
     return (
       <EuiToolTip content={String(val)}>
@@ -76,11 +73,7 @@ function getPropertyValue({
   return <PropertyValue>{val}</PropertyValue>;
 }
 
-export function StickyProperties({
-  stickyProperties,
-}: {
-  stickyProperties: IStickyProperty[];
-}) {
+export function StickyProperties({ stickyProperties }: { stickyProperties: IStickyProperty[] }) {
   /**
    * Note: the padding and margin styles here are strange because
    * EUI flex groups and items have a default "gutter" applied that

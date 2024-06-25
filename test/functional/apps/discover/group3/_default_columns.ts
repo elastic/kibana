@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -78,31 +79,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'DestCountry',
       ]);
 
-      await PageObjects.unifiedSearch.switchDataView(
-        'discover-dataView-switch-link',
-        'Kibana Sample Data Logs (TSDB)',
-        false
-      );
+      await dataViews.switchToAndValidate('Kibana Sample Data Logs (TSDB)');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['timestamp', 'message', 'extension']);
 
-      await PageObjects.unifiedSearch.switchDataView(
-        'discover-dataView-switch-link',
-        'kibana_sample_data_flights',
-        false
-      );
+      await dataViews.switchToAndValidate('kibana_sample_data_flights');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['timestamp', 'DestCountry']);
 
-      await PageObjects.unifiedSearch.switchDataView(
-        'discover-dataView-switch-link',
-        'logstash-*',
-        false
-      );
+      await dataViews.switchToAndValidate('logstash-*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -116,12 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'extension', 'bytes']);
-
-      await PageObjects.unifiedSearch.switchDataView(
-        'discover-dataView-switch-link',
-        'Kibana Sample Data Logs (TSDB)',
-        false
-      );
+      await dataViews.switchToAndValidate('Kibana Sample Data Logs (TSDB)');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -132,11 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'message',
       ]);
 
-      await PageObjects.unifiedSearch.switchDataView(
-        'discover-dataView-switch-link',
-        'logstash-*',
-        false
-      );
+      await dataViews.switchToAndValidate('logstash-*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -157,11 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'DestCountry',
       ]);
 
-      await PageObjects.unifiedSearch.switchDataView(
-        'discover-dataView-switch-link',
-        'kibana_sample_data_flights',
-        false
-      );
+      await dataViews.switchToAndValidate('kibana_sample_data_flights');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();

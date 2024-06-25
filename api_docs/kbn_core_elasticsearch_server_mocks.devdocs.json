@@ -127,6 +127,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
+            "id": "def-common.elasticsearchServiceMock.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
             "id": "def-common.elasticsearchServiceMock.create",
             "type": "Function",
             "tags": [],
@@ -220,14 +234,7 @@
             "label": "createInternalStart",
             "description": [],
             "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server-mocks",
-                "scope": "common",
-                "docId": "kibKbnCoreElasticsearchServerMocksPluginApi",
-                "section": "def-common.MockedElasticSearchServiceStart",
-                "text": "MockedElasticSearchServiceStart"
-              }
+              "() => MockedInternalElasticsearchServiceStart"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
             "deprecated": false,
@@ -303,20 +310,6 @@
                 "trackAdoption": false
               }
             ]
-          },
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-            "id": "def-common.elasticsearchServiceMock.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

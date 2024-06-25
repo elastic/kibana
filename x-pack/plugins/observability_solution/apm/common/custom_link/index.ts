@@ -11,19 +11,15 @@ import { set } from '@kbn/safer-lodash-set';
 import Mustache from 'mustache';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 
-export const INVALID_LICENSE = i18n.translate(
-  'xpack.apm.settings.customLink.license.text',
-  {
-    defaultMessage:
-      "To create custom links, you must be subscribed to an Elastic Gold license or above. With it, you'll have the ability to create custom links to improve your workflow when analyzing your services.",
-  }
-);
+export const INVALID_LICENSE = i18n.translate('xpack.apm.settings.customLink.license.text', {
+  defaultMessage:
+    "To create custom links, you must be subscribed to an Elastic Gold license or above. With it, you'll have the ability to create custom links to improve your workflow when analyzing your services.",
+});
 
 export const NO_PERMISSION_LABEL = i18n.translate(
   'xpack.apm.settings.customLink.noPermissionTooltipLabel',
   {
-    defaultMessage:
-      "Your user role doesn't have permissions to create custom links",
+    defaultMessage: "Your user role doesn't have permissions to create custom links",
   }
 );
 
@@ -35,10 +31,7 @@ export const extractTemplateVariableNames = (url: string): string[] => {
   return Array.from(uniqueVariableNames);
 };
 
-export function getEncodedCustomLinkUrl(
-  url: string,
-  transaction?: Transaction
-) {
+export function getEncodedCustomLinkUrl(url: string, transaction?: Transaction) {
   try {
     const templateVariables = extractTemplateVariableNames(url);
     const encodedTemplateVariables = {};

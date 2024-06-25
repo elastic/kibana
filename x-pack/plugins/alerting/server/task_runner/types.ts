@@ -13,7 +13,6 @@ import type {
   SavedObjectsServiceStart,
   ElasticsearchServiceStart,
   UiSettingsServiceStart,
-  ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -39,8 +38,8 @@ import {
   RuleTypeState,
   RuleAction,
   RuleAlertData,
+  RuleSystemAction,
   RulesSettingsFlappingProperties,
-  RulesSettingsQueryDelayProperties,
 } from '../../common';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
 import { NormalizedRuleType } from '../rule_type_registry';
@@ -55,6 +54,9 @@ import {
 } from '../types';
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { BackfillClient } from '../backfill_client/backfill_client';
+import { ElasticsearchError } from '../lib';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -124,7 +126,7 @@ export type Executable<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > = {
-  action: RuleAction;
+  action: RuleAction | RuleSystemAction;
 } & (
   | {
       alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
@@ -138,19 +140,25 @@ export type Executable<
 
 export interface RuleTypeRunnerContext {
   alertingEventLogger: AlertingEventLogger;
-  flappingSettings: RulesSettingsFlappingProperties;
+  flappingSettings?: RulesSettingsFlappingProperties;
   namespace?: string;
-  queryDelaySettings: RulesSettingsQueryDelayProperties;
+  queryDelaySec?: number;
   ruleId: string;
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
   spaceId: string;
 }
 
+export interface RuleRunnerErrorStackTraceLog {
+  message: ElasticsearchError;
+  stackTrace?: string;
+}
+
 export interface TaskRunnerContext {
   actionsConfigMap: ActionsConfigMap;
   actionsPlugin: ActionsPluginStartContract;
   alertsService: AlertsService | null;
+  backfillClient: BackfillClient;
   basePathService: IBasePath;
   cancelAlertsOnRuleTimeout: boolean;
   data: DataPluginStart;
@@ -162,7 +170,6 @@ export interface TaskRunnerContext {
   getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
   getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
-  internalSavedObjectsRepository: ISavedObjectsRepository;
   kibanaBaseUrl: string | undefined;
   logger: Logger;
   maxAlerts: number;
@@ -174,4 +181,5 @@ export interface TaskRunnerContext {
   supportsEphemeralTasks: boolean;
   uiSettings: UiSettingsServiceStart;
   usageCounter?: UsageCounter;
+  connectorAdapterRegistry: ConnectorAdapterRegistry;
 }

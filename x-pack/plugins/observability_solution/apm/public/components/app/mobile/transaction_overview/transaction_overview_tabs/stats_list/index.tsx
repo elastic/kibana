@@ -40,12 +40,7 @@ export function StatsList({
       comparisonEnabled,
       offset,
     });
-  }, [
-    detailedStatisticsLoading,
-    detailedStatistics,
-    comparisonEnabled,
-    offset,
-  ]);
+  }, [detailedStatisticsLoading, detailedStatistics, comparisonEnabled, offset]);
   return (
     <ManagedTable
       noItemsMessage={

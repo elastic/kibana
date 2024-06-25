@@ -58,7 +58,9 @@ describe('POST /api/saved_objects/{type}', () => {
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
     const config = setupConfig();
-    registerCreateRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+
+    registerCreateRoute(router, { config, coreUsageData, logger, access });
 
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
       return testTypes
@@ -86,6 +88,7 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(result.body).toEqual(clientResponse);
     expect(coreUsageStatsClient.incrementSavedObjectsCreate).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 

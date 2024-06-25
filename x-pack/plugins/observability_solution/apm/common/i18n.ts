@@ -7,9 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NOT_AVAILABLE_LABEL = i18n.translate(
-  'xpack.apm.notAvailableLabel',
-  {
-    defaultMessage: 'N/A',
-  }
-);
+export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.apm.notAvailableLabel', {
+  defaultMessage: 'N/A',
+});
+
+export const CLICK_ARIAL_LABEL = i18n.translate('xpack.apm.clickArialLabel.', {
+  defaultMessage: 'Click to view more details',
+});

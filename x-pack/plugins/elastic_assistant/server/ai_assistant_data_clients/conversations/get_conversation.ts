@@ -8,8 +8,8 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { SearchEsConversationSchema } from './types';
-import { transformESToConversations } from './transforms';
+import { EsConversationSchema } from './types';
+import { transformESSearchToConversations } from './transforms';
 
 export interface GetConversationParams {
   esClient: ElasticsearchClient;
@@ -47,7 +47,7 @@ export const getConversation = async ({
       ]
     : [];
   try {
-    const response = await esClient.search<SearchEsConversationSchema>({
+    const response = await esClient.search<EsConversationSchema>({
       body: {
         query: {
           bool: {
@@ -73,7 +73,7 @@ export const getConversation = async ({
       index: conversationIndex,
       seq_no_primary_term: true,
     });
-    const conversation = transformESToConversations(response);
+    const conversation = transformESSearchToConversations(response);
     return conversation[0] ?? null;
   } catch (err) {
     logger.error(`Error fetching conversation: ${err} with id: ${id}`);

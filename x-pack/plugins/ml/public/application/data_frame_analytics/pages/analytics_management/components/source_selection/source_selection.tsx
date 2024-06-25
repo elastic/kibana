@@ -80,7 +80,7 @@ export const SourceSelection: FC = () => {
           i18n.translate(
             'xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutBody',
             {
-              defaultMessage: `The saved search '{savedSearchTitle}' uses the data view '{dataViewName}'.`,
+              defaultMessage: `The saved search ''{savedSearchTitle}'' uses the data view ''{dataViewName}''.`,
               values: {
                 savedSearchTitle: getNestedProperty(savedObject, 'attributes.title'),
                 dataViewName,
@@ -160,7 +160,12 @@ export const SourceSelection: FC = () => {
               uiSettings,
             }}
           >
-            <CreateDataViewButton onDataViewCreated={onSearchSelected} allowAdHocDataView={true} />
+            <CreateDataViewButton
+              onDataViewCreated={(dataView) => {
+                onSearchSelected(dataView.id!, 'index-pattern', dataView.getIndexPattern());
+              }}
+              allowAdHocDataView={true}
+            />
           </SavedObjectFinder>
         </EuiPanel>
       </EuiPageBody>

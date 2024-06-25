@@ -52,6 +52,25 @@ export interface FieldValuePair {
 }
 
 /**
+ * Represents an item set returned from `frequent_item_sets` augmented
+ * with some metadata related to log rate analysis.
+ */
+export interface ItemSet {
+  /** An array of field-value pairs representing the items in the set. */
+  set: FieldValuePair[];
+  /** The size of the item set. */
+  size: number;
+  /** The maximum p-value associated with the item set. */
+  maxPValue: number;
+  /** The document count of the item set. */
+  doc_count: number;
+  /** The support value of the item set. */
+  support: number;
+  /** The total document count. */
+  total_doc_count: number;
+}
+
+/**
  * Interface describing attributes used for numeric histograms.
  * @interface
  */

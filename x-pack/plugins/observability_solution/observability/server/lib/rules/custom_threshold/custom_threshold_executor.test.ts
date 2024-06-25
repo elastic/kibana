@@ -5,25 +5,17 @@
  * 2.0.
  */
 
-import { AlertInstanceState as AlertState } from '@kbn/alerting-plugin/server';
-import {
-  AlertInstanceMock,
-  RuleExecutorServicesMock,
-  alertsMock,
-} from '@kbn/alerting-plugin/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
-import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createCustomThresholdExecutor } from './custom_threshold_executor';
 import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
-import { CustomThresholdAlertContext } from './types';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   Aggregators,
-  Comparator,
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
@@ -33,14 +25,6 @@ jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 jest.mock('../../../../common/custom_threshold_rule/get_view_in_app_url', () => ({
   getViewInAppUrl: jest.fn().mockReturnValue('mockedViewInApp'),
 }));
-
-interface AlertTestInstance {
-  instance: AlertInstanceMock;
-  actionQueue: any[];
-  state: any;
-}
-
-const persistAlertInstances = false;
 
 type TestRuleState = Record<string, unknown> & {
   aRuleStateKey: string;
@@ -71,6 +55,7 @@ const STARTED_AT_MOCK_DATE = new Date();
 const mockQuery = 'mockQuery';
 const mockOptions = {
   executionId: '',
+  startedAtOverridden: false,
   startedAt: STARTED_AT_MOCK_DATE,
   previousStartedAt: null,
   params: {
@@ -138,14 +123,118 @@ const mockOptions = {
 };
 
 const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
-  jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
+  return jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
+};
+
+const mockLibs: any = {
+  basePath: {
+    publicBaseUrl: 'http://localhost:5601',
+    prepend: (path: string) => path,
+  },
+  logger,
+  config: {
+    customThresholdRule: {
+      groupByPageSize: 10_000,
+    },
+  },
+  locators: {},
+};
+
+const executor = createCustomThresholdExecutor(mockLibs);
+
+const mockedIndex = {
+  id: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
+  title: 'metrics-fake_hosts',
+  name: 'mockedDataViewName',
+  fieldFormatMap: {},
+  typeMeta: {},
+  timeFieldName: '@timestamp',
+};
+const mockedDataView = {
+  getIndexPattern: () => 'mockedIndexPattern',
+  getName: () => 'mockedDataViewName',
+  ...mockedIndex,
+};
+const mockedSearchSource = {
+  getField: jest.fn(() => mockedDataView),
+} as any as ISearchSource;
+let services: RuleExecutorServicesMock;
+
+interface ReportedAlert {
+  id: string;
+  actionGroup: string;
+  payload: object;
+  context?: {
+    group: string;
+    reason: string;
+    tags: string[];
+  };
+}
+
+const alerts = new Map<string, ReportedAlert[]>();
+
+const setup = () => {
+  const alertsServices = alertsMock.createRuleExecutorServices();
+
+  services = {
+    ...alertsServices,
+    searchSourceClient: {
+      ...searchSourceCommonMock,
+      create: jest.fn(() => Promise.resolve(mockedSearchSource)),
+    },
+  };
+
+  services.alertsClient.report.mockImplementation((params: any) => {
+    alerts.set(params.id, [
+      {
+        id: params.id,
+        actionGroup: params.actionGroup,
+        payload: params.payload,
+      },
+    ]);
+
+    return {
+      uuid: `uuid-${params.id}`,
+      start: new Date().toISOString(),
+      alertDoc: {},
+    };
+  });
+
+  services.alertsClient.setAlertData.mockImplementation((params: any) => {
+    const alertsList = alerts.get(params.id);
+    if (alertsList && alertsList.length > 0) {
+      const lastAlert = alertsList[alertsList.length - 1];
+      lastAlert.context = params.context;
+    }
+  });
+
+  services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
+    if (sourceId === 'alternate')
+      return {
+        id: 'alternate',
+        attributes: { metricAlias: 'alternatebeat-*' },
+        type,
+        references: [],
+      };
+    if (sourceId === 'empty-response')
+      return {
+        id: 'empty',
+        attributes: { metricAlias: 'empty-response' },
+        type,
+        references: [],
+      };
+    return { id: 'default', attributes: { metricAlias: 'metricbeat-*' }, type, references: [] };
+  });
 };
 
 describe('The custom threshold alert type', () => {
+  setup();
+
   describe('querying the entire infrastructure', () => {
+    beforeEach(() => jest.clearAllMocks());
     afterAll(() => clearInstances());
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+    const execute = (comparator: COMPARATORS, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -162,7 +251,7 @@ describe('The custom threshold alert type', () => {
         },
       });
     const setResults = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       shouldFire: boolean = false,
       isNoData: boolean = false
@@ -182,74 +271,75 @@ describe('The custom threshold alert type', () => {
         },
       ]);
     test('alerts as expected with the > comparator', async () => {
-      setResults(Comparator.GT, [0.75], true);
-      await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
-      setResults(Comparator.GT, [1.5], false);
-      await execute(Comparator.GT, [1.5]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      setResults(COMPARATORS.GREATER_THAN, [0.75], true);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+      setResults(COMPARATORS.GREATER_THAN, [1.5], false);
+      await execute(COMPARATORS.GREATER_THAN, [1.5]);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the < comparator', async () => {
-      setResults(Comparator.LT, [1.5], true);
-      await execute(Comparator.LT, [1.5]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
-      setResults(Comparator.LT, [0.75], false);
-      await execute(Comparator.LT, [0.75]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      setResults(COMPARATORS.LESS_THAN, [1.5], true);
+      await execute(COMPARATORS.LESS_THAN, [1.5]);
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+      setResults(COMPARATORS.LESS_THAN, [0.75], false);
+      await execute(COMPARATORS.LESS_THAN, [0.75]);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the >= comparator', async () => {
-      setResults(Comparator.GT_OR_EQ, [0.75], true);
-      await execute(Comparator.GT_OR_EQ, [0.75]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
-      setResults(Comparator.GT_OR_EQ, [1.0], true);
-      await execute(Comparator.GT_OR_EQ, [1.0]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
-      setResults(Comparator.GT_OR_EQ, [1.5], false);
-      await execute(Comparator.GT_OR_EQ, [1.5]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      setResults(COMPARATORS.GREATER_THAN_OR_EQUALS, [0.75], true);
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [0.75]);
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+      setResults(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0], true);
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0]);
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+      setResults(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.5], false);
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.5]);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the <= comparator', async () => {
-      setResults(Comparator.LT_OR_EQ, [1.5], true);
-      await execute(Comparator.LT_OR_EQ, [1.5]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
-      setResults(Comparator.LT_OR_EQ, [1.0], true);
-      await execute(Comparator.LT_OR_EQ, [1.0]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
-      setResults(Comparator.LT_OR_EQ, [0.75], false);
-      await execute(Comparator.LT_OR_EQ, [0.75]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      setResults(COMPARATORS.LESS_THAN_OR_EQUALS, [1.5], true);
+      await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [1.5]);
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+      setResults(COMPARATORS.LESS_THAN_OR_EQUALS, [1.0], true);
+      await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [1.0]);
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+      setResults(COMPARATORS.LESS_THAN_OR_EQUALS, [0.75], false);
+      await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [0.75]);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the between comparator', async () => {
-      setResults(Comparator.BETWEEN, [0, 1.5], true);
-      await execute(Comparator.BETWEEN, [0, 1.5]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
-      setResults(Comparator.BETWEEN, [0, 0.75], false);
-      await execute(Comparator.BETWEEN, [0, 0.75]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      setResults(COMPARATORS.BETWEEN, [0, 1.5], true);
+      await execute(COMPARATORS.BETWEEN, [0, 1.5]);
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+      setResults(COMPARATORS.BETWEEN, [0, 0.75], false);
+      await execute(COMPARATORS.BETWEEN, [0, 0.75]);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
-    test('alerts as expected with the outside range comparator', async () => {
-      setResults(Comparator.OUTSIDE_RANGE, [0, 0.75], true);
-      await execute(Comparator.OUTSIDE_RANGE, [0, 0.75]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
-      setResults(Comparator.OUTSIDE_RANGE, [0, 1.5], false);
-      await execute(Comparator.OUTSIDE_RANGE, [0, 1.5]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+    test('alerts as expected with the not between comparator', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN, [0, 0.75], true);
+      await execute(COMPARATORS.NOT_BETWEEN, [0, 0.75]);
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+      setResults(COMPARATORS.NOT_BETWEEN, [0, 1.5], false);
+      await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('reports expected values to the action context', async () => {
-      setResults(Comparator.GT, [0.75], true);
-      await execute(Comparator.GT, [0.75]);
-      const { action } = mostRecentAction(instanceID);
-      expect(action.group).toBeUndefined();
-      expect(action.reason).toBe(
+      setResults(COMPARATORS.GREATER_THAN, [0.75], true);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
+      const reportedAlert = getLastReportedAlert(instanceID);
+      expect(reportedAlert?.context?.group).toBeUndefined();
+      expect(reportedAlert?.context?.reason).toBe(
         'Average test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName)'
       );
     });
   });
 
   describe('querying with a groupBy parameter', () => {
+    beforeEach(() => jest.clearAllMocks());
     afterAll(() => clearInstances());
     const execute = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       groupBy: string[] = ['groupByField'],
       metrics?: CustomThresholdExpressionMetric[],
@@ -279,7 +369,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -289,7 +379,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -299,16 +389,16 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBeAlertAction();
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
     });
     test('sends an alert when only some groups pass the threshold', async () => {
       setEvaluationResults([
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1.5],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -318,7 +408,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1.5],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -328,16 +418,16 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.LT, [1.5]);
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBe(undefined);
+      await execute(COMPARATORS.LESS_THAN, [1.5]);
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
     });
     test('sends no alert when no groups pass the threshold', async () => {
       setEvaluationResults([
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [5],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -347,7 +437,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [5],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -357,16 +447,16 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [5]);
-      expect(mostRecentAction(instanceIdA)).toBe(undefined);
-      expect(mostRecentAction(instanceIdB)).toBe(undefined);
+      await execute(COMPARATORS.GREATER_THAN, [5]);
+      expect(getLastReportedAlert(instanceIdA)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
     });
     test('reports group values to the action context', async () => {
       setEvaluationResults([
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -376,7 +466,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -386,11 +476,11 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceIdA).action.group).toEqual([
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
+      expect(getLastReportedAlert(instanceIdA)?.context?.group).toEqual([
         { field: 'groupByField', value: 'a' },
       ]);
-      expect(mostRecentAction(instanceIdB).action.group).toEqual([
+      expect(getLastReportedAlert(instanceIdB)?.context?.group).toEqual([
         { field: 'groupByField', value: 'b' },
       ]);
     });
@@ -399,7 +489,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -416,7 +506,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -433,7 +523,7 @@ describe('The custom threshold alert type', () => {
           },
           c: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -451,7 +541,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult1 } = await execute(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         ['groupByField'],
         [
@@ -467,7 +557,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -477,7 +567,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -487,7 +577,7 @@ describe('The custom threshold alert type', () => {
           },
           c: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: null,
             timestamp: new Date().toISOString(),
@@ -498,7 +588,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult2 } = await execute(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         ['groupByField'],
         [
@@ -517,7 +607,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -527,7 +617,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -538,7 +628,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult3 } = await execute(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         ['groupByField', 'groupByField-else'],
         [
@@ -554,7 +644,7 @@ describe('The custom threshold alert type', () => {
     });
 
     const executeWithFilter = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       filterQuery: string,
       metrics?: any,
@@ -589,7 +679,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -606,7 +696,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -623,7 +713,7 @@ describe('The custom threshold alert type', () => {
           },
           c: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -641,7 +731,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult1 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.2'
@@ -651,7 +741,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -661,7 +751,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -671,7 +761,7 @@ describe('The custom threshold alert type', () => {
           },
           c: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: null,
             timestamp: new Date().toISOString(),
@@ -682,7 +772,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult2 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.1',
@@ -695,7 +785,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -705,7 +795,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -716,7 +806,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult3 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'different' }),
         [
@@ -728,14 +818,162 @@ describe('The custom threshold alert type', () => {
         ],
         stateResult2
       );
-      expect(stateResult3.groups).toEqual(expect.arrayContaining([]));
+      expect(stateResult3.missingGroups).toEqual(expect.arrayContaining([]));
+    });
+    test('should remove a group from previous missing groups if the related alert is untracked', async () => {
+      setEvaluationResults([
+        {
+          a: {
+            ...customThresholdNonCountCriterion,
+            comparator: COMPARATORS.GREATER_THAN,
+            threshold: [0.75],
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: false,
+            bucketKey: { groupBy0: 'a' },
+          },
+          b: {
+            ...customThresholdNonCountCriterion,
+            comparator: COMPARATORS.GREATER_THAN,
+            threshold: [0.75],
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
+            currentValue: 3,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: false,
+            bucketKey: { groupBy0: 'b' },
+          },
+          c: {
+            ...customThresholdNonCountCriterion,
+            comparator: COMPARATORS.GREATER_THAN,
+            threshold: [0.75],
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
+            currentValue: 3,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: false,
+            bucketKey: { groupBy0: 'c' },
+          },
+        },
+      ]);
+      const { state: stateResult1 } = await executeWithFilter(
+        COMPARATORS.GREATER_THAN,
+        [0.75],
+        JSON.stringify({ query: 'q' }),
+        'test.metric.2'
+      );
+      expect(stateResult1.missingGroups).toEqual(expect.arrayContaining([]));
+      setEvaluationResults([
+        {
+          a: {
+            ...customThresholdNonCountCriterion,
+            comparator: COMPARATORS.GREATER_THAN,
+            threshold: [0.75],
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: false,
+            bucketKey: { groupBy0: 'a' },
+          },
+          b: {
+            ...customThresholdNonCountCriterion,
+            comparator: COMPARATORS.GREATER_THAN,
+            threshold: [0.75],
+            currentValue: null,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: true,
+            bucketKey: { groupBy0: 'b' },
+          },
+          c: {
+            ...customThresholdNonCountCriterion,
+            comparator: COMPARATORS.GREATER_THAN,
+            threshold: [0.75],
+            currentValue: null,
+            timestamp: new Date().toISOString(),
+            shouldFire: false,
+            isNoData: true,
+            bucketKey: { groupBy0: 'c' },
+          },
+        },
+      ]);
+      const { state: stateResult2 } = await executeWithFilter(
+        COMPARATORS.GREATER_THAN,
+        [0.75],
+        JSON.stringify({ query: 'q' }),
+        'test.metric.1',
+        stateResult1
+      );
+      expect(stateResult2.missingGroups).toEqual(
+        expect.arrayContaining([
+          { key: 'b', bucketKey: { groupBy0: 'b' } },
+          { key: 'c', bucketKey: { groupBy0: 'c' } },
+        ])
+      );
+      const mockedEvaluateRule = setEvaluationResults([
+        {
+          a: {
+            ...customThresholdNonCountCriterion,
+            comparator: COMPARATORS.GREATER_THAN,
+            threshold: [0.75],
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: false,
+            bucketKey: { groupBy0: 'a' },
+          },
+          b: {
+            ...customThresholdNonCountCriterion,
+            comparator: COMPARATORS.GREATER_THAN,
+            threshold: [0.75],
+            currentValue: null,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: true,
+            bucketKey: { groupBy0: 'b' },
+          },
+        },
+      ]);
+      // Consider c as untracked
+      services.alertsClient.isTrackedAlert.mockImplementation((id: string) => id !== 'c');
+      const { state: stateResult3 } = await executeWithFilter(
+        COMPARATORS.GREATER_THAN,
+        [0.75],
+        JSON.stringify({ query: 'q' }),
+        'test.metric.1',
+        stateResult2
+      );
+      expect(stateResult3.missingGroups).toEqual([{ key: 'b', bucketKey: { groupBy0: 'b' } }]);
+      expect(mockedEvaluateRule.mock.calls[2][9]).toEqual([
+        { bucketKey: { groupBy0: 'b' }, key: 'b' },
+      ]);
     });
   });
 
   describe('querying with a groupBy parameter host.name and rule tags', () => {
     afterAll(() => clearInstances());
     const execute = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       groupBy: string[] = ['host.name'],
       metrics?: any,
@@ -770,7 +1008,7 @@ describe('The custom threshold alert type', () => {
         {
           'host-01': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -783,7 +1021,7 @@ describe('The custom threshold alert type', () => {
           },
           'host-02': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -796,14 +1034,14 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceIdA).action.tags).toStrictEqual([
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
+      expect(getLastReportedAlert(instanceIdA)?.context?.tags).toStrictEqual([
         'host-01_tag1',
         'host-01_tag2',
         'ruleTag1',
         'ruleTag2',
       ]);
-      expect(mostRecentAction(instanceIdB).action.tags).toStrictEqual([
+      expect(getLastReportedAlert(instanceIdB)?.context?.tags).toStrictEqual([
         'host-02_tag1',
         'host-02_tag2',
         'ruleTag1',
@@ -815,7 +1053,7 @@ describe('The custom threshold alert type', () => {
   describe('querying without a groupBy parameter and rule tags', () => {
     afterAll(() => clearInstances());
     const execute = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       groupBy: string = '',
       metrics?: any,
@@ -848,7 +1086,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -860,15 +1098,18 @@ describe('The custom threshold alert type', () => {
       ]);
 
       const instanceID = '*';
-      await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceID).action.tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
+      expect(getLastReportedAlert(instanceID)?.context?.tags).toStrictEqual([
+        'ruleTag1',
+        'ruleTag2',
+      ]);
     });
   });
 
   describe('querying with multiple criteria', () => {
     afterAll(() => clearInstances());
     const execute = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       thresholdA: number[],
       thresholdB: number[],
       groupBy: string = '',
@@ -907,7 +1148,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [1.0],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -919,7 +1160,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [3.0],
             currentValue: 3.0,
             timestamp: new Date().toISOString(),
@@ -930,15 +1171,15 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const instanceID = '*';
-      await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0], [3.0]);
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
     });
     test('sends no alert when some, but not all, criteria cross the threshold', async () => {
       setEvaluationResults([
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT_OR_EQ,
+            comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
             threshold: [1.0],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -950,15 +1191,15 @@ describe('The custom threshold alert type', () => {
         {},
       ]);
       const instanceID = '*';
-      await execute(Comparator.LT_OR_EQ, [1.0], [2.5]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [1.0], [2.5]);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts only on groups that meet all criteria when querying with a groupBy parameter', async () => {
       setEvaluationResults([
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [1.0],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -968,7 +1209,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [1.0],
             currentValue: 3.0,
             timestamp: new Date().toISOString(),
@@ -980,7 +1221,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [3.0],
             metrics: [
               {
@@ -997,7 +1238,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [3.0],
             metrics: [
               {
@@ -1016,16 +1257,16 @@ describe('The custom threshold alert type', () => {
       ]);
       const instanceIdA = 'a';
       const instanceIdB = 'b';
-      await execute(Comparator.GT_OR_EQ, [1.0], [3.0], 'groupByField');
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBe(undefined);
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0], [3.0], 'groupByField');
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
     });
     test('sends all criteria to the action context', async () => {
       setEvaluationResults([
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [1.0],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -1037,7 +1278,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [3.0],
             metrics: [
               {
@@ -1055,9 +1296,9 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const instanceID = '*';
-      await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
-      const { action } = mostRecentAction(instanceID);
-      const reasons = action.reason;
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0], [3.0]);
+      const reportedAlert = getLastReportedAlert(instanceID);
+      const reasons = reportedAlert?.context?.reason;
       expect(reasons).toBe(
         'Average test.metric.1 is 1, above or equal the threshold of 1; Average test.metric.2 is 3, above or equal the threshold of 3. (duration: 1 min, data view: mockedDataViewName)'
       );
@@ -1067,7 +1308,7 @@ describe('The custom threshold alert type', () => {
   describe('querying with the count aggregator', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+    const execute = (comparator: COMPARATORS, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -1088,7 +1329,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.9],
             currentValue: 1,
             timestamp: new Date().toISOString(),
@@ -1098,13 +1339,13 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [0.9]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
+      await execute(COMPARATORS.GREATER_THAN, [0.9]);
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setEvaluationResults([
         {
           '*': {
             ...customThresholdCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [0.5],
             currentValue: 1,
             timestamp: new Date().toISOString(),
@@ -1114,12 +1355,12 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.LT, [0.5]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      await execute(COMPARATORS.LESS_THAN, [0.5]);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     describe('with a groupBy parameter', () => {
       const executeGroupBy = (
-        comparator: Comparator,
+        comparator: COMPARATORS,
         threshold: number[],
         sourceId: string = 'default',
         state?: any
@@ -1149,7 +1390,7 @@ describe('The custom threshold alert type', () => {
           {
             a: {
               ...customThresholdCountCriterion,
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               threshold: [0],
               currentValue: 1,
               timestamp: new Date().toISOString(),
@@ -1159,7 +1400,7 @@ describe('The custom threshold alert type', () => {
             },
             b: {
               ...customThresholdCountCriterion,
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               threshold: [0],
               currentValue: 1,
               timestamp: new Date().toISOString(),
@@ -1169,14 +1410,14 @@ describe('The custom threshold alert type', () => {
             },
           },
         ]);
-        const resultState = await executeGroupBy(Comparator.LT_OR_EQ, [0]);
-        expect(mostRecentAction(instanceIdA)).toBe(undefined);
-        expect(mostRecentAction(instanceIdB)).toBe(undefined);
+        const resultState = await executeGroupBy(COMPARATORS.LESS_THAN_OR_EQUALS, [0]);
+        expect(getLastReportedAlert(instanceIdA)).toBe(undefined);
+        expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
         setEvaluationResults([
           {
             a: {
               ...customThresholdCountCriterion,
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               threshold: [0],
               currentValue: 0,
               timestamp: new Date().toISOString(),
@@ -1186,7 +1427,7 @@ describe('The custom threshold alert type', () => {
             },
             b: {
               ...customThresholdCountCriterion,
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               threshold: [0],
               currentValue: 0,
               timestamp: new Date().toISOString(),
@@ -1196,16 +1437,16 @@ describe('The custom threshold alert type', () => {
             },
           },
         ]);
-        await executeGroupBy(Comparator.LT_OR_EQ, [0], 'empty-response', resultState);
-        expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-        expect(mostRecentAction(instanceIdB)).toBeAlertAction();
+        await executeGroupBy(COMPARATORS.LESS_THAN_OR_EQUALS, [0], 'empty-response', resultState);
+        expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+        expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
       });
     });
   });
 
   describe('querying recovered alert with a count aggregator', () => {
     afterAll(() => clearInstances());
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+    const execute = (comparator: COMPARATORS, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -1226,7 +1467,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.9],
             currentValue: 1,
             timestamp: new Date().toISOString(),
@@ -1247,7 +1488,7 @@ describe('The custom threshold alert type', () => {
           ]),
         };
       });
-      await execute(Comparator.GT, [0.9]);
+      await execute(COMPARATORS.GREATER_THAN, [0.9]);
       const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
       expect(getViewInAppUrl).toBeCalledWith({
         dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
@@ -1278,7 +1519,7 @@ describe('The custom threshold alert type', () => {
           criteria: [
             {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [1],
               metrics: [
                 {
@@ -1297,7 +1538,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1],
             metrics: [
               {
@@ -1315,18 +1556,18 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(true);
-      const recentAction = mostRecentAction(instanceID);
-      expect(recentAction.action.reason).toEqual(
+      const reportedAlert = getLastReportedAlert(instanceID);
+      expect(reportedAlert?.context?.reason).toEqual(
         'Average test.metric.3 reported no data in the last 1m'
       );
-      expect(recentAction).toBeNoDataAction();
+      expect(reportedAlert).toHaveNoDataAction();
     });
     test('does not send a No Data alert when not configured to do so', async () => {
       setEvaluationResults([
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1],
             metrics: [
               {
@@ -1344,7 +1585,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(false);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
   });
 
@@ -1361,7 +1602,7 @@ describe('The custom threshold alert type', () => {
           criteria: [
             {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [1],
               metrics: [
                 {
@@ -1373,7 +1614,7 @@ describe('The custom threshold alert type', () => {
             },
             {
               ...customThresholdCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [30],
             },
           ],
@@ -1385,7 +1626,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1],
             metrics: [
               {
@@ -1404,16 +1645,16 @@ describe('The custom threshold alert type', () => {
         {},
       ]);
       await execute(true);
-      const recentAction = mostRecentAction(instanceID);
-      expect(recentAction.action).toEqual({
-        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mock-alert-uuid',
+      const recentAlert = getLastReportedAlert(instanceID);
+      expect(recentAlert?.context).toEqual({
+        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/uuid-*',
         reason: 'Average test.metric.3 reported no data in the last 1m',
         timestamp: STARTED_AT_MOCK_DATE.toISOString(),
         value: ['[NO DATA]', null],
         tags: [],
         viewInAppUrl: 'mockedViewInApp',
       });
-      expect(recentAction).toBeNoDataAction();
+      expect(recentAlert).toHaveNoDataAction();
     });
   });
 
@@ -1434,7 +1675,7 @@ describe('The custom threshold alert type', () => {
           criteria: [
             {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metrics,
             },
@@ -1459,7 +1700,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1477,12 +1718,12 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       let resultState = await executeEmptyResponse();
-      expect(mostRecentAction(instanceID)).toBeNoDataAction();
+      expect(getLastReportedAlert(instanceID)).toHaveNoDataAction();
       setEvaluationResults([
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1500,12 +1741,12 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       resultState = await executeEmptyResponse(true, resultState);
-      expect(mostRecentAction(instanceID)).toBeNoDataAction();
+      expect(getLastReportedAlert(instanceID)).toHaveNoDataAction();
       setEvaluationResults([
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -1515,7 +1756,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -1526,9 +1767,9 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       resultState = await execute2GroupsABResponse(true, resultState);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
       interTestStateStorage.push(resultState); // Hand off resultState to the next test
     });
     test('sends No Data alerts for the previously detected groups when they stop reporting data, but not the * group', async () => {
@@ -1539,7 +1780,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1556,7 +1797,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1574,16 +1815,16 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await executeEmptyResponse(true, resultState);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(mostRecentAction(instanceIdA)).toBeNoDataAction();
-      expect(mostRecentAction(instanceIdB)).toBeNoDataAction();
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdA)).toHaveNoDataAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveNoDataAction();
     });
     test('does not send individual No Data alerts when groups disappear if alertOnGroupDisappear is disabled', async () => {
       setEvaluationResults([
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1600,7 +1841,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1617,7 +1858,7 @@ describe('The custom threshold alert type', () => {
           },
           c: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1635,15 +1876,15 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const resultState = await execute3GroupsABCResponse(false);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdC)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdC)).toHaveAlertAction();
       setEvaluationResults([
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             currentValue: 1,
             timestamp: new Date().toISOString(),
@@ -1653,7 +1894,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -1664,10 +1905,10 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute2GroupsABResponse(false, resultState);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdC)).toBe(undefined);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdC)).toBe(undefined);
     });
 
     describe('if alertOnNoData is disabled but alertOnGroupDisappear is enabled', () => {
@@ -1682,7 +1923,7 @@ describe('The custom threshold alert type', () => {
             criteria: [
               {
                 ...customThresholdNonCountCriterion,
-                comparator: Comparator.GT,
+                comparator: COMPARATORS.GREATER_THAN,
                 threshold: [0],
                 metrics,
               },
@@ -1703,7 +1944,7 @@ describe('The custom threshold alert type', () => {
           {
             '*': {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metrics: [
                 {
@@ -1721,12 +1962,12 @@ describe('The custom threshold alert type', () => {
           },
         ]);
         let resultState = await executeWeirdEmptyResponse();
-        expect(mostRecentAction(instanceID)).toBe(undefined);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
         setEvaluationResults([
           {
             '*': {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metrics: [
                 {
@@ -1744,12 +1985,12 @@ describe('The custom threshold alert type', () => {
           },
         ]);
         resultState = await executeWeirdEmptyResponse(resultState);
-        expect(mostRecentAction(instanceID)).toBe(undefined);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
         setEvaluationResults([
           {
             a: {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               currentValue: 1,
               timestamp: new Date().toISOString(),
@@ -1759,7 +2000,7 @@ describe('The custom threshold alert type', () => {
             },
             b: {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               currentValue: 3,
               timestamp: new Date().toISOString(),
@@ -1770,9 +2011,9 @@ describe('The custom threshold alert type', () => {
           },
         ]);
         resultState = await executeWeird2GroupsABResponse(resultState);
-        expect(mostRecentAction(instanceID)).toBe(undefined);
-        expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-        expect(mostRecentAction(instanceIdB)).toBeAlertAction();
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+        expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+        expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
         interTestStateStorage.push(resultState); // Hand off resultState to the next test
       });
       test('sends No Data alerts for the previously detected groups when they stop reporting data, but not the * group', async () => {
@@ -1781,7 +2022,7 @@ describe('The custom threshold alert type', () => {
           {
             a: {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metrics: [
                 {
@@ -1798,7 +2039,7 @@ describe('The custom threshold alert type', () => {
             },
             b: {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metrics: [
                 {
@@ -1816,128 +2057,46 @@ describe('The custom threshold alert type', () => {
           },
         ]);
         await executeWeirdEmptyResponse(resultState);
-        expect(mostRecentAction(instanceID)).toBe(undefined);
-        expect(mostRecentAction(instanceIdA)).toBeNoDataAction();
-        expect(mostRecentAction(instanceIdB)).toBeNoDataAction();
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+        expect(getLastReportedAlert(instanceIdA)).toHaveNoDataAction();
+        expect(getLastReportedAlert(instanceIdB)).toHaveNoDataAction();
       });
     });
   });
 });
 
-const mockLibs: any = {
-  threshold_rule: {
-    group_by_page_size: 10000,
-  },
-  basePath: {
-    publicBaseUrl: 'http://localhost:5601',
-    prepend: (path: string) => path,
-  },
-  logger,
-  config: {
-    customThresholdRule: {
-      groupByPageSize: 10_000,
-    },
-  },
-  locators: {},
-};
-
-const executor = createCustomThresholdExecutor(mockLibs);
-
-const alertsServices = alertsMock.createRuleExecutorServices();
-const mockedIndex = {
-  id: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
-  title: 'metrics-fake_hosts',
-  name: 'mockedDataViewName',
-  fieldFormatMap: {},
-  typeMeta: {},
-  timeFieldName: '@timestamp',
-};
-const mockedDataView = {
-  getIndexPattern: () => 'mockedIndexPattern',
-  getName: () => 'mockedDataViewName',
-  ...mockedIndex,
-};
-const mockedSearchSource = {
-  getField: jest.fn(() => mockedDataView),
-} as any as ISearchSource;
-const services: RuleExecutorServicesMock &
-  LifecycleAlertServices<AlertState, CustomThresholdAlertContext, string> = {
-  ...alertsServices,
-  ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
-  searchSourceClient: {
-    ...searchSourceCommonMock,
-    create: jest.fn(() => Promise.resolve(mockedSearchSource)),
-  },
-};
-services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
-  if (sourceId === 'alternate')
-    return {
-      id: 'alternate',
-      attributes: { metricAlias: 'alternatebeat-*' },
-      type,
-      references: [],
-    };
-  if (sourceId === 'empty-response')
-    return {
-      id: 'empty',
-      attributes: { metricAlias: 'empty-response' },
-      type,
-      references: [],
-    };
-  return { id: 'default', attributes: { metricAlias: 'metricbeat-*' }, type, references: [] };
-});
-
-const alertInstances = new Map<string, AlertTestInstance>();
-services.alertFactory.create.mockImplementation((instanceID: string) => {
-  const newAlertInstance: AlertTestInstance = {
-    instance: alertsMock.createAlertFactory.create(),
-    actionQueue: [],
-    state: {},
-  };
-  const alertInstance: AlertTestInstance = persistAlertInstances
-    ? alertInstances.get(instanceID) || newAlertInstance
-    : newAlertInstance;
-  alertInstances.set(instanceID, alertInstance);
-
-  alertInstance.instance.replaceState.mockImplementation((newState: any) => {
-    alertInstance.state = newState;
-    return alertInstance.instance;
-  });
-  (alertInstance.instance.scheduleActions as jest.Mock).mockImplementation(
-    (id: string, action: any) => {
-      alertInstance.actionQueue.push({ id, action });
-      return alertInstance.instance;
-    }
-  );
-  return alertInstance.instance;
-});
-
-function mostRecentAction(id: string) {
-  const instance = alertInstances.get(id);
-  if (!instance) return undefined;
-  return instance.actionQueue.pop();
+function getLastReportedAlert(id: string): ReportedAlert | undefined {
+  const alert = alerts.get(id);
+  if (!alert) return undefined;
+  return alert.pop();
 }
 
 function clearInstances() {
-  alertInstances.clear();
+  alerts.clear();
 }
 
 interface Action {
-  id: string;
-  action: { reason: string };
+  actionGroup: string;
+  context: {
+    alertDetailsUrl: string;
+    reason: string;
+    timestamp: string;
+  };
 }
 
 expect.extend({
-  toBeAlertAction(action?: Action) {
-    const pass = action?.id === FIRED_ACTION.id && !action?.action.reason.includes('no data');
+  toHaveAlertAction(action?: Action) {
+    const pass =
+      action?.actionGroup === FIRED_ACTION.id && !action?.context?.reason?.includes('no data');
     const message = () => `expected ${action} to be an ALERT action`;
     return {
       message,
       pass,
     };
   },
-  toBeNoDataAction(action?: Action) {
-    const pass = action?.id === NO_DATA_ACTION.id && action?.action.reason.includes('no data');
+  toHaveNoDataAction(action?: Action) {
+    const pass =
+      action?.actionGroup === NO_DATA_ACTION.id && action?.context?.reason?.includes('no data');
     const message = () => `expected ${action} to be a NO DATA action`;
     return {
       message,
@@ -1950,14 +2109,14 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     interface Matchers<R> {
-      toBeAlertAction(action?: Action): R;
-      toBeNoDataAction(action?: Action): R;
+      toHaveAlertAction(action?: Action): R;
+      toHaveNoDataAction(action?: Action): R;
     }
   }
 }
 
 const customThresholdNonCountCriterion: CustomMetricExpressionParams = {
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
   metrics: [
     {
       aggType: Aggregators.AVERAGE,
@@ -1972,7 +2131,7 @@ const customThresholdNonCountCriterion: CustomMetricExpressionParams = {
 
 const mockedCountFilter = 'mockedCountFilter';
 const customThresholdCountCriterion: CustomMetricExpressionParams = {
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
   metrics: [
     {
       aggType: Aggregators.COUNT,

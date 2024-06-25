@@ -10,15 +10,41 @@ import { httpServiceMock, type HttpSetupMock } from '@kbn/core-http-browser-mock
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createConversations } from './provider';
 import { coreMock } from '@kbn/core/public/mocks';
+import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants');
 let http: HttpSetupMock = coreMock.createSetup().http;
+export const mockConnectors = [
+  {
+    id: 'my-gen-ai',
+    name: 'Captain Connector',
+    isMissingSecrets: false,
+    actionTypeId: '.gen-ai',
+    secrets: {},
+    isPreconfigured: false,
+    isDeprecated: false,
+    isSystemAction: false,
+    config: {
+      apiProvider: 'OpenAI',
+    },
+  },
+  {
+    id: 'my-bedrock',
+    name: 'Professor Connector',
+    isMissingSecrets: false,
+    actionTypeId: '.bedrock',
+    secrets: {},
+    isPreconfigured: false,
+    isDeprecated: false,
+    isSystemAction: false,
+  },
+];
 const conversations = {
   'Alert summary': {
     id: 'Alert summary',
     isDefault: true,
     apiConfig: {
       connectorId: 'my-bedrock',
-      connectorTypeTitle: 'Amazon Bedrock',
       defaultSystemPromptId: 'default-system-prompt',
     },
     replacements: {
@@ -49,7 +75,6 @@ const conversations = {
     isDefault: true,
     apiConfig: {
       connectorId: 'my-gen-ai',
-      connectorTypeTitle: 'OpenAI',
       defaultSystemPromptId: 'default-system-prompt',
     },
     messages: [
@@ -105,7 +130,6 @@ const conversations = {
     },
     apiConfig: {
       connectorId: 'my-gen-ai',
-      connectorTypeTitle: 'OpenAI',
       defaultSystemPromptId: 'default-system-prompt',
     },
     messages: [],
@@ -127,13 +151,13 @@ describe('createConversations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     http = httpServiceMock.createStartContract();
+    (loadConnectors as jest.Mock).mockResolvedValue(mockConnectors);
   });
 
   it('should call bulk conversations with the transformed conversations from the local storage', async () => {
     await act(async () => {
       const { waitForNextUpdate } = renderHook(() =>
         createConversations(
-          [],
           coreMock.createStart().notifications,
           http,
           mockStorage as unknown as Storage
@@ -141,7 +165,7 @@ describe('createConversations', () => {
       );
       await waitForNextUpdate();
       expect(http.fetch.mock.calls[0][0]).toBe(
-        '/api/elastic_assistant/current_user/conversations/_bulk_action'
+        '/internal/elastic_assistant/current_user/conversations/_bulk_action'
       );
       expect(
         http.fetch.mock.calls[0].length > 1
@@ -149,6 +173,29 @@ describe('createConversations', () => {
             JSON.parse((http.fetch.mock.calls[0] as any[])[1]?.body).create.length
           : 0
       ).toBe(2);
+    });
+  });
+
+  it('should add missing actionTypeId to apiConfig', async () => {
+    await act(async () => {
+      const { waitForNextUpdate } = renderHook(() =>
+        createConversations(
+          coreMock.createStart().notifications,
+          http,
+          mockStorage as unknown as Storage
+        )
+      );
+      await waitForNextUpdate();
+      expect(http.fetch.mock.calls[0][0]).toBe(
+        '/internal/elastic_assistant/current_user/conversations/_bulk_action'
+      );
+      const createdConversations =
+        http.fetch.mock.calls[0].length > 1
+          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            JSON.parse((http.fetch.mock.calls[0] as any[])[1]?.body)?.create
+          : [];
+      expect(createdConversations[0].apiConfig.actionTypeId).toEqual('.bedrock');
+      expect(createdConversations[1].apiConfig.actionTypeId).toEqual('.gen-ai');
     });
   });
 });

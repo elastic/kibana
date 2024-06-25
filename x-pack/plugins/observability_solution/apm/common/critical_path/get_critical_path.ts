@@ -67,11 +67,7 @@ export function getCriticalPath(waterfall: IWaterfall): CriticalPath {
           // - The span/tx ends before the start of the initial scan period.
           // - The span ends _after_ the current scan time.
 
-          (
-            normalizedChildStart >= scanTime ||
-            normalizedChildEnd < start ||
-            childEnd > scanTime
-          )
+          (normalizedChildStart >= scanTime || normalizedChildEnd < start || childEnd > scanTime)
         );
 
         if (!isOnCriticalPath) {
@@ -124,8 +120,7 @@ export function getCriticalPath(waterfall: IWaterfall): CriticalPath {
 
   if (waterfall.entryWaterfallTransaction) {
     const start =
-      waterfall.entryWaterfallTransaction.skew +
-      waterfall.entryWaterfallTransaction.offset;
+      waterfall.entryWaterfallTransaction.skew + waterfall.entryWaterfallTransaction.offset;
     scan({
       item: waterfall.entryWaterfallTransaction,
       start,

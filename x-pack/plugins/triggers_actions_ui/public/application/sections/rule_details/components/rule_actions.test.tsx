@@ -8,17 +8,30 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
+import { screen, render } from '@testing-library/react';
 import { RuleActions } from './rule_actions';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { ActionConnector, ActionTypeModel, RuleAction } from '../../../../types';
+import { ActionConnector, ActionTypeModel } from '../../../../types';
 import * as useFetchRuleActionConnectorsHook from '../../../hooks/use_fetch_rule_action_connectors';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
+const actionType = {
+  id: 'test',
+  name: 'Test',
+  isSystemActionType: false,
+} as unknown as ActionTypeModel;
+
 const mockedUseFetchRuleActionConnectorsHook = jest.spyOn(
   useFetchRuleActionConnectorsHook,
   'useFetchRuleActionConnectors'
 );
+
 describe('Rule Actions', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    actionTypeRegistry.get.mockReturnValue(actionType);
+  });
+
   async function setup() {
     const ruleActions = [
       {
@@ -33,7 +46,7 @@ describe('Rule Actions', () => {
         actionTypeId: '.slack',
         params: {},
       },
-    ] as RuleAction[];
+    ];
 
     mockedUseFetchRuleActionConnectorsHook.mockReturnValue({
       isLoadingActionConnectors: false,
@@ -168,5 +181,41 @@ describe('Rule Actions', () => {
     expect(wrapper.find('[data-test-subj="actionConnectorName-2-logs2"]').exists).toBeTruthy();
     expect(wrapper.find('[data-test-subj="actionConnectorName-3-slack1"]').exists).toBeTruthy();
     expect(wrapper.find('[data-test-subj="actionConnectorName-4-slack2"]').exists).toBeTruthy();
+  });
+
+  it('shows the correct notify text for system actions', async () => {
+    const ruleActions = [
+      {
+        id: 'system-connector-.test-system-action',
+        actionTypeId: '.test-system-action',
+        params: {},
+      },
+    ];
+
+    actionTypeRegistry.list.mockReturnValue([
+      { id: '.test-system-action', iconClass: 'logsApp' },
+    ] as ActionTypeModel[]);
+
+    actionTypeRegistry.get.mockReturnValue({
+      ...actionType,
+      isSystemActionType: true,
+      id: '.test-system-action',
+    });
+
+    mockedUseFetchRuleActionConnectorsHook.mockReturnValue({
+      isLoadingActionConnectors: false,
+      actionConnectors: [
+        {
+          id: 'system-connector-.test-system-action',
+          actionTypeId: '.test-system-action',
+        },
+      ] as Array<ActionConnector<Record<string, unknown>>>,
+      errorActionConnectors: undefined,
+      reloadRuleActionConnectors: jest.fn(),
+    });
+
+    render(<RuleActions ruleActions={ruleActions} actionTypeRegistry={actionTypeRegistry} />);
+
+    expect(await screen.findByText('On check intervals')).toBeInTheDocument();
   });
 });

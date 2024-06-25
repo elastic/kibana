@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { ScopedHistory, Capabilities } from '@kbn/core/public';
+import { ScopedHistory, Capabilities, ThemeServiceStart } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
 import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
@@ -70,6 +70,8 @@ export interface ManagementAppMountParams {
   element: HTMLElement; // element the section should render into
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
+  theme: ThemeServiceStart;
+  /** @deprecated - use `theme` **/
   theme$: Observable<CoreTheme>;
 }
 
