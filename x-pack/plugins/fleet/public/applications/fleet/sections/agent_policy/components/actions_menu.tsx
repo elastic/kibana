@@ -143,6 +143,7 @@ export const AgentPolicyActionMenu = memo<{
                 <AgentPolicyDeleteProvider
                   hasFleetServer={policyHasFleetServer(agentPolicy as AgentPolicy)}
                   key="deletePolicy"
+                  packagePolicies={agentPolicy.package_policies}
                 >
                   {(deleteAgentPolicyPrompt) => (
                     <EuiContextMenuItem
