@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExclusiveUnion } from '@elastic/eui';
+import { ExclusiveUnion, htmlIdGenerator } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -31,33 +31,29 @@ import {
 } from '@elastic/eui';
 import { Form, FormikProvider, useFormik } from 'formik';
 import moment from 'moment-timezone';
-import type { FunctionComponent } from 'react';
+import { FunctionComponent, useRef } from 'react';
 import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { CodeEditorField } from '@kbn/code-editor';
+import type { AuthenticatedUser, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { useDarkMode, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
-import type { CategorizedApiKey } from './api_keys_table';
-import { ApiKeyBadge, ApiKeyStatus, TimeToolTip } from './api_keys_table';
-import type { ApiKeyRoleDescriptors } from '../../../../common/model';
-import { DocLink } from '../../../components/doc_link';
-import { FormField } from '../../../components/form_field';
-import { FormRow } from '../../../components/form_row';
-import { useCurrentUser } from '../../../components/use_current_user';
-import { useHtmlId } from '../../../components/use_html_id';
-import { useInitialFocus } from '../../../components/use_initial_focus';
-import { RolesAPIClient } from '../../roles/roles_api_client';
-import { APIKeysAPIClient } from '../api_keys_api_client';
+import { Role } from '@kbn/security-plugin-types-common';
+import { FormField, FormRow } from '@kbn/security-form-components';
+import type { ApiKeyRoleDescriptors, CategorizedApiKey } from '@kbn/security-plugin-types-common';
+import { ApiKeyBadge, ApiKeyStatus, TimeToolTip } from '.';
+import { APIKeysAPIClient } from './api_keys_api_client';
 import type {
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
-} from '../api_keys_api_client';
+} from './api_keys_api_client';
+import { DocLink } from './doc_link';
 
 const TypeLabel = () => (
   <FormattedMessage
@@ -97,6 +93,12 @@ interface CommonApiKeyFlyoutProps {
   onCancel(): void;
   canManageCrossClusterApiKeys?: boolean;
   readOnly?: boolean;
+  http?: CoreStart['http'];
+  currentUser?: AuthenticatedUser;
+  isLoadingCurrentUser?: boolean;
+  defaultMetadata?: string;
+  defaultRoleDescriptors?: string;
+  defaultExpiration?: string;
 }
 
 interface CreateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
@@ -160,43 +162,60 @@ const WRITE_ONLY_BOILERPLATE = `{
   }
 }`;
 
+const httpErrorText = i18n.translate('xpack.security.httpError', {
+  defaultMessage: 'Could not initialize http client.',
+});
+
 export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   onSuccess,
   onCancel,
+  defaultExpiration,
+  defaultMetadata,
+  defaultRoleDescriptors,
   apiKey,
   canManageCrossClusterApiKeys = false,
   readOnly = false,
+  currentUser,
+  isLoadingCurrentUser,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana();
   const isDarkMode = useDarkMode();
-  const { value: currentUser, loading: isLoadingCurrentUser } = useCurrentUser();
-  const [{ value: roles, loading: isLoadingRoles }, getRoles] = useAsyncFn(
-    () => new RolesAPIClient(services.http!).getRoles(),
-    [services.http]
-  );
+  const {
+    services: { http },
+  } = useKibana();
   const [responseError, setResponseError] = useState<KibanaServerError | undefined>(undefined);
+  const [{ value: roles, loading: isLoadingRoles }, getRoles] = useAsyncFn(() => {
+    if (http) {
+      return http.get<Role[]>('/api/security/role');
+    }
+    return Promise.resolve([]);
+  }, [http]);
 
   const formik = useFormik<ApiKeyFormValues>({
     onSubmit: async (values) => {
-      try {
-        if (apiKey) {
-          const updateApiKeyResponse = await new APIKeysAPIClient(services.http!).updateApiKey(
-            mapUpdateApiKeyValues(apiKey.type, apiKey.id, values)
-          );
+      if (http) {
+        try {
+          if (apiKey) {
+            const updateApiKeyResponse = await new APIKeysAPIClient(http).updateApiKey(
+              mapUpdateApiKeyValues(apiKey.type, apiKey.id, values)
+            );
 
-          onSuccess?.(updateApiKeyResponse);
-        } else {
-          const createApiKeyResponse = await new APIKeysAPIClient(services.http!).createApiKey(
-            mapCreateApiKeyValues(values)
-          );
+            onSuccess?.(updateApiKeyResponse);
+          } else {
+            const createApiKeyResponse = await new APIKeysAPIClient(http).createApiKey(
+              mapCreateApiKeyValues(values)
+            );
 
-          onSuccess?.(createApiKeyResponse);
+            onSuccess?.(createApiKeyResponse);
+          }
+          setResponseError(undefined);
+        } catch (error) {
+          setResponseError(error.body);
+          throw error;
         }
-        setResponseError(undefined);
-      } catch (error) {
-        setResponseError(error.body);
-        throw error;
+      } else {
+        setResponseError({ message: httpErrorText, statusCode: 0 });
+        throw new Error(httpErrorText);
       }
     },
     initialValues: apiKey ? mapApiKeyFormValues(apiKey) : defaultInitialValues,
@@ -225,15 +244,40 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
     }
   }, [currentUser, roles]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (defaultRoleDescriptors && !apiKey) {
+      formik.setFieldValue('role_descriptors', defaultRoleDescriptors);
+    }
+  }, [defaultRoleDescriptors]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (defaultMetadata && !apiKey) {
+      formik.setFieldValue('metadata', defaultMetadata);
+    }
+  }, [defaultMetadata]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (defaultExpiration && !apiKey) {
+      formik.setFieldValue('expiration', defaultExpiration);
+      formik.setFieldValue('customExpiration', true);
+    }
+  }, [defaultExpiration]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const isLoading = isLoadingCurrentUser || isLoadingRoles;
 
   const isOwner = currentUser && apiKey ? currentUser.username === apiKey.username : false;
   const hasExpired = apiKey ? apiKey.expiration && moment(apiKey.expiration).isBefore() : false;
   const canEdit = isOwner && !hasExpired;
 
-  const firstFieldRef = useInitialFocus<HTMLInputElement>([isLoading]);
+  // autofocus first field when loaded
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    if (inputRef?.current) {
+      inputRef?.current.focus();
+    }
+  }, [isLoading]);
 
-  const titleId = useHtmlId('formFlyout', 'title');
+  const titleId = htmlIdGenerator('formFlyout')('title');
   const isSubmitButtonHidden = readOnly || (apiKey && !canEdit);
 
   const isSubmitDisabled =
@@ -284,6 +328,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               {responseError && (
                 <>
                   <EuiCallOut
+                    data-test-subj="apiKeyFlyoutResponseError"
                     color="danger"
                     title={
                       <FormattedMessage
@@ -448,7 +493,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     <FormRow label={<NameLabel />} fullWidth>
                       <FormField
                         name="name"
-                        inputRef={firstFieldRef}
+                        inputRef={inputRef}
                         data-test-subj="apiKeyNameInput"
                         disabled={readOnly || !!apiKey}
                         validate={{
