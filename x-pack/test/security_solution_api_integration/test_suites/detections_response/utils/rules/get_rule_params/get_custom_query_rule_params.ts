@@ -27,8 +27,8 @@ export function getCustomQueryRuleParams(
     rule_id: 'rule-1',
     severity: 'high',
     index: ['logs-*'],
-    interval: '100m',
-    from: 'now-6m',
+    interval: '24h',
+    from: 'now-1450m', // 1450m is 24h + 10m
     enabled: false,
     ...rewrites,
   };

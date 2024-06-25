@@ -259,7 +259,7 @@ describe(
           'New Rule Test',
         ] as const;
         const expectedActionFrequency: RuleActionCustomFrequency = {
-          throttle: 2,
+          throttle: 24,
           throttleUnit: 'h',
         };
         const expectedEmail = 'test@example.com';

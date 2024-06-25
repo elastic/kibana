@@ -21,12 +21,12 @@ export const getMockSharedResponseSchema = (
   description: 'Simple Rule Query',
   enabled,
   false_positives: [],
-  from: 'now-6m',
+  from: 'now-1450m', // 1450m is 24h + 10m
   immutable: false,
   rule_source: {
     type: 'internal',
   },
-  interval: '5m',
+  interval: '24h',
   rule_id: ruleId,
   output_index: '',
   max_signals: 100,

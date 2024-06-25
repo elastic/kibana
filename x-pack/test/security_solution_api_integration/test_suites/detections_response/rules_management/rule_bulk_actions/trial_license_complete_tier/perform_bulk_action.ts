@@ -1559,7 +1559,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           {
             type: BulkActionEditTypeEnum.set_schedule,
-            value: { interval: '1m', lookback: '1m' },
+            value: { interval: '24h', lookback: '1m' },
           },
         ];
         cases.forEach(({ type, value }) => {
@@ -1624,7 +1624,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   {
                     type: BulkActionEditTypeEnum.set_rule_actions,
                     value: {
-                      throttle: '1h',
+                      throttle: '1d',
                       actions: [
                         {
                           ...webHookActionMock,
@@ -1643,7 +1643,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
-                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1682,7 +1682,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   {
                     type: BulkActionEditTypeEnum.set_rule_actions,
                     value: {
-                      throttle: '1h',
+                      throttle: '1d',
                       actions: [
                         {
                           ...webHookActionMock,
@@ -1701,7 +1701,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
-                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1776,7 +1776,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   {
                     type: BulkActionEditTypeEnum.add_rule_actions,
                     value: {
-                      throttle: '1h',
+                      throttle: '1d',
                       actions: [
                         {
                           ...webHookActionMock,
@@ -1795,7 +1795,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
-                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1836,7 +1836,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   {
                     type: BulkActionEditTypeEnum.add_rule_actions,
                     value: {
-                      throttle: '1h',
+                      throttle: '1d',
                       actions: [
                         {
                           ...webHookActionMock,
@@ -1860,7 +1860,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[1].uuid,
-                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1909,7 +1909,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   {
                     type: BulkActionEditTypeEnum.add_rule_actions,
                     value: {
-                      throttle: '1h',
+                      throttle: '1d',
                       actions: [
                         {
                           ...slackConnectorMockProps,
@@ -1933,7 +1933,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: slackConnector.id,
                 action_type_id: '.slack',
                 uuid: body.attributes.results.updated[0].actions[1].uuid,
-                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -2013,6 +2013,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const ruleId = 'ruleId';
             const createdRule = await createRule(supertest, log, {
               ...getSimpleRule(ruleId),
+              interval: '8h',
+              from: 'now-490m', // 490m is 8h + 10m
               actions: [defaultRuleAction],
               throttle: '8h',
             });
@@ -2241,7 +2243,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 const webHookConnector = await createWebHookConnector();
 
                 const ruleId = 'ruleId';
-                const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
+                const createdRule = await createRule(supertest, log, {
+                  ...getSimpleRule(ruleId),
+                  interval: '1h',
+                  from: 'now-70m',
+                });
 
                 const { body } = await postBulkAction()
                   .send({

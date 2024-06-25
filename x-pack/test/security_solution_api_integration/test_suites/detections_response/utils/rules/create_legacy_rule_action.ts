@@ -21,7 +21,7 @@ export const createLegacyRuleAction = async (
     .query({ alert_id: alertId })
     .send({
       name: 'Legacy notification with one action',
-      interval: '1h',
+      interval: '24h',
       actions: [
         {
           id: connectorId,

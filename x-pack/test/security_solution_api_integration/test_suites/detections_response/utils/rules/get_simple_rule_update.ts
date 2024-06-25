@@ -22,4 +22,6 @@ export const getSimpleRuleUpdate = (ruleId = 'rule-1', enabled = false): RuleUpd
   index: ['auditbeat-*'],
   type: 'query',
   query: 'user.name: root or user.name: admin',
+  interval: '24h',
+  from: 'now-1450m', // 1450m is 24h + 10m
 });

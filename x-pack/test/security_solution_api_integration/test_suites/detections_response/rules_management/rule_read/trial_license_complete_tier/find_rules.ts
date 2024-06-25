@@ -144,7 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // create rule with connector/action
       const rule: ReturnType<typeof getSimpleRule> = {
         ...getSimpleRule('rule-1'),
-        throttle: '1h', // <-- throttle makes this a scheduled action
+        throttle: '24h', // <-- throttle makes this a scheduled action
         actions: [action],
       };
       await createRule(supertest, log, rule);
@@ -159,7 +159,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             ...action,
             uuid: body.data[0].actions[0].uuid,
-            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+            frequency: { summary: true, throttle: '24h', notifyWhen: 'onThrottleInterval' },
           },
         ],
       };

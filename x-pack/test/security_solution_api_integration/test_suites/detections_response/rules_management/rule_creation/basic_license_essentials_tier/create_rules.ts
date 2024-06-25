@@ -192,6 +192,29 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      it('should create a rule with a default interval if "interval" value is not provided', async () => {
+        const ruleParams = getCustomQueryRuleParams({
+          rule_id: 'rule-without-interval',
+          interval: undefined,
+        });
+
+        const { body } = await securitySolutionApi
+          .createRule({
+            body: ruleParams,
+          })
+          .expect(200);
+
+        expect(body.interval).toEqual('5m');
+
+        const { body: createdRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-without-interval' },
+          })
+          .expect(200);
+
+        expect(createdRule.interval).toEqual('5m');
+      });
+
       describe('max_signals', () => {
         beforeEach(async () => {
           await deleteAllRules(supertest, log);

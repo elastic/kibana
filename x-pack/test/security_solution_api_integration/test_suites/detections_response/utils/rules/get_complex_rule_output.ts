@@ -44,7 +44,7 @@ export const getComplexRuleOutput = (
   rule_source: {
     type: 'internal',
   },
-  interval: '5m',
+  interval: '24h',
   output_index: '',
   meta: {
     anything_you_want_ui_related_or_otherwise: {
@@ -56,7 +56,7 @@ export const getComplexRuleOutput = (
   max_signals: 10,
   tags: ['tag 1', 'tag 2', 'any tag you want'],
   to: 'now',
-  from: 'now-6m',
+  from: 'now-1450m', // 1450m is 24h + 10m
   revision: 0,
   severity: 'high',
   severity_mapping: [],

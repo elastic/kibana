@@ -60,7 +60,6 @@ while read -r config; do
   # prevent non-zero exit code from breaking the loop
   set +e;
   node ./scripts/functional_tests \
-    --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config="$config" \
     "$EXTRA_ARGS"

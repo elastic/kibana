@@ -25,4 +25,6 @@ export const getSimpleRule = (ruleId = 'rule-1', enabled = false): QueryRuleCrea
   index: ['auditbeat-*'],
   type: 'query',
   query: 'user.name: root or user.name: admin',
+  interval: '24h',
+  from: 'now-1450m', // 1450m is 24h + 10m
 });

@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./create_rules'));
     loadTestFile(require.resolve('./create_new_terms'));
     loadTestFile(require.resolve('./preview_rules'));
+    loadTestFile(require.resolve('./create_rules_bulk'));
   });
 }
