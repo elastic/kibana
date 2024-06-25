@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+export function getBucketSizeFromTimeRangeAndBucketCount(
+  timeFrom: number,
+  timeTo: number,
+  numBuckets: number
+): number {
+  return Math.max(Math.floor((timeTo - timeFrom) / numBuckets), 1);
+}
+
 export function getLogRatePerMinute({
   logCount,
   timeFrom,

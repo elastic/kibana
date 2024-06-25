@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
 import { RegisterServicesParams } from '../register_services';
-import { getLogErrorRate, getLogRatePerMinute } from './utils';
+import { getLogErrorRate, getLogRatePerMinute } from '../../utils';
 
 export interface LogsRatesServiceParams {
   esClient: ElasticsearchClient;
