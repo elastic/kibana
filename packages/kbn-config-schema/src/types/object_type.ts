@@ -96,8 +96,13 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       .keys(schemaKeys)
       .default()
       .optional()
-      .unknown(unknowns === 'allow')
       .options({ stripUnknown: { objects: unknowns === 'ignore' } });
+
+    // We need to specify the `.unknown` property only when we want to override the default `forbid`
+    // or it will break `stripUnknown` functionality.
+    if (unknowns === 'allow') {
+      schema = schema.unknown(unknowns === 'allow');
+    }
 
     if (options.meta?.id) {
       schema = schema.id(options.meta.id);

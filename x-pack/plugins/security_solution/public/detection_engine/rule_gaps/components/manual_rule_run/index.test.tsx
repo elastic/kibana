@@ -6,73 +6,92 @@
  */
 
 import React from 'react';
-import { render, within } from '@testing-library/react';
-import { ManualRuleRunModal } from '.';
+import moment from 'moment';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { ManualRuleRunModal, MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS } from '.';
+
+const convertToDatePickerFormat = (date: moment.Moment) => {
+  return `${date.format('L')} ${date.format('LT')}`;
+};
 
 describe('ManualRuleRunModal', () => {
   const onCancelMock = jest.fn();
   const onConfirmMock = jest.fn();
+
+  let startDatePicker: Element;
+  let endDatePicker: Element;
+  let confirmModalConfirmButton: HTMLElement;
+  let cancelModalConfirmButton: HTMLElement;
+  let timeRangeForm: HTMLElement;
 
   afterEach(() => {
     onCancelMock.mockReset();
     onConfirmMock.mockReset();
   });
 
-  it('should render modal', () => {
-    const wrapper = render(
-      <ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />
-    );
+  beforeEach(() => {
+    render(<ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />);
 
-    expect(wrapper.getByTestId('manual-rule-run-modal-form')).toBeInTheDocument();
-    expect(wrapper.getByTestId('confirmModalCancelButton')).toBeEnabled();
-    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeEnabled();
+    timeRangeForm = screen.getByTestId('manual-rule-run-time-range-form');
+    startDatePicker = timeRangeForm.getElementsByClassName('start-date-picker')[0];
+    endDatePicker = timeRangeForm.getElementsByClassName('end-date-picker')[0];
+    confirmModalConfirmButton = screen.getByTestId('confirmModalConfirmButton');
+    cancelModalConfirmButton = screen.getByTestId('confirmModalCancelButton');
+  });
+
+  it('should render modal', () => {
+    expect(timeRangeForm).toBeInTheDocument();
+    expect(cancelModalConfirmButton).toBeEnabled();
+    expect(confirmModalConfirmButton).toBeEnabled();
   });
 
   it('should render confirmation button disabled if invalid time range has been selected', () => {
-    const wrapper = render(
-      <ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />
-    );
+    expect(confirmModalConfirmButton).toBeEnabled();
 
-    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeEnabled();
+    const now = moment();
+    const startDate = now.clone().subtract(1, 'd');
+    const endDate = now.clone().subtract(2, 'd');
 
-    within(wrapper.getByTestId('end-date-picker')).getByText('Previous Month').click();
+    fireEvent.change(startDatePicker, {
+      target: { value: convertToDatePickerFormat(startDate) },
+    });
+    fireEvent.change(endDatePicker, {
+      target: { value: convertToDatePickerFormat(endDate) },
+    });
 
-    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeDisabled();
-    expect(wrapper.getByTestId('manual-rule-run-time-range-form')).toHaveTextContent(
-      'Selected time range is invalid'
-    );
+    expect(confirmModalConfirmButton).toBeDisabled();
+    expect(timeRangeForm).toHaveTextContent('Selected time range is invalid');
   });
 
   it('should render confirmation button disabled if selected start date is more than 90 days in the past', () => {
-    const wrapper = render(
-      <ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />
-    );
+    expect(confirmModalConfirmButton).toBeEnabled();
 
-    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeEnabled();
+    const now = moment();
+    const startDate = now.clone().subtract(MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS, 'd');
 
-    within(wrapper.getByTestId('start-date-picker')).getByText('Previous Month').click();
-    within(wrapper.getByTestId('start-date-picker')).getByText('Previous Month').click();
-    within(wrapper.getByTestId('start-date-picker')).getByText('Previous Month').click();
-    within(wrapper.getByTestId('start-date-picker')).getByText('Previous Month').click();
+    fireEvent.change(startDatePicker, {
+      target: {
+        value: convertToDatePickerFormat(startDate),
+      },
+    });
 
-    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeDisabled();
-    expect(wrapper.getByTestId('manual-rule-run-time-range-form')).toHaveTextContent(
+    expect(confirmModalConfirmButton).toBeDisabled();
+    expect(timeRangeForm).toHaveTextContent(
       'Manual rule run cannot be scheduled earlier than 90 days ago'
     );
   });
 
   it('should render confirmation button disabled if selected end date is in future', () => {
-    const wrapper = render(
-      <ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />
-    );
+    expect(confirmModalConfirmButton).toBeEnabled();
 
-    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeEnabled();
+    const now = moment();
+    const endDate = now.clone().add(2, 'd');
 
-    within(wrapper.getByTestId('end-date-picker')).getByText('Next month').click();
+    fireEvent.change(endDatePicker, {
+      target: { value: convertToDatePickerFormat(endDate) },
+    });
 
-    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeDisabled();
-    expect(wrapper.getByTestId('manual-rule-run-time-range-form')).toHaveTextContent(
-      'Manual rule run cannot be scheduled for the future'
-    );
+    expect(confirmModalConfirmButton).toBeDisabled();
+    expect(timeRangeForm).toHaveTextContent('Manual rule run cannot be scheduled for the future');
   });
 });

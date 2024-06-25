@@ -13,8 +13,8 @@ import {
   RESPONSE_SECTION_CONTENT_TEST_ID,
   RESPONSE_SECTION_HEADER_TEST_ID,
 } from './test_ids';
-import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { ResponseSection } from './response_section';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { useExpandSection } from '../hooks/use_expand_section';
@@ -27,9 +27,9 @@ const renderResponseSection = () =>
   render(
     <IntlProvider locale="en">
       <TestProvider>
-        <RightPanelContext.Provider value={mockContextValue}>
+        <DocumentDetailsContext.Provider value={mockContextValue}>
           <ResponseSection />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProvider>
     </IntlProvider>
   );
@@ -70,14 +70,14 @@ describe('<ResponseSection />', () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
         <TestProvider>
-          <RightPanelContext.Provider
+          <DocumentDetailsContext.Provider
             value={{
               ...mockContextValue,
               getFieldsData: mockGetFieldsData,
             }}
           >
             <ResponseSection />
-          </RightPanelContext.Provider>
+          </DocumentDetailsContext.Provider>
         </TestProvider>
       </IntlProvider>
     );
@@ -90,9 +90,9 @@ describe('<ResponseSection />', () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
         <TestProvider>
-          <RightPanelContext.Provider value={{ ...mockContextValue, isPreview: true }}>
+          <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreview: true }}>
             <ResponseSection />
-          </RightPanelContext.Provider>
+          </DocumentDetailsContext.Provider>
         </TestProvider>
       </IntlProvider>
     );
@@ -111,14 +111,14 @@ describe('<ResponseSection />', () => {
     const { container } = render(
       <IntlProvider locale="en">
         <TestProvider>
-          <RightPanelContext.Provider
+          <DocumentDetailsContext.Provider
             value={{
               ...mockContextValue,
               getFieldsData: mockGetFieldsData,
             }}
           >
             <ResponseSection />
-          </RightPanelContext.Provider>
+          </DocumentDetailsContext.Provider>
         </TestProvider>
       </IntlProvider>
     );

@@ -38,7 +38,7 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
         },
       },
       async (context, req, res): Promise<IKibanaResponse<RelatedResponse>> => {
-        const { packageName, datastreamName, rawSamples, currentPipeline } = req.body;
+        const { packageName, dataStreamName, rawSamples, currentPipeline } = req.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
         const { getStartServices, logger } = await context.integrationAssistant;
@@ -71,7 +71,7 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
           const graph = await getRelatedGraph(client, model);
           const results = await graph.invoke({
             packageName,
-            datastreamName,
+            dataStreamName,
             rawSamples,
             currentPipeline,
           });
