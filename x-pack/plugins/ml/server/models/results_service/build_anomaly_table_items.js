@@ -139,7 +139,7 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
     // Aggregate by job, then detectorIndex.
     const jobId = record.job_id;
     const jobsAtTime = aggregatedData[roundedTime];
-    if (jobsAtTime[jobId] === undefined) {
+    if (jobsAtTime[jobId] === undefined || Object.hasOwn(jobsAtTime, jobId) === false) {
       jobsAtTime[jobId] = Object.create(null);
     }
 
