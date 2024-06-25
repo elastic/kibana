@@ -34,7 +34,7 @@ describe('artifacts lists', () => {
     mockExceptionClient = listMock.getExceptionListClient();
   });
 
-  describe('getFilteredEndpointExceptionListRaw', () => {
+  describe('getFilteredEndpointExceptionListRaw + convertExceptionsToEndpointFormat', () => {
     const TEST_FILTER = 'exception-list-agnostic.attributes.os_types:"linux"';
 
     test('it should get convert the exception lists response to the proper endpoint format', async () => {

@@ -246,8 +246,9 @@ function translateItem(
   item: ExceptionListItemSchema
 ): TranslatedExceptionListItem {
   const itemSet = new Set();
-  const getEntries = (): TranslatedExceptionListItem['entries'] => {
-    return item.entries.reduce<TranslatedEntry[]>((translatedEntries, entry) => {
+
+  const entries: TranslatedExceptionListItem['entries'] = item.entries.reduce<TranslatedEntry[]>(
+    (translatedEntries, entry) => {
       const translatedEntry = translateEntry(schemaVersion, item.entries, entry, item.os_types[0]);
 
       if (translatedEntry !== undefined) {
@@ -272,12 +273,13 @@ function translateItem(
       }
 
       return translatedEntries;
-    }, []);
-  };
+    },
+    []
+  );
 
   return {
     type: item.type,
-    entries: getEntries(),
+    entries,
   };
 }
 
