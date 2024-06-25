@@ -36,6 +36,26 @@ export const uptimeRuleFieldMap = {
     type: 'keyword',
     required: false,
   },
+  'monitor.tags': {
+    type: 'keyword',
+    required: false,
+  },
+  configId: {
+    type: 'keyword',
+    required: false,
+  },
+  'host.name': {
+    type: 'keyword',
+    required: false,
+  },
+  'location.id': {
+    type: 'keyword',
+    required: false,
+  },
+  'location.name': {
+    type: 'keyword',
+    required: false,
+  },
   // tls alert fields
   'tls.server.x509.issuer.common_name': {
     type: 'keyword',
@@ -67,5 +87,3 @@ export const uptimeRuleFieldMap = {
     required: false,
   },
 } as const;
-
-export type UptimeRuleFieldMap = typeof uptimeRuleFieldMap;
