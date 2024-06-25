@@ -8,9 +8,6 @@
 import { Replacements } from '@kbn/elastic-assistant-common';
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import type { ReactNode } from 'react';
-import { Conversation } from '../../assistant_context/types';
-import { QuickPrompt } from '../quick_prompts/types';
-import { Prompt } from '../types';
 
 /**
  * helps the Elastic AI Assistant display the most relevant user prompts
@@ -102,13 +99,3 @@ export type PromptContextTemplate = Omit<PromptContext, 'id' | 'getPromptContext
 export type UnRegisterPromptContext = (promptContextId: string) => void;
 
 export type RegisterPromptContext = (promptContext: PromptContext) => void;
-
-export interface AIAssistantDefaults {
-  conversations: Record<string, Conversation>;
-  quickPrompts?: QuickPrompt[];
-  systemPrompts?: Prompt[];
-  title?: string;
-  allowFields?: string[];
-  allowReplacementFields?: string[];
-  promptContexts?: PromptContextTemplate[];
-}

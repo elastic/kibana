@@ -17,7 +17,6 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { updatePromptContexts } from './helpers';
 import type {
-  AIAssistantDefaults,
   PromptContext,
   RegisterPromptContext,
   UnRegisterPromptContext,
@@ -25,8 +24,7 @@ import type {
 import type { Conversation } from './types';
 import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
-import { QuickPrompt } from '../assistant/quick_prompts/types';
-import { KnowledgeBaseConfig, Prompt, TraceOptions } from '../assistant/types';
+import { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
@@ -99,11 +97,8 @@ export interface UseAssistantContext {
     currentConversation: Conversation,
     showAnonymizedValues: boolean
   ) => CodeBlockDetails[][];
-  allQuickPrompts: QuickPrompt[];
-  allSystemPrompts: Prompt[];
   docLinks: Omit<DocLinksStart, 'links'>;
   basePath: string;
-  assistantDefaults?: Rx.BehaviorSubject<AIAssistantDefaults>;
   getComments: (commentArgs: {
     abortStream: () => void;
     currentConversation?: Conversation;
@@ -258,8 +253,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantFeatures: assistantFeatures ?? defaultAssistantFeatures,
       assistantTelemetry,
       augmentMessageCodeBlocks,
-      allQuickPrompts: [],
-      allSystemPrompts: [],
       basePath,
       docLinks,
       getComments,

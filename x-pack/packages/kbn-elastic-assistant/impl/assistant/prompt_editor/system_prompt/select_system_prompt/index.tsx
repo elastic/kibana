@@ -18,10 +18,10 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { Conversation } from '../../../../..';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
-import type { Prompt } from '../../../types';
 import { useAssistantContext } from '../../../../assistant_context';
 import { useConversation } from '../../../use_conversation';
 import { SYSTEM_PROMPTS_TAB } from '../../../settings/assistant_settings';
@@ -29,10 +29,10 @@ import { TEST_IDS } from '../../../constants';
 import { PROMPT_CONTEXT_SELECTOR_PREFIX } from '../../../quick_prompts/prompt_context_selector/translations';
 
 export interface Props {
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   compressed?: boolean;
   conversation?: Conversation;
-  selectedPrompt: Prompt | undefined;
+  selectedPrompt: PromptResponse | undefined;
   clearSelectedSystemPrompt?: () => void;
   isClearable?: boolean;
   isEditing?: boolean;
@@ -76,7 +76,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
 
   // Write the selected system prompt to the conversation config
   const setSelectedSystemPrompt = useCallback(
-    (prompt: Prompt | undefined) => {
+    (prompt: PromptResponse | undefined) => {
       if (conversation && conversation.apiConfig) {
         setApiConfig({
           conversation,

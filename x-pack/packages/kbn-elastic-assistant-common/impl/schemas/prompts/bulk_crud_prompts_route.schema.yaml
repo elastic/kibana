@@ -78,6 +78,13 @@ components:
       required:
         - id
 
+    PromptType:
+      type: string
+      description: Prompt type
+      enum:
+        - system
+        - Azure OpenAI
+
     NormalizedPromptError:
       type: object
       properties:

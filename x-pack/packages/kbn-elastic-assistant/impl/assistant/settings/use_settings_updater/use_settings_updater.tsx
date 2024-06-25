@@ -8,7 +8,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { Conversation, Prompt, QuickPrompt } from '../../../..';
+import {
+  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+  PromptResponse,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
+import { Conversation } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import type { KnowledgeBaseConfig } from '../../types';
 import {
@@ -23,9 +28,9 @@ interface UseSettingsUpdater {
   conversationsSettingsBulkActions: ConversationsBulkActions;
   updatedAnonymizationData: FindAnonymizationFieldsResponse;
   knowledgeBase: KnowledgeBaseConfig;
-  quickPromptSettings: QuickPrompt[];
+  quickPromptSettings: PromptResponse[];
   resetSettings: () => void;
-  systemPromptSettings: Prompt[];
+  systemPromptSettings: PromptResponse[];
   setUpdatedAnonymizationData: React.Dispatch<
     React.SetStateAction<FindAnonymizationFieldsResponse>
   >;
@@ -37,21 +42,22 @@ interface UseSettingsUpdater {
   setAnonymizationFieldsBulkActions: React.Dispatch<
     React.SetStateAction<PerformBulkActionRequestBody>
   >;
+  promptsBulkActions: PromptsPerformBulkActionRequestBody;
+  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
-  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
-  setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
+  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
+  setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
   setUpdatedAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   saveSettings: () => Promise<boolean>;
 }
 
 export const useSettingsUpdater = (
   conversations: Record<string, Conversation>,
-  anonymizationFields: FindAnonymizationFieldsResponse
+  anonymizationFields: FindAnonymizationFieldsResponse,
+  allSystemPrompts: FindPromptsResponse
 ): UseSettingsUpdater => {
   // Initial state from assistant context
   const {
-    allQuickPrompts,
-    allSystemPrompts,
     assistantTelemetry,
     knowledgeBase,
     assistantStreamingEnabled,
@@ -59,7 +65,6 @@ export const useSettingsUpdater = (
     setKnowledgeBase,
     http,
     toasts,
-    assistantDefaults,
   } = useAssistantContext();
 
   /**
@@ -71,13 +76,20 @@ export const useSettingsUpdater = (
   const [conversationsSettingsBulkActions, setConversationsSettingsBulkActions] =
     useState<ConversationsBulkActions>({});
   // Quick Prompts
-  const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] = useState<QuickPrompt[]>([]);
+  const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] = useState<PromptResponse[]>(
+    allSystemPrompts.data.filter((p) => p.promptType === 'quick')
+  );
   // System Prompts
-  const [updatedSystemPromptSettings, setUpdatedSystemPromptSettings] =
-    useState<Prompt[]>(allSystemPrompts);
+  const [updatedSystemPromptSettings, setUpdatedSystemPromptSettings] = useState<PromptResponse[]>(
+    allSystemPrompts.data.filter((p) => p.promptType === 'system')
+  );
   // Anonymization
   const [anonymizationFieldsBulkActions, setAnonymizationFieldsBulkActions] =
     useState<PerformBulkActionRequestBody>({});
+  // Prompts
+  const [promptsBulkActions, setPromptsBulkActions] = useState<PromptsPerformBulkActionRequestBody>(
+    {}
+  );
   const [updatedAnonymizationData, setUpdatedAnonymizationData] =
     useState<FindAnonymizationFieldsResponse>(anonymizationFields);
   const [updatedAssistantStreamingEnabled, setUpdatedAssistantStreamingEnabled] =
@@ -95,7 +107,7 @@ export const useSettingsUpdater = (
     setUpdatedQuickPromptSettings([]);
     setUpdatedKnowledgeBaseSettings(knowledgeBase);
     setUpdatedAssistantStreamingEnabled(assistantStreamingEnabled);
-    setUpdatedSystemPromptSettings(allSystemPrompts);
+    setUpdatedSystemPromptSettings(allSystemPrompts.data);
     setUpdatedAnonymizationData(anonymizationFields);
   }, [
     allSystemPrompts,
@@ -197,5 +209,7 @@ export const useSettingsUpdater = (
     setUpdatedSystemPromptSettings,
     setConversationSettings,
     setConversationsSettingsBulkActions,
+    promptsBulkActions,
+    setPromptsBulkActions,
   };
 };

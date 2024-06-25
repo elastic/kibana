@@ -16,7 +16,8 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { Conversation, Prompt, QuickPrompt } from '../../..';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
@@ -31,6 +32,7 @@ import {
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
+import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
 
 export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
 export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
@@ -71,9 +73,12 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       selectedSettingsTab,
       setSelectedSettingsTab,
       toasts,
+      currentAppId,
     } = useAssistantContext();
 
     const { data: anonymizationFields } = useFetchAnonymizationFields();
+
+    const { data: allPrompts } = useFetchPrompts({ consumer: currentAppId.getValue() });
 
     // Connector details
     const { data: connectors } = useLoadConnectors({
@@ -104,7 +109,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       resetSettings,
     } = useSettingsUpdater(
       conversations,
-      anonymizationFields ?? { page: 0, perPage: 0, total: 0, data: [] }
+      anonymizationFields ?? { page: 0, perPage: 0, total: 0, data: [] },
+      allPrompts
     );
 
     // Local state for saving previously selected items so tab switching is friendlier
@@ -126,21 +132,21 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     }, [conversationSettings, selectedConversation]);
 
     // Quick Prompt Selection State
-    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt | undefined>();
-    const onHandleSelectedQuickPromptChange = useCallback((quickPrompt?: QuickPrompt) => {
+    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<PromptResponse | undefined>();
+    const onHandleSelectedQuickPromptChange = useCallback((quickPrompt?: PromptResponse) => {
       setSelectedQuickPrompt(quickPrompt);
     }, []);
     useEffect(() => {
       if (selectedQuickPrompt != null) {
         setSelectedQuickPrompt(
-          quickPromptSettings.find((q) => q.title === selectedQuickPrompt.title)
+          quickPromptSettings.find((q) => q.name === selectedQuickPrompt.name)
         );
       }
     }, [quickPromptSettings, selectedQuickPrompt]);
 
     // System Prompt Selection State
-    const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<Prompt | undefined>();
-    const onHandleSelectedSystemPromptChange = useCallback((systemPrompt?: Prompt) => {
+    const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<PromptResponse | undefined>();
+    const onHandleSelectedSystemPromptChange = useCallback((systemPrompt?: PromptResponse) => {
       setSelectedSystemPrompt(systemPrompt);
     }, []);
     useEffect(() => {
