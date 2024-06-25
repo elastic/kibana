@@ -13,6 +13,7 @@ import { getEmptyValue } from '../../../common/components/empty_value';
 import { endpointActionResponseCodes } from '../endpoint_responder/lib/endpoint_action_response_codes';
 import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
 import { KeyValueDisplay } from '../key_value_display';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 const emptyValue = getEmptyValue();
 
@@ -32,6 +33,8 @@ interface EndpointActionFailureMessageProps {
 
 export const EndpointActionFailureMessage = memo<EndpointActionFailureMessageProps>(
   ({ action, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
     return useMemo(() => {
       if (!action.isCompleted || action.wasSuccessful) {
         return null;
@@ -45,6 +48,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
       if (action.outputs || (action.errors && action.errors.length)) {
         for (const agent of action.agents) {
           const endpointAgentOutput = action.outputs?.[agent];
+
           const agentState = action.agentState[agent];
           const hasErrors = agentState && agentState.errors;
           const hasOutputCode: boolean =
@@ -70,7 +74,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
             agentErrorInfo.errors.push(...errorMessages);
           }
 
-          if (agentErrorInfo.errors.length && action.hosts[agent].name) {
+          if (agentErrorInfo.errors.length && action.hosts[agent]?.name) {
             agentErrorInfo.name = action.hosts[agent].name;
           }
 
@@ -80,35 +84,26 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
         }
       }
 
-      if (!allAgentErrors.length) {
-        return (
-          <FormattedMessage
-            id="xpack.securitySolution.endpointActionFailureMessage.unknownFailure"
-            defaultMessage="Unknown error"
-          />
-        );
-      }
-
-      const groupCounts = allAgentErrors.reduce<{ agents: number; errors: number }>(
-        (acc, allErrors) => {
-          acc.agents += allErrors.name.length ? 1 : 0;
-          acc.errors += allErrors.errors.length;
-
-          return acc;
-        },
-        { agents: 0, errors: 0 }
-      );
+      const errorCount = allAgentErrors
+        .map((agentErrorInfo) => agentErrorInfo.errors)
+        .flat().length;
+      const isMultiAgentAction = errorCount && action.agents.length > 1;
 
       return (
-        <div data-test-subj={dataTestSubj}>
+        <div data-test-subj={getTestId('response-action-failure-info')}>
           <FormattedMessage
             id="xpack.securitySolution.endpointResponseActions.actionError.errorMessage"
             defaultMessage="The following { errorCount, plural, =1 {error was} other {errors were}} encountered:"
-            values={{ errorCount: groupCounts.errors }}
+            values={{ errorCount }}
           />
           <EuiSpacer size="s" />
           <>
-            {groupCounts.agents > 1 ? (
+            {!errorCount ? (
+              <FormattedMessage
+                id="xpack.securitySolution.endpointActionFailureMessage.unknownFailure"
+                defaultMessage="An unknown error occurred"
+              />
+            ) : isMultiAgentAction ? (
               allAgentErrors.map((agentErrorInfo) => (
                 <div key={agentErrorInfo.name}>
                   <KeyValueDisplay
@@ -128,16 +123,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
           </>
         </div>
       );
-    }, [
-      action.agentState,
-      action.agents,
-      action.errors,
-      action.hosts,
-      action.isCompleted,
-      action.outputs,
-      action.wasSuccessful,
-      dataTestSubj,
-    ]);
+    }, [action, getTestId]);
   }
 );
 EndpointActionFailureMessage.displayName = 'EndpointActionFailureMessage';
