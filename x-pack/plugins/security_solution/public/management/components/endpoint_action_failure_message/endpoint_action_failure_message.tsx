@@ -31,6 +31,50 @@ interface EndpointActionFailureMessageProps {
   'data-test-subj'?: string;
 }
 
+// logic for determining agent host/errors info
+const getAgentErrors = (action: MaybeImmutable<ActionDetails>) => {
+  const allAgentErrors: Array<{ name: string; errors: string[] }> = [];
+
+  if (action.outputs || (action.errors && action.errors.length)) {
+    for (const agent of action.agents) {
+      const endpointAgentOutput = action.outputs?.[agent];
+
+      const agentState = action.agentState[agent];
+      const hasErrors = agentState && agentState.errors;
+      const hasOutputCode: boolean =
+        !!endpointAgentOutput &&
+        endpointAgentOutput.type === 'json' &&
+        !!endpointAgentOutput.content &&
+        !!endpointAgentOutput.content.code;
+
+      const agentErrorInfo: { name: string; errors: string[] } = { name: '', errors: [] };
+
+      if (
+        hasOutputCode &&
+        !!endpointAgentOutput &&
+        !!endpointActionResponseCodes[endpointAgentOutput.content.code]
+      ) {
+        agentErrorInfo.errors.push(endpointActionResponseCodes[endpointAgentOutput.content.code]);
+      }
+
+      if (hasErrors) {
+        const errorMessages: string[] = [...new Set(agentState.errors)];
+        agentErrorInfo.errors.push(...errorMessages);
+      }
+
+      if (agentErrorInfo.errors.length && action.hosts[agent]?.name) {
+        agentErrorInfo.name = action.hosts[agent].name;
+      }
+
+      if (agentErrorInfo.errors.length) {
+        allAgentErrors.push(agentErrorInfo);
+      }
+    }
+  }
+
+  return allAgentErrors;
+};
+
 export const EndpointActionFailureMessage = memo<EndpointActionFailureMessageProps>(
   ({ action, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -40,49 +84,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
         return null;
       }
 
-      const allAgentErrors: Array<{ name: string; errors: string[] }> = [];
-
-      // Determine if each endpoint returned a response code and if so,
-      // see if we have a localized message for it
-      // if there are multiple agents, we need to show the outputs/error message for each agent
-      if (action.outputs || (action.errors && action.errors.length)) {
-        for (const agent of action.agents) {
-          const endpointAgentOutput = action.outputs?.[agent];
-
-          const agentState = action.agentState[agent];
-          const hasErrors = agentState && agentState.errors;
-          const hasOutputCode: boolean =
-            !!endpointAgentOutput &&
-            endpointAgentOutput.type === 'json' &&
-            !!endpointAgentOutput.content &&
-            !!endpointAgentOutput.content.code;
-
-          const agentErrorInfo: { name: string; errors: string[] } = { name: '', errors: [] };
-
-          if (
-            hasOutputCode &&
-            !!endpointAgentOutput &&
-            !!endpointActionResponseCodes[endpointAgentOutput.content.code]
-          ) {
-            agentErrorInfo.errors.push(
-              endpointActionResponseCodes[endpointAgentOutput.content.code]
-            );
-          }
-
-          if (hasErrors) {
-            const errorMessages: string[] = [...new Set(agentState.errors)];
-            agentErrorInfo.errors.push(...errorMessages);
-          }
-
-          if (agentErrorInfo.errors.length && action.hosts[agent]?.name) {
-            agentErrorInfo.name = action.hosts[agent].name;
-          }
-
-          if (agentErrorInfo.errors.length) {
-            allAgentErrors.push(agentErrorInfo);
-          }
-        }
-      }
+      const allAgentErrors = getAgentErrors(action);
 
       const errorCount = allAgentErrors
         .map((agentErrorInfo) => agentErrorInfo.errors)
