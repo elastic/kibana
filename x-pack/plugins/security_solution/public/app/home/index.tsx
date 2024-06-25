@@ -25,7 +25,6 @@ import { useUpdateExecutionContext } from '../../common/hooks/use_update_executi
 import { useUpgradeSecurityPackages } from '../../detection_engine/rule_management/logic/use_upgrade_security_packages';
 import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_monitoring';
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
-import { AssistantOverlay } from '../../assistant/overlay';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
 
 interface HomePageProps {
@@ -60,7 +59,6 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
             </DragDropContextWrapper>
             <HelpMenu />
             <TopValuesPopover />
-            <AssistantOverlay />
           </>
         </TourContextProvider>
       </ConsoleManager>
