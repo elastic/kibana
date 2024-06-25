@@ -5,8 +5,11 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { NotificationPolicy } from '../../sections/notifications_list/components/create_notification_policy_modal';
+import { INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
+import {
+  NotificationPolicy,
+  NotificationPolicyWithId,
+} from '../../sections/notifications_list/components/create_notification_policy_modal';
 
 export async function createPolicy({
   http,
@@ -14,9 +17,9 @@ export async function createPolicy({
 }: {
   http: HttpSetup;
   policy: NotificationPolicy;
-}): Promise<NotificationPolicy> {
+}): Promise<NotificationPolicyWithId> {
   console.log(`policy ${JSON.stringify(policy)}`);
-  return await http.post<NotificationPolicy>(`${INTERNAL_BASE_ALERTING_API_PATH}/policy`, {
+  return await http.post<NotificationPolicyWithId>(`${INTERNAL_BASE_ACTION_API_PATH}/policy`, {
     body: JSON.stringify(policy),
   });
 }

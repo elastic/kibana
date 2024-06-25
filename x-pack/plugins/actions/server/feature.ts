@@ -49,6 +49,7 @@ export const ACTIONS_FEATURE = {
           ACTION_SAVED_OBJECT_TYPE,
           ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
           CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+          'notification_policy',
         ],
         read: [],
       },

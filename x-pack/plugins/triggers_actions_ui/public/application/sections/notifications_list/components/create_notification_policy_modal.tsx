@@ -31,6 +31,7 @@ import {
   EuiCheckbox,
   EuiButtonGroup,
   EuiButton,
+  EuiFieldText,
 } from '@elastic/eui';
 import { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import { RuleActionParam } from '@kbn/alerting-types';
@@ -52,12 +53,15 @@ interface AlertCondition {
 }
 
 export interface NotificationPolicy {
+  name: string;
   alertType: string[];
   connectors: Array<{ id: string; params: any }>;
   frequency: string;
   throttle?: string;
   conditions: Array<{ type: string; value: string[] }>;
 }
+
+export type NotificationPolicyWithId = NotificationPolicy & { id: string };
 
 export interface CreateNotificationPolicyModalProps {
   connectors: ActionConnector[];
@@ -98,6 +102,7 @@ export const CreateNotificationPolicyModal: React.FC<CreateNotificationPolicyMod
     [dispatch]
   );
 
+  const [name, setName] = useState<string>('');
   const [selectedRunWhenOptions, setSelectedRunWhenOptions] = useState<ComboBoxFieldOption[]>([]);
   const [selectedConnectorsOptions, setSelectedConnectorsOptions] = useState<ComboBoxFieldOption[]>(
     []
@@ -170,24 +175,24 @@ export const CreateNotificationPolicyModal: React.FC<CreateNotificationPolicyMod
   }, [authorizedRuleTypes]);
 
   const onSave = async () => {
-    await createPolicy({
-      http,
-      policy: {
-        alertType: selectedRunWhenOptions.map((option) => option.key),
-        connectors: selectedConnectorsOptions.map((option) => ({
-          id: option.key,
-          params: connectorParams[option.key],
-        })),
-        frequency: selectedCadenceOptions?.[0].key,
-        ...(selectedCadenceOptions?.[0].key === 'onThrottleInterval' && {
-          throttle: `${throttle}${throttleUnit}`,
-        }),
-        conditions: alertConditions.map((condition) => ({
-          type: condition.conditionType![0].key,
-          value: (condition.conditionValue ?? []).map((c) => c.key ?? c.label),
-        })),
-      },
-    });
+    const policy = {
+      name,
+      alertType: selectedRunWhenOptions.map((option) => option.key),
+      connectors: selectedConnectorsOptions.map((option) => ({
+        id: option.key,
+        params: connectorParams[option.key],
+      })),
+      frequency: selectedCadenceOptions?.[0].key,
+      ...(selectedCadenceOptions?.[0].key === 'onThrottleInterval' && {
+        throttle: `${throttle}${throttleUnit}`,
+      }),
+      conditions: alertConditions.map((condition) => ({
+        type: condition.conditionType![0].key,
+        value: (condition.conditionValue ?? []).map((c) => c.key ?? c.label),
+      })),
+    };
+    await createPolicy({ http, policy });
+    onClose();
   };
 
   return (
@@ -227,6 +232,25 @@ export const CreateNotificationPolicyModal: React.FC<CreateNotificationPolicyMod
               marginTop: -euiTheme.size.base /* Offset extra padding for card hover drop shadow */,
             }}
           >
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false} style={{ marginTop: '6px' }}>
+                Name{' '}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFieldText
+                  compressed={true}
+                  autoFocus={true}
+                  name="name"
+                  value={name || ''}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiHorizontalRule />
+            <EuiSpacer size="s" />
             <EuiFlexGroup>
               <EuiFlexItem grow={false} style={{ marginTop: '6px' }}>
                 Send{' '}
