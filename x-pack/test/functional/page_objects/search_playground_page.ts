@@ -89,6 +89,11 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
     },
     PlaygroundChatPage: {
+      async navigateToChatPage(indexName: string) {
+        await comboBox.setCustom('selectIndicesComboBox', indexName);
+        await testSubjects.click('startChatButton');
+      },
+
       async expectChatWindowLoaded() {
         expect(await testSubjects.isEnabled('editContextActionButton')).to.be(true);
         expect(await testSubjects.isEnabled('viewQueryActionButton')).to.be(true);
