@@ -79,21 +79,26 @@ describe(
         }
       });
 
-      it('"scan --path" - should scan a folder', () => {
-        waitForEndpointListPageToBeLoaded(createdHost.hostname);
-        cy.task('createFileOnEndpoint', {
-          hostname: createdHost.hostname,
-          path: filePath,
-          content: fileContent,
+      [
+        ['file', filePath],
+        ['folder', homeFilePath],
+      ].forEach(([type, path]) => {
+        it(`"scan --path" - should scan a ${type}`, () => {
+          waitForEndpointListPageToBeLoaded(createdHost.hostname);
+          cy.task('createFileOnEndpoint', {
+            hostname: createdHost.hostname,
+            path: filePath,
+            content: fileContent,
+          });
+
+          cy.intercept('api/endpoint/action/scan').as('scanAction');
+          openResponseConsoleFromEndpointList();
+          inputConsoleCommand(`scan --path ${path}`);
+          submitCommand();
+          cy.wait('@scanAction', { timeout: 60000 });
+
+          cy.contains('Scan complete').click();
         });
-
-        cy.intercept('api/endpoint/action/scan').as('scanAction');
-        openResponseConsoleFromEndpointList();
-        inputConsoleCommand(`scan --path ${homeFilePath}`);
-        submitCommand();
-        cy.wait('@scanAction', { timeout: 60000 });
-
-        cy.contains('Scan complete').click();
       });
 
       it('"scan --path" - should scan a folder and report errors', () => {
