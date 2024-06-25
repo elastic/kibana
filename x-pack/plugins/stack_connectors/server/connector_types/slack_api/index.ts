@@ -102,6 +102,7 @@ const slackApiExecutor = async ({
   secrets,
   configurationUtilities,
   logger,
+  connectorMetricsService,
 }: SlackApiExecutorOptions): Promise<ActionTypeExecutorResult<unknown>> => {
   const subAction = params.subAction;
 
@@ -130,6 +131,7 @@ const slackApiExecutor = async ({
     return await api.validChannelId({
       externalService,
       params: params.subActionParams,
+      connectorMetricsService,
     });
   }
 
@@ -137,6 +139,7 @@ const slackApiExecutor = async ({
     return await api.postMessage({
       externalService,
       params: params.subActionParams,
+      connectorMetricsService,
     });
   }
 
@@ -144,6 +147,7 @@ const slackApiExecutor = async ({
     return await api.postBlockkit({
       externalService,
       params: params.subActionParams,
+      connectorMetricsService,
     });
   }
 

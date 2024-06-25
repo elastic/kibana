@@ -16,6 +16,7 @@ import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/se
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { ConnectorMetricsService } from './connector_metrics_service';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateConfig,
@@ -381,6 +382,7 @@ export class ActionExecutor {
       },
       async (span) => {
         const { actionTypeRegistry, eventLogger } = this.actionExecutorContext!;
+        const connectorMetricsService = new ConnectorMetricsService();
 
         const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
@@ -502,6 +504,7 @@ export class ActionExecutor {
             logger,
             source,
             ...(actionType.isSystemActionType ? { request } : {}),
+            connectorMetricsService,
           });
 
           if (rawResult && rawResult.status === 'error') {

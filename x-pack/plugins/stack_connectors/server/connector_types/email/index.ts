@@ -365,7 +365,12 @@ async function executor(
   let result;
 
   try {
-    result = await sendEmail(logger, sendEmailOptions, connectorTokenClient);
+    result = await sendEmail(
+      logger,
+      sendEmailOptions,
+      connectorTokenClient,
+      execOptions.connectorMetricsService
+    );
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.email.errorSendingErrorMessage', {
       defaultMessage: 'error sending email',

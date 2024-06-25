@@ -11,7 +11,10 @@ import { Logger } from '@kbn/core/server';
 import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import {
+  combineHeadersWithBasicAuthHeader,
+  ConnectorMetricsService,
+} from '@kbn/actions-plugin/server/lib';
 import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 import {
@@ -96,7 +99,10 @@ export const createExternalService = (
 
   const createIncidentUrl = removeSlash(createIncidentUrlConfig);
 
-  const getIncident = async (id: string): Promise<GetIncidentResponse> => {
+  const getIncident = async (
+    id: string,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<GetIncidentResponse> => {
     try {
       const getUrl = renderMustacheStringNoEscape(getIncidentUrl, {
         external: {
@@ -117,6 +123,7 @@ export const createExternalService = (
         logger,
         configurationUtilities,
         sslOverrides,
+        connectorMetricsService,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -131,9 +138,10 @@ export const createExternalService = (
     }
   };
 
-  const createIncident = async ({
-    incident,
-  }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
+  const createIncident = async (
+    { incident }: CreateIncidentParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<ExternalServiceIncidentResponse> => {
     try {
       const { description, id, severity, status: incidentStatus, tags, title } = incident;
       const normalizedUrl = validateAndNormalizeUrl(
@@ -162,6 +170,7 @@ export const createExternalService = (
         data: json,
         configurationUtilities,
         sslOverrides,
+        connectorMetricsService,
       });
 
       const { status, statusText, data } = res;
@@ -171,7 +180,7 @@ export const createExternalService = (
         requiredAttributesToBeInTheResponse: [createIncidentResponseKey],
       });
       const externalId = getObjectValueByKeyAsString(data, createIncidentResponseKey)!;
-      const insertedIncident = await getIncident(externalId);
+      const insertedIncident = await getIncident(externalId, connectorMetricsService);
 
       logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
 
@@ -199,10 +208,10 @@ export const createExternalService = (
     }
   };
 
-  const updateIncident = async ({
-    incidentId,
-    incident,
-  }: UpdateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
+  const updateIncident = async (
+    { incidentId, incident }: UpdateIncidentParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<ExternalServiceIncidentResponse> => {
     try {
       const updateUrl = renderMustacheStringNoEscape(updateIncidentUrl, {
         external: {
@@ -246,13 +255,14 @@ export const createExternalService = (
         data: json,
         configurationUtilities,
         sslOverrides,
+        connectorMetricsService,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
         res,
       });
 
-      const updatedIncident = await getIncident(incidentId as string);
+      const updatedIncident = await getIncident(incidentId as string, connectorMetricsService);
 
       const viewUrl = renderMustacheStringNoEscape(viewIncidentUrl, {
         external: {
@@ -280,7 +290,10 @@ export const createExternalService = (
     }
   };
 
-  const createComment = async ({ incidentId, comment }: CreateCommentParams): Promise<unknown> => {
+  const createComment = async (
+    { incidentId, comment }: CreateCommentParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<unknown> => {
     try {
       if (!createCommentUrl || !createCommentJson || !createCommentMethod) {
         return;
@@ -319,6 +332,7 @@ export const createExternalService = (
         data: json,
         configurationUtilities,
         sslOverrides,
+        connectorMetricsService,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({

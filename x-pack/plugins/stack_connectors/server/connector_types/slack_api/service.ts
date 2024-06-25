@@ -13,6 +13,7 @@ import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
+import { ConnectorMetricsService } from '@kbn/actions-plugin/server/types';
 import { SLACK_CONNECTOR_NAME } from './translations';
 import type {
   PostMessageSubActionParams,
@@ -128,7 +129,8 @@ export const createExternalService = (
   };
 
   const validChannelId = async (
-    channelId: string
+    channelId: string,
+    connectorMetricsService: ConnectorMetricsService
   ): Promise<ConnectorTypeExecutorResult<ValidChannelResponse | void>> => {
     try {
       const validChannel = (): Promise<AxiosResponse<ValidChannelResponse>> => {
@@ -139,6 +141,7 @@ export const createExternalService = (
           method: 'get',
           headers,
           url: `${SLACK_URL}conversations.info?channel=${channelId}`,
+          connectorMetricsService,
         });
       };
       if (channelId.length === 0) {
@@ -191,11 +194,10 @@ export const createExternalService = (
     return channelToUse;
   };
 
-  const postMessage = async ({
-    channels,
-    channelIds = [],
-    text,
-  }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
+  const postMessage = async (
+    { channels, channelIds = [], text }: PostMessageSubActionParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
       const channelToUse = getChannelToUse({ channels, channelIds });
 
@@ -207,6 +209,7 @@ export const createExternalService = (
         data: { channel: channelToUse, text },
         headers,
         configurationUtilities,
+        connectorMetricsService,
       });
 
       return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
@@ -215,11 +218,10 @@ export const createExternalService = (
     }
   };
 
-  const postBlockkit = async ({
-    channels,
-    channelIds = [],
-    text,
-  }: PostBlockkitSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
+  const postBlockkit = async (
+    { channels, channelIds = [], text }: PostBlockkitSubActionParams,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
       const channelToUse = getChannelToUse({ channels, channelIds });
       const blockJson = JSON.parse(text);
@@ -232,6 +234,7 @@ export const createExternalService = (
         data: { channel: channelToUse, blocks: blockJson.blocks },
         headers,
         configurationUtilities,
+        connectorMetricsService,
       });
 
       return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });

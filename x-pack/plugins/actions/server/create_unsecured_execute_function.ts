@@ -27,7 +27,10 @@ interface CreateBulkUnsecuredExecuteFunctionOptions {
 }
 
 export interface ExecuteOptions
-  extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects'> {
+  extends Pick<
+    ActionExecutorOptions,
+    'params' | 'source' | 'relatedSavedObjects' | 'connectorMetricsService'
+  > {
   id: string;
 }
 

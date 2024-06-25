@@ -17,7 +17,11 @@ import {
   getNodeSSLOptions,
   getSSLSettingsFromConfig,
 } from '@kbn/actions-plugin/server/lib/get_node_ssl_options';
-import { ConnectorTokenClientContract, ProxySettings } from '@kbn/actions-plugin/server/types';
+import {
+  ConnectorMetricsService,
+  ConnectorTokenClientContract,
+  ProxySettings,
+} from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
@@ -66,7 +70,8 @@ export interface Content {
 export async function sendEmail(
   logger: Logger,
   options: SendEmailOptions,
-  connectorTokenClient: ConnectorTokenClientContract
+  connectorTokenClient: ConnectorTokenClientContract,
+  connectorMetricsService: ConnectorMetricsService
 ): Promise<unknown> {
   const { transport, content } = options;
   const { message, messageHTML } = content;
@@ -74,9 +79,15 @@ export async function sendEmail(
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
 
   if (transport.service === AdditionalEmailServices.EXCHANGE) {
-    return await sendEmailWithExchange(logger, options, renderedMessage, connectorTokenClient);
+    return await sendEmailWithExchange(
+      logger,
+      options,
+      renderedMessage,
+      connectorTokenClient,
+      connectorMetricsService
+    );
   } else {
-    return await sendEmailWithNodemailer(logger, options, renderedMessage);
+    return await sendEmailWithNodemailer(logger, options, renderedMessage, connectorMetricsService);
   }
 }
 
@@ -85,7 +96,8 @@ export async function sendEmailWithExchange(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
-  connectorTokenClient: ConnectorTokenClientContract
+  connectorTokenClient: ConnectorTokenClientContract,
+  connectorMetricsService: ConnectorMetricsService
 ): Promise<unknown> {
   const { transport, configurationUtilities, connectorId } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
@@ -155,6 +167,7 @@ export async function sendEmailWithExchange(
     },
     logger,
     configurationUtilities,
+    connectorMetricsService,
     axiosInstance
   );
 }
@@ -163,7 +176,8 @@ export async function sendEmailWithExchange(
 async function sendEmailWithNodemailer(
   logger: Logger,
   options: SendEmailOptions,
-  messageHTML: string
+  messageHTML: string,
+  connectorMetricsService: ConnectorMetricsService
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;

@@ -24,6 +24,7 @@ import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { inspect } from 'util';
+import { ConnectorMetricsService } from '../lib';
 import { assertURL } from './helpers/validators';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SubAction, SubActionRequestParams } from './types';
@@ -130,15 +131,18 @@ export abstract class SubActionConnector<Config, Secrets> {
 
   protected abstract getResponseErrorMessage(error: AxiosError): string;
 
-  protected async request<R>({
-    url,
-    data,
-    method = 'get',
-    responseSchema,
-    headers,
-    timeout,
-    ...config
-  }: SubActionRequestParams<R>): Promise<AxiosResponse<R>> {
+  protected async request<R>(
+    {
+      url,
+      data,
+      method = 'get',
+      responseSchema,
+      headers,
+      timeout,
+      ...config
+    }: SubActionRequestParams<R>,
+    connectorMetricsService: ConnectorMetricsService
+  ): Promise<AxiosResponse<R>> {
     try {
       this.assertURL(url);
       this.ensureUriAllowed(url);
@@ -149,6 +153,7 @@ export abstract class SubActionConnector<Config, Secrets> {
       );
 
       const { auth, ...restConfig } = config;
+      const normalizedData = this.normalizeData(data);
 
       const res = await request({
         ...restConfig,
@@ -156,10 +161,11 @@ export abstract class SubActionConnector<Config, Secrets> {
         url: normalizedURL,
         logger: this.logger,
         method,
-        data: this.normalizeData(data),
+        data: normalizedData,
         configurationUtilities: this.configurationUtilities,
         headers: this.getHeaders(auth, headers as AxiosHeaders),
         timeout,
+        connectorMetricsService,
       });
 
       this.validateResponse(responseSchema, res.data);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ConnectorMetricsService } from '@kbn/actions-plugin/server/lib';
 import type {
   PostMessageSubActionParams,
   PostBlockkitSubActionParams,
@@ -15,26 +16,32 @@ import type {
 const validChannelIdHandler = async ({
   externalService,
   params: { channelId },
+  connectorMetricsService,
 }: {
   externalService: SlackApiService;
   params: ValidChannelIdSubActionParams;
-}) => await externalService.validChannelId(channelId ?? '');
+  connectorMetricsService: ConnectorMetricsService;
+}) => await externalService.validChannelId(channelId ?? '', connectorMetricsService);
 
 const postMessageHandler = async ({
   externalService,
   params: { channelIds, channels, text },
+  connectorMetricsService,
 }: {
   externalService: SlackApiService;
   params: PostMessageSubActionParams;
-}) => await externalService.postMessage({ channelIds, channels, text });
+  connectorMetricsService: ConnectorMetricsService;
+}) => await externalService.postMessage({ channelIds, channels, text }, connectorMetricsService);
 
 const postBlockkitHandler = async ({
   externalService,
   params: { channelIds, channels, text },
+  connectorMetricsService,
 }: {
   externalService: SlackApiService;
   params: PostBlockkitSubActionParams;
-}) => await externalService.postBlockkit({ channelIds, channels, text });
+  connectorMetricsService: ConnectorMetricsService;
+}) => await externalService.postBlockkit({ channelIds, channels, text }, connectorMetricsService);
 
 export const api = {
   validChannelId: validChannelIdHandler,
