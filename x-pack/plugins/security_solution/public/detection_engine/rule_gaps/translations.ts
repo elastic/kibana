@@ -31,7 +31,7 @@ export const BACKFILLS_TABLE_COLUMN_CREATED_AT = i18n.translate(
 export const BACKFILLS_TABLE_COLUMN_CREATED_AT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.rule_gaps.backfillsTable.column.createdAtTooltip',
   {
-    defaultMessage: 'When the manual run was started',
+    defaultMessage: 'When the manual run started',
   }
 );
 
