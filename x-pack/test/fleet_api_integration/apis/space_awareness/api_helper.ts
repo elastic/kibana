@@ -197,6 +197,19 @@ export class SpaceTestApiClient {
 
     return res;
   }
+  async deletePackageKibanaAssets(
+    { pkgName, pkgVersion }: { pkgName: string; pkgVersion: string },
+    spaceId?: string
+  ) {
+    const { body: res } = await this.supertest
+      .delete(
+        `${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}/kibana_assets`
+      )
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+
+    return res;
+  }
   async installPackageKibanaAssets(
     { pkgName, pkgVersion }: { pkgName: string; pkgVersion: string },
     spaceId?: string

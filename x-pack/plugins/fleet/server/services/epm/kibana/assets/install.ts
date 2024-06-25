@@ -30,7 +30,7 @@ import {
 } from '../index_pattern/install';
 import { kibanaAssetsToAssetsRef, saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
-import { KibanaSOReferenceError } from '../../../../errors';
+import { FleetError, KibanaSOReferenceError } from '../../../../errors';
 import { appContextService } from '../../../app_context';
 import { withPackageSpan } from '../../packages/utils';
 
@@ -339,7 +339,7 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
   }
 
   if (installedPkg.attributes.installed_kibana_space_id === spaceId) {
-    throw new Error(
+    throw new FleetError(
       'Impossible to delete kibana assets from the space where the package was installed, you must uninstall the package.'
     );
   }

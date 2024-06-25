@@ -40,7 +40,7 @@ export default function (providerContext: FtrProviderContext) {
 
     setupTestSpaces(providerContext);
 
-    describe('POST /epm/packages/{name}/{version}/kibana_assets', () => {
+    describe('kibana_assets', () => {
       describe('with package installed in default space', () => {
         before(async () => {
           await kibanaServer.savedObjects.cleanStandardList();
@@ -117,6 +117,32 @@ export default function (providerContext: FtrProviderContext) {
             TEST_SPACE_1
           ]!.find((asset) => asset.originId === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519');
           expect(dashboard).not.eql(undefined);
+        });
+
+        it('should not allow to delete kibana assets from default space', async () => {
+          let err: Error | undefined;
+          try {
+            await apiClient.deletePackageKibanaAssets({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          } catch (_err) {
+            err = _err;
+          }
+          expect(err).to.be.an(Error);
+          expect(err?.message).to.match(/400 "Bad Request"/);
+        });
+
+        it('should allow to delete kibana assets from test space', async () => {
+          await apiClient.deletePackageKibanaAssets(
+            { pkgName: 'nginx', pkgVersion: '1.20.0' },
+            TEST_SPACE_1
+          );
+
+          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          if (!('installationInfo' in res.item)) {
+            throw new Error('not installed');
+          }
+          expect(
+            Object.keys(res.item.installationInfo?.additionnal_spaces_installed_kibana ?? {})
+          ).eql([]);
         });
       });
 

@@ -95,7 +95,7 @@ export const deletePackageKibanaAssetsHandler: FleetRequestHandler<
     });
 
     if (!installation || installation.attributes.version !== pkgVersion) {
-      throw new Error('Version is not installed');
+      throw new FleetNotFoundError('Version is not installed');
     }
 
     await deleteKibanaAssetsAndReferencesForSpace({
