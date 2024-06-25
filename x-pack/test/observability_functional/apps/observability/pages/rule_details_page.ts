@@ -165,7 +165,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('handles clicking on active alerts correctly', async () => {
         const activeAlerts =
-          await observability.components.alertSummaryWidget.getCompactActiveAlertSelector();
+          await observability.components.alertSummaryWidget.getActiveAlertSelector();
         await activeAlerts.click();
 
         const url = await browser.getCurrentUrl();
@@ -178,9 +178,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
       });
 
-      it('handles clicking on all alerts correctly', async () => {
+      it('handles clicking on total alerts correctly', async () => {
         const totalAlerts =
-          await observability.components.alertSummaryWidget.getCompactTotalAlertSelector();
+          await observability.components.alertSummaryWidget.getTotalAlertSelector();
         await totalAlerts.click();
 
         const url = await browser.getCurrentUrl();
