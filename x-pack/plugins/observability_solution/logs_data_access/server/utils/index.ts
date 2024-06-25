@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import moment from 'moment/moment';
+import { calculateAuto } from '@kbn/calculate-auto';
+
 export function getBucketSizeFromTimeRangeAndBucketCount(
   timeFrom: number,
   timeTo: number,
   numBuckets: number
 ): number {
-  return Math.max(Math.floor((timeTo - timeFrom) / numBuckets), 1);
+  const duration = moment.duration(timeTo - timeFrom, 'ms');
+
+  return Math.max(calculateAuto.near(numBuckets, duration)?.asSeconds() ?? 0, 60);
 }
 
 export function getLogRatePerMinute({

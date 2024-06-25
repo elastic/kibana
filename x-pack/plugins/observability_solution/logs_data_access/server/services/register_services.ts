@@ -7,7 +7,8 @@
 
 import { Logger } from '@kbn/logging';
 import { createGetLogsRatesService } from './get_logs_rates_service';
-import { createGetLogsRateTimeseries } from './get_log_rate_timeseries';
+import { createGetLogsRateTimeseries } from './get_logs_rate_timeseries/get_logs_rate_timeseries';
+import { createGetLogErrorRateTimeseries } from './get_logs_error_rate_timeseries/get_logs_error_rate_timeseries';
 
 export interface RegisterServicesParams {
   logger: Logger;
@@ -18,6 +19,6 @@ export function registerServices(params: RegisterServicesParams) {
   return {
     getLogsRatesService: createGetLogsRatesService(params),
     getLogsRateTimeseries: createGetLogsRateTimeseries(params),
-    // getLogErrorRateTimeseries: createGetLogErrorRateTimeseries(params),
+    getLogsErrorRateTimeseries: createGetLogErrorRateTimeseries(params),
   };
 }
