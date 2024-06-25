@@ -11,7 +11,7 @@ import {
   AnonymizationFieldResponse,
   AnonymizationFieldUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import {
   CreateAnonymizationFieldSchema,
   EsAnonymizationFieldsSchema,

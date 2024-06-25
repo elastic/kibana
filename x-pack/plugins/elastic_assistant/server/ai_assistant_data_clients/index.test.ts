@@ -6,7 +6,7 @@
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '.';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 
 const date = '2023-03-28T22:27:28.159Z';
 let logger: ReturnType<typeof loggingSystemMock['createLogger']>;

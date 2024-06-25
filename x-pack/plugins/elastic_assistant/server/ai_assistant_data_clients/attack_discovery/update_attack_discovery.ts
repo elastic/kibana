@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryResponse,
   AttackDiscoveryStatus,
@@ -13,7 +13,6 @@ import {
   Provider,
   UUID,
 } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import * as uuid from 'uuid';
 import { EsReplacementSchema } from '../conversations/types';
 import { getAttackDiscovery } from './get_attack_discovery';

@@ -10,7 +10,7 @@ import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typ
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { conversationsDataClientMock } from '../__mocks__/data_clients.mock';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';

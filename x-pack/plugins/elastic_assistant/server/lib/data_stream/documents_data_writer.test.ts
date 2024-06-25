@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   getCreateConversationSchemaMock,
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { DocumentsDataWriter } from './documents_data_writer';
 
 describe('DocumentsDataWriter', () => {
