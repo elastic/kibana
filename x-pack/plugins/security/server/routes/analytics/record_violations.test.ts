@@ -95,7 +95,7 @@ describe('POST /internal/security/analytics/_record_violations', () => {
       user_agent: 'jest',
       body: {
         disposition: 'report',
-        featureId: 'camera',
+        policyId: 'camera',
       },
     };
 
