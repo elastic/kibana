@@ -20,6 +20,7 @@ export {
   setManaged,
   normalizeNamespace,
   getSavedObjectNamespaces,
+  getRawDocNamespacesFromSource,
   type GetSavedObjectFromSourceOptions,
 } from './internal_utils';
 export { type Left, type Either, type Right, isLeft, isRight, left, right } from './either';
