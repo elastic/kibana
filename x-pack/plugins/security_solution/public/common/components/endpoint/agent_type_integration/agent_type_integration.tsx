@@ -26,15 +26,16 @@ const INTEGRATION_SECTION_LABEL = i18n.translate(
 export interface AgentTypeIntegrationProps {
   agentType: ResponseActionAgentType;
   textSize?: EuiTextProps['size'];
+  layout?: 'vertical' | 'horizontal';
   'data-test-subj'?: string;
 }
 
 export const AgentTypeIntegration = memo<AgentTypeIntegrationProps>(
-  ({ agentType, textSize = 's', 'data-test-subj': dataTestSubj }) => {
+  ({ agentType, textSize = 's', layout = 'vertical', 'data-test-subj': dataTestSubj }) => {
     const testId = useTestIdGenerator(dataTestSubj);
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction={layout === 'horizontal' ? 'row' : 'column'} gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size={textSize} data-test-subj={testId('label')}>
             {INTEGRATION_SECTION_LABEL}&nbsp;
@@ -45,7 +46,7 @@ export const AgentTypeIntegration = memo<AgentTypeIntegrationProps>(
                   defaultMessage="The integration used to execute response actions on this host"
                 />
               }
-              position="right"
+              position={layout === 'horizontal' ? 'bottom' : 'right'}
             />
           </EuiText>
         </EuiFlexItem>
