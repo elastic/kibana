@@ -24,7 +24,7 @@ import {
   ServiceConnectionNode,
 } from '../../../common/service_map';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { calculateDocsPerShard } from './utils/calculate_docs_per_shard';
+import { calculateDocsPerShard } from './calculate_docs_per_shard';
 
 const SCRIPTED_METRICS_FIELDS_TO_COPY = [
   PARENT_ID,
