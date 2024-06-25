@@ -11,13 +11,11 @@ import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 import {
   AgentStatus,
   EndpointAgentStatusById,
-} from '../../../../common/components/agents/agent_status';
-import { CROWDSTRIKE_AGENT_ID_FIELD } from '../../../../common/utils/crowdstrike_alert_check';
-import { useRightPanelContext } from '../context';
+} from '../../../../common/components/endpoint/agents/agent_status';
+import { useDocumentDetailsContext } from '../../shared/context';
 import {
   AGENT_STATUS_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
@@ -32,6 +30,7 @@ import {
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../common/endpoint/service/response_actions/constants';
 
 interface LinkFieldCellProps {
   /**
@@ -45,7 +44,7 @@ interface LinkFieldCellProps {
  * // Currently we can use the same component for both host name and username
  */
 const LinkFieldCell: VFC<LinkFieldCellProps> = ({ value }) => {
-  const { scopeId, eventId, indexName } = useRightPanelContext();
+  const { scopeId, eventId, indexName } = useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToInsightsEntities = useCallback(() => {
@@ -117,11 +116,11 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
   originalField,
 }) => {
   const isSentinelOneAgentIdField = useMemo(
-    () => originalField === SENTINEL_ONE_AGENT_ID_FIELD,
+    () => originalField === RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
     [originalField]
   );
   const isCrowdstrikeAgentIdField = useMemo(
-    () => originalField === CROWDSTRIKE_AGENT_ID_FIELD,
+    () => originalField === RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
     [originalField]
   );
   const agentType: ResponseActionAgentType = useMemo(() => {

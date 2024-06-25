@@ -86,7 +86,7 @@ export class PackagePolicyBackupHelper {
       namespace: this.originalPackagePolicy.namespace,
       enabled: this.originalPackagePolicy.enabled,
       inputs: this.originalPackagePolicy.inputs,
-      policy_id: this.originalPackagePolicy.policy_id,
+      policy_ids: this.originalPackagePolicy.policy_ids,
     };
 
     request<UpdatePackagePolicyResponse>({

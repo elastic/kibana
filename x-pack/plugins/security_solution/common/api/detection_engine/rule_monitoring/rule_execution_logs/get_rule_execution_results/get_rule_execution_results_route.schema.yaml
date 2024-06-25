@@ -5,8 +5,10 @@ info:
 paths:
   /internal/detection_engine/rules/{ruleId}/execution/results:
     put:
-      operationId: GetRuleExecutionResults
+      x-labels: [ess, serverless]
+      x-internal: true
       x-codegen-enabled: true
+      operationId: GetRuleExecutionResults
       summary: Returns execution results of a given rule (aggregated by execution UUID) from Event Log.
       tags:
         - Rule Execution Log API

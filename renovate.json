@@ -46,7 +46,7 @@
     },
     {
       "groupName": "LaunchDarkly",
-      "matchDepNames": ["launchdarkly-js-client-sdk", "launchdarkly-node-server-sdk"],
+      "matchDepNames": ["launchdarkly-js-client-sdk", "@launchdarkly/node-server-sdk"],
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Security", "Team:Core", "backport:prev-minor"],
@@ -426,6 +426,14 @@
       "labels": ["Team:ESQL", "release_note:skip"],
       "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "MSW",
+      "matchPackageNames": ["msw"],
+      "reviewers": ["team:kibana-cloud-security-posture"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team: Cloud Security", "release_note:skip", "backport:skip"],
       "enabled": true
     }
   ]
