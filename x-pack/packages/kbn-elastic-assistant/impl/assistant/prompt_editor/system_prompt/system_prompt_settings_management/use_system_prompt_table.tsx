@@ -13,7 +13,7 @@ import { RowActions } from '../../../common/components/assistant_settings_manage
 import { Prompt } from '../../../types';
 import {
   getConversationApiConfig,
-  getDefaultSystemPrompt,
+  getInitialDefaultSystemPrompt,
 } from '../../../use_conversation/helpers';
 import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../system_prompt_modal/translations';
 import * as i18n from './translations';
@@ -52,9 +52,10 @@ export const useSystemPromptTable = () => {
         ) : null,
     },
     {
-      field: 'defaultConversations',
       name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_DEFAULT_CONVERSATIONS,
-      render: (defaultConversations: string[]) => <BadgesColumn items={defaultConversations} />,
+      render: ({ defaultConversations, id }: SystemPromptTableItem) => (
+        <BadgesColumn items={defaultConversations} prefix={id} />
+      ),
     },
     /* TODO: enable when createdAt is added
       {
@@ -93,10 +94,11 @@ export const useSystemPromptTable = () => {
     const conversationsWithApiConfig = Object.entries(
       conversationSettings
     ).reduce<ConversationsWithSystemPrompt>((acc, [key, conversation]) => {
-      const defaultSystemPrompt = getDefaultSystemPrompt({
+      const defaultSystemPrompt = getInitialDefaultSystemPrompt({
         allSystemPrompts: systemPromptSettings,
         conversation,
       });
+
       acc[key] = {
         ...conversation,
         ...getConversationApiConfig({
@@ -109,7 +111,6 @@ export const useSystemPromptTable = () => {
       };
       return acc;
     }, {});
-
     return systemPromptSettings.map((systemPrompt) => {
       return {
         ...systemPrompt,

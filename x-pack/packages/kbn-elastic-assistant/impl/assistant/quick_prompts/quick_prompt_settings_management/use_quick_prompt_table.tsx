@@ -9,15 +9,18 @@ import { EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { BadgesColumn } from '../../common/components/assistant_settings_management/badges';
 import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
+import { PromptContextTemplate } from '../../prompt_context/types';
 import { QuickPrompt } from '../types';
 import * as i18n from './translations';
 
 export const useQuickPromptTable = () => {
   const getColumns = useCallback(
     ({
+      basePromptContexts,
       onEditActionClicked,
       onDeleteActionClicked,
     }: {
+      basePromptContexts: PromptContextTemplate[];
       onEditActionClicked: (prompt: QuickPrompt) => void;
       onDeleteActionClicked: (prompt: QuickPrompt) => void;
     }) => [
@@ -29,9 +32,17 @@ export const useQuickPromptTable = () => {
           ) : null,
       },
       {
-        field: 'categories',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CONTEXTS,
-        render: (categories: QuickPrompt['categories']) => <BadgesColumn items={categories} />,
+        render: (prompt: QuickPrompt) => {
+          const selectedPromptContexts = (
+            basePromptContexts.filter((bpc) =>
+              prompt?.categories?.some((cat) => bpc?.category === cat)
+            ) ?? []
+          ).map((bpc) => bpc?.description);
+          return selectedPromptContexts ? (
+            <BadgesColumn items={selectedPromptContexts} prefix={prompt.title} />
+          ) : null;
+        },
       },
       /* TODO: enable when createdAt is added
       {
@@ -43,6 +54,9 @@ export const useQuickPromptTable = () => {
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_ACTIONS,
         width: '120px',
         render: (prompt: QuickPrompt) => {
+          if (!prompt) {
+            return null;
+          }
           const isDeletable = !prompt.isDefault;
           return (
             <RowActions<QuickPrompt>

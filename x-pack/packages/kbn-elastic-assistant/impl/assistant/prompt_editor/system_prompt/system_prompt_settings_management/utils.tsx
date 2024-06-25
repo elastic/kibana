@@ -7,7 +7,6 @@
 
 import { Conversation } from '../../../../assistant_context/types';
 import { Prompt } from '../../../types';
-import { getDefaultSystemPrompt } from '../../../use_conversation/helpers';
 
 export const getSelectedConversations = (
   allSystemPrompts: Prompt[],
@@ -15,10 +14,9 @@ export const getSelectedConversations = (
   systemPromptId: string
 ) => {
   return Object.values(conversationSettings).filter((conversation) => {
-    const defaultSystemPrompt = getDefaultSystemPrompt({
-      allSystemPrompts,
-      conversation,
-    });
-    return defaultSystemPrompt?.id === systemPromptId;
+    const conversationSystemPrompt = allSystemPrompts.find(
+      (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
+    );
+    return conversationSystemPrompt?.id === systemPromptId;
   });
 };

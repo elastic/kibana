@@ -28,10 +28,7 @@ import { TEST_IDS } from '../../../constants';
 import { ConversationsBulkActions } from '../../../api';
 import { getSelectedConversations } from '../system_prompt_settings_management/utils';
 import { useSystemPromptEditor } from './use_system_prompt_editor';
-import {
-  getConversationApiConfig,
-  getDefaultNewSystemPrompt,
-} from '../../../use_conversation/helpers';
+import { getConversationApiConfig } from '../../../use_conversation/helpers';
 
 interface Props {
   connectors: AIConnector[] | undefined;
@@ -137,7 +134,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
           ? // remove the default System Prompt if it is assigned to a conversation
             // but that conversation is not in the currentPromptConversationList
             // This means conversation was removed in the current transaction
-            getDefaultNewSystemPrompt(systemPromptSettings).id
+            systemPromptSettings?.[0].id
           : //  leave it as it is .. if that conversation was neither added nor removed.
             convo.apiConfig?.defaultSystemPromptId;
 
@@ -216,6 +213,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
                   },
                 }
               : {};
+
           updatedConversationsSettingsBulkActions = {
             ...updatedConversationsSettingsBulkActions,
             ...createOperation,

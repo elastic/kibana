@@ -79,7 +79,7 @@ export const getDefaultNewSystemPrompt = (allSystemPrompts: Prompt[]) =>
   allSystemPrompts.find((prompt) => prompt.isNewConversationDefault) ?? allSystemPrompts?.[0];
 
 /**
- * Returns the default system prompt for a given conversation
+ * Returns the default system prompt for a given (New Custom) conversation
  *
  * @param allSystemPrompts All available System Prompts
  * @param conversation Conversation to get the default system prompt for
@@ -97,6 +97,26 @@ export const getDefaultSystemPrompt = ({
   const defaultNewSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
 
   return conversationSystemPrompt ?? defaultNewSystemPrompt;
+};
+
+/**
+ * Returns the default system prompt for an existing conversation that has never been given a system prompt
+ *
+ * @param allSystemPrompts All available System Prompts
+ * @param conversation Conversation to get the default system prompt for
+ */
+export const getInitialDefaultSystemPrompt = ({
+  allSystemPrompts,
+  conversation,
+}: {
+  allSystemPrompts: Prompt[];
+  conversation: Conversation | undefined;
+}): Prompt | undefined => {
+  const conversationSystemPrompt = allSystemPrompts.find(
+    (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
+  );
+
+  return conversationSystemPrompt ?? allSystemPrompts?.[0];
 };
 
 /**
@@ -122,10 +142,15 @@ export const getConversationApiConfig = ({
     connectors?.find((c) => c.id === conversation.apiConfig?.connectorId) ?? defaultConnector;
   const connectorModel = getGenAiConfig(connector)?.defaultModel;
 
-  const defaultSystemPrompt = getDefaultSystemPrompt({
-    allSystemPrompts,
-    conversation,
-  });
+  const defaultSystemPrompt = conversation.apiConfig?.defaultSystemPromptId
+    ? getDefaultSystemPrompt({
+        allSystemPrompts,
+        conversation,
+      })
+    : getInitialDefaultSystemPrompt({
+        allSystemPrompts,
+        conversation,
+      });
   return connector
     ? {
         apiConfig: {

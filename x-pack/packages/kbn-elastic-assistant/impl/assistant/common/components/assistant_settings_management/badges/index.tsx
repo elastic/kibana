@@ -8,16 +8,16 @@
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 
-export const BadgesColumn: React.FC<{ items: string[] | null | undefined }> = React.memo(
-  ({ items }) =>
+export const BadgesColumn: React.FC<{ items: string[] | null | undefined; prefix: string }> =
+  React.memo(({ items, prefix }) =>
     items && items.length > 0 ? (
       <div>
         {items.map((c, idx) => (
-          <EuiBadge id={`${idx}`} color="hollow">
+          <EuiBadge key={`${prefix}-${idx}`} color="hollow">
             {c}
           </EuiBadge>
         ))}
       </div>
     ) : null
-);
+  );
 BadgesColumn.displayName = 'BadgesColumn';

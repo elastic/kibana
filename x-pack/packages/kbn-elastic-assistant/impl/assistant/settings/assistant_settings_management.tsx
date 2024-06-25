@@ -62,6 +62,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     const {
       actionTypeRegistry,
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
+      basePromptContexts,
       http,
       navigateToApp,
       selectedSettingsTab,
@@ -289,6 +290,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           )}
           {selectedSettingsTab === QUICK_PROMPTS_TAB && (
             <QuickPromptSettingsManagement
+              basePromptContexts={basePromptContexts}
               quickPromptSettings={quickPromptSettings}
               onSelectedQuickPromptChange={onHandleSelectedQuickPromptChange}
               selectedQuickPrompt={selectedQuickPrompt}

@@ -23,8 +23,10 @@ import { CANCEL, DELETE } from '../../settings/translations';
 import { useQuickPromptEditor } from '../quick_prompt_settings/use_quick_prompt_editor';
 import { useQuickPromptTable } from './use_quick_prompt_table';
 import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE } from '../../settings/const';
+import { PromptContextTemplate } from '../../prompt_context/types';
 
 interface Props {
+  basePromptContexts: PromptContextTemplate[];
   onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
   quickPromptSettings: QuickPrompt[];
   selectedQuickPrompt: QuickPrompt | undefined;
@@ -34,6 +36,7 @@ interface Props {
 }
 
 const QuickPromptSettingsManagementComponent = ({
+  basePromptContexts,
   onSelectedQuickPromptChange,
   quickPromptSettings,
   selectedQuickPrompt,
@@ -101,6 +104,7 @@ const QuickPromptSettingsManagementComponent = ({
 
   const { getColumns } = useQuickPromptTable();
   const columns = getColumns({
+    basePromptContexts,
     onEditActionClicked,
     onDeleteActionClicked,
   });

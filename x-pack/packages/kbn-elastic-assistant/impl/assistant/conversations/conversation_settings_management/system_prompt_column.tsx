@@ -9,7 +9,7 @@ import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import { Conversation } from '../../../assistant_context/types';
 import { Prompt } from '../../types';
-import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
+import { getInitialDefaultSystemPrompt } from '../../use_conversation/helpers';
 
 interface Props {
   allSystemPrompts: Prompt[];
@@ -21,7 +21,7 @@ export const SystemPromptColumn: React.FC<Props> = ({ allSystemPrompts, conversa
     ({ id }) => id === conversation.apiConfig?.defaultSystemPromptId
   );
 
-  const defaultSystemPrompt = getDefaultSystemPrompt({
+  const defaultSystemPrompt = getInitialDefaultSystemPrompt({
     allSystemPrompts,
     conversation,
   });
