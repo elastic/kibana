@@ -9,7 +9,7 @@ import React, { memo, useEffect, useState } from 'react';
 import type { EuiIconProps } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import type { ResponseActionAgentType } from '../../../../../../../common/endpoint/service/response_actions/constants';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 const fetchSentinelOneLogoSvg = (): Promise<string> =>
   import('./images/sentinelone_logo.svg').then((response) => response.default);

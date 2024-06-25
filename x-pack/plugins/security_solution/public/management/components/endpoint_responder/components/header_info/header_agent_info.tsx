@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AgentTypeVendorLogo } from './agent_type_vendor_logo';
+import { AgentTypeVendorLogo } from '../../../../../common/components/endpoint/agents/agent_type_vendor_logo';
 import { getAgentTypeName } from '../../../../../common/translations';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { Platform } from './platforms';
