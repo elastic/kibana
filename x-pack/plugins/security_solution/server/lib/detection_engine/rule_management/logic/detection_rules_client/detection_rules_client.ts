@@ -52,7 +52,7 @@ export const createDetectionRulesClient = (
 
   async updateRule(args: UpdateRuleArgs): Promise<RuleAlertType> {
     return withSecuritySpan('DetectionRulesClient.updateRule', async () => {
-      return updateRule(rulesClient, args, mlAuthz);
+      return updateRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 

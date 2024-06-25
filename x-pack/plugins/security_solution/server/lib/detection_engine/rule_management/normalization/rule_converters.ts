@@ -440,6 +440,8 @@ export const convertUpdateAPIToInternalSchema = ({
   existingRule,
   ruleUpdate,
 }: ConvertUpdateAPIToInternalSchemaProps) => {
+  const systemActions =
+    ruleUpdate.systemActions.map((action) => transformRuleToAlertAction(action)) ?? [];
   const alertActions =
     ruleUpdate.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
@@ -486,6 +488,7 @@ export const convertUpdateAPIToInternalSchema = ({
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
     actions,
+    systemActions,
   };
 
   return newInternalRule;

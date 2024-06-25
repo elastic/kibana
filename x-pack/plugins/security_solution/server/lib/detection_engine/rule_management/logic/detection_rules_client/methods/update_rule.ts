@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { partition } from 'lodash';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
@@ -17,6 +19,7 @@ import { validateMlAuth, ClientError, toggleRuleEnabledOnUpdate } from '../utils
 import { readRules } from '../read_rules';
 
 export const updateRule = async (
+  actionsClient: ActionsClient,
   rulesClient: RulesClient,
   args: UpdateRuleArgs,
   mlAuthz: MlAuthz
@@ -32,15 +35,33 @@ export const updateRule = async (
     id,
   });
 
+  console.error('EXISTING RULE', JSON.stringify(existingRule));
+
   if (existingRule == null) {
     const error = getIdError({ id, ruleId });
     throw new ClientError(error.message, error.statusCode);
   }
 
+  // split system action updates?
+
+  const [oldActions, systemActions] = partition(existingRule.actions, (action) =>
+    actionsClient.isSystemAction(action.actionTypeId)
+  );
+
+  const [oldRuleUpdateActions, ruleUpdateSystemActions] = partition(ruleUpdate.actions, (action) =>
+    actionsClient.isSystemAction(action.action_type_id)
+  );
+
   const newInternalRule = convertUpdateAPIToInternalSchema({
-    existingRule,
-    ruleUpdate,
+    existingRule: { ...existingRule, actions: oldActions, systemActions },
+    ruleUpdate: {
+      ...ruleUpdate,
+      actions: oldRuleUpdateActions,
+      systemActions: ruleUpdateSystemActions,
+    },
   });
+
+  console.error('newInternalRule', JSON.stringify(newInternalRule));
 
   const update = await rulesClient.update({
     id: existingRule.id,
