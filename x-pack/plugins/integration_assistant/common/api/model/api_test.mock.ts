@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { BuildIntegrationRequestBody } from '../build_integration/build_integration';
-import { CategorizationRequestBody } from '../categorization/categorization_route';
-import { EcsMappingRequestBody } from '../ecs/ecs_route';
-import { RelatedRequestBody } from '../related/related_route';
+import type { BuildIntegrationRequestBody } from '../build_integration/build_integration';
+import type { CategorizationRequestBody } from '../categorization/categorization_route';
+import type { EcsMappingRequestBody } from '../ecs/ecs_route';
+import type { RelatedRequestBody } from '../related/related_route';
 import type { DataStream, Integration, Pipeline } from './common_attributes';
 
 const rawSamples = ['{"test1": "test1"}'];
@@ -24,7 +24,7 @@ export const getDataStreamMock = (): DataStream => ({
       anotherKey: 'anotherValue',
     },
   ],
-  rawSamples: rawSamples,
+  rawSamples,
   pipeline: getPipelineMock(),
 });
 
@@ -59,7 +59,7 @@ export const getCategorizationRequestMock = (): CategorizationRequestBody => ({
   currentPipeline: getPipelineMock(),
   dataStreamName: 'test-data-stream-name',
   packageName: 'test-package-name',
-  rawSamples: rawSamples,
+  rawSamples,
 });
 
 export const getBuildIntegrationRequestMock = (): BuildIntegrationRequestBody => ({
@@ -67,7 +67,7 @@ export const getBuildIntegrationRequestMock = (): BuildIntegrationRequestBody =>
 });
 
 export const getEcsMappingRequestMock = (): EcsMappingRequestBody => ({
-  rawSamples: rawSamples,
+  rawSamples,
   dataStreamName: 'test-data-stream-name',
   packageName: 'test-package-name',
   connectorId: 'test-connector-id',
@@ -76,7 +76,7 @@ export const getEcsMappingRequestMock = (): EcsMappingRequestBody => ({
 export const getRelatedRequestMock = (): RelatedRequestBody => ({
   dataStreamName: 'test-data-stream-name',
   packageName: 'test-package-name',
-  rawSamples: rawSamples,
+  rawSamples,
   connectorId: 'test-connector-id',
   currentPipeline: getPipelineMock(),
 });
