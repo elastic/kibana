@@ -119,7 +119,6 @@ export const usePollApi = ({
       if (connectorId == null || connectorId === '') {
         throw new Error('Invalid connector id');
       }
-      // if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
       const rawResponse = await http.fetch(
         `/internal/elastic_assistant/attack_discovery/cancel/${connectorId}`,
         {
@@ -147,7 +146,8 @@ export const usePollApi = ({
       if (connectorId == null || connectorId === '') {
         throw new Error('Invalid connector id');
       }
-      // clearTimeout not working
+      // edge case - clearTimeout does not always work,
+      // so we need to check if the connectorId has changed
       if (connectorId !== connectorIdRef.current) {
         return;
       }

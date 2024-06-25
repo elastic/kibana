@@ -14,6 +14,7 @@ import {
   EuiNotificationBadge,
   EuiToolTip,
 } from '@elastic/eui';
+import * as i18n from './translations';
 
 interface Props {
   hasViewed: boolean;
@@ -28,7 +29,11 @@ export const AttackDiscoveryStatusIndicator: FunctionComponent<Props> = ({
   if (status === 'running') {
     return (
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="bottom" content={`Attack discovery generation in progress`}>
+        <EuiToolTip
+          aria-label={i18n.IN_PROGRESS_MESSAGE}
+          content={i18n.IN_PROGRESS_MESSAGE}
+          position="bottom"
+        >
           <EuiLoadingSpinner size="s" />
         </EuiToolTip>
       </EuiFlexItem>
@@ -39,8 +44,9 @@ export const AttackDiscoveryStatusIndicator: FunctionComponent<Props> = ({
     return (
       <EuiFlexItem grow={false}>
         <EuiToolTip
+          aria-label={i18n.SUCCESS_MESSAGE(count)}
+          content={i18n.SUCCESS_MESSAGE(count)}
           position="bottom"
-          content={`The connector has updated with ${count} potential attacks.`}
         >
           <EuiNotificationBadge>{count}</EuiNotificationBadge>
         </EuiToolTip>
@@ -51,11 +57,12 @@ export const AttackDiscoveryStatusIndicator: FunctionComponent<Props> = ({
     return (
       <EuiFlexItem grow={false}>
         <EuiIconTip
-          aria-label={`The connector encountered an error while generating attack discoveries.`}
+          aria-label={i18n.FAILURE_MESSAGE}
+          color="warning"
+          content={i18n.FAILURE_MESSAGE}
+          position="bottom"
           size="m"
           type="warning"
-          color="warning"
-          content={`The connector encountered an error while generating attack discoveries.`}
         />
       </EuiFlexItem>
     );

@@ -11,7 +11,6 @@ import type {
   Replacements,
   GenerationInterval,
   AttackDiscoveryStats,
-  AttackDiscoveryStatus,
 } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostResponse,
@@ -170,10 +169,6 @@ export const useAttackDiscovery = ({
 
       if (!parsedResponse.success) {
         throw new Error('Failed to parse the response');
-      }
-
-      if (parsedResponse.data.status === 'running') {
-        pollApi();
       }
     } catch (error) {
       setIsLoadingPost(false);
