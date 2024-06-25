@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiIcon, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { Conversation } from '../../../../assistant_context/types';
 import { AIConnector } from '../../../../connectorland/connector_selector';
@@ -33,8 +33,9 @@ export const useSystemPromptTable = () => {
   }: {
     onEditActionClicked: (prompt: SystemPromptTableItem) => void;
     onDeleteActionClicked: (prompt: SystemPromptTableItem) => void;
-  }) => [
+  }): Array<EuiBasicTableColumn<SystemPromptTableItem>> => [
     {
+      align: 'left',
       name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_NAME,
       truncateText: { lines: 3 },
       render: (prompt: SystemPromptTableItem) =>
@@ -52,6 +53,7 @@ export const useSystemPromptTable = () => {
         ) : null,
     },
     {
+      align: 'left',
       name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_DEFAULT_CONVERSATIONS,
       render: ({ defaultConversations, id }: SystemPromptTableItem) => (
         <BadgesColumn items={defaultConversations} prefix={id} />
@@ -59,11 +61,13 @@ export const useSystemPromptTable = () => {
     },
     /* TODO: enable when createdAt is added
       {
+        align: 'left',
         field: 'createdAt',
         name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_CREATED_ON,
       },
       */
     {
+      align: 'center',
       name: 'Actions',
       width: '120px',
       render: (prompt: SystemPromptTableItem) => {

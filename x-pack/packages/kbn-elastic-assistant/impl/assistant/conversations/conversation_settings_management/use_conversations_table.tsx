@@ -51,7 +51,7 @@ export const useConversationsTable = () => {
         },
         {
           name: i18n.CONVERSATIONS_TABLE_COLUMN_SYSTEM_PROMPT,
-          align: 'center',
+          align: 'left',
           render: (conversation: ConversationTableItem) => (
             <SystemPromptColumn allSystemPrompts={allSystemPrompts} conversation={conversation} />
           ),
@@ -59,7 +59,7 @@ export const useConversationsTable = () => {
         {
           field: 'actionType',
           name: i18n.CONVERSATIONS_TABLE_COLUMN_CONNECTOR,
-          align: 'center',
+          align: 'left',
           render: (actionType: ConversationTableItem['actionType']) =>
             actionType ? <EuiBadge color="hollow">{actionType}</EuiBadge> : null,
         },

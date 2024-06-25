@@ -48,7 +48,7 @@ const FlyoutComponent: React.FC<Props> = ({
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              size="s"
+              size="m"
               color="text"
               iconType="cross"
               data-test-subj="cancel-button"
@@ -59,7 +59,7 @@ const FlyoutComponent: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              size="s"
+              size="m"
               type="submit"
               data-test-subj="save-button"
               onClick={onSaveConfirmed}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { BadgesColumn } from '../../common/components/assistant_settings_management/badges';
 import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
@@ -23,8 +23,9 @@ export const useQuickPromptTable = () => {
       basePromptContexts: PromptContextTemplate[];
       onEditActionClicked: (prompt: QuickPrompt) => void;
       onDeleteActionClicked: (prompt: QuickPrompt) => void;
-    }) => [
+    }): Array<EuiBasicTableColumn<QuickPrompt>> => [
       {
+        align: 'left',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_NAME,
         render: (prompt: QuickPrompt) =>
           prompt?.title ? (
@@ -32,6 +33,7 @@ export const useQuickPromptTable = () => {
           ) : null,
       },
       {
+        align: 'left',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CONTEXTS,
         render: (prompt: QuickPrompt) => {
           const selectedPromptContexts = (
@@ -46,11 +48,13 @@ export const useQuickPromptTable = () => {
       },
       /* TODO: enable when createdAt is added
       {
+        align: 'left',
         field: 'createdAt',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CREATED_AT,
       },
       */
       {
+        align: 'center',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_ACTIONS,
         width: '120px',
         render: (prompt: QuickPrompt) => {

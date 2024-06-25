@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -78,7 +79,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
 
     const [hasPendingChanges, setHasPendingChanges] = useState(false);
-
+    const { euiTheme } = useEuiTheme();
     const {
       conversationSettings,
       setConversationSettings,
@@ -242,10 +243,12 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           paddingSize="none"
         />
         <EuiPageTemplate.Section
-          paddingSize="l"
+          paddingSize="none"
           css={css`
             padding-left: 0;
             padding-right: 0;
+            padding-top: ${euiTheme.base * 0.75}px;
+            padding-bottom: ${euiTheme.base * 0.75}px;
           `}
         >
           {selectedSettingsTab === CONNECTORS_TAB && (

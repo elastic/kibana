@@ -45,7 +45,7 @@ const ConversationStreamingSwitchComponent: React.FC<Props> = ({
       }
     >
       <EuiSwitch
-        label={<EuiText size={compressed ? 'xs' : 'm'}>{STREAMING_HELP_TEXT_TITLE}</EuiText>}
+        label={<EuiText size={compressed ? 'xs' : 's'}>{STREAMING_HELP_TEXT_TITLE}</EuiText>}
         checked={assistantStreamingEnabled}
         onChange={(e) => setAssistantStreamingEnabled(e.target.checked)}
         compressed={compressed}

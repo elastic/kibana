@@ -36,10 +36,10 @@ const ConnectorsSettingsManagementComponent: React.FC<Props> = () => {
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-      <EuiTitle size={'xs'}>
+      <EuiTitle size={'s'}>
         <h2>{i18n.CONNECTOR_SETTINGS_MANAGEMENT_TITLE}</h2>
       </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiText>{i18n.CONNECTOR_SETTINGS_MANAGEMENT_DESCRIPTION}</EuiText>
