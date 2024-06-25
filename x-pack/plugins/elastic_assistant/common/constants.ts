@@ -14,6 +14,8 @@ export const POST_ACTIONS_CONNECTOR_EXECUTE = `${BASE_PATH}/actions/connector/{c
 
 // Attack discovery
 export const ATTACK_DISCOVERY = `${BASE_PATH}/attack_discovery`;
+export const ATTACK_DISCOVERY_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/{connectorId}`;
+export const ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/cancel/{connectorId}`;
 
 // Model Evaluation
 export const EVALUATE = `${BASE_PATH}/evaluate`;
@@ -26,6 +28,9 @@ export const ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE = 100;
 
 export const MAX_PROMPTS_TO_UPDATE_IN_PARALLEL = 50;
 export const PROMPTS_TABLE_MAX_PAGE_SIZE = 100;
+
+// Knowledge Base
+export const KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE = 100;
 
 // Capabilities
 export const CAPABILITIES = `${BASE_PATH}/capabilities`;
