@@ -30,18 +30,6 @@ export default function (ftrContext: FtrProviderContext) {
 
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
 
-  async function deleteConnectors() {
-    const response = await supertest.get('/api/actions/connectors').expect(200);
-    for (const connector of response.body) {
-      if (connector.connector_type_id === '.gen-ai') {
-        await supertest
-          .delete(`/api/actions/connector/${connector.id}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(204);
-      }
-    }
-  }
-
   let proxy: LlmProxy;
   let removeOpenAIConnector: () => Promise<void>;
   const createConnector = async () => {
@@ -54,14 +42,12 @@ export default function (ftrContext: FtrProviderContext) {
 
   describe('Playground', () => {
     before(async () => {
-      await deleteConnectors();
       proxy = await createLlmProxy(log);
       await pageObjects.common.navigateToApp('enterpriseSearchApplications/playground');
     });
 
     after(async () => {
       await esArchiver.unload(esArchiveIndex);
-      await deleteConnectors();
       proxy.close();
     });
 
@@ -98,6 +84,11 @@ export default function (ftrContext: FtrProviderContext) {
             createConnector
           );
         });
+
+        after(async () => {
+          await removeOpenAIConnector?.();
+          await browser.refresh();
+        });
       });
 
       describe('without any indices', () => {
@@ -113,10 +104,18 @@ export default function (ftrContext: FtrProviderContext) {
 
         after(async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.removeIndexFromComboBox();
+          await esArchiver.unload(esArchiveIndex);
+          await browser.refresh();
         });
       });
 
       describe('with existing indices', () => {
+        before(async () => {
+          await createConnector();
+          await createIndex();
+          await browser.refresh();
+        });
+
         it('dropdown shows up', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectIndicesInDropdown();
         });
@@ -126,10 +125,22 @@ export default function (ftrContext: FtrProviderContext) {
             indexName
           );
         });
+
+        after(async () => {
+          await removeOpenAIConnector?.();
+          await esArchiver.unload(esArchiveIndex);
+          await browser.refresh();
+        });
       });
     });
 
     describe('chat page', () => {
+      before(async () => {
+        await createConnector();
+        await createIndex();
+        await browser.refresh();
+        await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage(indexName);
+      });
       it('loads successfully', async () => {
         await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
       });
@@ -167,6 +178,12 @@ export default function (ftrContext: FtrProviderContext) {
         it('show edit context', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
         });
+      });
+
+      after(async () => {
+        await removeOpenAIConnector?.();
+        await esArchiver.unload(esArchiveIndex);
+        await browser.refresh();
       });
     });
   });
