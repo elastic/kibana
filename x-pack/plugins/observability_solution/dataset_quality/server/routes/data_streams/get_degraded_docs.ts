@@ -76,7 +76,7 @@ export async function getDegradedDocsPaginated(options: {
     },
   });
 
-  const response = await datasetQualityESClient.msearch({ index: `${type}-*` }, [
+  const response = await datasetQualityESClient.msearch({ index: `${type}-*-*` }, [
     // degraded docs per dataset
     {
       size: 0,
