@@ -28,7 +28,6 @@ import { getHeaderActions } from '../shared/header_actions/header_actions';
 import { ConnectorConfiguration } from './connector_configuration';
 import { ConnectorNameAndDescription } from './connector_name_and_description';
 import { ConnectorViewLogic } from './connector_view_logic';
-import { ConnectorDeployment } from './deployment';
 import { ConnectorDetailOverview } from './overview';
 
 export enum ConnectorDetailTabId {
@@ -220,27 +219,6 @@ export const ConnectorDetail: React.FC = () => {
       ),
   };
 
-  const DEPLOYMENT_TAB = [
-    {
-      content: <ConnectorDeployment />,
-      id: ConnectorDetailTabId.DEPLOYMENT,
-      isSelected: tabId === ConnectorDetailTabId.DEPLOYMENT,
-      label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.deploymentTabLabel',
-        {
-          defaultMessage: 'Deployment',
-        }
-      ),
-      onClick: () =>
-        KibanaLogic.values.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.DEPLOYMENT,
-          })
-        ),
-    },
-  ];
-
   interface TabMenuItem {
     content: JSX.Element;
     disabled?: boolean;
@@ -256,7 +234,6 @@ export const ConnectorDetail: React.FC = () => {
     ...ALL_INDICES_TABS,
     ...CONNECTOR_TABS,
     ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
-    ...DEPLOYMENT_TAB,
     ...CONFIG_TAB,
   ];
 
