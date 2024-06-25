@@ -19,7 +19,7 @@ const ADD_AGG_VIS_ACTION_ID = 'ADD_AGG_VIS';
 type AddAggVisualizationPanelActionApi = HasType & CanAddNewPanel;
 
 const isApiCompatible = (api: unknown | null): api is AddAggVisualizationPanelActionApi => {
-  return apiHasType(api) && apiCanAddNewPanel(api);
+  return apiHasType(api) && apiCanAddNewPanel(api) && api.type === 'dashboard';
 };
 
 export class AddAggVisualizationPanelAction implements Action<EmbeddableApiContext> {
