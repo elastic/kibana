@@ -12,6 +12,8 @@ import {
   EuiButtonEmpty,
   EuiCodeBlock,
   EuiContextMenu,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -24,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PolicyFromES } from '../../../../../common/types';
 import { trackUiMetric } from '../../../services/ui_metric';
 import { hasLinkedIndices } from '../../../lib/policies';
@@ -31,7 +34,8 @@ import { getPoliciesListPath, getPolicyEditPath } from '../../../services/naviga
 import { UIM_EDIT_CLICK } from '../../../constants';
 import { useIsReadOnly } from '../../../lib/use_is_read_only';
 import { usePolicyListContext } from '../policy_list_context';
-import { DeprecatedPolicyBadge, ManagedPolicyBadge } from '.';
+import { DeprecatedPolicyBadge, ManagedPolicyBadge } from '../components';
+import { PhaseDescription } from './phase_description';
 
 export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
   const isReadOnly = useIsReadOnly();
@@ -127,7 +131,87 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiCodeBlock>{JSON.stringify(policy.policy, null, 2)}</EuiCodeBlock>
+        {/* Hot phase */}
+        {policy.policy.phases.hot && (
+          <PhaseDescription
+            phase={policy.policy.phases.hot}
+            title={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyFlyout.hotPhaseTitle"
+                defaultMessage="Hot phase"
+              />
+            }
+          />
+        )}
+
+        {/* Warm phase */}
+        {policy.policy.phases.warm && (
+          <PhaseDescription
+            phase={policy.policy.phases.warm}
+            title={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyFlyout.warmPhaseTitle"
+                defaultMessage="Warm phase"
+              />
+            }
+          />
+        )}
+
+        {/* Cold phase */}
+        {policy.policy.phases.cold && (
+          <PhaseDescription
+            phase={policy.policy.phases.cold}
+            title={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyFlyout.coldPhaseTitle"
+                defaultMessage="Cold phase"
+              />
+            }
+          />
+        )}
+
+        {/* Frozen phase */}
+        {policy.policy.phases.frozen && (
+          <PhaseDescription
+            phase={policy.policy.phases.frozen}
+            title={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyFlyout.frozenPhaseTitle"
+                defaultMessage="Frozen phase"
+              />
+            }
+          />
+        )}
+
+        {/* Delete phase */}
+        {policy.policy.phases.delete && (
+          <PhaseDescription
+            phase={policy.policy.phases.delete}
+            title={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyFlyout.deletePhaseTitle"
+                defaultMessage="Delete phase"
+              />
+            }
+          />
+        )}
+
+        {/* Metadata (optional) */}
+        {policy.policy._meta && (
+          <>
+            <EuiDescriptionListTitle data-test-subj="metaTitle">
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyFlyout.metaDescriptionListTitle"
+                defaultMessage="Metadata"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <EuiCodeBlock language="json">
+                {JSON.stringify(policy.policy._meta, null, 2)}
+              </EuiCodeBlock>
+            </EuiDescriptionListDescription>
+          </>
+        )}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

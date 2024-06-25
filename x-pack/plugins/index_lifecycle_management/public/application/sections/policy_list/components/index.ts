@@ -11,4 +11,3 @@ export { DeprecatedPolicyBadge } from './deprecated_policy_badge';
 export { ListActionHandler } from './list_action_handler';
 export { ManagedPolicyBadge } from './managed_policy_badge';
 export { PolicyTable } from './policy_table';
-export { ViewPolicyFlyout } from './view_policy_flyout';
