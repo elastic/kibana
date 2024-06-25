@@ -27,45 +27,39 @@ export function minMax$({
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([
-    dataViews$,
-    fieldName$,
-    dataControlFetch$,
-  ])
-    .pipe(
-      tap(() => {
-        if (prevRequestAbortController) {
-          prevRequestAbortController.abort();
-          prevRequestAbortController = undefined;
-        }
-      }),
-      switchMap(async ([dataViews, fieldName, dataControlFetchContext]) => {
-        const dataView = dataViews?.[0];
-        const dataViewField =
-          dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-        if (!dataView || !dataViewField) {
-          return { max: undefined, min: undefined };
-        }
+  return combineLatest([dataViews$, fieldName$, dataControlFetch$]).pipe(
+    tap(() => {
+      if (prevRequestAbortController) {
+        prevRequestAbortController.abort();
+        prevRequestAbortController = undefined;
+      }
+    }),
+    switchMap(async ([dataViews, fieldName, dataControlFetchContext]) => {
+      const dataView = dataViews?.[0];
+      const dataViewField = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+      if (!dataView || !dataViewField) {
+        return { max: undefined, min: undefined };
+      }
 
-        try {
-          setIsLoading(true);
-          const abortController = new AbortController();
-          prevRequestAbortController = abortController;
-          return await getMinMax({
-            abortSignal: abortController.signal,
-            data,
-            dataView,
-            field: dataViewField,
-            ...dataControlFetchContext,
-          });
-        } catch (error) {
-          return { error, max: undefined, min: undefined };
-        }
-      }),
-      tap(() => {
-        setIsLoading(false);
-      })
-    );
+      try {
+        setIsLoading(true);
+        const abortController = new AbortController();
+        prevRequestAbortController = abortController;
+        return await getMinMax({
+          abortSignal: abortController.signal,
+          data,
+          dataView,
+          field: dataViewField,
+          ...dataControlFetchContext,
+        });
+      } catch (error) {
+        return { error, max: undefined, min: undefined };
+      }
+    }),
+    tap(() => {
+      setIsLoading(false);
+    })
+  );
 }
 
 export async function getMinMax({

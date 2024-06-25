@@ -7,7 +7,7 @@
  */
 
 import { TimeRange } from '@kbn/es-query';
-import { BehaviorSubject, merge, of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ControlGroupApi } from '../../control_group/types';
@@ -26,7 +26,7 @@ describe('RangesliderControlApi', () => {
     parentApi: dashboardApi,
   } as unknown as ControlGroupApi;
   const dataStartServiceMock = dataPluginMock.createStartContract();
-  let totalResults = 20;
+  const totalResults = 20;
   dataStartServiceMock.search.searchSource.create = jest.fn().mockImplementation(() => {
     let isAggsRequest = false;
     return {
@@ -66,12 +66,17 @@ describe('RangesliderControlApi', () => {
       type: factory.type,
     };
   }
-  
+
   test('should not set filters when value is not provided', () => {
-    const { api } = factory.buildControl({
-      dataViewId: 'myDataView',
-      fieldName: 'myField',
-    }, buildApiMock, uuid, controlGroupApi);
+    const { api } = factory.buildControl(
+      {
+        dataViewId: 'myDataView',
+        fieldName: 'myField',
+      },
+      buildApiMock,
+      uuid,
+      controlGroupApi
+    );
     expect(api.filters$.value).toEqual(undefined);
   });
 });

@@ -8,10 +8,11 @@
 
 import React, { useEffect, useMemo } from 'react';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
+import { isEqual } from 'lodash';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
 import {
@@ -25,6 +26,7 @@ import { RangeSliderStrings } from './range_slider_strings';
 import { RangeSliderControl } from './components/range_slider_control';
 import { minMax$ } from './min_max';
 import { hasNoResults$ } from './has_no_results';
+import { DataControlFetchContext } from '../../control_group/types';
 
 export const getRangesliderControlFactory = (
   services: Services
@@ -108,10 +110,26 @@ export const getRangesliderControlFactory = (
         }
       );
 
-      const dataLoadingSubscription = combineLatest([
-        loadingMinMax$,
-        loadingHasNotResults$
-      ])
+      const dataControlFetch$ = controlGroupApi.dataControlFetch$.pipe(
+        map((context: DataControlFetchContext) => {
+          // remove this controls filter from context
+          // TODO remove once dataControlFetch$ propertly passes chained filters
+          const rangeFilter = dataControl.api.filters$?.value?.[0];
+          return context.filters && rangeFilter
+            ? {
+                ...context,
+                filters: context.filters.filter((filter) => {
+                  return (
+                    !isEqual(rangeFilter.meta, filter.meta) ||
+                    !isEqual(rangeFilter.query, filter.query)
+                  );
+                }),
+              }
+            : context;
+        })
+      );
+
+      const dataLoadingSubscription = combineLatest([loadingMinMax$, loadingHasNotResults$])
         .pipe(
           map((values) => {
             return values.some((value) => {
@@ -119,7 +137,7 @@ export const getRangesliderControlFactory = (
             });
           })
         )
-        .subscribe(isLoading => {
+        .subscribe((isLoading) => {
           dataLoading$.next(isLoading);
         });
 
@@ -136,10 +154,10 @@ export const getRangesliderControlFactory = (
 
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
-      
+
       const minMaxSubscription = minMax$({
         data: services.data,
-        dataControlFetch$: controlGroupApi.dataControlFetch$,
+        dataControlFetch$,
         dataViews$: dataControl.api.dataViews,
         fieldName$: dataControl.stateManager.fieldName,
         setIsLoading: (isLoading: boolean) => {
@@ -148,15 +166,24 @@ export const getRangesliderControlFactory = (
             dataControl.api.setBlockingError(undefined);
           }
           loadingMinMax$.next(isLoading);
-        }
-      })
-        .subscribe(({ error, min, max }: {error?: Error , min: number | undefined, max: number | undefined }) => {
+        },
+      }).subscribe(
+        ({
+          error,
+          min,
+          max,
+        }: {
+          error?: Error;
+          min: number | undefined;
+          max: number | undefined;
+        }) => {
           if (error) {
             dataControl.api.setBlockingError(error);
           }
           max$.next(max);
           min$.next(min);
-        });
+        }
+      );
 
       const outputFilterSubscription = value$.subscribe((value) => {
         const dataView = dataControl.api.dataViews?.value?.[0];
@@ -187,12 +214,11 @@ export const getRangesliderControlFactory = (
         dataViews$: dataControl.api.dataViews,
         filters$: dataControl.api.filters$,
         ignoreParentSettings$: controlGroupApi.ignoreParentSettings$,
-        dataControlFetch$: controlGroupApi.dataControlFetch$,
+        dataControlFetch$,
         setIsLoading: (isLoading: boolean) => {
           loadingHasNotResults$.next(isLoading);
         },
-      })
-      .subscribe((hasNoResults) => {
+      }).subscribe((hasNoResults) => {
         selectionHasNoResults$.next(hasNoResults);
       });
 

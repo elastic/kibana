@@ -29,46 +29,41 @@ export function hasNoResults$({
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([
-    filters$,
-    ignoreParentSettings$,
-    dataControlFetch$,
-  ])
-    .pipe(
-      tap(() => {
-        if (prevRequestAbortController) {
-          prevRequestAbortController.abort();
-          prevRequestAbortController = undefined;
-        }
-      }),
-      switchMap(async ([filters, ignoreParentSettings, dataControlFetchContext]) => {
-        const dataView = dataViews$?.value?.[0];
-        const rangeFilter = filters?.[0];
-        if (!dataView || !rangeFilter || ignoreParentSettings?.ignoreValidations) {
-          return false;
-        }
+  return combineLatest([filters$, ignoreParentSettings$, dataControlFetch$]).pipe(
+    tap(() => {
+      if (prevRequestAbortController) {
+        prevRequestAbortController.abort();
+        prevRequestAbortController = undefined;
+      }
+    }),
+    switchMap(async ([filters, ignoreParentSettings, dataControlFetchContext]) => {
+      const dataView = dataViews$?.value?.[0];
+      const rangeFilter = filters?.[0];
+      if (!dataView || !rangeFilter || ignoreParentSettings?.ignoreValidations) {
+        return false;
+      }
 
-        try {
-          setIsLoading(true);
-          const abortController = new AbortController();
-          prevRequestAbortController = abortController;
-          return await hasNoResults({
-            abortSignal: abortController.signal,
-            data,
-            dataView,
-            rangeFilter,
-            ...dataControlFetchContext,
-          });
-        } catch (error) {
-          // Ignore error, validation is not required for control to function properly
-          return false;
-        }
-      }),
-      tap(() => {
-        setIsLoading(false);
-      }),
-    );
-};
+      try {
+        setIsLoading(true);
+        const abortController = new AbortController();
+        prevRequestAbortController = abortController;
+        return await hasNoResults({
+          abortSignal: abortController.signal,
+          data,
+          dataView,
+          rangeFilter,
+          ...dataControlFetchContext,
+        });
+      } catch (error) {
+        // Ignore error, validation is not required for control to function properly
+        return false;
+      }
+    }),
+    tap(() => {
+      setIsLoading(false);
+    })
+  );
+}
 
 async function hasNoResults({
   abortSignal,
@@ -91,7 +86,7 @@ async function hasNoResults({
   searchSource.setField('size', 0);
   searchSource.setField('index', dataView);
   // Tracking total hits accurately has a performance cost
-  // Setting 'trackTotalHits' to 1 since we just want to know 
+  // Setting 'trackTotalHits' to 1 since we just want to know
   // "has no results" or "has results" vs the actual count
   searchSource.setField('trackTotalHits', 1);
 
@@ -109,10 +104,12 @@ async function hasNoResults({
     searchSource.setField('query', query);
   }
 
-  const resp = await lastValueFrom(searchSource.fetch$({
-    abortSignal,
-    legacyHitsTotal: false,
-  }));
+  const resp = await lastValueFrom(
+    searchSource.fetch$({
+      abortSignal,
+      legacyHitsTotal: false,
+    })
+  );
   const count = resp?.rawResponse?.hits?.total?.value;
   return typeof count === 'number' && count === 0;
 }
