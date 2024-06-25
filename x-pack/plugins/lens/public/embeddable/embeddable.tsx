@@ -1007,6 +1007,7 @@ export class Embeddable
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
+    console.log('EVENT: render complete');
     let datasourceEvents: string[] = [];
     let visualizationEvents: string[] = [];
 

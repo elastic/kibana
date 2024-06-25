@@ -244,6 +244,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options = {}) => {
+      console.log('EVENT: data requested');
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
@@ -266,6 +267,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       search,
       dataViews: indexPatterns,
       onResponse: (request, response, options) => {
+        console.log('EVENT: data received');
         if (!options.disableWarningToasts) {
           const { rawResponse } = response;
 
