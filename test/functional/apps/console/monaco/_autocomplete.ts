@@ -44,7 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
     });
 
-    describe('Autocomplete behavior', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186501
+    describe.skip('Autocomplete behavior', () => {
       beforeEach(async () => {
         await PageObjects.console.monaco.clearEditorText();
       });
